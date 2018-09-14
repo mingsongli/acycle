@@ -119,7 +119,7 @@ if exist('ac_pwd.txt', 'file') == 2
     fclose(fileID);
 else
     ac_pwd_str = which('refreshcolor.m');
-    [ac_pwd_dir,ac_pwd_name,ext] = fileparts(ac_pwd_str);
+    [ac_pwd_dir,~,~] = fileparts(ac_pwd_str);
     fileID = fopen(fullfile(ac_pwd_dir,'ac_pwd.txt'),'w');
     fprintf(fileID,'%s',pwd);
     fclose(fileID);
@@ -621,7 +621,14 @@ function menu_manuals_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_manuals (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+ac_dir = which('ac.m');
+[ac_folder,~,~] = fileparts(ac_dir);
+doc_dir = [ac_folder,handles.slash_v,'doc'];
+if ismac
+    system(['open ',doc_dir]);
+elseif ispc
+    winopen(doc_dir);
+end
 
 % --------------------------------------------------------------------
 function menu_findupdates_Callback(hObject, eventdata, handles)
@@ -811,7 +818,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
             time = data(:,1);
             value = (data(:,2)-mean(data(:,2)))/std(data(:,2));
             data1 = [time,value];
-            name1 = [dat_name,'-norm',ext];
+            name1 = [dat_name,'-stand',ext];
             %csvwrite(name1,data1)
             % cd ac_pwd dir
                 CDac_pwd
