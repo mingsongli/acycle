@@ -155,7 +155,7 @@ handles.nw = 2;
 handles.copycut = 'copy';
 handles.nplot = 0;
 handles.filetype = {'.txt','.csv',''};
-
+handles.acfig = gcf;
 assignin('base','unit',handles.unit)
 assignin('base','unit_type',handles.unit_type)
 % Update handles structure
@@ -1550,7 +1550,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                             end
                         end
                     end
-                    savefig(acfig_name) % save ac.fig automatically
+                    savefig(handles.acfig,acfig_name) % save ac.fig automatically
 
                     % open and write log into log_name file
                     fileID = fopen(fullfile(dat_dir,log_name),'w+');

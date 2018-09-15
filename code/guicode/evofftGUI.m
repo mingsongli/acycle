@@ -91,9 +91,12 @@ if ncal > 500
 end
 %
 set(handles.evofft_nyquist_text, 'String', num2str(handles.nyquist));
+set(handles.evofft_fmax_edit, 'String', num2str(handles.nyquist));
 set(handles.evofft_win_text, 'String', num2str(handles.window));
 set(handles.edit8, 'String', handles.unit);
 set(handles.edit_step, 'String', num2str(handles.step),'Value',1);
+set(handles.evofft_Nyquist_radiobutton, 'Value',0,'Enable','Off');
+set(handles.radiobutton2, 'Value',1,'Enable','Off');
 
 % Update handles structure
 guidata(hObject, handles);
@@ -201,6 +204,7 @@ fmax = str2double(get(handles.evofft_fmax_edit,'String'));
 if isnan(fmax)
     set(handles.radiobutton2, 'Value', 0);
     set(handles.evofft_Nyquist_radiobutton, 'Value', 1);
+    handles.evofft_fmax = handles.nyquist;
 else
     set(handles.radiobutton2, 'Value', 1);
     set(handles.evofft_Nyquist_radiobutton, 'Value', 0);
@@ -263,13 +267,16 @@ function evofft_Nyquist_radiobutton_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of evofft_Nyquist_radiobutton
-val = get(handles.evofft_Nyquist_radiobutton,'Value');
-if val > 0
-    %set(handles.evofft_fmax_edit, 'Enable', 'off');
-    handles.evofft_fmax = handles.nyquist;
-else
-    %set(handles.evofft_fmax_edit, 'Enable', 'on');
-end
+% val = get(handles.evofft_Nyquist_radiobutton,'Value')
+% if val > 0
+%     set(handles.evofft_fmax_edit, 'Enable', 'off');
+%     handles.evofft_fmax = handles.nyquist;
+%     set(handles.radiobutton2, 'Value', 0);
+% else
+%     set(handles.evofft_Nyquist_radiobutton,'Value',1)
+%     set(handles.radiobutton2, 'Value', 0);
+%     handles.evofft_fmax = handles.nyquist;
+% end
 
 % --- Executes on button press in radiobutton2.
 function radiobutton2_Callback(hObject, eventdata, handles)
@@ -278,11 +285,13 @@ function radiobutton2_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of radiobutton2
-% val = get(handles.radiobutton2,'Value');
+% val = get(handles.radiobutton2,'Value')
 % if val > 0
-%     set(handles.evofft_fmax_edit, 'Enable', 'on');
+%     set(handles.evofft_Nyquist_radiobutton,'Value',0)
+%     set(handles.radiobutton2, 'Value', 1);
 %     handles.evofft_fmax = str2double(get(handles.evofft_fmax_edit, 'String'));
 % else 
+%     set(handles.evofft_Nyquist_radiobutton,'Value',0)
 %     handles.evofft_fmax = handles.nyquist;
 % end
 
