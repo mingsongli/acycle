@@ -3,6 +3,14 @@
 Update Log
 _____________________________________
 
+Version : ACycle_v0.2.1.20180915
+Date    : Sept. 15, 2018; 10:18 pm EST
+By      : Mingsong Li (Penn State)
+
+	1. fix a bug in ac.m, save AC.fig automatically after running the eCOCO
+    2. evoFFT GUI bug fixed
+_____________________________________
+
 Version : ACycle_v0.2.1.20180913
 Date    : Sept. 13, 2018; 3:18 pm EST
 By      : Mingsong Li (Penn State)
