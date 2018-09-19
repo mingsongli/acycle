@@ -382,7 +382,17 @@ if check == 1;
         data_ft = textscan(fid,'%f%f','EmptyValue', Inf);
         fclose(fid);
         if iscell(data_ft)
-            data_filterout = cell2mat(data_ft);
+            try
+                data_filterout = cell2mat(data_ft);
+            catch
+                fid = fopen(plot_filter_s,'at');
+                fprintf(fid,'%d\n',[]);
+                fclose(fid)
+                fid = fopen(plot_filter_s);
+                data_ft = textscan(fid,'%f%f','EmptyValue', Inf);
+                fclose(fid);
+                data_filterout = cell2mat(data_ft);
+            end
         end
     end     
 
@@ -451,7 +461,17 @@ if check == 1;
         data_ft = textscan(fid,'%f%f','EmptyValue', NaN);
         fclose(fid);
         if iscell(data_ft)
-            data_filterout = cell2mat(data_ft);
+            try
+                data_filterout = cell2mat(data_ft);
+            catch
+                fid = fopen(plot_filter_s,'at');
+                fprintf(fid,'%d\n',[]);
+                fclose(fid)
+                fid = fopen(plot_filter_s);
+                data_ft = textscan(fid,'%f%f','EmptyValue', Inf);
+                fclose(fid);
+                data_filterout = cell2mat(data_ft);
+            end
         end
     catch
         data_filterout = load(plot_filter_s);
@@ -764,7 +784,17 @@ for nploti = 1:nplot
             data_ft = textscan(fid,'%f%f','EmptyValue', NaN);
             fclose(fid);
             if iscell(data_ft)
-                data = cell2mat(data_ft);
+                try
+                    data = cell2mat(data_ft);
+                catch
+                    fid = fopen(data_name,'at');
+                    fprintf(fid,'%d\n',[]);
+                    fclose(fid)
+                    fid = fopen(data_name);
+                    data_ft = textscan(fid,'%f%f','EmptyValue', Inf);
+                    fclose(fid);
+                    data = cell2mat(data_ft);
+                end
             end
         catch
             data = load(data_name);
@@ -1321,16 +1351,19 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                     CDac_pwd;
                     % Log name
                     log_name = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-COCO-log',ext];
+                    log_name_coco = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-COCO.fig'];
                     %log_file_exist = which(log_name); 
-                    if exist([pwd,handles.slash_v,log_name])
+                    if exist([pwd,handles.slash_v,log_name]) || exist([pwd,handles.slash_v,log_name_coco])
                         for i = 1:100
                             log_name = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-COCO-log-',num2str(i),ext];
-                            if exist([pwd,handles.slash_v,log_name])
+                            log_name_coco = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-COCO-',num2str(i),'.fig'];
+                            if exist([pwd,handles.slash_v,log_name]) || exist([pwd,handles.slash_v,log_name_coco])
                             else
                                 break
                             end
                         end
                     end
+                    savefig(log_name_coco) % save ac.fig automatically
                     % open and write log into log_name file
                     fileID = fopen(fullfile(dat_dir,log_name),'w+');
                     fprintf(fileID,'%s\n',' - - - - - - - - - - - - - Summary - - - - - - - - - - -');
@@ -2540,49 +2573,72 @@ if plot_selected > 2
     data_name_all = (contents(plot_selected));
     data_name = char(data_name_all{nploti});
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
-    disp(['>>  Processing ', data_name])
+    disp(['>>  Processing ', data_name]);
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
         if isdir(data_name) == 1
         else
-        [~,dat_name,ext] = fileparts(data_name);
+            [~,dat_name,ext] = fileparts(data_name);
         if sum(strcmp(ext,handles.filetype)) > 0
-            
-    try
-        fid = fopen(data_name);
-        data_ft = textscan(fid,'%f%f','EmptyValue', NaN);
-        fclose(fid);
-        if iscell(data_ft)
-            data = cell2mat(data_ft);
-        end
-    catch
-        data = load(data_name);
-    end
+            try
+                fid = fopen(data_name);
+                data_ft = textscan(fid,'%f%f','EmptyValue', NaN);
+                fclose(fid);
+                if iscell(data_ft)
+                    try
+                        data = cell2mat(data_ft);
+                    catch
+                        fid = fopen(data_name,'at');
+                        fprintf(fid,'%d\n',[]);
+                        fclose(fid);
+                        fid = fopen(data_name);
+                        data_ft = textscan(fid,'%f%f','EmptyValue', Inf);
+                        fclose(fid);
+                        data = cell2mat(data_ft);
+                    end
+                end
+            catch
+                data = load(data_name);
+            end
 
-            prompt = {'Sort in ascending order','Unique values'};
-            dlg_title = 'Sort and Unique (1 = yes)';
+            prompt = {'Sort data in ascending order?','Unique values in data?','Remove empty row?'};
+            dlg_title = 'Sort, Unique, Remove empty (1 = yes)';
             num_lines = 1;
-            defaultans = {'1','1'};
+            defaultans = {'1','1','1'};
             options.Resize='on';
             answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
             if ~isempty(answer)
                 datasort = str2double(answer{1});
                 dataunique = str2double(answer{2});
+                dataempty = str2double(answer{3});
                 data = data(~any(isnan(data),2),:); % remove NaN values
                 if datasort == 1
                     data = sortrows(data);
-                    name1 = [dat_name,'-so',ext];
+                    name1 = [dat_name,'-so'];
                 end
                 if dataunique == 1
                     data=findduplicate(data);
-                    name1 = [dat_name,'-u',ext];  % New name
+                    name1 = [dat_name,'-u'];  % New name
                 end
-                if (datasort + dataunique) > 1
-                    name1 = [dat_name,'-su',ext];  % New name
+                if (datasort + dataunique) == 2
+                    name1 = [dat_name,'-su'];  % New name
+                end
+                if dataempty == 1
+                    data(any(isinf(data),2),:) = [];
+                    if (datasort + dataunique) > 0
+                        name1 = [name1,'e'];  % New name
+                    else
+                        name1 = [dat_name,'-e'];  % New name
+                    end
+                end
+                if (datasort + dataunique + dataempty) > 0
+                    name2 = [name1,ext];
+                else
+                    name2 = [dat_name,ext];
                 end
                 %csvwrite(name1,data)
                 % cd ac_pwd dir
                 CDac_pwd
-                dlmwrite(name1, data, 'delimiter', ',', 'precision', 9);
+                dlmwrite(name2, data, 'delimiter', ',', 'precision', 9);
                 d = dir; %get files
                 set(handles.listbox1,'String',{d.name},'Value',1) %set string
                 refreshcolor;

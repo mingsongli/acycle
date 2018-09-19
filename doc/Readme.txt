@@ -3,6 +3,15 @@
 Update Log
 _____________________________________
 
+Version : ACycle_v0.2.1.20180918
+Date    : Sept. 18, 2018; 9:38 pm EST
+By      : Mingsong Li (Penn State)
+
+	1. fix a bug in PlotPLUS
+    2. Add a new function: remove empty row in data 
+        Math --> Sort/Unique/Delete-empty
+_____________________________________
+
 Version : ACycle_v0.2.1.20180915
 Date    : Sept. 15, 2018; 10:18 pm EST
 By      : Mingsong Li (Penn State)

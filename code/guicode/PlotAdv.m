@@ -81,16 +81,20 @@ handles.swapxy = 0;
 colordef = [0 0 0]; % default color for 1st line
 colordef_list = [1 0 0; 0 0 1; 0 1 0; 0 1 1; 1 0 1; 1 1 0]; % default color for 2-7 lines
 
-%                  1  2   3      4      5   6      7     8     9    10
-matrix_setting = { 1, 1, 1.0, colordef, 1, 6.0, [1 0 0], 1, [0 0 1], 0};
+%                 1  2   3      4      5   6      7     8     9    10
+matrix_setting = {1, 1, 1.0, colordef, 1, 6.0, colordef, 1, colordef, 0};
 matrix_set = repmat(matrix_setting,handles.nplot,1);
 
 if handles.nplot > 1
     for i = 2 : handles.nplot
         if i < 8
             matrix_set{i,4} = colordef_list(i-1,:);
+            matrix_set{i,7} = colordef_list(i-1,:);
+            matrix_set{i,9} = colordef_list(i-1,:);
         else 
             matrix_set{i,4} = rand(1,3);
+            matrix_set{i,7} = matrix_set{i,4};
+            matrix_set{i,9} = matrix_set{i,4};
         end
     end
 end
@@ -104,7 +108,7 @@ axis_set = {0, 0, 1, 1, 0, 0, 1, 0};
 axis_setting = repmat(axis_set,1,1);
 handles.flipxy = [0, 0];   % flip axis 0 = no; 1 = yes; 1st = x; 2nd = y;
 % line size list
-pop_type = get(handles.pop_type, 'String');
+pop_type_list = get(handles.pop_type, 'String');
 pop_linestyle_list = get(handles.pop_linestyle, 'String');
 pop_linesize_list = get(handles.pop_linesize, 'String');
 pop_markerstyle_list = get(handles.pop_markerstyle, 'String');
@@ -143,7 +147,8 @@ set(handles.pop_linestyle, 'Value', matrix_setting{2});
 set(handles.pop_linesize, 'Value', pop_linesize_ii);
 set(handles.pop_markerstyle, 'Value', matrix_setting{5});
 set(handles.pop_markersize, 'Value', pop_markersize_ii);
-
+set(handles.push_makerface,'BackgroundColor',colordef);
+set(handles.push_markeredge,'BackgroundColor', colordef);
 %if axis_setting{1,4} == 1
 set(handles.axis_start, 'String', axis_setting{1,1});
 set(handles.axis_end, 'String', axis_setting{1,2});
@@ -151,7 +156,7 @@ set(handles.axis_end, 'String', axis_setting{1,2});
 %end
 handles.basevalue = axis_setting{1,5}; %
 handles.basevalue_check = 0;
-handles.pop_type = pop_type;
+handles.pop_type_list = pop_type_list;
 handles.pop_linestyle_list = pop_linestyle_list;
 handles.pop_linesize_list = pop_linesize_list;
 handles.pop_markerstyle_list = pop_markerstyle_list;
@@ -194,15 +199,19 @@ val = get(hObject,'Value');
 matrix_set = handles.matrix_set;  % plot style setting
 %axis_setting = handles.axis_setting;  % axis setting
 plot_s = handles.plot_s;
-for i = 1: handles.nplot
+nplot = handles.nplot;
+for i = 1: nplot
+    [~,name,ext] = fileparts(plot_s{i});
+    selected_data = [name,ext];
     switch str{val};
-    case plot_s{i} % set selected.
-        disp(plot_s{i});
+    case selected_data % set selected.
+        disp(['Set style for data: ',selected_data]);
         handles.setseq = i;
         pop_linesize_ii = getlisti(handles.pop_linesize_list,num2str(matrix_set{i,3},'%2.1f'));
         pop_markersize_ii = getlisti(handles.pop_markersize_list,num2str(matrix_set{i,6},'%2.1f'));
+        %class(matrix_set{i,5})
+
         
-        set(handles.pop_type,'Value', matrix_set{i,1});
         set(handles.pop_linestyle,'Value', matrix_set{i,2});
         set(handles.push_linecolor,'BackgroundColor', matrix_set{i,4});
         set(handles.pop_markerstyle,'Value', matrix_set{i,5});
@@ -210,6 +219,7 @@ for i = 1: handles.nplot
         set(handles.push_markeredge,'BackgroundColor', matrix_set{i,9});
         set(handles.pop_linesize, 'Value', pop_linesize_ii);
         set(handles.pop_markersize, 'Value', pop_markersize_ii);
+        set(handles.pop_type,'Value', matrix_set{i,1});
         
         if matrix_set{i,8} == 1
             set(handles.push_face, 'String', 'Face');
@@ -243,7 +253,7 @@ str = get(hObject, 'String');
 val = get(hObject,'Value');
 %str = get(handles.pop_type, 'String');
 %val = get(handles.pop_type, 'Value');
-ii = getlisti(handles.pop_type,str{val});
+ii = getlisti(handles.pop_type_list,str{val});
 matrix_set_temp{handles.setseq,1} = ii;
 % save handles
 
