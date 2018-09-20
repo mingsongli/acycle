@@ -1,8 +1,16 @@
 function varargout = AC(varargin)
-% AC MATLAB code for AC.fig
-%      This is the main function of the whole software.
-%      By Mingsong Li, Penn State, 2017-2018
 %
+% AC MATLAB code for AC.fig
+%
+%      This is the main function of the whole software Acycle.
+%
+%      Acycle is a a time-series analysis software for paleoclimate projects
+%      By Mingsong Li, Penn State, (c) 2017-2018
+%
+%      Websites: mingsongli.com/acycle
+%                 github.com/mingsongli/acycle
+%
+%%
 %      AC, by itself, creates a new AC or raises the existing
 %      singleton*.
 %
@@ -156,6 +164,9 @@ handles.copycut = 'copy';
 handles.nplot = 0;
 handles.filetype = {'.txt','.csv',''};
 handles.acfig = gcf;
+handles.math_sort = 1;
+handles.math_unique = 1;
+handles.math_deleteempty = 1;
 assignin('base','unit',handles.unit)
 assignin('base','unit_type',handles.unit_type)
 % Update handles structure
@@ -366,9 +377,9 @@ for i = 1:nplot
         return
     end
 end
-
+plotsucess = 0;
 if check == 1;
-    figure;
+    figf = figure;
     hold on;
     for i = 1:nplot
         plot_no = plot_selected(i);
@@ -397,7 +408,17 @@ if check == 1;
     end     
 
         data_filterout = data_filterout(~any(isnan(data_filterout),2),:);
-        plot(data_filterout(:,1),data_filterout(:,2),'LineWidth',1);
+        try plot(data_filterout(:,1),data_filterout(:,2),'LineWidth',1)
+            plotsucess = 1;
+        catch
+            errordlg([plot_filter_s1,' : data error. Check data'],'Data Error')
+            if plotsucess > 0
+            else
+                close(figf)
+                continue
+                %break
+            end   
+        end
     end
     set(gca,'XMinorTick','on','YMinorTick','on')
     if handles.unit_type == 0;
@@ -410,6 +431,7 @@ if check == 1;
     title(plot_filter_s1)
     hold off
 end
+set(gcf,'color','w');
 guidata(hObject,handles)
 
 
@@ -491,6 +513,7 @@ if check == 1;
     set(gca,'XMinorTick','on','YMinorTick','on')
     hold off
 end
+set(gcf,'color','w');
 guidata(hObject,handles)
 
 % --------------------------------------------------------------------
@@ -2603,7 +2626,7 @@ if plot_selected > 2
             prompt = {'Sort data in ascending order?','Unique values in data?','Remove empty row?'};
             dlg_title = 'Sort, Unique, Remove empty (1 = yes)';
             num_lines = 1;
-            defaultans = {'1','1','1'};
+            defaultans = {num2str(handles.math_sort),num2str(handles.math_unique),num2str(handles.math_deleteempty)};
             options.Resize='on';
             answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
             if ~isempty(answer)
@@ -2635,7 +2658,10 @@ if plot_selected > 2
                 else
                     name2 = [dat_name,ext];
                 end
-                %csvwrite(name1,data)
+                % remember settings
+                handles.math_sort = datasort;
+                handles.math_unique = dataunique;
+                handles.math_deleteempty = dataempty;
                 % cd ac_pwd dir
                 CDac_pwd
                 dlmwrite(name2, data, 'delimiter', ',', 'precision', 9);

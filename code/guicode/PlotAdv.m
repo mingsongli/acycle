@@ -82,7 +82,7 @@ colordef = [0 0 0]; % default color for 1st line
 colordef_list = [1 0 0; 0 0 1; 0 1 0; 0 1 1; 1 0 1; 1 1 0]; % default color for 2-7 lines
 
 %                 1  2   3      4      5   6      7     8     9    10
-matrix_setting = {1, 1, 1.0, colordef, 1, 6.0, colordef, 1, colordef, 0};
+matrix_setting = {1, 1, 1.0, colordef, 3, 6.0, colordef, 1, colordef, 0};
 matrix_set = repmat(matrix_setting,handles.nplot,1);
 
 if handles.nplot > 1
@@ -126,8 +126,10 @@ for i = 1: handles.nplot
         [~,plotseries,ext] = fileparts(plot_no);
         handles.plot_list{i} = plotseries;
         handles.plot_list_ext{i} = [plotseries,ext];
-        dat = load(plot_no);
-        
+        try dat = load(plot_no);
+        catch
+            errordlg([[plotseries,ext],' Error! try "Math -> Sort/Unique/Delete-empty" first'],'Data Error')
+        end
         dat = dat(~any(isnan(dat),2),:);
         if i == 1
             axis_setting{1,1} = min(dat(:,1));
@@ -589,7 +591,7 @@ xlim([axis_setting{1,1} axis_setting{1,2}])
 ylim([axis_setting{1,5} axis_setting{1,6}])
 xlabel(handles.unit)
 ylabel('Value')
-title('Plot')
+%title('Plot')
 set(gca,'XMinorTick','on','YMinorTick','on')
 legend(handles.plot_list)
 
@@ -618,6 +620,7 @@ end
 if handles.swapxy == 1
     view([90 -90])
 end
+set(gcf,'color','w');
 
 
 % --- Executes on button press in push_face.
