@@ -33,7 +33,7 @@ function varargout = AC(varargin)
 
 % Edit the above text to modify the response to help AC
 
-% Last Modified by GUIDE v2.5 20-Mar-2018 07:11:55
+% Last Modified by GUIDE v2.5 20-Sep-2018 14:48:10
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -167,6 +167,7 @@ handles.acfig = gcf;
 handles.math_sort = 1;
 handles.math_unique = 1;
 handles.math_deleteempty = 1;
+handles.math_derivative = 1;
 assignin('base','unit',handles.unit)
 assignin('base','unit_type',handles.unit_type)
 % Update handles structure
@@ -988,29 +989,113 @@ if and ((min(plot_selected) > 2), (nplot == 1))
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
         if isdir(data_name) == 1
         else
-        [~,dat_name,ext] = fileparts(data_name);
-        if sum(strcmp(ext,handles.filetype)) > 0
-            data = load(data_name);
-            time = data(:,1);
-            value = data(:,2);
-            npts = length(time);
-            time1 = time(1:npts-1,1);
-            value1 = diff(value);
-            data1 = [time1,value1];
-            
-            name1 = [dat_name,'-1stdiff',ext];
-            %csvwrite(name1,data1)
-            % cd ac_pwd dir
+            [~,dat_name,ext] = fileparts(data_name);
+            if sum(strcmp(ext,handles.filetype)) > 0
+                data = load(data_name);
+                time = data(:,1);
+                value = data(:,2);
+                npts = length(time);
+                time1 = time(1:npts-1,1);
+                value1 = diff(value);
+                data1 = [time1,value1];
+
+                name1 = [dat_name,'-1stdiff',ext];
                 CDac_pwd
-            dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9); 
-            d = dir; %get files
-            set(handles.listbox1,'String',{d.name},'Value',1) %set string
-            refreshcolor;
-            cd(pre_dirML); % return to matlab view folder
+                dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9); 
+                d = dir; %get files
+                set(handles.listbox1,'String',{d.name},'Value',1) %set string
+                refreshcolor;
+                cd(pre_dirML); % return to matlab view folder
         end
         end
 end
 guidata(hObject, handles);
+
+
+% --------------------------------------------------------------------
+function menu_derivative_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_derivative (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+contents = cellstr(get(handles.listbox1,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox1,'Value');
+nplot = length(plot_selected);   % length
+disp(['Select ',num2str(nplot),' data'])
+%if and ((min(plot_selected) > 2), (nplot == 1))
+for nploti = 1:nplot
+if plot_selected > 2
+    data_name_all = (contents(plot_selected));
+    data_name = char(data_name_all{nploti});
+    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    disp(['>>  Processing derivative:', data_name]);
+    GETac_pwd; data_name = fullfile(ac_pwd,data_name);
+        if isdir(data_name) == 1
+        else
+            [~,dat_name,ext] = fileparts(data_name);
+        if sum(strcmp(ext,handles.filetype)) > 0
+            try
+                fid = fopen(data_name);
+                data_ft = textscan(fid,'%f%f','EmptyValue', NaN);
+                fclose(fid);
+                if iscell(data_ft)
+                    try
+                        data = cell2mat(data_ft);
+                    catch
+                        fid = fopen(data_name,'at');
+                        fprintf(fid,'%d\n',[]);
+                        fclose(fid);
+                        fid = fopen(data_name);
+                        data_ft = textscan(fid,'%f%f','EmptyValue', Inf);
+                        fclose(fid);
+                        data = cell2mat(data_ft);
+                    end
+                end
+            catch
+                data = load(data_name);
+            end
+
+            prompt = {'Derivative (1=1st, 2=2nd ...)'};
+            dlg_title = 'Approximate Derivatives:';
+            num_lines = 1;
+            defaultans = {num2str(handles.math_derivative)};
+            options.Resize='on';
+            answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+            if ~isempty(answer)
+                derivative_n = str2double(answer{1});
+                % check
+                int_gt_0 = @(n) (rem(n,1) == 0) & (n > 0);
+                math_derivative = int_gt_0(derivative_n);
+                
+                if math_derivative == 1
+                    data = data(~any(isnan(data),2),:); % remove NaN values
+                    data = sortrows(data);
+                    time  = data(:,1);
+                    value = data(:,2);
+                    for i=1:derivative_n
+                        value= diff(value)./diff(time);
+                        time = time(1:length(time)-1,1);
+                    end
+                    data1 = [time,value];
+                    % remember settings
+                    handles.math_derivative = derivative_n;
+                    name1 = [dat_name,'-',num2str(derivative_n),'derv',ext];
+                    % cd ac_pwd dir
+                    CDac_pwd
+                    dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
+                    d = dir; %get files
+                    set(handles.listbox1,'String',{d.name},'Value',1) %set string
+                    refreshcolor;
+                    cd(pre_dirML); % return to matlab view folder
+                else
+                    errordlg('Error, input must be a positive integer')
+                end
+            end
+        end
+        end
+end
+end
+guidata(hObject, handles);
+
 
 % --------------------------------------------------------------------
 function menu_period_Callback(hObject, eventdata, handles)
@@ -3512,8 +3597,8 @@ function menu_newtxt_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_newtxt (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-prompt = {'Type name of the text file'};
-dlg_title = 'Create a text file in the working directory';
+prompt = {'Name of the new text file'};
+dlg_title = 'New text file';
 num_lines = 1;
 defaultans = {'untitled.txt'};
 options.Resize='on';
@@ -3521,7 +3606,29 @@ answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
 if ~isempty(answer)
     
     CDac_pwd;
-    filename = (answer{1});
+    filename = answer{1};
+    if length(filename) < 4
+        filename = [filename,'.txt'];
+    else
+        if strcmp(filename(end-3:end),'.txt')
+        else
+            filename = [filename,'.txt'];
+        end
+    end
+    
+    if exist([ac_pwd,handles.slash_v,filename])
+        warndlg('File name exists. Used an alternative name','File Name Warning')
+        
+        for i = 1:100
+            filename = [filename(1:end-4),'-',num2str(i),'.txt'];
+            if exist([ac_pwd,handles.slash_v,filename])
+            else
+                break
+            end
+        end
+    end
+    
+    disp(['>>  Create a new data file entitled: ',filename])
     fid = fopen([ac_pwd,handles.slash_v,filename], 'wt' );
     fclose(fid);
     cd(ac_pwd);
@@ -3858,7 +3965,8 @@ if check == 1;
                 data_filterout = cell2mat(data_ft);
             end
         end
-        data_filterout = data_filterout(~any(isnan(data_filterout),2),:);
+        data_filterout = data_filterout(~any(isnan(data_filterout),2),:); %remove empty
+        
         if nplot == 1
             data_new = data_filterout;
         else
@@ -3908,3 +4016,4 @@ function axes_refresh_CreateFcn(hObject, eventdata, handles)
 % handles    empty - handles not created until after all CreateFcns called
 
 % Hint: place code in OpeningFcn to populate axes_refresh
+

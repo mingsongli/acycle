@@ -3,6 +3,23 @@
 Update Log
 _____________________________________
 
+Version : ACycle_v0.2.2.20181001
+Date    : Oct. 1, 2018; 9:37 pm EST
+By      : Mingsong Li (Penn State)
+
+	1. fix a bug for the high pass filter
+_____________________________________
+
+Version : ACycle_v0.2.2.20180928
+Date    : Sept. 28, 2018; 7:44 pm EST
+By      : Mingsong Li (Penn State)
+
+	1. add Approximate Derivative function
+    2. Fix filter missed code problem
+    3. New Text File: add .txt in filename if users forget to do so.
+    4. New Text File: use an alternative name if the file exists.
+_____________________________________
+
 Version : ACycle_v0.2.1.20180918
 Date    : Sept. 18, 2018; 9:38 pm EST
 By      : Mingsong Li (Penn State)

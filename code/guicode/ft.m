@@ -698,7 +698,7 @@ function popupmenu5_Callback(hObject, eventdata, handles)
 % read pop-up menu
 contents = cellstr(get(hObject,'String'));
 filter = contents{get(hObject,'Value')};
-hanldes.filter = filter;
+handles.filter = filter;
 data = handles.current_data;
 datax=data(:,2);
 time = data(:,1);
