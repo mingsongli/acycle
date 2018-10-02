@@ -63,7 +63,7 @@ function AC_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to AC (see VARARGIN)
 
-set(gcf,'Name','ACYCLE v0.2.1')
+set(gcf,'Name','ACYCLE v0.2.2')
 set(gcf,'DockControls', 'off')
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
