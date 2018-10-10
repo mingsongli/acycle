@@ -886,6 +886,101 @@ if and ((min(plot_selected) > 2), (nplot == 1))
 end
 guidata(hObject, handles);
 
+
+% --------------------------------------------------------------------
+function menu_clip_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_clip (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+contents = cellstr(get(handles.listbox1,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox1,'Value');
+nplot = length(plot_selected);   % length
+disp(['Select ',num2str(nplot),' data'])
+%if and ((min(plot_selected) > 2), (nplot == 1))
+for nploti = 1:nplot
+    if plot_selected > 2
+        data_name_all = (contents(plot_selected));
+        data_name = char(data_name_all{nploti});
+        data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+        disp(['>>  Processing clipping:', data_name]);
+        GETac_pwd; 
+        data_name = fullfile(ac_pwd,data_name);
+    
+        if isdir(data_name) == 1
+        else
+            [~,dat_name,ext] = fileparts(data_name);
+            if sum(strcmp(ext,handles.filetype)) > 0
+                try
+                    fid = fopen(data_name);
+                    data_ft = textscan(fid,'%f%f','EmptyValue', NaN);
+                    fclose(fid);
+                    if iscell(data_ft)
+                        try
+                            data = cell2mat(data_ft);
+                        catch
+                            fid = fopen(data_name,'at');
+                            fprintf(fid,'%d\n',[]);
+                            fclose(fid);
+                            fid = fopen(data_name);
+                            data_ft = textscan(fid,'%f%f','EmptyValue', Inf);
+                            fclose(fid);
+                            data = cell2mat(data_ft);
+                        end
+                    end
+                catch
+                    data = load(data_name);
+                end
+
+                prompt = {'Threshold value'; 'Keep high/low? (1=high; 0=low)'};
+                dlg_title = 'Clipping:';
+                num_lines = 1;
+                defaultans = {num2str(nanmean(data(:,2))), '1'};
+                options.Resize='on';
+                answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+                    if ~isempty(answer)
+
+                        clip_value = str2double(answer{1});
+                        clip_high  = str2double(answer{2});
+
+                        time = data(:,1);
+                        y = data(:,2);
+                        n = length(time);
+                        if clip_high == 1
+                            for i = 1:n
+                                if y(i) > clip_value
+                                    y(i) = y(i) - clip_value;
+                                else
+                                    y(i) = 0;
+                                end
+                            end
+                            name1 = [dat_name,'-clip>',num2str(clip_value),ext];
+                        else
+                            for i = 1:n
+                                if y(i) > clip_value
+                                    y(i) = 0;
+                                else
+                                    y(i) = y(i) - clip_value;
+                                end
+                            end
+                            name1 = [dat_name,'-clip<',num2str(clip_value),ext];
+                        end
+
+                            data1 = [time,y];
+                            CDac_pwd
+                            dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
+                            d = dir; %get files
+                            set(handles.listbox1,'String',{d.name},'Value',1) %set string
+                            refreshcolor;
+                            cd(pre_dirML); % return to matlab view folder
+                    else
+                        errordlg('Error, input must be a positive integer')
+                    end
+                end
+        end
+    end
+end
+guidata(hObject, handles);
+
 % --------------------------------------------------------------------
 function menu_log10_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_log10 (see GCBO)
@@ -1506,6 +1601,7 @@ function menu_ecoco_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox1,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox1,'Value');
 nplot = length(plot_selected);   % length
+saveacfigyes = 0;
 if and ((min(plot_selected) > 2), (nplot == 1))
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
@@ -1653,6 +1749,8 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                     plotn = 1;
                     disp('>> Wait ...')
                     
+                    handles.acfig = gcf; % read info of AC main window
+                    
                     tic
                     [prt_sr,out_depth,out_ecc,out_ep,out_eci,out_ecoco,out_ecocorb,out_norbit] = ...
                         ecoco(data,target,orbit7,window,srm,step,delinear,red,pad1,sr1,sr2,srstep,nsim,adjust,slices,plotn);
@@ -1691,7 +1789,6 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                             end
                         end
                     end
-                    savefig(handles.acfig,acfig_name) % save ac.fig automatically
 
                     % open and write log into log_name file
                     fileID = fopen(fullfile(dat_dir,log_name),'w+');
@@ -1744,15 +1841,35 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                     d = dir; %get files
                     set(handles.listbox1,'String',{d.name},'Value',1) %set string
                     refreshcolor;
+                    
+                    saveacfigyes = 1;
                     set(handles.menu_etrack,'Enable','On')
                     set(handles.menu_ecocoplot,'Enable','On')
+                    figure(handles.acfig)
+%                     handles.acfig = gcf;
+%                     savefig(handles.acfig,acfig_name) % save ac.fig automatically
                     cd(pre_dirML);
+                    
+                    disp('>>  *ECOCO.AC.fig file:')
+                    disp(acfig_name)
+                    disp('>>  *.ECOCO-log file:')
+                    disp(log_name)
                 end
             end
         end
         end
 end
+
 guidata(hObject, handles);
+
+if saveacfigyes == 1
+    CDac_pwd;
+    savefig(gcf,acfig_name)
+    d = dir; %get files
+    set(handles.listbox1,'String',{d.name},'Value',1) %set string
+    refreshcolor;
+    cd(pre_dirML);
+end
 
 % --------------------------------------------------------------------
 function menu_laskar_Callback(hObject, eventdata, handles)
@@ -2562,7 +2679,7 @@ else
 end
 % cd ac_pwd dir
 CDac_pwd
-dlmwrite([dat_name,'-noise.csv'], data, 'delimiter', ',', 'precision', 9);
+dlmwrite([dat_name,'-noise.txt'], data, 'delimiter', ',', 'precision', 9);
 end
 d = dir; %get files
 set(handles.listbox1,'String',{d.name},'Value',1) %set string
@@ -2597,7 +2714,7 @@ data(:,1) = t';
 data(:,2) = amp * zscore(redmark(rho1,length(t)));
 % cd ac_pwd dir
 CDac_pwd
-dlmwrite(['rednoise',num2str(rho1),'.csv'], data, 'delimiter', ',', 'precision', 9);
+dlmwrite(['rednoise',num2str(rho1),'.txt'], data, 'delimiter', ',', 'precision', 9);
 
 d = dir; %get files
 set(handles.listbox1,'String',{d.name},'Value',1) %set string
@@ -2656,7 +2773,7 @@ if check == 1;
     dat_merge = findduplicate(dat_merge);
     % cd ac_pwd dir
     CDac_pwd
-    dlmwrite('mergedseries.csv', dat_merge, 'delimiter', ',', 'precision', 9);
+    dlmwrite('mergedseries.txt', dat_merge, 'delimiter', ',', 'precision', 9);
     d = dir; %get files
 set(handles.listbox1,'String',{d.name},'Value',1) %set string
 refreshcolor;
@@ -3150,7 +3267,7 @@ data(:,1) = x;
 data(:,2) = y;
 
 CDac_pwd  % cd ac_pwd dir
-dlmwrite(['sineA',num2str(A),'T',num2str(T),'Ph',num2str(Ph),'B',num2str(B),'.csv'],...
+dlmwrite(['sineA',num2str(A),'T',num2str(T),'Ph',num2str(Ph),'B',num2str(B),'.txt'],...
     data, 'delimiter', ',', 'precision', 9);
 end
 d = dir; %get files

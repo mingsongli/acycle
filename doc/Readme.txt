@@ -1,6 +1,19 @@
 - - - - - -    READ ME    - - - - - -
 
 Update Log
+
+_____________________________________
+
+Version : ACycle_v0.2.2.20181010
+Date    : Oct. 10, 2018; 5:40 pm EST
+By      : Mingsong Li (Penn State)
+
+	1. add a CLIPPING function as a menu MATH item
+        It generates a new clipped series using the given value (default: mean)
+        Users decide to keep value larger than (1) or smaller than the given value (0)
+    2. fix a bug on the eCOCO plot
+
+    *Thanks Yanan Fang (NIGPAS, CAS) for her comments and bug reports
 _____________________________________
 
 Version : ACycle_v0.2.2.20181001
