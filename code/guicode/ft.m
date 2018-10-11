@@ -349,7 +349,7 @@ if strcmp(filter,'Butter')
     'DesignMethod','butter');
     yb = filtfilt(d,datax);  % filtfilt is okay. but it may not be included in some version of Matlab
     data_filterout = [time,yb];
-    add_list = [handles.dat_name,'-butter-',num2str(flch(1)),'-',num2str(flch(3)),'.csv'];
+    add_list = [handles.dat_name,'-butter-',num2str(flch(1)),'-',num2str(flch(3)),'.txt'];
 elseif strcmp(filter,'Cheby1')
     d = designfilt('bandpassiir', ...
         'FilterOrder',6, ...
@@ -359,7 +359,7 @@ elseif strcmp(filter,'Cheby1')
     'DesignMethod','cheby1');
     yb = filtfilt(d,datax);
     data_filterout = [time,yb];
-    add_list = [handles.dat_name,'-cheby1-',num2str(flch(1)),'-',num2str(flch(3)),'.csv'];
+    add_list = [handles.dat_name,'-cheby1-',num2str(flch(1)),'-',num2str(flch(3)),'.txt'];
 elseif strcmp(filter,'Ellip')
     d = designfilt('bandpassiir', ...
         'FilterOrder',6, ...
@@ -371,20 +371,28 @@ elseif strcmp(filter,'Ellip')
     'DesignMethod','ellip');
     yb = filtfilt(d,datax);
     data_filterout = [time,yb];
-    add_list = [handles.dat_name,'-ellip-',num2str(flch(1)),'-',num2str(flch(3)),'.csv'];
+    add_list = [handles.dat_name,'-ellip-',num2str(flch(1)),'-',num2str(flch(3)),'.txt'];
 elseif strcmp(filter,'Gaussian')
     [gaussbandx,filter,f]=gaussfilter(datax,dt,flch(2),flch(1),flch(3));
     data_filterout = [time,gaussbandx];
-    add_list = [handles.dat_name,'-gaus-',num2str(flch(2)),'+-',num2str(abs(flch(2)-flch(3))),'.csv'];
+    add_list = [handles.dat_name,'-gaus-',num2str(flch(2)),'+-',num2str(abs(flch(2)-flch(3))),'.txt'];
 elseif strcmp(filter,'Taner-Hilbert')
     % TANER-Hilbert Transformation
     [tanhilb,handles.ifaze,handles.ifreq] = ...
     tanerhilbertML(data,flch(2),flch(1),flch(3));
     handles.filterdd = tanhilb;
-    add_list = [handles.dat_name,'-Tan-',num2str(flch(2)),'+-',num2str(abs(flch(2)-flch(3))),'.csv'];
-    add_list_am = [handles.dat_name,'-Tan-',num2str(flch(2)),'+-',num2str(abs(flch(2)-flch(3))),'-AM.csv'];
+    add_list = [handles.dat_name,'-Tan-',num2str(flch(2)),'+-',num2str(abs(flch(2)-flch(3))),'.txt'];
+    add_list_am = [handles.dat_name,'-Tan-',num2str(flch(2)),'+-',num2str(abs(flch(2)-flch(3))),'-AM.txt'];
+    add_list_ufaze = [handles.dat_name,'-Tan-',num2str(flch(2)),'+-',num2str(abs(flch(2)-flch(3))),'-ufaze.txt'];
+    add_list_ufazedet = [handles.dat_name,'-Tan-',num2str(flch(2)),'+-',num2str(abs(flch(2)-flch(3))),'-ufazedet.txt'];
+    add_list_ifaze = [handles.dat_name,'-Tan-',num2str(flch(2)),'+-',num2str(abs(flch(2)-flch(3))),'-ifaze.txt'];
+    add_list_ifreq = [handles.dat_name,'-Tan-',num2str(flch(2)),'+-',num2str(abs(flch(2)-flch(3))),'-ifreq.txt'];
     data_filterout = tanhilb;
     handles.add_list_am = add_list_am;
+    handles.add_list_ufaze = add_list_ufaze;
+    handles.add_list_ufazedet = add_list_ufazedet;
+    handles.add_list_ifaze = add_list_ifaze;
+    handles.add_list_ifreq = add_list_ifreq;
 else
     add_list = '';
     data_filterout = '';
@@ -735,14 +743,14 @@ if sum(strcmp(type, {'highpassiir', 'lowpassiir'})) > 0
         'FilterOrder',6, ...
         'HalfPowerFrequency',f1,...
         'DesignMethod','butter');
-        add_list = [handles.filename,type,'butter-',num2str(f11),'.csv'];
+        add_list = [handles.filename,type,'butter-',num2str(f11),'.txt'];
     elseif strcmp(filter,'Cheby1')
         d = designfilt(type, ...
         'FilterOrder',6, ...
         'PassbandFrequency',f1,...
         'PassbandRipple',1,...
         'DesignMethod','cheby1');
-        add_list = [handles.filename,type,'cheby1-',num2str(f11),'.csv'];
+        add_list = [handles.filename,type,'cheby1-',num2str(f11),'.txt'];
     elseif strcmp(filter,'Ellip')
         d = designfilt(type, ...
         'FilterOrder',6, ...
@@ -750,7 +758,7 @@ if sum(strcmp(type, {'highpassiir', 'lowpassiir'})) > 0
         'PassbandRipple',1,...
         'StopbandAttenuation',20,...
         'DesignMethod','ellip');
-        add_list = [handles.filename,type,'ellip-',num2str(f11),'.csv'];
+        add_list = [handles.filename,type,'ellip-',num2str(f11),'.txt'];
     end
 else
     if strcmp(filter,'Butter')
@@ -759,7 +767,7 @@ else
         'HalfPowerFrequency1',flow,...
         'HalfPowerFrequency2',fhigh,...
         'DesignMethod','butter');
-        add_list = [handles.filename,type,'butter-',num2str(flow1*nyquist),'-',num2str(fhigh1*nyquist),'.csv'];
+        add_list = [handles.filename,type,'butter-',num2str(flow1*nyquist),'-',num2str(fhigh1*nyquist),'.txt'];
     elseif strcmp(filter,'Cheby1')
         d = designfilt(type, ...
         'PassbandFrequency1',flow,...
@@ -771,7 +779,7 @@ else
         'StopbandAttenuation',20,...
         'DesignMethod','cheby1',...
         'MatchExactly','both');
-        add_list = [handles.filename,type,'cheby1-',num2str(flow1*nyquist),'-',num2str(fhigh1*nyquist),'.csv'];
+        add_list = [handles.filename,type,'cheby1-',num2str(flow1*nyquist),'-',num2str(fhigh1*nyquist),'.txt'];
     elseif strcmp(filter,'Ellip')
         d = designfilt(type, ...
         'PassbandFrequency1',flow,...
@@ -783,7 +791,7 @@ else
         'StopbandAttenuation',20,...
         'DesignMethod','ellip',...
         'MatchExactly','both');
-        add_list = [handles.filename,type,'ellip-',num2str(flow1*nyquist),'-',num2str(fhigh1*nyquist),'.csv'];
+        add_list = [handles.filename,type,'ellip-',num2str(flow1*nyquist),'-',num2str(fhigh1*nyquist),'.txt'];
     else
         add_list = '';
     end
@@ -887,8 +895,19 @@ else
     if strcmp(filter,'Taner-Hilbert')
         add_list_am = handles.add_list_am;
         ampmod = [data_filterout(:,1),data_filterout(:,3)];
+        ifaze = [data_filterout(:,1),handles.ifaze];
+        ifreq = [data_filterout(1:end-1,1),handles.ifreq];
         dlmwrite(add_list_am, ampmod, 'delimiter', ',', 'precision', 9);
+        dlmwrite(handles.add_list_ufaze,[data_filterout(:,1),data_filterout(:,4)], 'delimiter', ',', 'precision', 9);
+        dlmwrite(handles.add_list_ufazedet, [data_filterout(:,1),data_filterout(:,5)], 'delimiter', ',', 'precision', 9);
+        dlmwrite(handles.add_list_ifaze, ifaze, 'delimiter', ',', 'precision', 9);
+        dlmwrite(handles.add_list_ifreq, ifreq, 'delimiter', ',', 'precision', 9);
     end
     cd(pre_dirML); % return to matlab view folder
+    disp(['>>  Save as: ', add_list_am])
+    disp(['>>  Save as: ', handles.add_list_ufaze])
+    disp(['>>  Save as: ', handles.add_list_ufazedet])
+    disp(['>>  Save as: ', handles.add_list_ifaze])
+    disp(['>>  Save as: ', handles.add_list_ifreq])
     disp('>> Done. See the working folder for the filtered output file(s)')
 end

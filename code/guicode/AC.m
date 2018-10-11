@@ -953,7 +953,7 @@ for nploti = 1:nplot
                                     y(i) = 0;
                                 end
                             end
-                            name1 = [dat_name,'-clip>',num2str(clip_value),ext];
+                            name1 = [dat_name,'-clip',num2str(clip_value),'+',ext];
                         else
                             for i = 1:n
                                 if y(i) > clip_value
@@ -962,7 +962,7 @@ for nploti = 1:nplot
                                     y(i) = y(i) - clip_value;
                                 end
                             end
-                            name1 = [dat_name,'-clip<',num2str(clip_value),ext];
+                            name1 = [dat_name,'-clip<',num2str(clip_value),'-',ext];
                         end
 
                             data1 = [time,y];
@@ -1004,7 +1004,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
             name1 = [dat_name,'-log10',ext];
             %csvwrite(name1,data1)
             % cd ac_pwd dir
-                CDac_pwd
+            CDac_pwd
             dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9); 
             d = dir; %get files
             set(handles.listbox1,'String',{d.name},'Value',1) %set string
@@ -1987,7 +1987,7 @@ if ~isempty(answer)
     ylabel('Global Benthic \delta^{18}O')
     title(['LR04 Stack: ',num2str(t1),'-',num2str(t2),' ka'])
     set(gca,'XMinorTick','on','YMinorTick','on')
-    filename = ['LR04_Stack_',num2str(t1),'_',num2str(t2),'ka'];
+    filename = ['LR04_Stack_',num2str(t1),'_',num2str(t2),'ka.txt'];
     % cd ac_pwd dir
     CDac_pwd
     dlmwrite(filename, LR04stack_s, 'delimiter', ',', 'precision', 9);
