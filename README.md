@@ -1,6 +1,6 @@
-# Acycle v0.2.2
+# Acycle v0.2.3
 
-<b>Acycle -- a time-series analysis software for paleoclimate projects  (version 0.2.2)</b>
+<b>Acycle -- a time-series analysis software for paleoclimate projects  (version 0.2.3)</b>
 
 Mingsong Li, Penn State. Oct. 2018
 
@@ -15,7 +15,7 @@ Acycle is a comprehensive, but simple-to-use software package for analysis of ti
 Acycle also provides a toolbox that evaluates astronomical signals in paleoclimate series, and estimates the most likely sedimentation rate by maximizing the correlation coefficient between power spectra of an astronomical solution and a paleoclimate series. Sedimentary noise models for sea-level variations are also included. 
 Many of the functions are specific to cyclostratigraphy and astrochronology, and are not found in standard, statistical packages. </i>
 
-Acycle version 0.2.2 can be downloaded <br />
+Acycle can be downloaded <br />
 here https://github.com/mingsongli/acycle   <br />
 here https://www.dropbox.com/sh/t53vjs539gmixnm/AAC0BqTR0U5xghKwuVc1Iwbma?dl=0   <br />
 or here https://pan.baidu.com/s/1C2ZOUGQl8w9M_eSBzb4NOg   <br />
@@ -29,7 +29,7 @@ A very preliminary User's Guide can be downloaded here https://github.com/mingso
 
 [1. MatLab version]: 
 
-Download and unzip the Acyclev0.2.1 software to your root directory.
+Download and unzip the Acyclev software to your root directory.
 
 <br />
 <br />
