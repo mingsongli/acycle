@@ -350,7 +350,7 @@ elseif strcmp(parameter,'Inclination')
 end
 %    cd(handles.working_folder)
     set(handles.text12,'String',handles.working_folder);
-    name = [handles.solution,'_',parameter,'_',num2str(t1),'_',num2str(t2),'.csv'];
+    name = [handles.solution,'_',parameter,'_',num2str(t1),'_',num2str(t2),'.txt'];
     %csvwrite(name,dat)
     CDac_pwd; % cd ac_pwd dir
     dlmwrite(name, dat, 'delimiter', ',', 'precision', 9);
