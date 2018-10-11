@@ -63,7 +63,7 @@ function AC_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to AC (see VARARGIN)
 
-set(gcf,'Name','ACYCLE v0.2.2')
+set(gcf,'Name','ACYCLE v0.2.3')
 set(gcf,'DockControls', 'off')
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
@@ -1243,6 +1243,87 @@ if and ((min(plot_selected) > 2), (nplot == 1))
         end
 end
 guidata(hObject, handles);
+
+
+% --------------------------------------------------------------------
+function menu_wavelet_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_clip (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+contents = cellstr(get(handles.listbox1,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox1,'Value');
+nplot = length(plot_selected);   % length
+disp(['Select ',num2str(nplot),' data'])
+%if and ((min(plot_selected) > 2), (nplot == 1))
+for nploti = 1:nplot
+    if plot_selected > 2
+        data_name_all = (contents(plot_selected));
+        data_name = char(data_name_all{nploti});
+        data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+        disp(['>>  Processing clipping:', data_name]);
+        GETac_pwd; 
+        data_name = fullfile(ac_pwd,data_name);
+    
+        if isdir(data_name) == 1
+        else
+            [~,dat_name,ext] = fileparts(data_name);
+            if sum(strcmp(ext,handles.filetype)) > 0
+                try
+                    fid = fopen(data_name);
+                    data_ft = textscan(fid,'%f%f','EmptyValue', NaN);
+                    fclose(fid);
+                    if iscell(data_ft)
+                        try
+                            data = cell2mat(data_ft);
+                        catch
+                            fid = fopen(data_name,'at');
+                            fprintf(fid,'%d\n',[]);
+                            fclose(fid);
+                            fid = fopen(data_name);
+                            data_ft = textscan(fid,'%f%f','EmptyValue', Inf);
+                            fclose(fid);
+                            data = cell2mat(data_ft);
+                        end
+                    end
+                catch
+                    data = load(data_name);
+                end
+                
+                time = data(:,1);
+                sst = data(:,2);
+                dt = mean(diff(time));
+                prompt = {['Period range from (',handles.unit,')']; ['Period range to (',handles.unit,')'];...
+                    'Pad (1=yes,0=no)'; 'Discrete scale spacing (default)'};
+                dlg_title = '1D Wavelet transform';
+                num_lines = 1;
+                defaultans = {num2str(2*dt),num2str(length(time)*dt/2), '1', '0.1'};
+                options.Resize='on';
+                answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+                    if ~isempty(answer)
+
+                        pt1 = str2double(answer{1});
+                        pt2 = str2double(answer{2});
+                        pad  = str2double(answer{3});
+                        dss  = str2double(answer{4});
+                        
+                        [~,~,~]= waveletML(sst,time,pad,dss,pt1,pt2);
+                        name1 = [dat_name,'-wavelet.fig'];
+                        disp(['>>  Save as: ',name1])
+                        CDac_pwd
+                        savefig(name1)
+                        d = dir; %get files
+                        set(handles.listbox1,'String',{d.name},'Value',1) %set string
+                        refreshcolor;
+                        cd(pre_dirML); % return to matlab view folder
+                    else
+                        
+                    end
+                end
+        end
+    end
+end
+guidata(hObject, handles);
+
 
 % --------------------------------------------------------------------
 function menu_filter_Callback(hObject, eventdata, handles)

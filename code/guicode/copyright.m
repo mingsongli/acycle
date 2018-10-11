@@ -56,7 +56,7 @@ set(gcf,'units','norm') % set location
 h=get(gcf,'Children');  % get all content
 h1=findobj(h,'FontUnits','points');  % find all font units as points
 set(h1,'FontUnits','norm');  % set as norm
-set(gcf,'Name','ACYCLE Copy Right')
+set(gcf,'Name','Acycle Copy Right')
 
 [I,m] = imread('acycle_logo.png');
 imshow(I,m,'parent',handles.logo_axes1);

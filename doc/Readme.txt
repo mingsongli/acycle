@@ -4,6 +4,31 @@ Update Log
 
 _____________________________________
 
+Version : ACycle_v0.2.3.20181010
+Date    : Oct. 10, 2018; 9:50 pm EST
+By      : Mingsong Li (Penn State)
+
+	1. ADD the famous Wavelet transform by Christopher Torrence and Gilbert P. Compo
+
+    %WAVELET  1D Wavelet transform with optional singificance testing
+    % ... ...
+    %----------------------------------------------------------------------------
+    %   Copyright (C) 1995-2004, Christopher Torrence and Gilbert P. Compo
+    %
+    %   This software may be used, copied, or redistributed as long as it is not
+    %   sold and this copyright notice is reproduced on each copy made. This
+    %   routine is provided as is without any express or implied warranties
+    %   whatsoever.
+    %
+    % Notice: Please acknowledge the use of the above software in any publications:
+    %    ``Wavelet software was provided by C. Torrence and G. Compo,
+    %      and is available at URL: http://paos.colorado.edu/research/wavelets/''.
+    %
+    % Reference: Torrence, C. and G. P. Compo, 1998: A Practical Guide to
+    %            Wavelet Analysis. <I>Bull. Amer. Meteor. Soc.</I>, 79, 61-78.
+
+_____________________________________
+
 Version : ACycle_v0.2.2.20181010
 Date    : Oct. 10, 2018; 5:40 pm EST
 By      : Mingsong Li (Penn State)
