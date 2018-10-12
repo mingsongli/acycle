@@ -63,7 +63,7 @@ function AC_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to AC (see VARARGIN)
 
-set(gcf,'Name','ACYCLE v0.2.3')
+set(gcf,'Name','ACYCLE v0.2.4')
 set(gcf,'DockControls', 'off')
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
@@ -2582,6 +2582,162 @@ if and ((min(plot_selected) > 2), (nplot == 1))
             end
             end
         end
+        end
+end
+guidata(hObject, handles);
+
+
+
+% --------------------------------------------------------------------
+function menu_imshow_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_function (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+contents = cellstr(get(handles.listbox1,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox1,'Value');
+nplot = length(plot_selected);   % length
+if and ((min(plot_selected) > 2), (nplot == 1))
+    data_name = char(contents(plot_selected));
+    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; data_name = fullfile(ac_pwd,data_name);
+        if isdir(data_name) == 1
+            
+        else
+            [~,dat_name,ext] = fileparts(data_name);
+            if sum(strcmp(ext,{'.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.TIF'})) > 0
+                im_name = imread(data_name);
+                figure;
+                imshow(im_name)
+                set(gcf,'Name',[dat_name,ext])
+            end
+        end
+end
+guidata(hObject, handles);
+
+
+% --------------------------------------------------------------------
+function menu_rgb2gray_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_function (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+contents = cellstr(get(handles.listbox1,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox1,'Value');
+nplot = length(plot_selected);   % length
+if and ((min(plot_selected) > 2), (nplot == 1))
+    data_name = char(contents(plot_selected));
+    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; data_name = fullfile(ac_pwd,data_name);
+        if isdir(data_name) == 1
+            
+        else
+            [~,dat_name,ext] = fileparts(data_name);
+            if sum(strcmp(ext,{'.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.TIF'})) > 0
+                im_name = imread(data_name);
+                
+                try I = rgb2gray(im_name);
+                figure
+                imshow(I)
+                dat_name = [dat_name,'-gray',ext];
+                set(gcf,'Name',dat_name)
+                CDac_pwd;
+                imwrite(I,dat_name)
+                d = dir; %get files
+                set(handles.listbox1,'String',{d.name},'Value',1) %set string
+                refreshcolor;
+                cd(pre_dirML); % return to matlab view folder
+                catch
+                    warndlg('This is not a RGB image')
+                end
+            end
+        end
+end
+guidata(hObject, handles);
+
+
+% --------------------------------------------------------------------
+function menu_improfile_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_function (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+contents = cellstr(get(handles.listbox1,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox1,'Value');
+nplot = length(plot_selected);   % length
+if and ((min(plot_selected) > 2), (nplot == 1))
+    data_name = char(contents(plot_selected));
+    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; data_name = fullfile(ac_pwd,data_name);
+        if isdir(data_name) == 1
+        else
+            [~,dat_name,ext] = fileparts(data_name);
+            if sum(strcmp(ext,{'.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.TIF'})) > 0
+                I = imread(data_name);
+                fig = figure;
+                imshow(I);
+                set(gcf,'Name',[dat_name,ext,': Press "ALT" & select cursors now'])
+                
+                choice = questdlg('Press "ALT" key and click to select 2 cursors, then press "Enter"', ...
+                    'Select', 'Got you','Cancel','Got you');
+                
+                switch choice
+                    case 'Got you'
+                        figure(fig)
+                        dcm_obj = datacursormode(fig);
+                        %set(dcm_obj,'DisplayStyle','datatip','SnapToDataVertex','off')
+                        Sure = input('>>  Press "Enter"');
+                        c_info = getCursorInfo(dcm_obj);
+                        m=length(c_info);
+                        CursorInfo_value = zeros(m,2);
+                        if m>=1
+                            for i=1:m
+                               CursorInfo_value(i,1)=c_info(i).Position(:,1);
+                               CursorInfo_value(i,2)=c_info(i).Position(:,2);
+                            end
+                        end
+                        %disp(CursorInfo_value)
+                        if m >= 2
+                            if m>2
+                                warndlg('More than 2 cursors are selected!')
+                            end
+                            [cx,cy,c,xi,yi] = improfile(I,CursorInfo_value(:,1),CursorInfo_value(:,2));
+                            cx = cx - min(cx);
+                            cy = cy - min(cy);
+                            cz = sqrt(cx.^2 + cy.^2);
+
+                            try data = [cz,c];
+                            catch
+                                warndlg('This is not a grayscale image!')
+                                try c = reshape(c,[],3);
+                                    %warndlg('Looks like a RGB image?')
+                                catch
+                                    warndlg('Looks like a cymk image, right?')
+                                    c = reshape(c,[],4);
+                                end
+                                data = [cz,c];
+                            end
+                            name = [dat_name,'-profile.txt'];
+                            name1= [dat_name,'-prof2pt.txt'];
+                            data1 = [xi,yi];
+                            
+                            CDac_pwd
+                            dlmwrite(name , data, 'delimiter', ',', 'precision', 9);
+                            dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
+                            disp(['>>  save profile data as   ',name1])
+                            disp(['>>  save control points as ',name1])
+                            d = dir; %get files
+                            set(handles.listbox1,'String',{d.name},'Value',1) %set string
+                            refreshcolor;
+                            cd(pre_dirML); % return to matlab view folder
+                            
+                            figure;plot(cx,c);title(name); xlabel('Pixels'); 
+                            if m == 2
+                                ylabel('Grayscale')
+                            else
+                                ylabel('Value')
+                            end
+                        end
+                    case 'Cancel'
+                end
+            end
         end
 end
 guidata(hObject, handles);

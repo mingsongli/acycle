@@ -1,6 +1,17 @@
 - - - - - -    READ ME    - - - - - -
 
 Update Log
+
+_____________________________________
+
+Version : ACycle_v0.2.4.20181012
+Date    : Oct. 12, 2018; 6:28 pm EST
+By      : Mingsong Li (Penn State)
+
+	1. Add Image menu, including 3 new functions
+        Show Image
+        RGB to Grayscale
+        Grayscale profile
 _____________________________________
 
 Version : ACycle_v0.2.3.20181011

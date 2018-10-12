@@ -1,6 +1,6 @@
-# Acycle v0.2.3
+# Acycle v0.2.4
 
-<b>Acycle -- a time-series analysis software for paleoclimate projects  (version 0.2.3)</b>
+<b>Acycle -- a time-series analysis software for paleoclimate projects</b>
 
 Mingsong Li, Penn State. Oct. 2018
 
