@@ -3170,7 +3170,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
         if isdir(data_name) == 1
         else
-            [~,dat_name,ext] = fileparts(data_name);
+            [~,~,ext] = fileparts(data_name);
         if sum(strcmp(ext,handles.filetype)) > 0
             data = load(data_name);
             samplerate = diff(data(:,1));
@@ -3193,7 +3193,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                     interpolate_rate= str2double(answer{2});
                     [data_even] = interpolate(data,interpolate_rate);
                     [rhox] = erhoAR1(data_even,window);
-                    
+                    name1 = 
                     figure; plot(rhox(:,1),rhox(:,2),'LineWidth',1)
                         if handles.unit_type == 0;
                             xlabel(['Unit (',handles.unit,')'])
@@ -3205,21 +3205,6 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                     set(gca,'XMinorTick','on','YMinorTick','on')
                     ylabel('RHO in AR(1)')
                     title(['Window = ',num2str(window),'. Sample rate = ',num2str(interpolate_rate)])
-                    
-                    name1 = [dat_name,'-rho1.txt'];
-                    CDac_pwd
-                    if exist([pwd,handles.slash_v,name1])
-                        for i = 1:100
-                            name1 = [dat_name,'-rho1-',num2str(i),'.txt'];
-                            if exist([pwd,handles.slash_v,name1])
-                            else
-                                 break
-                            end
-                        end
-                    end
-                    dlmwrite(name1, rhox, 'delimiter', ',', 'precision', 9); 
-                    disp(['>>  Save rho1    : ',name1])   
-                    cd(pre_dirML); % return to matlab view folder
                 end
             else
                 prompt = {'Monte Carlo simulations',...
@@ -3312,28 +3297,6 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                 legend('2.5% - 97.5%', '5% - 95%', '10% - 90%','15.87% - 84.14%', '25% - 75%', 'Median')
                 title(['Window: ',num2str(window1),'-',num2str(window2),...
                     '. Sample rate: ',num2str(samprate1),'-',num2str(samprate2)])
-                
-                name1 = [dat_name,'-rho1-median.txt'];
-                data1 = [y_grid_nan,powyad_p_nan(:,npercent2+1)];
-                name2 = [dat_name,'-rho1-percentile.txt'];
-                data2 = [y_grid_nan,powyad_p_nan];
-                CDac_pwd
-                if exist([pwd,handles.slash_v,name1]) || exist([pwd,handles.slash_v,name2])
-                    for i = 1:100
-                        name1 = [dat_name,'-rho1-median-',num2str(i),'.txt'];
-                        name1 = [dat_name,'-rho1-percentile-',num2str(i),'.txt'];
-                        if exist([pwd,handles.slash_v,name1]) || exist([pwd,handles.slash_v,name2])
-                        else
-                             break
-                        end
-                    end
-                end
-                dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9); 
-                dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9); 
-                disp(['>>  Save rho1 median    : ',name1])   
-                disp(['>>  Save rho1 percentile: ',name2])  
-                cd(pre_dirML); % return to matlab view folder
-                    
             else
                 errordlg('Number simulations is too few, try 1000','Error');
             end

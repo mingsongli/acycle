@@ -61,6 +61,7 @@ set(h1,'FontUnits','norm');  % set as norm
 handles.output = hObject;
 
 set(gcf,'Name','Spectral Analysis')
+
 data_s = varargin{1}.current_data;
 handles.current_data = data_s;
 handles.filename = varargin{1}.data_name;

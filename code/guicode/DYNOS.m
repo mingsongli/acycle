@@ -61,9 +61,19 @@ h=get(gcf,'Children');  % get all content
 h1=findobj(h,'FontUnits','points');  % find all font units as points
 set(h1,'FontUnits','norm');  % set as norm
 set(gcf,'Name','DYNOT')
+
 % Choose default command line output for DYNOS
 handles.output = hObject;
 
+data_s = varargin{1}.current_data;
+handles.data = data_s;
+assignin('base','data',data_s)
+
+handles.filename = varargin{1}.data_name;
+handles.dat_name = varargin{1}.dat_name;
+handles.unit = varargin{1}.unit;
+handles.path_temp = varargin{1}.path_temp;
+handles.slash_v = varargin{1}.slash_v;
 % Update handles structure
 guidata(hObject, handles);
 
@@ -396,6 +406,29 @@ handles.powyadjustp = powyadjustp;
 handles.y_grid_nan = y_grid_nan;
 handles.powyad_p_nan = powyad_p_nan;
 handles.colorcode = colorcode;
+% save data
+data1 = [y_grid_nan,powyad_p_nan(:,npercent2+1)];
+name1 = [handles.dat_name,'-DYNOT-median.txt'];
+data2 = [y_grid_nan,powyad_p_nan];
+name2 = [handles.dat_name,'-DYNOT-prctile.txt'];
+CDac_pwd
+
+if exist([pwd,handles.slash_v,name1]) || exist([pwd,handles.slash_v,name2])
+    for i = 1:100
+        name1 = [handles.dat_name,'-DYNOT-median-',num2str(i),'.txt'];
+        name2 = [handles.dat_name,'-DYNOT-prctile-',num2str(i),'.txt'];
+        if exist([pwd,handles.slash_v,name1]) || exist([pwd,handles.slash_v,name2])
+        else
+            break
+        end
+    end
+end
+disp(['>>  Save DYNOT median    : ',name1])
+disp(['>>  Save DYNOT percentile: ',name2])
+dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9); 
+dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9); 
+cd(pre_dirML); % return to matlab view folder
+%
 guidata(hObject, handles);
 
 

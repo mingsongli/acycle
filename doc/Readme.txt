@@ -1,6 +1,17 @@
 - - - - - -    READ ME    - - - - - -
 
 Update Log
+_____________________________________
+
+Version : ACycle_v0.2.3.20181011
+Date    : Oct. 11, 2018; 10:58 pm EST
+By      : Mingsong Li (Penn State)
+
+	1. Refine DYNOT and RHO-1 model
+        Save median and percentile outputs as txt files
+    2. Upgrade DYNOT
+        Select data and click Timeseries -> DYNOT
+        Pop-up window will read data automatically.
 
 _____________________________________
 
@@ -8,7 +19,7 @@ Version : ACycle_v0.2.3.20181010
 Date    : Oct. 10, 2018; 9:50 pm EST
 By      : Mingsong Li (Penn State)
 
-	1. ADD the famous Wavelet transform by Christopher Torrence and Gilbert P. Compo
+	1. ADD the Wavelet transform by Christopher Torrence and Gilbert P. Compo
 
     %WAVELET  1D Wavelet transform with optional singificance testing
     % ... ...
