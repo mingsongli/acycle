@@ -1,11 +1,11 @@
-function [meanboot,stdboot] = smoothciML(X,Y,method,span,bootn)
+function [meanboot,bootstd,bootprt] = smoothciML(X,Y,method,span,bootn)
 %
 % INPUT
 %   X:      n x 1 vector, time
 %   Y:      n x 1 vector, value
 %   method: 'loess', 'lowess', 'rloess', or 'rlowess'
 %   span:   percentage of smooth method
-%   bootn:  number of bootstrip
+%   bootn:  number of bootstrap
 %
 % OUTPUT
 %   meanboot:   mean of boot
@@ -15,7 +15,7 @@ function [meanboot,stdboot] = smoothciML(X,Y,method,span,bootn)
 %   X = (linspace(1,10,100))';
 %   Y = 1.6 -0.6*cos(X*.6) -1.3*sin(X*.6) -1.2 *cos(2*X*.6) -0.9*sin(2*X*.6);
 %   Y = Y +  .2*(max(Y)-min(Y)) * randn(100,1);
-%   [meanboot,stdboot] = smoothciML(X,Y,'loess',.3,500);
+%   [meanboot,bootstd,bootprt] = smoothciML(X,Y,'loess',.3,500);
 %
 % Calls for
 %   smoothci.m  An online Matlab code doing smooth and some data adjustments
@@ -36,14 +36,16 @@ f = @(xy) smoothci(xy,X,span,method);
 yboot2 = bootstrp(bootn,f,[X,Y])';
 
 meanboot = mean(yboot2,2);
-stdboot = std(yboot2,0,2);
+bootstd = std(yboot2,0,2);
+%percentile
+bootprt = prctile(yboot2, [.5,2.275,15.865,50,84.135,97.725,99.5],2);
 
 figure;
 scatter(X,Y)
 h1 = line(X, meanboot,'color','k','linestyle','-','linewidth',2);
-h3 = line(X, meanboot + 1 * stdboot,'color','r','linestyle','-','linewidth',1);
-h2 = line(X, meanboot + 2 * stdboot,'color','r','linestyle','--','linewidth',.5);
-h4 = line(X, meanboot - 1 * stdboot,'color','r','linestyle','-','linewidth',1);
-h5 = line(X, meanboot - 2 * stdboot,'color','r','linestyle','--','linewidth',.5);
+h3 = line(X, meanboot + 1 * bootstd,'color','r','linestyle','-','linewidth',1);
+h2 = line(X, meanboot + 2 * bootstd,'color','r','linestyle','--','linewidth',.5);
+h4 = line(X, meanboot - 1 * bootstd,'color','r','linestyle','-','linewidth',1);
+h5 = line(X, meanboot - 2 * bootstd,'color','r','linestyle','--','linewidth',.5);
 L5 = legend('Data',[num2str(span*100),'% ',method,' regression'],...
     '1\sigma confidence intervals','2\sigma confidence intervals',4);

@@ -63,7 +63,7 @@ function AC_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to AC (see VARARGIN)
 
-set(gcf,'Name','ACYCLE v0.2.4')
+set(gcf,'Name','ACYCLE v0.2.5')
 set(gcf,'DockControls', 'off')
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
@@ -362,7 +362,7 @@ for i = 1:nplot
         if isdir(plot_filter_s)
             return
         else
-            [~,~,ext] = fileparts(plot_filter_s);
+            [~,dat_name,ext] = fileparts(plot_filter_s);
             check = 0;
             if sum(strcmp(ext,handles.filetype)) > 0
                 check = 1; % selection can be executed 
@@ -409,8 +409,19 @@ if check == 1;
     end     
 
         data_filterout = data_filterout(~any(isnan(data_filterout),2),:);
-        try plot(data_filterout(:,1),data_filterout(:,2),'LineWidth',1)
+        
+        try plot(data_filterout(:,1),data_filterout(:,2:end),'LineWidth',1)
             plotsucess = 1;
+            % save current data for R 
+            assignin('base','currentdata',data_filterout);
+            %datar =[];
+            datar = num2str(data_filterout(1,2));
+            for ii=2:length(data_filterout(:,1));
+                r1 =data_filterout(ii,2); 
+                datar = [datar,',',num2str(r1)];
+            end
+            assignin('base','currentdataR',datar);
+            %
         catch
             errordlg([plot_filter_s1,' : data error. Check data'],'Data Error')
             if plotsucess > 0
@@ -1070,6 +1081,162 @@ if and ((min(plot_selected) > 2), (nplot == 1))
 end
 guidata(hObject, handles);
 
+
+% --------------------------------------------------------------------
+function menu_bootstrap_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_smooth (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+contents = cellstr(get(handles.listbox1,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox1,'Value');
+nplot = length(plot_selected);   % length
+if and ((min(plot_selected) > 2), (nplot == 1))
+    data_name = char(contents(plot_selected));
+    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; data_name = fullfile(ac_pwd,data_name);
+        if isdir(data_name) == 1
+        else
+            [~,dat_name,ext] = fileparts(data_name);
+        if sum(strcmp(ext,handles.filetype)) > 0
+
+        try
+            fid = fopen(data_name);
+            data_ft = textscan(fid,'%f%f','EmptyValue', NaN);
+            fclose(fid);
+            if iscell(data_ft)
+                data = cell2mat(data_ft);
+            end
+        catch
+            data = load(data_name);
+        end 
+
+            time = data(:,1);
+            value = data(:,2);
+            span_d = (time(end)-time(1))*.3;
+            dlg_title = 'Bootstrap';
+            prompt = {'Window (unit)','Method: "loess/lowess/rloess/rlowess"',...
+                'Number of bootstrap'};
+            num_lines = 1;
+            defaultans = {num2str(span_d),'loess','1000'};
+            options.Resize='on';
+            answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+            if ~isempty(answer)
+                span_v = str2double(answer{1});
+                method = (answer{2});
+                bootn = str2double(answer{3});
+                %q = char(39);
+                %method = strcat(q,method1,q)
+                span = span_v/(time(end)-time(1));
+                [meanboot,bootstd,bootprt] = smoothciML(time,value,method,span,bootn);
+                
+                data(:,2) = meanboot;
+                data(:,3) = bootstd;
+                data(:,4) = 2*bootstd;
+                data1 = [time,bootprt];
+                name = [dat_name,'-',num2str(span_v),'-',method,'-',num2str(bootn),'-bootstp-meanstd',ext];  % New name
+                name1 = [dat_name,'-',num2str(span_v),'-',method,'-',num2str(bootn),'-bootstp-percentile',ext];
+                
+                disp(['>>  Save [time, mean, std, 2std] as :',name])
+                disp(['>>  Save [time, percentiles] as :',name1])
+                disp('>>        Percentiles are ')
+                disp('>>        [0.5,2.275,15.865,50,84.135,97.725,99.5]')
+                CDac_pwd
+                dlmwrite(name, data, 'delimiter', ',', 'precision', 9); 
+                dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9); 
+                d = dir; %get files
+                set(handles.listbox1,'String',{d.name},'Value',1) %set string
+                refreshcolor;
+                cd(pre_dirML); % return to matlab view folder
+            end
+        end
+        end
+end
+guidata(hObject, handles);
+
+% --------------------------------------------------------------------
+function menu_gp_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_smooth (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+contents = cellstr(get(handles.listbox1,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox1,'Value');
+nplot = length(plot_selected);   % length
+if and ((min(plot_selected) > 2), (nplot == 1))
+    data_name = char(contents(plot_selected));
+    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; data_name = fullfile(ac_pwd,data_name);
+        if isdir(data_name) == 1
+        else
+            [~,dat_name,ext] = fileparts(data_name);
+        if sum(strcmp(ext,handles.filetype)) > 0
+
+        try
+            fid = fopen(data_name);
+            data_ft = textscan(fid,'%f%f','EmptyValue', NaN);
+            fclose(fid);
+            if iscell(data_ft)
+                data = cell2mat(data_ft);
+            end
+        catch
+            data = load(data_name);
+        end 
+        
+            x = data(:,1);
+            y = data(:,2);
+                
+            dlg_title = 'Gaussian Process';
+            prompt = {'X_1','X_n','Sampling rate (default = median)'};
+            num_lines = 1;
+            defaultans = {num2str(min(x)),num2str(max(x)),num2str(median(diff(x)))};
+            options.Resize='on';
+            answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+            if ~isempty(answer)
+                x_1 = str2double(answer{1});
+                x_2 = str2double(answer{2});
+                sr = str2double(answer{3});
+                x_n = (x_2-x_1)/sr; 
+                % gaussian process
+                
+                z = linspace(x_1,x_2,round(x_n))';
+                %
+                meanfunc = {@meanSum, {@meanLinear, @meanConst}}; 
+                covfunc = @covSEiso;
+                likfunc = @likGauss;
+                % hyp
+                hyp.cov = [0; 0]; 
+                hyp.mean = [0; 0]; 
+                hyp.lik = log(0.1);
+                disp('>>  Minimize hyperparameters ...')
+                hyp = minimize(hyp, @gp, -100, @infGaussLik, meanfunc, covfunc, likfunc, x, y);
+                % gp
+                [m s2] = gp(hyp, @infGaussLik, meanfunc, covfunc, likfunc, x, y, z);
+                
+                data1 = [z,m,sqrt(s2)];
+                name1 = [dat_name,'-gp-meanstd',ext];  % New name
+                % plot
+                figure;
+                f = [m+2*sqrt(s2); flip(m-2*sqrt(s2),1)];
+                f1 = [m+sqrt(s2); flip(m-sqrt(s2),1)];
+                fill([z; flip(z,1)], f, [7 7 7]/8,'LineStyle','none')
+                hold on;
+                fill([z; flip(z,1)], f1, [6 6 6]/8,'LineStyle','none')
+                plot(z, m,'k'); plot(x, y, 'b+');
+                xlabel(handles.unit);ylabel('Value');title([dat_name,'-gp-mean+-std'])
+                
+                disp(['>>  Save [mean, std] as :',name1])
+                CDac_pwd
+                dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9); 
+                d = dir; %get files
+                set(handles.listbox1,'String',{d.name},'Value',1) %set string
+                refreshcolor;
+                cd(pre_dirML); % return to matlab view folder
+            end
+        end
+        end
+end
+guidata(hObject, handles);
+
+
 % --------------------------------------------------------------------
 function menu_1stdiff_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_1stdiff (see GCBO)
@@ -1290,13 +1457,14 @@ for nploti = 1:nplot
                 end
                 
                 time = data(:,1);
+                timelen = time(end)-time(1);
                 sst = data(:,2);
                 dt = mean(diff(time));
                 prompt = {['Period range from (',handles.unit,')']; ['Period range to (',handles.unit,')'];...
                     'Pad (1=yes,0=no)'; 'Discrete scale spacing (default)'};
                 dlg_title = '1D Wavelet transform';
                 num_lines = 1;
-                defaultans = {num2str(2*dt),num2str(length(time)*dt/2), '1', '0.1'};
+                defaultans = {num2str(2*dt),num2str(timelen), '1', '0.1'};
                 options.Resize='on';
                 answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
                     if ~isempty(answer)
@@ -1305,12 +1473,15 @@ for nploti = 1:nplot
                         pt2 = str2double(answer{2});
                         pad  = str2double(answer{3});
                         dss  = str2double(answer{4});
-                        
+                        figwave = figure;
                         [~,~,~]= waveletML(sst,time,pad,dss,pt1,pt2);
                         name1 = [dat_name,'-wavelet.fig'];
                         disp(['>>  Save as: ',name1])
                         CDac_pwd
-                        savefig(name1)
+                        try savefig(figwave,name1)
+                        catch
+                            disp('>>  Eh ... Wavelet figure unsaved ...')
+                        end
                         d = dir; %get files
                         set(handles.listbox1,'String',{d.name},'Value',1) %set string
                         refreshcolor;
@@ -2587,6 +2758,143 @@ end
 guidata(hObject, handles);
 
 
+% --------------------------------------------------------------------
+function menu_maxmin_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_function (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+contents = cellstr(get(handles.listbox1,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox1,'Value');
+nplot = length(plot_selected);   % length
+if and ((min(plot_selected) > 2), (nplot == 1))
+    data_name = char(contents(plot_selected));
+    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; data_name = fullfile(ac_pwd,data_name);
+        if isdir(data_name) == 1
+        else
+            [~,dat_name,ext] = fileparts(data_name);
+        if sum(strcmp(ext,handles.filetype)) > 0
+
+        try
+            fid = fopen(data_name);
+            data_ft = textscan(fid,'%f%f','EmptyValue', NaN);
+            fclose(fid);
+            if iscell(data_ft)
+                data = cell2mat(data_ft);
+            end
+        catch
+            data = load(data_name);
+        end 
+        
+            x = data(:,1);
+            dlg_title = 'Find Max/Min value and indice';
+            prompt = {'Interval start','Interval end','Max or Min (1 = max, else = min)','Tested column'};
+            num_lines = 1;
+            defaultans = {num2str(min(x)),num2str(max(x)),'1','2'};
+            options.Resize='on';
+            answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+            if ~isempty(answer)
+                t1 = str2double(answer{1});
+                t2 = str2double(answer{2});
+                maxmin = str2double(answer{3});
+                ind = str2double(answer{4});
+                % 
+                [dat] = select_interval(data,t1,t2);
+                y = dat(:,ind);
+                % max
+                if maxmin == 1  
+                    [m,i] = max(y);
+                else
+                    [m,i] = min(y);
+                end
+                disp(dat(i,:))
+            end
+        end
+        end
+end
+guidata(hObject, handles);
+
+
+% --------------------------------------------------------------------
+function menu_cpt_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_function (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+contents = cellstr(get(handles.listbox1,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox1,'Value');
+nplot = length(plot_selected);   % length
+if and ((min(plot_selected) > 2), (nplot == 1))
+    data_name = char(contents(plot_selected));
+    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; data_name = fullfile(ac_pwd,data_name);
+        if isdir(data_name) == 1
+        else
+            [~,dat_name,ext] = fileparts(data_name);
+        if sum(strcmp(ext,handles.filetype)) > 0
+
+        try
+            fid = fopen(data_name);
+            data_ft = textscan(fid,'%f%f','EmptyValue', NaN);
+            fclose(fid);
+            if iscell(data_ft)
+                data = cell2mat(data_ft);
+            end
+        catch
+            data = load(data_name);
+        end 
+        
+            x = data(:,1);
+            dlg_title = 'Ruggieri (2013) Bayesian Changepoint';
+            prompt = {...
+                'k_max, max no. of change points allowed',...
+                'd_min, min distance between consecutive change points',...
+                'k_0, variance scaling hyperparameter',...
+                'v_0,  pseudo data point',...
+                'sig_0, pseudo data variance (maybe halved)',...
+                'n, number of sampled solutions',...
+                'Save data? (1 = yes, 0 = no)'};
+            num_lines = 1;
+            sig_0 = var(data(:,2));
+            k_0 = ceil( abs(x(end)-x(1))/44 ); % default value, 1/sub-interval*25%
+            defaultans = {'10','1','0.01',num2str(k_0),num2str(sig_0),'500','1'};
+            options.Resize='on';
+            answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+            if ~isempty(answer)
+                if length(x)> 500
+                    warndlg('Large dataset, wait...')
+                end
+                k_max = str2double(answer{1}); % default is 10
+                d_min = str2double(answer{2}); % at least twice as many data points as free parameters
+                    % in the regression model. Ensure enough data is
+                    % available to estimate the parameters of the model
+                    % accurately
+                k_0 = str2double(answer{3}); % set k0 to be small, yielding a wide prior distribution
+                    % on the regression coefficients
+                v_0 = str2double(answer{4}); % may be <25% of the size of the minimum allowed sub-interval
+                sig_0 = str2double(answer{5}); %  this will not be larger than the overall variance of the
+                    % data set, one option is to conservatively set the
+                    % prior variance sig_0^2, equal to the variance of the
+                    % data set being used
+                num_samp = str2double(answer{6});
+                savedata = str2double(answer{7});
+                % 
+                [mod,cpt,R_2] = bayes_cpt(data,k_max,d_min,k_0,v_0,sig_0,num_samp);
+                if savedata == 1
+                    CDac_pwd
+                    dlmwrite([dat_name,'-BayesRegModel',ext], mod, 'delimiter', ',', 'precision', 9);
+                    dlmwrite([dat_name,'-BayesChangepoint',ext], cpt, 'delimiter', ',', 'precision', 9);
+                    disp(['>> ',dat_name,ext,' Bayesian change points output saved. R_2 is ',num2str(R_2)])
+                    
+                    d = dir; %get files
+                    set(handles.listbox1,'String',{d.name},'Value',1) %set string
+                    refreshcolor;
+                    cd(pre_dirML); % return to matlab view folder
+                end
+            end
+        end
+        end
+end
+guidata(hObject, handles);
 
 % --------------------------------------------------------------------
 function menu_imshow_Callback(hObject, eventdata, handles)
@@ -2699,8 +3007,8 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                                 warndlg('More than 2 cursors are selected!')
                             end
                             [cx,cy,c,xi,yi] = improfile(I,CursorInfo_value(:,1),CursorInfo_value(:,2));
-                            cx = cx - min(cx);
-                            cy = cy - min(cy);
+                            cx = sort(cx - min(cx));
+                            cy = sort(cy - min(cy));
                             cz = sqrt(cx.^2 + cy.^2);
 
                             try data = [cz,c];
@@ -2715,7 +3023,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                                 data = [cz,c];
                             end
                             name = [dat_name,'-profile.txt'];
-                            name1= [dat_name,'-prof2pt.txt'];
+                            name1= [dat_name,'-controlpoints.txt'];
                             data1 = [xi,yi];
                             
                             CDac_pwd
@@ -2728,7 +3036,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                             refreshcolor;
                             cd(pre_dirML); % return to matlab view folder
                             
-                            figure;plot(cx,c);title(name); xlabel('Pixels'); 
+                            figure;plot(cz,c);title(name); xlabel('Pixels'); 
                             if m == 2
                                 ylabel('Grayscale')
                             else

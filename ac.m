@@ -14,7 +14,7 @@ function ac
 % By Mingsong Li, Penn State, 2017-2018 (c)
 %
 %
-restoredefaultpath;
+%restoredefaultpath;
 ac_dir_str = which('ac.m');
 [path_root,~,~] = fileparts(ac_dir_str);
 

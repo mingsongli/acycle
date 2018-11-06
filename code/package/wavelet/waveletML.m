@@ -31,11 +31,16 @@ s0 = 2*dt;    % this says start at a scale of 6 months
 % 
 %pt = 
 j1 = round(log2(pt2))/dj;    % this says do 7 powers-of-two with dj sub-octaves each
+j1 = round(pt2/dj);
 %j1 = 10.5/dj;
 %lag1 = 0.72;  % lag-1 autocorrelation for red noise background
 lag1 = rhoAR1ML(sst);
 mother = 'Morlet';
-
+% set range
+if pt2 > (time(end)-time(1))
+    pt2 = time(end)-time(1);
+end
+%
 % Wavelet transform:
 [wave,period,scale,coi] = wavelet(sst,dt,pad,dj,s0,j1,mother);
 power = (abs(wave)).^2 ;        % compute wavelet power spectrum
@@ -61,7 +66,7 @@ global_signif = wave_signif(variance,dt,scale,1,lag1,-1,dof,mother);
 %whos
 
 %------------------------------------------------------ Plotting
-figure;
+%figure(figwave);
 %--- Plot time series
 subplot('position',[0.1 0.65 0.65 0.3])
 plot(time,sst)

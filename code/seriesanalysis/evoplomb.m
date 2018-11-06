@@ -76,7 +76,7 @@ x_grid = linspace(fmin,fmax,nfmax-nfmin+1);
 if length(x_grid) ~= scol
     x_grid = linspace(fmin,fmax,scol);
 end
-if length(y_grid) ~= srow
+%if length(y_grid) ~= srow
     %y_grid = linspace((time(1)+window/2), (time(1)+window/2+(nspec-1)*step), srow);
     y_grid = linspace((time(1)+window/2), (time(end)-window/2), srow); %debug
-end
+%end
