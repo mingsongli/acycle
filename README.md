@@ -1,8 +1,8 @@
-# Acycle v0.2.4
+# Acycle v0.2.5
 
 <b>Acycle -- a time-series analysis software for paleoclimate projects</b>
 
-Mingsong Li, Penn State. Oct. 2018
+Mingsong Li, Penn State. Nov. 2018
 
 Website: www.mingsongli.com/acycle
 
@@ -59,17 +59,17 @@ The input file of data series can be in a variety of formats, including table- o
 
 The Acycle software contains the following functions.<br /><br />
 
-<b>File</b> (New Folder; New Text File, Save AC.fig; Open *.fig File; Open Working Directory)<br /><br />
+<b>File</b> (New Folder; New Text File, Save AC.fig; Open *.fig File; Open Working Directory; Extract Data)<br /><br />
 
 <b>Edit</b> (Rename; Cut; Copy; Paste; Delete)<br /><br />
 
-<b>Plot</b> (Plot; Plot PLUS; Plot Standardized; Plot Swap Axis; Sampling Rate; Data Distribution)<br /><br />
+<b>Plot</b> (Plot; Plot PLUS; Plot Standardized; Plot Swap Axis; Stairs; Sampling Rate; Data Distribution; ECOCO Plot)<br /><br />
 
 <b>Basic Series</b> (Insolation; Astronomical Solution; LR04 Stack; Sine Wave; White Noise; Red Noise)<br /><br />
 
-<b>Math</b> (Sorting & Unique; Select Parts; Merge Series; Add Gaps; Remove Parts; Remove Peaks; Interpolation; Smoothing; Standardize; Principal Component; Log-transform; First Difference; Simple Function)<br /><br />
+<b>Math</b> (Sort/Unique/Delete-empty; Select Parts; Merge Series; Add Gaps; Remove Parts; Remove Peaks; Clipping, Interpolation; Smoothing[Moving Average, Bootstrap, Gauss Process]; Changepoint; Sampling Rate Sensitivity; Standardize; Principal Component; Log-transform; First Difference; Derivative; Simple Function; Utilities[Find Max/Min]; Image[Show Image, RGB to Grayscale; Image Profile])<br /><br />
 
-<b>Time series</b> (Prewhitening; Spectral Analysis; Evolutionary Spectral Analysis; Filtering; Build Age Model; Age Scale; Sedimentary Rate to Age Model; Power Decomposition Analysis; DYNOT; ρ1 method; Correlation Coefficient; Evolutionary Correlation Coefficient; Track Sedimentation Rates)<br /><br />
+<b>Time series</b> (Pre-whitening; Spectral Analysis; Evolutionary Spectral Analysis; Wavelet transform; Filtering; Amplitude Modulation; Build Age Model; Age Scale; Sedimentary Rate to Age Model; Power Decomposition Analysis; DYNOT; ρ1 method; Correlation Coefficient; Evolutionary Correlation Coefficient; Track Sedimentation Rates)<br /><br />
 
 <b>Help</b> (Readme; Manuals; Find Updates; Copyright; Contact)<br /><br />
 <br />
