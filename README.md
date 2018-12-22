@@ -21,7 +21,7 @@ here https://www.dropbox.com/sh/t53vjs539gmixnm/AAC0BqTR0U5xghKwuVc1Iwbma?dl=0  
 or here https://pan.baidu.com/s/1C2ZOUGQl8w9M_eSBzb4NOg   <br />
 
 <br />
-A very preliminary User's Guide can be downloaded here https://github.com/mingsongli/acycle/blob/master/doc/AC_User's_Guide.pdf.
+A very preliminary User's Guide can be downloaded here https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf.
 <br />
 <br />
 <br />
