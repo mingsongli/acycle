@@ -897,17 +897,19 @@ else
         ampmod = [data_filterout(:,1),data_filterout(:,3)];
         ifaze = [data_filterout(:,1),handles.ifaze];
         ifreq = [data_filterout(1:end-1,1),handles.ifreq];
+        dlmwrite(add_list, data_filterout(:,1:2), 'delimiter', ',', 'precision', 9);
         dlmwrite(add_list_am, ampmod, 'delimiter', ',', 'precision', 9);
         dlmwrite(handles.add_list_ufaze,[data_filterout(:,1),data_filterout(:,4)], 'delimiter', ',', 'precision', 9);
         dlmwrite(handles.add_list_ufazedet, [data_filterout(:,1),data_filterout(:,5)], 'delimiter', ',', 'precision', 9);
         dlmwrite(handles.add_list_ifaze, ifaze, 'delimiter', ',', 'precision', 9);
         dlmwrite(handles.add_list_ifreq, ifreq, 'delimiter', ',', 'precision', 9);
+        disp(['>>  Save as: ', handles.add_list_am])
+        disp(['>>  Save as: ', handles.add_list_ufaze])
+        disp(['>>  Save as: ', handles.add_list_ufazedet])
+        disp(['>>  Save as: ', handles.add_list_ifaze])
+        disp(['>>  Save as: ', handles.add_list_ifreq])
     end
     cd(pre_dirML); % return to matlab view folder
-    disp(['>>  Save as: ', add_list_am])
-    disp(['>>  Save as: ', handles.add_list_ufaze])
-    disp(['>>  Save as: ', handles.add_list_ufazedet])
-    disp(['>>  Save as: ', handles.add_list_ifaze])
-    disp(['>>  Save as: ', handles.add_list_ifreq])
+    
     disp('>> Done. See the working folder for the filtered output file(s)')
 end

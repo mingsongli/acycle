@@ -53,6 +53,7 @@ function basicseries_OpeningFcn(hObject, eventdata, handles, varargin)
 % varargin   command line arguments to basicseries (see VARARGIN)
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
+set(gcf,'Name','Astronomical Solutions')
 h=get(gcf,'Children');  % get all content
 h1=findobj(h,'FontUnits','points');  % find all font units as points
 set(h1,'FontUnits','norm');  % set as norm

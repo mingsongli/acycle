@@ -586,9 +586,12 @@ for i = 1: handles.nplot
             pp.LineStyle = linestyle_list{matrix_set{i,2}};
         end
 end
-
-xlim([axis_setting{1,1} axis_setting{1,2}])
-ylim([axis_setting{1,5} axis_setting{1,6}])
+if axis_setting{1,1} < axis_setting{1,2}
+    xlim([axis_setting{1,1} axis_setting{1,2}])
+end
+if axis_setting{1,5} < axis_setting{1,6}
+    ylim([axis_setting{1,5} axis_setting{1,6}])
+end
 xlabel(handles.unit)
 ylabel('Value')
 %title('Plot')

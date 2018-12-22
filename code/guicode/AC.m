@@ -229,27 +229,45 @@ if handles.doubleclick
         disp(['>>  Change directory to < ', filename1, ' >'])
     catch
         [~,~,ext] = fileparts(filename);
-        %debug
-        %disp(ext)
-        if sum(strcmp(ext,handles.filetype)) > 0
-            try
-                open(filename);
-            catch
-            end
-        elseif strcmp(ext,'.fig')
-            try
-                openfig(filename);
-            catch
-            end
-        elseif strcmp(ext,{'.pdf','.ai','.ps'})
-            try
-                open(filename);
-            catch
+
+        filetype = handles.filetype;
+        if isdeployed
+            %filetype = {'.txt',''};
+            if strcmp(ext,'.fig')
+                try
+                    uiopen(filename,1);
+                catch
+                end
             end
         else
-            try
-                open(filename);
-            catch
+            %if sum(strcmp(ext,handles.filetype)) > 0
+            if sum(strcmp(ext,filetype)) > 0
+                try
+                    %open(filename);
+                    uiopen(filename,1);
+                catch
+                end
+            elseif strcmp(ext,'.fig')
+                try
+                    %openfig(filename);
+                    uiopen(filename,1);
+                catch
+                end
+            elseif strcmp(ext,{'.pdf','.ai','.ps'})
+                try
+                    %open(filename);
+                    uiopen(filename,1);
+                catch
+                end
+            else
+                try
+                    %open(filename);
+                    if isdeployed
+                    else
+                        uiopen(filename,1);
+                    end
+                catch
+                end
             end
         end
     end
@@ -391,7 +409,7 @@ if check == 1;
         data_filterout = load(plot_filter_s);
     catch       
         fid = fopen(plot_filter_s);
-        data_ft = textscan(fid,'%f%f','EmptyValue', Inf);
+        data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
         fclose(fid);
         if iscell(data_ft)
             try
@@ -399,11 +417,15 @@ if check == 1;
             catch
                 fid = fopen(plot_filter_s,'at');
                 fprintf(fid,'%d\n',[]);
-                fclose(fid)
-                fid = fopen(plot_filter_s);
-                data_ft = textscan(fid,'%f%f','EmptyValue', Inf);
                 fclose(fid);
-                data_filterout = cell2mat(data_ft);
+                fid = fopen(plot_filter_s);
+                data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
+                fclose(fid);
+                try
+                    data_filterout = cell2mat(data_ft);
+                catch
+                    warndlg(['Check data: ',dat_name],'Data Error!')
+                end
             end
         end
     end     
@@ -492,7 +514,7 @@ if check == 1;
           %  data_filterout = load(plot_filter_s);
     try
         fid = fopen(plot_filter_s);
-        data_ft = textscan(fid,'%f%f','EmptyValue', NaN);
+        data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
         fclose(fid);
         if iscell(data_ft)
             try
@@ -502,7 +524,7 @@ if check == 1;
                 fprintf(fid,'%d\n',[]);
                 fclose(fid)
                 fid = fopen(plot_filter_s);
-                data_ft = textscan(fid,'%f%f','EmptyValue', Inf);
+                data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
                 fclose(fid);
                 data_filterout = cell2mat(data_ft);
             end
@@ -669,21 +691,46 @@ function menu_read_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_read (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-open('Readme.txt')
+%
+if isdeployed
+    url = 'https://github.com/mingsongli/acycle/blob/master/doc/Readme.txt';
+    web(url,'-browser')
+else
+    open('Readme.txt')
+end
+% if isdeployed
+%     mydir = ctfroot;
+%     myfile = 'Readme.txt';
+%     readmefile = fullfile(mydir,myfile);
+%     fid = fopen(readmefile,'r');
+% end
+% 
+% if ismac
+%     uiopen('Readme.txt',1)
+% elseif ispc
+%     winopen('Readme.txt');
+% end
+
 
 % --------------------------------------------------------------------
 function menu_manuals_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_manuals (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-ac_dir = which('ac.m');
-[ac_folder,~,~] = fileparts(ac_dir);
-doc_dir = [ac_folder,handles.slash_v,'doc'];
-if ismac
-    system(['open ',doc_dir]);
-elseif ispc
-    winopen(doc_dir);
+if isdeployed
+    url = 'https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf';
+    web(url,'-browser')
+else
+    ac_dir = which('ac.m');
+    [ac_folder,~,~] = fileparts(ac_dir);
+    doc_dir = [ac_folder,handles.slash_v,'doc'];
+    if ismac
+        system(['open ',doc_dir]);
+    elseif ispc
+        winopen(doc_dir);
+    end
 end
+
 
 % --------------------------------------------------------------------
 function menu_findupdates_Callback(hObject, eventdata, handles)
@@ -710,12 +757,14 @@ function menu_selectinterval_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox1,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox1,'Value');
 nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
-    data_name = char(contents(plot_selected));
-    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+%if and ((min(plot_selected) > 2), (nplot == 1))
+if min(plot_selected) > 2
+    for i = 1:nplot
+        data_name = char(contents(plot_selected(i)));
+        data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
         if isdir(data_name) == 1
         else
-        [~,dat_name,ext] = fileparts(data_name);
+            [~,dat_name,ext] = fileparts(data_name);
         if sum(strcmp(ext,handles.filetype)) > 0
             GETac_pwd; data_name = fullfile(ac_pwd,data_name);
             data = load(data_name);
@@ -723,28 +772,76 @@ if and ((min(plot_selected) > 2), (nplot == 1))
             value = data(:,2);
             npts = length(time);
 
-            prompt = {'Enter the START of interval:','Enter the END of interval:'};
+            prompt = {'Enter the START of interval:','Enter the END of interval:','Apply to ALL? (1 = yes)'};
             dlg_title = 'Input Select interval';
             num_lines = 1;
-            defaultans = {num2str(time(1)),num2str(time(npts))};
+            defaultans = {num2str(time(1)),num2str(time(npts)),'0'};
             options.Resize='on';
             answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
             if ~isempty(answer)
                 xmin_cut = str2double(answer{1});
                 xmax_cut = str2double(answer{2});
-                [current_data] = select_interval(data,xmin_cut,xmax_cut); 
-                name1 = [dat_name,'-',num2str(xmin_cut),'-',num2str(xmax_cut),ext];  % New name
-                %csvwrite(name1,current_data)
+                ApplyAll = str2double(answer{3});
                 
-                CDac_pwd; % cd ac_pwd dir
-                dlmwrite(name1, current_data, 'delimiter', ',', 'precision', 9);
-                d = dir; %get files
-                set(handles.listbox1,'String',{d.name},'Value',1) %set string
-                refreshcolor;
-                cd(pre_dirML); % return to matlab view folder
+                if ApplyAll == 1
+                    for ii = 1:nplot
+                        data_name = char(contents(plot_selected(ii)));
+                        data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+                        if isdir(data_name) == 1
+                        else
+                            [~,dat_name,ext] = fileparts(data_name);
+                            disp(['>>  Processing ',data_name])
+                            if sum(strcmp(ext,handles.filetype)) > 0
+                                GETac_pwd; data_name = fullfile(ac_pwd,data_name);
+                                data = load(data_name);
+                                time = data(:,1);
+                                if or (max(time) < xmin_cut, min(time) > xmax_cut)
+                                    errordlg(['No overlap between selected interval and ',dat_name],'Error')
+                                    disp('      Error, no overlap')
+                                    continue
+                                end
+                                if and (min(time) > xmin_cut, max(time) < xmax_cut)
+                                    disp('      Selected interval too large, skipped')
+                                    continue
+                                end
+                                [current_data] = select_interval(data,xmin_cut,xmax_cut); 
+                                name1 = [dat_name,'-',num2str(xmin_cut),'-',num2str(xmax_cut),ext];  % New name
+                                CDac_pwd; % cd ac_pwd dir
+                                dlmwrite(name1, current_data, 'delimiter', ',', 'precision', 9);
+                            end
+                        end
+                    end
+                    d = dir; %get files
+                    set(handles.listbox1,'String',{d.name},'Value',1) %set string
+                    refreshcolor;
+                    cd(pre_dirML); % return to matlab view folder
+                    return
+                else
+                    
+                    if or (max(time) < xmin_cut, min(time) > xmax_cut)
+                        errordlg(['No overlap between selected interval and ',dat_name],'Error')
+                        disp('      Error, no overlap')
+                        return
+                    end
+                    if and (min(time) > xmin_cut, max(time) < xmax_cut)
+                        disp('Selected interval too large, skipped')
+                        return
+                    end
+                    [current_data] = select_interval(data,xmin_cut,xmax_cut); 
+                    name1 = [dat_name,'-',num2str(xmin_cut),'-',num2str(xmax_cut),ext];  % New name
+                    %csvwrite(name1,current_data)
+
+                    CDac_pwd; % cd ac_pwd dir
+                    dlmwrite(name1, current_data, 'delimiter', ',', 'precision', 9);
+                    d = dir; %get files
+                    set(handles.listbox1,'String',{d.name},'Value',1) %set string
+                    refreshcolor;
+                    cd(pre_dirML); % return to matlab view folder
+                end
             end
         end
         end
+    end
 end
 guidata(hObject, handles);
 
@@ -816,7 +913,7 @@ for nploti = 1:nplot
 
         try
             fid = fopen(data_name);
-            data_ft = textscan(fid,'%f%f','EmptyValue', NaN);
+            data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
             fclose(fid);
             if iscell(data_ft)
                 try
@@ -826,7 +923,7 @@ for nploti = 1:nplot
                     fprintf(fid,'%d\n',[]);
                     fclose(fid)
                     fid = fopen(data_name);
-                    data_ft = textscan(fid,'%f%f','EmptyValue', Inf);
+                    data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
                     fclose(fid);
                     data = cell2mat(data_ft);
                 end
@@ -923,7 +1020,7 @@ for nploti = 1:nplot
             if sum(strcmp(ext,handles.filetype)) > 0
                 try
                     fid = fopen(data_name);
-                    data_ft = textscan(fid,'%f%f','EmptyValue', NaN);
+                    data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
                     fclose(fid);
                     if iscell(data_ft)
                         try
@@ -933,7 +1030,7 @@ for nploti = 1:nplot
                             fprintf(fid,'%d\n',[]);
                             fclose(fid);
                             fid = fopen(data_name);
-                            data_ft = textscan(fid,'%f%f','EmptyValue', Inf);
+                            data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
                             fclose(fid);
                             data = cell2mat(data_ft);
                         end
@@ -1045,7 +1142,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
 
         try
             fid = fopen(data_name);
-            data_ft = textscan(fid,'%f%f','EmptyValue', NaN);
+            data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
             fclose(fid);
             if iscell(data_ft)
                 data = cell2mat(data_ft);
@@ -1101,7 +1198,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
 
         try
             fid = fopen(data_name);
-            data_ft = textscan(fid,'%f%f','EmptyValue', NaN);
+            data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
             fclose(fid);
             if iscell(data_ft)
                 data = cell2mat(data_ft);
@@ -1172,7 +1269,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
 
         try
             fid = fopen(data_name);
-            data_ft = textscan(fid,'%f%f','EmptyValue', NaN);
+            data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
             fclose(fid);
             if iscell(data_ft)
                 data = cell2mat(data_ft);
@@ -1297,7 +1394,7 @@ if plot_selected > 2
         if sum(strcmp(ext,handles.filetype)) > 0
             try
                 fid = fopen(data_name);
-                data_ft = textscan(fid,'%f%f','EmptyValue', NaN);
+                data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
                 fclose(fid);
                 if iscell(data_ft)
                     try
@@ -1307,7 +1404,7 @@ if plot_selected > 2
                         fprintf(fid,'%d\n',[]);
                         fclose(fid);
                         fid = fopen(data_name);
-                        data_ft = textscan(fid,'%f%f','EmptyValue', Inf);
+                        data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
                         fclose(fid);
                         data = cell2mat(data_ft);
                     end
@@ -1437,7 +1534,7 @@ for nploti = 1:nplot
             if sum(strcmp(ext,handles.filetype)) > 0
                 try
                     fid = fopen(data_name);
-                    data_ft = textscan(fid,'%f%f','EmptyValue', NaN);
+                    data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
                     fclose(fid);
                     if iscell(data_ft)
                         try
@@ -1447,7 +1544,7 @@ for nploti = 1:nplot
                             fprintf(fid,'%d\n',[]);
                             fclose(fid);
                             fid = fopen(data_name);
-                            data_ft = textscan(fid,'%f%f','EmptyValue', Inf);
+                            data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
                             fclose(fid);
                             data = cell2mat(data_ft);
                         end
@@ -2229,7 +2326,7 @@ if check == 1;
             GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
     try
         fid = fopen(plot_filter_s);
-        data_ft = textscan(fid,'%f%f','EmptyValue', NaN);
+        data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
         fclose(fid);
         if iscell(data_ft)
             dat = cell2mat(data_ft);
@@ -2296,7 +2393,7 @@ if check == 1;
             GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
      try
         fid = fopen(plot_filter_s);
-        data_ft = textscan(fid,'%f%f','EmptyValue', NaN);
+        data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
         fclose(fid);
         if iscell(data_ft)
             dat = cell2mat(data_ft);
@@ -2352,11 +2449,11 @@ if nplot == 1
             catch
                 disp('Error: Cannot copy or move a file or directory onto itself.')
             end
+            d = dir; %get files
+            set(handles.listbox1,'String',{d.name},'Value',1) %set string
+            refreshcolor;
+            cd(pre_dirML);
         end
-        d = dir; %get files
-    set(handles.listbox1,'String',{d.name},'Value',1) %set string
-    refreshcolor;
-    cd(pre_dirML);
     end
 end
 
@@ -2777,7 +2874,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
 
         try
             fid = fopen(data_name);
-            data_ft = textscan(fid,'%f%f','EmptyValue', NaN);
+            data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
             fclose(fid);
             if iscell(data_ft)
                 data = cell2mat(data_ft);
@@ -2820,6 +2917,9 @@ function menu_cpt_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_function (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+% Function of Bayesian changepoint technique
+
 contents = cellstr(get(handles.listbox1,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox1,'Value');
 nplot = length(plot_selected);   % length
@@ -2834,7 +2934,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
 
         try
             fid = fopen(data_name);
-            data_ft = textscan(fid,'%f%f','EmptyValue', NaN);
+            data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
             fclose(fid);
             if iscell(data_ft)
                 data = cell2mat(data_ft);
@@ -3360,85 +3460,191 @@ disp(['Select ',num2str(nplot),' data'])
 %if and ((min(plot_selected) > 2), (nplot == 1))
 for nploti = 1:nplot
 if plot_selected > 2
-    %data_name_all = char(contents(plot_selected));
-    data_name_all = (contents(plot_selected));
-    data_name = char(data_name_all{nploti});
-    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
-    disp(['>>  Processing ', data_name]);
-    GETac_pwd; data_name = fullfile(ac_pwd,data_name);
-        if isdir(data_name) == 1
-        else
-            [~,dat_name,ext] = fileparts(data_name);
-        if sum(strcmp(ext,handles.filetype)) > 0
-            try
-                fid = fopen(data_name);
-                data_ft = textscan(fid,'%f%f','EmptyValue', NaN);
-                fclose(fid);
-                if iscell(data_ft)
-                    try
-                        data = cell2mat(data_ft);
-                    catch
-                        fid = fopen(data_name,'at');
-                        fprintf(fid,'%d\n',[]);
-                        fclose(fid);
-                        fid = fopen(data_name);
-                        data_ft = textscan(fid,'%f%f','EmptyValue', Inf);
-                        fclose(fid);
-                        data = cell2mat(data_ft);
-                    end
-                end
-            catch
-                data = load(data_name);
-            end
-
-            prompt = {'Sort data in ascending order?','Unique values in data?','Remove empty row?'};
-            dlg_title = 'Sort, Unique, Remove empty (1 = yes)';
-            num_lines = 1;
-            defaultans = {num2str(handles.math_sort),num2str(handles.math_unique),num2str(handles.math_deleteempty)};
-            options.Resize='on';
-            answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-            if ~isempty(answer)
-                datasort = str2double(answer{1});
-                dataunique = str2double(answer{2});
-                dataempty = str2double(answer{3});
-                data = data(~any(isnan(data),2),:); % remove NaN values
-                if datasort == 1
-                    data = sortrows(data);
-                    name1 = [dat_name,'-so'];
-                end
-                if dataunique == 1
-                    data=findduplicate(data);
-                    name1 = [dat_name,'-u'];  % New name
-                end
-                if (datasort + dataunique) == 2
-                    name1 = [dat_name,'-su'];  % New name
-                end
-                if dataempty == 1
-                    data(any(isinf(data),2),:) = [];
-                    if (datasort + dataunique) > 0
-                        name1 = [name1,'e'];  % New name
+    prompt = {'Sort data in ascending order?','Unique values in data?','Remove empty row?','Apply to ALL'};
+        dlg_title = 'Sort, Unique & Remove empty (1 = yes)';
+        num_lines = 1;
+        defaultans = {num2str(handles.math_sort),num2str(handles.math_unique),num2str(handles.math_deleteempty),'0'};
+        options.Resize='on';
+        answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+        if ~isempty(answer)
+            datasort = str2double(answer{1});
+            dataunique = str2double(answer{2});
+            dataempty = str2double(answer{3});
+            dataApply2ALL = str2double(answer{4});
+            
+            if dataApply2ALL == 1
+                for nploti = 1:nplot
+                % Apply settings to all data
+                    data_name_all = (contents(plot_selected));
+                    data_name = char(data_name_all{nploti});
+                    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+                    disp(['>>  Processing ', data_name]);
+                    GETac_pwd; data_name = fullfile(ac_pwd,data_name);
+                    data_error = 0;
+                    if isdir(data_name) == 1
                     else
-                        name1 = [dat_name,'-e'];  % New name
+                        [~,dat_name,ext] = fileparts(data_name);
+                        if sum(strcmp(ext,handles.filetype)) > 0
+                            try
+                                fid = fopen(data_name);
+                                data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
+                                fclose(fid);
+                                if iscell(data_ft)
+                                    try
+                                        data = cell2mat(data_ft);
+                                    catch
+                                        fid = fopen(data_name,'at');
+                                        fprintf(fid,'%d\n',[]);
+                                        fclose(fid);
+                                        fid = fopen(data_name);
+                                        data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
+                                        fclose(fid);
+                                        try
+                                            data = cell2mat(data_ft);
+                                        catch
+                                            warndlg(['Check data file: ', dat_name],'Data Error!')
+                                            disp(['      Error! Skipped. Check the data file:', dat_name]);
+                                            data_error = 1;
+                                        end
+                                    end
+                                end
+                            catch
+                                data = load(data_name);
+                            end
+                            if data_error ==1
+                            else
+                                data = data(~any(isnan(data),2),:); % remove NaN values
+                                if datasort == 1
+                                    data = sortrows(data);
+                                    name1 = [dat_name,'-so'];
+                                end
+                                if dataunique == 1
+                                    data=findduplicate(data);
+                                    name1 = [dat_name,'-u'];  % New name
+                                end
+                                if (datasort + dataunique) == 2
+                                    name1 = [dat_name,'-su'];  % New name
+                                end
+                                if dataempty == 1
+                                    data(any(isinf(data),2),:) = [];
+                                    if (datasort + dataunique) > 0
+                                        name1 = [name1,'e'];  % New name
+                                    else
+                                        name1 = [dat_name,'-e'];  % New name
+                                    end
+                                end
+                                if (datasort + dataunique + dataempty) > 0
+                                    name2 = [name1,ext];
+                                else
+                                    name2 = [dat_name,ext];
+                                end
+                                % remember settings
+                                handles.math_sort = datasort;
+                                handles.math_unique = dataunique;
+                                handles.math_deleteempty = dataempty;
+
+                                % cd ac_pwd dir
+                                CDac_pwd
+                                dlmwrite(name2, data, 'delimiter', ',', 'precision', 9);
+                            end
+                        end
                     end
                 end
-                if (datasort + dataunique + dataempty) > 0
-                    name2 = [name1,ext];
-                else
-                    name2 = [dat_name,ext];
-                end
-                % remember settings
-                handles.math_sort = datasort;
-                handles.math_unique = dataunique;
-                handles.math_deleteempty = dataempty;
-                % cd ac_pwd dir
-                CDac_pwd
-                dlmwrite(name2, data, 'delimiter', ',', 'precision', 9);
                 d = dir; %get files
                 set(handles.listbox1,'String',{d.name},'Value',1) %set string
                 refreshcolor;
                 cd(pre_dirML); % return to matlab view folder
+                return
+            else
+                data_name_all = (contents(plot_selected));
+                data_name = char(data_name_all{nploti});
+                data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+                disp(['>>  Processing ', data_name]);
+                GETac_pwd; data_name = fullfile(ac_pwd,data_name);
+                data_error = 0;
+                if isdir(data_name) == 1
+                else
+                    [~,dat_name,ext] = fileparts(data_name);
+                    if sum(strcmp(ext,handles.filetype)) > 0
+                        try
+                            fid = fopen(data_name);
+                            data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
+                            fclose(fid);
+                            if iscell(data_ft)
+                                try
+                                    data = cell2mat(data_ft);
+                                catch
+                                    fid = fopen(data_name,'at');
+                                    fprintf(fid,'%d\n',[]);
+                                    fclose(fid);
+                                    fid = fopen(data_name);
+                                    data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
+                                    fclose(fid);
+                                    try
+                                        data = cell2mat(data_ft);
+                                    catch
+                                        % length of 2 columns are not equal
+                                        lengthmin = min(length(data_ft{1,1}), length(data_ft{1,2}));
+                                        data_ft1 = data_ft{1,1};
+                                        data_ft2 = data_ft{1,2};
+                                        data_ft_new{1,1} = data_ft1(1:lengthmin);
+                                        data_ft_new{1,2} = data_ft2(1:lengthmin);
+                                        try 
+                                            data = cell2mat(data_ft_new);
+                                        catch
+                                            warndlg(['Check data file: ', dat_name],'Data Error!')
+                                            disp(['      Error! Check the data file:', dat_name]);
+                                            data_error = 1;
+                                        end
+                                    end
+                                end
+                            end
+                        catch
+                            data = load(data_name);
+                        end
+                        if data_error == 1
+                        else
+                            data = data(~any(isnan(data),2),:); % remove NaN values
+                            if datasort == 1
+                                data = sortrows(data);
+                                name1 = [dat_name,'-so'];
+                            end
+                            if dataunique == 1
+                                data=findduplicate(data);
+                                name1 = [dat_name,'-u'];  % New name
+                            end
+                            if (datasort + dataunique) == 2
+                                name1 = [dat_name,'-su'];  % New name
+                            end
+                            if dataempty == 1
+                                data(any(isinf(data),2),:) = [];
+                                if (datasort + dataunique) > 0
+                                    name1 = [name1,'e'];  % New name
+                                else
+                                    name1 = [dat_name,'-e'];  % New name
+                                end
+                            end
+                            if (datasort + dataunique + dataempty) > 0
+                                name2 = [name1,ext];
+                            else
+                                name2 = [dat_name,ext];
+                            end
+                            % remember settings
+                            handles.math_sort = datasort;
+                            handles.math_unique = dataunique;
+                            handles.math_deleteempty = dataempty;
+
+                            % cd ac_pwd dir
+                            CDac_pwd
+                            dlmwrite(name2, data, 'delimiter', ',', 'precision', 9);
+                            d = dir; %get files
+                            set(handles.listbox1,'String',{d.name},'Value',1) %set string
+                            refreshcolor;
+                            cd(pre_dirML); % return to matlab view folder
+                        end
+                    end
+                end
             end
-        end
         end
 end
 end
@@ -3536,7 +3742,7 @@ if check == 1
 %            data = load(plot_filter_s);
      try
         fid = fopen(plot_filter_s);
-        data_ft = textscan(fid,'%f%f','EmptyValue', NaN);
+        data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
         fclose(fid);
         if iscell(data_ft)
             data = cell2mat(data_ft);
@@ -3920,7 +4126,7 @@ if check == 1;
             
      try
         fid = fopen(plot_filter_s);
-        data_ft = textscan(fid,'%f%f','EmptyValue', NaN);
+        data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
         fclose(fid);
         if iscell(data_ft)
             data_filterout = cell2mat(data_ft);
@@ -4011,7 +4217,7 @@ if check == 1;
      %       data_filterout = load(plot_filter_s); % load data
     try
         fid = fopen(plot_filter_s);
-        data_ft = textscan(fid,'%f%f','EmptyValue', NaN);
+        data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
         fclose(fid);
         if iscell(data_ft)
             data_filterout = cell2mat(data_ft);
@@ -4183,7 +4389,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                     answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
                     if ~isempty(answer)
                         answer = answer{1};
-                        answer1 = textscan(answer,'%f','Delimiter',',');
+                        answer1 = textscan(answer,'%f','Delimiter',{';','*',',','\t','\b',' '},'Delimiter',',');
                         sec = answer1{1};
                         n_sec = length(sec);
                         if mod(n_sec,2) == 1
@@ -4250,7 +4456,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                     answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
                     if ~isempty(answer)
                         answer = answer{1};
-                        answer1 = textscan(answer,'%f','Delimiter',',');
+                        answer1 = textscan(answer,'%f','Delimiter',{';','*',',','\t','\b',' '},'Delimiter',',');
                         sec = answer1{1};
                         n_sec = length(sec);
                         if mod(n_sec,2) == 1
@@ -4333,7 +4539,7 @@ if ~isempty(answer)
     end
     
     if exist([ac_pwd,handles.slash_v,filename])
-        warndlg('File name exists. Used an alternative name','File Name Warning')
+        warndlg('File name exists. An alternative name used','File Name Warning')
         
         for i = 1:100
             filename = [filename(1:end-4),'-',num2str(i),'.txt'];
@@ -4601,7 +4807,7 @@ if check == 1;
                     data = load(plot_filter_s);
                 catch       
                     fid = fopen(plot_filter_s);
-                    data_ft = textscan(fid,'%f',c0,'EmptyValue', Inf);
+                    data_ft = textscan(fid,'%f',c0,'Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
                     %size(data_ft)
                     fclose(fid);
                     if iscell(data_ft)
@@ -4675,7 +4881,7 @@ if check == 1;
             data_filterout = load(plot_filter_s);
         catch       
             fid = fopen(plot_filter_s);
-            data_ft = textscan(fid,'%f%f','EmptyValue', Inf);
+            data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
             fclose(fid);
             if iscell(data_ft)
                 data_filterout = cell2mat(data_ft);

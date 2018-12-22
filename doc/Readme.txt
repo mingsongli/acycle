@@ -1,6 +1,55 @@
 - - - - - -    READ ME    - - - - - -
 
 Update Log
+
+_____________________________________
+
+Version : ACycle_v0.2.5.20181108
+Date    : Nov. 8, 2018; 7:19 pm EST
+By      : Mingsong Li (Penn State)
+
+	1. fix bug in Taner-Hilbert transform
+    2. refine Sort/Unique/... and Select Parts function
+    3. Add Bayesian Changepoint function by Ruggieri (2013). Detailed below:
+
+%************************************************************************/
+%* The Bayesian Change Point algorithm - A program to caluclate the     */
+%* posterior probability of a change point in a time series.            */
+%*                                                                      */
+%* Please acknowledge the program author on any publication of          */
+%* scientific results based in part on use of the program and           */
+%* cite the following article in which the program was described.       */
+%*                                                                      */
+%* E. Ruggieri (2013) "A Bayesian Approach to Detecting Change Points   */
+%* in Climatic Records," International Journal of Climatology,          */
+%* 33: 520-528. doi: 10.1002/joc.3447                                   */
+%*                                                                      */
+%* Program Author: Eric Ruggieri                                        */
+%* College of the Holy Cross                                            */
+%* Worcester, MA 01610                                                  */
+%* Email:  eruggier@holycross.edu                                       */
+%*                                                                      */
+%* Copyright (C) 2012  Duquesne University                              */
+%*               2014 College of the Holy Cross                         */
+%*                                                                      */
+%* The Bayesian Change Point algorithn is free software: you can        */
+%* redistribute it and/or modify it under the terms of the GNU General  */
+%* Public License as published by the Free Software Foundation, either  */
+%* version 3 of the License, or (at your option) any later version.     */
+%*                                                                      */
+%* The Bayesian Change Point algorithm is distributed in the hope that  */
+%* it will be useful, but WITHOUT ANY WARRANTY; without even the        */
+%* implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR      */
+%* PURPOSE.  See the GNU General Public License for more details.       */
+%*                                                                      */
+%* You should have received a copy of the GNU General Public License    */
+%* along with Bayesian Change Point.  If not, see                       */
+%* <http://www.gnu.org/licenses/> or write to the                       */
+%* Free Software Foundation, Inc.                                       */
+%* 51 Franklin Street Fifth Floor                                       */
+%* Boston, MA 02110-1301, USA.                                          */
+%************************************************************************/
+
 _____________________________________
 
 Version : ACycle_v0.2.5.20181104
