@@ -2,6 +2,25 @@
 
 Update Log
 
+
+_____________________________________
+
+Version : ACycle_v0.2.6.20181222
+Date    : Dec. 22, 2018; 11:15 pm EST
+By      : Mingsong Li (Penn State)
+
+	1. fix bug in the Insolation function
+        insoML.m :  now Berger's insolation solution works
+    2. prepare for a deployed version for Mac
+        in the main window, double click won't trigger an "open" procedure 
+        for files (except *.fig). Double click still works with folder opening.
+    3. Deployed version
+        Help - Click "Readme" will open online version of readme.txt
+        help - Click "Manuals" will open online version of Users_Guide.PDF
+
+_____________________________________
+
+
 _____________________________________
 
 Version : ACycle_v0.2.5.20181108

@@ -64,7 +64,7 @@ if author == 6
   oblE = Orbit(:,4) * pi / 180;
   Prec = -Orbit(:,5);
   clear Orbit
-  w = unwrap(angle(hilbert(Prec./Ecc)))*180/pi+270;    %There is 270 degree phase discrepancy here.
+  w = unwrap(angle(hilbert(Prec./ecc)))*180/pi+270;    %There is 270 degree phase discrepancy here.
 elseif  author == 1
   %fprintf('\n Using orbital solution of Laskar et al. (2004) \n');
   load La04.mat;		%contains time, ecc, obl, prec

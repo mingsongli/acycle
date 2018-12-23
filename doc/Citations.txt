@@ -6,15 +6,27 @@
 Technique
 *******************************************************
 
->> evofft (evolutionary FFT)
-Kodama, K.P., Hinnov, L., 2015. Rock Magnetic Cyclostratigraphy. Wiley-Blackwell.
->> DYNOT and rho-1 (sedimentary noise)
-Li, M., Hinnov, L.A., Huang, C., Ogg, J.G., 2018. Sedimentary noise and sea levels linked to land–ocean water exchange and obliquity forcing. Nature communications 9, 1004.>> COCO and eCOCO (sedimentary rate)Li, M., Kump, L.R., Hinnov, L.A., Mann, M.E., 2018. Tracking variable sedimentation rates and astronomical forcing in Phanerozoic paleoclimate proxy series with evolutionary correlation coefficients and hypothesis testing. Earth and Planetary Science Letters 501, 165-179.
 
->> pda.m (powder decomposition analysis)
+>> Evofft (evolutionary FFT)
+Kodama, K.P., Hinnov, L., 2015. Rock Magnetic Cyclostratigraphy. Wiley-Blackwell.
+>> Sedimentary noise model (DYNOT and rho-1)
+Li, M., Hinnov, L.A., Huang, C., Ogg, J.G., 2018. Sedimentary noise and sea levels linked to land–ocean water exchange and obliquity forcing. Nature communications 9, 1004.>> Sedimentary rate and null hypothesis testing (correlation coefficient / COCO and evolutionary COCO / eCOCO)Li, M., Kump, L.R., Hinnov, L.A., Mann, M.E., 2018. Tracking variable sedimentation rates and astronomical forcing in Phanerozoic paleoclimate proxy series with evolutionary correlation coefficients and hypothesis testing. Earth and Planetary Science Letters 501, 165-179.
+
+>> Powder decomposition analysis (pda.m)
 Li, M., Huang, C., Hinnov, L., Ogg, J., Chen, Z.-Q., Zhang, Y., 2016. Obliquity-forced climate during the Early Triassic hothouse in China. Geology 44, 623-626.
+
+>> Bayesian Change Point algorithm
+E. Ruggieri (2013) "A Bayesian Approach to Detecting Change Points in Climatic Records," International Journal of Climatology, 33: 520-528. doi: 10.1002/joc.3447
+
+>> Wavelet transform with optional singificance testing
+Torrence, C. and G. P. Compo, 1998: A Practical Guide to Wavelet Analysis. Bull. Amer. Meteor. Soc., 79, 61-78.
+
+>> GAUSSIAN PROCESS REGRESSION AND CLASSIFICATION Toolbox version 4.2
+Rasmussen, C.E., Nickisch, H., 2010. Gaussian processes for machine learning (GPML) toolbox. Journal of machine learning research 11, 3011-3015.
+
 *******************************************************Astronomical solutions
 *******************************************************
+
 
 >> Berger & Loutre 1991
 Berger, A., Loutre, M.-F., 1991. Insolation values for the climate of the last 10 million years. Quaternary Science Reviews 10, 297-317.
@@ -24,15 +36,17 @@ Laskar, J., Robutel, P., Joutel, F., Gastineau, M., Correia, A.C.M., Levrard, B.
 
 >> La2010
 Laskar, J., Fienga, A., Gastineau, M., Manche, H., 2011. La2010: a new orbital solution for the long-term motion of the Earth. Astronomy & Astrophysics 532. doi:10.1051/0004-6361/201116836
-<calculation method in>
->> Wu, H., Zhang, S., Jiang, G., Hinnov, L., Yang, T., Li, H., Wan, X., Wang, C., 2013. Astrochronology of the Early Turonian–Early Campanian terrestrial succession in the Songliao Basin, northeastern China and its implication for long-period behavior of the Solar System. Palaeogeography, Palaeoclimatology, Palaeoecology 385, 55-70.
+<calculation method presented in>
+Wu, H., Zhang, S., Jiang, G., Hinnov, L., Yang, T., Li, H., Wan, X., Wang, C., 2013. Astrochronology of the Early Turonian–Early Campanian terrestrial succession in the Songliao Basin, northeastern China and its implication for long-period behavior of the Solar System. Palaeogeography, Palaeoclimatology, Palaeoecology 385, 55-70.
 
 >> ZB2017
 Zeebe, R.E., 2017. Numerical Solutions for the orbital motion of the Solar System over the Past 100 Myr: Limits and new results. The Astronomical Journal 154, 193. doi:10.3847/1538-3881/aa8cce
 
+
 *******************************************************
-Data set
+Dataset
 *******************************************************
+
 >> LR04statck5.3myr.txtLisiecki, L.E., Raymo, M.E., 2005. A Pliocene?Pleistocene stack of 57 globally distributed benthic ?18O records. Paleoceanography 20. PA1003, doi:10.1029/2004PA001071.>> Lietal2016EPSL
 Li, M., Ogg, J., Zhang, Y., Huang, C., Hinnov, L., Chen, Z.-Q., Zou, Z., 2016. Astronomical-cycle scaling of the end-Permian extinction and the Early Triassic Epoch of South China and Germany. Earth and Planetary Science Letters 441, 10-25.
 
@@ -43,8 +57,10 @@ Li, M., Zhang, Y., Huang, C., Ogg, J., Hinnov, L., Wang, Y., Zou, Z., Li, L., 20
 Li, M., Huang, C., Hinnov, L., Chen, W., Ogg, J., Tian, W., 2018. Astrochronology of the Anisian stage (Middle Triassic) at the Guandao reference section, South China. Earth and Planetary Science Letters 482, 591-606.
 
 >> Zhangetal2015PPPZhang, Y., Li, M., Ogg, J.G., Montgomery, P., Huang, C., Chen, Z.-Q., Shi, Z., Enos, P., Lehrmann, D.J., 2015. Cycle-calibrated Magnetostratigraphy of middle Carnian from South China: Implications for Late Triassic Time Scale and Termination of the Yangtze Platform. Palaeogeography, Palaeoclimatology, Palaeoecology 436, 135-166.
-*******************************************************Similar software
+
+*******************************************************Similar software packages
 *******************************************************
+
 
 >> AnalySeries 2.0.8
 Paillard, D., Labeyrie, L., Yiou, P., 1996. Macintosh program performs time‐series analysis. Eos, Transactions American Geophysical Union 77, 379-379.

@@ -53,6 +53,7 @@ function prewhiten_OpeningFcn(hObject, eventdata, handles, varargin)
 % varargin   command line arguments to prewhiten (see VARARGIN)
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
+set(gcf,'Name','Acycle - Detrending')
 h=get(gcf,'Children');  % get all content
 h1=findobj(h,'FontUnits','points');  % find all font units as points
 set(h1,'FontUnits','norm');  % set as norm

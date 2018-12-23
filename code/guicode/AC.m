@@ -63,7 +63,7 @@ function AC_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to AC (see VARARGIN)
 
-set(gcf,'Name','ACYCLE v0.2.5')
+set(gcf,'Name','ACYCLE v0.2.6')
 set(gcf,'DockControls', 'off')
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
@@ -1223,6 +1223,10 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                 bootn = str2double(answer{3});
                 %q = char(39);
                 %method = strcat(q,method1,q)
+                if bootn*length(time) >= 100000
+                    warndlg('Large number of bootstrap simulations. Please Wait ...','Bootstrap');
+                end
+                
                 span = span_v/(time(end)-time(1));
                 [meanboot,bootstd,bootprt] = smoothciML(time,value,method,span,bootn);
                 

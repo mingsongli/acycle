@@ -153,10 +153,20 @@ else
     lat = lat1;
 end
 qinso = handles.qinso;
+
+disp(t)
+disp(day)
+disp(lat)
+disp(qinso)
+disp(author)
+disp(res)
+disp(L)
+
 try
     [I, ~, xorb, yorb, veq, Insol_a_m, Ix,II]=insoML(t,day,lat,qinso,author,res, L);
 catch
     warndlg('Check time scale input, t must be larger than 0 and less than 249000 ka')
+    return
 end
 %
 assignin('base','insol_t',t0)
