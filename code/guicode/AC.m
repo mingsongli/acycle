@@ -693,24 +693,11 @@ function menu_read_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 %
 if isdeployed
-    url = 'https://github.com/mingsongli/acycle/blob/master/doc/Readme.txt';
+    url = 'https://github.com/mingsongli/acycle/blob/master/doc/UpdateLog.txt';
     web(url,'-browser')
 else
-    open('Readme.txt')
+    open('UpdateLog.txt')
 end
-% if isdeployed
-%     mydir = ctfroot;
-%     myfile = 'Readme.txt';
-%     readmefile = fullfile(mydir,myfile);
-%     fid = fopen(readmefile,'r');
-% end
-% 
-% if ismac
-%     uiopen('Readme.txt',1)
-% elseif ispc
-%     winopen('Readme.txt');
-% end
-
 
 % --------------------------------------------------------------------
 function menu_manuals_Callback(hObject, eventdata, handles)

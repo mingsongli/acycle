@@ -5,6 +5,20 @@ Update Log
 
 _____________________________________
 
+Version : ACycle_v0.2.6.20181224
+Date    : Dec. 24, 2018; 11:21 pm EST
+By      : Mingsong Li (Penn State)
+
+	1. Robust Estimation of Background Noise and Signal Detection
+        redconfML.m by Mingsong Li
+        minirhos0.m by Mingsong Li
+        moveMedian.m by Mingsong Li
+
+    % Reference:
+    %   Mann, M.E., Lees, J.M., 1996. Robust estimation of background noise 
+    %       and signal detection in climatic time series. Climatic Change 33, 409-445.
+_____________________________________
+
 Version : ACycle_v0.2.6.20181222
 Date    : Dec. 22, 2018; 11:15 pm EST
 By      : Mingsong Li (Penn State)

@@ -67,19 +67,17 @@ handles.current_data = data_s;
 handles.filename = varargin{1}.data_name;
 handles.unit = varargin{1}.unit;
 handles.path_temp = varargin{1}.path_temp;
-
+handles.linlogY = 1;
 handles.pad = 1;
 handles.checkbox_tabtchi = 0;
+handles.checkbox_robustAR1 = 1;
 handles.ntapers= 2;
-
-xmin = min(data_s(:,1));
-xmax = max(data_s(:,1));
 
 handles.mean = mean(diff(data_s(:,1)));
 handles.nyquist = 1/(2*handles.mean);     % prepare nyquist
 handles.method ='Multi-taper method';
 set(handles.text_nyquist, 'String', num2str(handles.nyquist));
-%set(handles.checkbox_tabtchi,'enable','on')
+
 % Update handles structure
 guidata(hObject, handles);
 
@@ -165,6 +163,10 @@ function pushbutton3_Callback(hObject, eventdata, handles)
 % set redconf input
     datax = data(:,2);
     timex = data(:,1);
+    diffx = diff(timex);
+    if max(diffx) - min(diffx) > 10*(double(single(1.1) - 1.1))
+        warndlg('Warning: the data may not be evenly spaced.')
+    end
     % dt = handles.mean;
     dt = median(diff(timex));
     unit = handles.unit;
@@ -197,23 +199,62 @@ if strcmp(method,'Multi-taper method')
     end
         fd1=w/(2*pi*dt);
         % Plot figure MTM
-    figure;  
-    figHandle = gcf;
-    colordef white;
-    plot(fd1,po,'LineWidth',1); 
-    line([0.7*fmax, 0.7*fmax+bw],[0.8*max(po), 0.8*max(po)],'Color','r')
-    xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
-    ylabel('Power ')
-    legend('Power','bw')
-    title([num2str(nw),' PI MTM method',' ','; Sampling rate = ',num2str(dt),' ', unit])
-    set(gcf,'Name',[num2str(filename),' ',num2str(nw),'PI MTM'])
-    xlim([0 fmax]);
-    set(gca,'XMinorTick','on','YMinorTick','on')
-    
+    if handles.checkbox_robustAR1 == 0
+        figure;  
+        figHandle = gcf;
+        colordef white;
+        plot(fd1,po,'LineWidth',1); 
+        line([0.7*fmax, 0.7*fmax+bw],[0.8*max(po), 0.8*max(po)],'Color','r')
+        xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
+        ylabel('Power ')
+        legend('Power','bw')
+        title([num2str(nw),' PI MTM method',' ','; Sampling rate = ',num2str(dt),' ', unit])
+        set(gcf,'Name',[num2str(filename),' ',num2str(nw),'PI MTM'])
+        xlim([0 fmax]);
+        set(gca,'XMinorTick','on','YMinorTick','on')
+        if handles.linlogY == 1;
+            set(gca, 'YScale', 'log')
+        else
+            set(gca, 'YScale', 'linear')
+        end
+    end
 %    filename_mtm = [dat_name,'-',num2str(nw),'piMTMspectrum.csv'];
 %     CDac_pwd; % cd ac_pwd dir
 %     dlmwrite(filename_mtm, [fd1,po], 'delimiter', ',', 'precision', 9);
 %     cd(pre_dirML); % return to matlab view folder
+    if handles.checkbox_robustAR1 == 1
+        dlg_title = 'Robust AR(1) Estimation';
+        prompt = {'Median smoothing window: default 0.2 = 20%';...
+            'AR1 best fit model? 1 = linear; 2 = log power'};
+        num_lines = 1;
+        defaultans = {num2str(0.2),num2str(2)};
+        options.Resize='on';
+        answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+        
+        if ~isempty(answer)
+            smoothwin = str2double(answer{1});
+            linlog = str2double(answer{2});
+            [rhoM, s0M,redconfAR1,redconfML96]=redconfML(datax,dt,nw,nzeropad,linlog,smoothwin,1);
+            name1 = [dat_name,'-',num2str(nw),'piMTM-RobustAR1',ext];
+            data1 = redconfML96;
+            name2 = [dat_name,'-',num2str(nw),'piMTM-ConvenAR1',ext];
+            data2 = redconfAR1;
+            title([dat_name,'-',num2str(nw),'piMTM-RobustAR1: rho = ',num2str(rhoM)])
+            xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
+            if handles.linlogY == 1;
+                set(gca, 'YScale', 'log')
+            else
+                set(gca, 'YScale', 'linear')
+            end
+
+            dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
+            dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9);
+            disp('>>  Refresh main window to see red noise estimation data files: ')
+            disp(name1)
+            disp(name2)
+        end
+    
+    end
     
 if handles.checkbox_tabtchi == 1
     % Waitbar
@@ -262,11 +303,16 @@ step = 4.5;
 step = 5.5;
     waitbar(step / steps)
     delete(hwaitbar)
+    if handles.linlogY == 1;
+        set(gca, 'YScale', 'log')
+    else
+        set(gca, 'YScale', 'linear')
+    end
     %filename_mtm = [dat_name,'-',num2str(nw),'piMTMspectrum.csv'];
     filename_mtm_cl = [dat_name,'-',num2str(nw),'piMTM-CL.csv'];
     CDac_pwd; % cd ac_pwd dir
     dlmwrite(filename_mtm_cl, [fd,po,theored,tabtchi90,tabtchi95,tabtchi99], 'delimiter', ',', 'precision', 9);
-    disp('Refresh the Main Window:')
+    disp('>>  Refresh the Main Window to see output data')
     %disp(filename_mtm)
     disp(filename_mtm_cl)
     cd(pre_dirML); % return to matlab view folder
@@ -289,6 +335,11 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
     set(gcf,'Name',[num2str(filename),': Lomb-Scargle spectrum'])
     set(gca,'XMinorTick','on','YMinorTick','on')
     xlim([0 fmax]);
+    if handles.linlogY == 1;
+        set(gca, 'YScale', 'log')
+    else
+        set(gca, 'YScale', 'linear')
+    end
     filename_LS = [dat_name,'-Lomb-Scargle.csv'];
     CDac_pwd; % cd ac_pwd dir
     dlmwrite(filename_LS, [fd1,po,(pth*ones(size(fd1')))'], 'delimiter', ',', 'precision', 9);
@@ -325,6 +376,11 @@ elseif  strcmp(method,'Periodogram')
         plot(fd1,tabtchired999,'LineWidth',1)
         legend('Power','Mean','90%','95%','99%','99.9')
         set(gca,'XMinorTick','on','YMinorTick','on')
+        if handles.linlogY == 1;
+            set(gca, 'YScale', 'log')
+        else
+            set(gca, 'YScale', 'linear')
+        end
         hold off
     end
     filename_Periodogram = [dat_name,'-Periodogram.csv'];
@@ -374,7 +430,6 @@ else
 end
 guidata(hObject, handles);
 
-
 % --- Executes on button press in checkbox_tabtchi.
 function checkbox_tabtchi_Callback(hObject, eventdata, handles)
 % hObject    handle to checkbox_tabtchi (see GCBO)
@@ -385,6 +440,27 @@ function checkbox_tabtchi_Callback(hObject, eventdata, handles)
 
 check_checkbox_tabtchi = get(hObject,'Value');
 handles.checkbox_tabtchi = check_checkbox_tabtchi;
+if check_checkbox_tabtchi == 1
+    disp('>>  Select conventional AR(1) model')
+else
+    
+end
+guidata(hObject, handles);
+
+% --- Executes on button press in checkbox_robustAR1.
+function checkbox_robust_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_tabtchi (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_tabtchi
+check_checkbox_robustAR1 = get(handles.checkbox_robust,'Value');
+handles.checkbox_robustAR1 = check_checkbox_robustAR1;
+if check_checkbox_robustAR1 == 1
+    disp('>>  Select robust AR(1) model')
+else
+    disp('>>  Unselect robust AR(1) model')
+end
 guidata(hObject, handles);
 
 function edit_nsimulation_Callback(hObject, eventdata, handles)
@@ -448,6 +524,41 @@ else
     set(handles.edit4,'Enable','On')
     set(handles.edit3,'Enable','Off')
     set(handles.radiobutton4,'Value',1)
+end
+guidata(hObject, handles);
+
+
+% --- Executes on button press in checkbox4.
+function checkbox4_Callback(hObject, eventdata, handles)
+% hObject    handle to radiobutton3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of radiobutton3
+linY = get(handles.checkbox4,'Value');
+if linY > 0
+    handles.linlogY = 0;
+    set(handles.checkbox5,'Value',0)
+else
+    handles.linlogY = 1;
+    set(handles.checkbox5,'Value',1)
+end
+guidata(hObject, handles);
+
+% --- Executes on button press in checkbox5.
+function checkbox5_Callback(hObject, eventdata, handles)
+% hObject    handle to radiobutton3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of radiobutton3
+logY = get(handles.checkbox5,'Value');
+if logY > 0
+    handles.linlogY = 1;
+    set(handles.checkbox4,'Value',0)
+else
+    handles.linlogY = 0;
+    set(handles.checkbox4,'Value',1)
 end
 guidata(hObject, handles);
 
@@ -572,6 +683,10 @@ function pushbutton17_Callback(hObject, eventdata, handles)
 % set redconf input
     datax = data(:,2);
     timex = data(:,1);
+    diffx = diff(timex);
+    if max(diffx) - min(diffx) > 10*(double(single(1.1) - 1.1))
+        warndlg('Warning: the data may not be evenly spaced.')
+    end
     dt = median(diff(timex));
     unit = handles.unit;
     filename = handles.filename;
@@ -603,17 +718,49 @@ if strcmp(method,'Multi-taper method')
     end
         fd1=w/(2*pi*dt);
         % Plot figure MTM
-    figure;  
-    figHandle = gcf;
-    colordef white;
-    plot(fd1,po,'LineWidth',1); 
-    line([0.7*fmax, 0.7*fmax+bw],[0.8*max(po), 0.8*max(po)],'Color','r')
-    xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
-    ylabel('Power ')
-    legend('Power','bw')
-    title([num2str(nw),' PI MTM method',' ','; Sampling rate = ',num2str(dt),' ', unit])
-    set(gcf,'Name',[num2str(filename),' ',num2str(nw),'PI MTM'])
-    xlim([0 fmax]);
+    if handles.checkbox_robustAR1 == 0
+        figure;  
+        figHandle = gcf;
+        colordef white;
+        plot(fd1,po,'LineWidth',1); 
+        line([0.7*fmax, 0.7*fmax+bw],[0.8*max(po), 0.8*max(po)],'Color','r')
+        xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
+        ylabel('Power ')
+        legend('Power','bw')
+        title([num2str(nw),' PI MTM method',' ','; Sampling rate = ',num2str(dt),' ', unit])
+        set(gcf,'Name',[num2str(filename),' ',num2str(nw),'PI MTM'])
+        xlim([0 fmax]);
+        if handles.linlogY == 1;
+            set(gca, 'YScale', 'log')
+        else
+            set(gca, 'YScale', 'linear')
+        end
+    end
+    
+    if handles.checkbox_robustAR1 == 1
+        dlg_title = 'Robust AR(1) Estimation';
+        prompt = {'Median smoothing window: default 0.2 = 20%';...
+            'AR1 best fit model? 1 = linear; 2 = log power'};
+        num_lines = 1;
+        defaultans = {num2str(0.2),num2str(2)};
+        options.Resize='on';
+        answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+
+        if ~isempty(answer)
+            smoothwin = str2double(answer{1});
+            linlog = str2double(answer{2});
+            [rhoM, s0M,redconfAR1,redconfML96]=redconfML(datax,dt,nw,nzeropad,linlog,smoothwin,1);
+            xlim([0 fmax]);
+            xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
+            title([num2str(nw),'piMTM',' ','-RobustAR(1)SamplingRate = ',num2str(dt), unit])
+            if handles.linlogY == 1;
+                set(gca, 'YScale', 'log')
+            else
+                set(gca, 'YScale', 'linear')
+            end
+        end
+
+    end
 
 if handles.checkbox_tabtchi == 1
     % Waitbar
@@ -658,6 +805,11 @@ step = 4.5;
 step = 5.5;
 waitbar(step / steps)
 delete(hwaitbar)
+if handles.linlogY == 1;
+    set(gca, 'YScale', 'log')
+else
+    set(gca, 'YScale', 'linear')
+end
 else
 end  
 
@@ -677,6 +829,11 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
     title(['Lomb-Scargle spectrum; Sampling rate = ',num2str(dt),' ', unit])
     set(gcf,'Name',[num2str(filename),': Lomb-Scargle spectrum'])
     xlim([0 fmax]);
+    if handles.linlogY == 1;
+        set(gca, 'YScale', 'log')
+    else
+        set(gca, 'YScale', 'linear')
+    end
 %     filename_mtm = [dat_name,'-Lomb-Scargle.csv'];
 %     dlmwrite(filename_mtm, [fd1,po], 'delimiter', ',', 'precision', 9);
 elseif  strcmp(method,'Periodogram')
@@ -706,6 +863,11 @@ elseif  strcmp(method,'Periodogram')
         plot(fd1,tabtchired99,'LineWidth',1)
         plot(fd1,tabtchired999,'LineWidth',1)
         legend('Power','Mean','90%','95%','99%','99.9')
+        if handles.linlogY == 1;
+            set(gca, 'YScale', 'log')
+        else
+            set(gca, 'YScale', 'linear')
+        end
     end
 else
 end
