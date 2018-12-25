@@ -16,9 +16,9 @@ Acycle also provides a toolbox that evaluates astronomical signals in paleoclima
 Many of the functions are specific to cyclostratigraphy and astrochronology, and are not found in standard, statistical packages. </i>
 
 Acycle can be downloaded <br />
-here https://github.com/mingsongli/acycle   <br />
-here https://www.dropbox.com/sh/t53vjs539gmixnm/AAC0BqTR0U5xghKwuVc1Iwbma?dl=0   <br />
-or here https://pan.baidu.com/s/1C2ZOUGQl8w9M_eSBzb4NOg   <br />
+(GITHUB) here https://github.com/mingsongli/acycle   <br />
+(DROPBOX) here https://www.dropbox.com/sh/t53vjs539gmixnm/AAC0BqTR0U5xghKwuVc1Iwbma?dl=0   <br />
+or (BAIDU CLOUD) here https://pan.baidu.com/s/1C2ZOUGQl8w9M_eSBzb4NOg   <br />
 
 <br />
 A very preliminary User's Guide can be downloaded here https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf.
