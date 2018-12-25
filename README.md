@@ -1,15 +1,15 @@
-# Acycle v0.2.5
+# Acycle v0.2.6
 
-<b>Acycle -- a time-series analysis software for paleoclimate projects</b>
+<b>Acycle -- a time-series analysis software for paleoclimate projects and education</b>
 
-Mingsong Li, Penn State. Nov. 2018
+Mingsong Li, Penn State. Dec. 25, 2018
 
 Website: www.mingsongli.com/acycle
 
 ```diff
 + With redesigned Acycle GUI, NO coding experience is required.
 ```
-Acycle is a comprehensive, but simple-to-use software package for analysis of time-series designed for paleoclimate research and education. Acycle runs either in the MATLAB environment or as a stand-alone application on Windows and Macintosh OS X <i>(coming)</i>, and is available free of charge.
+Acycle is a comprehensive, but simple-to-use software package for analysis of time-series designed for paleoclimate research and education. Acycle runs either in the MATLAB environment or as a stand-alone application on Macintosh OS X <i>ready</i> and Windows  <i>(coming)</i>, and is available free of charge.
 
 <i>Acycle provides prewhitening procedures with multiple options available to track or remove secular trends, and integrates various power spectral analysis approaches for detection and tracking of periodic signals. 
 Acycle also provides a toolbox that evaluates astronomical signals in paleoclimate series, and estimates the most likely sedimentation rate by maximizing the correlation coefficient between power spectra of an astronomical solution and a paleoclimate series. Sedimentary noise models for sea-level variations are also included. 
@@ -76,5 +76,5 @@ The Acycle software contains the following functions.<br /><br />
 <br />
 <br />
 ```json
-Read more at /doc/AC_User's_Guide.pdf
+Read more at /doc/AC_Users_Guide.pdf
 ```
