@@ -60,6 +60,7 @@ if ismac
     set(gcf,'position',[0.5,0.5,0.28,0.3]) % set position
 elseif ispc
     set(gcf,'position',[0.5,0.4,0.48,0.5]) % set position
+    set(handles.pushbutton17,'Visible','off')
 end
 %set(handles.text7,'position', [0.055,0.875,0.235,0.06])
 set(handles.text7,'position', [0.05,0.875,0.235,0.06])
@@ -232,9 +233,9 @@ if strcmp(method,'Multi-taper method')
     end
         fd1=w/(2*pi*dt);
         % Plot figure MTM
-    if handles.checkbox_robustAR1 == 0
-        figure;  
+        figure;
         figHandle = gcf;
+    if handles.checkbox_robustAR1_v == 0
         colordef white;
         plot(fd1,po,'LineWidth',1); 
         line([0.7*fmax, 0.7*fmax+bw],[0.8*max(po), 0.8*max(po)],'Color','r')
@@ -251,10 +252,7 @@ if strcmp(method,'Multi-taper method')
             set(gca, 'YScale', 'linear')
         end
     end
-%    filename_mtm = [dat_name,'-',num2str(nw),'piMTMspectrum.csv'];
-%     CDac_pwd; % cd ac_pwd dir
-%     dlmwrite(filename_mtm, [fd1,po], 'delimiter', ',', 'precision', 9);
-%     cd(pre_dirML); % return to matlab view folder
+
     if handles.checkbox_robustAR1_v == 1
         dlg_title = 'Robust AR(1) Estimation';
         prompt = {'Median smoothing window: default 0.2 = 20%';...
@@ -487,7 +485,7 @@ function checkbox_robust_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox_tabtchi
-checkbox_robustAR1 = get(hObject,'Value')
+checkbox_robustAR1 = get(hObject,'Value');
 handles.checkbox_robustAR1_v = checkbox_robustAR1;
 if checkbox_robustAR1 == 1
     disp('>>  Select robust AR(1) model')
