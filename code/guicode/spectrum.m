@@ -103,7 +103,7 @@ handles.path_temp = varargin{1}.path_temp;
 handles.linlogY = 1;
 handles.pad = 1;
 handles.checkbox_tabtchi = 0;
-handles.checkbox_robustAR1 = 1;
+handles.checkbox_robustAR1_v = 1;
 handles.ntapers= 2;
 
 handles.mean = mean(diff(data_s(:,1)));
@@ -255,7 +255,7 @@ if strcmp(method,'Multi-taper method')
 %     CDac_pwd; % cd ac_pwd dir
 %     dlmwrite(filename_mtm, [fd1,po], 'delimiter', ',', 'precision', 9);
 %     cd(pre_dirML); % return to matlab view folder
-    if handles.checkbox_robustAR1 == 1
+    if handles.checkbox_robustAR1_v == 1
         dlg_title = 'Robust AR(1) Estimation';
         prompt = {'Median smoothing window: default 0.2 = 20%';...
             'AR1 best fit model? 1 = linear; 2 = log power'};
@@ -482,14 +482,14 @@ guidata(hObject, handles);
 
 % --- Executes on button press in checkbox_robustAR1.
 function checkbox_robust_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox_tabtchi (see GCBO)
+% hObject    handle to checkbox_robust (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox_tabtchi
-check_checkbox_robustAR1 = get(handles.checkbox_robust,'Value');
-handles.checkbox_robustAR1 = check_checkbox_robustAR1;
-if check_checkbox_robustAR1 == 1
+checkbox_robustAR1 = get(hObject,'Value')
+handles.checkbox_robustAR1_v = checkbox_robustAR1;
+if checkbox_robustAR1 == 1
     disp('>>  Select robust AR(1) model')
 else
     disp('>>  Unselect robust AR(1) model')
@@ -684,11 +684,6 @@ function popupmenu2_Callback(hObject, eventdata, handles)
 %        contents{get(hObject,'Value')} returns selected item from popupmenu2
 contents = cellstr(get(hObject,'String'));
 handles.method = contents{get(hObject,'Value')};
-% if strcmp(handles.method, 'Periodogram')
-%     set(handles.checkbox_tabtchi,'enable','off')
-% else
-%     set(handles.checkbox_tabtchi,'enable','on')
-% end
 guidata(hObject,handles)
 
 
@@ -750,8 +745,8 @@ if strcmp(method,'Multi-taper method')
         [po,w]=pmtm(datax,nw);
     end
         fd1=w/(2*pi*dt);
-        % Plot figure MTM
-    if handles.checkbox_robustAR1 == 0
+        % Plot figure MTM handles.checkbox_robustAR1_v = checkbox_robustAR1;
+    if handles.checkbox_robustAR1_v == 0
         figure;  
         figHandle = gcf;
         colordef white;
@@ -770,7 +765,7 @@ if strcmp(method,'Multi-taper method')
         end
     end
     
-    if handles.checkbox_robustAR1 == 1
+    if handles.checkbox_robustAR1_v == 1
         dlg_title = 'Robust AR(1) Estimation';
         prompt = {'Median smoothing window: default 0.2 = 20%';...
             'AR1 best fit model? 1 = linear; 2 = log power'};
