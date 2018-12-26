@@ -53,11 +53,53 @@ function ft_OpeningFcn(hObject, eventdata, handles, varargin)
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
 h=get(gcf,'Children');  % get all content
-h1=findobj(h,'FontUnits','points');  % find all font units as points
-set(h1,'FontUnits','norm');  % set as norm
+h1=findobj(h,'FontUnits','norm');  % find all font units as points
+set(h1,'FontUnits','points','FontSize',11.5);  % set as norm
+h2=findobj(h,'FontUnits','points');  % find all font units as points
+set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
+
+%if ismac
+    set(gcf,'position',[0.4,0.5,0.55,0.4]) % set position
+%elseif ispc
+%    set(gcf,'position',[0.4,0.5,0.75,0.5]) % set position
+%end
+set(handles.text10,'position',[0.497,0.903,0.146,0.05])
+set(handles.text12,'position',[0.666,0.903,0.196,0.05])
+set(handles.ft_axes3,'position',[0.411,0.523,0.546,0.364])
+set(handles.ft_axes4,'position',[0.411,0.084,0.546,0.367])
+set(handles.ft_uipanel2,'position',[0.022,0.51,0.18,0.438])
+set(handles.uipanel6,'position',[0.205,0.51,0.149,0.438])
+set(handles.uibuttongroup2,'position',[0.022,0.084,0.18,0.425])
+set(handles.pushbutton26,'position',[0.236,0.156,0.093,0.256])
+
+set(handles.text1,'position',[0.054,0.8,0.415,0.122])
+set(handles.text2,'position',[0.054,0.591,0.415,0.122])
+set(handles.text3,'position',[0.054,0.417,0.415,0.122])
+set(handles.popupmenu4,'position',[0.061,0.053,0.83,0.256])
+set(handles.filt_fmin_edit1,'position',[0.503,0.791,0.395,0.159])
+set(handles.filt_fmid_edit2,'position',[0.503,0.574,0.395,0.159])
+set(handles.filt_fmax_edit3,'position',[0.503,0.391,0.395,0.159])
+
+set(handles.text16,'position',[0.074,0.754,0.27,0.094])
+set(handles.text15,'position',[0.074,0.58,0.27,0.094])
+set(handles.text18,'position',[0.074,0.4,0.27,0.094])
+set(handles.text17,'position',[0.074,0.22,0.27,0.094])
+
+set(handles.edit11,'position',[0.369,0.717,0.574,0.159])
+set(handles.edit10,'position',[0.369,0.536,0.574,0.159])
+set(handles.edit13,'position',[0.369,0.362,0.574,0.159])
+set(handles.edit12,'position',[0.369,0.181,0.574,0.159])
+
+set(handles.radiobutton6,'position',[0.049,0.759,0.634,0.205])
+set(handles.radiobutton7,'position',[0.049,0.562,0.634,0.205])
+set(handles.radiobutton8,'position',[0.049,0.366,0.634,0.205])
+
+set(handles.edit16,'position',[0.626,0.768,0.35,0.159])
+set(handles.edit17,'position',[0.626,0.554,0.35,0.159])
+set(handles.popupmenu5,'position',[0.024,0.054,0.976,0.259])
 
 handles.output = hObject;
-set(gcf,'Name','Filtering')
+set(gcf,'Name','Acycle: Filtering')
 data_s = varargin{1}.current_data;
 handles.current_data = data_s;
 handles.data_name = varargin{1}.data_name;
@@ -66,7 +108,7 @@ handles.unit = varargin{1}.unit;
 xmin = min(data_s(:,1));
 xmax = max(data_s(:,1));
 npts = length(data_s(:,1));
-set(handles.text12, 'String', handles.data_name); % f max
+set(handles.text12, 'String', handles.dat_name); % f max
 
 handles.index_selected = 0;
 handles.cycle = 41;

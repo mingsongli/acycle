@@ -54,16 +54,23 @@ function copyright_OpeningFcn(hObject, eventdata, handles, varargin)
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
 h=get(gcf,'Children');  % get all content
-h1=findobj(h,'FontUnits','points');  % find all font units as points
-set(h1,'FontUnits','norm');  % set as norm
-set(gcf,'Name','Acycle Copy Right')
+h1=findobj(h,'FontUnits','norm');  % find all font units as points
+set(h1,'FontUnits','points','FontSize',12);  % set as norm
+h2=findobj(h,'FontUnits','points');  % find all font units as points
+set(h2,'FontUnits','points','FontSize',12);  % set as norm
+
+set(gcf,'position',[0.5,0.1,0.45,0.5]) % set position
+set(handles.logo_axes1,'position',[0.054,0.609,0.261,0.345]) % set position
+set(handles.text5,'position',[0.332,0.609,0.61,0.345]) % set position
+set(handles.edit1,'position',[0.054,0.054,0.89,0.531]) % set position
+
+set(gcf,'Name','Acycle: Copyright')
 
 [I,m] = imread('acycle_logo.png');
 imshow(I,m,'parent',handles.logo_axes1);
 % imshow(I,'Colormap',m,'parent',handles.logo_axes1);
 % Choose default command line output for copyright
 handles.output = hObject;
-set(gcf,'Name','Contact us')
 % Update handles structure
 guidata(hObject, handles);
 

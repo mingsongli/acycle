@@ -66,6 +66,9 @@ nfft = length(s(1,:));
 nfmin = ceil(nfft*fmin/nyquist);
 if nfmin == 0; nfmin = 1; end
 nfmax = floor(nfft*fmax/(2*nyquist));
+if nfmax > length(s(1,:))
+    nfmax = length(s(1,:));
+end
 s = s(:,nfmin:nfmax);
 if normal == 1
     s = zeros(i,nfmax-nfmin+1);
@@ -83,5 +86,5 @@ if length(x_grid) ~= scol
 end
 %if length(y_grid) ~= srow
     %y_grid = linspace((time(1)+window/2), (time(1)+window/2+(nspec-1)*step), srow);
-y_grid = linspace((time(1)+window/2), (time(end)-window/2), srow); %debug
+y_grid = linspace((x(1)+window/2), (x(end)-window/2), srow); %debug
 %end

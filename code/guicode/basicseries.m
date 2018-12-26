@@ -53,11 +53,29 @@ function basicseries_OpeningFcn(hObject, eventdata, handles, varargin)
 % varargin   command line arguments to basicseries (see VARARGIN)
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
-set(gcf,'Name','Astronomical Solutions')
-h=get(gcf,'Children');  % get all content
-h1=findobj(h,'FontUnits','points');  % find all font units as points
-set(h1,'FontUnits','norm');  % set as norm
+set(gcf,'Name','Acycle: Astronomical Solutions')
 
+h=get(gcf,'Children');  % get all content
+h1=findobj(h,'FontUnits','norm');  % find all font units as points
+set(h1,'FontUnits','points','FontSize',12);  % set as norm
+h2=findobj(h,'FontUnits','points');  % find all font units as points
+set(h2,'FontUnits','points','FontSize',12);  % set as norm
+
+set(gcf,'position',[0.5,0.55,0.4,0.3]) % set position
+set(handles.text2,'position', [0.064,0.84,0.2,0.06])
+set(handles.text4,'position', [0.47,0.84,0.2,0.06])
+set(handles.popupmenu1,'position', [0.043,0.67,0.3,0.1])
+set(handles.text3,'position', [0.043,0.568,0.2,0.06])
+set(handles.popupmenu3,'position', [0.043,0.407,0.3,0.1])
+
+set(handles.text5,'position', [0.4,0.707,0.07,0.06])
+set(handles.text6,'position', [0.4,0.619,0.07,0.06])
+set(handles.text7,'position', [0.628,0.707,0.07,0.06])
+set(handles.text9,'position', [0.628,0.619,0.07,0.06])
+set(handles.edit1,'position', [0.48,0.69,0.13,0.09])
+set(handles.edit2,'position', [0.48,0.585,0.13,0.09])
+set(handles.pushbutton1,'position', [0.4,0.407,0.25,0.1])
+set(handles.textref,'position', [0.064,0.013,0.915,0.35])
 % Choose default command line output for basicseries
 handles.output = hObject;
 

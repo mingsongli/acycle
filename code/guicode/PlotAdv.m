@@ -51,12 +51,46 @@ function PlotAdv_OpeningFcn(hObject, eventdata, handles, varargin)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to PlotAdv (see VARARGIN)
-set(gcf,'Name','Plot PLUS')
+set(gcf,'Name','Acycle: Advanced Plot')
 set(0,'Units','normalized') % set units as normalized
-set(gcf,'units','norm') % set location
 h=get(gcf,'Children');  % get all content
-h1=findobj(h,'FontUnits','points');  % find all font units as points
-set(h1,'FontUnits','norm');  % set as norm
+h1=findobj(h,'FontUnits','norm');  % find all font units as points
+set(h1,'FontUnits','points','FontSize',12);  % set as norm
+h2=findobj(h,'FontUnits','points');  % find all font units as points
+set(h2,'FontUnits','points','FontSize',12);  % set as norm
+set(gcf,'position',[0.5,0.1,0.33,0.28]) % set position
+%
+set(handles.text5,'position',[0.031,0.88,0.16,0.08])
+set(handles.pop_data,'position',[0.179,0.88,0.8,0.08])
+%type
+set(handles.text2,'position',[0.031,0.737,0.16,0.08])
+set(handles.pop_type,'position',[0.179,0.737,0.312,0.08])
+set(handles.checkbox_basevalue,'position',[0.522,0.737,0.188,0.08])
+set(handles.edit_basevalue,'position',[0.717,0.737,0.155,0.08])
+%line
+set(handles.text3,'position',[0.031,0.59,0.16,0.08])
+set(handles.pop_linestyle,'position',[0.179,0.59,0.312,0.08])
+set(handles.pop_linesize,'position',[0.493,0.59,0.186,0.08])
+set(handles.text6,'position',[0.681,0.59,0.08,0.08])
+set(handles.push_linecolor,'position',[0.772,0.59,0.055,0.08])
+%marker
+set(handles.text4,'position',[0.031,0.42,0.16,0.08])
+set(handles.pop_markerstyle,'position',[0.179,0.42,0.312,0.08])
+set(handles.pop_markersize,'position',[0.493,0.42,0.186,0.08])
+set(handles.push_face,'position',[0.681,0.42,0.084,0.08])
+set(handles.push_makerface,'position',[0.772,0.42,0.055,0.08])
+set(handles.push_edge,'position',[0.841,0.42,0.084,0.08])
+set(handles.push_markeredge,'position',[0.929,0.42,0.055,0.08])
+%
+set(handles.text9,'position',[0.031,0.271,0.16,0.088])
+set(handles.push_axis,'position',[0.195,0.271,0.095,0.088])
+set(handles.axis_start,'position',[0.319,0.271,0.155,0.088])
+set(handles.axis_end,'position',[0.496,0.271,0.155,0.088])
+set(handles.push_axis_log,'position',[0.677,0.271,0.095,0.088])
+set(handles.pushbutton_flipxy,'position',[0.779,0.271,0.122,0.088])
+set(handles.push_swap,'position',[0.907,0.271,0.084,0.088])
+
+set(handles.plot_done,'position',[0.035,0.056,0.294,0.143])
 
 plot_s = varargin{1}.plot_s;
 handles.plot_s = plot_s;
