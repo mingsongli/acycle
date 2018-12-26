@@ -56,7 +56,11 @@ set(gcf,'units','norm') % set location
 h=get(gcf,'Children');  % get all content
 h1=findobj(h,'FontUnits','points');  % find all font units as points
 set(h1,'FontUnits','norm');  % set as norm
-set(gcf,'position',[0.5,0.5,0.28,0.3]) % set position
+if ismac
+    set(gcf,'position',[0.5,0.5,0.28,0.3]) % set position
+elseif ispc
+    set(gcf,'position',[0.5,0.4,0.48,0.5]) % set position
+end
 %set(handles.text7,'position', [0.055,0.875,0.235,0.06])
 set(handles.text7,'position', [0.05,0.875,0.235,0.06])
 set(handles.popupmenu2,'position', [0.3,0.823,0.62,0.12])

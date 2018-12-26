@@ -57,7 +57,11 @@ set(gcf,'Name','Acycle: Detrending')
 h=get(gcf,'Children');  % get all content
 h1=findobj(h,'FontUnits','points');  % find all font units as points
 set(h1,'FontUnits','norm');  % set as norm
-set(gcf,'position',[0.5,0.4,0.2,0.4]) % set position
+if ismac
+    set(gcf,'position',[0.5,0.4,0.25,0.5]) % set position
+elseif ispc
+    set(gcf,'position',[0.4,0.1,0.4,0.8]) % set position
+end
 set(handles.uipanel6,'position',[0.126,0.254,0.724,0.666])
 set(handles.text21,'position',[0.021,0.852,0.26,0.07],'FontSize',0.6)
 set(handles.edit10,'position',[0.284,0.852,0.24,0.1])

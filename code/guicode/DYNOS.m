@@ -61,7 +61,9 @@ h=get(gcf,'Children');  % get all content
 h1=findobj(h,'FontUnits','points');  % find all font units as points
 set(h1,'FontUnits','norm');  % set as norm
 set(gcf,'Name','Acycle: Sedimentary Noise Model - DYNOT')
-
+if ispc
+    set(gcf,'position',[0.1,0.1,0.85,0.85]) % set position
+end
 % Choose default command line output for DYNOS
 handles.output = hObject;
 

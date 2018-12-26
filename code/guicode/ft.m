@@ -55,8 +55,11 @@ set(gcf,'units','norm') % set location
 h=get(gcf,'Children');  % get all content
 h1=findobj(h,'FontUnits','points');  % find all font units as points
 set(h1,'FontUnits','norm');  % set as norm
-set(gcf,'position',[0.4,0.5,0.55,0.35]) % set position
-
+if ismac
+    set(gcf,'position',[0.4,0.5,0.55,0.35]) % set position
+elseif ispc
+    set(gcf,'position',[0.4,0.5,0.75,0.5]) % set position
+end
 handles.output = hObject;
 set(gcf,'Name','Acycle: Filtering')
 data_s = varargin{1}.current_data;
