@@ -55,6 +55,7 @@ set(gcf,'units','norm') % set location
 h=get(gcf,'Children');  % get all content
 h1=findobj(h,'FontUnits','points');  % find all font units as points
 set(h1,'FontUnits','norm');  % set as norm
+set(gcf,'position',[0.4,0.5,0.55,0.35]) % set position
 
 handles.output = hObject;
 set(gcf,'Name','Acycle: Filtering')
@@ -66,7 +67,7 @@ handles.unit = varargin{1}.unit;
 xmin = min(data_s(:,1));
 xmax = max(data_s(:,1));
 npts = length(data_s(:,1));
-set(handles.text12, 'String', handles.data_name); % f max
+set(handles.text12, 'String', handles.dat_name); % f max
 
 handles.index_selected = 0;
 handles.cycle = 41;

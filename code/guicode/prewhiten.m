@@ -57,6 +57,33 @@ set(gcf,'Name','Acycle: Detrending')
 h=get(gcf,'Children');  % get all content
 h1=findobj(h,'FontUnits','points');  % find all font units as points
 set(h1,'FontUnits','norm');  % set as norm
+set(gcf,'position',[0.5,0.4,0.2,0.4]) % set position
+set(handles.uipanel6,'position',[0.126,0.254,0.724,0.666])
+set(handles.text21,'position',[0.021,0.852,0.26,0.07],'FontSize',0.6)
+set(handles.edit10,'position',[0.284,0.852,0.24,0.1])
+set(handles.text20,'position',[0.538,0.873,0.13,0.07],'FontSize',0.6)
+set(handles.edit11,'position',[0.69,0.852,0.18,0.1])
+set(handles.text23,'position',[0.871,0.852,0.13,0.07],'FontSize',0.6)
+set(handles.slider4,'position',[0.1,0.729,0.75,0.09])
+
+set(handles.prewhiten_lowess_checkbox,'position',[0.043,0.61,0.4,0.1])
+set(handles.prewhiten_rlowess_checkbox,'position',[0.043,0.51,0.4,0.1])
+set(handles.prewhiten_loess_checkbox,'position',[0.043,0.41,0.4,0.1])
+set(handles.prewhiten_rloess_checkbox,'position',[0.043,0.31,0.4,0.1])
+set(handles.prewhiten_all_checkbox,'position',[0.043,0.11,0.38,0.1])
+set(handles.prewhiten_clear_pushbutton,'position',[0.375,0.11,0.285,0.1])
+set(handles.prewhiten_pushbutton,'position',[0.673,0.11,0.235,0.1])
+
+set(handles.prewhiten_mean_checkbox,'position',  [0.447,0.55,0.5,0.1])
+set(handles.prewhiten_linear_checkbox,'position',[0.447,0.45,0.5,0.1])
+set(handles.checkbox11,'position',[0.447,0.35,0.5,0.1])
+set(handles.checkbox13,'position',[0.447,0.25,0.13,0.1])
+set(handles.edit23,'position',[0.548,0.266,0.115,0.1])
+set(handles.text25,'position',[0.688,0.288,0.173,0.07])
+
+set(handles.uipanel7,'position',[0.126,0.03,0.724,0.213])
+set(handles.prewhiten_select_popupmenu,'position',[0.043,0.2,0.9,0.5])
+
 handles.smooth_win = 0.35;  % windows for smooth 
 handles.unit = varargin{1}.unit;
 handles.unit_type = varargin{1}.unit_type;

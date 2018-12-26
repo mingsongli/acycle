@@ -6,7 +6,7 @@ Mingsong Li, Penn State. Dec. 25, 2018
 
 Website: www.mingsongli.com/acycle
 
-![logo](https://github.com/mingsongli/acycle/blob/master/code/icons/acycle_logo.png | width=100)
+![](https://github.com/mingsongli/acycle/blob/master/code/icons/acycle_logo.png | width=100)
 
 ```diff
 + With redesigned Acycle GUI, NO coding experience is required.

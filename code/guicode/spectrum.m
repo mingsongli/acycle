@@ -56,6 +56,35 @@ set(gcf,'units','norm') % set location
 h=get(gcf,'Children');  % get all content
 h1=findobj(h,'FontUnits','points');  % find all font units as points
 set(h1,'FontUnits','norm');  % set as norm
+set(gcf,'position',[0.5,0.5,0.28,0.3]) % set position
+%set(handles.text7,'position', [0.055,0.875,0.235,0.06])
+set(handles.text7,'position', [0.05,0.875,0.235,0.06])
+set(handles.popupmenu2,'position', [0.3,0.823,0.62,0.12])
+
+set(handles.uipanel2,'position', [0.05,0.41,0.445,0.37])
+set(handles.text3,'position', [0.04,0.8,0.483,0.176])
+set(handles.popupmenu_tapers,'position', [0.523,0.635,0.443,0.365])
+set(handles.text5,'position', [0.055,0.486,0.436,0.176])
+set(handles.radiobutton3,'position', [0.503,0.405,0.195,0.311])
+set(handles.edit3,'position', [0.664,0.419,0.154,0.23])
+set(handles.text6,'position', [0.859,0.446,0.081,0.176])
+set(handles.radiobutton4,'position', [0.503,0.054,0.195,0.365])
+set(handles.edit4,'position', [0.664,0.089,0.3,0.23])
+
+set(handles.uipanel3,'position', [0.05,0.082,0.445,0.32])
+set(handles.checkbox_robust,'position', [0.2,0.516,0.682,0.37])
+set(handles.checkbox_tabtchi,'position', [0.2,0.177,0.682,0.37])
+
+set(handles.uibuttongroup1,'position', [0.5,0.31,0.45,0.47])
+set(handles.radiobutton_fmax,'position', [0.089,0.638,0.473,0.324])
+set(handles.text_nyquist,'position', [0.541,0.723,0.356,0.183])
+set(handles.radiobutton_input,'position', [0.089,0.349,0.4,0.325])
+set(handles.edit_fmax_input,'position', [0.541,0.384,0.356,0.267])
+set(handles.checkbox4,'position', [0.089,0.07,0.507,0.267])
+set(handles.checkbox5,'position', [0.541,0.07,0.507,0.267])
+
+set(handles.pushbutton17,'position', [0.5,0.082,0.166,0.12])
+set(handles.pushbutton3,'position', [0.67,0.082,0.282,0.12])
 
 % Choose default command line output for spectrum
 handles.output = hObject;

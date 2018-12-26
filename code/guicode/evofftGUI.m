@@ -56,6 +56,7 @@ set(gcf,'units','norm') % set location
 h=get(gcf,'Children');  % get all content
 h1=findobj(h,'FontUnits','points');  % find all font units as points
 set(h1,'FontUnits','norm');  % set as norm
+set(gcf,'position',[0.5,0.2,0.4,0.4]) % set position
 
 % Choose default command line output for evofftGUI
 handles.output = hObject;

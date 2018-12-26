@@ -56,6 +56,8 @@ set(gcf,'units','norm') % set location
 h=get(gcf,'Children');  % get all content
 h1=findobj(h,'FontUnits','points');  % find all font units as points
 set(h1,'FontUnits','norm');  % set as norm
+set(gcf,'position',[0.5,0.1,0.45,0.5]) % set position
+
 set(gcf,'Name','Acycle: Copyright')
 
 [I,m] = imread('acycle_logo.png');

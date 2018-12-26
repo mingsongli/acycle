@@ -67,6 +67,16 @@ set(gcf,'Name','ACYCLE v0.2.6')
 set(gcf,'DockControls', 'off')
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
+set(gcf,'position',[0.5,0.1,0.45,0.8]) % set position
+set(handles.popupmenu1,'position', [0.75,0.945,0.24,0.04])
+set(handles.axes_up,'position',    [0.02,0.945,0.06,0.05])
+set(handles.axes_folder,'position',[0.106,0.945,0.065,0.05])
+set(handles.axes_plot,'position',  [0.2,0.945,0.06,0.05])
+set(handles.axes_populate,'position',[0.28,0.945,0.06,0.05])
+set(handles.axes_refresh,'position',[0.36,0.945,0.06,0.05])
+set(handles.axes_robot,'position',  [0.44,0.945,0.06,0.05])
+set(handles.edit1,'position',       [0.02,0.9,0.96,0.04])
+set(handles.listbox1,'position',    [0.02,0.008,0.965,0.884])
 h=get(gcf,'Children');  % get all content
 h1=findobj(h,'FontUnits','points');  % find all font units as points
 set(h1,'FontUnits','norm');  % set as norm
@@ -116,8 +126,10 @@ handles.foldname = 'foldname'; % default file name
 
 if ismac
     handles.slash_v = '/';
+    set(handles.listbox1,'FontSize',0.019)
 elseif ispc
     handles.slash_v = '\';
+    set(handles.listbox1,'FontSize',0.019)
 end
     handles.path_temp = [path_root,handles.slash_v,'temp'];
     handles.working_folder = [handles.path_temp,handles.slash_v,handles.foldname];
@@ -1603,11 +1615,12 @@ if and ((min(plot_selected) > 2), (nplot == 1))
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
         if isdir(data_name) == 1
         else
-            [~,~,ext] = fileparts(data_name);
+            [~,dat_name,ext] = fileparts(data_name);
             if sum(strcmp(ext,handles.filetype)) > 0
                 current_data = load(data_name);
                 handles.current_data = current_data;
                 handles.data_name = data_name;
+                handles.dat_name = dat_name;
                 guidata(hObject, handles);
                 ft(handles);
             end

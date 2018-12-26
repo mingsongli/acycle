@@ -60,9 +60,11 @@ set(gcf,'units','norm') % set location
 h=get(gcf,'Children');  % get all content
 h1=findobj(h,'FontUnits','points');  % find all font units as points
 set(h1,'FontUnits','norm');  % set as norm
+set(gcf,'position',[0.5,0.4,0.6,0.5]) % set position
 
 d = dir; %get files
 set(handles.listbox1,'String',{d.name},'Value',1) %set string
+set(handles.edit1,'String',pwd) % set position
 
 % Update handles structure
 guidata(hObject, handles);
