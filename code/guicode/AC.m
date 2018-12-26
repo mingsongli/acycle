@@ -4948,9 +4948,9 @@ for i = 1:nplot
         robot_pause  = str2double(answer{8});
         disp('>>  ==================================================')
         disp('>>  ==================================================')
-        disp('>>  Hi, I am ~  Acycle Robot')
-        disp('>>  My dad is Mingsong Li')
-        disp('>>  I was born on Dec. 25, 2018 at Penn State')
+        disp('>>  Hi, this is ~  acycle robot ')
+        disp('>>      by Mingsong Li')
+        disp('>>  It was born on Dec. 25, 2018 at Penn State')
         disp('>>  MatXmas ... ')
         disp('>>')
         disp(['>>  ==========   ',dat_name])
@@ -5273,7 +5273,14 @@ for i = 1:nplot
             disp('>>  ==========    Step 6: Wavelet transform   ==========')
             disp('>>')
             figwave = figure;
-            [~,~,~]= waveletML(daty,datx,1,0.1,2*dt,datx(end)-datx(1));
+            try [~,~,~]= waveletML(daty,datx,1,0.1,2*dt,datx(end)-datx(1));
+            catch
+                try [~,~,~]= waveletML(daty,datx,1,0.1,2*dt,1/2*(datx(end)-datx(1)));
+                catch
+                    errordlg('Error. Please try with more parameters')
+                    disp('>>  ==========    Error in wavelet transform')
+                end
+            end
         end
         disp('')
         disp('>>  ==========    Done   ==========')
