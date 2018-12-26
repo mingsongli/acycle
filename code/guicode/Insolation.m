@@ -56,6 +56,7 @@ set(gcf,'units','norm') % set location
 h=get(gcf,'Children');  % get all content
 h1=findobj(h,'FontUnits','points');  % find all font units as points
 set(h1,'FontUnits','norm');  % set as norm
+set(gcf,'Name','Acycle: Insolation Solutions')
 
 % Choose default command line output for Insolation
 handles.output = hObject;

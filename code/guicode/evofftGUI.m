@@ -60,7 +60,7 @@ set(h1,'FontUnits','norm');  % set as norm
 % Choose default command line output for evofftGUI
 handles.output = hObject;
 
-set(gcf,'Name','Evolutionary Spectral Analysis')
+set(gcf,'Name','Acycle: Evolutionary Spectral Analysis')
 data_s = varargin{1}.current_data;
 handles.unit = varargin{1}.unit;
 handles.unit_type = varargin{1}.unit_type;

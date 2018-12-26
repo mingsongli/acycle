@@ -54,8 +54,7 @@ function agescale_OpeningFcn(hObject, eventdata, handles, varargin)
 
 % Choose default command line output for agescale
 handles.output = hObject;
-set(gcf,'Name','Age Scale')
-
+set(gcf,'Name','Acycle: Age Scale')
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
 h=get(gcf,'Children');  % get all content

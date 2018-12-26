@@ -17,6 +17,11 @@ By      : Mingsong Li (Penn State)
     % Reference:
     %   Mann, M.E., Lees, J.M., 1996. Robust estimation of background noise 
     %       and signal detection in climatic time series. Climatic Change 33, 409-445.
+
+    2. Add demean option for the Detrending function
+
+    3. Add a robot. "Give me a depth/time series, robot will do the rest".
+
 _____________________________________
 
 Version : ACycle_v0.2.6.20181222

@@ -51,7 +51,7 @@ function PlotAdv_OpeningFcn(hObject, eventdata, handles, varargin)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to PlotAdv (see VARARGIN)
-set(gcf,'Name','Plot PLUS')
+set(gcf,'Name','Acycle: Advanced Plot')
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
 h=get(gcf,'Children');  % get all content

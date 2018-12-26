@@ -56,14 +56,13 @@ set(gcf,'units','norm') % set location
 h=get(gcf,'Children');  % get all content
 h1=findobj(h,'FontUnits','points');  % find all font units as points
 set(h1,'FontUnits','norm');  % set as norm
-set(gcf,'Name','Acycle Copy Right')
+set(gcf,'Name','Acycle: Copyright')
 
 [I,m] = imread('acycle_logo.png');
 imshow(I,m,'parent',handles.logo_axes1);
 % imshow(I,'Colormap',m,'parent',handles.logo_axes1);
 % Choose default command line output for copyright
 handles.output = hObject;
-set(gcf,'Name','Contact us')
 % Update handles structure
 guidata(hObject, handles);
 

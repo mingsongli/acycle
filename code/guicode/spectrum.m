@@ -60,7 +60,7 @@ set(h1,'FontUnits','norm');  % set as norm
 % Choose default command line output for spectrum
 handles.output = hObject;
 
-set(gcf,'Name','Spectral Analysis')
+set(gcf,'Name','Acycle: Spectral Analysis')
 
 data_s = varargin{1}.current_data;
 handles.current_data = data_s;

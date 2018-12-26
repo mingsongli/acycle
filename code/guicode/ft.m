@@ -57,7 +57,7 @@ h1=findobj(h,'FontUnits','points');  % find all font units as points
 set(h1,'FontUnits','norm');  % set as norm
 
 handles.output = hObject;
-set(gcf,'Name','Filtering')
+set(gcf,'Name','Acycle: Filtering')
 data_s = varargin{1}.current_data;
 handles.current_data = data_s;
 handles.data_name = varargin{1}.data_name;
