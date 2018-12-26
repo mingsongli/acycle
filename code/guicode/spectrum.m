@@ -226,33 +226,6 @@ else
 end
 
 if strcmp(method,'Multi-taper method')
-    if padtimes > 1
-        [po,w]=pmtm(datax,nw,nzeropad);
-    else 
-        [po,w]=pmtm(datax,nw);
-    end
-        fd1=w/(2*pi*dt);
-        % Plot figure MTM
-        figure;
-        figHandle = gcf;
-    if handles.checkbox_robustAR1_v == 0
-        colordef white;
-        plot(fd1,po,'LineWidth',1); 
-        line([0.7*fmax, 0.7*fmax+bw],[0.8*max(po), 0.8*max(po)],'Color','r')
-        xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
-        ylabel('Power ')
-        legend('Power','bw')
-        title([num2str(nw),' PI MTM method',' ','; Sampling rate = ',num2str(dt),' ', unit])
-        set(gcf,'Name',[num2str(filename),' ',num2str(nw),'PI MTM'])
-        xlim([0 fmax]);
-        set(gca,'XMinorTick','on','YMinorTick','on')
-        if handles.linlogY == 1;
-            set(gca, 'YScale', 'log')
-        else
-            set(gca, 'YScale', 'linear')
-        end
-    end
-
     if handles.checkbox_robustAR1_v == 1
         dlg_title = 'Robust AR(1) Estimation';
         prompt = {'Median smoothing window: default 0.2 = 20%';...
@@ -285,6 +258,34 @@ if strcmp(method,'Multi-taper method')
             disp(name2)
         end
     
+    end
+    
+    if padtimes > 1
+        [po,w]=pmtm(datax,nw,nzeropad);
+    else 
+        [po,w]=pmtm(datax,nw);
+    end
+        fd1=w/(2*pi*dt);
+        % Plot figure MTM
+        
+    if handles.checkbox_robustAR1_v == 0
+        figure;
+        figHandle = gcf;
+        colordef white;
+        plot(fd1,po,'LineWidth',1); 
+        line([0.7*fmax, 0.7*fmax+bw],[0.8*max(po), 0.8*max(po)],'Color','r')
+        xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
+        ylabel('Power ')
+        legend('Power','bw')
+        title([num2str(nw),' PI MTM method',' ','; Sampling rate = ',num2str(dt),' ', unit])
+        set(gcf,'Name',[num2str(filename),' ',num2str(nw),'PI MTM'])
+        xlim([0 fmax]);
+        set(gca,'XMinorTick','on','YMinorTick','on')
+        if handles.linlogY == 1;
+            set(gca, 'YScale', 'log')
+        else
+            set(gca, 'YScale', 'linear')
+        end
     end
     
 if handles.checkbox_tabtchi == 1
@@ -737,6 +738,31 @@ else
 end
 
 if strcmp(method,'Multi-taper method')
+    
+    if handles.checkbox_robustAR1_v == 1
+        dlg_title = 'Robust AR(1) Estimation';
+        prompt = {'Median smoothing window: default 0.2 = 20%';...
+            'AR1 best fit model? 1 = linear; 2 = log power'};
+        num_lines = 1;
+        defaultans = {num2str(0.2),num2str(2)};
+        options.Resize='on';
+        answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+
+        if ~isempty(answer)
+            smoothwin = str2double(answer{1});
+            linlog = str2double(answer{2});
+            [rhoM, s0M,redconfAR1,redconfML96]=redconfML(datax,dt,nw,nzeropad,linlog,smoothwin,1);
+            xlim([0 fmax]);
+            xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
+            title([num2str(nw),'piMTM',' ','-RobustAR(1)SamplingRate = ',num2str(dt), unit])
+            if handles.linlogY == 1;
+                set(gca, 'YScale', 'log')
+            else
+                set(gca, 'YScale', 'linear')
+            end
+        end
+    end
+    
     if padtimes > 1
         [po,w]=pmtm(datax,nw,nzeropad);
     else 
@@ -761,32 +787,7 @@ if strcmp(method,'Multi-taper method')
         else
             set(gca, 'YScale', 'linear')
         end
-    end
-    
-    if handles.checkbox_robustAR1_v == 1
-        dlg_title = 'Robust AR(1) Estimation';
-        prompt = {'Median smoothing window: default 0.2 = 20%';...
-            'AR1 best fit model? 1 = linear; 2 = log power'};
-        num_lines = 1;
-        defaultans = {num2str(0.2),num2str(2)};
-        options.Resize='on';
-        answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-
-        if ~isempty(answer)
-            smoothwin = str2double(answer{1});
-            linlog = str2double(answer{2});
-            [rhoM, s0M,redconfAR1,redconfML96]=redconfML(datax,dt,nw,nzeropad,linlog,smoothwin,1);
-            xlim([0 fmax]);
-            xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
-            title([num2str(nw),'piMTM',' ','-RobustAR(1)SamplingRate = ',num2str(dt), unit])
-            if handles.linlogY == 1;
-                set(gca, 'YScale', 'log')
-            else
-                set(gca, 'YScale', 'linear')
-            end
-        end
-
-    end
+    end 
 
 if handles.checkbox_tabtchi == 1
     % Waitbar
