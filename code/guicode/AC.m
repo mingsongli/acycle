@@ -77,12 +77,18 @@ set(handles.axes_refresh,'position',[0.36,0.945,0.06,0.05])
 set(handles.axes_robot,'position',  [0.44,0.945,0.06,0.05])
 set(handles.edit1,'position',       [0.02,0.9,0.96,0.04])
 set(handles.listbox1,'position',    [0.02,0.008,0.965,0.884])
-
+if ismac
+    handles.slash_v = '/';
+    %set(handles.listbox1,'FontSize',0.019)
+elseif ispc
+    handles.slash_v = '\';
+    %set(handles.listbox1,'FontSize',0.019)
+end
 h=get(gcf,'Children');  % get all content
-%h1=findobj(h,'FontUnits','norm');  % find all font units as points
-%set(h1,'FontUnits','points','FontSize',11);  % set as norm
+h1=findobj(h,'FontUnits','norm');  % find all font units as points
+set(h1,'FontUnits','points','FontSize',12);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
-set(h2,'FontUnits','points','FontSize',11);  % set as norm
+set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
 % set icons
 axes(handles.axes_up);
 menu_up = imread('menu_up.png');
@@ -127,15 +133,8 @@ path_root = pwd;
 set(handles.edit1,'String',path_root);
 handles.foldname = 'foldname'; % default file name
 
-if ismac
-    handles.slash_v = '/';
-    set(handles.listbox1,'FontSize',0.019)
-elseif ispc
-    handles.slash_v = '\';
-    set(handles.listbox1,'FontSize',0.019)
-end
-    handles.path_temp = [path_root,handles.slash_v,'temp'];
-    handles.working_folder = [handles.path_temp,handles.slash_v,handles.foldname];
+handles.path_temp = [path_root,handles.slash_v,'temp'];
+handles.working_folder = [handles.path_temp,handles.slash_v,handles.foldname];
 % if ad_pwd.txt exist; then go to this folder
 if exist('ac_pwd.txt', 'file') == 2
     fileID = fopen('ac_pwd.txt','r');

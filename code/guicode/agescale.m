@@ -59,11 +59,12 @@ set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
 h=get(gcf,'Children');  % get all content
 h1=findobj(h,'FontUnits','norm');  % find all font units as points
-set(h1,'FontUnits','points','FontSize',12);  % set as norm
+set(h1,'FontUnits','points','FontSize',11.5);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
-set(h2,'FontUnits','points','FontSize',12);  % set as norm
+set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
 
-set(gcf,'position',[0.5,0.4,0.5,0.4]) % set position
+set(gcf,'position',[0.5,0.4,0.65,0.4]) % set position
+
 set(handles.pushbutton2,'position',[0.034,0.84,0.06,0.06]) % set position
 set(handles.pushbutton3,'position',[0.1,0.84,0.06,0.06]) % set position
 set(handles.pushbutton4,'position',[0.485,0.732,0.06,0.06]) % set position
@@ -73,7 +74,7 @@ set(handles.edit1,'position',[0.018,0.748,0.436,0.06]) % set position
 set(handles.edit2,'position',[0.58,0.738,0.4,0.06]) % set position
 set(handles.listbox1,'position',[0.018,0.114,0.436,0.634]) % set position
 set(handles.listbox2,'position',[0.58,0.114,0.4,0.476]) % set position
-set(handles.text3,'position',[0.58,0.84, 0.1,0.06]) % set position
+set(handles.text3,'position',[0.58,0.84, 0.15,0.06]) % set position
 set(handles.text4,'position',[0.58,0.606,0.1,0.06]) % set position
 
 d = dir; %get files

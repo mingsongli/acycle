@@ -54,15 +54,17 @@ set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
 h=get(gcf,'Children');  % get all content
 h1=findobj(h,'FontUnits','norm');  % find all font units as points
-set(h1,'FontUnits','points','FontSize',11.5);  % set as norm
+set(h1,'FontUnits','points','FontSize',12);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
-set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
+set(h2,'FontUnits','points','FontSize',12);  % set as norm
 
-%if ismac
+if ismac
     set(gcf,'position',[0.4,0.5,0.55,0.4]) % set position
-%elseif ispc
-%    set(gcf,'position',[0.4,0.5,0.75,0.5]) % set position
-%end
+elseif ispc
+    set(gcf,'position',[0.4,0.5,0.65,0.58]) % set position
+    set(h1,'FontUnits','points','FontSize',11);  % set as norm
+    set(h2,'FontUnits','points','FontSize',11);  % set as norm
+end
 set(handles.text10,'position',[0.497,0.903,0.146,0.05])
 set(handles.text12,'position',[0.666,0.903,0.196,0.05])
 set(handles.ft_axes3,'position',[0.411,0.523,0.546,0.364])
