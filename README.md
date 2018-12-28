@@ -31,15 +31,21 @@ A very preliminary User's Guide can be downloaded here https://github.com/mingso
 <br />
 <b>MatLab version</b>
 <br />
+<br />
 For MatLab on Mac & Windows: Recommended! MatLab is essential for the Acycle software package.
+<br />
 <br />
 [1. How to install ]: 
 <br />
+<br />
 Download and unzip the Acycle software to your root directory. All set.
+<br />
 <br />
 [2. How to startup ]:
 <br />
+<br />
 (1) Change the MatLab working directory to the Acycle directory 
+<br />
 <br />
 (2) Option 1: right-click file "ac.m", then choose "Run". 
 <br />
@@ -47,13 +53,15 @@ Download and unzip the Acycle software to your root directory. All set.
 ```json
 ac
 ```
+
 in MatLab command window, then press the ENTER key.
 <br />
 <br />
 ```json
 Read more tips on the installation at Section 3.3 in /doc/AC_Users_Guide.pdf
-or here: https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf
 ```
+or here: https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf
+<br />
 <br />
 <br />
 <b>Mac version</b>
@@ -62,86 +70,116 @@ This software is a stand-alone program. It was tested in Mac OS Mojave system (m
 <br />
 <br />
 Two versions are available:
+<br />
+<br />
 v1. Acycle0.2.6-Mac
 <br />
-[1. How to install ]: 
-No installation needed. Size: 97.0 Mb. If you have Matlab installed. Steps 1-2 can be skipped.
 <br />
-Step 1: Download runtime. MatLab runtime R2015b is not included in this package and the ?MCR_R2015b_maci64_installer.zip? can be downloaded at: https://www.mathworks.com/products/compiler/matlab-runtime.html 
+[1. How to install ]: 
+No installation needed. Size: 97.0 Mb. If you have Matlab R2015b installed. Steps 1-2 can be skipped.
+<br />
+<br />
+Step 1: Download runtime. MatLab runtime R2015b is not included in this package and the <i>MCR_R2015b_maci64_installer.zip</i> can be downloaded at: https://www.mathworks.com/products/compiler/matlab-runtime.html 
+<br />
 <br />
 Step 2: Install runtime R2015b for mac OS X. Double click the file "InstallForMacOSX". 
-Or right-click and select ?Show Package Contents? of "the InstallForMacOSX" file. In the pop-up folder, double click ?InstallForMacOSX?. Then it may ask permission for installation. Follow instructions of the MatLab Runtime installer, you will install Runtime.
+Or right-click and select "Show Package Contents" of "the InstallForMacOSX" file. In the pop-up folder, double click "InstallForMacOSX". Then it may ask the permission for installation. Follow instructions of the MatLab Runtime installer, you will install Runtime.
+<br />
 <br />
 Step 3: Setup Runtime environment 
 How to set the MatLab Runtime environment variable DYLD_LIBRARY_PATH?
 Here is a nice answer by Walter Roberson on 14 Jan 2016.
 https://www.mathworks.com/matlabcentral/answers/263824-mcr-with-mac-and-environment-variable 
 <br />
+<br />
 Step 4: Download Acycle0.2.6-Mac
 Dropbox at: https://www.dropbox.com/sh/t53vjs539gmixnm/AAC0BqTR0U5xghKwuVc1Iwbma?dl=0 , or 
 Baidu Cloud at: https://pan.baidu.com/s/14-xRzV_-BBrE6XfyR_71Nw
 <br />
-Step 5: Drag the Acycle0.2.6-Mac file to the /Applications folder. Go to the ?/Applications? folder. Right click ?Acyclev0.2.6-Mac? file, choose ?Show Package Content?.
 <br />
-Step 6: Go to ?/Contents/MacOS? folder, drag the ?AC? file to dock (NOT the ?Acycle? file).
+Step 5: Drag the <i>Acycle0.2.6-Mac</i> file to the /Applications folder. Go to the <i>/Applications</i> folder. Right click <i>Acyclev0.2.6-Mac</i> file, choose <i>Show Package Content</i>.
+<br />
+<br />
+Step 6: Go to /Contents/MacOS folder, drag the <i>AC</i> file to dock (NOT the <i>Acycle</i> file).
+<br />
 <br />
 [2. How to startup ]:
 <br />
-Step 1: Click icon of ?AC? in the dock above to start the Acycle software.
+<br />
+Step 1: Click icon of <i>AC</i> in the dock above to start the Acycle software.
+<br />
 <br />
 v2. Acycle0.2.6-Mac-Installer_w_runtime
 <br />
+<br />
 [1. How to install ]: 
+<br />
 Install Acycle and MatLab runtime simultaneously.
 Size: 883.2 Mb; MatLab runtime R2015b has been imbedded in this package.
 <br />
-Step 1: Download Acycle0.2.6-Mac-Installer_w_runtime
+<br />
+Step 1: Download <i>Acycle0.2.6-Mac-Installer_w_runtime</i>
 Dropbox at: https://www.dropbox.com/sh/t53vjs539gmixnm/AAC0BqTR0U5xghKwuVc1Iwbma?dl=0 , or 
 Baidu Cloud at: https://pan.baidu.com/s/14-xRzV_-BBrE6XfyR_71Nw
 <br />
-Step 2. Installation of Acycle and MatLab runtime simultaneously. Double click ?Acycle0.2.6-Mac-Installer_w_runtime? to start the installation. The admin permission may be required.
 <br />
-Step 3: Following instructions of Acycle Installer. Choose Acycle installation folder (default folder is /Applications/Acycle).
+Step 2. Installation of Acycle and MatLab runtime simultaneously. Double click <i>Acycle0.2.6-Mac-Installer_w_runtime</i> to start the installation. The admin permission may be required.
 <br />
-Step 4: Choose MATLAB Runtime installation folder (default folder is /Applications/MATLAB/MATLAB_Runtime).
+<br />
+Step 3: Following instructions of the Acycle Installer. Choose <i>Acycle installation folder</i> (default folder is <i>/Applications/Acycle</i>).
+<br />
+<br />
+Step 4: Choose MATLAB Runtime installation folder (default folder is <i>/Applications/MATLAB/MATLAB_Runtime</i>).
+<br />
 <br />
 Step 5: Setup Runtime environment
+<br />
 How to set the MatLab Runtime environment variable DYLD_LIBRARY_PATH?
 Here is a nice answer by Walter Roberson on 14 Jan 2016.
 https://www.mathworks.com/matlabcentral/answers/263824-mcr-with-mac-and-environment-variable 
 <br />
+<br />
 [2. How to startup ]:
+<br />
 <br />
 You only need to do Steps 1-3 for the first time. Then only Step 4 below is need.
 <br />
-Step 1: Go to the installation folder (for example: /Applications/Acycle/application). 
 <br />
-Step 2: Right click ?Acycle? file, choose ?Show Package Content?
+Step 1: Go to the installation folder (for example: <i>/Applications/Acycle/application</i>). 
 <br />
-Step 3: Go to the ?Contents/MacOS? folder, drag the applauncher file to dock. Before that, you may want to change filename of the ?applauncher? to ?AC? or any other name except Acycle.
 <br />
-Step 4: Click icon of ?applauncher? (or ?AC?) above to start the Acycle software. 
-?Warning: NEVER close the terminal window (left panel below)  when using Acycle. This will close Acycle either. To kill Acycle software, press CTRL + C keys?
+Step 2: Right-click <i>Acycle</i> file, choose <i>Show Package Content</i>
+<br />
+<br />
+Step 3: Go to the <i>Contents/MacOS</i> folder, drag the <i>applauncher</i> file to dock. Before that, you may want to change filename of the <i>applauncher</i> to <i>AC</i> or any other name except <i>Acycle</i>.
+<br />
+<br />
+Step 4: Click icon of <i>applauncher</i> (or <i>AC</i>) above to start the Acycle software. 
+<br />
+Warning: NEVER close the terminal window (left panel below)  when using Acycle. This will close Acycle either. To kill Acycle software, press <i>CTRL + C</i> keys
+<br />
 <br />
 ```json
 Read more tips on the installation at Section 3.4 in /doc/AC_Users_Guide.pdf
-or here: https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf
 ```
+or here: https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf
+<br />
 <br />
 <b>Windows version</b>
 <br />
 Coming
 <br />
+<br />
 <b>Data requirement</b>
-
+<br />
 See example data at https://github.com/mingsongli/acycle/tree/master/data
-
-The input file of data series can be in a variety of formats, including table- or space-delimited text (.txt), and comma-separated values files (.csv) from an Excel-type spreadsheet. The data file must contain two columns of series. The first column must be in depth or time, and the second column should be value in the corresponding depth or time. Unit of the series in depth domain should be in meters. The data can be saved in any directory and is recommended to save in Acycle ???data??? folder. All data files, plots, and folders are displayed in the GUI list box.
+<br /><br />
+The input file of data series can be in a variety of formats, including table- or space-delimited text (.txt), and comma-separated values files (.csv) from an Excel-type spreadsheet. The data file must contain two columns of series. The first column must be in depth or time, and the second column should be value in the corresponding depth or time. Unit of the series in depth domain should be in meters. The data can be saved in any directory and is recommended to save in Acycle <i>data</i> folder. All data files, plots, and folders are displayed in the GUI list box.
 <br />
 <br />
 <br />
 <b>Functions and GUI</b>
-
+<br /><br />
 The Acycle software contains the following functions.<br /><br />
 
 <b>File</b> (New Folder; New Text File, Save AC.fig; Open *.fig File; Open Working Directory; Extract Data)<br /><br />

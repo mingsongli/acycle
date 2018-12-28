@@ -33,7 +33,7 @@ function varargout = AC(varargin)
 
 % Edit the above text to modify the response to help AC
 
-% Last Modified by GUIDE v2.5 20-Sep-2018 14:48:10
+% Last Modified by GUIDE v2.5 28-Dec-2018 00:06:19
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -584,6 +584,12 @@ function menu_math_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+% --- Executes during object creation, after setting all properties.
+function menu_help_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes_refresh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
 
 % --------------------------------------------------------------------
 function menu_help_Callback(hObject, eventdata, handles)
@@ -894,6 +900,13 @@ if and ((min(plot_selected) > 2), (nplot == 1))
         end
 end
 guidata(hObject, handles);
+
+
+% --- Executes during object creation, after setting all properties.
+function menu_interp_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes_refresh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
 
 
 % --------------------------------------------------------------------
@@ -1467,6 +1480,11 @@ end
 end
 guidata(hObject, handles);
 
+% --- Executes during object creation, after setting all properties.
+function menu_period_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes_refresh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
 
 % --------------------------------------------------------------------
 function menu_period_Callback(hObject, eventdata, handles)
@@ -1493,6 +1511,13 @@ if and ((min(plot_selected) > 2), (nplot == 1))
         end
 end
 guidata(hObject, handles);
+
+
+% --- Executes during object creation, after setting all properties.
+function menu_power_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes_refresh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
 
 % --------------------------------------------------------------------
 function menu_power_Callback(hObject, eventdata, handles)
@@ -1604,6 +1629,11 @@ for nploti = 1:nplot
 end
 guidata(hObject, handles);
 
+% --- Executes during object creation, after setting all properties.
+function menu_filter_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes_refresh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
 
 % --------------------------------------------------------------------
 function menu_filter_Callback(hObject, eventdata, handles)
@@ -1739,10 +1769,10 @@ if and ((min(plot_selected) > 2), (nplot == 1))
             time = data(:,1);
             npts = length(time);
             sr_all = diff(time);
-            srmean = mean(sr_all);
             sr_equal = abs((max(sr_all)-min(sr_all))/2);
             if sr_equal > eps('single')
-                warndlg('Data problem detected. Try "Math->Sort&Unique" and "Math->Interpolation" first...','Data Warning');
+                warndlg({'Data problem detected.';...
+                    'Try "Math->Sort&Unique" or "Math->Interpolation" first...'},'Data: Warning');
             end
             % set zeropadding
             if npts <= 2500
@@ -1752,14 +1782,28 @@ if and ((min(plot_selected) > 2), (nplot == 1))
             else
                 handles.pad = fix(npts/5000) * 5000 + 5000;
             end
-%             nyquist = 1/(2*srmean);
-%             rayleigh = 1/(npts*srmean);
-            % check unit
             if strcmp(handles.unit,'m')
             elseif strcmp(handles.unit, 'unit')
-                warndlg('Make sure the UNIT of the data is "meter". You can try "Math -> Simple Function" ...','Unit Warning');
+                warndlg({'Unit of the selected data is "unit"'; ...
+                    '(see pop-up menu at top right corner of Acycle main window)';...
+                    'Acycle assumes the real UNIT is "m"';'If this is not true, please correct.'},'Unit Warning');
+            elseif strcmp(handles.unit,'dm')
+                warndlg({'Unit of the selected data is "dm"'; ...
+                    '(see pop-up menu at top right corner of Acycle main window)';...
+                    'Acycle transformed the data, now the unit of "m"'},'Unit transformed');
+                data(:,1) = data(:,1) * 0.1; % dm to m
+            elseif strcmp(handles.unit,'cm')
+                warndlg({'Unit of the selected data is "cm"'; ...
+                    '(see pop-up menu at top right corner of Acycle main window)';...
+                    'Acycle transformed the data, now the unit of "m"'},'Unit transformed');
+                data(:,1) = data(:,1) * 0.01; % cm to m
+            elseif strcmp(handles.unit,'mm')
+                warndlg({'Unit of the selected data is "mm"'; ...
+                    '(see pop-up menu at top right corner of Acycle main window)';...
+                    'Acycle transformed the data, now the unit of "m"'},'Unit transformed');
+                data(:,1) = data(:,1) * 0.001; % cm to m
             else
-                errordlg('UNIT of the data MUST be "meter"!. Try "Math -> Simple Function" ...','Unit Error')
+                warndlg('UNIT of the data MUST be "m/dm/cm/mm"!.','Unit Error')
             end
             
             prompt = {'DATA: AGE of the data in Ma',...
@@ -1770,8 +1814,6 @@ if and ((min(plot_selected) > 2), (nplot == 1))
             %defaultans = {num2str(handles.t1),num2str(handles.t2),'0','0.06','1','0.6','0.5'};
             defaultans = {num2str(handles.t1),num2str(handles.f2),num2str(handles.pad)};
             options.Resize='on';
-            
-            
             answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
             if ~isempty(answer)
                 t1 = 1000 * str2double(answer{1});
@@ -1863,7 +1905,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                 options.Resize='on';
                 answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
                 if ~isempty(answer)
-                    srm = srmean;
+                    srm = mean(diff(data(:,1)));
                     pad1 = pad;
                     sr1 = str2double(answer{1});
                     sr2 = str2double(answer{2});
@@ -1919,7 +1961,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                     else
                         param3 = ['Adjust: ', num2str(adjust),'. Remove red: ',num2str(red),'. Correlation method: Spearman'];
                     end
-                    param4 = ['Data: ',num2str(time(1)),' to ',num2str(time(end)),'m. Sampling rate: ', num2str(srmean),'. Number of data points: ', num2str(npts)];
+                    param4 = ['Data: ',num2str(data(1,1)),' to ',num2str(data(end,1)),'m. Sampling rate: ', num2str(srm),'. Number of data points: ', num2str(npts)];
                     disp('')
                     disp(' - - - - - - - - - - - - - Summary - - - - - - - - - - - ')
                     disp(data_name);
@@ -1999,9 +2041,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
             data = load(data_name);
             time = data(:,1);
             npts = length(time);
-            
             sr_all = diff(time);
-            srmean = mean(sr_all);
             sr_equal = abs((max(sr_all)-min(sr_all))/2);
             if sr_equal > eps('single')
                 warndlg('Data problem detected. Try "Math->Sort&Unique" and "Math->Interpolation" first ...','Warning');
@@ -2010,9 +2050,26 @@ if and ((min(plot_selected) > 2), (nplot == 1))
             % check unit
             if strcmp(handles.unit,'m')
             elseif strcmp(handles.unit, 'unit')
-                warndlg('Make sure the UNIT of the data is "meter". You can try "Math -> Simple Function" ...','Unit Warning');
+                warndlg({'Unit of the selected data is "unit"'; ...
+                    '(see pop-up menu at top right corner of Acycle main window)';...
+                    'Acycle assumes the real UNIT is "m"';'If this is not true, please correct.'},'Unit Warning');
+            elseif strcmp(handles.unit,'dm')
+                warndlg({'Unit of the selected data is "dm"'; ...
+                    '(see pop-up menu at top right corner of Acycle main window)';...
+                    'Acycle transformed the data, now the unit of "m"'},'Unit transformed');
+                data(:,1) = data(:,1) * 0.1; % dm to m
+            elseif strcmp(handles.unit,'cm')
+                warndlg({'Unit of the selected data is "cm"'; ...
+                    '(see pop-up menu at top right corner of Acycle main window)';...
+                    'Acycle transformed the data, now the unit of "m"'},'Unit transformed');
+                data(:,1) = data(:,1) * 0.01; % cm to m
+            elseif strcmp(handles.unit,'mm')
+                warndlg({'Unit of the selected data is "mm"'; ...
+                    '(see pop-up menu at top right corner of Acycle main window)';...
+                    'Acycle transformed the data, now the unit of "m"'},'Unit transformed');
+                data(:,1) = data(:,1) * 0.001; % cm to m
             else
-                errordlg('UNIT of the data MUST be "meter"!. Try "Math -> Simple Function" ...','Unit Error')
+                warndlg('UNIT of the data MUST be "m/dm/cm/mm"!.','Unit Error')
             end
             
             prompt = {'TARGET: What is the age of the data in Ma (e.g., 55):',...
@@ -2106,7 +2163,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                     'Remove red noise: 0 = No, 1 = x/AR(1), 2 = x-AR(1)'};
                 dlg_title = 'Evolutionary Correlation Coefficient (eCOCO): DATA';
                 num_lines = 1;
-                eCOCO_win = 0.25*(time(end)-time(1));
+                eCOCO_win = 0.25*(data(end,1)-data(1,1));
                 step = ceil(npts/300); % number of sliding windows
                 
                 defaultans = {num2str(eCOCO_win),num2str(step),...
@@ -2118,7 +2175,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                 
                 if ~isempty(answer)
                     window = str2double(answer{1});
-                    srm = srmean;
+                    srm = mean(diff(data(:,1)));
                     step = str2double(answer{2});
                     pad1 = pad;
                     sr1 = str2double(answer{3});
@@ -2142,7 +2199,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                     param1 = ['Sliding window is ',num2str(window),' m. Number of sliding steps is ', num2str(step),'. Sliding step is',num2str(srm*step),' m'];
                     param2 = ['Tested sedimentation rate: from ',num2str(sr1),' to ',num2str(sr2),' with a step of ', num2str(srstep), ' cm/kyr'];
                     param3 = ['Number of Monte Carlo simulations ',num2str(nsim), '. Remove red noise: ',num2str(red),'. Zero padding is ',num2str(pad1)];
-                    param4 = ['Data: ',num2str(time(1)),' to ',num2str(time(end)),'m. Sampling rate: ', num2str(srmean),'. Number of data points: ', num2str(npts)];
+                    param4 = ['Data: ',num2str(data(1,1)),' to ',num2str(data(end,1)),'m. Sampling rate: ', num2str(srm),'. Number of data points: ', num2str(npts)];
                     disp('')
                     disp(' - - - - - - - - - - - - - Summary - - - - - - - - - - - ')
                     disp(data_name);
@@ -2254,6 +2311,14 @@ if saveacfigyes == 1
     cd(pre_dirML);
 end
 
+
+% --- Executes during object creation, after setting all properties.
+function menu_laskar_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes_refresh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+
 % --------------------------------------------------------------------
 function menu_laskar_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_laskar (see GCBO)
@@ -2264,7 +2329,11 @@ basicseries;
 % set(handles.listbox1,'String',{d.name},'Value',1) %set string
 % refreshcolor;
 
-
+% --- Executes during object creation, after setting all properties.
+function menu_LR04_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes_refresh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
 
 % --------------------------------------------------------------------
 function menu_LR04_Callback(hObject, eventdata, handles)
@@ -2273,7 +2342,7 @@ function menu_LR04_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 prompt = {'Start Age in k.a. (>= 0):',...
                 'End Age in k.a. (<= 5320):'};
-dlg_title = 'Lisiecki&Raymo(2005) stack of lio-Pleistocene benthic \delta^{18}O';
+dlg_title = 'LR04 stack: Plio-Pleistocene \delta^{18}O(ben)';
 num_lines = 1;
 defaultans = {'0','5320'};
 options.Resize='on';
@@ -2578,6 +2647,12 @@ function menuac_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+
+% --- Executes during object creation, after setting all properties.
+function menu_prewhiten_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes_refresh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
 
 % --------------------------------------------------------------------
 function menu_prewhiten_Callback(hObject, eventdata, handles)
@@ -3164,6 +3239,14 @@ end
 guidata(hObject, handles);
 
 
+% --- Executes during object creation, after setting all properties.
+function menu_cut_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes_refresh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: place code in OpeningFcn to populate axes_refresh
+
 % --------------------------------------------------------------------
 function menu_cut_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_cut (see GCBO)
@@ -3188,6 +3271,14 @@ cd(pre_dirML);
 guidata(hObject, handles);
 
 
+% --- Executes during object creation, after setting all properties.
+function menu_copy_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes_refresh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: place code in OpeningFcn to menu_copy
+
 % --------------------------------------------------------------------
 function menu_copy_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_copy (see GCBO)
@@ -3211,6 +3302,15 @@ handles.copycut = 'copy';
 cd(pre_dirML);
 guidata(hObject, handles);
 
+
+
+% --- Executes during object creation, after setting all properties.
+function menu_paste_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes_refresh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: place code in OpeningFcn to menu_copy
 
 % --------------------------------------------------------------------
 function menu_paste_Callback(hObject, eventdata, handles)
@@ -3366,6 +3466,13 @@ refreshcolor;
 cd(pre_dirML); % return to matlab view folder
 
 
+% --- Executes during object creation, after setting all properties.
+function menu_red_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes_refresh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+
 % --------------------------------------------------------------------
 function menu_red_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_red (see GCBO)
@@ -3460,6 +3567,12 @@ cd(pre_dirML); % return to matlab view folder
 end
 guidata(hObject,handles)
 
+
+% --- Executes during object creation, after setting all properties.
+function menu_sort_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes_refresh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
 
 % --------------------------------------------------------------------
 function menu_sort_Callback(hObject, eventdata, handles)
@@ -3780,6 +3893,13 @@ if check == 1
 end
 guidata(hObject, handles);
 
+% --- Executes during object creation, after setting all properties.
+function menu_plotplus_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes_refresh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: place code in OpeningFcn to menu_plotplus
 
 % --------------------------------------------------------------------
 function menu_plotplus_Callback(hObject, eventdata, handles)
@@ -4505,6 +4625,13 @@ end
 guidata(hObject, handles);
 
 
+% --- Executes during object creation, after setting all properties.
+function menu_insol_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes_refresh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: place code in OpeningFcn to menu_copy
 % --------------------------------------------------------------------
 function menu_insol_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_insol (see GCBO)
@@ -4526,6 +4653,14 @@ function github_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+
+% --- Executes during object creation, after setting all properties.
+function menu_newtxt_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes_refresh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: place code in OpeningFcn to menu_copy
 
 % --------------------------------------------------------------------
 function menu_newtxt_Callback(hObject, eventdata, handles)
@@ -4602,6 +4737,15 @@ cd(pre_dirML); % return view dir
 guidata(hObject,handles)
 
 
+% --- Executes during object creation, after setting all properties.
+function axes_refresh_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes_refresh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: place code in OpeningFcn to populate axes_refresh
+
+
 % --- Executes on mouse press over axes background.
 function axes_refresh_ButtonDownFcn(hObject, eventdata, handles)
 % hObject    handle to axes_refresh (see GCBO)
@@ -4611,6 +4755,30 @@ handles = guidata(hObject);
 CDac_pwd; % cd working dir
 refreshcolor;
 cd(pre_dirML); % return view dir
+
+% --- Executes during object creation, after setting all properties.
+function menu_refreshlist_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes_refresh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: place code in OpeningFcn to populate axes_refresh
+% --- Executes on mouse press over axes background.
+function menu_refreshlist_Callback(hObject, eventdata, handles)
+% hObject    handle to axes_refresh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles = guidata(hObject);
+CDac_pwd; % cd working dir
+refreshcolor;
+cd(pre_dirML); % return view dir
+
+% --- Executes during object creation, after setting all properties.
+function menu_opendir_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes_refresh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
 
 % --------------------------------------------------------------------
 function menu_opendir_Callback(hObject, eventdata, handles)
@@ -5398,11 +5566,40 @@ end
 guidata(hObject,handles)
 
 
-% --- Executes during object creation, after setting all properties.
-function axes_refresh_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to axes_refresh (see GCBO)
+
+% --------------------------------------------------------------------
+function menu_smooth1_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_help (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
+% handles    structure with handles and user data (see GUIDATA)
 
-% Hint: place code in OpeningFcn to populate axes_refresh
+% --------------------------------------------------------------------
+function menu_utilities_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_help (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
 
+% --------------------------------------------------------------------
+function menu_image_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_help (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function menu_menu_utilities_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_utilities (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% --------------------------------------------------------------------
+function menu_whiten_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_utilities (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% --------------------------------------------------------------------
+function menu_sednoise_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_utilities (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
