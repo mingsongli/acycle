@@ -5432,10 +5432,12 @@ for i = 1:nplot
                 name1 = [name1,'-rsp',num2str(interpolate_rate)];
                 dati = interpolate(dat,interpolate_rate);
             else
-                if isnumeric(robot_sr)
-                    interpolate_rate = robot_sr;
-                    name1 = [name1,'-rsp',num2str(num2str(interpolate_rate))];
-                    dati = interpolate(dat,interpolate_rate);
+                try str2double(robot_sr)
+                    if isnumeric(str2double(robot_sr))
+                        interpolate_rate = str2double(robot_sr);
+                        name1 = [name1,'-rsp',num2str(num2str(interpolate_rate))];
+                        dati = interpolate(dat,interpolate_rate);
+                    end
                 end
             end
             clear dat; dat = dati;
@@ -5458,6 +5460,8 @@ for i = 1:nplot
         % detrend
         % pause
         pause(robot_pause);
+        datx = dat(:,1);
+        daty = dat(:,2);
         if strcmp(robot_detrend,'no')
             dats = dat;
         elseif strcmp(robot_detrend,'linear')
