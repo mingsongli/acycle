@@ -178,24 +178,48 @@ corrCI = [corrxch,corry_rch,corrpych,nmi];
 %% simulation:  corry (sr x nsim) correlation coefficient
 sr_range = sr1:srstep:sr2;
 mpts = length(sr_range);
-%critical = 100/mpts;% critical significance level by Meyers
+%critical = 100/mpts;% critical significance level by Steve Meyers
+
 if nsim > 0
-        %% Monte Carlo simulation
-        corry = zeros(mpts,nsim);
-        for i = 1: nsim
-            
-            randspectrum = randspec_sin(f,npks,dat_ray);
-            sim_spectum = [f,randspectrum];
-            %[prand,frand] = randpermperiodogram(dat_demean,dt,pad); % Mingsong Li, 20180417
-            %sim_spectum = [frand,prand]; % Mingsong Li, 20180417
-            
-            corryi = cyclecorrsig(sim_spectum,targetf,targetp,target_real,orbit7,dat_ray,sr1,sr2,srstep,sr0,adjust,method);
-            if display == 1
-                disp(['>> Step 2: Simulation ',num2str(i),' of ',num2str(nsim)])
-                %disp(['>> Step 2: Simulation ',num2str(i),' of ',num2str(nsim),'. mpts ',num2str(mpts),' corryi ',num2str(length(corryi))])
-            end
-            corry(:,i) = corryi;
+    % Waitbar
+    hwaitbar = waitbar(0,'Monte Carlo. Heavy loads, processing ...',...    
+       'WindowStyle','modal');
+    hwaitbar_find = findobj(hwaitbar,'Type','Patch');
+    set(hwaitbar_find,'EdgeColor',[0 0.9 0],'FaceColor',[0 0.9 0]) % changes the color to blue
+    setappdata(hwaitbar,'canceling',0)
+    steps = 100;
+    % step estimation for waitbar
+    nmc_n = round(nsim/steps);
+    waitbarstep = 1;
+    waitbar(waitbarstep / steps)
+    %% Monte Carlo simulation
+    corry = zeros(mpts,nsim);
+    for i = 1: nsim
+        randspectrum = randspec_sin(f,npks,dat_ray);
+        sim_spectum = [f,randspectrum];
+        %[prand,frand] = randpermperiodogram(dat_demean,dt,pad); % Mingsong Li, 20180417
+        %sim_spectum = [frand,prand]; % Mingsong Li, 20180417
+        corryi = cyclecorrsig(sim_spectum,targetf,targetp,target_real,orbit7,dat_ray,sr1,sr2,srstep,sr0,adjust,method);
+        if display == 1
+            disp(['>> Step 2: Simulation ',num2str(i),' of ',num2str(nsim)])
+            %disp(['>> Step 2: Simulation ',num2str(i),' of ',num2str(nsim),'. mpts ',num2str(mpts),' corryi ',num2str(length(corryi))])
         end
+        corry(:,i) = corryi;
+
+        if rem(i,nmc_n) == 0
+            waitbarstep = waitbarstep+1; 
+            if waitbarstep > steps; waitbarstep = steps; end
+            pause(0.001);%
+            waitbar(waitbarstep / steps)
+        end
+        if getappdata(hwaitbar,'canceling')
+            break
+            %delete(hwaitbar)
+        end
+    end
+    if ishandle(hwaitbar); 
+        close(hwaitbar);
+    end
     assignin('base','sim_spectum',sim_spectum)
     %% MC results
     corry_sim_sort = sort(corry,2);

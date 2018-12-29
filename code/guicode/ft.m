@@ -65,8 +65,8 @@ elseif ispc
     set(h1,'FontUnits','points','FontSize',11);  % set as norm
     set(h2,'FontUnits','points','FontSize',11);  % set as norm
 end
-set(handles.text10,'position',[0.497,0.903,0.146,0.05])
-set(handles.text12,'position',[0.666,0.903,0.196,0.05])
+set(handles.text10,'position',[0.413,0.903,0.12,0.05])
+set(handles.text12,'position',[0.531,0.903,0.415,0.05])
 set(handles.ft_axes3,'position',[0.411,0.523,0.546,0.364])
 set(handles.ft_axes4,'position',[0.411,0.084,0.546,0.367])
 set(handles.ft_uipanel2,'position',[0.022,0.51,0.18,0.438])
@@ -102,10 +102,16 @@ set(handles.popupmenu5,'position',[0.024,0.054,0.976,0.259])
 
 handles.output = hObject;
 set(gcf,'Name','Acycle: Filtering')
+% contact with acycle main window
+handles.acfigmain = varargin{1}.acfigmain;
+handles.listbox_acmain = varargin{1}.listbox_acmain;
+handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
+%
 data_s = varargin{1}.current_data;
 handles.current_data = data_s;
 handles.data_name = varargin{1}.data_name;
 handles.unit = varargin{1}.unit;
+handles.unit_type = varargin{1}.unit_type;
 [~,handles.dat_name,handles.ext] = fileparts(handles.data_name);
 xmin = min(data_s(:,1));
 xmax = max(data_s(:,1));
@@ -931,11 +937,24 @@ add_list = handles.add_list;
 if isempty(add_list)
     errordlg('Select filtering method')
 else
-
+    figft = gcf;
     data_filterout = handles.data_filterout;
     filter = handles.filter;
     CDac_pwd; % cd ac_pwd dir
     dlmwrite(add_list, data_filterout, 'delimiter', ',', 'precision', 9);
+    figdata = figure;
+    data = handles.current_data;
+    plot(data(:,1),data(:,2),'k');hold on
+    plot(data_filterout(:,1),data_filterout(:,2),'r')
+    xlim([min(data(:,1)),max(data(:,1))])
+    title(add_list)
+    if handles.unit_type == 0;
+        xlabel(['Unit (',handles.unit,')'])
+    elseif handles.unit_type == 1;
+        xlabel(['Depth (',handles.unit,')'])
+    else
+        xlabel(['Time (',handles.unit,')'])
+    end
     if strcmp(filter,'Taner-Hilbert')
         add_list_am = handles.add_list_am;
         ampmod = [data_filterout(:,1),data_filterout(:,3)];
@@ -952,8 +971,16 @@ else
         disp(['>>  Save as: ', handles.add_list_ufazedet])
         disp(['>>  Save as: ', handles.add_list_ifaze])
         disp(['>>  Save as: ', handles.add_list_ifreq])
+        plot(data_filterout(:,1),data_filterout(:,3),'b')
     end
     cd(pre_dirML); % return to matlab view folder
     
-    disp('>> Done. See the working folder for the filtered output file(s)')
+    disp('>> Done. See AC main window for the filtered output file(s)')
+    % refresh AC main window
+    figure(handles.acfigmain);
+    CDac_pwd; % cd working dir
+    refreshcolor;
+    cd(pre_dirML); % return view dir
+    figure(figft);
+    figure(figdata); % return plot
 end

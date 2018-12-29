@@ -98,6 +98,11 @@ handles.output = hObject;
 
 set(gcf,'Name','Acycle: Spectral Analysis')
 
+% contact with acycle main window
+handles.acfigmain = varargin{1}.acfigmain;
+handles.listbox_acmain = varargin{1}.listbox_acmain;
+handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
+%
 data_s = varargin{1}.current_data;
 handles.current_data = data_s;
 handles.filename = varargin{1}.data_name;
@@ -252,6 +257,7 @@ if strcmp(method,'Multi-taper method')
             else
                 set(gca, 'YScale', 'linear')
             end
+            figdata = gcf;
             CDac_pwd;
             dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
             dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9);
@@ -272,7 +278,7 @@ if strcmp(method,'Multi-taper method')
         % Plot figure MTM
         
     if handles.checkbox_robustAR1_v == 0
-        figure;
+        %figdata = figure;
         figHandle = gcf;
         colordef white;
         plot(fd1,po,'LineWidth',1); 
@@ -351,6 +357,7 @@ step = 5.5;
     %disp(filename_mtm)
     disp(filename_mtm_cl)
     cd(pre_dirML); % return to matlab view folder
+    figdata = figHandle;
 else
 end  
 
@@ -360,7 +367,7 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
     % timex must be larger than zero
     timex = timex + abs(min(timex));
     [po,fd1,pth] = plomb(datax,timex,fmax,'Pd',pd);
-    figure;  
+    figdata = figure;  
     colordef white;
     plot(fd1,po,fd1,pth*ones(size(fd1')),'LineWidth',1); 
     text(0.3*fmax*[1 1 1 1],pth-.5,[repmat('P_{fa} = ',[4 1]) num2str(pfa')])
@@ -388,7 +395,7 @@ elseif  strcmp(method,'Periodogram')
     else 
         [po,fd1]=periodogram(datax,[],[],1/dt);
     end
-    figure;  
+    figdata = figure;  
     colordef white;
     plot(fd1,po,'LineWidth',1);
     xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
@@ -427,6 +434,13 @@ elseif  strcmp(method,'Periodogram')
     disp(filename_Periodogram)
 else
 end
+
+% refresh AC main window
+figure(handles.acfigmain);
+CDac_pwd; % cd working dir
+refreshcolor;
+cd(pre_dirML); % return view dir
+if ishandle(figdata); figure(figdata); end% return plot
 guidata(hObject,handles);
     
 
@@ -763,6 +777,7 @@ if strcmp(method,'Multi-taper method')
             else
                 set(gca, 'YScale', 'linear')
             end
+            figdata = gcf;
         end
     end
     
@@ -841,6 +856,7 @@ else
     set(gca, 'YScale', 'linear')
 end
 else
+    figdata = gcf;
 end  
 
 elseif strcmp(method,'Lomb-Scargle spectrum')
@@ -850,7 +866,7 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
     timex = timex + abs(min(timex));
     %[po,fd1,pth] = plomb(datax,timex,fmax,'normalized','Pd',pd);
     [po,fd1,pth] = plomb(datax,timex,fmax,'Pd',pd);
-    figure;  
+    figdata = figure;  
     colordef white;
     plot(fd1,po,fd1,pth*ones(size(fd1')),'LineWidth',1); 
     text(0.3*fmax*[1 1 1 1],pth-.5,[repmat('P_{fa} = ',[4 1]) num2str(pfa')])
@@ -872,7 +888,7 @@ elseif  strcmp(method,'Periodogram')
     else 
         [po,fd1]=periodogram(datax,[],[],1/dt);
     end
-    figure;  
+    figdata = figure;  
     colordef white;
     plot(fd1,po,'LineWidth',1);
     xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
@@ -901,4 +917,10 @@ elseif  strcmp(method,'Periodogram')
     end
 else
 end
+% refresh AC main window
+figure(handles.acfigmain);
+CDac_pwd; % cd working dir
+refreshcolor;
+cd(pre_dirML); % return view dir
+if ishandle(figdata); figure(figdata); end% return plot
 guidata(hObject,handles);

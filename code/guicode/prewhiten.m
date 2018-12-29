@@ -51,6 +51,7 @@ function prewhiten_OpeningFcn(hObject, eventdata, handles, varargin)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to prewhiten (see VARARGIN)
+
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
 set(gcf,'Name','Acycle: Detrending')
@@ -59,11 +60,9 @@ h1=findobj(h,'FontUnits','norm');  % find all font units as points
 set(h1,'FontUnits','points','FontSize',12);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',12);  % set as norm
-%if ismac
-    set(gcf,'position',[0.5,0.4,0.25,0.5]) % set position
-%elseif ispc
-%    set(gcf,'position',[0.4,0.1,0.4,0.8]) % set position
-%end
+
+set(gcf,'position',[0.7,0.3,0.25,0.5]) % set position
+
 set(handles.uipanel6,'position',[0.126,0.254,0.724,0.666])
 set(handles.text21,'position',[0.021,0.852,0.26,0.07])
 set(handles.edit10,'position',[0.284,0.852,0.24,0.1])
@@ -92,6 +91,11 @@ set(handles.uipanel7,'position',[0.126,0.03,0.724,0.213])
 set(handles.prewhiten_select_popupmenu,'position',[0.043,0.2,0.9,0.5])
 
 handles.smooth_win = 0.35;  % windows for smooth 
+% contact with acycle main window
+handles.acfigmain = varargin{1}.acfigmain;
+handles.listbox_acmain = varargin{1}.listbox_acmain;
+handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
+%
 handles.unit = varargin{1}.unit;
 handles.unit_type = varargin{1}.unit_type;
 
@@ -217,12 +221,16 @@ elseif nametype == 3
     handles.name1 = [dat_name,'-',prewhiten_s,ext];
     name2 = [dat_name,'-',prewhiten_s,'trend',ext];
 end
-if nametype >0
+if nametype > 0
+% refresh AC main window
+    figure(handles.acfigmain);
     CDac_pwd; % cd ac_pwd dir
     dlmwrite(handles.name1, new_data, 'delimiter', ',', 'precision', 9);
     dlmwrite(name2, current_trend, 'delimiter', ',', 'precision', 9);
-    disp('>>  Refresh main AC window to see trend and detrended data')
+    refreshcolor;
+    disp('>>  AC main window: see trend and detrended data')
     cd(pre_dirML); % return to matlab view folder
+    %figure(figdata); % return plot
 end
 guidata(hObject,handles)
 

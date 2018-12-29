@@ -88,6 +88,19 @@ i = 1;
 %%
 corrCI =[];
 sr_p = zeros(m3,6);
+
+% Waitbar
+hwaitbar = waitbar(0,'eCOCO: sliding window. processing ...',...    
+   'WindowStyle','modal');
+hwaitbar_find = findobj(hwaitbar,'Type','Patch');
+set(hwaitbar_find,'EdgeColor',[0 0.9 0],'FaceColor',[0 0.9 0]) % changes the color to blue
+setappdata(hwaitbar,'canceling',0)
+steps = 50;
+% step estimation for waitbar
+nmc_n = ceil(m3/steps);
+waitbarstep = 0;
+waitbar(waitbarstep / steps)
+
  for i = 1:m3
      [corrCI,~,~] = corrcoefslices_rank([timex(:,i),x(:,i)],target,orbit7,dt,pad,sr1,sr2,srstep,adjust,red,0,0,slices);
      out_ecc(:,i) = corrCI(:,2);  % evolutionary ecorrcoef value
@@ -103,6 +116,16 @@ sr_p = zeros(m3,6);
          out_ecoco(j,i) = (- log10(out_eci(j,i))) * out_ecc(j,i);
          out_ecocorb(j,i) = out_norbit(j,i) / 7 * out_ecoco(j,i);
      end
+     
+     if rem(i,nmc_n) == 0
+        waitbarstep = waitbarstep+1; 
+        if waitbarstep > steps; waitbarstep = steps; end
+        pause(0.001);%
+        waitbar(waitbarstep / steps)
+    end
+    if getappdata(hwaitbar,'canceling')
+        break
+    end
      
      if nsim > 1
          prt_sr = corrCI(:,1);
@@ -145,6 +168,9 @@ sr_p = zeros(m3,6);
          out_ecocorb(:,i) = out_norbit.*out_ecc(:,i);
      end
  end
+ if ishandle(hwaitbar); 
+    close(hwaitbar);
+end
 %    sr_p(:,1) = prt_sr;
     assignin('base','sr_disp',sr_p)
     out_depth = (linspace(data(1,1)+window/2,data(nrow,1)-window/2,m3))';

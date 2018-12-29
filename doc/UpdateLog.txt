@@ -2,6 +2,20 @@
 
 Update Log
 
+_____________________________________
+
+Version : ACycle_v0.2.6.20181229
+Date    : Dec. 24, 2018; 11:21 pm EST
+By      : Mingsong Li (Penn State)
+
+	1. Merge Matlab versions (Windows & Mac). Refine GUI window.
+
+    2. Add a waitbar showing process for time-consuming steps
+
+    3. Refresh AC main window after every step that generates new output data
+
+    4. Double click image file (*.jpg, *.png, etc.) listed in main window will
+        trigger the software to show the image
 
 _____________________________________
 

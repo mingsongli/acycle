@@ -3,7 +3,7 @@ pre  = '<HTML><FONT color="blue">';
 post = '</FONT></HTML>';
 d = dir; %get files
 address = pwd;
-set(handles.edit1,'String',address);
+set(handles.edit_acfigmain_dir,'String',address);
 listboxStr = cell(numel(d),1);
 % Save pwd into a text file
 ac_pwd_str = which('ac_pwd.txt');
@@ -20,4 +20,4 @@ for i = 1:numel( d )
         listboxStr{i} = d(i).name;
     end
 end
-set(handles.listbox1,'String',listboxStr,'Value',1) %set string
+set(handles.listbox_acmain,'String',listboxStr,'Value',1) %set string

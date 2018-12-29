@@ -165,6 +165,18 @@ corrCI = [corrxch,corry_rch,corrpych,corrloch,corrupch,nmi];
 sr_range = sr1:srstep:sr2;
 mpts = length(sr_range);
 %critical = 100/mpts;% critical significance level by Meyers
+
+% Waitbar
+hwaitbar = waitbar(0,'Monte Carlo. Heavy loads, processing ...',...    
+   'WindowStyle','modal');
+hwaitbar_find = findobj(hwaitbar,'Type','Patch');
+set(hwaitbar_find,'EdgeColor',[0 0.9 0],'FaceColor',[0 0.9 0]) % changes the color to blue
+steps = 100;
+% step estimation for waitbar
+nmc_n = round(nsim/steps);
+waitbarstep = 1;
+waitbar(waitbarstep / steps)
+
 if nsim > 0
    
         %% Monte Carlo simulation
@@ -175,8 +187,16 @@ if nsim > 0
             end
             randspectrum = randspec_sin(f,npks,dat_ray);
             [corry(:,i)] = cyclecorr4sig([f,randspectrum],targetf,targetp,target_real,orbit7,dat_ray,sr1,sr2,srstep,sr0,adjust);
+            if rem(i,nmc_n) == 0
+                waitbarstep = waitbarstep+1; 
+                if waitbarstep > steps; waitbarstep = steps; end
+                pause(0.001);%
+                waitbar(waitbarstep / steps)
+            end
         end
-
+        if ishandle(hwaitbar); 
+            close(hwaitbar);
+        end
     %% MC results
     corry_sim_sort = sort(corry,2);
     corrlength = length(corry_rch);  % number of tested sed. rate

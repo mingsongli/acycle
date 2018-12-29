@@ -51,6 +51,10 @@ function basicseries_OpeningFcn(hObject, eventdata, handles, varargin)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to basicseries (see VARARGIN)
+handles.acfigmain = varargin{1}.acfigmain;
+handles.listbox_acmain = varargin{1}.listbox_acmain;
+handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
+
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
 set(gcf,'Name','Acycle: Astronomical Solutions')
@@ -368,10 +372,21 @@ elseif strcmp(parameter,'Inclination')
     dat=[data(:,1),data(:,3)];
 end
 %    cd(handles.working_folder)
-    set(handles.text12,'String',handles.working_folder);
-    name = [handles.solution,'_',parameter,'_',num2str(t1),'_',num2str(t2),'.txt'];
-    %csvwrite(name,dat)
-    CDac_pwd; % cd ac_pwd dir
-    dlmwrite(name, dat, 'delimiter', ',', 'precision', 9);
-    cd(pre_dirML); % return to matlab view folder
+set(handles.text12,'String',handles.working_folder);
+name = [handles.solution,'_',parameter,'_',num2str(t1),'_',num2str(t2),'.txt'];
+%csvwrite(name,dat)
+CDac_pwd; % cd ac_pwd dir
+dlmwrite(name, dat, 'delimiter', ',', 'precision', 9);
+cd(pre_dirML); % return to matlab view folder
 % close
+figdata = figure; 
+plot(dat(:,1),dat(:,2));
+xlim([min(dat(:,1)),max(dat(:,1))]);
+xlabel('Time (kyr)')
+title(name)
+% refresh AC main window
+figure(handles.acfigmain);
+CDac_pwd; % cd working dir
+refreshcolor;
+cd(pre_dirML); % return view dir
+figure(figdata); % return plot

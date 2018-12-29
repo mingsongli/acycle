@@ -40,13 +40,17 @@ for i = 1: nn
 end
 % get indice for rho, and s0 of the minimum distance
 [x,y]=find(disti==min(min(disti)));
-rho = rhoi(x);
-s0 = s0i(y);
+% rho = rhoi(x);
+% s0 = s0i(y);
 %disp([rho s0])
 
 % second run
-rhoi = linspace(0.8*rhoi(x),1.2*rhoi(x),nn);
-s0i = linspace(0.8*s0i(y), 1.2*s0i(y),nn);
+rhomax = 1.1*rhoi(x);
+if rhomax >= 1
+    rhomax = 0.9999;
+end
+rhoi = linspace(0.9*rhoi(x),rhomax,nn);
+s0i = linspace(0.9*s0i(y), 1.1*s0i(y),nn);
 disti = zeros(nn,nn);
 
 for i = 1: nn

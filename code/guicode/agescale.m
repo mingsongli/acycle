@@ -51,7 +51,11 @@ function agescale_OpeningFcn(hObject, eventdata, handles, varargin)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to agescale (see VARARGIN)
-
+% contact with acycle main window
+handles.acfigmain = varargin{1}.acfigmain;
+handles.listbox_acmain = varargin{1}.listbox_acmain;
+handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
+%
 % Choose default command line output for agescale
 handles.output = hObject;
 set(gcf,'Name','Acycle: Age Scale')
@@ -283,11 +287,29 @@ agemodel = load(agemodelname);
 
 list_content = cellstr(get(handles.listbox2,'String')); % read contents of listbox 1 
 nrow = length(list_content);
+figagescale = gcf;
+figdata = figure;
+xmax1 = nan;
+xmin1 = nan;
+xmax2 = nan;
+xmin2 = nan;
 for i = 1:nrow
     data_name = char(list_content(i,1));
     data = load(data_name);
+    subplot(2,1,1)
+    plot(data(:,1),data(:,2)); hold on;
+    xmin1 = nanmin(xmin1,min(data(:,1)));
+    xmax1 = nanmax(xmax1,max(data(:,1)));
+    title('Origin data')
+    xlim([xmin1,xmax1])
     [time,handles.sr] = depthtotime(data(:,1),agemodel);
     handles.tunedseries = [time,data(:,2)];
+    subplot(2,1,2)
+    plot(time,data(:,2)); hold on;
+    title('Tuned data')
+    xmin2 = nanmin(xmin2,min(time));
+    xmax2 = nanmax(xmax2,max(time));
+    xlim([xmin2,xmax2])
 %    cd(handles.working_folder)
     add_list = [data_name,'_TD_',agemodelname];
     %csvwrite(add_list,handles.tunedseries)
@@ -297,4 +319,13 @@ for i = 1:nrow
     set(handles.listbox1,'String',{d.name},'Value',1) %set string
     cd(pre_dirML); % return to matlab view folder
 end
+
+% refresh AC main window
+figure(handles.acfigmain);
+CDac_pwd; % cd working dir
+refreshcolor;
+cd(pre_dirML); % return view dir
+figure(figagescale);
+figure(figdata); % return plot
+
 guidata(hObject,handles)

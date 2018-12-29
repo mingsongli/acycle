@@ -159,7 +159,11 @@ set(handles.text50,'position', [0.337,0.511,0.636,0.185])
 set(handles.text41,'position', [0.03,0.03,0.926,0.446])
 
 handles.output = hObject;
-
+% contact with acycle main window
+handles.acfigmain = varargin{1}.acfigmain;
+handles.listbox_acmain = varargin{1}.listbox_acmain;
+handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
+%
 data_s = varargin{1}.current_data;
 handles.data = data_s;
 assignin('base','data',data_s)
@@ -324,9 +328,27 @@ if shiftwin == 1
 else
     shiftwin1 = shiftwin;
 end
+
+% Waitbar
+hwaitbar = waitbar(0,'Very heavy loads, may take several hours ...',...    
+   'WindowStyle','modal');
+hwaitbar_find = findobj(hwaitbar,'Type','Patch');
+set(hwaitbar_find,'EdgeColor',[0 0.9 0],'FaceColor',[0 0.9 0]) % changes the color to blue
+setappdata(hwaitbar,'canceling',0)
+steps = 100;
+% step estimation for waitbar
+nmc_n = round(nmc/steps);
+waitbarstep = 1;
+waitbar(waitbarstep / steps)
+    
 if nmc > 199
+    % Check for clicked Cancel button
+    
   if numcore == 1  % can not use parpool or matlabpool
     for i=1:nmc
+        if getappdata(hwaitbar,'canceling')
+            break
+        end
         dat = [];
         dat(:,1) = data(1,1):samplez(i):data(length(data(:,1)),1);
         dat(:,2) = interp1(data(:,1),data(:,2),dat(:,1),'pchip'); 
@@ -342,64 +364,105 @@ if nmc > 199
         time = toc; t_rem = (time*nmc/i)-time;
         hh = fix(t_rem/3600); mm = fix((t_rem-hh*3600)/60); sec = t_rem-hh*3600-mm*60;
         dispstat(sprintf(' Progress %.1f%%. Remain %d:%d:%.0f',100*i/nmc,hh,mm,sec),'timestamp')
+        % waitbar
+        if rem(i,nmc_n) == 0
+            waitbarstep = waitbarstep+1; 
+            if waitbarstep > steps; waitbarstep = steps; end
+            pause(0.001);%
+            waitbar(waitbarstep / steps)
+        end
     end
+    if ishandle(hwaitbar); 
+        close(hwaitbar);
+    end
+    
   else  % ready to use parpool or matlabpool
       % run first 50 times to estimate total computation time
+    
         for i=1:itinerary
-        dat = [];
-        dat(:,1) = data(1,1):samplez(i):data(length(data(:,1)),1);
-        dat(:,2) = interp1(data(:,1),data(:,2),dat(:,1),'pchip'); 
-        f3=f3m(i,:);
-        window = windowz(i);
-        y_grid_rand=randi([-1*shiftwin1,shiftwin1])*window/2;   % shift y_grid1
-        nw = nwz(i);
-        [power]=pdan(dat,f3,window,nw,ftmin,ftmax,step,pad); % power ratio of data series
-        powy(:,i)=interp1((power(:,1)+y_grid_rand/shiftwin),power(:,2),y_grid);
-        power2=power(:,2); %
-        powmean(1,i)=mean(power2(~isnan(power2))); % mean power of each calculation
-
-        time = toc; t_rem = (time*nmc/i)-time;
-        hh = fix(t_rem/3600); mm = fix((t_rem-hh*3600)/60); sec = t_rem-hh*3600-mm*60;
-        dispstat(sprintf(' Progress %.2f%%. Remain %d:%d:%.0f',100*i/nmc,hh,mm,sec),'timestamp')
-        end
-        t_rem = t_rem/numcore;
-        hh = fix(t_rem/3600); 
-        mm = fix((t_rem-hh*3600)/60); 
-        sec = round(t_rem-hh*3600-mm*60);
-        dispstat(sprintf(' First %d iterations suggest: remain >= %dh:%dm:%dsec',itinerary,hh,mm,sec),'timestamp')
-% use parpool when version of matlab is higher than 8.2, else use matlabpool
-       if useparpool
-           poolobj = parpool('local',numcore);
-       else
-            if matlabpool('size')<=0
-                matlabpool('open','local',numcore); 
-            else
+            if getappdata(hwaitbar,'canceling')
+                break
             end
-       end
+            dat = [];
+            dat(:,1) = data(1,1):samplez(i):data(length(data(:,1)),1);
+            dat(:,2) = interp1(data(:,1),data(:,2),dat(:,1),'pchip'); 
+            f3=f3m(i,:);
+            window = windowz(i);
+            y_grid_rand=randi([-1*shiftwin1,shiftwin1])*window/2;   % shift y_grid1
+            nw = nwz(i);
+            [power]=pdan(dat,f3,window,nw,ftmin,ftmax,step,pad); % power ratio of data series
+            powy(:,i)=interp1((power(:,1)+y_grid_rand/shiftwin),power(:,2),y_grid);
+            power2=power(:,2); %
+            powmean(1,i)=mean(power2(~isnan(power2))); % mean power of each calculation
+
+            time = toc; t_rem = (time*nmc/i)-time;
+            hh = fix(t_rem/3600); mm = fix((t_rem-hh*3600)/60); sec = t_rem-hh*3600-mm*60;
+            dispstat(sprintf(' Progress %.2f%%. Remain %d:%d:%.0f',100*i/nmc,hh,mm,sec),'timestamp')
+            % waitbar
+            if rem(i,nmc_n) == 0
+                waitbarstep = waitbarstep+1; 
+                if waitbarstep > steps; waitbarstep = steps; end
+                pause(0.001);%
+                waitbar(waitbarstep / steps)
+            end
+        end
+            t_rem = t_rem/numcore;
+            hh = fix(t_rem/3600); 
+            mm = fix((t_rem-hh*3600)/60); 
+            sec = round(t_rem-hh*3600-mm*60);
+            dispstat(sprintf(' First %d iterations suggest: remain >= %dh:%dm:%dsec',itinerary,hh,mm,sec),'timestamp')
+  %end   
+            if ishandle(hwaitbar); close(hwaitbar);end
+            msgbox_v = {'Remaining time is likely:';...
+                [num2str(hh),' hr ',num2str(mm),' min ', num2str(sec), ' sec'];...
+                ['Come back at ~ ',datestr(now + t_rem/86400,'dd-mm-yyyy HH:MM:SS FFF')]};
+            msgbox1 = msgbox(msgbox_v,'Wait ...');
+%           use parpool when version of matlab is higher than 8.2, else use matlabpool
+        if useparpool
+            poolobj = parpool('local',numcore);
+        else
+             if matlabpool('size')<=0
+                 matlabpool('open','local',numcore); 
+             else
+             end
+        end
         % Parallel computing
-    parfor i=itinerary+1:nmc
-        tic;
-        dat = [];
-        dat(:,1) = data(1,1):samplez(i):data(length(data(:,1)),1);
-        dat(:,2) = interp1(data(:,1),data(:,2),dat(:,1),'pchip'); 
-        f3=f3m(i,:);
-        window = windowz(i);
-        y_grid_rand=randi([-1*shiftwin1,shiftwin1])*window/2;   % shift y_grid1
-        nw = nwz(i);
-        [power]=pdan(dat,f3,window,nw,ftmin,ftmax,step,pad); % power ratio of data series
-        powy(:,i)=interp1((power(:,1)+y_grid_rand/shiftwin),power(:,2),y_grid);
-        power2=power(:,2); %
-        powmean(1,i)=mean(power2(~isnan(power2))); % mean power of each calculation
-        dispstat(sprintf(' Current iteration takes %.2f seconds',toc),'timestamp')
-    end
+        parfor i = itinerary+1:nmc
+            tic;
+            dat = [];
+            dat(:,1) = data(1,1):samplez(i):data(length(data(:,1)),1);
+            dat(:,2) = interp1(data(:,1),data(:,2),dat(:,1),'pchip'); 
+            f3=f3m(i,:);
+            window = windowz(i);
+            y_grid_rand=randi([-1*shiftwin1,shiftwin1])*window/2;   % shift y_grid1
+            nw = nwz(i);
+            [power]=pdan(dat,f3,window,nw,ftmin,ftmax,step,pad); % power ratio of data series
+            powy(:,i)=interp1((power(:,1)+y_grid_rand/shiftwin),power(:,2),y_grid);
+            power2=power(:,2); %
+            powmean(1,i)=mean(power2(~isnan(power2))); % mean power of each calculation
+            dispstat(sprintf(' Current iteration takes %.2f seconds',toc),'timestamp')
+            %
+%             if rem(i,nmc_n) == 0
+%                 waitbarstep1 = round(i/nmc_n); 
+%                 if waitbarstep1 > steps; waitbarstep1 = steps; end
+%                 pause(0.001);%
+%                 waitbar(waitbarstep1 / steps)
+%             end
+        end
         if useparpool
               delete(poolobj);
         else
               matlabpool close
         end
+        if ishandle(hwaitbar); close(hwaitbar);end
+        if ishandle(msgbox1); close(msgbox1);end
   end
 else
+    %figdat = msgbox('Heavy loads, please wait','Wait ...');
     for i=1:nmc
+        if getappdata(hwaitbar,'canceling')
+            break
+        end
         dat = [];
         dat(:,1) = data(1,1):samplez(i):data(length(data(:,1)),1);
         dat(:,2) = interp1(data(:,1),data(:,2),dat(:,1),'pchip'); 
@@ -415,7 +478,16 @@ else
         time = toc; t_rem = (time*nmc/i)-time;
         hh = fix(t_rem/3600); mm = fix((t_rem-hh*3600)/60); sec = t_rem-hh*3600-mm*60;
         dispstat(sprintf(' Progress %.1f%%. Remain %d:%d:%.0f',100*i/nmc,hh,mm,sec),'timestamp')
+        %
+        %
+        if rem(i,nmc_n) == 0
+            waitbarstep = waitbarstep+1; 
+            if waitbarstep > steps; waitbarstep = steps; end
+            pause(0.001);%
+            waitbar(waitbarstep / steps)
+        end
     end
+    if ishandle(hwaitbar); close(hwaitbar);end
 end
 
 %% Adjust each power ratio to a unique ratio
@@ -524,6 +596,12 @@ dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
 dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9); 
 cd(pre_dirML); % return to matlab view folder
 %
+% refresh AC main window
+figure(handles.acfigmain);
+CDac_pwd; % cd working dir
+refreshcolor;
+cd(pre_dirML); % return view dir
+
 guidata(hObject, handles);
 
 

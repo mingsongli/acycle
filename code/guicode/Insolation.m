@@ -51,6 +51,11 @@ function Insolation_OpeningFcn(hObject, eventdata, handles, varargin)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to Insolation (see VARARGIN)
+% contact with acycle main window
+handles.acfigmain = varargin{1}.acfigmain;
+handles.listbox_acmain = varargin{1}.listbox_acmain;
+handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
+%
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
 h=get(gcf,'Children');  % get all content
@@ -213,13 +218,14 @@ else
 end
 qinso = handles.qinso;
 
-disp(t)
-disp(day)
-disp(lat)
-disp(qinso)
-disp(author)
-disp(res)
-disp(L)
+% disp(t)
+% disp(day)
+% disp(lat)
+% disp(qinso)
+% disp(author)
+% disp(res)
+% disp(L)
+figmsgbox = msgbox('Please wait','Wait');
 
 try
     [I, ~, xorb, yorb, veq, Insol_a_m, Ix,II]=insoML(t,day,lat,qinso,author,res, L);
@@ -257,13 +263,32 @@ auth_list = {'La04','La10a','La10b','La10c','La10d','BL91'};
 name_insol = [name_insol,auth_list{author}];
 name_insol_all = [name_insol,'.txt'];
 %name_insol_annual = [name_insold, auth_list{author},'-FullEarth.txt'];
+
+%close msgbox
+if ishandle(figmsgbox); close(figmsgbox); end
+% save data
 CDac_pwd; % cd ac_pwd dir
 dlmwrite(name_insol_all, [t0',Ix'], 'delimiter', ',', 'precision', 9);
+% plot data
+figdata = figure; 
+plot(t0',Ix');
+xlim([min(t0),max(t0)]);
+xlabel(['Time (', unit_t_r,')'])
+ylabel('Insolation (W/m^2)')
+title(name_insol)
 %dlmwrite(name_insol_annual, [t0',Insol_a_m'], 'delimiter', ',', 'precision', 9);
 if and((type == 1),(handles.latrange == 1))
     InsolLatDayGif(II,t0,lat,day,unit_t_r,name_insol);
 end
 cd(pre_dirML); % return to matlab view folder
+
+% refresh AC main window
+figure(handles.acfigmain);
+CDac_pwd; % cd working dir
+refreshcolor;
+cd(pre_dirML); % return view dir
+figure(figdata); % return plot
+guidata(hObject, handles);
 
 % --- Outputs from this function are returned to the command line.
 function varargout = Insolation_OutputFcn(hObject, eventdata, handles) 
