@@ -58,13 +58,106 @@ function DYNOS_OpeningFcn(hObject, eventdata, handles, varargin)
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
 h=get(gcf,'Children');  % get all content
-h1=findobj(h,'FontUnits','points');  % find all font units as points
-set(h1,'FontUnits','norm');  % set as norm
+h1=findobj(h,'FontUnits','norm');  % find all font units as points
+if ismac
+    fontsize = 12;
+elseif ispc
+    fontsize = 11;
+end
+set(h1,'FontUnits','points','FontSize',fontsize);  % set as norm
+h2=findobj(h,'FontUnits','points');  % find all font units as points
+set(h2,'FontUnits','points','FontSize',fontsize);  % set as norm
+
 set(gcf,'Name','Acycle: Sedimentary Noise Model - DYNOT')
-%if ispc
-%set(gcf,'position',[0.1,0.1,0.85,0.85]) % set position
-%end
+
 % Choose default command line output for DYNOS
+set(gcf,'position',[0.05,0.05,0.85,0.85]) % set position
+% uipanels
+set(handles.uipanel6,'position', [0.015,0.9,0.124,0.076])
+set(handles.uipanel7,'position', [0.14,0.9,0.167,0.076])
+set(handles.uipanel8,'position', [0.015,0.776,0.291,0.12])
+set(handles.uipanel9,'position', [0.015,0.592,0.291,0.18])
+set(handles.uipanel10,'position', [0.015,0.344,0.291,0.245])
+set(handles.uipanel11,'position', [0.015,0.179,0.291,0.145])
+set(handles.uipanel12,'position', [0.014,0.005,0.291,0.175])
+% plot area
+set(handles.text2,'position', [0.36,0.914,0.588,0.052],'FontSize',16)
+set(handles.text51,'position', [0.36,0.902,0.588,0.025],'FontSize',12)
+set(handles.uipanel2,'position', [0.321,0.47,0.669,0.43])
+set(handles.uipanel3,'position', [0.321,0.012,0.669,0.43])
+set(handles.axes1,'position', [0.1,0.159,0.94,0.8])
+set(handles.axes2,'position', [0.1,0.159,0.94,0.8])
+% data/dynot
+set(handles.pushbutton4,'position', [0.2,0.15,0.65,0.7])
+set(handles.pushbutton5,'position', [0.15,0.15,0.7,0.7])
+% interpolation
+set(handles.text45,'position', [0.035,0.627,0.249,0.237])
+set(handles.text8,'position', [0.035,0.22,0.249,0.237])
+set(handles.text44,'position', [0.455,0.627,0.078,0.237])
+set(handles.text10,'position', [0.455,0.22,0.078,0.237])
+set(handles.text46,'position', [0.716,0.22,0.08,0.237])
+set(handles.edit26,'position', [0.28,0.559,0.156,0.288])
+set(handles.edit25,'position', [0.529,0.559,0.156,0.288])
+set(handles.edit_sampa,'position', [0.28,0.153,0.156,0.288])
+set(handles.edit_sampb,'position', [0.529,0.153,0.156,0.288])
+set(handles.pushbutton_cut,'position', [0.712,0.559,0.233,0.288])
+% MC
+set(handles.text11,'position', [0.035,0.747,0.265,0.179])
+set(handles.edit6,'position', [0.366,0.747,0.163,0.179])
+set(handles.text13,'position', [0.545,0.747,0.062,0.179])
+set(handles.edit7,'position', [0.615,0.747,0.2,0.179])
+set(handles.text14,'position', [0.852,0.747,0.09,0.179])
+
+set(handles.text15,'position', [0.035,0.526,0.521,0.179])
+set(handles.edit8,'position', [0.568,0.526,0.117,0.179])
+set(handles.text17,'position', [0.7,0.526,0.062,0.179])
+set(handles.edit9,'position', [0.774,0.526,0.117,0.179])
+
+set(handles.text18,'position', [0.035,0.3,0.253,0.179])
+set(handles.edit10,'position', [0.323,0.3,0.163,0.179])
+set(handles.text16,'position', [0.615,0.3,0.148,0.179])
+set(handles.edit21,'position', [0.735,0.3,0.117,0.179])
+set(handles.text43,'position', [0.868,0.3,0.09,0.179])
+set(handles.text40,'position', [0.035,0.08,0.665,0.179])
+set(handles.edit24,'position', [0.712,0.08,0.253,0.179])
+% frequency
+set(handles.radiobutton1,'position', [0.03,0.774,0.541,0.14])
+set(handles.edit29,'position', [0.584,0.774,0.187,0.14])
+set(handles.text49,'position', [0.848,0.774,0.089,0.14])
+
+set(handles.radiobutton2,'position', [0.03,0.594,0.934,0.128])
+set(handles.edit11,'position', [0.1,0.444,0.85,0.128])
+set(handles.text23,'position', [0.03,0.241,0.436,0.128])
+set(handles.edit13,'position', [0.45,0.241,0.109,0.128])
+set(handles.text25,'position', [0.584,0.241,0.062,0.128])
+set(handles.edit14,'position', [0.642,0.241,0.109,0.128])
+set(handles.text27,'position', [0.76,0.241,0.226,0.128])
+
+set(handles.text26,'position', [0.03,0.07,0.374,0.128])
+set(handles.edit15,'position', [0.393,0.07,0.14,0.128])
+set(handles.text28,'position', [0.549,0.07,0.062,0.128])
+set(handles.edit12,'position', [0.619,0.07,0.14,0.128])
+set(handles.text47,'position', [0.755,0.07,0.226,0.128])
+%Plot
+set(handles.text30,'position', [0.03,0.77,0.43,0.176])
+set(handles.checkbox1median,'position', [0.521,0.73,0.268,0.25])
+set(handles.checkbox50,'position', [0.755,0.73,0.214,0.25])
+set(handles.checkbox68,'position', [0.07,0.473,0.214,0.25])
+set(handles.checkbox80,'position', [0.296,0.473,0.214,0.25])
+set(handles.checkbox90,'position', [0.521,0.473,0.214,0.25])
+set(handles.checkbox95,'position', [0.755,0.473,0.214,0.25])
+set(handles.text29,'position', [0.03,0.12,0.42,0.25])
+set(handles.edit22,'position', [0.428,0.12,0.163,0.25])
+set(handles.text36,'position', [0.607,0.12,0.268,0.25])
+set(handles.edit23,'position', [0.875,0.12,0.11,0.25])
+% process
+set(handles.text48,'position', [0.03,0.75,0.659,0.185])
+set(handles.edit27,'position', [0.717,0.75,0.163,0.185])
+set(handles.text37,'position', [0.03,0.511,0.953,0.185])
+set(handles.edit28,'position', [0.202,0.511,0.128,0.185])
+set(handles.text50,'position', [0.337,0.511,0.636,0.185])
+set(handles.text41,'position', [0.03,0.03,0.926,0.446])
+
 handles.output = hObject;
 
 data_s = varargin{1}.current_data;

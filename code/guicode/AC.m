@@ -367,6 +367,12 @@ function pushbutton5_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 
+% --- Executes during object creation, after setting all properties.
+function menu_file_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes_refresh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
 % --------------------------------------------------------------------
 function menu_file_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_file (see GCBO)
@@ -374,11 +380,24 @@ function menu_file_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 
+% --- Executes during object creation, after setting all properties.
+function menu_edit_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes_refresh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
 % --------------------------------------------------------------------
 function menu_edit_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_edit (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes during object creation, after setting all properties.
+function menu_plotall_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes_refresh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
 
 function menu_plotall_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_edit (see GCBO)
@@ -571,12 +590,25 @@ end
 set(gcf,'color','w');
 guidata(hObject,handles)
 
+
+% --- Executes during object creation, after setting all properties.
+function menu_basic_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes_refresh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
 % --------------------------------------------------------------------
 function menu_basic_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_basic (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+
+% --- Executes during object creation, after setting all properties.
+function menu_math_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes_refresh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
 
 % --------------------------------------------------------------------
 function menu_math_Callback(hObject, eventdata, handles)
@@ -589,7 +621,6 @@ function menu_help_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to axes_refresh (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
-
 
 % --------------------------------------------------------------------
 function menu_help_Callback(hObject, eventdata, handles)
@@ -2640,6 +2671,12 @@ if and ((min(plot_selected) > 2), (nplot == 1))
 end
 guidata(hObject, handles);
 
+
+% --- Executes during object creation, after setting all properties.
+function menuac_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes_refresh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
 
 % --------------------------------------------------------------------
 function menuac_Callback(hObject, eventdata, handles)
