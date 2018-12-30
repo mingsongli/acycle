@@ -278,7 +278,7 @@ if strcmp(method,'Multi-taper method')
         % Plot figure MTM
         
     if handles.checkbox_robustAR1_v == 0
-        %figdata = figure;
+        figdata = figure;
         figHandle = gcf;
         colordef white;
         plot(fd1,po,'LineWidth',1); 

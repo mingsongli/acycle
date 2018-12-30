@@ -156,7 +156,7 @@ set(handles.edit27,'position', [0.717,0.75,0.163,0.185])
 set(handles.text37,'position', [0.03,0.511,0.953,0.185])
 set(handles.edit28,'position', [0.202,0.511,0.128,0.185])
 set(handles.text50,'position', [0.337,0.511,0.636,0.185])
-set(handles.text41,'position', [0.03,0.03,0.926,0.446])
+set(handles.text41,'position', [0.03,0.03,0.926,0.446],'FontSize',fontsize-1)
 
 handles.output = hObject;
 % contact with acycle main window
