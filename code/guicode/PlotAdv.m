@@ -58,7 +58,7 @@ h1=findobj(h,'FontUnits','norm');  % find all font units as points
 set(h1,'FontUnits','points','FontSize',12);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',12);  % set as norm
-set(gcf,'position',[0.5,0.1,0.33,0.28]) % set position
+set(gcf,'position',[0.45,0.5,0.33,0.28]) % set position
 %
 set(handles.text5,'position',[0.031,0.88,0.16,0.08])
 set(handles.pop_data,'position',[0.179,0.88,0.8,0.08])

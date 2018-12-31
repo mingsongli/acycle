@@ -60,19 +60,24 @@ h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',12);  % set as norm
 
 set(gcf,'position',[0.5,0.1,0.45,0.5]) % set position
-set(handles.logo_axes1,'position',[0.054,0.609,0.261,0.345]) % set position
-set(handles.text5,'position',[0.332,0.609,0.61,0.345]) % set position
-set(handles.edit1,'position',[0.054,0.054,0.89,0.531]) % set position
+set(handles.logo_axes1,'position',[0.02,0.762,0.164,0.215]) % set position
+%set(handles.logo_axes2,'position',[0.8,0.762,0.164,0.164]) % set position
+set(handles.text5,'position',[0.25,0.762,0.35,0.2]) % set position
+set(handles.edit1,'position',[0.02,0.02,0.96,0.74]) % set position
 
 set(gcf,'Name','Acycle: Copyright')
 
 [I,m] = imread('acycle_logo.png');
 imshow(I,m,'parent',handles.logo_axes1);
 % imshow(I,'Colormap',m,'parent',handles.logo_axes1);
+
+%[I,m] = imread('AC-LOGO-S.png');
+%imshow(I,m,'parent',handles.logo_axes2);
 % Choose default command line output for copyright
 handles.output = hObject;
 % Update handles structure
 guidata(hObject, handles);
+
 
 % UIWAIT makes copyright wait for user response (see UIRESUME)
 % uiwait(handles.figure1);

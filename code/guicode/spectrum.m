@@ -59,9 +59,9 @@ set(h1,'FontUnits','points','FontSize',11.5);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
 if ismac
-    set(gcf,'position',[0.5,0.5,0.28,0.3]) % set position
+    set(gcf,'position',[0.45,0.5,0.28,0.3]) % set position
 elseif ispc
-    set(gcf,'position',[0.5,0.4,0.48,0.5]) % set position
+    set(gcf,'position',[0.45,0.4,0.48,0.5]) % set position
     set(handles.pushbutton17,'Visible','off')
 end
 %set(handles.text7,'position', [0.055,0.875,0.235,0.06])
@@ -198,6 +198,7 @@ function pushbutton3_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton3 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+    figspectrum = gcf;
     data = handles.current_data; % load current_data
     data_name = handles.filename;
     [~,dat_name,ext] = fileparts(data_name);
@@ -251,7 +252,8 @@ if strcmp(method,'Multi-taper method')
             name2 = [dat_name,'-',num2str(nw),'piMTM-ConvenAR1',ext];
             data2 = redconfAR1;
             title([dat_name,'-',num2str(nw),'piMTM-RobustAR1: rho = ',num2str(rhoM)])
-            xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
+            xlabel(['Frequency (cycles/',num2str(unit),')']) 
+            set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'PI MTM'])
             if handles.linlogY == 1;
                 set(gca, 'YScale', 'log')
             else
@@ -287,7 +289,7 @@ if strcmp(method,'Multi-taper method')
         ylabel('Power ')
         legend('Power','bw')
         title([num2str(nw),' PI MTM method',' ','; Sampling rate = ',num2str(dt),' ', unit])
-        set(gcf,'Name',[num2str(filename),' ',num2str(nw),'PI MTM'])
+        set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'PI MTM'])
         xlim([0 fmax]);
         set(gca,'XMinorTick','on','YMinorTick','on')
         if handles.linlogY == 1;
@@ -374,7 +376,7 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
     xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
     ylabel('Power ')
     title(['Lomb-Scargle spectrum; Sampling rate = ',num2str(dt),' ', unit])
-    set(gcf,'Name',[num2str(filename),': Lomb-Scargle spectrum'])
+    set(gcf,'Name',[dat_name,ext,': Lomb-Scargle spectrum'])
     set(gca,'XMinorTick','on','YMinorTick','on')
     xlim([0 fmax]);
     if handles.linlogY == 1;
@@ -401,7 +403,7 @@ elseif  strcmp(method,'Periodogram')
     xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
     ylabel('Power ')
     title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit])
-    set(gcf,'Name',[num2str(filename),': periodogram'])
+    set(gcf,'Name',[dat_name,ext,': periodogram'])
     set(gca,'XMinorTick','on','YMinorTick','on')
     xlim([0 fmax]);
     if handles.checkbox_tabtchi == 1
@@ -440,6 +442,7 @@ figure(handles.acfigmain);
 CDac_pwd; % cd working dir
 refreshcolor;
 cd(pre_dirML); % return view dir
+figure(figspectrum);
 if ishandle(figdata); figure(figdata); end% return plot
 guidata(hObject,handles);
     
@@ -721,6 +724,7 @@ function pushbutton17_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton17 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+    figspectrum = gcf;
     data = handles.current_data; % load current_data
     data_name = handles.filename;
     [~,dat_name,ext] = fileparts(data_name);
@@ -770,8 +774,9 @@ if strcmp(method,'Multi-taper method')
             linlog = str2double(answer{2});
             [rhoM, s0M,redconfAR1,redconfML96]=redconfML(datax,dt,nw,nzeropad,linlog,smoothwin,1);
             xlim([0 fmax]);
-            xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
+            xlabel(['Frequency (cycles/',num2str(unit),')']) 
             title([num2str(nw),'piMTM',' ','-RobustAR(1)SamplingRate = ',num2str(dt), unit])
+            set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'PI MTM'])
             if handles.linlogY == 1;
                 set(gca, 'YScale', 'log')
             else
@@ -789,16 +794,16 @@ if strcmp(method,'Multi-taper method')
         fd1=w/(2*pi*dt);
         % Plot figure MTM handles.checkbox_robustAR1_v = checkbox_robustAR1;
     if handles.checkbox_robustAR1_v == 0
-        figure;  
+        figdata = figure;  
         figHandle = gcf;
         colordef white;
         plot(fd1,po,'LineWidth',1); 
         line([0.7*fmax, 0.7*fmax+bw],[0.8*max(po), 0.8*max(po)],'Color','r')
-        xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
+        xlabel(['Frequency (cycles/',num2str(unit),')']) 
         ylabel('Power ')
         legend('Power','bw')
         title([num2str(nw),' PI MTM method',' ','; Sampling rate = ',num2str(dt),' ', unit])
-        set(gcf,'Name',[num2str(filename),' ',num2str(nw),'PI MTM'])
+        set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'PI MTM'])
         xlim([0 fmax]);
         if handles.linlogY == 1;
             set(gca, 'YScale', 'log')
@@ -870,10 +875,10 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
     colordef white;
     plot(fd1,po,fd1,pth*ones(size(fd1')),'LineWidth',1); 
     text(0.3*fmax*[1 1 1 1],pth-.5,[repmat('P_{fa} = ',[4 1]) num2str(pfa')])
-    xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
+    xlabel(['Frequency (cycles/',num2str(unit),')']) 
     ylabel('Power ')
     title(['Lomb-Scargle spectrum; Sampling rate = ',num2str(dt),' ', unit])
-    set(gcf,'Name',[num2str(filename),': Lomb-Scargle spectrum'])
+    set(gcf,'Name',[dat_name,ext,': Lomb-Scargle spectrum'])
     xlim([0 fmax]);
     if handles.linlogY == 1;
         set(gca, 'YScale', 'log')
@@ -891,10 +896,10 @@ elseif  strcmp(method,'Periodogram')
     figdata = figure;  
     colordef white;
     plot(fd1,po,'LineWidth',1);
-    xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
+    xlabel(['Frequency (cycles/',num2str(unit),')']) 
     ylabel('Power ')
     title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit])
-    set(gcf,'Name',[num2str(filename),': periodogram'])
+    set(gcf,'Name',[dat_name,ext,': periodogram'])
     xlim([0 fmax]);
     if handles.checkbox_tabtchi == 1
         [theored]=theoredar1ML(datax,fd1,mean(po),dt);
@@ -922,5 +927,6 @@ figure(handles.acfigmain);
 CDac_pwd; % cd working dir
 refreshcolor;
 cd(pre_dirML); % return view dir
+figure(figspectrum);
 if ishandle(figdata); figure(figdata); end% return plot
 guidata(hObject,handles);

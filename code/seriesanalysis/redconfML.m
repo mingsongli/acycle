@@ -100,11 +100,11 @@ if plot == 1
     hold on; 
     semilogy(ft,pxxsmooth,'m-.');
     semilogy(ft,theored,'g-');
-    semilogy(ft,theored1,'r-');
+    semilogy(ft,theored1,'k-','LineWidth',2);
     semilogy(ft,chi90,'r-');
-    semilogy(ft,chi95,'r--');
+    semilogy(ft,chi95,'r--','LineWidth',2);
     semilogy(ft,chi99,'r-.');
-    semilogy(ft,chi999,'r.');
+    semilogy(ft,chi999,'r.','LineWidth',1);
     xlabel('Frequency')
     ylabel('Power')
     smthwin = ['Median-smoothing ',num2str(smoothwin*100),'%'];

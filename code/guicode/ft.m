@@ -61,7 +61,7 @@ set(h2,'FontUnits','points','FontSize',12);  % set as norm
 if ismac
     set(gcf,'position',[0.4,0.5,0.55,0.4]) % set position
 elseif ispc
-    set(gcf,'position',[0.4,0.5,0.65,0.58]) % set position
+    set(gcf,'position',[0.3,0.5,0.65,0.58]) % set position
     set(h1,'FontUnits','points','FontSize',11);  % set as norm
     set(h2,'FontUnits','points','FontSize',11);  % set as norm
 end

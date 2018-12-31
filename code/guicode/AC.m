@@ -65,18 +65,20 @@ function AC_OpeningFcn(hObject, eventdata, handles, varargin)
 
 set(gcf,'Name','ACYCLE v0.2.6')
 set(gcf,'DockControls', 'off')
+set(gcf,'Color', 'white')
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
 set(gcf,'position',[0.5,0.1,0.45,0.8]) % set position
 set(handles.popupmenu1,'position', [0.75,0.945,0.24,0.04])
 set(handles.axes_up,'position',    [0.02,0.945,0.06,0.05])
 set(handles.axes_folder,'position',[0.106,0.945,0.065,0.05])
+set(handles.axes_openfolder,'position',[0.02,0.902,0.045,0.038])
 set(handles.axes_plot,'position',  [0.2,0.945,0.06,0.05])
 set(handles.axes_populate,'position',[0.28,0.945,0.06,0.05])
 set(handles.axes_refresh,'position',[0.36,0.945,0.06,0.05])
 set(handles.axes_robot,'position',  [0.44,0.945,0.06,0.05])
-set(handles.edit_acfigmain_dir,'position',       [0.02,0.9,0.96,0.04])
-set(handles.listbox_acmain,'position',    [0.02,0.008,0.965,0.884])
+set(handles.edit_acfigmain_dir,'position',       [0.07,0.9,0.91,0.04])
+set(handles.listbox_acmain,'position',    [0.02,0.008,0.96,0.884])
 if ismac
     handles.slash_v = '/';
     %set(handles.listbox_acmain,'FontSize',0.019)
@@ -86,7 +88,11 @@ elseif ispc
 end
 
 handles.acfigmain = gcf;  %handles of the ac main window
-
+%if isdeployed
+    copyright;
+%end
+figure(handles.acfigmain)
+%guidata(hObject, handles);
 h=get(gcf,'Children');  % get all content
 h1=findobj(h,'FontUnits','norm');  % find all font units as points
 set(h1,'FontUnits','points','FontSize',12);  % set as norm
@@ -104,6 +110,12 @@ menu_folder = imread('menu_folder.png');
 im_folder = image(menu_folder);
 set(im_folder, 'ButtonDownFcn',@axes_folder_ButtonDownFcn)
 set(handles.axes_folder,'visible', 'off');
+
+axes(handles.axes_openfolder);
+menu_openfolder = imread('menu_open.png');
+im_openfolder = image(menu_openfolder);
+set(im_openfolder, 'ButtonDownFcn',@axes_openfolder_ButtonDownFcn)
+set(handles.axes_openfolder,'visible', 'off');
 
 axes(handles.axes_refresh);
 menu_refresh = imread('menu_refresh.png');
@@ -132,7 +144,6 @@ set(handles.axes_robot,'visible', 'off');
 % Choose default command line output for AC
 handles.output = hObject;
 path_root = pwd;
-% addpath(genpath(path_root));
 set(handles.edit_acfigmain_dir,'String',path_root);
 handles.foldname = 'foldname'; % default file name
 
@@ -192,13 +203,8 @@ handles.math_deleteempty = 1;
 handles.math_derivative = 1;
 assignin('base','unit',handles.unit)
 assignin('base','unit_type',handles.unit_type)
-
-%handles.fontsizeall = 12;
 % Update handles structure
 guidata(hObject, handles);
-
-% UIWAIT makes AC wait for user response (see UIRESUME)
-% uiwait(handles.acmain);
 
 
 % --- Outputs from this function are returned to the command line.
@@ -4914,7 +4920,6 @@ function menu_opendir_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_opendir (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
 CDac_pwd; % cd working dir
 if ismac
     system(['open ',ac_pwd]);
@@ -4989,6 +4994,30 @@ if ismac
     system(['open ',ac_pwd]);
 elseif ispc
     winopen(ac_pwd);
+end
+
+
+% --- Executes on mouse press over axes background.
+function axes_openfolder_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to axes_folder (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+%acfigmain = gcf;
+handles = guidata(hObject);
+pre_dirML = pwd;
+fileID = fopen('ac_pwd.txt','r');
+formatSpec = '%s';
+ac_pwd = fscanf(fileID,formatSpec);   % AC window folder dir
+fclose(fileID);
+selpath = uigetdir(ac_pwd);
+if selpath == 0
+else
+    if isdir(selpath)
+        disp(['>>  Change working folder to ',selpath])
+        cd(selpath)
+        refreshcolor;
+        cd(pre_dirML); % return view dir
+    end
 end
 
 
