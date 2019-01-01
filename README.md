@@ -2,7 +2,7 @@
 
 <b>Acycle -- a time-series analysis software for paleoclimate projects and education</b>
 
-Mingsong Li, Penn State. Dec. 25, 2018
+Mingsong Li, Penn State. Jan. 1, 2019
 
 Website: www.mingsongli.com/acycle
 

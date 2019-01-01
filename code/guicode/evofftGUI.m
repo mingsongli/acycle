@@ -376,6 +376,7 @@ end
 fmin = str2double(get(handles.edit7,'String'));
 unit = get(handles.edit8,'String');
 filename =  handles.filename;
+[~,dat_name,ext] = fileparts(filename);
 norm = get(handles.radiobutton5,'Value');
 % Evofft Plot
 if strcmp(method,'Periodogram')
@@ -427,7 +428,7 @@ end
     else
         ylabel(['Time (',handles.unit,')'])
     end
-    set(gcf,'Name',[num2str(filename),': Running Periodogram'])
+    set(gcf,'Name',[dat_name,ext,': Running Periodogram'])
     xlim([fmin fmax])
     
 if handles.flipy == 1;

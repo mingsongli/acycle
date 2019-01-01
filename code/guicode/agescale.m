@@ -296,6 +296,7 @@ xmin2 = nan;
 for i = 1:nrow
     data_name = char(list_content(i,1));
     data = load(data_name);
+    [~,dat_name,ext] = fileparts(data_name);
     subplot(2,1,1)
     plot(data(:,1),data(:,2)); hold on;
     xmin1 = nanmin(xmin1,min(data(:,1)));
@@ -311,7 +312,7 @@ for i = 1:nrow
     xmax2 = nanmax(xmax2,max(time));
     xlim([xmin2,xmax2])
 %    cd(handles.working_folder)
-    add_list = [data_name,'_TD_',agemodelname];
+    add_list = [dat_name,'-TD-',agemodelname];
     %csvwrite(add_list,handles.tunedseries)
     CDac_pwd; % cd ac_pwd dir
     dlmwrite(add_list, handles.tunedseries, 'delimiter', ',', 'precision', 9);

@@ -118,7 +118,7 @@ handles.mean = mean(diff(data_s(:,1)));
 handles.nyquist = 1/(2*handles.mean);     % prepare nyquist
 handles.method ='Multi-taper method';
 set(handles.text_nyquist, 'String', num2str(handles.nyquist));
-
+set(handles.edit4, 'String', num2str(length(data_s(:,1))));
 % Update handles structure
 guidata(hObject, handles);
 
@@ -234,6 +234,7 @@ else
 end
 
 if strcmp(method,'Multi-taper method')
+    
     if handles.checkbox_robustAR1_v == 1
         dlg_title = 'Robust AR(1) Estimation';
         prompt = {'Median smoothing window: default 0.2 = 20%';...
@@ -246,7 +247,13 @@ if strcmp(method,'Multi-taper method')
         if ~isempty(answer)
             smoothwin = str2double(answer{1});
             linlog = str2double(answer{2});
+            if length(datax)>2000
+                hwarn = warndlg('Large dataset, wait ...');
+            end
             [rhoM, s0M,redconfAR1,redconfML96]=redconfML(datax,dt,nw,nzeropad,linlog,smoothwin,1);
+%             if length(datax)>2000
+%                 close(hwarn)
+%             end
             name1 = [dat_name,'-',num2str(nw),'piMTM-RobustAR1',ext];
             data1 = redconfML96;
             name2 = [dat_name,'-',num2str(nw),'piMTM-ConvenAR1',ext];
@@ -772,7 +779,14 @@ if strcmp(method,'Multi-taper method')
         if ~isempty(answer)
             smoothwin = str2double(answer{1});
             linlog = str2double(answer{2});
+            
+            if length(datax)>2000
+                hwarn = warndlg('Large dataset, wait ...');
+            end
             [rhoM, s0M,redconfAR1,redconfML96]=redconfML(datax,dt,nw,nzeropad,linlog,smoothwin,1);
+%             if length(datax)>2000
+%                 close(hwarn)
+%             end
             xlim([0 fmax]);
             xlabel(['Frequency (cycles/',num2str(unit),')']) 
             title([num2str(nw),'piMTM',' ','-RobustAR(1)SamplingRate = ',num2str(dt), unit])
@@ -818,7 +832,7 @@ if handles.checkbox_tabtchi == 1
        'WindowStyle','modal');
     hwaitbar_find = findobj(hwaitbar,'Type','Patch');
     set(hwaitbar_find,'EdgeColor',[0 0.9 0],'FaceColor',[0 0.9 0]) % changes the color to blue
-    setappdata(hwaitbar,'canceling',0)
+    %setappdata(hwaitbar,'canceling',0)
     steps = 6;
     step = 1;
     waitbar(step / steps)

@@ -1,11 +1,19 @@
 - - - - - -    READ ME    - - - - - -
 
 Update Log
+_____________________________________
 
+Version : ACycle_v0.2.6.20190101
+Date    : Jan. 1, 2019; 00:12 am EST
+By      : Mingsong Li (Penn State)
+
+	1. Minor revisions on GUI
+
+    2. Add a Open Folder icon/tool to change working dir. easily
 _____________________________________
 
 Version : ACycle_v0.2.6.20181229
-Date    : Dec. 24, 2018; 11:21 pm EST
+Date    : Dec. 29, 2018; 11:21 am EST
 By      : Mingsong Li (Penn State)
 
 	1. Merge Matlab versions (Windows & Mac). Refine GUI window.

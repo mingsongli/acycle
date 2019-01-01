@@ -804,29 +804,60 @@ function menu_read_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 %
-if isdeployed
-    url = 'https://github.com/mingsongli/acycle/blob/master/doc/UpdateLog.txt';
-    web(url,'-browser')
-else
-    open('UpdateLog.txt')
+filename = 'UpdateLog.txt';
+url = 'https://github.com/mingsongli/acycle/blob/master/doc/UpdateLog.txt';
+
+try uiopen(filename,1);
+catch
+    try open(filename)
+    catch
+        if ispc
+            try winopen(filename)
+            catch
+                try web(url,'-browser')
+                catch
+                end
+            end
+        elseif ismac
+            try system(['open ',filename]);
+            catch
+                try web(url,'-browser')
+                catch
+                end
+            end
+        end
+    end
 end
+
 
 % --------------------------------------------------------------------
 function menu_manuals_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_manuals (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-if isdeployed
-    url = 'https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf';
-    web(url,'-browser')
-else
-    ac_dir = which('ac.m');
-    [ac_folder,~,~] = fileparts(ac_dir);
-    doc_dir = [ac_folder,handles.slash_v,'doc'];
-    if ismac
-        system(['open ',doc_dir]);
-    elseif ispc
-        winopen(doc_dir);
+
+filename = 'AC_Users_Guide.pdf';
+url = 'https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf';
+
+try uiopen(filename,1);
+catch
+    try open(filename)
+    catch
+        if ispc
+            try winopen(filename)
+            catch
+                try web(url,'-browser')
+                catch
+                end
+            end
+        elseif ismac
+            try system(['open ',filename]);
+            catch
+                try web(url,'-browser')
+                catch
+                end
+            end
+        end
     end
 end
 
@@ -970,7 +1001,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
             prompt = {'Tested sampling rate 1:','Tested sampling rate 2:',...
                 'Number of tested sampling rates','Number of simulation'};
             num_lines = 1;
-            defaultans = {num2str(0.25*dtmin),num2str(4*dtmax),'100','200'};
+            defaultans = {num2str(0.5*dtmin),num2str(5*dtmax),'100','1000'};
             options.Resize='on';
             answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
             
@@ -4373,7 +4404,7 @@ for i = 1:nplot
         if isdir(plot_filter_s)
             return
         else
-            [~,~,ext] = fileparts(plot_filter_s);
+            [~,dat_name,ext] = fileparts(plot_filter_s);
             check = 0;
             if sum(strcmp(ext,handles.filetype)) > 0
                 check = 1; % selection can be executed 
@@ -4403,7 +4434,6 @@ if check == 1;
             
             t = data_filterout(:,1);
             dt = diff(t);
-            %y = data_filterout(:,2);
             len_t = length(t);
             figure;
             datasamp = [t(1:len_t-1),dt];
@@ -4412,6 +4442,11 @@ if check == 1;
             %plot(dat(:,1),dat(:,2),'k','LineWidth',1);
             stairs(datasamp(:,1),datasamp(:,2),'LineWidth',1,'Color','k');
             set(gca,'XMinorTick','on','YMinorTick','on')
+            set(gcf,'Color', 'white')
+            set(0,'Units','normalized') % set units as normalized
+            set(gcf,'units','norm') % set location
+            set(gcf,'position',[0.1,0.5,0.45,0.45]) % set position
+            set(gcf,'Name', 'Sampling rate (original domain)')
             %plot(data_filterout(1:(len_t-1),1),dt);
             if handles.unit_type == 0;
                 xlabel(['Unit (',handles.unit,')'])
@@ -4424,13 +4459,18 @@ if check == 1;
                 ylabel(handles.unit)
             end
             
-            title([plot_filter_s,': sampling rate'])
+            title([[dat_name,ext],': sampling rate'])
             xlim([min(datasamp(:,1)),max(datasamp(:,1))])
             ylim([0.9*min(dt) max(dt)*1.1])
             
             figure;
             histfit(dt,[],'kernel')
-            title([plot_filter_s,': kernel fit of the sampling rate'])
+            set(gcf,'Color', 'white')
+            set(0,'Units','normalized') % set units as normalized
+            set(gcf,'units','norm') % set location
+            set(gcf,'position',[0.55,0.5,0.45,0.45]) % set position
+            title([[dat_name,ext],': kernel fit of sampling rates'])
+            set(gcf,'Name', 'Sampling rate: distribution')
             if handles.unit_type == 0;
                 xlabel(['Sampling rate (',handles.unit,')'])
             elseif handles.unit_type == 1;
@@ -4441,7 +4481,8 @@ if check == 1;
             ylabel('Number')
             note = ['max: ',num2str(max(dt)),'; mean: ',num2str(mean(dt)),...
                 '; median: ',num2str(median(dt)),'; min: ',num2str(min(dt))];
-            text(mean(dt),len_t/10,note);
+            legend(note)
+            %text(mean(dt),len_t/10,note);
     end
 end
 guidata(hObject,handles)
@@ -4464,7 +4505,7 @@ for i = 1:nplot
         if isdir(plot_filter_s)
             return
         else
-            [~,~,ext] = fileparts(plot_filter_s);
+            [~,dat_name,ext] = fileparts(plot_filter_s);
             check = 0;
             if sum(strcmp(ext,handles.filetype)) > 0
                 check = 1; % selection can be executed 
@@ -4495,11 +4536,13 @@ if check == 1;
             datax = data_filterout(:,2);
             figure;
             histfit(datax,[],'kernel')
-            title([plot_filter_s,': kernel fit of the data'])
+            set(gcf,'Name', 'Data Distribution')
+            title([[dat_name,ext],': kernel fit of the data'])
             xlabel('Data')
             note = ['max: ',num2str(max(datax)),'; mean: ',num2str(mean(datax)),...
                 '; median: ',num2str(median(datax)),'; min: ',num2str(min(datax))];
-            text(mean(datax),length(datax)/10,note);
+            %text(mean(datax),length(datax)/10,note);
+            legend(note)
     end
 end
 guidata(hObject,handles)
