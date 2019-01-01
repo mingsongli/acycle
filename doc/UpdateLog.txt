@@ -10,6 +10,10 @@ By      : Mingsong Li (Penn State)
 	1. Minor revisions on GUI
 
     2. Add a Open Folder icon/tool to change working dir. easily
+
+    3. Refine spectrum and detrending GUI
+
+    4. Astronomical solution GUI refine
 _____________________________________
 
 Version : ACycle_v0.2.6.20181229

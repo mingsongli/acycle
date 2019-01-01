@@ -206,7 +206,7 @@ function pushbutton3_Callback(hObject, eventdata, handles)
     datax = data(:,2);
     timex = data(:,1);
     diffx = diff(timex);
-    if max(diffx) - min(diffx) > 10*(double(single(1.1) - 1.1))
+    if max(diffx) - min(diffx) > eps('single')
         warndlg('Warning: the data may not be evenly spaced.')
     end
     % dt = handles.mean;
@@ -708,8 +708,26 @@ function popupmenu2_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns popupmenu2 contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupmenu2
+%handles = hObject;
+%handles = handles;
 contents = cellstr(get(hObject,'String'));
-handles.method = contents{get(hObject,'Value')};
+method = contents{get(hObject,'Value')};
+handles.method = method;
+if strcmp(method,'Multi-taper method')
+    set(handles.popupmenu_tapers,'Enable','on')
+    set(handles.checkbox_robust,'Enable','on')
+%    set(handles.checkbox_tabtchi,'Enable','on')
+elseif strcmp(method,'Periodogram')
+    set(handles.popupmenu_tapers,'Enable','off')
+    set(handles.checkbox_robust,'Enable','off')
+%    set(handles.checkbox_tabtchi,'Enable','on')
+elseif strcmp(method,'Lomb-Scargle spectrum')
+    set(handles.popupmenu_tapers,'Enable','off')
+    set(handles.checkbox_robust,'Enable','off')
+%    set(handles.checkbox_tabtchi,'Enable','off')
+else
+    
+end
 guidata(hObject,handles)
 
 
@@ -739,7 +757,7 @@ function pushbutton17_Callback(hObject, eventdata, handles)
     datax = data(:,2);
     timex = data(:,1);
     diffx = diff(timex);
-    if max(diffx) - min(diffx) > 10*(double(single(1.1) - 1.1))
+    if max(diffx) - min(diffx) > eps('single')
         warndlg('Warning: the data may not be evenly spaced.')
     end
     dt = median(diff(timex));

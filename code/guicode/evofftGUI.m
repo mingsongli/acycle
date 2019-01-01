@@ -142,6 +142,15 @@ set(handles.radiobutton2, 'Value',1,'Enable','Off');
 % Update handles structure
 guidata(hObject, handles);
 
+diffx = diff(data_s(:,1));
+if max(diffx) - min(diffx) > eps('single')
+    hwarn = warndlg('Warning: the data may not be evenly spaced.');
+    %set(0,'Units','normalized') % set units as normalized
+    set(gcf,'units','norm') % set location
+    set(gcf,'position',[0.25,0.6,0.2,0.1])
+    figure(hwarn);
+end
+
 % UIWAIT makes evofftGUI wait for user response (see UIRESUME)
 % uiwait(handles.evofftGUI_figure);
 

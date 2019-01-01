@@ -167,6 +167,14 @@ hold off
 handles.add_list = '';
 guidata(hObject,handles)
 
+diffx = diff(data_s(:,1));
+if max(diffx) - min(diffx) > eps('single')
+    hwarn = warndlg('Warning: the data may not be evenly spaced.');
+    %set(0,'Units','normalized') % set units as normalized
+    set(gcf,'units','norm') % set location
+    set(gcf,'position',[0.2,0.6,0.2,0.1])
+    figure(hwarn);
+end
 
 % --- Outputs from this function are returned to the command line.
 function varargout = ft_OutputFcn(hObject, eventdata, handles) 

@@ -80,6 +80,16 @@ set(handles.edit1,'position', [0.48,0.69,0.13,0.09])
 set(handles.edit2,'position', [0.48,0.585,0.13,0.09])
 set(handles.pushbutton1,'position', [0.4,0.407,0.25,0.1])
 set(handles.textref,'position', [0.064,0.013,0.915,0.35])
+
+set(handles.uipanel_ETP,'position', [0.717,0.407,0.226,0.466])
+set(handles.text13,'position', [0.043,0.735,0.5,0.133])
+set(handles.text14,'position', [0.043,0.439,0.5,0.133])
+set(handles.text15,'position', [0.043,0.143,0.5,0.133])
+
+set(handles.edit3,'position', [0.6,0.735,0.3,0.222])
+set(handles.edit4,'position', [0.6,0.439,0.3,0.222])
+set(handles.edit5,'position', [0.6,0.143,0.3,0.222])
+
 % Choose default command line output for basicseries
 handles.output = hObject;
 
@@ -310,6 +320,12 @@ function popupmenu3_Callback(hObject, eventdata, handles)
 % handles.parameter = 'ETP';
 contents = cellstr(get(hObject,'String'));
 handles.parameter = contents{get(hObject,'Value')};
+
+if strcmp(handles.parameter,'ETP')
+    set(handles.uipanel_ETP,'Visible','on')
+else
+    set(handles.uipanel_ETP,'Visible','off')
+end
 guidata(hObject, handles);
 
 % --- Executes during object creation, after setting all properties.
@@ -357,11 +373,18 @@ data = select_interval(dat,t1,t2);
 %data = dat(t1:t2,:);
 clear dat
 if strcmp(parameter,'ETP')
+    % get weight
+    wE = str2double(get(handles.edit3,'String'));
+    wT = str2double(get(handles.edit4,'String'));
+    wP = str2double(get(handles.edit5,'String'));
     %data(:,5)=zscore(data(:,2))+.75*zscore(data(:,3))-zscore(data(:,4));
     %data(:,5)=zscore(data(:,2))+.4*zscore(data(:,3))-.5*zscore(data(:,4));
-    data(:,5)=zscore(data(:,2))+zscore(data(:,3))-zscore(data(:,4));
+    data(:,5)=wE * zscore(data(:,2))+ wT * zscore(data(:,3)) + wP * zscore(data(:,4));
     dat(:,1)=data(:,1);
     dat(:,2)=data(:,5);
+    if wE ~= 1 || wT~= 1 || wP ~= 1
+        parameter = [get(handles.edit3,'String'),'E',get(handles.edit4,'String'),'T',get(handles.edit5,'String'),'P'];
+    end
 elseif strcmp(parameter,'Eccentricity')
     dat=[data(:,1),data(:,2)];
 elseif strcmp(parameter,'Obliquity')
@@ -371,9 +394,8 @@ elseif strcmp(parameter,'Precession')
 elseif strcmp(parameter,'Inclination')
     dat=[data(:,1),data(:,3)];
 end
-%    cd(handles.working_folder)
-set(handles.text12,'String',handles.working_folder);
-name = [handles.solution,'_',parameter,'_',num2str(t1),'_',num2str(t2),'.txt'];
+
+name = [handles.solution,'-',parameter,'-',num2str(t1),'-',num2str(t2),'.txt'];
 %csvwrite(name,dat)
 CDac_pwd; % cd ac_pwd dir
 dlmwrite(name, dat, 'delimiter', ',', 'precision', 9);

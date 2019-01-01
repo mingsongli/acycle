@@ -20,10 +20,6 @@ E. Ruggieri (2013) "A Bayesian Approach to Detecting Change Points in Climatic R
 
 >> Wavelet transform with optional singificance testing
 Torrence, C. and G. P. Compo, 1998: A Practical Guide to Wavelet Analysis. Bull. Amer. Meteor. Soc., 79, 61-78.
-
->> GAUSSIAN PROCESS REGRESSION AND CLASSIFICATION Toolbox version 4.2
-Rasmussen, C.E., Nickisch, H., 2010. Gaussian processes for machine learning (GPML) toolbox. Journal of machine learning research 11, 3011-3015.
-
 *******************************************************Astronomical solutions
 *******************************************************
 
