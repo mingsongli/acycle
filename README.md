@@ -180,9 +180,40 @@ Read more tips on the installation at Section 3.4 in /doc/AC_Users_Guide.pdf
 ```
 or here: https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf
 <br />
-<br /><br /><br />
-<b>*** *** 3. Windows version</b>
-<br /><br /><br />
+<br />
+<br />
+<br />
+<b>*** *** 3. Windows version
+</b>
+<br />
+<br />
+<br />
+<b> v1. Acycle0.2.6-Win-green</b>
+<br />
+<br />
+Green version. No installation needed. MatLab Runtime 2017a is essential.
+<br />
+(Step 1) Download Acycle0.2.6-Win-Installer
+
+Dropbox (https://www.dropbox.com/sh/t53vjs539gmixnm/AAC0BqTR0U5xghKwuVc1Iwbma?dl=0), or
+
+Baidu Cloud (https://pan.baidu.com/s/14-xRzV_-BBrE6XfyR_71Nw).
+<br />
+<br />
+(Step 2) Download MatLab runtime R2017a here:
+https://www.mathworks.com/products/compiler/matlab-runtime.html
+<br />
+<br />
+(Step 3) Install MatLab runtime R2017a.
+<br />
+<br />
+(Step 4) Run Acycle: Double-click Acycle.exe to run the software <br />
+<br />
+<br />
+<br />
+<b> v2. Acycle0.2.6-Win-Installer</b>
+
+<br />
 (Step 1) Download Acycle0.2.6-Win-Installer
 
 Dropbox (https://www.dropbox.com/sh/t53vjs539gmixnm/AAC0BqTR0U5xghKwuVc1Iwbma?dl=0), or
