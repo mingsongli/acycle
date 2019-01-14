@@ -81,10 +81,11 @@ set(handles.listbox2,'position',[0.58,0.114,0.4,0.476]) % set position
 set(handles.text3,'position',[0.58,0.84, 0.15,0.06]) % set position
 set(handles.text4,'position',[0.58,0.606,0.1,0.06]) % set position
 
+CDac_pwd; % cd ac_pwd dir
 d = dir; %get files
 set(handles.listbox1,'String',{d.name},'Value',1) %set string
 set(handles.edit1,'String',pwd) % set position
-
+cd(pre_dirML); % return to matlab view folder
 % Update handles structure
 guidata(hObject, handles);
 
@@ -282,23 +283,28 @@ function pushbutton8_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton8 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+CDac_pwd; % cd working dir
+
 agemodelname = char(get(handles.edit2,'String'));
 agemodel = load(agemodelname);
 
 list_content = cellstr(get(handles.listbox2,'String')); % read contents of listbox 1 
 nrow = length(list_content);
+
 figagescale = gcf;
 figdata = figure;
 xmax1 = nan;
 xmin1 = nan;
 xmax2 = nan;
 xmin2 = nan;
+
 for i = 1:nrow
     data_name = char(list_content(i,1));
     data = load(data_name);
     [~,dat_name,ext] = fileparts(data_name);
     subplot(2,1,1)
     plot(data(:,1),data(:,2)); hold on;
+    set(gca,'XMinorTick','on','YMinorTick','on')
     xmin1 = nanmin(xmin1,min(data(:,1)));
     xmax1 = nanmax(xmax1,max(data(:,1)));
     title('Origin data')
@@ -307,26 +313,21 @@ for i = 1:nrow
     handles.tunedseries = [time,data(:,2)];
     subplot(2,1,2)
     plot(time,data(:,2)); hold on;
+    set(gca,'XMinorTick','on','YMinorTick','on')
     title('Tuned data')
     xmin2 = nanmin(xmin2,min(time));
     xmax2 = nanmax(xmax2,max(time));
     xlim([xmin2,xmax2])
-%    cd(handles.working_folder)
     add_list = [dat_name,'-TD-',agemodelname];
-    %csvwrite(add_list,handles.tunedseries)
-    CDac_pwd; % cd ac_pwd dir
     dlmwrite(add_list, handles.tunedseries, 'delimiter', ',', 'precision', 9);
     d = dir; %get files
     set(handles.listbox1,'String',{d.name},'Value',1) %set string
-    cd(pre_dirML); % return to matlab view folder
 end
 
 % refresh AC main window
 figure(handles.acfigmain);
-CDac_pwd; % cd working dir
 refreshcolor;
 cd(pre_dirML); % return view dir
 figure(figagescale);
 figure(figdata); % return plot
-
 guidata(hObject,handles)

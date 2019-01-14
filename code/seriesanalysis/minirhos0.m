@@ -19,15 +19,16 @@ if nargin < 6
     end
 end
 % Two runs for estimation of rho and s0.
-nn = 100;
+nn = 50;
 % first run
 rhoi = linspace(0.001,0.999,nn);
-s0i = linspace(0.1*s0, 10*s0,nn);
+s0i = linspace(0.2*s0, 5*s0,nn/2);
 disti = zeros(length(rhoi), length(s0i));
+
 for i = 1: nn
     rho0 = rhoi(i);
     %disp(i)
-    for j = 1: nn
+    for j = 1: nn/2
         s0j = s0i(j);
         theored = s0j * (1-rho0^2)./(1-(2.*rho0.*cos(pi.*ft./fn))+rho0^2);
         if linlog == 1
@@ -40,33 +41,33 @@ for i = 1: nn
 end
 % get indice for rho, and s0 of the minimum distance
 [x,y]=find(disti==min(min(disti)));
-% rho = rhoi(x);
-% s0 = s0i(y);
-%disp([rho s0])
 
+mm = nn/2;
 % second run
-rhomax = 1.1*rhoi(x);
-if rhomax >= 1
-    rhomax = 0.9999;
-end
-rhoi = linspace(0.9*rhoi(x),rhomax,nn);
-s0i = linspace(0.9*s0i(y), 1.1*s0i(y),nn);
-disti = zeros(nn,nn);
-
-for i = 1: nn
-    rho0 = rhoi(i);
-    for j = 1: nn
-        s0j = s0i(j);
-        theored = s0j * (1-rho0^2)./(1-(2.*rho0.*cos(pi.*ft./fn))+rho0^2);
-        if linlog == 1
-            dist = theored - pxxsmooth;
-        else
-            dist = log(theored) - log(pxxsmooth);
-        end
-        disti(i,j) = (sum(dist.^2));
+for k= 1:3
+    rhomax = 1.05^(1/k/2)*rhoi(x);
+    if rhomax >= 1
+        rhomax = 0.9999;
     end
+    rhoi = linspace(0.95^(1/k/2)*rhoi(x),rhomax,mm);
+    s0i = linspace(0.95^(1/k/2)*s0i(y), 1.05^(1/k/2)*s0i(y),mm);
+    
+    disti = zeros(mm,mm);
+    for i = 1: mm
+        rho0 = rhoi(i);
+        for j = 1: mm
+            s0j = s0i(j);
+            theored = s0j * (1-rho0^2)./(1-(2.*rho0.*cos(pi.*ft./fn))+rho0^2);
+            if linlog == 1
+                dist = theored - pxxsmooth;
+            else
+                dist = log(theored) - log(pxxsmooth);
+            end
+            disti(i,j) = (sum(dist.^2));
+        end
+    end
+    [x,y]=find(disti==min(min(disti)));
 end
-[x,y]=find(disti==min(min(disti)));
 
 rho = rhoi(x);
 s0 = s0i(y);

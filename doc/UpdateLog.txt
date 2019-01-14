@@ -1,6 +1,62 @@
 - - - - - -    READ ME    - - - - - -
 
 Update Log
+
+_____________________________________
+
+Version : ACycle_v0.3.0.20190112
+Date    : Jan. 12, 2019; 11:50 pm EST
+By      : Mingsong Li (Penn State)
+
+	1. fix a bug in Zeebe17X solutions
+
+        Thanks Prof. Richard Zeebe (University of Hawaii at Manoa)
+        for his bug report and suggestion!
+
+    2. Refine spectral analysis GUI and robust AR1 model
+        Thanks Mr. Meng Wang (China University of Geosciences) 
+        for his help on the bug report
+
+    3. Add Steve Meyers' timeOpt and timeOptSim function
+        Timeseries -> timeOpt
+
+    4. Refine filtering GUI: 
+        refresh pop-up menu automatically allowing easy control of filter methods
+        add control of yaxis of MTM plot
+
+    5. Refine Detrending toolbox
+        Plot can be updated automatically when a window size changes.
+
+    6. Refine Evolutionary Spectral Analysis
+        Plot can be updated when specified parameters changes.
+
+    7. Evolutionary Spectral Analysis
+        More colormap options are available
+        Thanks Prof. Paul Olsen (Columbia University) 
+        for his suggestions!
+
+    8. Plot Pro GUI updated
+
+    9. Update Reminder
+
+    10. Add examples datasets
+
+    11. Fix a bug in Spectral Analysis
+        Periodogram with conventional confidence levels used the gamma distribution
+        Now changes to the chi2 distribution
+
+    12. Age Scale GUI refine
+_____________________________________
+_____________________________________
+
+New Stage:  ACycle_v0.2.6 Stand-alone versions
+
+    Today stand-alone versions for both Mac and Windows released!
+
+    This allows me to call it Acycle_v0.3 in the future update!
+
+    Thanks Qiyan Zhang for borrowing his laptop and MatLab
+_____________________________________
 _____________________________________
 
 Version : ACycle_v0.2.6.20190101
@@ -13,7 +69,7 @@ By      : Mingsong Li (Penn State)
 
     3. Refine spectrum and detrending GUI
 
-    4. Astronomical solution GUI refine
+    4. Astronomical solutions GUI refined
 _____________________________________
 
 Version : ACycle_v0.2.6.20181229

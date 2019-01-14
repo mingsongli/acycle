@@ -1,4 +1,4 @@
-function [rhoM, s0M,redconfAR1,redconfML96]=redconfML(x,dt,nw,nfft,linlog,smoothwin,plot)
+function [rhoM, s0M,redconfAR1,redconfML96]=redconfML(x,dt,nw,nfft,linlog,smoothwin,fmax,plot)
 %
 % Robust Estimation of Background Noise and Signal Detection
 %INPUT
@@ -13,6 +13,7 @@ function [rhoM, s0M,redconfAR1,redconfML96]=redconfML(x,dt,nw,nfft,linlog,smooth
 %           1 = a linear fit to S(f); 2 = a fit to log S(f).
 % smoothwin:median smoothing window. Should be smaller than 0.25 and
 %           larger than 0.05 or the spectral resolution. Default value is 0.2
+% fmax: maximum estimate frequency
 % plot: plot results or not
 %
 %OUTPUT
@@ -40,8 +41,10 @@ function [rhoM, s0M,redconfAR1,redconfML96]=redconfML(x,dt,nw,nfft,linlog,smooth
 % [rhoM, s0M,redconfAR1,redconfML96]=redconfML(x,dt,nw,nfft,linlog,smoothwin,plot);
 %
 %
-if nargin < 7
+if nargin < 8
     plot = 1;
+    if nargin < 7;
+        fmax = 1/(2*dt);
     if nargin < 6
         smoothwin = 0.2;
         if nargin < 5
@@ -57,6 +60,7 @@ if nargin < 7
             end
         end
     end
+    end
 end
 %
 % Nyquist frequency
@@ -65,10 +69,19 @@ fn = 1/(2*dt);
 [pxx,f] = pmtm(x,nw,nfft);
 % true frequencies
 ft = f/pi*fn;
+%
+%
+% testing fmax warning
+pxx = pxx(ft<=fmax);
+fn = fmax;
+ft = ft(ft<=fmax);
 % median-smoothing data numbers
 smoothn = round(smoothwin * length(pxx));
 % median-smoothing
 pxxsmooth = moveMedian(pxx,smoothn);
+%
+%pxxsmooth = pxxsmooth(ft<= fmax);
+%
 % convential rho1 (lag-1 autocorrelation coefficient)
 [rho]=rhoAR1(x);
 % mean power of spectrum
@@ -81,6 +94,9 @@ theored = s0 * (1-rho^2)./(1-(2.*rho.*cos(pi.*ft./fn))+rho^2);
 % 1996).
 % Here we use a naive grid search method.
 [rhoM, s0M] = minirhos0(s0,fn,ft,pxxsmooth,linlog);
+%
+% minimize rho only!
+%[rhoM, s0M] = minirho(s0,fn,ft,pxxsmooth,linlog);
 % median-smoothing reshape significance level
 theored1 = s0M * (1-rhoM^2)./(1-(2.*rhoM.*cos(pi.*ft./fn))+rhoM^2);
 
@@ -99,7 +115,7 @@ if plot == 1
     figure; semilogy(ft,pxx,'k')
     hold on; 
     semilogy(ft,pxxsmooth,'m-.');
-    semilogy(ft,theored,'g-');
+    %semilogy(ft,theored,'g-');
     semilogy(ft,theored1,'k-','LineWidth',2);
     semilogy(ft,chi90,'r-');
     semilogy(ft,chi95,'r--','LineWidth',2);
@@ -108,6 +124,8 @@ if plot == 1
     xlabel('Frequency')
     ylabel('Power')
     smthwin = ['Median-smoothing ',num2str(smoothwin*100),'%'];
-    legend('Power',smthwin,'Conventional AR(1)','Robust AR(1) median',...
+    legend('Power',smthwin,'Robust AR(1) median',...
         'Robust AR(1) 90%','Robust AR(1) 95%','Robust AR(1) 99%','Robust AR(1) 99.9%')
+%     legend('Power',smthwin,'Conventional AR(1)','Robust AR(1) median',...
+%         'Robust AR(1) 90%','Robust AR(1) 95%','Robust AR(1) 99%','Robust AR(1) 99.9%')
 end

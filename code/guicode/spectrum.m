@@ -62,7 +62,7 @@ if ismac
     set(gcf,'position',[0.45,0.5,0.28,0.3]) % set position
 elseif ispc
     set(gcf,'position',[0.45,0.4,0.48,0.5]) % set position
-    set(handles.pushbutton17,'Visible','off')
+    %set(handles.pushbutton17,'Visible','off')
 end
 %set(handles.text7,'position', [0.055,0.875,0.235,0.06])
 set(handles.text7,'position', [0.05,0.875,0.235,0.06])
@@ -79,8 +79,8 @@ set(handles.radiobutton4,'position', [0.503,0.054,0.195,0.365])
 set(handles.edit4,'position', [0.664,0.089,0.3,0.23])
 
 set(handles.uipanel3,'position', [0.05,0.082,0.445,0.32])
-set(handles.checkbox_robust,'position', [0.2,0.516,0.682,0.37])
-set(handles.checkbox_tabtchi,'position', [0.2,0.177,0.682,0.37])
+set(handles.checkbox_robust,'position', [0.2,0.516,0.75,0.37])
+set(handles.checkbox_tabtchi,'position', [0.2,0.177,0.75,0.37])
 
 set(handles.uibuttongroup1,'position', [0.5,0.31,0.45,0.47])
 set(handles.radiobutton_fmax,'position', [0.089,0.638,0.473,0.324])
@@ -93,6 +93,7 @@ set(handles.checkbox5,'position', [0.541,0.07,0.507,0.267])
 set(handles.pushbutton17,'position', [0.5,0.082,0.166,0.12])
 set(handles.pushbutton3,'position', [0.67,0.082,0.282,0.12])
 
+set(handles.checkbox_tabtchi,'String','Classical AR(1)')
 % Choose default command line output for spectrum
 handles.output = hObject;
 
@@ -110,13 +111,26 @@ handles.unit = varargin{1}.unit;
 handles.path_temp = varargin{1}.path_temp;
 handles.linlogY = 1;
 handles.pad = 1;
-handles.checkbox_tabtchi = 0;
+handles.checkbox_tabtchi_v = 0;
 handles.checkbox_robustAR1_v = 1;
 handles.ntapers= 2;
+handles.datasample = 0;  % warning of sampling rate: uneven = 1
+Dt = diff(data_s(:,1));
+if max(Dt) - min(Dt) > 10 * eps('single')
+    handles.datasample = 1;
+    handles.method ='Lomb-Scargle spectrum';
+    set(handles.popupmenu2, 'Value', 2);
+    set(handles.popupmenu_tapers,'Enable','off')
+    set(handles.checkbox_robust,'Enable','off')
+    set(handles.checkbox_robust,'Value',0)
+    set(handles.checkbox_tabtchi,'Value',0)
+    set(handles.checkbox_tabtchi,'String','White noise')
+else
+    handles.method ='Multi-taper method';
+end
 
-handles.mean = mean(diff(data_s(:,1)));
+handles.mean = mean(Dt);
 handles.nyquist = 1/(2*handles.mean);     % prepare nyquist
-handles.method ='Multi-taper method';
 set(handles.text_nyquist, 'String', num2str(handles.nyquist));
 set(handles.edit4, 'String', num2str(length(data_s(:,1))));
 % Update handles structure
@@ -191,35 +205,33 @@ function edit_fmax_input_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
     
 % --- Executes on button press in pushbutton3.
 function pushbutton3_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton3 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    figspectrum = gcf;
-    data = handles.current_data; % load current_data
-    data_name = handles.filename;
-    [~,dat_name,ext] = fileparts(data_name);
+figspectrum = gcf;
+data = handles.current_data; % load current_data
+data_name = handles.filename;
+[~,dat_name,ext] = fileparts(data_name);
 % set redconf input
-    datax = data(:,2);
-    timex = data(:,1);
-    diffx = diff(timex);
-    if max(diffx) - min(diffx) > eps('single')
-        warndlg('Warning: the data may not be evenly spaced.')
-    end
-    % dt = handles.mean;
-    dt = median(diff(timex));
-    unit = handles.unit;
-    filename = handles.filename;
-    nlength = length(datax);
-    method = handles.method;
-    df = 1/(timex(nlength)-timex(1));
-    check_plot_fmax = get(handles.radiobutton_fmax,'Value');
-    plot_fmax_input = str2double(get(handles.edit_fmax_input,'String'));
-    nw = handles.ntapers;
-    bw=2*nw*df;
+datax = data(:,2);
+timex = data(:,1);
+diffx = diff(timex);
+
+% dt = handles.mean;
+dt = median(diff(timex));
+unit = handles.unit;
+filename = handles.filename;
+nlength = length(datax);
+method = handles.method;
+df = 1/(timex(nlength)-timex(1));
+check_plot_fmax = get(handles.radiobutton_fmax,'Value');
+plot_fmax_input = str2double(get(handles.edit_fmax_input,'String'));
+nw = handles.ntapers;
+bw=2*nw*df;
+
 if handles.pad > 0
     padtimes = str2double(get(handles.edit3,'String'));
     nzeropad = nlength*padtimes;
@@ -227,14 +239,19 @@ else
     nzeropad = str2double(get(handles.edit4,'String'));
 end
 
-if check_plot_fmax >0
+if check_plot_fmax > 0
     fmax = handles.nyquist;
 else
     fmax = plot_fmax_input;
 end
 
 if strcmp(method,'Multi-taper method')
-    
+    if max(diffx) - min(diffx) > 10 * eps('single')
+        figwarn = warndlg({'Data may be interpolated to an uniform sampling interval';...
+            '';'    Or select : Lomb-Scargle spectrum'});
+        set(figwarn,'units','norm') % set location
+        set(figwarn,'position',[0.5,0.8,0.225,0.09]) % set position
+    end
     if handles.checkbox_robustAR1_v == 1
         dlg_title = 'Robust AR(1) Estimation';
         prompt = {'Median smoothing window: default 0.2 = 20%';...
@@ -250,10 +267,10 @@ if strcmp(method,'Multi-taper method')
             if length(datax)>2000
                 hwarn = warndlg('Large dataset, wait ...');
             end
-            [rhoM, s0M,redconfAR1,redconfML96]=redconfML(datax,dt,nw,nzeropad,linlog,smoothwin,1);
-%             if length(datax)>2000
-%                 close(hwarn)
-%             end
+            [rhoM, s0M,redconfAR1,redconfML96]=redconfML(datax,dt,nw,nzeropad,linlog,smoothwin,fmax,1);
+            try close(hwarn)
+            catch
+            end
             name1 = [dat_name,'-',num2str(nw),'piMTM-RobustAR1',ext];
             data1 = redconfML96;
             name2 = [dat_name,'-',num2str(nw),'piMTM-ConvenAR1',ext];
@@ -261,6 +278,9 @@ if strcmp(method,'Multi-taper method')
             title([dat_name,'-',num2str(nw),'piMTM-RobustAR1: rho = ',num2str(rhoM)])
             xlabel(['Frequency (cycles/',num2str(unit),')']) 
             set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'PI MTM'])
+            set(gca,'XMinorTick','on','YMinorTick','on')
+            xlim([0 fmax]);
+            set(gcf,'Color', 'white')
             if handles.linlogY == 1;
                 set(gca, 'YScale', 'log')
             else
@@ -274,6 +294,8 @@ if strcmp(method,'Multi-taper method')
             disp(name1)
             disp(name2)
             cd(pre_dirML);
+        else
+            return
         end
     
     end
@@ -289,7 +311,7 @@ if strcmp(method,'Multi-taper method')
     if handles.checkbox_robustAR1_v == 0
         figdata = figure;
         figHandle = gcf;
-        colordef white;
+        set(gcf,'Color', 'white')
         plot(fd1,po,'LineWidth',1); 
         line([0.7*fmax, 0.7*fmax+bw],[0.8*max(po), 0.8*max(po)],'Color','r')
         xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
@@ -299,6 +321,7 @@ if strcmp(method,'Multi-taper method')
         set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'PI MTM'])
         xlim([0 fmax]);
         set(gca,'XMinorTick','on','YMinorTick','on')
+        
         if handles.linlogY == 1;
             set(gca, 'YScale', 'log')
         else
@@ -306,7 +329,7 @@ if strcmp(method,'Multi-taper method')
         end
     end
     
-if handles.checkbox_tabtchi == 1
+if handles.checkbox_tabtchi_v == 1
     % Waitbar
     hwaitbar = waitbar(0,'Conventional red noise estimation may take a few minutes...',...    
        'WindowStyle','modal');
@@ -340,9 +363,7 @@ step = 2;
         step = 2.5;
         waitbar(step / steps)
         [fd,po,theored,tabtchi90,tabtchi95,tabtchi99]=redconftabtchi(datax,nw,dt,nzeropad,2);
-           % [Mspecred,~,po,fd,~,tabtchi,theored,rho] = redconf(datax,timex,dt,nsim,nw);
-           % Mspecred=Mspecred';
-           % theored=theored';
+
 step = 4.5;
     waitbar(step / steps)
         figure(figHandle);
@@ -353,13 +374,14 @@ step = 4.5;
 step = 5.5;
     waitbar(step / steps)
     delete(hwaitbar)
+    xlim([0 fmax]);
     if handles.linlogY == 1;
         set(gca, 'YScale', 'log')
     else
         set(gca, 'YScale', 'linear')
     end
-    %filename_mtm = [dat_name,'-',num2str(nw),'piMTMspectrum.csv'];
-    filename_mtm_cl = [dat_name,'-',num2str(nw),'piMTM-CL.csv'];
+    %filename_mtm = [dat_name,'-',num2str(nw),'piMTMspectrum.txt'];
+    filename_mtm_cl = [dat_name,'-',num2str(nw),'piMTM-CL.txt'];
     CDac_pwd; % cd ac_pwd dir
     dlmwrite(filename_mtm_cl, [fd,po,theored,tabtchi90,tabtchi95,tabtchi99], 'delimiter', ',', 'precision', 9);
     disp('>>  Refresh the Main Window to see output data')
@@ -377,9 +399,13 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
     timex = timex + abs(min(timex));
     [po,fd1,pth] = plomb(datax,timex,fmax,'Pd',pd);
     figdata = figure;  
-    colordef white;
-    plot(fd1,po,fd1,pth*ones(size(fd1')),'LineWidth',1); 
-    text(0.3*fmax*[1 1 1 1],pth-.5,[repmat('P_{fa} = ',[4 1]) num2str(pfa')])
+    set(gcf,'Color', 'white')
+    if handles.checkbox_tabtchi_v == 1
+        plot(fd1,po,fd1,pth*ones(size(fd1')),'LineWidth',1); 
+        text(0.3*fmax*[1 1 1 1],pth-.5,[repmat('P_{fa} = ',[4 1]) num2str(pfa')])
+    else
+        plot(fd1,po,'LineWidth',1); 
+    end
     xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
     ylabel('Power ')
     title(['Lomb-Scargle spectrum; Sampling rate = ',num2str(dt),' ', unit])
@@ -391,7 +417,7 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
     else
         set(gca, 'YScale', 'linear')
     end
-    filename_LS = [dat_name,'-Lomb-Scargle.csv'];
+    filename_LS = [dat_name,'-Lomb-Scargle.txt'];
     CDac_pwd; % cd ac_pwd dir
     dlmwrite(filename_LS, [fd1,po,(pth*ones(size(fd1')))'], 'delimiter', ',', 'precision', 9);
     cd(pre_dirML); % return to matlab view folder
@@ -399,47 +425,57 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
     disp(filename_LS)
     
 elseif  strcmp(method,'Periodogram')
+    if max(diffx) - min(diffx) > 10 * eps('single')
+        figwarn = warndlg({'Data may be interpolated to an uniform sampling interval';...
+            '';'    Or select : Lomb-Scargle spectrum'});
+    end
     if padtimes > 1
         [po,fd1] = periodogram(datax,[],nzeropad,1/dt);
     else 
         [po,fd1]=periodogram(datax,[],[],1/dt);
     end
     figdata = figure;  
-    colordef white;
-    plot(fd1,po,'LineWidth',1);
+    set(gcf,'Color', 'white')
+    plot(fd1,po,'k-','LineWidth',1);
     xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
     ylabel('Power ')
     title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit])
     set(gcf,'Name',[dat_name,ext,': periodogram'])
     set(gca,'XMinorTick','on','YMinorTick','on')
     xlim([0 fmax]);
-    if handles.checkbox_tabtchi == 1
+    if handles.linlogY == 1;
+        set(gca, 'YScale', 'log')
+    else
+        set(gca, 'YScale', 'linear')
+    end
+    if handles.checkbox_tabtchi_v == 1
         [theored]=theoredar1ML(datax,fd1,mean(po),dt);
-        tabtchired90 = theored * 2*gammaincinv(90/100,2)/(2*2);
-        tabtchired95 = theored * 2*gammaincinv(95/100,2)/(2*2);
-        tabtchired99 = theored * 2*gammaincinv(99/100,2)/(2*2);
-        tabtchired999 = theored * 2*gammaincinv(99.9/100,2)/(2*2);
+        tabtchired90 = theored * chi2inv(90/100,2)/2;
+        tabtchired95 = theored * chi2inv(95/100,2)/2;
+        tabtchired99 = theored * chi2inv(99/100,2)/2;
+        tabtchired999 = theored * chi2inv(99.9/100,2)/2;
+%         tabtchired90 = theored * 2*gammaincinv(90/100,2)/(2*2);
+%         tabtchired95 = theored * 2*gammaincinv(95/100,2)/(2*2);
+%         tabtchired99 = theored * 2*gammaincinv(99/100,2)/(2*2);
+%         tabtchired999 = theored * 2*gammaincinv(99.9/100,2)/(2*2);
         hold on
-        plot(fd1,theored,'LineWidth',1)
-        plot(fd1,tabtchired90,'LineWidth',1)
-        plot(fd1,tabtchired95,'LineWidth',1)
-        plot(fd1,tabtchired99,'LineWidth',1)
-        plot(fd1,tabtchired999,'LineWidth',1)
+        plot(fd1,theored,'k-','LineWidth',2)
+        plot(fd1,tabtchired90,'r-','LineWidth',1)
+        plot(fd1,tabtchired95,'r--','LineWidth',2)
+        plot(fd1,tabtchired99,'b-.','LineWidth',1)
+        plot(fd1,tabtchired999,'g.','LineWidth',1)
         legend('Power','Mean','90%','95%','99%','99.9')
-        set(gca,'XMinorTick','on','YMinorTick','on')
-        if handles.linlogY == 1;
-            set(gca, 'YScale', 'log')
-        else
-            set(gca, 'YScale', 'linear')
-        end
         hold off
     end
-    filename_Periodogram = [dat_name,'-Periodogram.csv'];
+    filename_Periodogram = [dat_name,'-Periodogram.txt'];
     CDac_pwd; % cd ac_pwd dir
-    dlmwrite(filename_Periodogram, [fd1,po,theored,tabtchired90,tabtchired95,tabtchired99,tabtchired999], ...
+try    dlmwrite(filename_Periodogram, [fd1,po,theored,tabtchired90,tabtchired95,tabtchired99,tabtchired999], ...
         'delimiter', ',', 'precision', 9);
+catch
+    dlmwrite(filename_Periodogram, [fd1,po], ...
+        'delimiter', ',', 'precision', 9);
+end
     cd(pre_dirML); % return to matlab view folder
-    disp('Refresh the Main Window:')
     disp(filename_Periodogram)
 else
 end
@@ -450,7 +486,14 @@ CDac_pwd; % cd working dir
 refreshcolor;
 cd(pre_dirML); % return view dir
 figure(figspectrum);
-if ishandle(figdata); figure(figdata); end% return plot
+try figure(figwarn); 
+catch
+end
+try figure(figdata);
+    set(figdata,'units','norm') % set location
+    set(figdata,'position',[0.05,0.4,0.45,0.45]) % set position
+catch
+end% return plot
 guidata(hObject,handles);
     
 
@@ -497,13 +540,8 @@ function checkbox_tabtchi_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox_tabtchi
 
-check_checkbox_tabtchi = get(hObject,'Value');
-handles.checkbox_tabtchi = check_checkbox_tabtchi;
-if check_checkbox_tabtchi == 1
-    disp('>>  Select conventional AR(1) model')
-else
-    
-end
+checkbox_tabtchi_v = get(hObject,'Value');
+handles.checkbox_tabtchi_v = checkbox_tabtchi_v;
 guidata(hObject, handles);
 
 % --- Executes on button press in checkbox_robustAR1.
@@ -515,11 +553,6 @@ function checkbox_robust_Callback(hObject, eventdata, handles)
 % Hint: get(hObject,'Value') returns toggle state of checkbox_tabtchi
 checkbox_robustAR1 = get(hObject,'Value');
 handles.checkbox_robustAR1_v = checkbox_robustAR1;
-if checkbox_robustAR1 == 1
-    disp('>>  Select robust AR(1) model')
-else
-    disp('>>  Unselect robust AR(1) model')
-end
 guidata(hObject, handles);
 
 function edit_nsimulation_Callback(hObject, eventdata, handles)
@@ -708,23 +741,32 @@ function popupmenu2_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns popupmenu2 contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupmenu2
-%handles = hObject;
-%handles = handles;
+
 contents = cellstr(get(hObject,'String'));
 method = contents{get(hObject,'Value')};
 handles.method = method;
 if strcmp(method,'Multi-taper method')
+    if handles.datasample == 1
+        msgbox('Sampling rate may not be uneven! Ignore if this is not ture.','Waning')
+    end
     set(handles.popupmenu_tapers,'Enable','on')
     set(handles.checkbox_robust,'Enable','on')
-%    set(handles.checkbox_tabtchi,'Enable','on')
+    set(handles.checkbox_tabtchi,'Enable','on')
+    set(handles.checkbox_tabtchi,'String','Classical AR(1)')
 elseif strcmp(method,'Periodogram')
+    if handles.datasample == 1
+        msgbox('Sampling rate may not be uneven! Ignore if this is not ture.','Waning')
+    end
     set(handles.popupmenu_tapers,'Enable','off')
     set(handles.checkbox_robust,'Enable','off')
-%    set(handles.checkbox_tabtchi,'Enable','on')
+    set(handles.checkbox_tabtchi,'Enable','on')
+    set(handles.checkbox_tabtchi,'String','Classical AR(1)')
 elseif strcmp(method,'Lomb-Scargle spectrum')
     set(handles.popupmenu_tapers,'Enable','off')
     set(handles.checkbox_robust,'Enable','off')
-%    set(handles.checkbox_tabtchi,'Enable','off')
+    set(handles.checkbox_robust,'Value',0)
+    set(handles.checkbox_tabtchi,'Value',0)
+    set(handles.checkbox_tabtchi,'String','White noise')
 else
     
 end
@@ -749,27 +791,24 @@ function pushbutton17_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton17 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    figspectrum = gcf;
-    data = handles.current_data; % load current_data
-    data_name = handles.filename;
-    [~,dat_name,ext] = fileparts(data_name);
+figspectrum = gcf;
+data = handles.current_data; % load current_data
+data_name = handles.filename;
+[~,dat_name,ext] = fileparts(data_name);
 % set redconf input
-    datax = data(:,2);
-    timex = data(:,1);
-    diffx = diff(timex);
-    if max(diffx) - min(diffx) > eps('single')
-        warndlg('Warning: the data may not be evenly spaced.')
-    end
-    dt = median(diff(timex));
-    unit = handles.unit;
-    filename = handles.filename;
-    nlength = length(datax);
-    method = handles.method;
-    df = 1/(timex(nlength)-timex(1));
-    check_plot_fmax = get(handles.radiobutton_fmax,'Value');
-    plot_fmax_input = str2double(get(handles.edit_fmax_input,'String'));
-    nw = handles.ntapers;
-    bw=2*nw*df;
+datax = data(:,2);
+timex = data(:,1);
+diffx = diff(timex);
+dt = median(diff(timex));
+unit = handles.unit;
+filename = handles.filename;
+nlength = length(datax);
+method = handles.method;
+df = 1/(timex(nlength)-timex(1));
+check_plot_fmax = get(handles.radiobutton_fmax,'Value');
+plot_fmax_input = str2double(get(handles.edit_fmax_input,'String'));
+nw = handles.ntapers;
+bw=2*nw*df;
 if handles.pad > 0
     padtimes = str2double(get(handles.edit3,'String'));
     nzeropad = nlength*padtimes;
@@ -784,7 +823,12 @@ else
 end
 
 if strcmp(method,'Multi-taper method')
-    
+    if max(diffx) - min(diffx) > 10 * eps('single')
+        figwarn = warndlg({'Data may be interpolated to an uniform sampling interval';...
+            '';'    Or select : Lomb-Scargle spectrum'});
+        set(figwarn,'units','norm') % set location
+        set(figwarn,'position',[0.5,0.8,0.225,0.09]) % set position
+    end
     if handles.checkbox_robustAR1_v == 1
         dlg_title = 'Robust AR(1) Estimation';
         prompt = {'Median smoothing window: default 0.2 = 20%';...
@@ -801,20 +845,24 @@ if strcmp(method,'Multi-taper method')
             if length(datax)>2000
                 hwarn = warndlg('Large dataset, wait ...');
             end
-            [rhoM, s0M,redconfAR1,redconfML96]=redconfML(datax,dt,nw,nzeropad,linlog,smoothwin,1);
-%             if length(datax)>2000
-%                 close(hwarn)
-%             end
+            [rhoM, s0M,redconfAR1,redconfML96]=redconfML(datax,dt,nw,nzeropad,linlog,smoothwin,fmax,1);
+            try close(hwarn)
+            catch
+            end
             xlim([0 fmax]);
             xlabel(['Frequency (cycles/',num2str(unit),')']) 
             title([num2str(nw),'piMTM',' ','-RobustAR(1)SamplingRate = ',num2str(dt), unit])
             set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'PI MTM'])
+            set(gca,'XMinorTick','on','YMinorTick','on')
+            set(gcf,'Color', 'white')
             if handles.linlogY == 1;
                 set(gca, 'YScale', 'log')
             else
                 set(gca, 'YScale', 'linear')
             end
             figdata = gcf;
+        else
+            return
         end
     end
     
@@ -828,7 +876,7 @@ if strcmp(method,'Multi-taper method')
     if handles.checkbox_robustAR1_v == 0
         figdata = figure;  
         figHandle = gcf;
-        colordef white;
+        set(gcf,'Color', 'white')
         plot(fd1,po,'LineWidth',1); 
         line([0.7*fmax, 0.7*fmax+bw],[0.8*max(po), 0.8*max(po)],'Color','r')
         xlabel(['Frequency (cycles/',num2str(unit),')']) 
@@ -836,6 +884,7 @@ if strcmp(method,'Multi-taper method')
         legend('Power','bw')
         title([num2str(nw),' PI MTM method',' ','; Sampling rate = ',num2str(dt),' ', unit])
         set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'PI MTM'])
+        set(gca,'XMinorTick','on','YMinorTick','on')
         xlim([0 fmax]);
         if handles.linlogY == 1;
             set(gca, 'YScale', 'log')
@@ -844,7 +893,7 @@ if strcmp(method,'Multi-taper method')
         end
     end 
 
-if handles.checkbox_tabtchi == 1
+if handles.checkbox_tabtchi_v == 1
     % Waitbar
     hwaitbar = waitbar(0,'Conventional red noise estimation may take a few minutes...',...    
        'WindowStyle','modal');
@@ -899,58 +948,73 @@ end
 elseif strcmp(method,'Lomb-Scargle spectrum')
     pfa = [50 10 1 0.01]/100;
     pd = 1 - pfa;
-    
     timex = timex + abs(min(timex));
     %[po,fd1,pth] = plomb(datax,timex,fmax,'normalized','Pd',pd);
     [po,fd1,pth] = plomb(datax,timex,fmax,'Pd',pd);
-    figdata = figure;  
+    figdata = figure;
     colordef white;
-    plot(fd1,po,fd1,pth*ones(size(fd1')),'LineWidth',1); 
-    text(0.3*fmax*[1 1 1 1],pth-.5,[repmat('P_{fa} = ',[4 1]) num2str(pfa')])
+    if handles.checkbox_tabtchi_v == 1
+        plot(fd1,po,fd1,pth*ones(size(fd1')),'LineWidth',1); 
+        text(0.3*fmax*[1 1 1 1],pth-.5,[repmat('P_{fa} = ',[4 1]) num2str(pfa')])
+    else
+        plot(fd1,po,'LineWidth',1); 
+    end
+    
     xlabel(['Frequency (cycles/',num2str(unit),')']) 
     ylabel('Power ')
     title(['Lomb-Scargle spectrum; Sampling rate = ',num2str(dt),' ', unit])
     set(gcf,'Name',[dat_name,ext,': Lomb-Scargle spectrum'])
+    set(gca,'XMinorTick','on','YMinorTick','on')
     xlim([0 fmax]);
     if handles.linlogY == 1;
         set(gca, 'YScale', 'log')
     else
         set(gca, 'YScale', 'linear')
     end
-%     filename_mtm = [dat_name,'-Lomb-Scargle.csv'];
+%     filename_mtm = [dat_name,'-Lomb-Scargle.txt'];
 %     dlmwrite(filename_mtm, [fd1,po], 'delimiter', ',', 'precision', 9);
 elseif  strcmp(method,'Periodogram')
+    
+    if max(diffx) - min(diffx) > 10 * eps('single')
+        figwarn = warndlg({'Data may be interpolated to an uniform sampling interval';...
+            '';'    Or select : Lomb-Scargle spectrum'});
+    end
     if padtimes > 1
         [po,fd1] = periodogram(datax,[],nzeropad,1/dt);
     else 
         [po,fd1]=periodogram(datax,[],[],1/dt);
     end
     figdata = figure;  
-    colordef white;
-    plot(fd1,po,'LineWidth',1);
+    set(gcf,'Color', 'white')
+    plot(fd1,po,'k-','LineWidth',1);
     xlabel(['Frequency (cycles/',num2str(unit),')']) 
     ylabel('Power ')
     title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit])
     set(gcf,'Name',[dat_name,ext,': periodogram'])
+    set(gca,'XMinorTick','on','YMinorTick','on')
     xlim([0 fmax]);
-    if handles.checkbox_tabtchi == 1
+    if handles.linlogY == 1;
+        set(gca, 'YScale', 'log')
+    else
+        set(gca, 'YScale', 'linear')
+    end
+    if handles.checkbox_tabtchi_v == 1
         [theored]=theoredar1ML(datax,fd1,mean(po),dt);
-        tabtchired90 = theored * 2*gammaincinv(90/100,2)/(2*2);
-        tabtchired95 = theored * 2*gammaincinv(95/100,2)/(2*2);
-        tabtchired99 = theored * 2*gammaincinv(99/100,2)/(2*2);
-        tabtchired999 = theored * 2*gammaincinv(99.9/100,2)/(2*2);
+        tabtchired90 = theored * chi2inv(90/100,2)/2;
+        tabtchired95 = theored * chi2inv(95/100,2)/2;
+        tabtchired99 = theored * chi2inv(99/100,2)/2;
+        tabtchired999 = theored * chi2inv(99.9/100,2)/2;
+%         tabtchired90 = theored * 2*gammaincinv(90/100,2)/(2*2);
+%         tabtchired95 = theored * 2*gammaincinv(95/100,2)/(2*2);
+%         tabtchired99 = theored * 2*gammaincinv(99/100,2)/(2*2);
+%         tabtchired999 = theored * 2*gammaincinv(99.9/100,2)/(2*2);
         hold on
-        plot(fd1,theored,'LineWidth',1)
-        plot(fd1,tabtchired90,'LineWidth',1)
-        plot(fd1,tabtchired95,'LineWidth',1)
-        plot(fd1,tabtchired99,'LineWidth',1)
-        plot(fd1,tabtchired999,'LineWidth',1)
+        plot(fd1,theored,'k-','LineWidth',2)
+        plot(fd1,tabtchired90,'r-','LineWidth',1)
+        plot(fd1,tabtchired95,'r--','LineWidth',2)
+        plot(fd1,tabtchired99,'b-.','LineWidth',1)
+        plot(fd1,tabtchired999,'g.','LineWidth',1)
         legend('Power','Mean','90%','95%','99%','99.9')
-        if handles.linlogY == 1;
-            set(gca, 'YScale', 'log')
-        else
-            set(gca, 'YScale', 'linear')
-        end
     end
 else
 end
@@ -960,5 +1024,13 @@ CDac_pwd; % cd working dir
 refreshcolor;
 cd(pre_dirML); % return view dir
 figure(figspectrum);
-if ishandle(figdata); figure(figdata); end% return plot
+
+try figure(figwarn);
+catch
+end
+try figure(figdata); 
+    set(figdata,'units','norm') % set location
+    set(figdata,'position',[0.05,0.4,0.45,0.45]) % set position
+catch
+end
 guidata(hObject,handles);

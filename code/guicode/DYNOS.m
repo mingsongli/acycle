@@ -541,6 +541,7 @@ end
 plot(y_grid_nan,powyad_p_nan(:,npercent2+1),'Color',[0,120/255,0],'LineWidth',1.5,'LineStyle','--')
 axis([data(1,1) data(length(data(:,1)),1) min(powyad_p_nan(:,npercent)) max(powyad_p_nan(:,1))]) 
 set(handles.axes2,'Ydir','reverse')
+set(gca,'XMinorTick','on','YMinorTick','on')
 hold off
 
 set(handles.uipushtool4, 'Enable', 'On');
@@ -641,6 +642,7 @@ if ismember('data',existdata)
     % plot
     plot(handles.axes1,data(:,1),data(:,2));
     axis(handles.axes1,[xmin xmax ymin ymax])
+    set(gca,'XMinorTick','on','YMinorTick','on')
     % plot
     axes(handles.axes2)
     histfit(samplerate,40,'kernel');

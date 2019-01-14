@@ -135,8 +135,8 @@ end
 handles.matrix_set = matrix_set;
 
 % settings for x-axis 1st row and y-axis 2nd row
-% 1 column = start; 2 = end; 3 = linear1/log0; 4 = set x or y
-% 5 column = start; 6 = end; 7 = linear1/log0; 8 = set x or y
+% 1 column = start; 2 = end; 3 = linear(=1)/log(=0); 4 = set x or y
+% 5 column = start; 6 = end; 7 = linear(=1)/log(=0); 8 = set x or y
 %           1  2  3  4  5  6  7  8
 axis_set = {0, 0, 1, 1, 0, 0, 1, 0};
 axis_setting = repmat(axis_set,1,1);
@@ -188,7 +188,6 @@ set(handles.push_markeredge,'BackgroundColor', colordef);
 %if axis_setting{1,4} == 1
 set(handles.axis_start, 'String', axis_setting{1,1});
 set(handles.axis_end, 'String', axis_setting{1,2});
-
 %end
 handles.basevalue = axis_setting{1,5}; %
 handles.basevalue_check = 0;
@@ -199,6 +198,7 @@ handles.pop_markerstyle_list = pop_markerstyle_list;
 handles.pop_markersize_list = pop_markersize_list;
 handles.axis_setting = axis_setting;
 % Update handles structure
+handles.plotproGUIfig = gcf;
 guidata(hObject, handles);
 %end
 % UIWAIT makes PlotAdv wait for user response (see UIRESUME)
@@ -236,13 +236,15 @@ matrix_set = handles.matrix_set;  % plot style setting
 %axis_setting = handles.axis_setting;  % axis setting
 plot_s = handles.plot_s;
 nplot = handles.nplot;
+handles.setseq = val;
+
 for i = 1: nplot
     [~,name,ext] = fileparts(plot_s{i});
     selected_data = [name,ext];
     switch str{val};
     case selected_data % set selected.
-        disp(['Set style for data: ',selected_data]);
-        handles.setseq = i;
+        disp(['>>  Set style for data: ',selected_data]);
+        %handles.setseq = i;
         pop_linesize_ii = getlisti(handles.pop_linesize_list,num2str(matrix_set{i,3},'%2.1f'));
         pop_markersize_ii = getlisti(handles.pop_markersize_list,num2str(matrix_set{i,6},'%2.1f'));
         %class(matrix_set{i,5})
@@ -337,6 +339,10 @@ end
 handles.matrix_set = matrix_set_temp;
 % Update handles structure
 guidata(hObject, handles);
+try figure(handles.plotprofig)
+    plotpro_plot_done;
+catch
+end
 
 
 % --- Executes during object creation, after setting all properties.
@@ -371,6 +377,11 @@ handles.matrix_set = matrix_set_temp;
 % Update handles structure
 guidata(hObject, handles);
 
+try figure(handles.plotprofig)
+    plotpro_plot_done;
+catch
+end
+
 % --- Executes during object creation, after setting all properties.
 function pop_linestyle_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to pop_linestyle (see GCBO)
@@ -403,6 +414,12 @@ handles.matrix_set = matrix_set_temp;
 % Update handles structure
 guidata(hObject, handles);
 
+try figure(handles.plotprofig)
+    plotpro_plot_done;
+catch
+end
+
+
 % --- Executes during object creation, after setting all properties.
 function pop_markerstyle_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to pop_markerstyle (see GCBO)
@@ -433,6 +450,12 @@ matrix_set_temp{handles.setseq,3} = str2double(str{val});
 handles.matrix_set = matrix_set_temp;
 % Update handles structure
 guidata(hObject, handles);
+
+try figure(handles.plotprofig)
+    plotpro_plot_done;
+catch
+end
+
 
 % --- Executes during object creation, after setting all properties.
 function pop_linesize_CreateFcn(hObject, eventdata, handles)
@@ -465,6 +488,11 @@ handles.matrix_set = matrix_set_temp;
 % Update handles structure
 guidata(hObject, handles);
 
+try figure(handles.plotprofig)
+    plotpro_plot_done;
+catch
+end
+
 
 % --- Executes during object creation, after setting all properties.
 function pop_markersize_CreateFcn(hObject, eventdata, handles)
@@ -491,6 +519,11 @@ handles.matrix_set = matrix_set_temp;
 set(handles.push_linecolor, 'BackgroundColor', c);
 % Update handles structure
 guidata(hObject, handles);
+try figure(handles.plotprofig)
+    plotpro_plot_done;
+catch
+end
+
 
 % --- Executes on button press in push_makerface.
 function push_makerface_Callback(hObject, eventdata, handles)
@@ -504,6 +537,11 @@ handles.matrix_set = matrix_set_temp;
 set(handles.push_makerface, 'BackgroundColor', c);
 % Update handles structure
 guidata(hObject, handles);
+try figure(handles.plotprofig)
+    plotpro_plot_done;
+catch
+end
+
 
 % --- Executes on button press in push_markeredge.
 function push_markeredge_Callback(hObject, eventdata, handles)
@@ -517,6 +555,11 @@ handles.matrix_set = matrix_set_temp;
 set(handles.push_markeredge, 'BackgroundColor', c);
 % Update handles structure
 guidata(hObject, handles);
+try figure(handles.plotprofig)
+    plotpro_plot_done;
+catch
+end
+
 
 % --- Executes during object creation, after setting all properties.
 function pop_data_CreateFcn(hObject, eventdata, handles)
@@ -541,14 +584,20 @@ function plot_done_Callback(hObject, eventdata, handles)
 %                   5 = marker style, 6 = marker size, 7 = marker fill
 %                   color, 8 = maker show?, 9 = marker edge color, 10 = marker edge
 %                   show?
+plotprofig = figure;
+
+set(0,'Units','normalized') % set units as normalized
+set(plotprofig,'units','norm') % set location
+set(plotprofig,'position',[0.03,0.5,0.42,0.45]) % set position
+set(plotprofig,'Name', 'Acycle: Plot Pro')
+
 
 matrix_set = handles.matrix_set;
 axis_setting = handles.axis_setting;
 flipxy = handles.flipxy;
-figure;
+
 hold on
 for i = 1: handles.nplot
-    
     try
         dat = load(handles.plot_s{i});
     catch
@@ -628,36 +677,47 @@ if axis_setting{1,5} < axis_setting{1,6}
 end
 xlabel(handles.unit)
 ylabel('Value')
-%title('Plot')
 set(gca,'XMinorTick','on','YMinorTick','on')
-legend(handles.plot_list)
 
-if and(axis_setting{1,3} == 1, axis_setting{1,7} == 1)
-%    disp('plot')
-elseif and(axis_setting{1,3} == 0, axis_setting{1,7} == 1)
-    set(gca,'xscale','log')
-%     disp('semilogx')
-elseif and(axis_setting{1,3} == 1, axis_setting{1,7} == 0)
-    set(gca,'yscale','log')
-%     disp('semilogy')
-else
-    set(gca,'xscale','log')
-    set(gca,'yscale','log')
-%     disp('loglog')
+%  settings for x-axis 1st row and y-axis 2nd row
+%  1 column = start; 2 = end; 3 = linear(=1)/log(=0); 4 = set x or y
+%  5 column = start; 6 = end; 7 = linear(=1)/log(=0); 8 = set x or y
+%            1  2  3  4  5  6  7  8
+%axis_set = {0, 0, 1, 1, 0, 0, 1, 0};
+
+if axis_setting{1,3} == 0
+    set(gca,'XScale','log')
+elseif axis_setting{1,3} == 1
+    set(gca,'XScale','linear')
 end
-hold off
+
+if axis_setting{1,7} == 0
+    set(gca,'YScale','log')
+elseif axis_setting{1,7} == 1
+    set(gca,'YScale','linear')
+end
 
 if flipxy(1) == 1
     set(gca,'Xdir','reverse')
+else
+    set(gca,'Xdir','normal')
 end
 if flipxy(2) == 1
     set(gca,'Ydir','reverse')
+else
+    set(gca,'Ydir','normal')
 end
 
 if handles.swapxy == 1
     view([90 -90])
+else
+    view([0 90]);
 end
+legend(handles.plot_list)
+hold off
+handles.plotprofig = plotprofig;
 set(gcf,'color','w');
+guidata(hObject, handles);
 
 
 % --- Executes on button press in push_face.
@@ -684,6 +744,10 @@ end
 handles.matrix_set = matrix_set_temp;
 % Update handles structure
 guidata(hObject, handles);
+try figure(handles.plotprofig)
+    plotpro_plot_done;
+catch
+end
 
 
 % --- Executes on button press in push_edge.
@@ -703,6 +767,10 @@ end
 handles.matrix_set = matrix_set_temp;
 % Update handles structure
 guidata(hObject, handles);
+try figure(handles.plotprofig)
+    plotpro_plot_done;
+catch
+end
 
 
 % --- Executes on button press in push_axis.
@@ -718,6 +786,17 @@ if axis_setting{1,4} == 0
     set(handles.push_axis,'String','X')
     set(handles.axis_start,'String',axis_setting{1,1})
     set(handles.axis_end,'String',axis_setting{1,2})
+%  settings for x-axis 1st row and y-axis 2nd row
+%  1 column = start; 2 = end; 3 = linear(=1)/log(=0); 4 = set x or y
+%  5 column = start; 6 = end; 7 = linear(=1)/log(=0); 8 = set x or y
+%            1  2  3  4  5  6  7  8
+%axis_set = {0, 0, 1, 1, 0, 0, 1, 0};
+
+    if axis_setting{1,3} == 1
+        set(handles.push_axis_log,'String','Linear')
+    else
+        set(handles.push_axis_log,'String','Log')
+    end
     % normal or fliped
     if flipxy(1) == 0
         set(handles.pushbutton_flipxy,'String','Normal')
@@ -730,6 +809,11 @@ else
     set(handles.push_axis,'String','Y')
     set(handles.axis_start,'String',axis_setting{1,5})
     set(handles.axis_end,'String',axis_setting{1,6})
+    if axis_setting{1,7} == 1
+        set(handles.push_axis_log,'String','Linear')
+    else
+        set(handles.push_axis_log,'String','Log')
+    end
     % normal or fliped
     if flipxy(2) == 0
         set(handles.pushbutton_flipxy,'String','Normal')
@@ -740,6 +824,7 @@ end
 handles.axis_setting = axis_setting;
 % Update handles structure
 guidata(hObject, handles);
+
 
 function axis_start_Callback(hObject, eventdata, handles)
 % hObject    handle to axis_start (see GCBO)
@@ -758,6 +843,10 @@ end
 handles.axis_setting = axis_setting;
 % Update handles structure
 guidata(hObject, handles);
+try figure(handles.plotprofig)
+    plotpro_plot_done;
+catch
+end
 
 % --- Executes during object creation, after setting all properties.
 function axis_start_CreateFcn(hObject, eventdata, handles)
@@ -790,6 +879,11 @@ end
 handles.axis_setting = axis_setting;
 % Update handles structure
 guidata(hObject, handles);
+try figure(handles.plotprofig)
+    plotpro_plot_done;
+catch
+end
+
 
 % --- Executes during object creation, after setting all properties.
 function axis_end_CreateFcn(hObject, eventdata, handles)
@@ -810,28 +904,46 @@ function push_axis_log_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+%  settings for x-axis 1st row and y-axis 2nd row
+%  1 column = start; 2 = end; 3 = linear(=1)/log(=0); 4 = set x(=1) or y(=0)
+%  5 column = start; 6 = end; 7 = linear(=1)/log(=0); 8 = set x(=1) or y(=0)
+%            1  2  3  4  5  6  7  8
+%axis_set = {0, 0, 1, 1, 0, 0, 1, 0};
+
 axis_setting = handles.axis_setting;
 if axis_setting{1,4} == 1  % setting for X axis
-    if axis_setting{1,3} == 1  % linear
+    if axis_setting{1,3} == 1  
+        % linear
         axis_setting{1,3} = 0; % change to log
         set(handles.push_axis_log,'String','Log');
-    elseif axis_setting{1,3} == 0  % log
+        %disp('X change to log')
+    else
+        % log
         axis_setting{1,3} = 1; % change to linear
         set(handles.push_axis_log,'String','Linear');
+        %disp('X change to linear')
     end
 elseif axis_setting{1,4} == 0  % setting for Y axis
-    if axis_setting{1,7} == 1  % linear
+    if axis_setting{1,7} == 1  
+        % linear
         axis_setting{1,7} = 0; % change to log
         set(handles.push_axis_log,'String','Log');
-    elseif axis_setting{1,7} == 0  % log
+        %disp('Y change to log')
+    elseif axis_setting{1,7} == 0  
+        % log
         axis_setting{1,7} = 1; % change to linear
         set(handles.push_axis_log,'String','Linear');
+        %disp('Y change to linear')
     end
 end
 
 handles.axis_setting = axis_setting;
 % Update handles structure
 guidata(hObject, handles);
+try figure(handles.plotprofig)
+    plotpro_plot_done;
+catch
+end
 
 
 % --- Executes on button press in pushbutton_flipxy.
@@ -863,10 +975,13 @@ elseif axis_setting{1,4} == 0  % setting for Y axis
     end
     
 end
-
 handles.flipxy = flipxy;
 % Update handles structure
 guidata(hObject, handles);
+try figure(handles.plotprofig)
+    plotpro_plot_done;
+catch
+end
 
 
 % --- Executes on button press in push_swap.
@@ -882,9 +997,12 @@ else % to swap
     set(handles.push_swap,'String','Swap');
     handles.swapxy = 1;
 end
-
 % Update handles structure
 guidata(hObject, handles);
+try figure(handles.plotprofig)
+    plotpro_plot_done;
+catch
+end
 
 
 function edit_basevalue_Callback(hObject, eventdata, handles)
@@ -911,6 +1029,10 @@ end
 % Update handles structure
 handles.axis_setting = axis_setting;
 guidata(hObject, handles);
+try figure(handles.plotprofig)
+    plotpro_plot_done;
+catch
+end
 
 % --- Executes during object creation, after setting all properties.
 function edit_basevalue_CreateFcn(hObject, eventdata, handles)
@@ -935,3 +1057,7 @@ function checkbox_basevalue_Callback(hObject, eventdata, handles)
 handles.basevalue_check = get(hObject,'Value');
 % Update handles structure
 guidata(hObject, handles);
+try figure(handles.plotprofig)
+    plotpro_plot_done;
+catch
+end

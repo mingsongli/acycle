@@ -33,7 +33,7 @@ function varargout = AC(varargin)
 
 % Edit the above text to modify the response to help AC
 
-% Last Modified by GUIDE v2.5 29-Dec-2018 12:37:19
+% Last Modified by GUIDE v2.5 12-Jan-2019 23:46:07
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -63,7 +63,7 @@ function AC_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to AC (see VARARGIN)
 
-set(gcf,'Name','ACYCLE v0.2.6')
+set(gcf,'Name','Acycle v0.3')
 set(gcf,'DockControls', 'off')
 set(gcf,'Color', 'white')
 set(0,'Units','normalized') % set units as normalized
@@ -88,9 +88,10 @@ elseif ispc
 end
 
 handles.acfigmain = gcf;  %handles of the ac main window
-%if isdeployed
+
+if isdeployed
     copyright;
-%end
+end
 figure(handles.acfigmain)
 %guidata(hObject, handles);
 h=get(gcf,'Children');  % get all content
@@ -203,6 +204,11 @@ handles.math_deleteempty = 1;
 handles.math_derivative = 1;
 assignin('base','unit',handles.unit)
 assignin('base','unit_type',handles.unit_type)
+% Update reminder
+try 
+    ac_check_update;
+catch
+end
 % Update handles structure
 guidata(hObject, handles);
 
@@ -249,7 +255,7 @@ if handles.doubleclick
 %debug
 %    disp(filename)
     try
-        % try to open the folder, if selected item is a folder.
+        % if selected item is a folder, try to open the folder.
         CDac_pwd; % cd working dir
         filename1 = strrep2(filename, '<HTML><FONT color="blue">', '</FONT></HTML>');
         filename = fullfile(ac_pwd,filename1);
@@ -308,7 +314,6 @@ if handles.doubleclick
             %if sum(strcmp(ext,handles.filetype)) > 0
             if strcmp(ext,'.fig')
                 try
-                    %openfig(filename);
                     uiopen(filename,1);
                     set(gcf,'Name',[dat_name,ext])
                 catch
@@ -340,12 +345,12 @@ if handles.doubleclick
                 try
                     %open(filename);
                     uiopen(filename,1);
-                    set(gcf,'Name',[dat_name,ext])
+                    %set(gcf,'Name',[dat_name,ext])
                 catch
                 end
             else
                 try uiopen(filename,1);
-                    set(gcf,'Name',[dat_name,ext])
+                    %set(gcf,'Name',[dat_name,ext])
                 catch
                     fileID = fopen('ac_pwd.txt','r');
                     formatSpec = '%s';
@@ -496,7 +501,9 @@ for i = 1:nplot
                 check = 1; % selection can be executed 
             elseif strcmp(ext,'.fig')
                 plot_filter_s = char(contents(plot_selected(1)));
-                openfig(plot_filter_s);
+                try openfig(plot_filter_s);
+                catch
+                end
             elseif strcmp(ext,{'.pdf','.ai','.ps'})
                 plot_filter_s = char(contents(plot_selected(1)));
                 open(plot_filter_s);
@@ -1101,11 +1108,11 @@ for nploti = 1:nplot
             data = load(data_name);
         end 
             time = data(:,1);
-            srmean = mean(diff(time));
+            srmedian = median(diff(time));
             dlg_title = 'Interpolation';
-            prompt = {'New sample rate:'};
+            prompt = {'New sample rate (default = median):'};
             num_lines = 1;
-            defaultans = {num2str(srmean)};
+            defaultans = {num2str(srmedian)};
             options.Resize='on';
             answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
             
@@ -1341,6 +1348,15 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                 refreshcolor;
                 cd(pre_dirML); % return to matlab view folder
+                figure;
+                plot(time,value,'k')
+                hold on;
+                plot(time,data(:,2),'r','LineWidth',2.5)
+                title([dat_name,ext])
+                xlabel(handles.unit)
+                ylabel('Value')
+                legend('Raw',[num2str(smooth_v),'points-smoothed'])
+                hold off;
             end
         end
         end
@@ -1912,7 +1928,6 @@ if and ((min(plot_selected) > 2), (nplot == 1))
     else
         [dat_dir,dat_name,ext] = fileparts(data_name);
         if sum(strcmp(ext,handles.filetype)) > 0
-            
             data = load(data_name);
             time = data(:,1);
             npts = length(time);
@@ -1954,7 +1969,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                 warndlg('UNIT of the data MUST be "m/dm/cm/mm"!.','Unit Error')
             end
             
-            prompt = {'DATA: AGE of the data in Ma',...
+            prompt = {'DATA: Middle Age of the data (Ma)',...
                 'TARGET: MAX frequency (default)',...
                 'TARGET: Zero padding: (default)'};
             dlg_title = 'STEP 1: TARGET: Correlation coefficient';
@@ -2220,8 +2235,8 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                 warndlg('UNIT of the data MUST be "m/dm/cm/mm"!.','Unit Error')
             end
             
-            prompt = {'TARGET: What is the age of the data in Ma (e.g., 55):',...
-                'TARGET: MAX frequency (default)',...
+            prompt = {'DATA: Middle Age of the data (Ma) (e.g., 55):',...
+                'TARGET: Maximum frequency (default)',...
                 'TARGET: Zero-padding: (default)'};
             dlg_title = 'Evolutionary COrrelation COefficient: TARGET';
             num_lines = 1;
@@ -3378,6 +3393,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                             cd(pre_dirML); % return to matlab view folder
                             
                             figure;plot(cz,c);title(name); xlabel('Pixels'); 
+                            set(gca,'XMinorTick','on','YMinorTick','on')
                             if m == 2
                                 ylabel('Grayscale')
                             else
@@ -5588,6 +5604,7 @@ if check == 1
             figure; 
             plot(dat(:,1),dat(:,2));hold on;
             plot(dats(:,1),dats(:,2));
+            set(gca,'XMinorTick','on','YMinorTick','on')
             %legend('Raw data','detrended data')
             if strcmp(robot_detrend,'no')
             else
@@ -5671,7 +5688,7 @@ if check == 1
                 else
                     xlabel(['Time (',handles.unit,')'])
                 end
-
+                set(gca,'XMinorTick','on','YMinorTick','on')
                 subplot(2,1,2)
                 whitebg('white');
                 %try pcolor(x_grid,y_grid,s)
@@ -5688,9 +5705,11 @@ if check == 1
                     xlabel(['Time (',handles.unit,')'])
                 end
                 set(gcf,'Name',[num2str(name1),': Running Periodogram'])
-                set(gca, 'YScale', 'log')
+                %set(gca, 'YScale', 'log')
                 ylim([0 fn])
                 xlim([min(dat(:,1)),max(dat(:,1))])
+                set(gca,'XMinorTick','on','YMinorTick','on')
+                set(gca, 'TickDir', 'out')
                 catch
                     errordlg('EvoFFT: Sampling rate or something else is incorrect.')
                 end
@@ -5704,8 +5723,12 @@ if check == 1
                 disp('>>')
                 figwave = figure;
                 try [~,~,~]= waveletML(daty,datx,1,0.1,2*dt,datx(end)-datx(1));
+                    set(gca,'XMinorTick','on','YMinorTick','on')
+                    %set(gca, 'TickDir', 'out')
                 catch
                     try [~,~,~]= waveletML(daty,datx,1,0.1,2*dt,1/2*(datx(end)-datx(1)));
+                        set(gca,'XMinorTick','on','YMinorTick','on')
+                        %set(gca, 'TickDir', 'out')
                     catch
                         errordlg('Error. Please try with other parameters')
                         disp('>>  ==========    Error in wavelet transform')
@@ -5853,3 +5876,396 @@ function menu_sednoise_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_utilities (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function menu_timeOpt_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_timeOpt (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox_acmain,'Value');
+nplot = length(plot_selected);   % length
+if and ((min(plot_selected) > 2), (nplot == 1))
+    data_name = char(contents(plot_selected));
+    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; data_name = fullfile(ac_pwd,data_name);
+        if isdir(data_name) == 1
+        else
+            [~,dat_name,ext] = fileparts(data_name);
+            if sum(strcmp(ext,handles.filetype)) > 0
+                current_data = load(data_name);
+                handles.current_data = current_data;
+                handles.data_name = data_name;
+                handles.dat_name = dat_name;
+                guidata(hObject, handles);
+                timeOptGUI(handles);
+            end
+        end
+end
+guidata(hObject, handles);
+
+
+% --------------------------------------------------------------------
+function menu_movmedian_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_movmedian (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox_acmain,'Value');
+nplot = length(plot_selected);   % length
+if and ((min(plot_selected) > 2), (nplot == 1))
+    data_name = char(contents(plot_selected));
+    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; data_name = fullfile(ac_pwd,data_name);
+        if isdir(data_name) == 1
+        else
+            [~,dat_name,ext] = fileparts(data_name);
+        if sum(strcmp(ext,handles.filetype)) > 0
+        try
+            fid = fopen(data_name);
+            data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
+            fclose(fid);
+            if iscell(data_ft)
+                data = cell2mat(data_ft);
+            end
+        catch
+            data = load(data_name);
+        end 
+
+            time = data(:,1);
+            value = data(:,2);
+            npts = length(time);
+            dlg_title = 'Moving Median';
+            prompt = {'Moving median window: (0.2 = 20%)'};
+            num_lines = 1;
+            defaultans = {'0.2'};
+            options.Resize='on';
+            answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+            if ~isempty(answer)
+                smooth_v = str2double(answer{1});
+                % median-smoothing data numbers
+                smoothn = round(smooth_v * npts);
+                % median-smoothing
+                try data(:,2) = moveMedian(data(:,2),smoothn);
+                    name1 = [dat_name,'-',num2str(smooth_v*100),'%-median',ext];  % New name
+                    %csvwrite(name1,data)
+                    % cd ac_pwd dir
+                    CDac_pwd
+                    dlmwrite(name1, data, 'delimiter', ',', 'precision', 9); 
+                    d = dir; %get files
+                    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+                    refreshcolor;
+                    cd(pre_dirML); % return to matlab view folder
+                    mvmedianfig = figure;
+                    plot(time,value,'k')
+                    hold on;
+                    plot(time,data(:,2),'r','LineWidth',2.5)
+                    title([dat_name,ext])
+                    xlabel(handles.unit)
+                    ylabel('Value')
+                    legend('Raw',[num2str(smooth_v*100),'%-median smoothed'])
+                    hold off;
+                catch
+                    msgbox('Data error, empty value?','Error')
+                end
+            end
+        end
+        end
+end
+guidata(hObject, handles);
+
+
+% --------------------------------------------------------------------
+function menu_examples_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_examples (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function menu_example_PETM_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_example_PETM (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+data_name = which('Example-SvalbardPETM-logFe.txt');
+
+[loc,dat_name,ext] = fileparts(data_name);
+try
+    fid = fopen(data_name);
+    data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
+    fclose(fid);
+    if iscell(data_ft)
+        data = cell2mat(data_ft);
+    end
+catch
+    data = load(data_name);
+end 
+
+time = data(:,1);
+value = data(:,2);
+figure;
+plot(time,value)
+title([dat_name,ext])
+
+CDac_pwd
+dlmwrite([dat_name,ext], data, 'delimiter', ',', 'precision', 9);
+d = dir; %get files
+set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+refreshcolor;
+cd(pre_dirML); % return to matlab view folder
+
+
+% --------------------------------------------------------------------
+function menu_example_GD2GR_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_example_GD2GR (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+data_name = which('Example-Guandao2AnisianGR.txt');
+
+[~,dat_name,ext] = fileparts(data_name);
+try
+    fid = fopen(data_name);
+    data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
+    fclose(fid);
+    if iscell(data_ft)
+        data = cell2mat(data_ft);
+    end
+catch
+    data = load(data_name);
+end 
+
+time = data(:,1);
+value = data(:,2);
+figure;
+plot(time,value)
+title([dat_name,ext])
+
+CDac_pwd
+dlmwrite([dat_name,ext], data, 'delimiter', ',', 'precision', 9);
+d = dir; %get files
+set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+refreshcolor;
+cd(pre_dirML); % return to matlab view folder
+
+
+% --------------------------------------------------------------------
+function menu_example_inso2Ma_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_example_inso2Ma (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+data_name = which('Example-Insol-t-0-2000ka-day-80-lat-65-meandaily-La04.txt');
+
+[~,dat_name,ext] = fileparts(data_name);
+try
+    fid = fopen(data_name);
+    data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
+    fclose(fid);
+    if iscell(data_ft)
+        data = cell2mat(data_ft);
+    end
+catch
+    data = load(data_name);
+end 
+
+time = data(:,1);
+value = data(:,2);
+figure;
+plot(time,value)
+title([dat_name,ext])
+
+CDac_pwd
+dlmwrite([dat_name,ext], data, 'delimiter', ',', 'precision', 9);
+d = dir; %get files
+set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+refreshcolor;
+cd(pre_dirML); % return to matlab view folder
+
+
+% --------------------------------------------------------------------
+function menu_example_la04etp_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_example_la04etp (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+data_name = which('Example-La2004-1E.5T-1P-0-2000.txt');
+
+[~,dat_name,ext] = fileparts(data_name);
+try
+    fid = fopen(data_name);
+    data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
+    fclose(fid);
+    if iscell(data_ft)
+        data = cell2mat(data_ft);
+    end
+catch
+    data = load(data_name);
+end 
+
+time = data(:,1);
+value = data(:,2);
+figure;
+plot(time,value)
+title([dat_name,ext])
+
+CDac_pwd
+dlmwrite([dat_name,ext], data, 'delimiter', ',', 'precision', 9);
+d = dir; %get files
+set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+refreshcolor;
+cd(pre_dirML); % return to matlab view folder
+
+% --------------------------------------------------------------------
+function menu_example_redp7_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_example_redp7 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+data_name = which('Example-Rednoise0.7-2000.txt');
+
+[~,dat_name,ext] = fileparts(data_name);
+try
+    fid = fopen(data_name);
+    data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
+    fclose(fid);
+    if iscell(data_ft)
+        data = cell2mat(data_ft);
+    end
+catch
+    data = load(data_name);
+end 
+
+time = data(:,1);
+value = data(:,2);
+figure;
+plot(time,value)
+title([dat_name,ext])
+
+CDac_pwd
+dlmwrite([dat_name,ext], data, 'delimiter', ',', 'precision', 9);
+d = dir; %get files
+set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+refreshcolor;
+cd(pre_dirML); % return to matlab view folder
+
+% --------------------------------------------------------------------
+function menu_example_wayao_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_example_wayao (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+data_name = which('Example-WayaoCarnianGR0.txt');
+
+[~,dat_name,ext] = fileparts(data_name);
+try
+    fid = fopen(data_name);
+    data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
+    fclose(fid);
+    if iscell(data_ft)
+        data = cell2mat(data_ft);
+    end
+catch
+    data = load(data_name);
+end 
+
+time = data(:,1);
+value = data(:,2);
+figure;
+plot(time,value)
+title([dat_name,ext])
+
+CDac_pwd
+dlmwrite([dat_name,ext], data, 'delimiter', ',', 'precision', 9);
+d = dir; %get files
+set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+refreshcolor;
+cd(pre_dirML); % return to matlab view folder
+
+
+% --------------------------------------------------------------------
+function menu_example_Newark_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_example_Newark (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+data_name = which('Example-LateTriassicNewarkDepthRank.txt');
+
+[~,dat_name,ext] = fileparts(data_name);
+try
+    fid = fopen(data_name);
+    data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
+    fclose(fid);
+    if iscell(data_ft)
+        data = cell2mat(data_ft);
+    end
+catch
+    data = load(data_name);
+end 
+
+time = data(:,1);
+value = data(:,2);
+figure;
+plot(time,value)
+title([dat_name,ext])
+
+CDac_pwd
+dlmwrite([dat_name,ext], data, 'delimiter', ',', 'precision', 9);
+d = dir; %get files
+set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+refreshcolor;
+cd(pre_dirML); % return to matlab view folder
+
+
+% --------------------------------------------------------------------
+function menu_example_marsimage_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_example_marsimage (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+data_name = which('Example-HiRISE-PSP_002733_1880_RED.jpg');
+[loc,dat_name,ext] = fileparts(data_name);
+if sum(strcmp(ext,{'.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.TIF'})) > 0
+    im_name = imread(data_name);
+    figure;
+    imshow(im_name)
+    set(gcf,'Name',[dat_name,ext])
+end
+
+CDac_pwd
+copyfile(data_name,pwd)
+d = dir; %get files
+set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+refreshcolor;
+cd(pre_dirML); % return to matlab view folder
+
+
+% --------------------------------------------------------------------
+function menu_example_hawaiiCO2_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_example_hawaiiCO2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+data_name = which('Example-LaunaLoa-Hawaii-CO2-monthly-mean.txt');
+
+% url = 'https://www.esrl.noaa.gov/gmd/ccgg/trends/data.html'
+% Dr. Pieter Tans, NOAA/ESRL (www.esrl.noaa.gov/gmd/ccgg/trends/) and 
+% Dr. Ralph Keeling, Scripps Institution of Oceanography (scrippsco2.ucsd.edu/).
+
+[~,dat_name,ext] = fileparts(data_name);
+try
+    fid = fopen(data_name);
+    data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
+    fclose(fid);
+    if iscell(data_ft)
+        data = cell2mat(data_ft);
+    end
+catch
+    data = load(data_name);
+end 
+
+time = data(:,1);
+value = data(:,2);
+figure;
+plot(time,value)
+title([dat_name,ext])
+
+CDac_pwd
+dlmwrite([dat_name,ext], data, 'delimiter', ',', 'precision', 9);
+d = dir; %get files
+set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+refreshcolor;
+cd(pre_dirML); % return to matlab view folder

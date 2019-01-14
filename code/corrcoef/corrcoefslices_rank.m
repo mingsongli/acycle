@@ -290,30 +290,30 @@ end
 
 %%
 function datanew = data_slices(dat, slices)
-    % INPUT: data input
-    datanew = [];
-    if slices <= 1
-        return
+% INPUT: data input
+datanew = [];
+if slices <= 1
+    return
+end
+x = dat(:,1);
+data_size = size(x);
+data_length = data_size(1,1);
+t1 = dat(1,1);
+tn = dat(data_length,1);
+slice = linspace(t1, tn, slices+1);
+
+for i = 1: slices
+    data_int = select_interval(dat,slice(i),slice(i+1));
+    time = data_int(:,1);
+    value = (data_int(:,2)-mean(data_int(:,2)))/std(data_int(:,2));
+    data_int = [time,detrend(value,0)];
+    time_len(i) = length(time);
+    if max(time_len) > time_len(i)
+        datanew(1:time_len(i),(2*i-1):(2*i)) = data_int;
+    elseif max(time_len) < time_len(i)
+        datanew((time_len(i-1)+1):time_len(i),(2*i-3):(2*i-2)) = 0;
+        datanew(:,(2*i-1):(2*i)) = data_int;
+    else
+        datanew(:,(2*i-1):(2*i)) = data_int;
     end
-    x = dat(:,1);
-    data_size = size(x);
-    data_length = data_size(1,1);
-    t1 = dat(1,1);
-    tn = dat(data_length,1);
-    slice = linspace(t1, tn, slices+1);
-    
-    for i = 1: slices
-        data_int = select_interval(dat,slice(i),slice(i+1));
-        time = data_int(:,1);
-        value = (data_int(:,2)-mean(data_int(:,2)))/std(data_int(:,2));
-        data_int = [time,detrend(value,0)];
-        time_len(i) = length(time);
-        if max(time_len) > time_len(i)
-            datanew(1:time_len(i),(2*i-1):(2*i)) = data_int;
-        elseif max(time_len) < time_len(i)
-            datanew((time_len(i-1)+1):time_len(i),(2*i-3):(2*i-2)) = 0;
-            datanew(:,(2*i-1):(2*i)) = data_int;
-        else
-            datanew(:,(2*i-1):(2*i)) = data_int;
-        end
-    end
+end

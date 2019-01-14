@@ -22,7 +22,7 @@ function varargout = evofftGUI(varargin)
 
 % Edit the above text to modify the response to help evofftGUI
 
-% Last Modified by GUIDE v2.5 31-Dec-2017 15:50:40
+% Last Modified by GUIDE v2.5 11-Jan-2019 19:30:40
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -69,11 +69,18 @@ set(handles.popupmenu2,'position',[0.26,0.856,0.68,0.06])
 set(handles.uipanel1,'position',[0.034,0.037,0.906,0.793])
 set(handles.uipanel2,'position',[0.029,0.553,0.454,0.42])
 set(handles.uipanel5,'position',[0.496,0.559,0.239,0.419])
-set(handles.uipanel7,'position',[0.738,0.559,0.257,0.419])
-set(handles.uipanel3,'position',[0.029,0.1,0.251,0.42])
-set(handles.uipanel6,'position',[0.288,0.1,0.256,0.42])
-set(handles.uipanel8,'position',[0.544,0.1,0.188,0.42])
-set(handles.uipanel9,'position',[0.732,0.1,0.161,0.42])
+set(handles.uipanel3,'position',[0.738,0.559,0.257,0.419])
+
+set(handles.checkbox2,'position',[0.293,0.4,0.36,0.1])
+set(handles.checkbox3,'position',[0.293,0.3,0.36,0.1])
+set(handles.checkbox5,'position',[0.293,0.2,0.36,0.1])
+set(handles.checkbox4,'position',[0.293,0.1,0.36,0.1])
+
+set(handles.uipanel6,'position',[0.029,0.1,0.251,0.42])
+set(handles.uipanel10,'position',[0.637,0.1,0.251,0.42])
+set(handles.popupmenu3,'position',[0.02,0.5,0.95,0.36])
+set(handles.text8,'position',[0.0637,0.22,0.371,0.173])
+set(handles.edit9,'position',[0.412,0.2,0.4,0.25])
 
 set(handles.evofft_ok_pushbutton,'position',[0.888,0.169,0.11,0.283])
 set(handles.text6,'position',[0.138,0.714,0.316,0.238])
@@ -86,17 +93,11 @@ set(handles.edit_step,'position',[0.103,0.54,0.4,0.38])
 set(handles.pushbutton8,'position',[0.538,0.556,0.41,0.349])
 set(handles.edit8,'position',[0.103,0.143,0.397,0.381])
 set(handles.text7,'position',[0.577,0.206,0.346,0.206])
-set(handles.radiobutton5,'position',[0.155,0.508,0.738,0.365])
-set(handles.radiobutton6,'position',[0.155,0.143,0.738,0.365])
 set(handles.evofft_win_text,'position',[0.131,0.55,0.738,0.375])
 set(handles.evofft_tips_win_pushbutton,'position',[0.095,0.075,0.774,0.35])
 set(handles.radiobutton_2d,'position',[0.048,0.524,0.56,0.365])
 set(handles.radiobutton_3d,'position',[0.512,0.524,0.476,0.365])
 set(handles.rotation,'position',[0.06,0.127,0.881,0.365])
-set(handles.radiobutton8,'position',[0.152,0.508,0.788,0.365])
-set(handles.radiobutton7,'position',[0.152,0.143,0.712,0.365])
-set(handles.radiobutton9,'position',[0.152,0.508,0.788,0.365])
-set(handles.radiobutton10,'position',[0.152,0.143,0.712,0.365])
 
 % Choose default command line output for evofftGUI
 handles.output = hObject;
@@ -112,8 +113,12 @@ handles.path_temp = varargin{1}.path_temp;
 
 handles.plot_2d = 1;
 handles.plot_log = 0;
+handles.freq_log = 0;
 handles.normal = 1;
 handles.flipy = 1;
+handles.color = 'parula'; % default
+handles.colorgrid = [];
+
 xmin = min(data_s(:,1));
 xmax = max(data_s(:,1));
 mean1 = median(diff(data_s(:,1)));
@@ -168,7 +173,129 @@ varargout{1} = handles.output;
 
 guidata(hObject, handles);
 
+% --------------------------------------------------------------------
+function checkbox2_Callback(hObject, eventdata, handles)
+% hObject    handle to menuFile (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles.normal = get(handles.checkbox2,'Value');
+guidata(hObject, handles);
 
+% --- Executes during object creation, after setting all properties.
+function checkbox2_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit8 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+% --------------------------------------------------------------------
+function checkbox3_Callback(hObject, eventdata, handles)
+% hObject    handle to menuFile (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles.flipy = (get(hObject,'Value'));
+try figure(handles.evofftfig)
+    if handles.flipy == 1;
+        set(gca,'Ydir','reverse')
+    else
+        set(gca,'Ydir','normal')
+    end
+catch
+end
+guidata(hObject, handles);
+
+% --------------------------------------------------------------------
+function checkbox4_Callback(hObject, eventdata, handles)
+% hObject    handle to menuFile (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles.plot_log = (get(hObject,'Value'));
+guidata(hObject, handles);
+
+% --------------------------------------------------------------------
+function checkbox5_Callback(hObject, eventdata, handles)
+% hObject    handle to menuFile (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles.freq_log = (get(hObject,'Value'));
+try figure(handles.evofftfig)
+    if handles.freq_log == 1;
+        set(gca, 'XScale', 'log')
+    else
+        set(gca, 'XScale', 'linear')
+    end
+catch
+end
+guidata(hObject, handles);
+
+% --------------------------------------------------------------------
+function edit9_Callback(hObject, eventdata, handles)
+% hObject    handle to menuFile (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+try
+    colorgrid = str2double(get(hObject,'String'));
+    if colorgrid > 0
+        handles.colorgrid = round(colorgrid);
+    else
+        handles.colorgrid = [];
+    end
+catch
+    msgbox('Grid # should be a positive integer','Error')
+end
+
+try figure(handles.evofftfig)
+    %colormap(jet)
+    if isempty(handles.colorgrid)
+        % no grid
+        setcolor = handles.color;
+    else
+        setcolor = [handles.color,'(',round(num2str(handles.colorgrid)),')'];
+    end
+    try colormap(setcolor)
+    catch
+        colormap default
+    end
+catch
+end
+
+guidata(hObject, handles);
+
+% --------------------------------------------------------------------
+function popupmenu3_Callback(hObject, eventdata, handles)
+% hObject    handle to menuFile (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+str = get(hObject, 'String');
+val = get(hObject,'Value');
+% Set current data to the selected data set.
+handles.color = str{val};
+if val == 1;
+    set(handles.edit9,'String','')
+    handles.colorgrid = [];
+end
+
+try figure(handles.evofftfig)
+    %colormap(jet)
+    if isempty(handles.colorgrid)
+        % no grid
+        setcolor = handles.color;
+    else
+        setcolor = [handles.color,'(',round(num2str(handles.colorgrid)),')'];
+    end
+    try colormap(setcolor)
+    catch
+        colormap default
+    end
+catch
+end
+guidata(hObject, handles);
 
 function evofft_win_text_Callback(hObject, eventdata, handles)
 % hObject    handle to evofft_win_text (see GCBO)
@@ -259,6 +386,13 @@ else
     set(handles.radiobutton2, 'Value', 1);
     set(handles.evofft_Nyquist_radiobutton, 'Value', 0);
     handles.evofft_fmax = fmax;
+end
+
+
+try figure(handles.evofftfig)
+    fmin = str2double(get(handles.edit7,'String'));
+    xlim([fmin fmax])
+catch
 end
 
 guidata(hObject,handles)
@@ -376,37 +510,35 @@ data =  handles.current_data;
 window = handles.window;
 step = str2double(get(handles.edit_step,'String'));
 fmax_select = get(handles.evofft_Nyquist_radiobutton,'Value');
+freq_log = get(handles.checkbox5,'Value');
 method = handles.method;
-if fmax_select == 1
-    fmax = handles.nyquist;
-else
-    fmax = str2double(get(handles.evofft_fmax_edit,'String'));
-end
+
 fmin = str2double(get(handles.edit7,'String'));
 unit = get(handles.edit8,'String');
 filename =  handles.filename;
 [~,dat_name,ext] = fileparts(filename);
-norm = get(handles.radiobutton5,'Value');
+%norm = get(handles.radiobutton5,'Value');
+norm = handles.normal;
 % Evofft Plot
 if strcmp(method,'Periodogram')
-    [s,x_grid,y_grid]=evoperiodogram(data,window,step,fmin,fmax,norm);
+    [s,x_grid,y_grid]=evoperiodogram(data,window,step,fmin,handles.nyquist,norm);
 elseif strcmp(method,'Lomb-Scargle periodogram')
-    [s,x_grid,y_grid]=evoplomb(data,window,step,fmin,fmax,norm);
+    [s,x_grid,y_grid]=evoplomb(data,window,step,fmin,handles.nyquist,norm);
 elseif strcmp(method,'Multi-taper method')
-    [s,x_grid,y_grid] = evopmtm(data,window,step,fmin,fmax,norm);
+    [s,x_grid,y_grid] = evopmtm(data,window,step,fmin,handles.nyquist,norm);
 elseif strcmp(method,'Fast Fourier transform')
     fmin = str2double(get(handles.edit7,'String'));
-    [s,x_grid,y_grid]=evofftML(data,window,step,fmin,fmax,norm);
+    [s,x_grid,y_grid]=evofftML(data,window,step,fmin,handles.nyquist,norm);
 elseif strcmp(method,'Fast Fourier transform (LAH)')
     dt = data(2,1)-data(1,1);
     %[s,x_grid,y_grid]=evofftLAH(data,window,step,dt,fmin,fmax,norm);
-    [s,x_grid,y_grid]=evofft(data,window,step,dt,fmin,fmax,norm);
+    [s,x_grid,y_grid]=evofft(data,window,step,dt,fmin,handles.nyquist,norm);
 end
 
 assignin('base','s',s);
 assignin('base','x',x_grid);
 assignin('base','y',y_grid);
-figure
+evofftfig = figure;
 whitebg('white');
 
 if handles.plot_2d == 1
@@ -426,8 +558,18 @@ else
         surf(x_grid,y_grid,s)
     end
 end 
-        colormap(jet)
-        shading interp
+    %colormap(jet)
+    if isempty(handles.colorgrid)
+        % no grid
+        setcolor = handles.color;
+    else
+        setcolor = [handles.color,'(',round(num2str(handles.colorgrid)),')'];
+    end
+    try colormap(setcolor)
+    catch
+        colormap default
+    end
+    shading interp
     title([method,'. Window',' = ',num2str(window),' ',unit,'; step = ',num2str(step),' ', unit])
     xlabel(['Frequency ( cycles per ',unit,' )'])
     if handles.unit_type == 0;
@@ -438,13 +580,27 @@ end
         ylabel(['Time (',handles.unit,')'])
     end
     set(gcf,'Name',[dat_name,ext,': Running Periodogram'])
+    
+    if fmax_select == 1
+        fmax = handles.nyquist;
+    else
+        fmax = str2double(get(handles.evofft_fmax_edit,'String'));
+    end
+
     xlim([fmin fmax])
     
-if handles.flipy == 1;
-    set(gca,'Ydir','reverse')
-end
+    if handles.flipy == 1;
+        set(gca,'Ydir','reverse')
+    end
+    
+    if freq_log == 1;
+        set(gca, 'XScale', 'log')
+    end
     if handles.plot_2d == 1
+        set(gca,'XMinorTick','on','YMinorTick','on')
+        set(gca, 'TickDir', 'out')
     else
+       set(gca, 'TickDir', 'out')
        if handles.rotate == 0
             view(10,70);
         else
@@ -454,7 +610,8 @@ end
             end
        end
     end
-
+handles.evofftfig = evofftfig;
+colorbar
 guidata(hObject, handles);
 
 % --------------------------------------------------------------------
@@ -602,162 +759,75 @@ function pushbutton16_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 
-% --- Executes on button press in pushbutton20.
-function pushbutton20_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton20 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-list_content = cellstr(get(handles.listbox2,'String')); % read contents of listbox 1 
-plot_selected = handles.index_selected;  % read selection in listbox 1; minus 2 for listbox
-nplot = length(plot_selected);   % length
-if plot_selected > 2
-    if nplot > 1
-        open_data = 'Tips: Select ONE folder';
-        h = helpdlg(open_data,'Tips: Close');
-        uiwait(h);
-    else
-        plot_filter_selection = char(list_content(plot_selected));
-        if ~exist(plot_filter_selection,'dir')==1
-            h = helpdlg('This is NOT a folder','Tips: Close');
-            uiwait(h);
-        else
-            cd(plot_filter_selection)
-            address = pwd;
-            set(handles.edit6,'String',address);
-        end
-    end
-end
-guidata(hObject,handles)
-
-
-% --- Executes on button press in pushbutton22.
-function pushbutton22_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton22 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-contents = cellstr(get(handles.listbox2,'String')); % read contents of listbox 1 
-selected = handles.index_selected;  % read selection in listbox 1
-nplot = length(selected);   % length
-
-if selected > 2
-if nplot == 1
-    data_name = char(contents(selected));  % name of the selected data
-    data_s = load(data_name); % load selected data
-    handles.filename = data_name;
-    xmin = min(data_s(:,1));
-    xmax = max(data_s(:,1));
-    handles.current_data = data_s;
-    check=1;
-end
-end
-if check == 1
-    mean1 = median(diff(data_s(:,1)));
-    handles.mean = mean1;
-    handles.step = handles.mean;
-    handles.nyquist = 1/(2*handles.mean);     % prepare nyquist
-    handles.window = 0.2*(xmax-xmin);
-    handles.rotate = 0;
-    handles.method = 'Periodogram';
-    set(handles.evofft_nyquist_text, 'String', num2str(handles.nyquist));
-    set(handles.evofft_win_text, 'String', num2str(handles.window));
-    set(handles.edit_step, 'String', num2str(handles.mean),'Value',1);
-end
-%%
-guidata(hObject,handles)
 % 
-% % --- Executes on button press in pushbutton23.
-% function pushbutton23_Callback(hObject, eventdata, handles)
-% % hObject    handle to pushbutton23 (see GCBO)
+% % --- Executes on button press in radiobutton6.
+% function radiobutton6_Callback(hObject, eventdata, handles)
+% % hObject    handle to radiobutton6 (see GCBO)
 % % eventdata  reserved - to be defined in a future version of MATLAB
 % % handles    structure with handles and user data (see GUIDATA)
-% contents = cellstr(get(handles.listbox2,'String')); % read contents of listbox 1 
-% plot_selected = handles.index_selected;  % read selection in listbox 1
-% nplot = length(plot_selected);   % length
 % 
-% figure;
-% for i = 1:nplot
-%     plot_no = plot_selected(i);
-%     if plot_no > 2
-%         plot_filter_s = char(contents(plot_no));
-%     %   cd(handles.working_folder)
-%         data_filterout = load(plot_filter_s);
-%         hold on
-%         plot(data_filterout(:,1),data_filterout(:,2));
-%         hold off
-%     end
+% % Hint: get(hObject,'Value') returns toggle state of radiobutton6
+% val = get(handles.radiobutton6,'Value');
+% if val == 1
+%     set (handles.radiobutton5, 'Value', 0);
+%     handles.normal = 0;
+% else
+%     set (handles.radiobutton5, 'Value', 1);
+%     handles.normal = 1;
 % end
-% guidata(hObject,handles)
+% guidata(hObject, handles);
 
+% % --- Executes on button press in radiobutton5.
+% function radiobutton5_Callback(hObject, eventdata, handles)
+% % hObject    handle to radiobutton5 (see GCBO)
+% % eventdata  reserved - to be defined in a future version of MATLAB
+% % handles    structure with handles and user data (see GUIDATA)
+% 
+% % Hint: get(hObject,'Value') returns toggle state of radiobutton5
+% val = get(handles.radiobutton5,'Value');
+% if val == 1
+%     set (handles.radiobutton6, 'Value', 0);
+%     handles.normal = 1;
+% else
+%     set (handles.radiobutton6, 'Value', 1);
+%     handles.normal = 0;
+% end
+% guidata(hObject, handles);
 
-% --- Executes on button press in radiobutton6.
-function radiobutton6_Callback(hObject, eventdata, handles)
-% hObject    handle to radiobutton6 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of radiobutton6
-val = get(handles.radiobutton6,'Value');
-if val == 1
-    set (handles.radiobutton5, 'Value', 0);
-    handles.normal = 0;
-else
-    set (handles.radiobutton5, 'Value', 1);
-    handles.normal = 1;
-end
-guidata(hObject, handles);
-
-% --- Executes on button press in radiobutton5.
-function radiobutton5_Callback(hObject, eventdata, handles)
-% hObject    handle to radiobutton5 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of radiobutton5
-val = get(handles.radiobutton5,'Value');
-if val == 1
-    set (handles.radiobutton6, 'Value', 0);
-    handles.normal = 1;
-else
-    set (handles.radiobutton6, 'Value', 1);
-    handles.normal = 0;
-end
-guidata(hObject, handles);
-
-
-% --- Executes on button press in radiobutton8.
-function radiobutton8_Callback(hObject, eventdata, handles)
-% hObject    handle to radiobutton8 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of radiobutton8
-val = get(hObject,'Value');
-if val == 1
-    set (handles.radiobutton7, 'Value', 0);
-    handles.flipy = 1;
-else
-    set (handles.radiobutton7, 'Value', 1);
-    handles.flipy = 0;
-end
-guidata(hObject, handles);
-
-% --- Executes on button press in radiobutton7.
-function radiobutton7_Callback(hObject, eventdata, handles)
-% hObject    handle to radiobutton7 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of radiobutton7
-val = get(hObject,'Value');
-if val == 1
-    set (handles.radiobutton8, 'Value', 0);
-    handles.flipy = 0;
-else
-    set (handles.radiobutton8, 'Value', 1);
-    handles.flipy = 1;
-end
-guidata(hObject, handles);
+% 
+% % --- Executes on button press in radiobutton8.
+% function radiobutton8_Callback(hObject, eventdata, handles)
+% % hObject    handle to radiobutton8 (see GCBO)
+% % eventdata  reserved - to be defined in a future version of MATLAB
+% % handles    structure with handles and user data (see GUIDATA)
+% 
+% % Hint: get(hObject,'Value') returns toggle state of radiobutton8
+% val = get(hObject,'Value');
+% if val == 1
+%     set (handles.radiobutton7, 'Value', 0);
+%     handles.flipy = 1;
+% else
+%     set (handles.radiobutton7, 'Value', 1);
+%     handles.flipy = 0;
+% end
+% guidata(hObject, handles);
+% 
+% % --- Executes on button press in radiobutton7.
+% function radiobutton7_Callback(hObject, eventdata, handles)
+% % hObject    handle to radiobutton7 (see GCBO)
+% % eventdata  reserved - to be defined in a future version of MATLAB
+% % handles    structure with handles and user data (see GUIDATA)
+% 
+% % Hint: get(hObject,'Value') returns toggle state of radiobutton7
+% val = get(hObject,'Value');
+% if val == 1
+%     set (handles.radiobutton8, 'Value', 0);
+%     handles.flipy = 0;
+% else
+%     set (handles.radiobutton8, 'Value', 1);
+%     handles.flipy = 1;
+% end
+% guidata(hObject, handles);
 
 
 % --- Executes on button press in rotation.
@@ -803,7 +873,12 @@ function edit7_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit7 as text
 %        str2double(get(hObject,'String')) returns contents of edit7 as a double
-
+fmin = str2double(get(handles.edit7,'String'));
+try figure(handles.evofftfig)
+    fmax = str2double(get(handles.evofft_fmax_edit,'String'));
+    xlim([fmin fmax])
+catch
+end
 
 % --- Executes during object creation, after setting all properties.
 function edit7_CreateFcn(hObject, eventdata, handles)
@@ -841,37 +916,27 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on button press in radiobutton10.
-function radiobutton10_Callback(hObject, eventdata, handles)
-% hObject    handle to radiobutton10 (see GCBO)
+% --- Executes during object creation, after setting all properties.
+function popupmenu3_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popupmenu3 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+% handles    empty - handles not created until after all CreateFcns called
 
-% Hint: get(hObject,'Value') returns toggle state of radiobutton10
-val = get(hObject,'Value');
-if val == 1
-    set (handles.radiobutton9, 'Value', 0);
-    handles.plot_log = 0;
-else
-    set (handles.radiobutton10, 'Value', 1);
-    handles.plot_log = 1;
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
 end
-guidata(hObject, handles);
 
 
-% --- Executes on button press in radiobutton9.
-function radiobutton9_Callback(hObject, eventdata, handles)
-% hObject    handle to radiobutton9 (see GCBO)
+% --- Executes during object creation, after setting all properties.
+function edit9_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit9 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+% handles    empty - handles not created until after all CreateFcns called
 
-% Hint: get(hObject,'Value') returns toggle state of radiobutton9
-val = get(hObject,'Value');
-if val == 1
-    set (handles.radiobutton10, 'Value', 0);
-    handles.plot_log = 1;
-else
-    set (handles.radiobutton9, 'Value', 1);
-    handles.plot_log = 0;
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
 end
-guidata(hObject, handles);

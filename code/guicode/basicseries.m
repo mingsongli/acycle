@@ -360,7 +360,7 @@ if t2 <= t1
     error('Error: t2 must be larger than t1')
     return;
 end
-if ref == 3 && t2 >= 1.0e+05
+if ref == 3 && t2 > 1.0e+05
     error('Error: t2 must be less than 100,000')
     return;
 end
@@ -403,6 +403,7 @@ cd(pre_dirML); % return to matlab view folder
 % close
 figdata = figure; 
 plot(dat(:,1),dat(:,2));
+set(gca,'XMinorTick','on','YMinorTick','on')
 xlim([min(dat(:,1)),max(dat(:,1))]);
 xlabel('Time (kyr)')
 title(name)

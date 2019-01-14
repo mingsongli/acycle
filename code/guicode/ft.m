@@ -129,6 +129,7 @@ datax = data_s(:,1);
 fd2 = w2/(2*pi*handles.step);
 [po,fd1] = periodogram(data_s(:,2),[],5*length(datax),1/sample_rate);
 handles.curvepmtm = [fd1,po];   % 
+handles.plotratio = max(po2)/max(po);
     %
 handles.x_1 = 0;
 handles.x_2 = max(fd1);
@@ -207,6 +208,7 @@ hold on
 plot(curvepmtm(:,1),gauss_mf,'r-')
 axis([handles.x_1 handles.x_2 handles.y_1 handles.y_2])
 hold off
+set(handles.popupmenu4,'Value',1)
 
 set(handles.filt_fmax_edit3,'String',num2str(fwidth+handles.filt_fmid))
 guidata(hObject, handles);
@@ -236,6 +238,7 @@ handles.filt_fmid = str2double(get(hObject,'String'));
 curvepmtm = handles.curvepmtm;
 pomax = max(curvepmtm(:,2));
 fwidth = abs(handles.filt_fmid - handles.filt_fmin);
+try
 gauss_mf = pomax*gaussmf(curvepmtm(:,1),[fwidth handles.filt_fmid]);
       
 axes(handles.ft_axes3);
@@ -244,7 +247,11 @@ hold on
 plot(curvepmtm(:,1),gauss_mf,'r-')
 axis([handles.x_1 handles.x_2 handles.y_1 handles.y_2])
 hold off
+set(handles.popupmenu4,'Value',1)
 set(handles.filt_fmax_edit3,'String',num2str(fwidth+handles.filt_fmid))
+catch
+    msgbox('Error')
+end
 guidata(hObject, handles);
 %%
 
@@ -400,7 +407,7 @@ end
 stopband2 = fcenter + fweight;
 
 if strcmp(filter,'Butter')
-    d = designfilt('bandpassiir', ...
+    try d = designfilt('bandpassiir', ...
         'FilterOrder',6, ...
     'HalfPowerFrequency1',flow,...
     'HalfPowerFrequency2',fhigh,...
@@ -408,8 +415,10 @@ if strcmp(filter,'Butter')
     yb = filtfilt(d,datax);  % filtfilt is okay. but it may not be included in some version of Matlab
     data_filterout = [time,yb];
     add_list = [handles.dat_name,'-butter-',num2str(flch(1)),'-',num2str(flch(3)),'.txt'];
+    catch
+    end
 elseif strcmp(filter,'Cheby1')
-    d = designfilt('bandpassiir', ...
+    try d = designfilt('bandpassiir', ...
         'FilterOrder',6, ...
     'PassbandFrequency1',flow,...
     'PassbandFrequency2',fhigh,...
@@ -418,8 +427,10 @@ elseif strcmp(filter,'Cheby1')
     yb = filtfilt(d,datax);
     data_filterout = [time,yb];
     add_list = [handles.dat_name,'-cheby1-',num2str(flch(1)),'-',num2str(flch(3)),'.txt'];
+    catch
+    end
 elseif strcmp(filter,'Ellip')
-    d = designfilt('bandpassiir', ...
+    try d = designfilt('bandpassiir', ...
         'FilterOrder',6, ...
     'PassbandFrequency1',flow,...
     'PassbandFrequency2',fhigh,...
@@ -430,13 +441,17 @@ elseif strcmp(filter,'Ellip')
     yb = filtfilt(d,datax);
     data_filterout = [time,yb];
     add_list = [handles.dat_name,'-ellip-',num2str(flch(1)),'-',num2str(flch(3)),'.txt'];
+    catch
+    end
 elseif strcmp(filter,'Gaussian')
-    [gaussbandx,filter,f]=gaussfilter(datax,dt,flch(2),flch(1),flch(3));
+    try [gaussbandx,filter,f]=gaussfilter(datax,dt,flch(2),flch(1),flch(3));
     data_filterout = [time,gaussbandx];
     add_list = [handles.dat_name,'-gaus-',num2str(flch(2)),'+-',num2str(abs(flch(2)-flch(3))),'.txt'];
+    catch
+    end
 elseif strcmp(filter,'Taner-Hilbert')
     % TANER-Hilbert Transformation
-    [tanhilb,handles.ifaze,handles.ifreq] = ...
+    try [tanhilb,handles.ifaze,handles.ifreq] = ...
     tanerhilbertML(data,flch(2),flch(1),flch(3));
     handles.filterdd = tanhilb;
     add_list = [handles.dat_name,'-Tan-',num2str(flch(2)),'+-',num2str(abs(flch(2)-flch(3))),'.txt'];
@@ -451,14 +466,17 @@ elseif strcmp(filter,'Taner-Hilbert')
     handles.add_list_ufazedet = add_list_ufazedet;
     handles.add_list_ifaze = add_list_ifaze;
     handles.add_list_ifreq = add_list_ifreq;
+    catch
+    end
 else
     add_list = '';
     data_filterout = '';
 end
-
+try
 handles.add_list = add_list;
-
 handles.data_filterout = data_filterout;
+catch
+end
 %disp(' Ready to save')
 guidata(hObject, handles);
 
@@ -483,12 +501,12 @@ function edit10_Callback(hObject, eventdata, handles)
 % Hints: get(hObject,'String') returns contents of edit10 as text
 %        str2double(get(hObject,'String')) returns contents of edit10 as a double
 handles.x_1 = str2double(get(hObject,'String'));
-
+if handles.x_1>0
 axes(handles.ft_axes3);
 xlim([handles.x_1 handles.x_2]);
 axes(handles.ft_axes4);
 xlim([handles.x_1 handles.x_2]);
-
+end
 guidata(hObject,handles)
 
 % --- Executes during object creation, after setting all properties.
@@ -513,12 +531,14 @@ function edit11_Callback(hObject, eventdata, handles)
 % Hints: get(hObject,'String') returns contents of edit11 as text
 %        str2double(get(hObject,'String')) returns contents of edit11 as a double
 handles.x_2 = str2double(get(hObject,'String'));
-
-axes(handles.ft_axes3);
-xlim([handles.x_1 handles.x_2]);
-axes(handles.ft_axes4);
-xlim([handles.x_1 handles.x_2]);
+if handles.x_2 > 0
+    axes(handles.ft_axes3);
+    xlim([handles.x_1 handles.x_2]);
+    axes(handles.ft_axes4);
+    xlim([handles.x_1 handles.x_2]);
+end
 guidata(hObject,handles)
+
 
 % --- Executes during object creation, after setting all properties.
 function edit11_CreateFcn(hObject, eventdata, handles)
@@ -542,11 +562,14 @@ function edit12_Callback(hObject, eventdata, handles)
 % Hints: get(hObject,'String') returns contents of edit12 as text
 %        str2double(get(hObject,'String')) returns contents of edit12 as a double
 handles.y_1 = str2double(get(hObject,'String'));
+if handles.y_1 > 0
 axes(handles.ft_axes3);
 ylim([handles.y_1 handles.y_2]);
+
 axes(handles.ft_axes4);
-ylim([handles.y_1 handles.y_2]);
+ylim([handles.y_1*handles.plotratio handles.y_2*handles.plotratio]);
 guidata(hObject,handles)
+end
 
 % --- Executes during object creation, after setting all properties.
 function edit12_CreateFcn(hObject, eventdata, handles)
@@ -570,11 +593,13 @@ function edit13_Callback(hObject, eventdata, handles)
 % Hints: get(hObject,'String') returns contents of edit13 as text
 %        str2double(get(hObject,'String')) returns contents of edit13 as a double
 handles.y_2 = str2double(get(hObject,'String'));
+if handles.y_2>0
 axes(handles.ft_axes3);
 ylim([handles.y_1 handles.y_2]);
-% axes(handles.ft_axes4);
-% ylim([handles.y_1 handles.y_2]);
+axes(handles.ft_axes4);
+ylim([handles.y_1*handles.plotratio handles.y_2*handles.plotratio]);
 guidata(hObject,handles)
+end
 
 % --- Executes during object creation, after setting all properties.
 function edit13_CreateFcn(hObject, eventdata, handles)
@@ -715,7 +740,7 @@ function edit16_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit16 as text
 %        str2double(get(hObject,'String')) returns contents of edit16 as a double
-
+set(handles.popupmenu5,'Value',1)
 
 % --- Executes during object creation, after setting all properties.
 function edit16_CreateFcn(hObject, eventdata, handles)
@@ -738,7 +763,7 @@ function edit17_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit17 as text
 %        str2double(get(hObject,'String')) returns contents of edit17 as a double
-
+set(handles.popupmenu5,'Value',1)
 
 % --- Executes during object creation, after setting all properties.
 function edit17_CreateFcn(hObject, eventdata, handles)
@@ -797,37 +822,45 @@ handles.filename = handles.dat_name;
 
 if sum(strcmp(type, {'highpassiir', 'lowpassiir'})) > 0
     if strcmp(filter,'Butter')
-        d = designfilt(type, ...
+        try d = designfilt(type, ...
         'FilterOrder',6, ...
         'HalfPowerFrequency',f1,...
         'DesignMethod','butter');
         add_list = [handles.filename,type,'butter-',num2str(f11),'.txt'];
+        catch
+        end
     elseif strcmp(filter,'Cheby1')
-        d = designfilt(type, ...
+        try d = designfilt(type, ...
         'FilterOrder',6, ...
         'PassbandFrequency',f1,...
         'PassbandRipple',1,...
         'DesignMethod','cheby1');
         add_list = [handles.filename,type,'cheby1-',num2str(f11),'.txt'];
+        catch
+        end
     elseif strcmp(filter,'Ellip')
-        d = designfilt(type, ...
+        try d = designfilt(type, ...
         'FilterOrder',6, ...
         'PassbandFrequency',f1,...
         'PassbandRipple',1,...
         'StopbandAttenuation',20,...
         'DesignMethod','ellip');
         add_list = [handles.filename,type,'ellip-',num2str(f11),'.txt'];
+        catch
+        end
     end
 else
     if strcmp(filter,'Butter')
-        d = designfilt(type, ...
+        try d = designfilt(type, ...
         'FilterOrder',6, ...
         'HalfPowerFrequency1',flow,...
         'HalfPowerFrequency2',fhigh,...
         'DesignMethod','butter');
         add_list = [handles.filename,type,'butter-',num2str(flow1*nyquist),'-',num2str(fhigh1*nyquist),'.txt'];
+        catch
+        end
     elseif strcmp(filter,'Cheby1')
-        d = designfilt(type, ...
+        try d = designfilt(type, ...
         'PassbandFrequency1',flow,...
         'StopbandFrequency1',passband1,...
         'StopbandFrequency2',passband2,...
@@ -838,8 +871,10 @@ else
         'DesignMethod','cheby1',...
         'MatchExactly','both');
         add_list = [handles.filename,type,'cheby1-',num2str(flow1*nyquist),'-',num2str(fhigh1*nyquist),'.txt'];
+        catch
+        end
     elseif strcmp(filter,'Ellip')
-        d = designfilt(type, ...
+        try d = designfilt(type, ...
         'PassbandFrequency1',flow,...
         'StopbandFrequency1',passband1,...
         'StopbandFrequency2',passband2,...
@@ -850,16 +885,20 @@ else
         'DesignMethod','ellip',...
         'MatchExactly','both');
         add_list = [handles.filename,type,'ellip-',num2str(flow1*nyquist),'-',num2str(fhigh1*nyquist),'.txt'];
+        catch
+        end
     else
         add_list = '';
     end
 
 end
-
+try
 yb = filtfilt(d,datax);  % filtfilt is okay. but it may not be included in some version of Matlab
 data_filterout = [time,yb];
 handles.add_list = add_list;
 handles.data_filterout = data_filterout;
+catch
+end
 %disp(' Ready to save')
 guidata(hObject, handles);
 
@@ -889,6 +928,7 @@ if get(hObject,'Value')
 else
     set(handles.edit17,'Visible','Off');
 end
+set(handles.popupmenu5,'Value',1)
 
 
 % --- Executes on button press in radiobutton7.
@@ -901,7 +941,7 @@ function radiobutton7_Callback(hObject, eventdata, handles)
 if get(hObject,'Value')
     set(handles.edit17,'Visible','Off');
 end
-
+set(handles.popupmenu5,'Value',1)
 
 % --- Executes on button press in radiobutton6.
 function radiobutton6_Callback(hObject, eventdata, handles)
@@ -912,6 +952,7 @@ function radiobutton6_Callback(hObject, eventdata, handles)
 % Hint: get(hObject,'Value') returns toggle state of radiobutton6
 if get(hObject,'Value')
     set(handles.edit17,'Visible','Off');
+    set(handles.popupmenu5,'Value',1)
 end
 
 % --- Executes when ft_uipanel2 is resized.
@@ -948,7 +989,7 @@ else
     figft = gcf;
     data_filterout = handles.data_filterout;
     filter = handles.filter;
-    CDac_pwd; % cd ac_pwd dir
+    CDac_pwd;
     dlmwrite(add_list, data_filterout, 'delimiter', ',', 'precision', 9);
     figdata = figure;
     data = handles.current_data;
@@ -963,6 +1004,7 @@ else
     else
         xlabel(['Time (',handles.unit,')'])
     end
+    set(gca,'XMinorTick','on','YMinorTick','on')
     if strcmp(filter,'Taner-Hilbert')
         add_list_am = handles.add_list_am;
         ampmod = [data_filterout(:,1),data_filterout(:,3)];

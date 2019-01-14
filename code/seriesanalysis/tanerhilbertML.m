@@ -1,4 +1,4 @@
-function [tanhilb,ifaze,ifreq] = tanerhilbertML(data,fc,fl,fh)
+function [tanhilb,ifaze,ifreq] = tanerhilbertML(data,fc,fl,fh,c)
 %tanerhilbert.m - Produces a bandpassed version of an input real-
 %            valued time series by FFT, multiplication by filter
 %           designed in frequency domain, and inverse FFT.
@@ -24,6 +24,7 @@ function [tanhilb,ifaze,ifreq] = tanerhilbertML(data,fc,fl,fh)
 %         Rock Solid Images, Inc., Houston, Texas, URL:
 %         http://www.rocksolidimages.com/pdf/attrib_revisited.htm 
 %%
+if nargin < 5; c = 10^12; end
 t=data(:,1);
 x=data(:,2);
 dt=t(2)-t(1);
@@ -32,7 +33,7 @@ xftfor = [ ];
 xftinv = [ ];
 bandx = [ ];
 twopi=2.*pi;
-c=10^12;
+%c=10^12;
 npts=length(x);
 xnpts = npts;
 wnyq = twopi/(2.*dt);
