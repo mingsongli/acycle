@@ -275,9 +275,10 @@ if strcmp(method,'Multi-taper method')
             data1 = redconfML96;
             name2 = [dat_name,'-',num2str(nw),'piMTM-ConvenAR1',ext];
             data2 = redconfAR1;
-            title([dat_name,'-',num2str(nw),'piMTM-RobustAR1: rho = ',num2str(rhoM)])
+            
+            title([dat_name,'-',num2str(nw),'\pi-MTM-Robust-AR1: \rho = ',num2str(rhoM),'. S0 =',num2str(s0M)])
             xlabel(['Frequency (cycles/',num2str(unit),')']) 
-            set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'PI MTM'])
+            set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'pi MTM'])
             set(gca,'XMinorTick','on','YMinorTick','on')
             xlim([0 fmax]);
             set(gcf,'Color', 'white')
@@ -317,8 +318,8 @@ if strcmp(method,'Multi-taper method')
         xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
         ylabel('Power ')
         legend('Power','bw')
-        title([num2str(nw),' PI MTM method',' ','; Sampling rate = ',num2str(dt),' ', unit])
-        set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'PI MTM'])
+        title([num2str(nw),'\pi MTM method',' ','; Sampling rate = ',num2str(dt),' ', unit])
+        set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'pi MTM'])
         xlim([0 fmax]);
         set(gca,'XMinorTick','on','YMinorTick','on')
         
@@ -845,14 +846,14 @@ if strcmp(method,'Multi-taper method')
             if length(datax)>2000
                 hwarn = warndlg('Large dataset, wait ...');
             end
-            [rhoM, s0M,redconfAR1,redconfML96]=redconfML(datax,dt,nw,nzeropad,linlog,smoothwin,fmax,1);
+                [rhoM, s0M,redconfAR1,redconfML96]=redconfML(datax,dt,nw,nzeropad,linlog,smoothwin,fmax,1);
             try close(hwarn)
             catch
             end
             xlim([0 fmax]);
             xlabel(['Frequency (cycles/',num2str(unit),')']) 
-            title([num2str(nw),'piMTM',' ','-RobustAR(1)SamplingRate = ',num2str(dt), unit])
-            set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'PI MTM'])
+            title([num2str(nw),'\pi-MTM-Robust-AR(1): \rho = ',num2str(rhoM),'. S0 = ',num2str(s0M)])
+            set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'pi MTM'])
             set(gca,'XMinorTick','on','YMinorTick','on')
             set(gcf,'Color', 'white')
             if handles.linlogY == 1;
@@ -882,8 +883,8 @@ if strcmp(method,'Multi-taper method')
         xlabel(['Frequency (cycles/',num2str(unit),')']) 
         ylabel('Power ')
         legend('Power','bw')
-        title([num2str(nw),' PI MTM method',' ','; Sampling rate = ',num2str(dt),' ', unit])
-        set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'PI MTM'])
+        title([num2str(nw),' \pi MTM method',' ','; Sampling rate = ',num2str(dt),' ', unit])
+        set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'pi MTM'])
         set(gca,'XMinorTick','on','YMinorTick','on')
         xlim([0 fmax]);
         if handles.linlogY == 1;

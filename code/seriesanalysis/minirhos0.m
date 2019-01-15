@@ -1,4 +1,4 @@
-function [rho, s0] = minirhos0(s0,fn,ft,pxxsmooth,linlog,plot)
+function [rho, s0] = minirhos0(s0,fn,ft,pxxsmooth,linlog,genplot)
 % 
 % best fit of rho and s0
 %
@@ -10,7 +10,7 @@ function [rho, s0] = minirhos0(s0,fn,ft,pxxsmooth,linlog,plot)
 % plot: show 3d best fit plot? 1 = yes; else = no (default)
 %
 if nargin < 6
-    plot =0;
+    genplot = 0;
     if nargin < 5
         linlog = 2;
         if nargin < 4
@@ -18,19 +18,21 @@ if nargin < 6
         end
     end
 end
+
+cospara = cos(pi.*ft./fn);
 % Two runs for estimation of rho and s0.
 nn = 50;
 % first run
 rhoi = linspace(0.001,0.999,nn);
-s0i = linspace(0.2*s0, 5*s0,nn/2);
+s0i = linspace(0.2*s0, 5*s0,nn);
 disti = zeros(length(rhoi), length(s0i));
 
 for i = 1: nn
     rho0 = rhoi(i);
     %disp(i)
-    for j = 1: nn/2
+    for j = 1: nn
         s0j = s0i(j);
-        theored = s0j * (1-rho0^2)./(1-(2.*rho0.*cos(pi.*ft./fn))+rho0^2);
+        theored = s0j * (1-rho0^2)./(1-(2.*rho0.*cospara)+rho0^2);
         if linlog == 1
             dist = theored - pxxsmooth;
         else
@@ -41,23 +43,41 @@ for i = 1: nn
 end
 % get indice for rho, and s0 of the minimum distance
 [x,y]=find(disti==min(min(disti)));
+rho = rhoi(x);
+s0 = s0i(y);
+%disp([rho s0])
+if genplot == 1
+    [X,Y] = meshgrid(rhoi,s0i);
+    figure;
+    surf(X,Y,disti)
+    xlabel('rho')
+    ylabel('s0')
+    title('Best fit values of rho and S0 to the median-smoothed spectrum')
+    shading flat
+end
 
 mm = nn/2;
 % second run
 for k= 1:3
-    rhomax = 1.05^(1/k/2)*rhoi(x);
+    s0imax = s0i(y) + (s0i(2) - s0i(1));
+    s0imin = s0i(y) - (s0i(2) - s0i(1));
+    rhomax = rhoi(x) + (rhoi(2)-rhoi(1));
+    rhomin = rhoi(x) - (rhoi(2)-rhoi(1));
     if rhomax >= 1
         rhomax = 0.9999;
     end
-    rhoi = linspace(0.95^(1/k/2)*rhoi(x),rhomax,mm);
-    s0i = linspace(0.95^(1/k/2)*s0i(y), 1.05^(1/k/2)*s0i(y),mm);
+    if rhomin <= 0
+        rhomin = 0.0001;
+    end
+    rhoi = linspace(rhomin,rhomax,mm);
+    s0i = linspace(s0imin, s0imax,mm);
     
     disti = zeros(mm,mm);
     for i = 1: mm
         rho0 = rhoi(i);
         for j = 1: mm
             s0j = s0i(j);
-            theored = s0j * (1-rho0^2)./(1-(2.*rho0.*cos(pi.*ft./fn))+rho0^2);
+            theored = s0j * (1-rho0^2)./(1-(2.*rho0.*cospara)+rho0^2);
             if linlog == 1
                 dist = theored - pxxsmooth;
             else
@@ -67,13 +87,12 @@ for k= 1:3
         end
     end
     [x,y]=find(disti==min(min(disti)));
-end
 
 rho = rhoi(x);
 s0 = s0i(y);
 
 %disp([rho s0])
-if plot == 1
+if genplot == 1
     [X,Y] = meshgrid(rhoi,s0i);
     figure;
     surf(X,Y,disti)
@@ -81,5 +100,6 @@ if plot == 1
     ylabel('s0')
     title('Best fit values of rho and S0 to the median-smoothed spectrum')
     shading flat
-    zlim([min(min(disti)),1.2*min(min(disti))])
+    %zlim([min(min(disti)),1.2*min(min(disti))])
+end
 end

@@ -1,4 +1,4 @@
-function [rho, s0] = minirho(s0,fn,ft,pxxsmooth,linlog,plot)
+function [rho, s0] = minirho(s0,fn,ft,pxxsmooth,linlog,genplot)
 % 
 % best fit of rho and s0
 %
@@ -10,7 +10,7 @@ function [rho, s0] = minirho(s0,fn,ft,pxxsmooth,linlog,plot)
 % plot: show 3d best fit plot? 1 = yes; else = no (default)
 %
 if nargin < 6
-    plot =0;
+    genplot =0;
     if nargin < 5
         linlog = 2;
         if nargin < 4
@@ -18,6 +18,8 @@ if nargin < 6
         end
     end
 end
+
+cospara = cos(pi.*ft./fn);
 % Two runs for estimation of rho and s0.
 nn = 50;
 % first run
@@ -26,7 +28,7 @@ disti = zeros(length(rhoi), 1);
 for i = 1: nn
     rho0 = rhoi(i);
     %disp(i)
-    theored = s0 * (1-rho0^2)./(1-(2.*rho0.*cos(pi.*ft./fn))+rho0^2);
+    theored = s0 * (1-rho0^2)./(1-(2.*rho0.*cospara)+rho0^2);
     if linlog == 1
         dist = theored - pxxsmooth;
     else
@@ -35,27 +37,44 @@ for i = 1: nn
     disti(i) = (sum(dist.^2));
 end
 % get indice for rho, and s0 of the minimum distance
-x=find(disti==min(disti));
+x=find(disti == min(disti));
+%length(rhoi)
 
-% second run
-rhomax = 1.1*rhoi(x);
-if rhomax >= 1
-    rhomax = 0.9999;
-end
-rhoi = linspace(0.9*rhoi(x),rhomax,nn);
-disti = zeros(nn,1);
+mm = nn/2;
 
-for i = 1: nn
-    rho0 = rhoi(i);
-    theored = s0 * (1-rho0^2)./(1-(2.*rho0.*cos(pi.*ft./fn))+rho0^2);
-    if linlog == 1
-        dist = theored - pxxsmooth;
-    else
-        dist = log(theored) - log(pxxsmooth);
+for k = 1:3
+    
+    % second run
+    rhomax = rhoi(x) + (rhoi(2)-rhoi(1));
+    rhomin = rhoi(x) - (rhoi(2)-rhoi(1));
+    if rhomax >= 1
+        rhomax = 0.9999;
     end
-    disti(i) = (sum(dist.^2));
-
+    if rhomin <= 0
+        rhomin = 0.0001;
+    end
+    rhoi = linspace(rhomin,rhomax,mm);
+    disti = zeros(mm,1);
+    
+    for i = 1: mm
+        rho0 = rhoi(i);
+        theored = s0 * (1-rho0^2)./(1-(2.*rho0.*cospara)+rho0^2);
+        if linlog == 1
+            dist = theored - pxxsmooth;
+        else
+            dist = log(theored) - log(pxxsmooth);
+        end
+        disti(i) = sum(dist.^2);
+    end
 end
 
-[x]=find(disti==min(disti));
+x = find(disti==min(disti));
 rho = rhoi(x);
+
+if genplot ==1
+    figure;
+    plot(rhoi,disti);
+    xlabel('RHO')
+    ylabel('Distance')
+    title('Best fit values of rho to the spectrum')
+end
