@@ -4,10 +4,16 @@
 <br />
 <br />
 
-<b> Mingsong Li, Penn State. Jan. 12, 2019
+<b> Mingsong Li, Penn State. Jan. 13, 2019
+
+<b>E-mail</b>: <i> mul450 {at} psu.edu;</i>
+
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <i>limingsonglms {at} gmail.com </i>
 <br /><br />
 
 Website: www.mingsongli.com/acycle
+
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; https://github.com/mingsongli/acycle
 
 <br />
 
@@ -70,19 +76,17 @@ For MatLab on either Mac or Windows: MatLab is essential for the Acycle software
 2. <b>How to startup </b>
 
 - (step 1) Change the MatLab working directory to the Acycle directory
-<br />
 
 - (step 2) Start-up.
     Option 1: right-click file "ac.m", then choose "Run".
-
 +    Option 2: Type
-<br />
+
 
 ```json
 ac
 ```
 <br />
-in MatLab command window, then press the ENTER key.
+in MatLab command window, press the ENTER key.
 <br />
 <br />
 
@@ -113,12 +117,12 @@ Two versions are available:
 - (Step 1) Download and unzip <b>Acycle0.3.0-Mac-green.zip <br />
 
 
-- (Step 2) Download MatLab runtime R2015b “MCR_R2015b_maci64_installer.zip” here:
+- (Step 2) Download MatLab runtime <b>R2015b</b> “MCR_R2015b_maci64_installer.zip” here:
 https://www.mathworks.com/products/compiler/matlab-runtime.html
 
-- (Step 3) Install MatLab runtime R2015b. <br /><br />
+- (Step 3) Install MatLab runtime <b>R2015b</b>. <br /><br />
 Right-click "InstallForMacOSX" and select “Show Package Contents”.
-In the pop-up folder, double-click “Content/MacOS/InstallForMacOSX” to install runtime r2015b.
+In the pop-up folder, double-click “Content/MacOS/InstallForMacOSX” to install runtime <b>R2015b</b>.
 
 - (Step 4) Setup Runtime environment <br /> <br />
 
@@ -128,11 +132,11 @@ https://www.mathworks.com/matlabcentral/answers/263824-mcr-with-mac-and-environm
 
 2. <b>How to startup:
 
-- (Step 1) Drag the <i>Acycle0.3.0-Mac-green</i> file to the <i>"/Applications"</i> folder.<br />
+- (Step 1) Drag the <i>Acycle0.3.0</i> file to the <i>"/Applications"</i> folder.<br />
 
-- (Step 2) Go to the “/Applications” folder. Right-click <i>Acyclev0.3.0-Mac</i> file, choose <i>Show Package Content</i>
+- (Step 2) Go to the <i>“/Applications”</i> folder. Right-click <i>Acyclev0.3.0</i>, choose <i>Show Package Content</i>
 
-- (Step 3) Go to the <i>Contents/MacOS</i> folder, drag the <i>applauncher</i> file to dock.
+- (Step 3) Go to the <i>"Contents/MacOS"</i> folder, drag the <i>applauncher</i> file to dock.
 
 - (Step 4) Click icon of <i>applauncher</i> in the dock to start the Acycle.
 
@@ -150,8 +154,8 @@ Read more tips on the installation at Section 3.4 in /doc/AC_Users_Guide.pdf
 
 1. <b>How to install:
 
-- (Step 1) Download and unzip <b>Acycle0.3.0-Mac-Install.zip <br />
-- (Step 2) Double click to install Acycle and MatLab runtime R2015b simultaneously. <br />
+- (Step 1) Download and unzip <b>Acycle0.3.0-Mac-Installer.zip <br />
+- (Step 2) Double click to install Acycle and MatLab runtime <b>R2015b</b> simultaneously. <br />
 - (Step 3) Setup Runtime environment <br /> <br />
 
     How to set the MatLab Runtime environment variable DYLD_LIBRARY_PATH?<br />
@@ -174,41 +178,34 @@ Go to the “Contents/MacOS” folder, drag the <i>applauncher</i> file to dock.
 
 - <b> version #1. Acycle0.3.0-Win-green</b>
 
- Green version. No installation needed. MatLab Runtime 2017a is essential.
+ Green version. No installation needed. MatLab Runtime <b>R2017a</b> is essential.
 <br />
-- (Step 1) Download <b>Acycle0.3.0-Win-Installer
+- (Step 1) Download <b>Acycle0.3.0-Win-green
 
 - (Step 2) Download MatLab runtime <b>R2017a</b> here:
 https://www.mathworks.com/products/compiler/matlab-runtime.html
 
 - (Step 3) Install MatLab runtime <b>R2017a</b>.
 
-- (Step 4) Run Acycle: Double-click <b> Acycle.exe </b> to run the software<br /><br />
-	You could just double click the Acycle icon on the desktop to start
-	or start from the Windows “All Program” menu like any other software.
-<br />
+- (Step 4) Run Acycle: <br /><br />
+	You could just double click <b> Acycle.exe </b> to run the software
 
-    However, I strongly recommend the following start-up method,
+    <b> However, I strongly recommend the following start-up method,
     which will enable a command window showing a lot of information about many time-consuming steps.
-<br />
-
 - (Step 4.1) Use “Win + R” short-cut keys to start the “RUN” of Window<br />
 Then in the pop-up window, type the following command, and then click OK button.
 <br />
 
     cmd
-<br />
 
-- (Step 4.2) Type following two lines of commend below in the command window. <br />
+- (Step 4.2) Type following two lines of command below in the command window to run Acycle. <br />
 
-- <i>For example, my <b>Acycle.exe</b> file wasunder the directory “ C:\”, so it should be:<br /></i>
+- <i>For example, my <b>Acycle.exe</b> file is under the directory “ C:\”, so the two lines should be:<br /></i>
 <br />
 
     cd C:\
     Acycle
-<br />
 
-- The Acycle will start
 <br />
 
     Warning: the first-time start-up can be extremely slow.
@@ -224,35 +221,31 @@ Then in the pop-up window, type the following command, and then click OK button.
 - (Step 1) Download Acycle0.3.0-Win-Installer
 - (Step 2) Installation
 <br /><br />
-Double click “AcycleInstaller.exe” to install Acycle and MatLab runtime R2017a simultaneously. <br />
+Double click “AcycleInstaller.exe” to install Acycle and MatLab runtime <b>R2017a</b> simultaneously. <br />
 Following the instructions, you will get everything set. <br />
-Downloading MatLab runtime R2017a can take a lot of time. The runtime needs 1 GB space. <br />
+Downloading MatLab runtime <b>R2017a</b> can take a lot of time. The runtime needs 1 GB space. <br />
 - (Step 3) Start-up <br /><br />
-	You could just double click the Acycle icon on the desktop to start
+	You could just double click the <b>AC</b> icon on the desktop to run Acycle
 	or start from the Windows “All Program” menu like any other software.
-<br />
 
-    However, I strongly recommend the following start-up method,
+    <b> However, I strongly recommend the following start-up method,
     which will enable a command window showing a lot of information about many time-consuming steps.
-<br />
 
 - (Step 4.1) Use “Win + R” short-cut keys to start the “RUN” of Window<br />
-Then in the pop-up window, type the following command, and then click OK button.
+Then in the pop-up window, type the following command, and click <b>OK</b> button.
 <br />
 
     cmd
 <br />
 
-- (Step 4.2) Type following two lines of commend below in the command window. <br />
+- (Step 4.2) Type following two lines of command below in the command window to run Acycle. <br />
 
-- <i>For example, my Acycle software was installed under the directory “ C:\Program Files”, so it should be:<br /></i>
+- <i>For example, my <b>Acycle</b> software was installed under the directory “ C:\Program Files”, so it should be:<br /></i>
 <br />
 
     cd C:\Program Files\Acycle\application\
     Acycle
-<br />
 
-- The Acycle will start
 <br />
 
     Warning: the first-time start-up can be extremely slow.
