@@ -4419,12 +4419,11 @@ data(:,2) = y;
 CDac_pwd  % cd ac_pwd dir
 dlmwrite(['sineA',num2str(A),'T',num2str(T),'Ph',num2str(Ph),'B',num2str(B),'.txt'],...
     data, 'delimiter', ',', 'precision', 9);
-end
 d = dir; %get files
 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
 cd(pre_dirML); % return to matlab view folder
-
+end
 
 % --------------------------------------------------------------------
 function menu_email_Callback(hObject, eventdata, handles)
@@ -5990,26 +5989,18 @@ function menu_example_PETM_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 data_name = which('Example-SvalbardPETM-logFe.txt');
 
-[loc,dat_name,ext] = fileparts(data_name);
-try
-    fid = fopen(data_name);
-    data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
-    fclose(fid);
-    if iscell(data_ft)
-        data = cell2mat(data_ft);
-    end
-catch
-    data = load(data_name);
-end 
+[~,dat_name,ext] = fileparts(data_name);
+data = load(data_name);
 
 time = data(:,1);
 value = data(:,2);
 figure;
 plot(time,value)
 title([dat_name,ext])
-
+xlabel('Depth (m)')
+ylabel('Log(Fe)')
 CDac_pwd
-dlmwrite([dat_name,ext], data, 'delimiter', ',', 'precision', 9);
+copyfile(data_name,pwd);
 d = dir; %get files
 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
@@ -6024,25 +6015,17 @@ function menu_example_GD2GR_Callback(hObject, eventdata, handles)
 data_name = which('Example-Guandao2AnisianGR.txt');
 
 [~,dat_name,ext] = fileparts(data_name);
-try
-    fid = fopen(data_name);
-    data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
-    fclose(fid);
-    if iscell(data_ft)
-        data = cell2mat(data_ft);
-    end
-catch
-    data = load(data_name);
-end 
+data = load(data_name);
 
 time = data(:,1);
 value = data(:,2);
 figure;
 plot(time,value)
 title([dat_name,ext])
-
+xlabel('Depth (m)')
+ylabel('Gamma ray (cpm)')
 CDac_pwd
-dlmwrite([dat_name,ext], data, 'delimiter', ',', 'precision', 9);
+copyfile(data_name,pwd);
 d = dir; %get files
 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
@@ -6057,25 +6040,17 @@ function menu_example_inso2Ma_Callback(hObject, eventdata, handles)
 data_name = which('Example-Insol-t-0-2000ka-day-80-lat-65-meandaily-La04.txt');
 
 [~,dat_name,ext] = fileparts(data_name);
-try
-    fid = fopen(data_name);
-    data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
-    fclose(fid);
-    if iscell(data_ft)
-        data = cell2mat(data_ft);
-    end
-catch
-    data = load(data_name);
-end 
+data = load(data_name);
 
 time = data(:,1);
 value = data(:,2);
 figure;
 plot(time,value)
 title([dat_name,ext])
-
+xlabel('Time (kyr)')
+ylabel('Insolation (W/m^{2})')
 CDac_pwd
-dlmwrite([dat_name,ext], data, 'delimiter', ',', 'precision', 9);
+copyfile(data_name,pwd);
 d = dir; %get files
 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
@@ -6090,25 +6065,16 @@ function menu_example_la04etp_Callback(hObject, eventdata, handles)
 data_name = which('Example-La2004-1E.5T-1P-0-2000.txt');
 
 [~,dat_name,ext] = fileparts(data_name);
-try
-    fid = fopen(data_name);
-    data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
-    fclose(fid);
-    if iscell(data_ft)
-        data = cell2mat(data_ft);
-    end
-catch
-    data = load(data_name);
-end 
-
+data = load(data_name);
 time = data(:,1);
 value = data(:,2);
 figure;
 plot(time,value)
 title([dat_name,ext])
-
+xlabel('Age (ka)')
+ylabel('ETP')
 CDac_pwd
-dlmwrite([dat_name,ext], data, 'delimiter', ',', 'precision', 9);
+copyfile(data_name,pwd);
 d = dir; %get files
 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
@@ -6122,25 +6088,17 @@ function menu_example_redp7_Callback(hObject, eventdata, handles)
 data_name = which('Example-Rednoise0.7-2000.txt');
 
 [~,dat_name,ext] = fileparts(data_name);
-try
-    fid = fopen(data_name);
-    data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
-    fclose(fid);
-    if iscell(data_ft)
-        data = cell2mat(data_ft);
-    end
-catch
-    data = load(data_name);
-end 
+data = load(data_name);
 
 time = data(:,1);
 value = data(:,2);
 figure;
 plot(time,value)
 title([dat_name,ext])
-
+xlabel('Number (#)')
+ylabel('Value')
 CDac_pwd
-dlmwrite([dat_name,ext], data, 'delimiter', ',', 'precision', 9);
+copyfile(data_name,pwd);
 d = dir; %get files
 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
@@ -6154,25 +6112,17 @@ function menu_example_wayao_Callback(hObject, eventdata, handles)
 data_name = which('Example-WayaoCarnianGR0.txt');
 
 [~,dat_name,ext] = fileparts(data_name);
-try
-    fid = fopen(data_name);
-    data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
-    fclose(fid);
-    if iscell(data_ft)
-        data = cell2mat(data_ft);
-    end
-catch
-    data = load(data_name);
-end 
+data = load(data_name);
 
 time = data(:,1);
 value = data(:,2);
 figure;
 plot(time,value)
 title([dat_name,ext])
-
+xlabel('Depth (m)')
+ylabel('Gamma ray (cpm)')
 CDac_pwd
-dlmwrite([dat_name,ext], data, 'delimiter', ',', 'precision', 9);
+copyfile(data_name,pwd);
 d = dir; %get files
 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
@@ -6187,25 +6137,17 @@ function menu_example_Newark_Callback(hObject, eventdata, handles)
 data_name = which('Example-LateTriassicNewarkDepthRank.txt');
 
 [~,dat_name,ext] = fileparts(data_name);
-try
-    fid = fopen(data_name);
-    data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
-    fclose(fid);
-    if iscell(data_ft)
-        data = cell2mat(data_ft);
-    end
-catch
-    data = load(data_name);
-end 
+data = load(data_name);
 
 time = data(:,1);
 value = data(:,2);
 figure;
 plot(time,value)
 title([dat_name,ext])
-
+xlabel('Depth (m)')
+ylabel('Depth Rank')
 CDac_pwd
-dlmwrite([dat_name,ext], data, 'delimiter', ',', 'precision', 9);
+copyfile(data_name,pwd);
 d = dir; %get files
 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
@@ -6233,7 +6175,6 @@ set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
 cd(pre_dirML); % return to matlab view folder
 
-
 % --------------------------------------------------------------------
 function menu_example_hawaiiCO2_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_example_hawaiiCO2 (see GCBO)
@@ -6246,25 +6187,19 @@ data_name = which('Example-LaunaLoa-Hawaii-CO2-monthly-mean.txt');
 % Dr. Ralph Keeling, Scripps Institution of Oceanography (scrippsco2.ucsd.edu/).
 
 [~,dat_name,ext] = fileparts(data_name);
-try
-    fid = fopen(data_name);
-    data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
-    fclose(fid);
-    if iscell(data_ft)
-        data = cell2mat(data_ft);
-    end
-catch
-    data = load(data_name);
-end 
+data = load(data_name);
 
 time = data(:,1);
 value = data(:,2);
 figure;
 plot(time,value)
 title([dat_name,ext])
+xlabel('Year')
+ylabel('pCO_2 (ppm)')
 
 CDac_pwd
-dlmwrite([dat_name,ext], data, 'delimiter', ',', 'precision', 9);
+copyfile(data_name,pwd);
+disp(['>> Data saved: ',[dat_name,ext]])
 d = dir; %get files
 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
