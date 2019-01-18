@@ -8,7 +8,7 @@ Version : ACycle_v0.3.0.20190112
 Date    : Jan. 12, 2019; 11:50 pm EST
 By      : Mingsong Li (Penn State)
 
-	1. fix a bug in Zeebe17X solutions
+	1. fix a bug in Zeebe17X solutions; fix a bug in Basic Series- Astronomical solutions
 
         Thanks Prof. Richard Zeebe (University of Hawaii at Manoa)
         for his bug report and suggestion!

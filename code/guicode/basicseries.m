@@ -93,22 +93,21 @@ set(handles.edit5,'position', [0.6,0.143,0.3,0.222])
 % Choose default command line output for basicseries
 handles.output = hObject;
 
-existdata = evalin('base','who');
-
-if ismember('filename',existdata)
-    handles.filename = evalin('base','filename');
-else
-    handles.filename = 'filename';
-end
-
-if ismember('path_temp',existdata)
-    handles.path_temp = evalin('base','path_temp');
-else
-    temp_dir = what('temp');
-    handles.path_temp = temp_dir.path;
-end
-handles.working_folder = [handles.path_temp,'/',handles.filename];
-
+% existdata = evalin('base','who');
+% 
+% if ismember('filename',existdata)
+%     handles.filename = evalin('base','filename');
+% else
+%     handles.filename = 'filename';
+% end
+% 
+% if ismember('path_temp',existdata)
+%     handles.path_temp = evalin('base','path_temp');
+% else
+%     temp_dir = what('temp');
+%     handles.path_temp = temp_dir.path;
+% end
+% handles.working_folder = [handles.path_temp,'/',handles.filename];
 
 %
 handles.solution = 'La2004';
