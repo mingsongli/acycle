@@ -1,6 +1,6 @@
 function ac
 
-%% ACYCLE v0.3 
+%% ACYCLE v0.3.1
 %%- a time-series analysis software for paleoclimate projects and education
 %%
 % This is a start-up script for the Acycle software (MatLab version)

@@ -2,7 +2,21 @@
 
 Update Log
 
+
 _____________________________________
+
+Version : ACycle_v0.3.1.20190117
+Date    : Jan. 17, 2019; 9:26 pm EST
+By      : Mingsong Li (Penn State)
+
+	1. fix a bug in the "Basic Series" - "Astronomical solution" GUI
+
+        Thanks Xiaoni Hu at Penn State for her help 
+            to identify this bug before my departure
+
+    2. Remove GAUSSIAN PROCESS REGRESSION AND CLASSIFICATION Toolbox 
+_____________________________________
+
 
 Version : ACycle_v0.3.0.20190112
 Date    : Jan. 12, 2019; 11:50 pm EST
@@ -46,6 +60,8 @@ By      : Mingsong Li (Penn State)
         Now changes to the chi2 distribution
 
     12. Age Scale GUI refine
+_____________________________________
+_____________________________________
 _____________________________________
 _____________________________________
 
@@ -120,8 +136,8 @@ By      : Mingsong Li (Penn State)
         help - Click "Manuals" will open online version of Users_Guide.PDF
 
 _____________________________________
-
-
+_____________________________________
+_____________________________________
 _____________________________________
 
 Version : ACycle_v0.2.5.20181108
