@@ -1,10 +1,10 @@
-# Acycle v0.3.0
+# Acycle v0.3.1
 <br />
 <b>Acycle -- a time-series analysis software for paleoclimate projects and education</b>
 <br />
 <br />
 
-<b> Mingsong Li, Penn State. Jan. 13, 2019
+<b> Mingsong Li, Penn State. Jan. 17, 2019
 
 <b>E-mail</b>: <i> mul450 {at} psu.edu;</i>
 
@@ -110,11 +110,11 @@ Two versions are available:
 <br />
 <br />
 
-- <b>version #1. Acycle0.3.0-Mac-green</b>
+- <b>version #1. Acycle0.3.1-Mac-green</b>
 
 1. <b>How to install:
 
-- (Step 1) Download and unzip <b>Acycle0.3.0-Mac-green.zip <br />
+- (Step 1) Download and unzip <b>Acycle0.3.1-Mac-green.zip <br />
 
 
 - (Step 2) Download MatLab runtime <b>R2015b</b> “MCR_R2015b_maci64_installer.zip” here:
@@ -132,9 +132,9 @@ https://www.mathworks.com/matlabcentral/answers/263824-mcr-with-mac-and-environm
 
 2. <b>How to startup:
 
-- (Step 1) Drag the <i>Acycle0.3.0</i> file to the <i>"/Applications"</i> folder.<br />
+- (Step 1) Drag the <i>Acycle0.3.1</i> file to the <i>"/Applications"</i> folder.<br />
 
-- (Step 2) Go to the <i>“/Applications”</i> folder. Right-click <i>Acyclev0.3.0</i>, choose <i>Show Package Content</i>
+- (Step 2) Go to the <i>“/Applications”</i> folder. Right-click <i>Acyclev0.3.1</i>, choose <i>Show Package Content</i>
 
 - (Step 3) Go to the <i>"Contents/MacOS"</i> folder, drag the <i>applauncher</i> file to dock.
 
@@ -150,11 +150,11 @@ Read more tips on the installation at Section 3.4 in /doc/AC_Users_Guide.pdf
 <br />
 <br />
 
-- <b>version #2. Acycle0.3.0-Mac-Installer</b>
+- <b>version #2. Acycle0.3.1-Mac-Installer</b>
 
 1. <b>How to install:
 
-- (Step 1) Download and unzip <b>Acycle0.3.0-Mac-Installer.zip <br />
+- (Step 1) Download and unzip <b>Acycle0.3.1-Mac-Installer.zip <br />
 - (Step 2) Double click to install Acycle and MatLab runtime <b>R2015b</b> simultaneously. <br />
 - (Step 3) Setup Runtime environment <br /> <br />
 
@@ -176,11 +176,11 @@ Go to the “Contents/MacOS” folder, drag the <i>applauncher</i> file to dock.
 ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `3. Windows version`
 </b>
 
-- <b> version #1. Acycle0.3.0-Win-green</b>
+- <b> version #1. Acycle0.3.1-Win-green</b>
 
  Green version. No installation needed. MatLab Runtime <b>R2017a</b> is essential.
 <br />
-- (Step 1) Download <b>Acycle0.3.0-Win-green
+- (Step 1) Download <b>Acycle0.3.1-Win-green
 
 - (Step 2) Download MatLab runtime <b>R2017a</b> here:
 https://www.mathworks.com/products/compiler/matlab-runtime.html
@@ -215,10 +215,10 @@ Then in the pop-up window, type the following command, and then click OK button.
 
 <br />
 
-- <b> version #2. Acycle0.3.0-Win-Installer</b>
+- <b> version #2. Acycle0.3.1-Win-Installer</b>
 
 
-- (Step 1) Download Acycle0.3.0-Win-Installer
+- (Step 1) Download Acycle0.3.1-Win-Installer
 - (Step 2) Installation
 <br /><br />
 Double click “AcycleInstaller.exe” to install Acycle and MatLab runtime <b>R2017a</b> simultaneously. <br />
