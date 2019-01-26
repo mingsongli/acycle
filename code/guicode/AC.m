@@ -89,9 +89,6 @@ end
 
 handles.acfigmain = gcf;  %handles of the ac main window
 
-if isdeployed
-    copyright;
-end
 figure(handles.acfigmain)
 %guidata(hObject, handles);
 h=get(gcf,'Children');  % get all content
@@ -105,42 +102,49 @@ menu_up = imread('menu_up.png');
 im = image(menu_up);
 set(im, 'ButtonDownFcn',@axes_up_ButtonDownFcn)
 set(handles.axes_up,'visible', 'off');
+pause(0.0001);%
 
 axes(handles.axes_folder);
 menu_folder = imread('menu_folder.png');
 im_folder = image(menu_folder);
 set(im_folder, 'ButtonDownFcn',@axes_folder_ButtonDownFcn)
 set(handles.axes_folder,'visible', 'off');
+pause(0.0001);%
 
 axes(handles.axes_openfolder);
 menu_openfolder = imread('menu_open.png');
 im_openfolder = image(menu_openfolder);
 set(im_openfolder, 'ButtonDownFcn',@axes_openfolder_ButtonDownFcn)
 set(handles.axes_openfolder,'visible', 'off');
+pause(0.0001);%
 
 axes(handles.axes_refresh);
 menu_refresh = imread('menu_refresh.png');
 im_refresh = image(menu_refresh);
 set(im_refresh, 'ButtonDownFcn',@axes_refresh_ButtonDownFcn)
 set(handles.axes_refresh,'visible', 'off');
+pause(0.0001);%
 
 axes(handles.axes_plot);
 menu_plot = imread('menu_plot.png');
 im_plot = image(menu_plot);
 set(im_plot, 'ButtonDownFcn',@axes_plot_ButtonDownFcn)
 set(handles.axes_plot,'visible', 'off');
+pause(0.0001);%
 
 axes(handles.axes_populate);
 menu_populate = imread('menu_expand.png');
 im_populate = image(menu_populate);
 set(im_populate, 'ButtonDownFcn',@axes_populate_ButtonDownFcn)
 set(handles.axes_populate,'visible', 'off');
+pause(0.0001);%
 
 axes(handles.axes_robot);
 menu_refresh = imread('menu_robot.png');
 im_refresh = image(menu_refresh);
 set(im_refresh, 'ButtonDownFcn',@axes_robot_ButtonDownFcn)
 set(handles.axes_robot,'visible', 'off');
+pause(0.0001);%
 
 % Choose default command line output for AC
 handles.output = hObject;
@@ -167,6 +171,8 @@ else
     fclose(fileID);
 end
 %
+pause(0.0001);%
+
 refreshcolor;
 cd(path_root) %back to root path
 
@@ -204,14 +210,17 @@ handles.math_deleteempty = 1;
 handles.math_derivative = 1;
 assignin('base','unit',handles.unit)
 assignin('base','unit_type',handles.unit_type)
+% Update handles structure
+guidata(hObject, handles);
 % Update reminder
+pause(0.0001);%
+if isdeployed
+    copyright;
+end
 try 
     ac_check_update;
 catch
 end
-% Update handles structure
-guidata(hObject, handles);
-
 
 % --- Outputs from this function are returned to the command line.
 function varargout = AC_OutputFcn(hObject, eventdata, handles) 

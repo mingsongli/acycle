@@ -2,6 +2,13 @@
 
 Update Log
 
+_____________________________________
+
+Version : ACycle_v0.3.2.20190127
+Date    : Jan. 27, 2019; 6:20 am Beijing
+By      : Mingsong Li
+
+	1. Reduce start-up GUI loading time
 
 _____________________________________
 
@@ -15,6 +22,7 @@ By      : Mingsong Li (Penn State)
             to identify this bug before my departure
 
     2. Remove GAUSSIAN PROCESS REGRESSION AND CLASSIFICATION Toolbox 
+
 _____________________________________
 
 
