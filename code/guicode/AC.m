@@ -1983,7 +1983,6 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                 'TARGET: Zero padding: (default)'};
             dlg_title = 'STEP 1: TARGET: Correlation coefficient';
             num_lines = 1;
-            %defaultans = {num2str(handles.t1),num2str(handles.t2),'0','0.06','1','0.6','0.5'};
             defaultans = {num2str(handles.t1),num2str(handles.f2),num2str(handles.pad)};
             options.Resize='on';
             answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
