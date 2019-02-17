@@ -2,6 +2,14 @@
 
 Update Log
 
+
+_____________________________________
+
+Version : ACycle_v0.3.2.20190218
+Date    : Feb. 18, 2019; 12:59 am Beijing
+By      : Mingsong Li
+
+	1. Add Plot Digitizer Function
 _____________________________________
 
 Version : ACycle_v0.3.2.20190127
