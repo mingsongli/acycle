@@ -1,10 +1,10 @@
-# Acycle v0.3.1
+# Acycle v0.3.2
 <br />
-<b>Acycle -- a time-series analysis software for paleoclimate projects and education</b>
+<b>Acycle: a time-series analysis software for paleoclimate projects and education</b>
 <br />
 <br />
 
-<b> Mingsong Li, Penn State. Jan. 17, 2019
+<b> Mingsong Li, Penn State. Feb. 18, 2019
 
 <b>E-mail</b>: <i> mul450 {at} psu.edu;</i>
 
