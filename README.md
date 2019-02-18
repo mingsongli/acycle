@@ -1,6 +1,7 @@
 # Acycle v0.3.2
 <br />
-<b>Acycle: a time-series analysis software for paleoclimate projects and education</b>
+<b>Acycle: time-series analysis software for paleoclimate research and education
+</b>
 <br />
 <br />
 
@@ -10,6 +11,13 @@
 
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <i>limingsonglms {at} gmail.com </i>
 <br /><br />
+
+<b> `Please cite: Mingsong Li, Linda Hinnov, Lee Kump, 2019.
+Acycle: time-series analysis software for paleoclimate research and education.
+Computers & Geosciences. (In Press) `</b>
+<br /><br />
+
+`Please give it a "Star" and "Watch" if you like this software. (top right corner of this page)`
 
 Website: www.mingsongli.com/acycle
 
@@ -28,7 +36,7 @@ Website: www.mingsongli.com/acycle
 Acycle is a comprehensive, but "user-friendly" software package for analysis
 of time-series designed for paleoclimate research and education.
 Acycle runs either in the MATLAB environment or as a stand-alone application
-on macOS and Windows, and is available free of charge.
+on macOS and Windows. It is an open-source package and is available free of charge.
 
 <i>Acycle provides data preparation tools, detrending procedures with multiple options available
  to track or remove secular trends, and integrates various power spectral
@@ -79,7 +87,10 @@ For MatLab on either Mac or Windows: MatLab is essential for the Acycle software
 
 - (step 2) Start-up.
     Option 1: right-click file "ac.m", then choose "Run".
-+    Option 2: Type
+
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+    &nbsp; &nbsp; Option 2: Type
 
 
 ```json
