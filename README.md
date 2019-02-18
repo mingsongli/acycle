@@ -12,7 +12,7 @@
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <i>limingsonglms {at} gmail.com </i>
 <br /><br />
 
-<b> `Please cite: Mingsong Li, Linda Hinnov, Lee Kump, 2019.
+<b> ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) &nbsp; `Please cite: Mingsong Li, Linda Hinnov, Lee Kump, 2019.
 Acycle: time-series analysis software for paleoclimate research and education.
 Computers & Geosciences. (In Press) `</b>
 <br /><br />
