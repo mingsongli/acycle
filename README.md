@@ -1,22 +1,23 @@
-# Acycle v0.3.2
+# Acycle v0.3.3
 <br />
 <b>Acycle: time-series analysis software for paleoclimate research and education
 </b>
 <br />
 <br />
 
-<b> Mingsong Li, Penn State. Feb. 18, 2019
+<b> Mingsong Li, Penn State. Feb. 25, 2019
 
 <b>E-mail</b>: <i> mul450 {at} psu.edu;</i>
 
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <i>limingsonglms {at} gmail.com </i>
 <br /><br />
 
-<b> ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) &nbsp; `Please cite: Mingsong Li, Linda Hinnov, Lee Kump, 2019.
+<b> ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) &nbsp;
+`Please cite: Mingsong Li, Linda A. Hinnov, Lee R. Kump, 2019.
 Acycle: time-series analysis software for paleoclimate research and education.
 Computers & Geosciences. (In Press) `</b>
 <br /><br />
-
+<b> ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) &nbsp;
 `Please give it a "Star" and "Watch" if you like this software. (top right corner of this page)`
 
 Website: www.mingsongli.com/acycle
@@ -26,7 +27,7 @@ Website: www.mingsongli.com/acycle
 <br />
 
 ```diff
-+ With redesigned Acycle GUI, NO coding experience is required.
++ With redesigned Acycle graphical user interface, NO coding experience is required.
 ```
 
 ```diff
@@ -53,6 +54,10 @@ Many of the functions are specific to cyclostratigraphy and astrochronology,
 and are not found in standard, statistical packages. </i>
 <br />
 <br />
+<br />
+
+---
+
 ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `0. Download`
 
 
@@ -71,6 +76,8 @@ https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf
 <br />
 <br />
 <br />
+
+---
 ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `1. MatLab version`
 <br />
 <br />
@@ -109,6 +116,8 @@ or here: https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf
 <br />
 <br />
 <br />
+
+---
 ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `2. Mac version`
 <br />
 <br />
@@ -121,11 +130,11 @@ Two versions are available:
 <br />
 <br />
 
-- <b>version #1. Acycle0.3.1-Mac-green</b>
+- <b>version #1. Acycle0.3.3-Mac-green</b>
 
 1. <b>How to install:
 
-- (Step 1) Download and unzip <b>Acycle0.3.1-Mac-green.zip <br />
+- (Step 1) Download and unzip <b>Acycle0.3.3-Mac-green.zip <br />
 
 
 - (Step 2) Download MatLab runtime <b>R2015b</b> “MCR_R2015b_maci64_installer.zip” here:
@@ -143,9 +152,9 @@ https://www.mathworks.com/matlabcentral/answers/263824-mcr-with-mac-and-environm
 
 2. <b>How to startup:
 
-- (Step 1) Drag the <i>Acycle0.3.1</i> file to the <i>"/Applications"</i> folder.<br />
+- (Step 1) Drag the <i>Acycle0.3.3</i> file to the <i>"/Applications"</i> folder.<br />
 
-- (Step 2) Go to the <i>“/Applications”</i> folder. Right-click <i>Acyclev0.3.1</i>, choose <i>Show Package Content</i>
+- (Step 2) Go to the <i>“/Applications”</i> folder. Right-click <i>Acyclev0.3.3</i>, choose <i>Show Package Content</i>
 
 - (Step 3) Go to the <i>"Contents/MacOS"</i> folder, drag the <i>applauncher</i> file to dock.
 
@@ -161,11 +170,11 @@ Read more tips on the installation at Section 3.4 in /doc/AC_Users_Guide.pdf
 <br />
 <br />
 
-- <b>version #2. Acycle0.3.1-Mac-Installer</b>
+- <b>version #2. Acycle0.3.3-Mac-Installer</b>
 
 1. <b>How to install:
 
-- (Step 1) Download and unzip <b>Acycle0.3.1-Mac-Installer.zip <br />
+- (Step 1) Download and unzip <b>Acycle0.3.3-Mac-Installer.zip <br />
 - (Step 2) Double click to install Acycle and MatLab runtime <b>R2015b</b> simultaneously. <br />
 - (Step 3) Setup Runtime environment <br /> <br />
 
@@ -183,15 +192,15 @@ Go to the “Contents/MacOS” folder, drag the <i>applauncher</i> file to dock.
 - Click icon of <i>applauncher</i> in the dock to start the Acycle software.
 <br />
 
-
+---
 ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `3. Windows version`
 </b>
 
-- <b> version #1. Acycle0.3.1-Win-green</b>
+- <b> version #1. Acycle0.3.3-Win-green</b>
 
  Green version. No installation needed. MatLab Runtime <b>R2017a</b> is essential.
 <br />
-- (Step 1) Download <b>Acycle0.3.1-Win-green
+- (Step 1) Download <b>Acycle0.3.3-Win-green
 
 - (Step 2) Download MatLab runtime <b>R2017a</b> here:
 https://www.mathworks.com/products/compiler/matlab-runtime.html
@@ -226,10 +235,10 @@ Then in the pop-up window, type the following command, and then click OK button.
 
 <br />
 
-- <b> version #2. Acycle0.3.1-Win-Installer</b>
+- <b> version #2. Acycle0.3.3-Win-Installer</b>
 
 
-- (Step 1) Download Acycle0.3.1-Win-Installer
+- (Step 1) Download Acycle0.3.3-Win-Installer
 - (Step 2) Installation
 <br /><br />
 Double click “AcycleInstaller.exe” to install Acycle and MatLab runtime <b>R2017a</b> simultaneously. <br />
@@ -267,6 +276,7 @@ Then in the pop-up window, type the following command, and click <b>OK</b> butto
 <br />
 <br />
 
+---
 ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `. Data requirement`
 
 </b>
@@ -298,6 +308,8 @@ All data files, plots, and folders are displayed in the GUI list box.
 <br />
 <br />
 
+---
+
 ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `. Functions and GUI`
 
 <br />
@@ -307,32 +319,36 @@ All data files, plots, and folders are displayed in the GUI list box.
 - <b>File</b> (New Folder; New Text File, Save AC.fig;
 Open Working Directory; Extract Data)<br />
 
-- <b>Edit</b> (Rename; Cut; Copy; Paste; Delete)<br />
+- <b>Edit</b> (Refresh; Rename; Cut; Copy; Paste; Delete)<br />
 
-- <b>Plot</b> (Plot; Plot PLUS; Plot Standardized; Plot Swap Axis;
+- <b>Plot</b> (Plot; Plot Pro; Plot Standardized; Plot Standardized +2;
+Plot Swap Axis;
 Stairs; Sampling Rate; Data Distribution; ECOCO Plot)<br />
 
 - <b>Basic Series</b> (Insolation; Astronomical Solution;
-LR04 Stack; Sine Wave; White Noise; Red Noise)<br />
+LR04 Stack; Sine Wave; White Noise; Red Noise; Examples)<br />
 
-- <b>Math</b> (Sort/Unique/Delete-empty; Select Parts; Merge Series;
-Add Gaps; Remove Parts; Remove Peaks; Clipping, Interpolation;
-Smoothing (Moving Average, Bootstrap); Changepoint;
-Standardize; Principal Component; Log-transform; First Difference;
+- <b>Math</b> (Sort/Unique/Delete-empty; Interpolation; Select Parts; Merge Series;
+Add Gaps; Remove Parts; Remove Peaks; Clipping;
+Smoothing (Moving Average, Moving Median, Bootstrap); Changepoint;
+Standardize; Principal Component; Log-transform;
 Derivative; Simple Function; Utilities (Find Max/Min);
-Image (Show Image, RGB to Grayscale; Image Profile))<br />
+Image (Show Image, RGB to Grayscale; Image Profile)); Plot Digitizer<br />
 
-- <b>Time series</b> (Pre-whitening; Spectral Analysis;
+- <b>Time series</b> (Detrending; Pre-whitening (First Difference;);
+Spectral Analysis;
 Evolutionary Spectral Analysis; Wavelet transform; Filtering;
 Amplitude Modulation; Build Age Model; Age Scale;
 Sedimentary Rate to Age Model; Power Decomposition Analysis;
-DYNOT; rho-1 method; Correlation Coefficient;
-Evolutionary Correlation Coefficient; Track Sedimentation Rates)<br />
+Sedimentary Noise Model (DYNOT; rho-1 method); Correlation Coefficient;
+Evolutionary Correlation Coefficient; Track Sedimentation Rates; TimeOpt;
+eTimeOpt)<br />
 
 - <b>Help</b> (Readme; Manuals; Find Updates; Copyright; Contact)<br />
 
 <br />
 
+---
 ```json
 Read more at /doc/AC_Users_Guide.pdf
 ```

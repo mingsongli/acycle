@@ -5,11 +5,15 @@ Update Log
 
 _____________________________________
 
-Version : ACycle_v0.3.2.20190218
-Date    : Feb. 18, 2019; 12:59 am Beijing
+Version : ACycle_v0.3.3.20190225
+Date    : Feb. 25, 2019; 1:15 am Beijing
 By      : Mingsong Li
 
-	1. Add Plot Digitizer Function
+	1. Add eTimeOpt GUI
+
+    2. Add Plot Digitizer Function
+
+    3. refine the main gui figure showing tooltips (when mouse moveover)
 _____________________________________
 
 Version : ACycle_v0.3.2.20190127
@@ -17,7 +21,6 @@ Date    : Jan. 27, 2019; 6:20 am Beijing
 By      : Mingsong Li
 
 	1. Reduce start-up GUI loading time
-
 _____________________________________
 
 Version : ACycle_v0.3.1.20190117

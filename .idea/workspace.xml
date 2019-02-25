@@ -2,7 +2,30 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a44cbf35-e700-449e-9317-4d084452f929" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/bin/ac_pwd.txt" beforeDir="false" afterPath="$PROJECT_DIR$/code/bin/ac_pwd.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/guicode/AC.fig" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/AC.fig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/guicode/AC.m" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/AC.m" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/guicode/DataExtractML.m" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/DataExtractML.m" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/guicode/PlotAdv.fig" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/PlotAdv.fig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/guicode/PlotAdv.m" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/PlotAdv.m" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/guicode/copyright.fig" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/copyright.fig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/guicode/timeOptGUI.m" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/timeOptGUI.m" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/icons/menu_expand.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/icons/menu_folder.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/icons/menu_open.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/icons/menu_plot.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/icons/menu_refresh.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/icons/menu_robot.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/icons/menu_up.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/icons/robot.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/package/timeOpt/timeOptAc.m" beforeDir="false" afterPath="$PROJECT_DIR$/code/package/timeOpt/timeOptAc.m" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/doc/AC_Users_Guide.docx" beforeDir="false" afterPath="$PROJECT_DIR$/doc/AC_Users_Guide.docx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/doc/AC_Users_Guide.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/doc/AC_Users_Guide.pdf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/doc/UpdateLog.txt" beforeDir="false" afterPath="$PROJECT_DIR$/doc/UpdateLog.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/doc/~$_Users_Guide.docx" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -14,32 +37,32 @@
     <session id="-1347350849">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="8" />
+          <entry key="project.closed" value="12" />
           <entry key="project.open.time.0" value="1" />
-          <entry key="project.open.time.1" value="1" />
+          <entry key="project.open.time.1" value="3" />
           <entry key="project.open.time.2" value="5" />
-          <entry key="project.open.time.3" value="2" />
-          <entry key="project.opened" value="9" />
+          <entry key="project.open.time.3" value="3" />
+          <entry key="project.opened" value="12" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="md" value="2031" />
+          <entry key="md" value="2301" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Markdown" value="2031" />
+          <entry key="Markdown" value="2301" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="md" value="1" />
+          <entry key="md" value="3" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Markdown" value="1" />
+          <entry key="Markdown" value="3" />
         </counts>
       </usages-collector>
     </session>
@@ -50,8 +73,8 @@
         <entry file="file://$PROJECT_DIR$/README.md">
           <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
             <state split_layout="SPLIT">
-              <first_editor relative-caret-position="270">
-                <caret line="18" lean-forward="true" selection-start-line="18" selection-end-line="18" />
+              <first_editor relative-caret-position="75">
+                <caret line="5" column="6" lean-forward="true" selection-start-line="1" selection-end-line="6" />
               </first_editor>
               <second_editor>
                 <markdownNavigatorState />
@@ -88,6 +111,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Course" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -99,7 +123,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Course" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -122,10 +145,10 @@
     <configuration />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="25" width="1440" height="847" extended-state="6" />
+    <frame x="0" y="24" width="1440" height="847" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.0021141649" />
+      <window_info content_ui="combo" id="Project" order="0" weight="0.0021141649" />
       <window_info id="Structure" order="1" weight="0.25" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
@@ -149,8 +172,8 @@
     <entry file="file://$PROJECT_DIR$/README.md">
       <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
         <state split_layout="SPLIT">
-          <first_editor relative-caret-position="270">
-            <caret line="18" lean-forward="true" selection-start-line="18" selection-end-line="18" />
+          <first_editor relative-caret-position="75">
+            <caret line="5" column="6" lean-forward="true" selection-start-line="1" selection-end-line="6" />
           </first_editor>
           <second_editor>
             <markdownNavigatorState />

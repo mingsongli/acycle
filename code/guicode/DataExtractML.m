@@ -56,7 +56,7 @@ function DataExtractML_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.output = hObject;
 handles.DataExtractMain = gcf;
 set(handles.DataExtractMain,'position',[0,0.95,0.5,0.11]) % set position
-
+set(gcf,'Name','Acycle: Plot Digitizer')
 handles.x00 = 0;
 handles.x01 = 1;
 handles.x02 = 2; % 1 = linear; 0 = log

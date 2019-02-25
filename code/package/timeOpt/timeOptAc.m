@@ -188,20 +188,21 @@ xx = zeros(numsed,4);
 for i = 1:numsed
     sedrate1 = sedrate(i);
     data(:,1) = dat(:,1)/sedrate1;
-        [tanhilb,~,~] = tanerhilbertML(data,fc,fl,fh,roll);
-        timeSeries(:,1) = tanhilb(:,1);
-        timeSeries(:,2) = tanhilb(:,3);
-        if fit == 1
-            [rsq, ~] = fitItls(timeSeries, sedrate1,targetE, cormethod,lsmethod);
-            [rsqpwrOut, ~] = fitItls(data, sedrate1,targetTot, cormethod,lsmethod);
-        elseif fit == 2
-            [rsq, ~] = fitItls(timeSeries, sedrate1,targetE(1), cormethod,lsmethod);
-            [rsqpwrOut, ~] = fitItls(data, sedrate1, targetTot, cormethod,lsmethod);
-        end
-        xx(i,1) = sedrate1;
-        xx(i,2) = rsq;
-        xx(i,3) = rsqpwrOut;
-        xx(i,4) = rsq*rsqpwrOut;
+    %
+    [tanhilb,~,~] = tanerhilbertML(data,fc,fl,fh,roll);
+    timeSeries(:,1) = tanhilb(:,1);
+    timeSeries(:,2) = tanhilb(:,3);
+    if fit == 1
+        [rsq, ~] = fitItls(timeSeries, sedrate1,targetE, cormethod,lsmethod);
+        [rsqpwrOut, ~] = fitItls(data, sedrate1,targetTot, cormethod,lsmethod);
+    elseif fit == 2
+        [rsq, ~] = fitItls(timeSeries, sedrate1,targetE(1), cormethod,lsmethod);
+        [rsqpwrOut, ~] = fitItls(data, sedrate1, targetTot, cormethod,lsmethod);
+    end
+    xx(i,1) = sedrate1;
+    xx(i,2) = rsq;
+    xx(i,3) = rsqpwrOut;
+    xx(i,4) = rsq*rsqpwrOut;
 end
 
 %% Find max

@@ -116,7 +116,7 @@ set(handles.checkbox4,'position',[0.6,0.06,0.2,0.056])
 set(handles.text16,'position',[0.05,0.01,0.9,0.04])
 set(handles.text16,'FontSize',10);  % set as norm
 
-set(gcf,'Name','Acycle: timeOpt')
+set(gcf,'Name','Acycle: TimeOpt')
 dat = varargin{1}.current_data;  % data
 handles.unit = varargin{1}.unit; % unit
 handles.unit_type = varargin{1}.unit_type; % unit type

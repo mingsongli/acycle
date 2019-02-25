@@ -92,6 +92,26 @@ set(handles.push_swap,'position',[0.907,0.271,0.084,0.088])
 
 set(handles.plot_done,'position',[0.035,0.056,0.294,0.143])
 
+% tooltip
+s_push_axis = sprintf('Click to set Y (or X) axis');
+set(handles.push_axis,'TooltipString',s_push_axis)
+s_push_axis_log = sprintf('Linear <-> Log');
+set(handles.push_axis_log,'TooltipString',s_push_axis_log)
+s_pushbutton_flipxy = sprintf('Normal <-> reversed');
+set(handles.pushbutton_flipxy,'TooltipString',s_pushbutton_flipxy)
+s_push_swap = sprintf('Swap X and Y axes');
+set(handles.push_swap,'TooltipString',s_push_swap)
+s_push_linecolor = sprintf('Change line color');
+set(handles.push_linecolor,'TooltipString',s_push_linecolor)
+s_push_makerface = sprintf('Change marker face color');
+set(handles.push_makerface,'TooltipString',s_push_makerface)
+s_push_markeredge = sprintf('Change marker edge color');
+set(handles.push_markeredge,'TooltipString',s_push_markeredge)
+s_push_edge = sprintf('Display / hide marker edge');
+set(handles.push_edge,'TooltipString',s_push_edge)
+s_push_face = sprintf('Display / hide marker face');
+set(handles.push_face,'TooltipString',s_push_face)
+%
 plot_s = varargin{1}.plot_s;
 handles.plot_s = plot_s;
 handles.nplot = varargin{1}.nplot;
