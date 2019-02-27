@@ -1,11 +1,11 @@
 function ac
 
-%% ACYCLE v0.3.1
-%%- a time-series analysis software for paleoclimate projects and education
+%% ACYCLE
+%% time-series analysis software for paleoclimate projects and education
 %%
 % This is a start-up script for the Acycle software (MatLab version)
 %
-% Option 1: Right-click ac.m , then select "Run". All set.
+% Option 1: Right click ac.m , then select "Run". All set.
 %
 % Option 2: In MatLab Command Window, type:
 %           ac
@@ -16,20 +16,20 @@ function ac
 % results based in part on use of the program and cite the following
 % article in which the program was described:
 %
-%           Mingsong Li, Linda Hinnov, Lee Kump. Acycle: a time-series  
+%           Mingsong Li, Linda Hinnov, Lee Kump. Acycle: time-series  
 %           analysis software for paleoclimate projects and education,
 %           Computers and Geosciences, in press
 %
 % If you publish results using techniques such as correlation coefficient,
 % sedimentary noise model, power decomposition analysis, evolutionary fast
-% Fourier transform, wavelet transform, Bayesian changepoint, gaussian
-% processes toolbox, or other approaches, please also cite original
-% publications, as detailed in "AC_Users_Guide.pdf" file at
+% Fourier transform, wavelet transform, Bayesian changepoint, (e)TimeOpt,
+% or other approaches, please also cite original publications,
+% as detailed in "AC_Users_Guide.pdf" file at
 %
 % https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf
 %
 % Program Author:
-%           Mingsong Li
+%           Mingsong Li, PhD
 %           Department of Geosciences
 %           Pennsylvania State University
 %           410 Deike Bldg, 
@@ -54,8 +54,7 @@ function ac
 %
 %**************************************************************************
 %%
-%restoredefaultpath;
-%
+
 ac_dir_str = which('ac.m');
 [path_root,~,~] = fileparts(ac_dir_str);
 % Test valid directory
@@ -69,6 +68,6 @@ catch
 end
 % add path
 addpath(genpath(path_root));
-% start up
+% start up Acycle GUI
 AC
 end

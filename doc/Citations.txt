@@ -1,26 +1,35 @@
-*******************************************************
-*********************** Reference ****************************************************************************
-
 
 *******************************************************
 Technique
 *******************************************************
 
+>> Bayesian Change Point algorithm
+E. Ruggieri (2013) "A Bayesian Approach to Detecting Change Points in Climatic Records," International Journal of Climatology, 33: 520-528. doi: 10.1002/joc.3447
 
 >> Evofft (evolutionary FFT)
 Kodama, K.P., Hinnov, L., 2015. Rock Magnetic Cyclostratigraphy. Wiley-Blackwell.
->> Sedimentary noise model (DYNOT and rho-1)
-Li, M., Hinnov, L.A., Huang, C., Ogg, J.G., 2018. Sedimentary noise and sea levels linked to land–ocean water exchange and obliquity forcing. Nature communications 9, 1004.>> Sedimentary rate and null hypothesis testing (correlation coefficient / COCO and evolutionary COCO / eCOCO)Li, M., Kump, L.R., Hinnov, L.A., Mann, M.E., 2018. Tracking variable sedimentation rates and astronomical forcing in Phanerozoic paleoclimate proxy series with evolutionary correlation coefficients and hypothesis testing. Earth and Planetary Science Letters 501, 165-179.
+
+>> Optimal sedimentary rate and null hypothesis testing
+(correlation coefficient / COCO and evolutionary COCO / eCOCO)
+Li, M., Kump, L.R., Hinnov, L.A., Mann, M.E., 2018. Tracking variable sedimentation rates and astronomical forcing in Phanerozoic paleoclimate proxy series with evolutionary correlation coefficients and hypothesis testing. Earth and Planetary Science Letters 501, 165-179.
+
+(TimeOpt)
+Meyers, S.R., 2015. The evaluation of eccentricity?related amplitude modulation and bundling in paleoclimate data: An inverse approach for astrochronologic testing and time scale optimization. Paleoceanography. doi: 10.1002/2015PA002850
+
+(eTimeOpt)
+Meyers, S.R., 2019. Cyclostratigraphy and the problem of astrochronologic testing. Earth-Science Reviews 190, 190-223.
 
 >> Powder decomposition analysis (pda.m)
 Li, M., Huang, C., Hinnov, L., Ogg, J., Chen, Z.-Q., Zhang, Y., 2016. Obliquity-forced climate during the Early Triassic hothouse in China. Geology 44, 623-626.
 
->> Bayesian Change Point algorithm
-E. Ruggieri (2013) "A Bayesian Approach to Detecting Change Points in Climatic Records," International Journal of Climatology, 33: 520-528. doi: 10.1002/joc.3447
+>> Sedimentary noise model (DYNOT and rho-1)
+Li, M., Hinnov, L.A., Huang, C., Ogg, J.G., 2018. Sedimentary noise and sea levels linked to land-ocean water exchange and obliquity forcing. Nature communications 9, 1004.
 
 >> Wavelet transform with optional singificance testing
 Torrence, C. and G. P. Compo, 1998: A Practical Guide to Wavelet Analysis. Bull. Amer. Meteor. Soc., 79, 61-78.
-*******************************************************Astronomical solutions
+
+*******************************************************
+Astronomical solution
 *******************************************************
 
 
@@ -32,40 +41,9 @@ Laskar, J., Robutel, P., Joutel, F., Gastineau, M., Correia, A.C.M., Levrard, B.
 
 >> La2010
 Laskar, J., Fienga, A., Gastineau, M., Manche, H., 2011. La2010: a new orbital solution for the long-term motion of the Earth. Astronomy & Astrophysics 532. doi:10.1051/0004-6361/201116836
-<calculation method presented in>
-Wu, H., Zhang, S., Jiang, G., Hinnov, L., Yang, T., Li, H., Wan, X., Wang, C., 2013. Astrochronology of the Early Turonian–Early Campanian terrestrial succession in the Songliao Basin, northeastern China and its implication for long-period behavior of the Solar System. Palaeogeography, Palaeoclimatology, Palaeoecology 385, 55-70.
+
+  <calculation method presented in>
+  Wu, H., Zhang, S., Jiang, G., Hinnov, L., Yang, T., Li, H., Wan, X., Wang, C., 2013. Astrochronology of the Early Turonian???Early Campanian terrestrial succession in the Songliao Basin, northeastern China and its implication for long-period behavior of the Solar System. Palaeogeography, Palaeoclimatology, Palaeoecology 385, 55-70.
 
 >> ZB2017
 Zeebe, R.E., 2017. Numerical Solutions for the orbital motion of the Solar System over the Past 100 Myr: Limits and new results. The Astronomical Journal 154, 193. doi:10.3847/1538-3881/aa8cce
-
-
-*******************************************************
-Dataset
-*******************************************************
-
->> LR04statck5.3myr.txtLisiecki, L.E., Raymo, M.E., 2005. A Pliocene?Pleistocene stack of 57 globally distributed benthic ?18O records. Paleoceanography 20. PA1003, doi:10.1029/2004PA001071.>> Lietal2016EPSL
-Li, M., Ogg, J., Zhang, Y., Huang, C., Hinnov, L., Chen, Z.-Q., Zou, Z., 2016. Astronomical-cycle scaling of the end-Permian extinction and the Early Triassic Epoch of South China and Germany. Earth and Planetary Science Letters 441, 10-25.
-
->> Lietal2017EPSL
-Li, M., Zhang, Y., Huang, C., Ogg, J., Hinnov, L., Wang, Y., Zou, Z., Li, L., 2017. Astronomical tuning and magnetostratigraphy of the Upper Triassic Xujiahe Formation of South China and Newark Supergroup of North America: Implications for the Late Triassic time scale. Earth and Planetary Science Letters 475, 207-223.
-
->> Lietal2018EPSL
-Li, M., Huang, C., Hinnov, L., Chen, W., Ogg, J., Tian, W., 2018. Astrochronology of the Anisian stage (Middle Triassic) at the Guandao reference section, South China. Earth and Planetary Science Letters 482, 591-606.
-
->> Zhangetal2015PPPZhang, Y., Li, M., Ogg, J.G., Montgomery, P., Huang, C., Chen, Z.-Q., Shi, Z., Enos, P., Lehrmann, D.J., 2015. Cycle-calibrated Magnetostratigraphy of middle Carnian from South China: Implications for Late Triassic Time Scale and Termination of the Yangtze Platform. Palaeogeography, Palaeoclimatology, Palaeoecology 436, 135-166.
-
-*******************************************************Similar software packages
-*******************************************************
-
-
->> AnalySeries 2.0.8
-Paillard, D., Labeyrie, L., Yiou, P., 1996. Macintosh program performs time‐series analysis. Eos, Transactions American Geophysical Union 77, 379-379.
-
->> SSA-MTM toolkit
-Ghil, M., 1997. The SSA-MTM Toolkit: Applications to analysis and prediction of time series, Optical Science, Engineering and Instrumentation'97. International Society for Optics and Photonics, pp. 216-230.
-
->> REDFIT
-Schulz, M., Mudelsee, M., 2002. REDFIT: estimating red-noise spectra directly from unevenly spaced paleoclimatic time series. Computers & Geosciences 28, 421-426.
-
->> Astrochron
-Meyers, S.R., 2014. astrochron: An R Package for Astrochronology. http://cran.r-project.org/package=astrochron.

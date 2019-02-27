@@ -1,11 +1,11 @@
-# Acycle v0.3.3
+# Acycle 1.0
 <br />
 <b>Acycle: time-series analysis software for paleoclimate research and education
 </b>
 <br />
 <br />
 
-<b> Mingsong Li, Penn State. Feb. 25, 2019
+<b> Mingsong Li, Penn State. Feb. 26, 2019
 
 <b>E-mail</b>: <i> mul450 {at} psu.edu;</i>
 
@@ -130,11 +130,11 @@ Two versions are available:
 <br />
 <br />
 
-- <b>version #1. Acycle0.3.3-Mac-green</b>
+- <b>version #1. Acycle1.0-Mac-green</b>
 
 1. <b>How to install:
 
-- (Step 1) Download and unzip <b>Acycle0.3.3-Mac-green.zip <br />
+- (Step 1) Download and unzip <b>Acycle1.0-Mac-green.zip <br />
 
 
 - (Step 2) Download MatLab runtime <b>R2015b</b> “MCR_R2015b_maci64_installer.zip” here:
@@ -152,9 +152,9 @@ https://www.mathworks.com/matlabcentral/answers/263824-mcr-with-mac-and-environm
 
 2. <b>How to startup:
 
-- (Step 1) Drag the <i>Acycle0.3.3</i> file to the <i>"/Applications"</i> folder.<br />
+- (Step 1) Drag the <i>Acycle1.0</i> file to the <i>"/Applications"</i> folder.<br />
 
-- (Step 2) Go to the <i>“/Applications”</i> folder. Right-click <i>Acyclev0.3.3</i>, choose <i>Show Package Content</i>
+- (Step 2) Go to the <i>“/Applications”</i> folder. Right-click <i>Acyclev1.0</i>, choose <i>Show Package Content</i>
 
 - (Step 3) Go to the <i>"Contents/MacOS"</i> folder, drag the <i>applauncher</i> file to dock.
 
@@ -170,11 +170,11 @@ Read more tips on the installation at Section 3.4 in /doc/AC_Users_Guide.pdf
 <br />
 <br />
 
-- <b>version #2. Acycle0.3.3-Mac-Installer</b>
+- <b>version #2. Acycle1.0-Mac-Installer</b>
 
 1. <b>How to install:
 
-- (Step 1) Download and unzip <b>Acycle0.3.3-Mac-Installer.zip <br />
+- (Step 1) Download and unzip <b>Acycle1.0-Mac-Installer.zip <br />
 - (Step 2) Double click to install Acycle and MatLab runtime <b>R2015b</b> simultaneously. <br />
 - (Step 3) Setup Runtime environment <br /> <br />
 
@@ -192,15 +192,23 @@ Go to the “Contents/MacOS” folder, drag the <i>applauncher</i> file to dock.
 - Click icon of <i>applauncher</i> in the dock to start the Acycle software.
 <br />
 
+```json
+Warning: NEVER close the terminal window when using Acycle. This will close Acycle either.
+
+Read more tips on the installation at Section 3.4 in /doc/AC_Users_Guide.pdf
+```
+- or here: https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf
+<br />
+
 ---
 ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `3. Windows version`
 </b>
 
-- <b> version #1. Acycle0.3.3-Win-green</b>
+- <b> version #1. Acycle1.0-Win-green</b>
 
  Green version. No installation needed. MatLab Runtime <b>R2017a</b> is essential.
 <br />
-- (Step 1) Download <b>Acycle0.3.3-Win-green
+- (Step 1) Download <b>Acycle1.0-Win-green
 
 - (Step 2) Download MatLab runtime <b>R2017a</b> here:
 https://www.mathworks.com/products/compiler/matlab-runtime.html
@@ -235,10 +243,14 @@ Then in the pop-up window, type the following command, and then click OK button.
 
 <br />
 
-- <b> version #2. Acycle0.3.3-Win-Installer</b>
+- Read more here: https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf
+
+<br />
+
+- <b> version #2. Acycle1.0-Win-Installer</b>
 
 
-- (Step 1) Download Acycle0.3.3-Win-Installer
+- (Step 1) Download Acycle1.0-Win-Installer
 - (Step 2) Installation
 <br /><br />
 Double click “AcycleInstaller.exe” to install Acycle and MatLab runtime <b>R2017a</b> simultaneously. <br />
@@ -274,6 +286,9 @@ Then in the pop-up window, type the following command, and click <b>OK</b> butto
              The commend window will keep on showing information when it runs time-consuming steps.
 
 <br />
+
+- Read more here: https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf
+
 <br />
 
 ---
@@ -300,9 +315,9 @@ All data files, plots, and folders are displayed in the GUI list box.
 
     Still have no idea, don't worry. Try this, you’ll have a perfect example:
 
-    Choose “Basic Series” menu --  select "Insolation" -- Click “OK” button
+    Choose “Basic Series” menu --  select "Examples" -- Click one dataset
 
-    Double-click generated file “Insol-t-1-1000ka-day-80-lat-65-meandaily-La04.txt” for details.
+    Double-click generated file to see details.
     Double-click the "Open Working Folder" icon, you will see this new text file in the working folder.
 
 <br />
@@ -349,6 +364,13 @@ eTimeOpt)<br />
 <br />
 
 ---
+Read more at
+
 ```json
-Read more at /doc/AC_Users_Guide.pdf
+  /doc/AC_Users_Guide.pdf
 ```
+- here:  "Help" menu - "Manual",
+- or here: https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf
+
+<b> ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) &nbsp;
+`Please give it a "Star" and "Watch" if you like this software. (top right corner of this page)`

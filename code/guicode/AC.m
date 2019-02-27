@@ -1,15 +1,54 @@
 function varargout = AC(varargin)
+%% ACYCLE
+%% time-series analysis software for paleoclimate projects and education
+%%
 %
 % AC MATLAB code for AC.fig
 %
-%      This is the main function of the whole software Acycle.
+%      This is the main function of the Acycle software.
 %
-%      Acycle is a a time-series analysis software for paleoclimate projects
-%      By Mingsong Li, Penn State, (c) 2017-2018
+%% ************************************************************************
+% Please acknowledge the program author on any publication of scientific 
+% results based in part on use of the program and cite the following
+% article in which the program was described:
 %
-%      Websites: mingsongli.com/acycle
-%                 github.com/mingsongli/acycle
+%           Mingsong Li, Linda Hinnov, Lee Kump. Acycle: time-series  
+%           analysis software for paleoclimate projects and education,
+%           Computers and Geosciences, in press
 %
+% If you publish results using techniques such as correlation coefficient,
+% sedimentary noise model, power decomposition analysis, evolutionary fast
+% Fourier transform, wavelet transform, Bayesian changepoint, (e)TimeOpt,
+% or other approaches, please also cite original publications,
+% as detailed in "AC_Users_Guide.pdf" file at
+%
+% https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf
+%
+% Program Author:
+%           Mingsong Li, PhD
+%           Department of Geosciences
+%           Pennsylvania State University
+%           410 Deike Bldg, 
+%           University Park, PA 16801, USA
+%
+% Email:    mul450@psu.edu; limingsonglms@gmail.com
+% Website:  https://github.com/mingsongli/acycle
+%           http://mingsongli.com
+%
+% Copyright (C) 2017-2019
+%
+% This program is a free software; you can redistribute it and/or modify it
+% under the terms of the GNU GENERAL PUBLIC LICENSE as published by the 
+% Free Software Foundation.
+%
+% This program is distributed in the hope that it will be useful, but 
+% WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+% or FITNESS FOR A PARTICULAR PURPOSE.
+%
+% You should have received a copy of the GNU General Public License. If
+% not, see < https://www.gnu.org/licenses/ >
+%
+%**************************************************************************
 %%
 %      AC, by itself, creates a new AC or raises the existing
 %      singleton*.
@@ -63,7 +102,7 @@ function AC_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to AC (see VARARGIN)
 
-set(gcf,'Name','Acycle v0.3.3')
+set(gcf,'Name','Acycle v1.0')
 set(gcf,'DockControls', 'off')
 set(gcf,'Color', 'white')
 set(0,'Units','normalized') % set units as normalized
@@ -84,16 +123,12 @@ set(handles.listbox_acmain,'position',    [0.02,0.008,0.96,0.884])
 
 if ismac
     handles.slash_v = '/';
-    %set(handles.listbox_acmain,'FontSize',0.019)
 elseif ispc
     handles.slash_v = '\';
-    %set(handles.listbox_acmain,'FontSize',0.019)
 end
 
 handles.acfigmain = gcf;  %handles of the ac main window
-
 figure(handles.acfigmain)
-%guidata(hObject, handles);
 h=get(gcf,'Children');  % get all content
 h1=findobj(h,'FontUnits','norm');  % find all font units as points
 set(h1,'FontUnits','points','FontSize',12);  % set as norm
@@ -243,8 +278,6 @@ if handles.doubleclick
     index_selected = get(hObject,'Value');
     file_list = get(hObject,'String');
     filename = file_list{index_selected};
-%debug
-%    disp(filename)
     try
         % if selected item is a folder, try to open the folder.
         CDac_pwd; % cd working dir
@@ -258,7 +291,6 @@ if handles.doubleclick
         [~,dat_name,ext] = fileparts(filename);
         filetype = handles.filetype;
         if isdeployed
-            %filetype = {'.txt',''};
             if strcmp(ext,'.fig')
                 try uiopen(filename,1);
                 catch
@@ -302,7 +334,6 @@ if handles.doubleclick
                 end
             end
         else
-            %if sum(strcmp(ext,handles.filetype)) > 0
             if strcmp(ext,'.fig')
                 try
                     uiopen(filename,1);
@@ -320,28 +351,21 @@ if handles.doubleclick
                 end
             elseif strcmp(ext,{'.pdf','.ai','.ps'})
                 try
-                    %open(filename);
                     uiopen(filename,1);
-                    %set(gcf,'Name',[dat_name,ext])
                 catch
                 end
             elseif strcmp(ext,{'.doc','.docx','.ppt','.pptx','.xls','.xlsx'})
                 try
-                    %open(filename);
                     uiopen(filename,1);
-                    %set(gcf,'Name',[dat_name,ext])
                 catch
                 end
             elseif sum(strcmp(ext,filetype)) > 0
                 try
-                    %open(filename);
                     uiopen(filename,1);
-                    %set(gcf,'Name',[dat_name,ext])
                 catch
                 end
             else
                 try uiopen(filename,1);
-                    %set(gcf,'Name',[dat_name,ext])
                 catch
                     fileID = fopen('ac_pwd.txt','r');
                     formatSpec = '%s';
@@ -519,7 +543,6 @@ if check == 1;
         plot_no = plot_selected(i);
         plot_filter_s1 = char(contents(plot_no));
         GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s1);
-        %disp(plot_filter_s)
     try
         data_filterout = load(plot_filter_s);
     catch       
@@ -555,7 +578,6 @@ if check == 1;
             plotsucess = 1;
             % save current data for R 
             assignin('base','currentdata',data_filterout);
-            %datar =[];
             datar = num2str(data_filterout(1,2));
             for ii=2:length(data_filterout(:,1));
                 r1 =data_filterout(ii,2); 
@@ -569,7 +591,6 @@ if check == 1;
             else
                 close(figf)
                 continue
-                %break
             end   
         end
     end
@@ -630,7 +651,6 @@ if check == 1;
         plot_no = plot_selected(i);
         plot_filter_s = char(contents(plot_no));
         GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
-          %  data_filterout = load(plot_filter_s);
     try
         fid = fopen(plot_filter_s);
         data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
@@ -706,49 +726,6 @@ function menu_help_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_help (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes on button press in pushbutton7.
-function pushbutton7_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton7 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-CDac_pwd;
-cd ..;
-address = pwd;
-set(handles.edit_acfigmain_dir,'String',address);
-refreshcolor;
-cd(pre_dirML);
-guidata(hObject,handles)
-
-% --- Executes on button press in pushbutton8.
-function pushbutton8_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton8 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-list_content = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = handles.index_selected;  % read selection in listbox 1; minus 2 for listbox
-nplot = length(plot_selected);   % length
-if plot_selected > 2
-    if nplot > 1
-        open_data = 'Tips: Select ONE folder';
-        h = helpdlg(open_data,'Tips: Close');
-        uiwait(h);
-    else
-        plot_filter_selection = char(list_content(plot_selected));
-        if ~exist(plot_filter_selection,'dir')==1
-            h = helpdlg('This is NOT a folder','Tips: Close');
-            uiwait(h);
-        else
-            cd(plot_filter_selection)
-            address = pwd;
-            set(handles.edit_acfigmain_dir,'String',address);
-        end
-        refreshcolor;
-    end
-end
-guidata(hObject,handles)
-
 
 % --- Executes on selection change in popupmenu1.
 function popupmenu1_Callback(hObject, eventdata, handles)
@@ -902,7 +879,6 @@ function menu_selectinterval_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-%if and ((min(plot_selected) > 2), (nplot == 1))
 if min(plot_selected) > 2
     for i = 1:nplot
         data_name = char(contents(plot_selected(i)));
@@ -974,7 +950,6 @@ if min(plot_selected) > 2
                     end
                     [current_data] = select_interval(data,xmin_cut,xmax_cut); 
                     name1 = [dat_name,'-',num2str(xmin_cut),'-',num2str(xmax_cut),ext];  % New name
-                    %csvwrite(name1,current_data)
 
                     CDac_pwd; % cd ac_pwd dir
                     dlmwrite(name1, current_data, 'delimiter', ',', 'precision', 9);
@@ -1032,13 +1007,11 @@ if and ((min(plot_selected) > 2), (nplot == 1))
 end
 guidata(hObject, handles);
 
-
 % --- Executes during object creation, after setting all properties.
 function menu_interp_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to axes_refresh (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
-
 
 % --------------------------------------------------------------------
 function menu_interp_Callback(hObject, eventdata, handles)
@@ -1054,8 +1027,6 @@ for nploti = 1:nplot
     if plot_selected > 2
     data_name_all = (contents(plot_selected));
     data_name = char(data_name_all{nploti});
-%if and ((min(plot_selected) > 2), (nplot == 1))
-    %data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
         if isdir(data_name) == 1
@@ -1096,10 +1067,8 @@ for nploti = 1:nplot
                 interpolate_rate = str2double(answer{1});
                 data_interp = interpolate(data,interpolate_rate);
                 name1 = [dat_name,'-rsp',num2str(interpolate_rate),ext];  % New name
-                % cd ac_pwd dir
                 CDac_pwd
                 dlmwrite(name1, data_interp, 'delimiter', ',', 'precision', 9); 
-                % csvwrite(name1,data_interp)
                 d = dir; %get files
                 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                 refreshcolor;
@@ -1133,8 +1102,6 @@ if and ((min(plot_selected) > 2), (nplot == 1))
             value = (data(:,2)-mean(data(:,2)))/std(data(:,2));
             data1 = [time,value];
             name1 = [dat_name,'-stand',ext];
-            %csvwrite(name1,data1)
-            % cd ac_pwd dir
             CDac_pwd
             dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9); 
             d = dir; %get files
@@ -1156,7 +1123,6 @@ contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of lis
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
 disp(['Select ',num2str(nplot),' data'])
-%if and ((min(plot_selected) > 2), (nplot == 1))
 for nploti = 1:nplot
     if plot_selected > 2
         data_name_all = (contents(plot_selected));
@@ -1316,8 +1282,6 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                 smooth_v = str2double(answer{1});
                 data(:,2) = movemean(data(:,2),smooth_v,'omitnan');
                 name1 = [dat_name,'-',num2str(smooth_v),'ptsm',ext];  % New name
-                %csvwrite(name1,data)
-                % cd ac_pwd dir
                 CDac_pwd
                 dlmwrite(name1, data, 'delimiter', ',', 'precision', 9); 
                 d = dir; %get files
@@ -1382,8 +1346,6 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                 span_v = str2double(answer{1});
                 method = (answer{2});
                 bootn = str2double(answer{3});
-                %q = char(39);
-                %method = strcat(q,method1,q)
                 if bootn*length(time) >= 100000
                     warndlg('Large number of bootstrap simulations. Please Wait ...','Bootstrap');
                 end
@@ -1603,7 +1565,6 @@ if plot_selected > 2
                     % remember settings
                     handles.math_derivative = derivative_n;
                     name1 = [dat_name,'-',num2str(derivative_n),'derv',ext];
-                    % cd ac_pwd dir
                     CDac_pwd
                     dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
                     d = dir; %get files
@@ -2424,8 +2385,6 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                     set(handles.menu_etrack,'Enable','On')
                     set(handles.menu_ecocoplot,'Enable','On')
                     figure(handles.acfig)
-%                     handles.acfig = gcf;
-%                     savefig(handles.acfig,acfig_name) % save ac.fig automatically
                     cd(pre_dirML);
                     
                     disp('>>  *ECOCO.AC.fig file:')
@@ -2699,7 +2658,6 @@ else
     data=load(aaa);
     
     CDac_pwd % cd ac_pwd dir
-    %csvwrite(handles.foldname,data)
     dlmwrite(handles.foldname, data, 'delimiter', ',', 'precision', 9); 
     d = dir; %get files
     set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
@@ -2758,19 +2716,17 @@ if and ((min(plot_selected) > 2), (nplot == 1))
             options.Resize='on';
             answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
             if ~isempty(answer)
-            ymin_cut = str2double(answer{1});
-            ymax_cut = str2double(answer{2});
-            [current_data]=depeaks(data,ymin_cut,ymax_cut); 
+                ymin_cut = str2double(answer{1});
+                ymax_cut = str2double(answer{2});
+                [current_data]=depeaks(data,ymin_cut,ymax_cut); 
 
-            name1 = [dat_name,'-dpks',num2str(ymin_cut),'-',num2str(ymax_cut),ext];  % New name
-            %csvwrite(name1,current_data)    
-            % cd ac_pwd dir
+                name1 = [dat_name,'-dpks',num2str(ymin_cut),'-',num2str(ymax_cut),ext];  % New name
                 CDac_pwd
-            dlmwrite(name1, current_data, 'delimiter', ',', 'precision', 9); 
-            d = dir; %get files
-            set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-            refreshcolor;
-            cd(pre_dirML); % return to matlab view folder
+                dlmwrite(name1, current_data, 'delimiter', ',', 'precision', 9); 
+                d = dir; %get files
+                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+                refreshcolor;
+                cd(pre_dirML); % return to matlab view folder
             end
         end
         end
@@ -2874,17 +2830,8 @@ if ~isempty(answer)
         norbit = norbit(srsh_1:srsh_n,:); % selected data
         ecoco = ecoco(srsh_1:srsh_n,:); % selected data
     end
-    %[Y] = ebrief(handles.out_ecocorb,2,-2); % brief ecocorb
-    %[Y] = ebrief(handles.out_ecoco,2,-2); % brief ecoco
     [Y] = ebrief(ecc,2,-2); % brief ecoco
-%     size(Y)
-%     size(ecc)
-    %[Ypcc,locatcc] = eccpeaks(Y,handles.out_ecc,handles.out_eci,n,ci,corrcf,1,NaN);
     [Ypcc,locatcc] = eccpeaks(Y,ecc,eci,norbit,corrcf,ci,sh_norb,n,1,NaN); % get peaks
-    
-%     [srslice_range,srn_all,srn_best,eccout_all] = ecocotrack(locatcc,ecc,eci,ecoco,...
-%     norbit,handles.out_depth,handles.sr1,handles.sr2,srstep,...
-%     srsh,srslice,corrcf,ci,plotn,sh_norb);
 
     [~,~,srn_best,~] = ecocotrack(locatcc,ecc,eci,ecoco,...
     norbit,handles.out_depth,sr1,sr2,srstep,...
@@ -2892,7 +2839,6 @@ if ~isempty(answer)
 
     assignin('base','Y',Y)
     assignin('base','Ypcc',Ypcc)
-    %assignin('base','handles.out_ecoco',handles.out_ecoco)
     
     name0 = [handles.dat_name,'-',num2str(n),'pk-',num2str(ci),'%H0SL',...
         num2str(corrcf),'co-',num2str(srslice),'sl','-SR'];  % New name
@@ -2906,10 +2852,8 @@ if ~isempty(answer)
             end
         end
     end
-    %srn_map(:,2) = (handles.sr1+handles.srstep*(srn_best(1,:)-1))';
     srn_map(:,2) = (sr1+handles.srstep*(srn_best(1,:)-1))';
     srn_map(:,1) = handles.out_depth;
-    % cd ac_pwd dir
     CDac_pwd
     dlmwrite(name1, srn_map, 'delimiter', ',', 'precision', 9);
     disp(['>> Sedimentation rate file: ',name1])
@@ -3016,9 +2960,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
             datapksperiod = datapksperiod*period;
             datapksperiod = datapksperiod';
             handles.datapks_tie = [datapks(:,1),datapksperiod];
-            %csvwrite([dat_name,'-agemod-',num2str(period),'-',plot_filter_s,ext],handles.datapks_tie)
             name1 = [dat_name,'-agemod-',num2str(period),'-',plot_filter_s,ext];
-            % cd ac_pwd dir
             CDac_pwd
             dlmwrite(name1, handles.datapks_tie, 'delimiter', ',', 'precision', 9);
             d = dir; %get files
@@ -3070,14 +3012,12 @@ if and ((min(plot_selected) > 2), (nplot == 1))
             data(:,2) = c * data(:,2) + d;
             if and(and(a == 1, b==0), and(c==1, d==0))
             else
-            %csvwrite([dat_name,'-new',ext],data)
-            % cd ac_pwd dir
-            CDac_pwd
-            dlmwrite([dat_name,'-new',ext], data, 'delimiter', ',', 'precision', 9);
-            d = dir; %get files
-            set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-            refreshcolor;
-            cd(pre_dirML); % return to matlab view folder
+                CDac_pwd
+                dlmwrite([dat_name,'-new',ext], data, 'delimiter', ',', 'precision', 9);
+                d = dir; %get files
+                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+                refreshcolor;
+                cd(pre_dirML); % return to matlab view folder
             end
             end
         end
@@ -3126,10 +3066,8 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                 t2 = str2double(answer{2});
                 maxmin = str2double(answer{3});
                 ind = str2double(answer{4});
-                % 
                 [dat] = select_interval(data,t1,t2);
                 y = dat(:,ind);
-                % max
                 if maxmin == 1  
                     [m,i] = max(y);
                 else
@@ -3325,7 +3263,6 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                         c_info = getCursorInfo(dcm_obj);
                         m = length(c_info);
                         CursorInfo_value = zeros(m,2);
-                         % if m>=1
                         if m == 2
                             for i = 1 : m
                                CursorInfo_value(i,1)=c_info(i).Position(:,1);
@@ -3337,7 +3274,6 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                         if m > 2
                             warndlg('More than 2 cursors selected, only first 2 used!')
                         end
-                         %set(dcm_obj,'DisplayStyle','datatip','SnapToDataVertex','off')
 
                         if m >= 2
                             [cx,cy,c,xi,yi] = improfile(I,CursorInfo_value(:,1),CursorInfo_value(:,2));
@@ -3349,7 +3285,6 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                             catch
                                 warndlg('This is not a grayscale image!')
                                 try c = reshape(c,[],3);
-                                    %warndlg('Looks like a RGB image?')
                                 catch
                                     warndlg('Looks like a cymk image, right?')
                                     c = reshape(c,[],4);
@@ -3495,7 +3430,6 @@ for i = 1:nplot
         new_name = handles.data_name{i};
         new_name_w_dir = [ac_pwd,handles.slash_v,new_name];
         if exist(new_name_w_dir)
-            %disp('exist files')
             [~,dat_name,ext] = fileparts(new_name);
             for i = 1:100
                 new_name = [dat_name,'_copy',num2str(i),ext];
@@ -3532,7 +3466,6 @@ switch choice
     case 'No'
         deletefile = 0;
     case 'Yes'
-        %disp([choice ' coming right up.'])
         deletefile = 1;
 end
 
@@ -3546,7 +3479,6 @@ if deletefile == 1
         
         for i = 1:nplot
             plot_no = selected(i);
-            % delete selected data
             plot_filter_selection = char(list_content(plot_no));
             
             if plot_no > 2
@@ -3606,7 +3538,6 @@ else
     data(:,2) = amp * rand(length(t),1);
     dat_name = 'rand';
 end
-% cd ac_pwd dir
 CDac_pwd
 dlmwrite([dat_name,'-noise.txt'], data, 'delimiter', ',', 'precision', 9);
 end
@@ -3648,7 +3579,6 @@ rho1 = str2double(answer{5});
 t = t1:sr:t2;
 data(:,1) = t';
 data(:,2) = amp * zscore(redmark(rho1,length(t)));
-% cd ac_pwd dir
 CDac_pwd
 dlmwrite(['rednoise',num2str(rho1),'.txt'], data, 'delimiter', ',', 'precision', 9);
 
@@ -3707,7 +3637,6 @@ if check == 1;
     else
     end
     dat_merge = findduplicate(dat_merge);
-    % cd ac_pwd dir
     CDac_pwd
     dlmwrite('mergedseries.txt', dat_merge, 'delimiter', ',', 'precision', 9);
     d = dir; %get files
@@ -3733,7 +3662,6 @@ contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of lis
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
 disp(['Select ',num2str(nplot),' data'])
-%if and ((min(plot_selected) > 2), (nplot == 1))
 for nploti = 1:nplot
 if plot_selected > 2
     prompt = {'Sort data in ascending order?','Unique values in data?','Remove empty row?','Apply to ALL'};
@@ -3819,7 +3747,6 @@ if plot_selected > 2
                                 handles.math_unique = dataunique;
                                 handles.math_deleteempty = dataempty;
 
-                                % cd ac_pwd dir
                                 CDac_pwd
                                 dlmwrite(name2, data, 'delimiter', ',', 'precision', 9);
                             end
@@ -3910,7 +3837,6 @@ if plot_selected > 2
                             handles.math_unique = dataunique;
                             handles.math_deleteempty = dataempty;
 
-                            % cd ac_pwd dir
                             CDac_pwd
                             dlmwrite(name2, data, 'delimiter', ',', 'precision', 9);
                             d = dir; %get files
@@ -3957,7 +3883,6 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                 agemodel(i,2) = 100*(time(i)-time(i-1))/value(i-1)+agemodel(i-1,2);
             end
             name1 = [dat_name,'-agemod',ext];  % New name
-            % cd ac_pwd dir
                 CDac_pwd
             dlmwrite(name1, agemodel, 'delimiter', ',', 'precision', 9);
             d = dir; %get files
@@ -4000,14 +3925,6 @@ for i = 1:nplot
 end
 
 if check == 1
-%     prompt = {'Interpolation sample rate for stairs'};
-%     dlg_title = 'Input sample rate (1 = yes)';
-%     num_lines = 1;
-%     defaultans = {'0.1'};
-%     options.Resize='on';
-%     answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-%     if ~isempty(answer)
-%         dt = str2double(answer{1});
         
         figure;
         hold on;
@@ -4015,7 +3932,6 @@ if check == 1
             plot_no = plot_selected(j);
             plot_filter_s = char(contents(plot_no));
             GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
-%            data = load(plot_filter_s);
      try
         fid = fopen(plot_filter_s);
         data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
@@ -4039,7 +3955,6 @@ if check == 1
             xlabel(['Time (',handles.unit,')'])
         end
         title(plot_filter_s)
-%     end
 end
 guidata(hObject, handles);
 
@@ -4324,7 +4239,6 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                     dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9); 
                     disp(['>>  Save rho1 median    : ',name1])   
                     disp(['>>  Save rho1 percentile: ',name2])  
-                    %cd(pre_dirML); % return to matlab view folder
                     
                     d = dir; %get files
                     set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
@@ -4466,8 +4380,6 @@ if check == 1;
             figure;
             datasamp = [t(1:len_t-1),dt];
             datasamp = datasamp(~any(isnan(datasamp),2),:);
-            %[dat] = n2stair(datasamp,min(dt)/10);
-            %plot(dat(:,1),dat(:,2),'k','LineWidth',1);
             stairs(datasamp(:,1),datasamp(:,2),'LineWidth',1,'Color','k');
             set(gca,'XMinorTick','on','YMinorTick','on')
             set(gcf,'Color', 'white')
@@ -4475,7 +4387,6 @@ if check == 1;
             set(gcf,'units','norm') % set location
             set(gcf,'position',[0.1,0.5,0.45,0.45]) % set position
             set(gcf,'Name', 'Sampling rate (original domain)')
-            %plot(data_filterout(1:(len_t-1),1),dt);
             if handles.unit_type == 0;
                 xlabel(['Unit (',handles.unit,')'])
                 ylabel('Unit')
@@ -4569,7 +4480,6 @@ if check == 1;
             xlabel('Data')
             note = ['max: ',num2str(max(datax)),'; mean: ',num2str(mean(datax)),...
                 '; median: ',num2str(median(datax)),'; min: ',num2str(min(datax))];
-            %text(mean(datax),length(datax)/10,note);
             legend(note)
     end
 end
@@ -4590,7 +4500,6 @@ for i = 1:nplot
     if plot_no > 2
         plot_filter_s = char(contents(plot_no));
         plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
-        %GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
         if isdir(plot_filter_s)
             addpath(genpath(plot_filter_s));
         end
@@ -4647,7 +4556,6 @@ if check == 1;
     answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
     if ~isempty(answer)
         f3 = str2num(answer{1});
-        %f3 = sort(f3);
         window = str2double(answer{2});
         nw = str2double(answer{3});
         ftmin = str2double(answer{4});
@@ -4843,7 +4751,6 @@ function menu_insol_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 guidata(hObject, handles);
 Insolation(handles);
-%Insolation;
 
 
 % --------------------------------------------------------------------
@@ -4852,13 +4759,11 @@ function Official_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-
 % --------------------------------------------------------------------
 function github_Callback(hObject, eventdata, handles)
 % hObject    handle to github (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
 
 % --- Executes during object creation, after setting all properties.
 function menu_newtxt_CreateFcn(hObject, eventdata, handles)
@@ -4921,9 +4826,6 @@ function menu_open_Callback(hObject, eventdata, handles)
 [filename, pathname] = uigetfile({'*.fig','Files (*.fig)'},...
     'Open *.fig file');
 if filename == 0
-%     open_data = 'Tips: open 2 colume data';
-%     h = helpdlg(open_data,'Tips: Close');
-%     uiwait(h); 
 else
     aaa = [pathname,filename];
     openfig(aaa)
@@ -5093,7 +4995,6 @@ if check == 1;
                 CDac_pwd  % cd ac_pwd dir
                 % save data
                 name1 = [dat_name,'-c',num2str(c1),'-c',num2str(c2),ext];  % New name
-                %csvwrite(name1,current_data)
                 dlmwrite(name1, data_new, 'delimiter', ',', 'precision', 9);
                 disp(['Extract data from columns ',num2str(c1),' & ',num2str(c2),' : ',dat_name,ext])
                 d = dir; %get files
@@ -5311,8 +5212,6 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                 % median-smoothing
                 try data(:,2) = moveMedian(data(:,2),smoothn);
                     name1 = [dat_name,'-',num2str(smooth_v*100),'%-median',ext];  % New name
-                    %csvwrite(name1,data)
-                    % cd ac_pwd dir
                     CDac_pwd
                     dlmwrite(name1, data, 'delimiter', ',', 'precision', 9); 
                     d = dir; %get files
@@ -5354,7 +5253,6 @@ data_name = which('Example-SvalbardPETM-logFe.txt');
 
 [~,dat_name,ext] = fileparts(data_name);
 data = load(data_name);
-
 time = data(:,1);
 value = data(:,2);
 figure;
@@ -5789,16 +5687,13 @@ for i = 1:nplot
         plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
         GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
         if isdir(plot_filter_s)
-            %return
         else
             [~,dat_name,ext] = fileparts(plot_filter_s);
-            %check = 0;
             if sum(strcmp(ext,handles.filetype)) > 0
                 check = 1; % selection can be executed 
             end
         end
     else
-        %return
     end
 end
 
@@ -6183,7 +6078,6 @@ if check == 1
                 set(gca,'XMinorTick','on','YMinorTick','on')
                 subplot(2,1,2)
                 whitebg('white');
-                %try pcolor(x_grid,y_grid,s)
                 try pcolor(y_grid,x_grid,s')
                 colormap(jet)
                 shading interp
@@ -6197,7 +6091,6 @@ if check == 1
                     xlabel(['Time (',handles.unit,')'])
                 end
                 set(gcf,'Name',[num2str(name1),': Running Periodogram'])
-                %set(gca, 'YScale', 'log')
                 ylim([0 fn])
                 xlim([min(dat(:,1)),max(dat(:,1))])
                 set(gca,'XMinorTick','on','YMinorTick','on')
@@ -6216,11 +6109,9 @@ if check == 1
                 figwave = figure;
                 try [~,~,~]= waveletML(daty,datx,1,0.1,2*dt,datx(end)-datx(1));
                     set(gca,'XMinorTick','on','YMinorTick','on')
-                    %set(gca, 'TickDir', 'out')
                 catch
                     try [~,~,~]= waveletML(daty,datx,1,0.1,2*dt,1/2*(datx(end)-datx(1)));
                         set(gca,'XMinorTick','on','YMinorTick','on')
-                        %set(gca, 'TickDir', 'out')
                     catch
                         errordlg('Error. Please try with other parameters')
                         disp('>>  ==========    Error in wavelet transform')

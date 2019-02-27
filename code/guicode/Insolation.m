@@ -63,7 +63,7 @@ h1=findobj(h,'FontUnits','norm');  % find all font units as points
 set(h1,'FontUnits','points','FontSize',12);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',12);  % set as norm
-set(gcf,'Name','Acycle: Insolation Solutions')
+set(gcf,'Name','Acycle: Insolation')
 %type
 set(handles.uibuttongroup1,'position',[0.03,0.852,0.386,0.107])
 set(handles.radiobutton1,'position',[0.089,0.244,0.384,0.561])

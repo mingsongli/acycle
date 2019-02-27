@@ -1,21 +1,31 @@
-Acycle version 0.2.6 | Copyright (C) 2017-2019
+Acycle version 1.0 | Copyright (C) 2017-2019
 
 Please acknowledge the program author on any publication of scientific results based in part on use of the program and cite the following article in which the program was described:
-           Mingsong Li, Linda Hinnov, Lee Kump. 2019. Acycle: a time-series  
+           Mingsong Li, Linda Hinnov, Lee Kump. 2019. Acycle: time-series  
            analysis software for paleoclimate research and education,
            Computers and Geosciences, in press
 
-If you publish results using techniques such as correlation coefficient, sedimentary noise model, power decomposition analysis, evolutionary fast Fourier transform, wavelet transform, Bayesian changepoint, gaussian processes toolbox, or other approaches, please also cite original publications, as detailed in User's Guide file at https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf
+If you publish results using techniques such as 
+correlation coefficient, 
+sedimentary noise model, 
+power decomposition analysis, 
+evolutionary fast Fourier transform, 
+wavelet transform, 
+Bayesian changepoint, 
+(e)TimeOpt, 
+or other approaches, 
+please also cite original publications, as detailed in User's Guide file at 
+https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf
 
 Program Author:
-           Mingsong Li
+           Mingsong Li, PhD
            Department of Geosciences
            Pennsylvania State University
            410 Deike Bldg, 
            University Park, PA 16801, USA
 
-Email:      mul450@psu.edu; limingsonglms@gmail.com
-Website:  https://github.com/mingsongli/acycle
+Email:     mul450@psu.edu; limingsonglms@gmail.com
+Website:   https://github.com/mingsongli/acycle
                 http://mingsongli.com
 
 This program is a free software; you can redistribute it and/or modify it under the terms of the GNU GENERAL PUBLIC LICENSE as published by the Free Software Foundation.

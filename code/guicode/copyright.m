@@ -60,8 +60,7 @@ h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',12);  % set as norm
 
 set(gcf,'position',[0.5,0.1,0.45,0.5]) % set position
-set(handles.logo_axes1,'position',[0.02,0.762,0.164,0.215]) % set position
-%set(handles.logo_axes2,'position',[0.8,0.762,0.164,0.164]) % set position
+set(handles.logo_axes1,'position',[0.02,0.78,0.2,0.2]) % set position
 set(handles.text5,'position',[0.25,0.762,0.35,0.2]) % set position
 set(handles.edit1,'position',[0.02,0.02,0.96,0.74]) % set position
 
