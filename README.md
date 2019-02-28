@@ -204,11 +204,11 @@ Read more tips on the installation at Section 3.4 in /doc/AC_Users_Guide.pdf
 ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `3. Windows version`
 </b>
 
-- <b> version #1. Acycle1.0-Win-green</b>
+- <b> version #1. Acycle0.3-Win-green</b>
 
  Green version. No installation needed. MatLab Runtime <b>R2017a</b> is essential.
 <br />
-- (Step 1) Download <b>Acycle1.0-Win-green
+- (Step 1) Download <b>Acycle0.3-Win-green
 
 - (Step 2) Download MatLab runtime <b>R2017a</b> here:
 https://www.mathworks.com/products/compiler/matlab-runtime.html
@@ -247,10 +247,10 @@ Then in the pop-up window, type the following command, and then click OK button.
 
 <br />
 
-- <b> version #2. Acycle1.0-Win-Installer</b>
+- <b> version #2. Acycle0.3-Win-Installer</b>
 
 
-- (Step 1) Download Acycle1.0-Win-Installer
+- (Step 1) Download Acycle0.3-Win-Installer
 - (Step 2) Installation
 <br /><br />
 Double click “AcycleInstaller.exe” to install Acycle and MatLab runtime <b>R2017a</b> simultaneously. <br />
