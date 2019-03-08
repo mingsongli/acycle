@@ -3,26 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="a44cbf35-e700-449e-9317-4d084452f929" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ac.m" beforeDir="false" afterPath="$PROJECT_DIR$/ac.m" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/code/bin/ac_date.txt" beforeDir="false" afterPath="$PROJECT_DIR$/code/bin/ac_date.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/code/bin/ac_pwd.txt" beforeDir="false" afterPath="$PROJECT_DIR$/code/bin/ac_pwd.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/code/bin/ac_version.txt" beforeDir="false" afterPath="$PROJECT_DIR$/code/bin/ac_version.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/code/guicode/AC.fig" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/AC.fig" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/code/guicode/AC.m" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/AC.m" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/code/guicode/Insolation.m" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/Insolation.m" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/code/guicode/PlotAdv.m" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/PlotAdv.m" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/code/guicode/copyright.fig" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/copyright.fig" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/code/guicode/copyright.m" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/copyright.m" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/code/icons/AC-LOGO-S.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/code/icons/acycle_logo.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/code/icons/acycle_logo.png" beforeDir="false" afterPath="$PROJECT_DIR$/code/icons/acycle_logo.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/doc/AC_Users_Guide.docx" beforeDir="false" afterPath="$PROJECT_DIR$/doc/AC_Users_Guide.docx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/doc/AC_Users_Guide.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/doc/AC_Users_Guide.pdf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/doc/Citations.txt" beforeDir="false" afterPath="$PROJECT_DIR$/doc/Citations.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/doc/Copyright.txt" beforeDir="false" afterPath="$PROJECT_DIR$/doc/Copyright.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/doc/UpdateLog.txt" beforeDir="false" afterPath="$PROJECT_DIR$/doc/UpdateLog.txt" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -34,32 +17,32 @@
     <session id="-1347350849">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="14" />
+          <entry key="project.closed" value="15" />
           <entry key="project.open.time.0" value="1" />
-          <entry key="project.open.time.1" value="4" />
+          <entry key="project.open.time.1" value="5" />
           <entry key="project.open.time.2" value="6" />
           <entry key="project.open.time.3" value="3" />
-          <entry key="project.opened" value="14" />
+          <entry key="project.opened" value="15" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="md" value="2438" />
+          <entry key="md" value="2464" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Markdown" value="2438" />
+          <entry key="Markdown" value="2464" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="md" value="4" />
+          <entry key="md" value="5" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Markdown" value="4" />
+          <entry key="Markdown" value="5" />
         </counts>
       </usages-collector>
     </session>
@@ -130,7 +113,7 @@
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1440" height="847" extended-state="6" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.0021141649" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.17124736" />
       <window_info id="Structure" order="1" weight="0.25" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
@@ -154,8 +137,8 @@
     <entry file="file://$PROJECT_DIR$/README.md">
       <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
         <state split_layout="SPLIT">
-          <first_editor relative-caret-position="60">
-            <caret line="4" column="6" lean-forward="true" selection-start-line="4" selection-start-column="6" selection-end-line="4" selection-end-column="6" />
+          <first_editor relative-caret-position="635">
+            <caret line="137" lean-forward="true" selection-end-line="137" />
           </first_editor>
           <second_editor>
             <markdownNavigatorState />

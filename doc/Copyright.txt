@@ -1,37 +1,38 @@
 Acycle version 1.0 | Copyright (C) 2017-2019
 
 Please acknowledge the program author on any publication of scientific results based in part on use of the program and cite the following article in which the program was described:
-           Mingsong Li, Linda Hinnov, Lee Kump. 2019. Acycle: time-series  
-           analysis software for paleoclimate research and education,
-           Computers and Geosciences, in press
 
-If you publish results using techniques such as 
-correlation coefficient, 
-sedimentary noise model, 
-power decomposition analysis, 
-evolutionary fast Fourier transform, 
-wavelet transform, 
-Bayesian changepoint, 
-(e)TimeOpt, 
-or other approaches, 
-please also cite original publications, as detailed in User's Guide file at 
+           Mingsong Li, Linda Hinnov, Lee Kump. 2019. Acycle: time-series analysis
+           software for paleoclimate research and education, Computers & Geosciences,
+           https://doi.org/10.1016/j.cageo.2019.02.011
+
+If you publish results using techniques such as correlation coefficient, sedimentary noise model, power decomposition analysis, evolutionary fast Fourier transform, wavelet transform, Bayesian changepoint, gaussian processes toolbox, or other approaches, please also cite original publications, as detailed in User's Guide file at
+
+https://doi.org/10.1016/j.cageo.2019.02.011
 https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf
 
 Program Author:
-           Mingsong Li, PhD
+           Mingsong Li
            Department of Geosciences
            Pennsylvania State University
            410 Deike Bldg, 
            University Park, PA 16801, USA
 
-Email:     mul450@psu.edu; limingsonglms@gmail.com
-Website:   https://github.com/mingsongli/acycle
-                http://mingsongli.com
+Email:      mul450@psu.edu; limingsonglms@gmail.com
+Website:  https://github.com/mingsongli/acycle
+               http://mingsongli.com
 
-This program is a free software; you can redistribute it and/or modify it under the terms of the GNU GENERAL PUBLIC LICENSE as published by the Free Software Foundation.
+Academic users:
+
+This software can be freely downloaded, used, and shared by all academic, governmental, or non-profit uses. You can redistribute it and/or modify it under the terms of the GNU GENERAL PUBLIC LICENSE as published by the Free Software Foundation. You should have received a copy of the GNU General Public License. If not, see https://www.gnu.org/licenses/.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+The original author reserves the right to license this program or modified versions of this program under other licenses at the discretion.
+
+Commercial users:
+
+Please contact the authors prior to use: licensing varies by usage scenario.
 
 %----------------------------------------------------------------------------
 %   WAVELET  1D Wavelet transform with optional singificance testing

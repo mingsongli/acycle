@@ -9,8 +9,14 @@ _____________________________________
 
 
 Version : ACycle v1.0
-Date    : Feb. 26, 2019
+Date    : Feb. 26, 2019 - Mar. 8, 2019
 By      : Mingsong Li
+
+    1. Wiki: https://github.com/mingsongli/acycle/wiki
+
+    2. Acycle paper was accepted:
+
+	Mingsong Li, Linda Hinnov, Lee Kump. 2019. Acycle: time-series analysis software for paleoclimate projects and education, Computers and Geosciences, https://doi.org/10.1016/j.cageo.2019.02.011
 
 _____________________________________
 _____________________________________

@@ -1,376 +1,137 @@
-# Acycle 1.0
-<br />
-<b>Acycle: time-series analysis software for paleoclimate research and education
-</b>
-<br />
-<br />
+![logo](https://github.com/mingsongli/acycleFig/blob/master/default_icon_1024-git.gif)
 
-<b> Mingsong Li, Penn State. Feb. 26, 2019
+[![](https://img.shields.io/badge/license-GPL-brightgreen.svg)](https://www.gnu.org/licenses/)
+[![](https://img.shields.io/badge/platform-Mac_Win-green.svg)]()
+[![](https://img.shields.io/badge/version-v1.0-blue.svg)]()
+![](https://img.shields.io/badge/language-MatLab-red.svg)
+---
+`Acycle is a time-series analysis software for paleoclimate research and education`
 
-<b>E-mail</b>: <i> mul450 {at} psu.edu;</i>
+### Highlights
+> * Acycle is signal processing software for paleoclimate research and education
+> * Many of the functions are specific to cyclostratigraphy and astrochronology
+> * Acycle includes models for sedimentary noise and sedimentation rate
+> * A fully implemented graphical user interface facilitates operator use
+
+### Please cite
+> Mingsong Li, Linda A. Hinnov, Lee R. Kump, 2019. _Acycle_: Time-series analysis software for paleoclimate research and education. Computers & Geosciences. https://doi.org/10.1016/j.cageo.2019.02.011.
+---
+Mingsong Li, Penn State. Feb. 26, 2019
+
+E-mail: <i> mul450 {at} psu.edu;</i>
 
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <i>limingsonglms {at} gmail.com </i>
-<br /><br />
+<br><br>
+Website: www.mingsongli.com/acycle <br>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; https://github.com/mingsongli/acycle <br>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; https://github.com/mingsongli/acycle/wiki
+<br><br>
 
-<b> ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) &nbsp;
-`Please cite: Mingsong Li, Linda A. Hinnov, Lee R. Kump, 2019.
-Acycle: time-series analysis software for paleoclimate research and education.
-Computers & Geosciences. (In Press) `</b>
-<br /><br />
 <b> ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) &nbsp;
 `Please give it a "Star" and "Watch" if you like this software. (top right corner of this page)`
 
-Website: www.mingsongli.com/acycle
-
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; https://github.com/mingsongli/acycle
-
-<br />
-
-```diff
-+ With redesigned Acycle graphical user interface, NO coding experience is required.
-```
-
-```diff
-+ With Acycle stand-alone versions, NO Matlab is needed.
-```
-
-Acycle is a comprehensive, but "user-friendly" software package for analysis
-of time-series designed for paleoclimate research and education.
-Acycle runs either in the MATLAB environment or as a stand-alone application
-on macOS and Windows. It is an open-source package and is available free of charge.
-
-<i>Acycle provides data preparation tools, detrending procedures with multiple options available
- to track or remove secular trends, and integrates various power spectral
- analysis approaches for detection and tracking of periodic signals.
-
-Acycle also provides a toolbox that evaluates astronomical signals in
-paleoclimate series, and estimates the most likely sedimentation rate
-by maximizing the correlation coefficient between power spectra of
-an astronomical solution and a paleoclimate series.
-
-Sedimentary noise models for sea-level variations are also included.
-
-Many of the functions are specific to cyclostratigraphy and astrochronology,
-and are not found in standard, statistical packages. </i>
-<br />
-<br />
-<br />
+<br>
 
 ---
 
-![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `0. Download`
+* Acycle is a comprehensive, but "user-friendly" software package for analysis of time-series designed for paleoclimate research and education.
+* Acycle runs either in the MATLAB environment or as a stand-alone application on macOS and Windows.
+* It is an open-source package and is available free of charge.
+    * Acycle provides data preparation tools, detrending procedures with multiple options available to track or remove secular trends, and integrates various power spectral analysis approaches for detection and tracking of periodic signals.
 
+    * Acycle also provides a toolbox that evaluates astronomical signals in paleoclimate series, and estimates the most likely sedimentation rate by maximizing the correlation coefficient between power spectra of an astronomical solution and a paleoclimate series.
 
-<b>Matlab version can be downloaded </b><br /><br />
-(GITHUB) here https://github.com/mingsongli/acycle   <br /> <br />
+    * Sedimentary noise models for sea-level variations are also included.
 
-<b>Windows and Mac standalone versions can be downloaded </b>
-<br />
-<br />
-(DROPBOX) here https://www.dropbox.com/sh/t53vjs539gmixnm/AAC0BqTR0U5xghKwuVc1Iwbma?dl=0  or <br />
-(BAIDU CLOUD) here https://pan.baidu.com/s/1C2ZOUGQl8w9M_eSBzb4NOg   <br />
-<br />
-<b>A very preliminary User's Guide can be downloaded here </b>:
+    * Many of the functions are specific to cyclostratigraphy and astrochronology, and are not found in standard, statistical packages.
 
-https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf
-<br />
-<br />
-<br />
+![gui](https://github.com/mingsongli/acycleFig/blob/master/Fig.1-GUI.jpg)
+---
+## Table of Content
+
+[**1. Copyright**](https://github.com/mingsongli/acycle/wiki/1.--Copyrights) <br>
+[**2. References**](https://github.com/mingsongli/acycle/wiki/2.--References) <br>
+
+[**3. Getting Started**](https://github.com/mingsongli/acycle/wiki/3.-Getting-Started) <br>
+* [3.1 System requirements](https://github.com/mingsongli/acycle/wiki/3.-Getting-Started#31-system-requirements) <br>
+* [3.2 Downloading](https://github.com/mingsongli/acycle/wiki/3.-Getting-Started#32-downloading-the-acycle-software) <br>
+* [3.3 MatLab version](https://github.com/mingsongli/acycle/wiki/3.-Getting-Started#33-matlab-version) <br>
+* [3.4 Mac version](https://github.com/mingsongli/acycle/wiki/3.-Getting-Started#34-mac-version) <br>
+* [3.5 Windows version](https://github.com/mingsongli/acycle/wiki/3.-Getting-Started#35-windows-version) <br>
+* [3.6 Data requirement](https://github.com/mingsongli/acycle/wiki/3.-Getting-Started#36-data-requirement) <br>
+
+[**4. Graphical User Interface**](https://github.com/mingsongli/acycle/wiki/4.-Graphical-User-Interface) <br>
+* [4.1 Functions and GUI](https://github.com/mingsongli/acycle/wiki/4.-Graphical-User-Interface#41-functions-and-gui) <br>
+* [4.2 File](https://github.com/mingsongli/acycle/wiki/4.-Graphical-User-Interface#42-file) <br>
+* [4.3 Edit](https://github.com/mingsongli/acycle/wiki/4.-Graphical-User-Interface#43-edit) <br>
+* [4.4 Plot](https://github.com/mingsongli/acycle/wiki/4.-Graphical-User-Interface#44-plot) <br>
+* [4.5 Basic Series](https://github.com/mingsongli/acycle/wiki/4.5-Basic-Series) <br>
+    * [Insolation](https://github.com/mingsongli/acycle/wiki/4.5-Basic-Series#insolation)
+    * [Astronomical solution](https://github.com/mingsongli/acycle/wiki/4.5-Basic-Series#astronomical-solution)
+    * [LR04 stack](https://github.com/mingsongli/acycle/wiki/4.5-Basic-Series#lr04-stack)
+    * [Sine wave](https://github.com/mingsongli/acycle/wiki/4.5-Basic-Series#sine-wave)
+    * [White noise](https://github.com/mingsongli/acycle/wiki/4.5-Basic-Series#white-noise)
+    * [Red noise](https://github.com/mingsongli/acycle/wiki/4.5-Basic-Series#red-noise)
+    * [Examples](https://github.com/mingsongli/acycle/wiki/4.5-Basic-Series#examples)
+
+* [4.6 Math](https://github.com/mingsongli/acycle/wiki/4.6-Math)
+    * [Sort/Unique/Delete-empty](https://github.com/mingsongli/acycle/wiki/4.6-Math#sortuniquedelete-empty)
+    * [Interpolation](https://github.com/mingsongli/acycle/wiki/4.6-Math#interpolation)
+    * [Select Parts](https://github.com/mingsongli/acycle/wiki/4.6-Math#select-parts)
+    * [Merge Series](https://github.com/mingsongli/acycle/wiki/4.6-Math#merge-series)
+    * [Add Gaps](https://github.com/mingsongli/acycle/wiki/4.6-Math#add-gaps)
+    * [Remove Part](https://github.com/mingsongli/acycle/wiki/4.6-Math#remove-parts)
+    * [Remove peaks](https://github.com/mingsongli/acycle/wiki/4.6-Math#remove-peaks)
+    * [Clipping](https://github.com/mingsongli/acycle/wiki/4.6-Math#clipping)
+    * [Smoothing](https://github.com/mingsongli/acycle/wiki/4.6-Math#smoothing)
+    * [Changepoint](https://github.com/mingsongli/acycle/wiki/4.6-Math#changepoint)
+    * [Standardize](https://github.com/mingsongli/acycle/wiki/4.6-Math#standardize)
+    * [Principle Component](https://github.com/mingsongli/acycle/wiki/4.6-Math#principal-component)
+    * [Log-transform](https://github.com/mingsongli/acycle/wiki/4.6-Math#log-transform)
+    * [Derivative](https://github.com/mingsongli/acycle/wiki/4.6-Math#derivative)
+    * [Simple Function](https://github.com/mingsongli/acycle/wiki/4.6-Math#simple-function)
+    * [Utilities](https://github.com/mingsongli/acycle/wiki/4.6-Math#utilities)
+    * [Image](https://github.com/mingsongli/acycle/wiki/4.6-Math#image)
+    * [Plot Digitizer](https://github.com/mingsongli/acycle/wiki/4.6-Math#plot-digitizer)
+
+* [4.7 Time series](https://github.com/mingsongli/acycle/wiki/4.7.1-Detrending)
+    * [Detrending](https://github.com/mingsongli/acycle/wiki/4.7.1-Detrending)
+    * [Prewhitening](https://github.com/mingsongli/acycle/wiki/4.7.2-Prewhitening)
+    * [Spectral analysis](https://github.com/mingsongli/acycle/wiki/4.7.3-Spectral-Analysis)
+    * [Evolutionary spectral analysis](https://github.com/mingsongli/acycle/wiki/4.7.4-Evolutionary-Spectral-Analysis)
+    * [Wavelet](https://github.com/mingsongli/acycle/wiki/4.7.5-Wavelet-transform)
+    * [Filtering](https://github.com/mingsongli/acycle/wiki/4.7.6-Filtering)
+    * [Build age model](https://github.com/mingsongli/acycle/wiki/4.7.7-Build-Age-Model)
+    * [Age scale](https://github.com/mingsongli/acycle/wiki/4.7.8-Age-Scale)
+    * [Sedimentation rate to age model](https://github.com/mingsongli/acycle/wiki/4.7.9-Sedimentary-Rate-to-Age-Model)
+    * [Power decomposition analysis](https://github.com/mingsongli/acycle/wiki/4.7.10-Power-Decomposition-Analysis)
+    * [Sedimentary noise model](https://github.com/mingsongli/acycle/wiki/4.7.11-Sedimentary-noise-model)
+    * [Correlation coefficient (COCO)](https://github.com/mingsongli/acycle/wiki/4.7.12-Correlation-Coefficient-(COCO))
+    * [Evolutionary COCO (eCOCO)](https://github.com/mingsongli/acycle/wiki/4.7.13-Evolutionary-Correlation-Coefficient-(eCOCO))
+    * [TimeOpt](https://github.com/mingsongli/acycle/wiki/4.7.14-TimeOpt)
+    * [eTimeOpt](https://github.com/mingsongli/acycle/wiki/4.7.15-eTimeOpt)
+
+* [4.8 Help](https://github.com/mingsongli/acycle/wiki/4.8-Help)
+* [4.9 Mini-robot](https://github.com/mingsongli/acycle/wiki/4.9-Mini-robot)
+* [**Examples**](https://github.com/mingsongli/acycle/wiki/Examples) <br>
+    * [Insolation](https://github.com/mingsongli/acycle/wiki/Examples#example-1-insolation)
+    * [Astronomical solution](https://github.com/mingsongli/acycle/wiki/Examples#example-2-la2004-astronomical-solution-etp)
+    * [Wayao Triassic](https://github.com/mingsongli/acycle/wiki/Examples#example-3-carnian-cyclostratigraphy)
+
+## Communication
+
+[**FAQ**](https://github.com/mingsongli/acycle/wiki/Frequently-Asked-Questions) <br>
 
 ---
-![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `1. MatLab version`
-<br />
-<br />
-For MatLab on either Mac or Windows: MatLab is essential for the Acycle software package.
-<br />
-
-1. <b>How to install</b>
-
-- Download and unzip the Acycle software to your root directory. All set.
-
-2. <b>How to startup </b>
-
-- (step 1) Change the MatLab working directory to the Acycle directory
-
-- (step 2) Start-up.
-    Option 1: right-click file "ac.m", then choose "Run".
-
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-    &nbsp; &nbsp; Option 2: Type
-
-
-```json
-ac
-```
-<br />
-in MatLab command window, press the ENTER key.
-<br />
-<br />
-
-```json
-Read more tips on the installation at Section 3.3 in /doc/AC_Users_Guide.pdf
-```
-or here: https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf
-<br />
-<br />
-<br />
-<br />
-
----
-![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `2. Mac version`
-<br />
-<br />
-<br />
-It was tested in Mac OS Mojave system (macOS 10.14). <br /><br />
-If the Mac runs with no MatLab, MatLab runtime 2015b is essential for the Acycle stand-alone software.
-<br />
-<br />
-Two versions are available:
-<br />
-<br />
-
-- <b>version #1. Acycle1.0-Mac-green</b>
-
-1. <b>How to install:
-
-- (Step 1) Download and unzip <b>Acycle1.0-Mac-green.zip <br />
-
-
-- (Step 2) Download MatLab runtime <b>R2015b</b> “MCR_R2015b_maci64_installer.zip” here:
-https://www.mathworks.com/products/compiler/matlab-runtime.html
-
-- (Step 3) Install MatLab runtime <b>R2015b</b>. <br /><br />
-Right-click "InstallForMacOSX" and select “Show Package Contents”.
-In the pop-up folder, double-click “Content/MacOS/InstallForMacOSX” to install runtime <b>R2015b</b>.
-
-- (Step 4) Setup Runtime environment <br /> <br />
-
-    How to set the MatLab Runtime environment variable DYLD_LIBRARY_PATH? <br />
-    Below is a nice answer by Walter Roberson on 14 Jan 2016.<br />
-https://www.mathworks.com/matlabcentral/answers/263824-mcr-with-mac-and-environment-variable
-
-2. <b>How to startup:
-
-- (Step 1) Drag the <i>Acycle1.0</i> file to the <i>"/Applications"</i> folder.<br />
-
-- (Step 2) Go to the <i>“/Applications”</i> folder. Right-click <i>Acyclev1.0</i>, choose <i>Show Package Content</i>
-
-- (Step 3) Go to the <i>"Contents/MacOS"</i> folder, drag the <i>applauncher</i> file to dock.
-
-- (Step 4) Click icon of <i>applauncher</i> in the dock to start the Acycle.
-
-```json
-Warning: NEVER close the terminal window when using Acycle. This will close Acycle either.
-
-Read more tips on the installation at Section 3.4 in /doc/AC_Users_Guide.pdf
-```
+## Read more
+- **Wiki**: https://github.com/mingsongli/acycle/wiki <br>
 - or here: https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf
-<br />
-<br />
-<br />
-
-- <b>version #2. Acycle1.0-Mac-Installer</b>
-
-1. <b>How to install:
-
-- (Step 1) Download and unzip <b>Acycle1.0-Mac-Installer.zip <br />
-- (Step 2) Double click to install Acycle and MatLab runtime <b>R2015b</b> simultaneously. <br />
-- (Step 3) Setup Runtime environment <br /> <br />
-
-    How to set the MatLab Runtime environment variable DYLD_LIBRARY_PATH?<br />
-    Below is a nice answer by Walter Roberson on 14 Jan 2016.<br />
-https://www.mathworks.com/matlabcentral/answers/263824-mcr-with-mac-and-environment-variable
-
-- (Step 4) Go to the installation folder (for example: /Applications/Acycle/application)<br />
-
-
-- Right click “Acycle” file, choose “Show Package Content”<br />
-Go to the “Contents/MacOS” folder, drag the <i>applauncher</i> file to dock.
-
-2. <b>How to startup:
-- Click icon of <i>applauncher</i> in the dock to start the Acycle software.
-<br />
-
-```json
-Warning: NEVER close the terminal window when using Acycle. This will close Acycle either.
-
-Read more tips on the installation at Section 3.4 in /doc/AC_Users_Guide.pdf
-```
-- or here: https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf
-<br />
-
----
-![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `3. Windows version`
-</b>
-
-- <b> version #1. Acycle1.0-Win-green</b>
-
- Green version. No installation needed. MatLab Runtime <b>R2017a</b> is essential.
-<br />
-- (Step 1) Download <b>Acycle1.0-Win-green
-
-- (Step 2) Download MatLab runtime <b>R2017a</b> here:
-https://www.mathworks.com/products/compiler/matlab-runtime.html
-
-- (Step 3) Install MatLab runtime <b>R2017a</b>.
-
-- (Step 4) Run Acycle: <br /><br />
-	You could just double click <b> Acycle.exe </b> to run the software
-
-    <b> However, I strongly recommend the following start-up method,
-    which will enable a command window showing a lot of information about many time-consuming steps.
-- (Step 4.1) Use “Win + R” short-cut keys to start the “RUN” of Window<br />
-Then in the pop-up window, type the following command, and then click OK button.
-<br />
-
-    cmd
-
-- (Step 4.2) Type following two lines of command below in the command window to run Acycle. <br />
-
-- <i>For example, my <b>Acycle.exe</b> file is under the directory “ C:\”, so the two lines should be:<br /></i>
-<br />
-
-    cd C:\
-    Acycle
-
-<br />
-
-    Warning: the first-time start-up can be extremely slow.
-
-    Warning: Never close the command window when Acycle is running.
-             The commend window will keep on showing information when it runs time-consuming steps.
-
-<br />
-
-- Read more here: https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf
-
-<br />
-
-- <b> version #2. Acycle1.0-Win-Installer</b>
-
-
-- (Step 1) Download Acycle1.0-Win-Installer
-- (Step 2) Installation
-<br /><br />
-Double click “AcycleInstaller.exe” to install Acycle and MatLab runtime <b>R2017a</b> simultaneously. <br />
-Following the instructions, you will get everything set. <br />
-Downloading MatLab runtime <b>R2017a</b> can take a lot of time. The runtime needs 1 GB space. <br />
-- (Step 3) Start-up <br /><br />
-	You could just double click the <b>AC</b> icon on the desktop to run Acycle
-	or start from the Windows “All Program” menu like any other software.
-
-    <b> However, I strongly recommend the following start-up method,
-    which will enable a command window showing a lot of information about many time-consuming steps.
-
-- (Step 4.1) Use “Win + R” short-cut keys to start the “RUN” of Window<br />
-Then in the pop-up window, type the following command, and click <b>OK</b> button.
-<br />
-
-    cmd
-<br />
-
-- (Step 4.2) Type following two lines of command below in the command window to run Acycle. <br />
-
-- <i>For example, my <b>Acycle</b> software was installed under the directory “ C:\Program Files”, so it should be:<br /></i>
-<br />
-
-    cd C:\Program Files\Acycle\application\
-    Acycle
-
-<br />
-
-    Warning: the first-time start-up can be extremely slow.
-
-    Warning: Never close the command window when Acycle is running.
-             The commend window will keep on showing information when it runs time-consuming steps.
-
-<br />
-
-- Read more here: https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf
-
-<br />
-
----
-![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `. Data requirement`
-
-</b>
-
-
-- See example data at https://github.com/mingsongli/acycle/tree/master/data
-<br /><br />
-The input file of data series can be in a variety of formats,
-including table- or space-delimited text (.txt),
-and comma-separated values files (.csv) from an Excel-type spreadsheet.
-
-- The data file must contain two columns of series.
-
-- The first column must be in depth or time, and the second column
-should be value in the corresponding depth or time.
-
-- Unit of the series in depth domain should be in meters.
-
-- The data can be saved in any directory.
-All data files, plots, and folders are displayed in the GUI list box.
-
-    Still have no idea, don't worry. Try this, you’ll have a perfect example:
-
-    Choose “Basic Series” menu --  select "Examples" -- Click one dataset
-
-    Double-click generated file to see details.
-    Double-click the "Open Working Folder" icon, you will see this new text file in the working folder.
-
-<br />
-<br />
-
----
-
-![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `. Functions and GUI`
-
-<br />
-
-- The Acycle software contains the following functions.<br />
-
-- <b>File</b> (New Folder; New Text File, Save AC.fig;
-Open Working Directory; Extract Data)<br />
-
-- <b>Edit</b> (Refresh; Rename; Cut; Copy; Paste; Delete)<br />
-
-- <b>Plot</b> (Plot; Plot Pro; Plot Standardized; Plot Standardized +2;
-Plot Swap Axis;
-Stairs; Sampling Rate; Data Distribution; ECOCO Plot)<br />
-
-- <b>Basic Series</b> (Insolation; Astronomical Solution;
-LR04 Stack; Sine Wave; White Noise; Red Noise; Examples)<br />
-
-- <b>Math</b> (Sort/Unique/Delete-empty; Interpolation; Select Parts; Merge Series;
-Add Gaps; Remove Parts; Remove Peaks; Clipping;
-Smoothing (Moving Average, Moving Median, Bootstrap); Changepoint;
-Standardize; Principal Component; Log-transform;
-Derivative; Simple Function; Utilities (Find Max/Min);
-Image (Show Image, RGB to Grayscale; Image Profile)); Plot Digitizer<br />
-
-- <b>Time series</b> (Detrending; Pre-whitening (First Difference;);
-Spectral Analysis;
-Evolutionary Spectral Analysis; Wavelet transform; Filtering;
-Amplitude Modulation; Build Age Model; Age Scale;
-Sedimentary Rate to Age Model; Power Decomposition Analysis;
-Sedimentary Noise Model (DYNOT; rho-1 method); Correlation Coefficient;
-Evolutionary Correlation Coefficient; Track Sedimentation Rates; TimeOpt;
-eTimeOpt)<br />
-
-- <b>Help</b> (Readme; Manuals; Find Updates; Copyright; Contact)<br />
-
-<br />
-
----
-Read more at
+- or here:  _Acycle_ "**Help**" menu - "**Manual**",
+- or here:
 
 ```json
   /doc/AC_Users_Guide.pdf
 ```
-- here:  "Help" menu - "Manual",
-- or here: https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf
 
 <b> ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) &nbsp;
 `Please give it a "Star" and "Watch" if you like this software. (top right corner of this page)`
