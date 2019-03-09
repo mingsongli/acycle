@@ -27,7 +27,7 @@
 > Mingsong Li, Linda A. Hinnov, Lee R. Kump, 2019. _Acycle_: Time-series analysis software for paleoclimate research and education. Computers & Geosciences. https://doi.org/10.1016/j.cageo.2019.02.011.
 ---
 ### Contact
-Mingsong Li, Penn State. Feb. 26, 2019
+Mingsong Li, Penn State. Mar. 8, 2019
 
 E-mail: <i> mul450 {at} psu.edu;</i>
 
