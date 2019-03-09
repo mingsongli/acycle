@@ -39,7 +39,7 @@ Website: www.mingsongli.com/acycle <br>
 <br><br>
 
 <b> ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) &nbsp;
-`Please give it a " ⭐️**Star**" and "👁 **Watch**" if you like this software. (top right corner of this page)`
+`Please give it a " ⭐️Star" and "👁 Watch" if you like this software. (top right corner of this page)`
 
 <br>
 
@@ -173,4 +173,4 @@ and interesting.
 ```
 
 <b> ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) &nbsp;
-`Please give it a "Star" and "Watch" if you like this software. (top right corner of this page)`
+`Please give it a " ⭐️Star" and "👁 Watch" if you like this software. (top right corner of this page)`
