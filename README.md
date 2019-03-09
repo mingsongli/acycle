@@ -120,7 +120,7 @@ Website: www.mingsongli.com/acycle <br>
 
 ## Communication
 
-[**FAQ**](https://github.com/mingsongli/acycle/wiki/Frequently-Asked-Questions) <br>
+[**Frequently Asked Questions**](https://github.com/mingsongli/acycle/wiki/Frequently-Asked-Questions) <br>
 
 ---
 ## Read more
