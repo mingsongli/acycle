@@ -13,9 +13,19 @@
 > * Acycle includes models for sedimentary noise and sedimentation rate
 > * A fully implemented graphical user interface facilitates operator use
 
+### Wiki: Table of Content
+* [**Getting Started**](https://github.com/mingsongli/acycle/wiki/3.-Getting-Started) <br>
+* [Read More](https://github.com/mingsongli/acycle#table-of-content)
+    
+### What they say
+* **Dr. James Ogg** (Professor, Purdue University, USA):
+    > His _**Acycle**_ software will become the standard tool for time-scale applications by all international workers."
+    [Read More](https://github.com/mingsongli/acycle#what-they-say)
+    
 ### Please cite
 > Mingsong Li, Linda A. Hinnov, Lee R. Kump, 2019. _Acycle_: Time-series analysis software for paleoclimate research and education. Computers & Geosciences. https://doi.org/10.1016/j.cageo.2019.02.011.
 ---
+### Contact
 Mingsong Li, Penn State. Feb. 26, 2019
 
 E-mail: <i> mul450 {at} psu.edu;</i>
@@ -33,7 +43,7 @@ Website: www.mingsongli.com/acycle <br>
 <br>
 
 ---
-
+### Abstract
 * Acycle is a comprehensive, but "user-friendly" software package for analysis of time-series designed for paleoclimate research and education.
 * Acycle runs either in the MATLAB environment or as a stand-alone application on macOS and Windows.
 * It is an open-source package and is available free of charge.
@@ -47,7 +57,7 @@ Website: www.mingsongli.com/acycle <br>
 
 ![gui](https://github.com/mingsongli/acycleFig/blob/master/Fig.1-GUI.jpg)
 ---
-## Table of Content
+## Wiki: Table of Content
 
 [**1. Copyright**](https://github.com/mingsongli/acycle/wiki/1.--Copyrights) <br>
 [**2. References**](https://github.com/mingsongli/acycle/wiki/2.--References) <br>
