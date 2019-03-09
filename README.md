@@ -12,6 +12,7 @@
 > * Many of the functions are specific to cyclostratigraphy and astrochronology
 > * Acycle includes models for sedimentary noise and sedimentation rate
 > * A fully implemented graphical user interface facilitates operator use
+* [Read More](https://github.com/mingsongli/acycle#abstract)
 
 ### Wiki: Table of Content
 * [**Getting Started**](https://github.com/mingsongli/acycle/wiki/3.-Getting-Started) <br>
@@ -19,8 +20,8 @@
     
 ### What they say
 * **Dr. James Ogg** (Professor, Purdue University, USA):
-    > His _**Acycle**_ software will become the standard tool for time-scale applications by all international workers."
-    [Read More](https://github.com/mingsongli/acycle#what-they-say)
+    > His _**Acycle**_ software will become the standard tool for time-scale applications by all international workers."<br>
+* [Read More](https://github.com/mingsongli/acycle#what-they-say)
     
 ### Please cite
 > Mingsong Li, Linda A. Hinnov, Lee R. Kump, 2019. _Acycle_: Time-series analysis software for paleoclimate research and education. Computers & Geosciences. https://doi.org/10.1016/j.cageo.2019.02.011.
