@@ -21,7 +21,7 @@
 ### What they say
 * **Dr. James Ogg** (Professor, Purdue University, USA):
     > His _**Acycle**_ software will become the standard tool for time-scale applications by all international workers."<br>
-* [Read More](https://github.com/mingsongli/acycle#what-they-say)
+* [Read More](https://github.com/mingsongli/acycle#what-they-say-1)
     
 ### Please cite
 > Mingsong Li, Linda A. Hinnov, Lee R. Kump, 2019. _Acycle_: Time-series analysis software for paleoclimate research and education. Computers & Geosciences. https://doi.org/10.1016/j.cageo.2019.02.011.
