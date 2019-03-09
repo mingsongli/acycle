@@ -136,7 +136,7 @@ Website: www.mingsongli.com/acycle <br>
 ---
 ## What they say
 
-* **Dr. James Ogg** (Professor of DEPT. EARTH ,ATMOS. & PLANET. SCI., Purdue University, USA):
+* **Dr. James Ogg** (Professor, DEPT. EARTH ,ATMOS. & PLANET. SCI., Purdue University, USA):
 
     > "Mingsong Li's _**Acycle**_ software enables us to quickly analyze the potential of new outcrops and boreholes, and then to determine the sedimentation rates and elapsed time. His _**Acycle**_ software will become the standard tool for time-scale applications by all international workers."
 
@@ -144,11 +144,11 @@ Website: www.mingsongli.com/acycle <br>
 
     > Not only is this software powerful and effective, it is also simple to use and therefore benefits researchers and at all levels within the paleoclimatology community, from novices to experts.
 
-* **Dr. Marco Franceschi** (Professor of Department of Geosciences, University of Padova, Italy):
+* **Dr. Marco Franceschi** (Professor, Department of Geosciences, University of Padova, Italy):
 
     > Dr. Li’s software is being immensely valuable to my work. Some of the stratigraphic series I am studying display a prominent cyclicity, but were deposited in contexts characterized by relevant changes in sedimentation rates and often lack accurate geochronological constraints. _**Acycle**_ has been designed specifically for dealing with similar cases, by tackling them with a rigorous statistical approach, and therefore is providing an invaluable tool for their investigation.
     
-* **Dr. Xu Yao** (Professor of School of Earth Sciences, Lanzhou University, China)
+* **Dr. Xu Yao** (Professor, School of Earth Sciences, Lanzhou University, China)
     > I am working on cyclostratigraphy and paleoclimate study of ancient strata and rocks (270 million years ago) with assistance from _**Acycle**_ software. I also introduced this software to my colleagues whose research areas are paleoclimate implications of Quaternary loess (several thousand years ago). My colleagues have given me really good feedbacks about _**Acycle**_ software. 
     
 * **Dr. Christian Zeeden** (IMCCE, Observatoire de Paris, France):
