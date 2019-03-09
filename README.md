@@ -16,7 +16,7 @@
 
 ### Wiki: Table of Content
 * [**Getting Started**](https://github.com/mingsongli/acycle/wiki/3.-Getting-Started) <br>
-* [Read More](https://github.com/mingsongli/acycle/blob/master/README.md#wiki-table-of-content-1)
+* [Read More](https://github.com/mingsongli/acycle#wiki-table-of-content-1)
     
 ### What they say
 * **Dr. James Ogg** (Professor, Purdue University, USA):
