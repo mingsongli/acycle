@@ -142,6 +142,13 @@ Website: www.mingsongli.com/acycle <br>
     
 * **Dr. Christian Zeeden** (IMCCE, Observatoire de Paris, France):
     > Dr. Li’s software is novel and valuable in this context, especially because it facilitates the easy application of otherwise complex calculations.
+  
+* **A professor of University of Zaragoza in Spain**:
+    > Thank you very much and congratulations for the _**acycle**_ software. I am using it and it is very very useful
+and interesting.
+
+* **A professor of University of Copenhagen in Denmark**:
+    > I’ve been playing a lot with the excellent _**Acycle**_ package for Matlab that Mingsong developed. Congratulations, this is a very nice interface that simplifies a lot our work and makes it truly faster to analyse a time-series.
     
 ---
 ## Read more
