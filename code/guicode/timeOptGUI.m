@@ -154,6 +154,22 @@ else
 end
 %
 set(handles.text3,'String',handles.dat_name)
+set(handles.radiobutton1,'Value',1)
+set(handles.radiobutton2,'Value',0)
+set(handles.radiobutton3,'Value',1)
+set(handles.edit4,'Enable','on')
+set(handles.edit5,'Enable','off')
+set(handles.edit6,'Enable','off')
+set(handles.radiobutton4,'Value',0)
+set(handles.radiobutton5,'Value',1)
+set(handles.radiobutton6,'Value',0)
+set(handles.radiobutton7,'Value',1)
+set(handles.radiobutton8,'Value',0)
+set(handles.checkbox1,'Value',0)
+set(handles.checkbox2,'Value',1)
+set(handles.checkbox3,'Value',0)
+set(handles.checkbox4,'Value',0)
+set(handles.edit10,'Enable','off')
 %
 datx = dat(:,1);  % unit should be cm
 daty = dat(:,2);

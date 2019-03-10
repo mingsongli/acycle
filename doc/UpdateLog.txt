@@ -3,6 +3,16 @@
 Update Log
 
 _____________________________________
+
+Version : ACycle_v1.0.1
+Date    : Mar. 10, 2019; 6:27 am
+By      : Mingsong Li
+
+	1. Refine GUIs of Detrending, Spectral Analysis, Evolutionary Spectral
+    Analysis, Filtering, TimeOpt and eTimeOpt
+
+        Thanks Mr. Dongyang Liu (China University of Geosciences, Wuhan) for his bug reports
+_____________________________________
 _____________________________________
 _____________________________________
 _____________________________________
@@ -16,7 +26,9 @@ By      : Mingsong Li
 
     2. Acycle paper was accepted:
 
-	Mingsong Li, Linda Hinnov, Lee Kump. 2019. Acycle: time-series analysis software for paleoclimate projects and education, Computers and Geosciences, https://doi.org/10.1016/j.cageo.2019.02.011
+	Mingsong Li, Linda Hinnov, Lee Kump. 2019. Acycle: Time-series analysis 
+    software for paleoclimate projects and education, Computers & Geosciences, 
+    https://doi.org/10.1016/j.cageo.2019.02.011
 
 _____________________________________
 _____________________________________

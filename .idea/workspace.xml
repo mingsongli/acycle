@@ -4,8 +4,17 @@
     <list default="true" id="a44cbf35-e700-449e-9317-4d084452f929" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/code/bin/ac_pwd.txt" beforeDir="false" afterPath="$PROJECT_DIR$/code/bin/ac_pwd.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/doc/AC_Users_Guide.docx" beforeDir="false" afterPath="$PROJECT_DIR$/doc/AC_Users_Guide.docx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/guicode/AC.fig" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/AC.fig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/guicode/AC.m" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/AC.m" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/guicode/copyright.fig" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/copyright.fig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/guicode/eTimeOptGUI.m" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/eTimeOptGUI.m" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/guicode/evofftGUI.m" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/evofftGUI.m" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/guicode/ft.m" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/ft.m" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/guicode/prewhiten.m" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/prewhiten.m" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/guicode/spectrum.fig" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/spectrum.fig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/guicode/spectrum.m" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/spectrum.m" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/guicode/timeOptGUI.m" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/timeOptGUI.m" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/doc/UpdateLog.txt" beforeDir="false" afterPath="$PROJECT_DIR$/doc/UpdateLog.txt" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -17,44 +26,60 @@
     <session id="-1347350849">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="15" />
+          <entry key="project.closed" value="16" />
           <entry key="project.open.time.0" value="1" />
-          <entry key="project.open.time.1" value="5" />
+          <entry key="project.open.time.1" value="6" />
           <entry key="project.open.time.2" value="6" />
           <entry key="project.open.time.3" value="3" />
-          <entry key="project.opened" value="15" />
+          <entry key="project.opened" value="16" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="md" value="2464" />
+          <entry key="md" value="2469" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Markdown" value="2464" />
+          <entry key="Markdown" value="2469" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="md" value="5" />
+          <entry key="md" value="6" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Markdown" value="5" />
+          <entry key="Markdown" value="6" />
         </counts>
       </usages-collector>
     </session>
   </component>
   <component name="FileEditorManager">
-    <leaf />
+    <leaf>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/README.md">
+          <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
+            <state split_layout="SPLIT">
+              <first_editor relative-caret-position="435">
+                <caret line="29" column="38" selection-start-line="29" selection-start-column="34" selection-end-line="29" selection-end-column="38" />
+              </first_editor>
+              <second_editor>
+                <markdownNavigatorState />
+              </second_editor>
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
       <find>0.2.6</find>
       <find>0.3.0</find>
       <find>0.3.3</find>
+      <find>1.0</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -77,6 +102,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Course" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -88,7 +114,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Course" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -112,6 +137,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1440" height="847" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.17124736" />
       <window_info id="Structure" order="1" weight="0.25" />
@@ -137,8 +163,8 @@
     <entry file="file://$PROJECT_DIR$/README.md">
       <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
         <state split_layout="SPLIT">
-          <first_editor relative-caret-position="635">
-            <caret line="137" lean-forward="true" selection-end-line="137" />
+          <first_editor relative-caret-position="435">
+            <caret line="29" column="38" selection-start-line="29" selection-start-column="34" selection-end-line="29" selection-end-column="38" />
           </first_editor>
           <second_editor>
             <markdownNavigatorState />

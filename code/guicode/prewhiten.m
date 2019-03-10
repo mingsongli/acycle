@@ -108,7 +108,20 @@ handles.xrange = xmax -xmin; % length of data
 
 handles.prewhiten_win = (xmax-xmin) * handles.smooth_win;
 set(handles.edit10,'String', num2str(handles.prewhiten_win));
+set(handles.edit11,'String', '35');
 set(handles.slider4, 'Value', handles.smooth_win);
+set(handles.prewhiten_lowess_checkbox,'Value', 0);
+set(handles.prewhiten_rlowess_checkbox,'Value', 0);
+set(handles.prewhiten_loess_checkbox,'Value', 0);
+set(handles.prewhiten_rloess_checkbox,'Value', 0);
+set(handles.prewhiten_mean_checkbox,'Value', 0);
+set(handles.prewhiten_linear_checkbox,'Value', 0);
+set(handles.prewhiten_all_checkbox,'Value', 0);
+set(handles.checkbox11,'Value', 0);
+set(handles.checkbox13,'Value', 0);
+set(handles.edit23,'String', '3');
+set(handles.prewhiten_select_popupmenu,'Value', 1);
+
 % Choose default command line output for prewhiten
 handles.output = hObject;
 handles.prewhiten_mean = 'notmean';

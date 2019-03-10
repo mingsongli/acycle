@@ -61,10 +61,8 @@ set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
 if ismac
     set(gcf,'position',[0.45,0.5,0.28,0.3]) % set position
 elseif ispc
-    set(gcf,'position',[0.45,0.4,0.48,0.5]) % set position
-    %set(handles.pushbutton17,'Visible','off')
+    set(gcf,'position',[0.45,0.5,0.4,0.4]) % set position
 end
-%set(handles.text7,'position', [0.055,0.875,0.235,0.06])
 set(handles.text7,'position', [0.05,0.875,0.235,0.06])
 set(handles.popupmenu2,'position', [0.3,0.823,0.62,0.12])
 
@@ -98,7 +96,14 @@ set(handles.checkbox_tabtchi,'String','Classical AR(1)')
 handles.output = hObject;
 
 set(gcf,'Name','Acycle: Spectral Analysis')
-
+set(handles.checkbox_robust,'Value',1)
+set(handles.checkbox_tabtchi,'Value',0)
+set(handles.radiobutton4,'Value',1)
+set(handles.radiobutton3,'Value',0)
+set(handles.checkbox4,'Value',0)
+set(handles.checkbox5,'Value',1)
+set(handles.radiobutton_fmax,'Value',1)
+set(handles.radiobutton_input,'Value',0)
 % contact with acycle main window
 handles.acfigmain = varargin{1}.acfigmain;
 handles.listbox_acmain = varargin{1}.listbox_acmain;
@@ -113,7 +118,7 @@ handles.linlogY = 1;
 handles.pad = 1;
 handles.checkbox_tabtchi_v = 0;
 handles.checkbox_robustAR1_v = 1;
-handles.ntapers= 2;
+handles.ntapers = 2;
 handles.datasample = 0;  % warning of sampling rate: uneven = 1
 Dt = diff(data_s(:,1));
 if max(Dt) - min(Dt) > 10 * eps('single')
@@ -127,6 +132,8 @@ if max(Dt) - min(Dt) > 10 * eps('single')
     set(handles.checkbox_tabtchi,'String','White noise')
 else
     handles.method ='Multi-taper method';
+    set(handles.popupmenu2, 'Value', 1);
+    set(handles.popupmenu_tapers, 'Value', 1);
 end
 
 handles.mean = mean(Dt);

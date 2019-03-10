@@ -139,7 +139,11 @@ set(handles.edit10,'String',num2str(handles.x_1))
 set(handles.edit12,'String',num2str(handles.y_1))
 set(handles.edit11,'String',num2str(0.5*handles.x_2))
 set(handles.edit13,'String',num2str(handles.y_2))
-
+set(handles.popupmenu4,'Value',1)
+set(handles.popupmenu5,'Value',1)
+set(handles.radiobutton6,'Value',1)
+set(handles.radiobutton7,'Value',0)
+set(handles.radiobutton8,'Value',0)
 % PLOT: linear | MTM  in axes 3
 axes(handles.ft_axes3);
 plot(fd1,po);   % plot power spectrum of data

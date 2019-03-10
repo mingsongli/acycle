@@ -16,16 +16,17 @@ function ac
 % results based in part on use of the program and cite the following
 % article in which the program was described:
 %
-%           Mingsong Li, Linda Hinnov, Lee Kump. Acycle: time-series  
+%           Mingsong Li, Linda Hinnov, Lee Kump. 2019. Acycle: Time-series  
 %           analysis software for paleoclimate projects and education,
-%           Computers and Geosciences, in press
+%           Computers & Geosciences, https://doi.org/10.1016/j.cageo.2019.02.011
 %
 % If you publish results using techniques such as correlation coefficient,
 % sedimentary noise model, power decomposition analysis, evolutionary fast
 % Fourier transform, wavelet transform, Bayesian changepoint, (e)TimeOpt,
 % or other approaches, please also cite original publications,
-% as detailed in "AC_Users_Guide.pdf" file at
+% as detailed in Acycle Wiki and the "AC_Users_Guide.pdf" file at
 %
+% https://github.com/mingsongli/acycle/wiki
 % https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf
 %
 % Program Author:
@@ -37,6 +38,7 @@ function ac
 %
 % Email:    mul450@psu.edu; limingsonglms@gmail.com
 % Website:  https://github.com/mingsongli/acycle
+%           https://github.com/mingsongli/acycle/wiki
 %           http://mingsongli.com
 %
 % Copyright (C) 2017-2019

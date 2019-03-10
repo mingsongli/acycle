@@ -139,11 +139,22 @@ end
 set(handles.evofft_nyquist_text, 'String', num2str(handles.nyquist));
 set(handles.evofft_fmax_edit, 'String', num2str(handles.nyquist));
 set(handles.evofft_win_text, 'String', num2str(handles.window));
+set(handles.edit7, 'String', '0');
 set(handles.edit8, 'String', handles.unit);
 set(handles.edit_step, 'String', num2str(handles.step),'Value',1);
 set(handles.evofft_Nyquist_radiobutton, 'Value',0,'Enable','Off');
 set(handles.radiobutton2, 'Value',1,'Enable','Off');
-
+set(handles.popupmenu2, 'Value',1);
+set(handles.evofft_Nyquist_radiobutton, 'Value',1);
+set(handles.radiobutton_2d, 'Value',1);
+set(handles.radiobutton_3d, 'Value',0);
+set(handles.rotation, 'Value',0);
+set(handles.checkbox2, 'Value',1);
+set(handles.checkbox3, 'Value',1);
+set(handles.checkbox4, 'Value',0);
+set(handles.checkbox5, 'Value',0);
+set(handles.popupmenu3, 'Value',1);
+set(handles.edit9, 'String', '');
 % Update handles structure
 guidata(hObject, handles);
 
