@@ -4,16 +4,12 @@
     <list default="true" id="a44cbf35-e700-449e-9317-4d084452f929" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/bin/ac_pwd.txt" beforeDir="false" afterPath="$PROJECT_DIR$/code/bin/ac_pwd.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/code/guicode/AC.fig" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/AC.fig" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/code/guicode/AC.m" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/AC.m" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/code/guicode/copyright.fig" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/copyright.fig" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/code/guicode/eTimeOptGUI.m" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/eTimeOptGUI.m" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/code/guicode/evofftGUI.m" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/evofftGUI.m" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/code/guicode/ft.m" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/ft.m" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/code/guicode/prewhiten.m" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/prewhiten.m" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/code/guicode/spectrum.fig" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/spectrum.fig" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/code/guicode/spectrum.m" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/spectrum.m" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/code/guicode/timeOptGUI.m" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/timeOptGUI.m" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/guicode/DataExtractML.fig" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/DataExtractML.fig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/guicode/DataExtractML.m" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/DataExtractML.m" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/guicode/ft.fig" beforeDir="false" afterPath="$PROJECT_DIR$/code/guicode/ft.fig" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/doc/UpdateLog.txt" beforeDir="false" afterPath="$PROJECT_DIR$/doc/UpdateLog.txt" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -26,22 +22,22 @@
     <session id="-1347350849">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="16" />
+          <entry key="project.closed" value="17" />
           <entry key="project.open.time.0" value="1" />
           <entry key="project.open.time.1" value="6" />
-          <entry key="project.open.time.2" value="6" />
+          <entry key="project.open.time.2" value="7" />
           <entry key="project.open.time.3" value="3" />
-          <entry key="project.opened" value="16" />
+          <entry key="project.opened" value="17" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="md" value="2469" />
+          <entry key="md" value="2471" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Markdown" value="2469" />
+          <entry key="Markdown" value="2471" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
@@ -57,22 +53,7 @@
     </session>
   </component>
   <component name="FileEditorManager">
-    <leaf>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/README.md">
-          <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
-            <state split_layout="SPLIT">
-              <first_editor relative-caret-position="435">
-                <caret line="29" column="38" selection-start-line="29" selection-start-column="34" selection-end-line="29" selection-end-column="38" />
-              </first_editor>
-              <second_editor>
-                <markdownNavigatorState />
-              </second_editor>
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300" />
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
@@ -102,7 +83,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Course" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -114,6 +94,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Course" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -137,7 +118,6 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1440" height="847" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.17124736" />
       <window_info id="Structure" order="1" weight="0.25" />
@@ -164,7 +144,7 @@
       <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
         <state split_layout="SPLIT">
           <first_editor relative-caret-position="435">
-            <caret line="29" column="38" selection-start-line="29" selection-start-column="34" selection-end-line="29" selection-end-column="38" />
+            <caret line="29" column="38" lean-forward="true" selection-start-line="29" selection-start-column="38" selection-end-line="29" selection-end-column="38" />
           </first_editor>
           <second_editor>
             <markdownNavigatorState />

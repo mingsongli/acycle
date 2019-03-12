@@ -329,9 +329,21 @@ CDac_pwd; % cd working dir
 
 tableData = handles.tableData;
 name1 = [dat_name,'-Digit.txt'];
+name3 = [dat_name,'-DigitNo.txt'];
+
+if exist(name1) || exist(name3)
+    for i = 1:100
+        name1 = [dat_name,'-Digit-', num2str(i),'.txt'];
+        name3 = [dat_name,'-DigitNo-',num2str(i),'.txt'];
+        if exist(name1) || exist(name3)
+        else
+            break
+        end
+    end
+end
+
 dlmwrite(name1, tableData(:,2:3), 'delimiter', ',', 'precision', 9);
-name1 = [dat_name,'-DigitNo.txt'];
-dlmwrite(name1, tableData, 'delimiter', ',', 'precision', 9);
+dlmwrite(name3, tableData, 'delimiter', ',', 'precision', 9);
 
 try
     YYYtrue = handles.YYYtrue;

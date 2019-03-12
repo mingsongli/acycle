@@ -14,7 +14,7 @@ function varargout = AC(varargin)
 %
 %       Mingsong Li, Linda Hinnov, Lee Kump. Acycle: Time-series analysis
 %       software for paleoclimate projects and education, Computers & Geosciences,
-%       https://doi.org/10.1016/j.cageo.2019.02.011
+%       127: 12-22. https://doi.org/10.1016/j.cageo.2019.02.011
 %
 % If you publish results using techniques such as correlation coefficient,
 % sedimentary noise model, power decomposition analysis, evolutionary fast
@@ -104,7 +104,7 @@ function AC_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to AC (see VARARGIN)
 
-set(gcf,'Name','Acycle v1.0.1')
+set(gcf,'Name','Acycle v1.0.2')
 set(gcf,'DockControls', 'off')
 set(gcf,'Color', 'white')
 set(0,'Units','normalized') % set units as normalized
@@ -223,7 +223,7 @@ handles.MTMtabtchi = 'notabtchi';
 handles.nw = 2;
 handles.copycut = 'copy';
 handles.nplot = 0;
-handles.filetype = {'.txt','.csv',''};
+handles.filetype = {'.txt','.csv','','.res'};
 handles.acfig = gcf;
 handles.math_sort = 1;
 handles.math_unique = 1;
@@ -343,13 +343,14 @@ if handles.doubleclick
                 catch
                 end
                
-            elseif sum(strcmp(ext,{'.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.TIF'})) > 0
+            elseif sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
                 try 
                     im_name = imread(filename);
                     figure;
                     imshow(im_name)
                     set(gcf,'Name',[dat_name,ext])
                 catch
+                    warndlg('Image color space not supported. Convert to RGB or Grayscale')
                 end
             elseif strcmp(ext,{'.pdf','.ai','.ps'})
                 try
@@ -523,13 +524,14 @@ for i = 1:nplot
             elseif strcmp(ext,{'.pdf','.ai','.ps'})
                 plot_filter_s = char(contents(plot_selected(1)));
                 open(plot_filter_s);
-            elseif sum(strcmp(ext,{'.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.TIF'})) > 0
+            elseif sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
                 try 
                     im_name = imread(plot_filter_s);
                     figure;
                     imshow(im_name)
                     set(gcf,'Name',[dat_name,ext])
                 catch
+                    warndlg('Image color space not supported. Convert to RGB or Grayscale')
                 end
             end
         end
@@ -3187,11 +3189,16 @@ if and ((min(plot_selected) > 2), (nplot == 1))
             
         else
             [~,dat_name,ext] = fileparts(data_name);
-            if sum(strcmp(ext,{'.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.TIF'})) > 0
-                im_name = imread(data_name);
-                figure;
-                imshow(im_name)
-                set(gcf,'Name',[dat_name,ext])
+            if sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
+                try
+                    % GRB and Grayscale supported here
+                    im_name = imread(data_name);
+                    figure;
+                    imshow(im_name)
+                    set(gcf,'Name',[dat_name,ext])
+                catch
+                    warndlg('Image color space not supported. Convert to RGB or Grayscale')
+                end
             end
         end
 end
@@ -3214,22 +3221,26 @@ if and ((min(plot_selected) > 2), (nplot == 1))
             
         else
             [~,dat_name,ext] = fileparts(data_name);
-            if sum(strcmp(ext,{'.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.TIF'})) > 0
-                im_name = imread(data_name);
-                
-                try I = rgb2gray(im_name);
-                figure
-                imshow(I)
-                dat_name = [dat_name,'-gray',ext];
-                set(gcf,'Name',dat_name)
-                CDac_pwd;
-                imwrite(I,dat_name)
-                d = dir; %get files
-                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-                refreshcolor;
-                cd(pre_dirML); % return to matlab view folder
+            if sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
+                try
+                    im_name = imread(data_name);
+
+                    try I = rgb2gray(im_name);
+                        figure
+                        imshow(I)
+                        dat_name = [dat_name,'-gray',ext];
+                        set(gcf,'Name',dat_name)
+                        CDac_pwd;
+                        imwrite(I,dat_name)
+                        d = dir; %get files
+                        set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+                        refreshcolor;
+                        cd(pre_dirML); % return to matlab view folder
+                    catch
+                        warndlg('This is not a RGB image')
+                    end
                 catch
-                    warndlg('This is not a RGB image')
+                    warndlg('Image color space not supported. Convert to RGB or Grayscale')
                 end
             end
         end
@@ -3252,78 +3263,83 @@ if and ((min(plot_selected) > 2), (nplot == 1))
         if isdir(data_name) == 1
         else
             [~,dat_name,ext] = fileparts(data_name);
-            if sum(strcmp(ext,{'.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.TIF'})) > 0
-                I = imread(data_name);
-                figI = figure;
-                imshow(I);
-                set(gcf,'Name',[dat_name,ext,': Press "ALT" & select cursors now'])
-                
-                choice = questdlg('Steps: 1) click the "DataCursor" tool; 2) select two cursors; 3) press "Enter"', ...
-                    'Press "ALT" key & select 2 cursors', 'Continue','Cancel','Continue');
-                
-                switch choice
-                    case 'Continue'
-                        figure(figI)
-                        dcm_obj = datacursormode(figI);
-                        Sure = input('>>  Press "Enter"');
-                        c_info = getCursorInfo(dcm_obj);
-                        m = length(c_info);
-                        CursorInfo_value = zeros(m,2);
-                        if m == 2
-                            for i = 1 : m
-                               CursorInfo_value(i,1)=c_info(i).Position(:,1);
-                               CursorInfo_value(i,2)=c_info(i).Position(:,2);
-                            end
-                        end
-                        hold on; plot( CursorInfo_value(:,1), CursorInfo_value(:,2), 'g-','LineWidth',3)
-                        
-                        if m > 2
-                            warndlg('More than 2 cursors selected, only first 2 used!')
-                        end
+            if sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
+                try
+                    I = imread(data_name);
+                    figI = figure;
+                    imshow(I);
+                    set(gcf,'Name',[dat_name,ext,': Press "ALT" & select cursors now'])
 
-                        if m >= 2
-                            [cx,cy,c,xi,yi] = improfile(I,CursorInfo_value(:,1),CursorInfo_value(:,2));
-                            cx = sort(cx - min(cx));
-                            cy = sort(cy - min(cy));
-                            cz = sqrt(cx.^2 + cy.^2);
+                    choice = questdlg('Steps: 1) click the "DataCursor" tool; 2) select two cursors; 3) press "Enter"', ...
+                        'Press "ALT" key & select 2 cursors', 'Continue','Cancel','Continue');
 
-                            try data = [cz,c];
-                            catch
-                                warndlg('This is not a grayscale image!')
-                                try c = reshape(c,[],3);
-                                catch
-                                    warndlg('Looks like a cymk image, right?')
-                                    c = reshape(c,[],4);
-                                end
-                                data = [cz,c];
-                            end
-                            name = [dat_name,'-profile.txt'];
-                            name1= [dat_name,'-controlpoints.txt'];
-                            data1 = [xi,yi];
-                            
-                            CDac_pwd
-                            dlmwrite(name , data, 'delimiter', ',', 'precision', 9);
-                            dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
-                            disp(['>>  save profile data as   ',name1])
-                            disp(['>>  save control points as ',name1])
-                            d = dir; %get files
-                            set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-                            refreshcolor;
-                            cd(pre_dirML); % return to matlab view folder
-                            
-                            figure;plot(cz,c);title(name); xlabel('Pixels'); 
-                            set(gca,'XMinorTick','on','YMinorTick','on')
+                    switch choice
+                        case 'Continue'
+                            figure(figI)
+                            dcm_obj = datacursormode(figI);
+                            Sure = input('>>  Press "Enter"');
+                            c_info = getCursorInfo(dcm_obj);
+                            m = length(c_info);
+                            CursorInfo_value = zeros(m,2);
                             if m == 2
-                                ylabel('Grayscale')
-                            else
-                                ylabel('Value')
+                                for i = 1 : m
+                                   CursorInfo_value(i,1)=c_info(i).Position(:,1);
+                                   CursorInfo_value(i,2)=c_info(i).Position(:,2);
+                                end
                             end
-                        end
-                    case 'Cancel'
-                        try close(figI)
-                        catch
-                        end
+                            hold on; plot( CursorInfo_value(:,1), CursorInfo_value(:,2), 'g-','LineWidth',3)
+
+                            if m > 2
+                                warndlg('More than 2 cursors selected, only first 2 used!')
+                            end
+
+                            if m >= 2
+                                [cx,cy,c,xi,yi] = improfile(I,CursorInfo_value(:,1),CursorInfo_value(:,2));
+                                cx = sort(cx - min(cx));
+                                cy = sort(cy - min(cy));
+                                cz = sqrt(cx.^2 + cy.^2);
+
+                                try data = [cz,c];
+                                catch
+                                    warndlg('This is not a grayscale image!')
+                                    try c = reshape(c,[],3);
+                                    catch
+                                        warndlg('Looks like a cymk image, right?')
+                                        c = reshape(c,[],4);
+                                    end
+                                    data = [cz,c];
+                                end
+                                name = [dat_name,'-profile.txt'];
+                                name1= [dat_name,'-controlpoints.txt'];
+                                data1 = [xi,yi];
+
+                                CDac_pwd
+                                dlmwrite(name , data, 'delimiter', ',', 'precision', 9);
+                                dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
+                                disp(['>>  save profile data as   ',name1])
+                                disp(['>>  save control points as ',name1])
+                                d = dir; %get files
+                                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+                                refreshcolor;
+                                cd(pre_dirML); % return to matlab view folder
+
+                                figure;plot(cz,c);title(name); xlabel('Pixels'); 
+                                set(gca,'XMinorTick','on','YMinorTick','on')
+                                if m == 2
+                                    ylabel('Grayscale')
+                                else
+                                    ylabel('Value')
+                                end
+                            end
+                        case 'Cancel'
+                            try close(figI)
+                            catch
+                            end
+                    end
+                catch
+                    warndlg('Image color space not supported. Convert to RGB or Grayscale')
                 end
+                    
             end
         end
 end
@@ -3995,14 +4011,15 @@ for i = 1:nplot
             check = 0;
             if sum(strcmp(ext,handles.filetype)) > 0
                 check = 1; % selection can be executed 
-            elseif sum(strcmp(ext,{'.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.TIF'})) > 0
+            elseif sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
                 try 
                     im_name = imread(plot_filter_s);
                     figure;
                     imshow(im_name)
-                    set(gcf,'Name',[dat_name,ext])
-                    set(gcf,'color','w');
+                    %set(gcf,'Name',[dat_name,ext])
+                    %set(gcf,'color','w');
                 catch
+                    warndlg('Image color space not supported. Convert to RGB or Grayscale')
                 end
             end
         end
@@ -4875,6 +4892,8 @@ end
 cd(pre_dirML); % return view dir
 
 
+% removed?????
+
 % --- Executes on mouse press over axes background.
 function axes_plot_ButtonDownFcn(hObject, eventdata, handles)
 % hObject    handle to axes_plot (see GCBO)
@@ -5489,12 +5508,15 @@ if and ((min(plot_selected) > 2), (nplot == 1))
             
         else
             [~,dat_name,ext] = fileparts(data_name);
-            if sum(strcmp(ext,{'.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.TIF'})) > 0
-                
-                handles.figname = data_name;
-                guidata(hObject, handles);
-                DataExtractML(handles);
-                
+            if sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
+                try
+                    I = imread(data_name);
+                    handles.figname = data_name;
+                    guidata(hObject, handles);
+                    DataExtractML(handles);
+                catch
+                    warndlg('Image color space not supported. Convert to RGB or Grayscale')
+                end
             end
         end
 end
@@ -5566,13 +5588,14 @@ for i = 1:nplot
             check = 0;
             if sum(strcmp(ext,handles.filetype)) > 0
                 check = 1; % selection can be executed 
-            elseif sum(strcmp(ext,{'.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.TIF'})) > 0
+            elseif sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
                 try 
                     im_name = imread(plot_filter_s);
                     figure;
                     imshow(im_name)
-                    set(gcf,'Name',[dat_name,ext])
+                    %set(gcf,'Name',[dat_name,ext])
                 catch
+                    warndlg('Image color space not supported. Convert to RGB or Grayscale')
                 end
             end
         end

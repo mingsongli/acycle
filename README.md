@@ -1,8 +1,8 @@
 ![logo](https://github.com/mingsongli/acycleFig/blob/master/default_icon_1024-git.gif)
 
+[![](https://img.shields.io/badge/version-v1.0.2-blue.svg)]()
 [![](https://img.shields.io/badge/license-GPL-brightgreen.svg)](https://www.gnu.org/licenses/)
 [![](https://img.shields.io/badge/platform-Mac_Win-green.svg)]()
-[![](https://img.shields.io/badge/version-v1.0.1-blue.svg)]()
 ![](https://img.shields.io/badge/language-MatLab-red.svg)
 ---
 `Acycle is a time-series analysis software for paleoclimate research and education`
@@ -19,15 +19,15 @@
 * [Read More](https://github.com/mingsongli/acycle#wiki-table-of-content-1)
 
 ### What they say
-* **Dr. James Ogg** (Professor, Purdue University, USA):
-    > His _**Acycle**_ software will become the standard tool for time-scale applications by all international workers."<br>
+* **Dr. James G. Ogg** (Professor, Purdue University, USA):
+    > "His _**Acycle**_ software will become the standard tool for time-scale applications by all international workers."<br>
 * [Read More](https://github.com/mingsongli/acycle#what-they-say-1)
 
 ### Please cite
 > Mingsong Li, Linda A. Hinnov, Lee R. Kump, 2019. _Acycle_: Time-series analysis software for paleoclimate research and education. Computers & Geosciences. https://doi.org/10.1016/j.cageo.2019.02.011.
 ---
 ### Contact
-Mingsong Li, Penn State. Mar. 10, 2019
+Mingsong Li, Penn State. Mar. 12, 2019
 
 E-mail: <i> mul450 {at} psu.edu;</i>
 
@@ -136,30 +136,30 @@ Website: www.mingsongli.com/acycle <br>
 ---
 ## What they say
 
-* **Dr. James Ogg** (Professor, DEPT. EARTH ,ATMOS. & PLANET. SCI., Purdue University, USA):
+* **Dr. James G. Ogg** (Professor, DEPT. EARTH ,ATMOS. & PLANET. SCI., Purdue University, USA):
 
     > "Mingsong Li's _**Acycle**_ software enables us to quickly analyze the potential of new outcrops and boreholes, and then to determine the sedimentation rates and elapsed time. His _**Acycle**_ software will become the standard tool for time-scale applications by all international workers."
 
-* **Dr. Paul E. Olsen** (Arthur Storke Memorial Professor of Earth and Environmental Sciences of **Columbia University**; Member, National Academy of Sciences of the USA):
+* **Dr. Paul E. Olsen** (Professor of Earth and Environmental Sciences, Columbia University; Member, National Academy of Sciences of the USA):
 
-    > Not only is this software powerful and effective, it is also simple to use and therefore benefits researchers and at all levels within the paleoclimatology community, from novices to experts.
+    > "Not only is this software powerful and effective, it is also simple to use and therefore benefits researchers and at all levels within the paleoclimatology community, from novices to experts."
+
+* **Dr. Arsenio Muñoz de la Peña** (Professor, Department of Analytical Chemistry, University of Zaragoza, Spain):
+    > "Thank you very much and congratulations for the _**acycle**_ software. I am using it and it is very very useful
+and interesting."
 
 * **Dr. Marco Franceschi** (Professor, Department of Geosciences, University of Padova, Italy):
 
-    > Dr. Li’s software is being immensely valuable to my work. Some of the stratigraphic series I am studying display a prominent cyclicity, but were deposited in contexts characterized by relevant changes in sedimentation rates and often lack accurate geochronological constraints. _**Acycle**_ has been designed specifically for dealing with similar cases, by tackling them with a rigorous statistical approach, and therefore is providing an invaluable tool for their investigation.
+    > "Dr. Li’s software is being immensely valuable to my work. Some of the stratigraphic series I am studying display a prominent cyclicity, but were deposited in contexts characterized by relevant changes in sedimentation rates and often lack accurate geochronological constraints. _**Acycle**_ has been designed specifically for dealing with similar cases, by tackling them with a rigorous statistical approach, and therefore is providing an invaluable tool for their investigation."
 
-* **Dr. Xu Yao** (Professor, School of Earth Sciences, Lanzhou University, China)
-    > I am working on cyclostratigraphy and paleoclimate study of ancient strata and rocks (270 million years ago) with assistance from _**Acycle**_ software. I also introduced this software to my colleagues whose research areas are paleoclimate implications of Quaternary loess (several thousand years ago). My colleagues have given me really good feedbacks about _**Acycle**_ software.
+* **Dr. Xu Yao** (School of Earth Sciences, Lanzhou University, China):
+    > "I am working on cyclostratigraphy and paleoclimate study of ancient strata and rocks (270 million years ago) with assistance from _**Acycle**_ software. I also introduced this software to my colleagues whose research areas are paleoclimate implications of Quaternary loess (several thousand years ago). My colleagues have given me really good feedbacks about _**Acycle**_ software."
 
 * **Dr. Christian Zeeden** (IMCCE, Observatoire de Paris, France):
-    > Dr. Li’s software is novel and valuable in this context, especially because it facilitates the easy application of otherwise complex calculations.
-
-* **A professor from the University of Zaragoza in Spain**:
-    > Thank you very much and congratulations for the _**acycle**_ software. I am using it and it is very very useful
-and interesting.
+    > "Dr. Li’s software is novel and valuable in this context, especially because it facilitates the easy application of otherwise complex calculations."
 
 * **A professor from the University of Copenhagen in Denmark**:
-    > I’ve been playing a lot with the excellent _**Acycle**_ package for Matlab that Mingsong developed. Congratulations, this is a very nice interface that simplifies a lot our work and makes it truly faster to analyse a time-series.
+    > "I’ve been playing a lot with the excellent _**Acycle**_ package for Matlab that Mingsong developed. Congratulations, this is a very nice interface that simplifies a lot our work and makes it truly faster to analyse a time-series."
 
 ---
 ## Read more

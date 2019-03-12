@@ -4,14 +4,23 @@ Update Log
 
 _____________________________________
 
-Version : ACycle_v1.0.1
-Date    : Mar. 10, 2019; 6:27 am
+Version : ACycle_v1.0.2
+Date    : Mar. 12, 2019; 2:04 pm
 By      : Mingsong Li
 
 	1. Refine GUIs of Detrending, Spectral Analysis, Evolutionary Spectral
     Analysis, Filtering, TimeOpt and eTimeOpt
 
-        Thanks Mr. Dongyang Liu (China University of Geosciences, Wuhan) for his bug reports
+        Thanks Mr. Dongyang Liu (China University of Geosciences, Wuhan) for the bug reports
+
+    2. Refine Plot. Warndlg will show for plotting images in CYMK color space
+
+    3. Plot Digitizer: Save Data won't over-write exsiting data files.
+
+    4. Support *.res file
+
+    5. Support text files with a header starting with a %
+
 _____________________________________
 _____________________________________
 _____________________________________
