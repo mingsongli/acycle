@@ -1,4 +1,4 @@
-Acycle version 1.0.2 | Copyright (C) 2017-2019
+Acycle | Copyright (C) 2017-2019
 
 Please acknowledge the program author on any publication of scientific results based in part on use of the program and cite the following article in which the program was described:
 

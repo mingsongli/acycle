@@ -221,7 +221,7 @@ handles.dt = dt;
 handles.nsim = 0;
 handles.linLog = 2;
 handles.fit = 1;
-handles.roll = 10^3;
+handles.roll = 10^12;
 handles.detrend = 1;
 handles.cormethod = 2;
 handles.genplot = 1;
@@ -281,7 +281,7 @@ detrend = handles.detrend;
 cormethod = handles.cormethod;
 genplot = handles.genplot;
 
-[xx,datopt,xcl]=...
+[xx,datopt,xcl,sr_p]=...
     timeOptAc(dat,sedmin,sedmax,numsed,nsim,linLog,fit,fl,fh,roll,...
     targetE,targetP,detrend,cormethod,genplot);
 try close(hwarn)
@@ -752,14 +752,14 @@ if val == 1
     handles.fit = 1;
     handles.fl = 0.035;
     handles.fh = 0.065;
-    handles.roll = 10^3;
+    handles.roll = 10^12;
 else
     % fit short eccentricity
     set (handles.radiobutton6, 'Value', 1);
     handles.fit = 2;
     handles.fl = 0.007;
     handles.fh = 0.0115;
-    handles.roll = 10^5;
+    handles.roll = 10^12;
 end
 set(handles.edit7, 'String', num2str(handles.fl));
 set(handles.edit8, 'String', num2str(handles.fh));
@@ -779,13 +779,13 @@ if val == 1
     handles.fit = 2;
     handles.fl = 0.007;
     handles.fh = 0.0115;
-    handles.roll = 10^5;
+    handles.roll = 10^12;
 else
     set (handles.radiobutton5, 'Value', 1);
     handles.fit = 1;
     handles.fl = 0.035;
     handles.fh = 0.065;
-    handles.roll = 10^3;
+    handles.roll = 10^12;
 end
 set(handles.edit7, 'String', num2str(handles.fl));
 set(handles.edit8, 'String', num2str(handles.fh));

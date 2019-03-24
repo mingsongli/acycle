@@ -182,7 +182,7 @@ mpts = length(sr_range);
 
 if nsim > 0
     % Waitbar
-    hwaitbar = waitbar(0,'Monte Carlo. Heavy loads, processing ...',...    
+    hwaitbar = waitbar(0,'Monte Carlo processing ... [CTRL + C to quit]',...    
        'WindowStyle','modal');
     hwaitbar_find = findobj(hwaitbar,'Type','Patch');
     set(hwaitbar_find,'EdgeColor',[0 0.9 0],'FaceColor',[0 0.9 0]) % changes the color to blue

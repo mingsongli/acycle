@@ -4,6 +4,15 @@ Update Log
 
 _____________________________________
 
+Version : ACycle_v1.0.3
+Date    : Mar. 24, 2019; 12:29 pm
+By      : Mingsong Li
+
+	1. eCOCO: save optimal sed. rate as a text file: "*.ECOCO.Optimal.txt"
+    2. eTimeOpt: save optimal sed. rate as a text file: "*.eTimeOpt.txt"
+    3. TimeOpt and eTimeOpt use Taner roll-off rate of 10^12 now.
+_____________________________________
+
 Version : ACycle_v1.0.2
 Date    : Mar. 12, 2019; 2:04 pm
 By      : Mingsong Li

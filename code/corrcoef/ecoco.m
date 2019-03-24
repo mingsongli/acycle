@@ -1,4 +1,4 @@
-function [prt_sr,out_depth,out_ecc,out_ep,out_eci,out_ecoco,out_ecocorb,out_norbit] = ...
+function [prt_sr,out_depth,out_ecc,out_ep,out_eci,out_ecoco,out_ecocorb,out_norbit,sr_p] = ...
    ecoco(data,target,orbit7,window,dt,step,delinear,red,pad,sr1,sr2,srstep,nsim,adjust,slices,plotn)
 % Evolutionary correlation coefficient
 % INPUT
@@ -90,7 +90,7 @@ corrCI =[];
 sr_p = zeros(m3,6);
 
 % Waitbar
-hwaitbar = waitbar(0,'eCOCO: sliding window. processing ...',...    
+hwaitbar = waitbar(0,'eCOCO processing ... [CTRL + C to quit]',...    
    'WindowStyle','modal');
 hwaitbar_find = findobj(hwaitbar,'Type','Patch');
 set(hwaitbar_find,'EdgeColor',[0 0.9 0],'FaceColor',[0 0.9 0]) % changes the color to blue
@@ -132,12 +132,17 @@ waitbar(waitbarstep / steps)
          prt_ecc = corrCI(:,2);
          prt_eci = out_eci(:,i);
          prints_ecocorb = max(out_ecocorb(:,i)); % max ecc value
-
          prints_sr = prt_sr(out_ecocorb(:,i) == prints_ecocorb);
          prints_eci = prt_eci(out_ecocorb(:,i) == prints_ecocorb);
          prints_ecc = prt_ecc(out_ecocorb(:,i) == prints_ecocorb);
          prints_ecoco = prt_ecc(out_ecocorb(:,i) == prints_ecocorb);
          prints_norbit = out_norbit(out_ecocorb(:,i) == prints_ecocorb);
+%          prints_ecoco = max(out_ecoco(:,i)); % max ecc value
+%          prints_sr = prt_sr(out_ecoco(:,i) == prints_ecoco);
+%          prints_eci = prt_eci(out_ecoco(:,i) == prints_ecoco);
+%          prints_ecc = prt_ecc(out_ecoco(:,i) == prints_ecoco);
+%          prints_ecoco = prt_ecc(out_ecoco(:,i) == prints_ecoco);
+%          prints_norbit = out_norbit(out_ecoco(:,i) == prints_ecoco);
          
          if length(prints_sr) > 1
              disp('Warning: multiple sedimentary rate options are :')
@@ -157,13 +162,13 @@ waitbar(waitbarstep / steps)
          end
              disp(['    Correlation coeffcient ',num2str(prints_ecc(1)),...
                  '. H0 significance level ',num2str(100*prints_eci(1)),'%']);
-             disp(['    ECOCO value is ',num2str(prints_ecoco(1)),'. ECOCO x # of orbits : ',num2str(prints_ecocorb)])
+             disp(['    COCOxH0-SL value ',num2str(prints_ecoco(1)), 'COCOxH0-SLxOrbits',num2str(prints_ecocorb(1)) ])
              sr_p(i,1) = loci;
              sr_p(i,2) = prints_sr(1);
              sr_p(i,3) = prints_ecc(1);
              sr_p(i,4) = prints_eci(1);
              sr_p(i,5) = prints_norbit(1);
-             sr_p(i,6) = prints_ecocorb;
+             sr_p(i,6) = prints_ecocorb(1);
      else
          out_ecocorb(:,i) = out_norbit.*out_ecc(:,i);
      end
@@ -171,14 +176,18 @@ waitbar(waitbarstep / steps)
  if ishandle(hwaitbar); 
     close(hwaitbar);
 end
-%    sr_p(:,1) = prt_sr;
-    assignin('base','sr_disp',sr_p)
+%    assignin('base','sr_disp',sr_p)
     out_depth = (linspace(data(1,1)+window/2,data(nrow,1)-window/2,m3))';
     
 if abs(plotn) > 0
+    hwarn = warndlg('Wait, eCOCO plot ...');
     if nsim > 1
         [prt_sr] =  ecocoplot(corrCI(:,1),out_depth,out_ecc,out_ep,out_eci,out_ecoco,out_ecocorb,out_norbit,plotn);
     else
         [prt_sr] = ecocoplots(corrCI(:,1),out_depth,out_ecc,out_ep,out_eci,out_ecoco,out_ecocorb,plotn);
+    end
+    try
+        close(hwarn)
+    catch
     end
 end

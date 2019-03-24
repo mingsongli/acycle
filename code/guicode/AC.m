@@ -104,12 +104,12 @@ function AC_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to AC (see VARARGIN)
 
-set(gcf,'Name','Acycle v1.0.2')
+set(gcf,'position',[0.5,0.1,0.45,0.8]) % set position
+set(gcf,'Name','Acycle v1.0.3')
 set(gcf,'DockControls', 'off')
 set(gcf,'Color', 'white')
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
-set(gcf,'position',[0.5,0.1,0.45,0.8]) % set position
 %
 set(handles.push_up,'position',    [0.02,0.945,0.06,0.05])
 set(handles.push_folder,'position',[0.106,0.945,0.065,0.05])
@@ -235,9 +235,9 @@ assignin('base','unit_type',handles.unit_type)
 guidata(hObject, handles);
 % Update reminder
 pause(0.0001);%
-if isdeployed
-    copyright;
-end
+% if isdeployed
+%     copyright;
+% end
 try 
     ac_check_update;
 catch
@@ -2299,7 +2299,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                     handles.acfig = gcf; % read info of AC main window
                     
                     tic
-                    [prt_sr,out_depth,out_ecc,out_ep,out_eci,out_ecoco,out_ecocorb,out_norbit] = ...
+                    [prt_sr,out_depth,out_ecc,out_ep,out_eci,out_ecoco,out_ecocorb,out_norbit,sr_p] = ...
                         ecoco(data,target,orbit7,window,srm,step,delinear,red,pad1,sr1,sr2,srstep,nsim,adjust,slices,plotn);
 
                     param0 = ['Target age is ',num2str(t1),' ka. Zero padding is ',num2str(pad),'. Frequency: ',num2str(f1),'-',num2str(f2),' cycles/kyr'];
@@ -2325,12 +2325,13 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                     acfig_name = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-',num2str(window),'win-ECOCO.AC.fig'];
                     % Log name
                     log_name = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-',num2str(window),'win-ECOCO-log',ext];
-                    
-                    if exist([pwd,handles.slash_v,acfig_name]) || exist([pwd,handles.slash_v,log_name])
+                    savefile_name =[dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-',num2str(window),'win-ECOCO.Optimal',ext];
+                    if exist([pwd,handles.slash_v,acfig_name]) || exist([pwd,handles.slash_v,log_name]) || exist([pwd,handles.slash_v,savefile_name])
                         for i = 1:100
                             acfig_name = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-',num2str(window),'win-ECOCO-',num2str(i),'.AC.fig'];
                             log_name   = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-',num2str(window),'win-ECOCO-',num2str(i),'.log',ext];
-                            if exist([pwd,handles.slash_v,acfig_name]) || exist([pwd,handles.slash_v,log_name])
+                            savefile_name =[dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-',num2str(window),'win-ECOCO-',num2str(i),'.Optimal',ext];
+                            if exist([pwd,handles.slash_v,acfig_name]) || exist([pwd,handles.slash_v,log_name]) || exist([pwd,handles.slash_v,savefile_name])
                             else
                                 break
                             end
@@ -2350,6 +2351,14 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                     fprintf(fileID,'%s\n',param3);
                     fprintf(fileID,'%s\n',param4);
                     fprintf(fileID,'%s\n',' - - - - - - - - - - - - - - End - - - - - - - - - - - -');
+                    fclose(fileID);
+                    
+                    fileID = fopen(fullfile(dat_dir,savefile_name),'w+');
+                    fprintf(fileID,'%s\n','%location, Optimal Sed.Rate, CorrCoef, H0-SL, #Orbits, COCOxH0x#Orbits');                    
+                    %fprintf(fileID,'%s\n\n',mat2str(sr_p));
+                    for row = 1: length(prt_sr);
+                        fprintf(fileID,'%s, %s, %s, %s, %d, %s\n',sr_p(row,1),sr_p(row,2),sr_p(row,3),sr_p(row,4),sr_p(row,5),sr_p(row,6));
+                    end
                     fclose(fileID);
                     
                     handles.t1 = t1/1000;
@@ -2397,8 +2406,10 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                     
                     disp('>>  *ECOCO.AC.fig file:')
                     disp(acfig_name)
-                    disp('>>  *.ECOCO-log file:')
+                    disp('>>  *ECOCO-log.txt file:')
                     disp(log_name)
+                    disp('>>  *ECOCO.Optimal.txt file:')
+                    disp(savefile_name)
                 end
             end
         end
@@ -2921,9 +2932,15 @@ defaultans = {'1'};
 options.Resize='on';
 answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
 if ~isempty(answer)
+    hwarn = warndlg('Wait, eCOCO plot ...');
     plotn = str2double(answer{1});
     [~] = ecocoplot(handles.prt_sr,handles.out_depth,...
     handles.out_ecc,handles.out_ep,handles.out_eci,handles.out_ecoco,handles.out_ecocorb,handles.out_norbit,plotn);
+    try 
+        close(hwarn)
+    catch
+    end
+    
 end
 
 

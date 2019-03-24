@@ -1,4 +1,4 @@
-function [senv,spow,sopt,x_grid,y_grid] = eTimeOpt(data,window,step,sedmin,sedmax,numsed,nsim,linLog,fit,fl,fh,roll,targetE,targetP,normal,detrend,cormethod,genplot)
+function [senv,spow,sopt,x_grid,y_grid,sr_p_data] = eTimeOpt(data,window,step,sedmin,sedmax,numsed,nsim,linLog,fit,fl,fh,roll,targetE,targetP,normal,detrend,cormethod,genplot)
 %                                                   1     2     3     4      5      6      7     8    9  10 11  12     13      14     15      16       17       18
 if nargin < 18; genplot = 1; end % default: plot
 if nargin < 17; cormethod = 2; end
@@ -42,6 +42,8 @@ n_step = floor(step/dt); % number of data for 1 step
 npts_new1 = npts - n_win +1; % size of y_grid if step = 1
 npts_new = ceil(npts_new1/n_step); % size of y_grid
 % 
+sr_p_data = zeros(npts_new,6);
+
 if mod(n_win,2)==0
     nstart = (n_win/2);
 else
@@ -88,10 +90,11 @@ for i =1 : npts_new
     dat = [depth_w,d'];
     disp(' ')
     disp(['--> Sliding window ',num2str(i),' of ',num2str(npts_new),'. Window center = ',num2str(y_grid(i)/100)])
-    [xx,~,~] =timeOptAc(dat,sedmin,sedmax,numsed,nsim,linLog,fit,fl,fh,roll,targetE,targetP,detrend,cormethod,0);
+    [xx,~,~,sr_p] =timeOptAc(dat,sedmin,sedmax,numsed,nsim,linLog,fit,fl,fh,roll,targetE,targetP,detrend,cormethod,0);
     senv(i,:) = xx(:,2)';
     spow(i,:) = xx(:,3)';
     sopt(i,:) = xx(:,4)';
+    sr_p_data(i,:) = sr_p;
 end
 % hwaitbar
 try close(hwaitbar)

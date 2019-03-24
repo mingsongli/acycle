@@ -1,6 +1,8 @@
-![logo](https://github.com/mingsongli/acycleFig/blob/master/default_icon_1024-git.gif)
+<a href="https://github.com/mingsongli/acycle">
+    <img src="https://github.com/mingsongli/acycleFig/blob/master/default_icon_1024-git.gif" alt="homepage" title="Acycle GitHub homepage">
+</a>
 
-[![](https://img.shields.io/badge/version-v1.0.2-blue.svg)]()
+[![](https://img.shields.io/badge/version-v1.0.3-blue.svg)]()
 [![](https://img.shields.io/badge/license-GPL-brightgreen.svg)](https://www.gnu.org/licenses/)
 [![](https://img.shields.io/badge/platform-Mac_Win-green.svg)]()
 ![](https://img.shields.io/badge/language-MatLab-red.svg)
@@ -8,10 +10,8 @@
 `Acycle is a time-series analysis software for paleoclimate research and education`
 
 ### Highlights
-> * Acycle is signal processing software for paleoclimate research and education
-> * Many of the functions are specific to cyclostratigraphy and astrochronology
-> * Acycle includes models for sedimentary noise and sedimentation rate
-> * A fully implemented graphical user interface facilitates operator use
+> * A fully implemented graphical user interface (GUI) facilitates operator use
+> * Acycle runs either in the MATLAB environment or as a stand-alone application on Mac and Windows
 * [Read More](https://github.com/mingsongli/acycle#abstract)
 
 ### Wiki: Table of Content
@@ -23,21 +23,38 @@
     > "His _**Acycle**_ software will become the standard tool for time-scale applications by all international workers."<br>
 * [Read More](https://github.com/mingsongli/acycle#what-they-say-1)
 
+### Has been used in
+* Li, M., Hinnov, L.A., Huang, C., Ogg, J.G., 2018. Nature communications. https://doi.org/10.1038/s41467-018-03454-y
+* [Read More](https://github.com/mingsongli/acycle#acycle-has-been-used-in)
+
 ### Please cite
-> Mingsong Li, Linda A. Hinnov, Lee R. Kump, 2019. _Acycle_: Time-series analysis software for paleoclimate research and education. Computers & Geosciences. https://doi.org/10.1016/j.cageo.2019.02.011.
+> Mingsong Li, Linda A. Hinnov, Lee R. Kump, 2019. _Acycle_: Time-series analysis software for paleoclimate research and education. Computers & Geosciences. 127: 12-22. https://doi.org/10.1016/j.cageo.2019.02.011.
 ---
 ### Contact
-Mingsong Li, Penn State. Mar. 12, 2019
+<a href="https://mingsongli.com/">
+    <img src="https://github.com/mingsongli/acycleFig/blob/master/WechatIMG17.jpeg" alt="MingsongLi.com" title="Mingsong Li homepage" width="100" height="100">
+</a>
+<br>
+Mingsong Li, Penn State. Mar. 19, 2019 <br>
+E-mail: <i> mul450 {at} psu.edu;  limingsonglms {at} gmail.com </i> <br><br>
 
-E-mail: <i> mul450 {at} psu.edu;</i>
+<a href="https://scholar.google.com/citations?user=NYUXDW0AAAAJ&hl=en&inst=4855597776033322861">
+    <img src="https://github.com/mingsongli/acycleFig/blob/master/google-scholar-icon-1.jpg" alt="Google Scholar" title="Google Scholar homepage" width="48" height="48">
+</a>
+<a href="https://www.researchgate.net/profile/Mingsong_Li">
+    <img src="https://github.com/mingsongli/acycleFig/blob/master/RG.jpeg" alt="ResearchGate" title="Mingsong Li ResearchGate homepage" width="48" height="48">
+</a>
+<a href="https://github.com/mingsongli/">
+    <img src="https://github.com/mingsongli/acycleFig/blob/master/github-icon-for-resume-14.jpg" alt="GitHub" title="Mingsong Li GitHub homepage" width="48" height="48">
+</a>
+<a href="https://www.mingsongli.com/acycle">
+    <img src="https://github.com/mingsongli/acycleFig/blob/master/homepage.png" alt="Mingsong Li" title="Acycle homepage" width="48" height="48">
+</a>
+<a href="https://github.com/mingsongli/acycle/wiki">
+    <img src="https://github.com/mingsongli/acycleFig/blob/master/wiki-ch.jpg" alt="wiki" title="Acycle Wiki" width="48" height="48">
+</a>
 
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <i>limingsonglms {at} gmail.com </i>
 <br><br>
-Website: www.mingsongli.com/acycle <br>
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; https://github.com/mingsongli/acycle <br>
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; https://github.com/mingsongli/acycle/wiki
-<br><br>
-
 <b> ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) &nbsp;
 `Please give it a " ⭐️Star" and "👁 Watch" if you like this software. (top right corner of this page)`
 
@@ -45,18 +62,37 @@ Website: www.mingsongli.com/acycle <br>
 
 ---
 ### Abstract
-* Acycle is a comprehensive, but "user-friendly" software package for analysis of time-series designed for paleoclimate research and education.
-* Acycle runs either in the MATLAB environment or as a stand-alone application on macOS and Windows.
+* _Acycle_ is a comprehensive, but "user-friendly" software package for analysis of time-series designed for paleoclimate research and education.
+* _Acycle_ runs either in the MATLAB environment or as a stand-alone application on Mac and Windows.
 * It is an open-source package and is available free of charge.
-    * Acycle provides data preparation tools, detrending procedures with multiple options available to track or remove secular trends, and integrates various power spectral analysis approaches for detection and tracking of periodic signals.
+    * _Acycle_ provides data preparation tools, detrending procedures with multiple options available to track or remove secular trends, and integrates various power spectral analysis approaches for detection and tracking of periodic signals.
 
-    * Acycle also provides a toolbox that evaluates astronomical signals in paleoclimate series, and estimates the most likely sedimentation rate by maximizing the correlation coefficient between power spectra of an astronomical solution and a paleoclimate series.
+    * _Acycle_ also provides a toolbox that evaluates astronomical signals in paleoclimate series, and estimates the most likely sedimentation rate by maximizing the correlation coefficient between power spectra of an astronomical solution and a paleoclimate series.
 
     * Sedimentary noise models for sea-level variations are also included.
 
     * Many of the functions are specific to cyclostratigraphy and astrochronology, and are not found in standard, statistical packages.
 
 ![gui](https://github.com/mingsongli/acycleFig/blob/master/Fig.1-GUI.jpg)
+
+![structure](https://github.com/mingsongli/acycleFig/blob/master/Fig.2-design-201902.jpg)
+
+_The structure of the Acycle program_
+
+
+![](https://github.com/mingsongli/acycleFig/blob/master/chapter6/6.2.la04-evofft.result.png)
+
+_Evolutionary FFT of the astronomical solution._
+
+
+![](https://github.com/mingsongli/acycleFig/blob/master/chapter6/6.3.wayao.detrend.set.png)
+
+_Detrending GUI and results_
+
+![](https://github.com/mingsongli/acycleFig/blob/master/chapter6/6.3.wayao.spectral.result.png)
+
+_2π multi-taper method power spectrum of the gamma ray series is shown with `20%` median-smoothed spectrum, background AR(1) model, and 90%, 95%, 99%,  and 99.9% confidence levels._
+
 ---
 ## Wiki: Table of Content
 
@@ -129,9 +165,9 @@ Website: www.mingsongli.com/acycle <br>
     * [Astronomical solution](https://github.com/mingsongli/acycle/wiki/Examples#example-2-la2004-astronomical-solution-etp)
     * [Wayao Triassic](https://github.com/mingsongli/acycle/wiki/Examples#example-3-carnian-cyclostratigraphy)
 
-## Communication
+#### [Frequently Asked Questions](https://github.com/mingsongli/acycle/wiki/Frequently-Asked-Questions) <br>
 
-[**Frequently Asked Questions**](https://github.com/mingsongli/acycle/wiki/Frequently-Asked-Questions) <br>
+#### [Acknowledgements](https://github.com/mingsongli/acycle/wiki/Acknowledgements)
 
 ---
 ## What they say
@@ -158,8 +194,16 @@ and interesting."
 * **Dr. Christian Zeeden** (IMCCE, Observatoire de Paris, France):
     > "Dr. Li’s software is novel and valuable in this context, especially because it facilitates the easy application of otherwise complex calculations."
 
-* **A professor from the University of Copenhagen in Denmark**:
+* **Dr. Nicolas R. Thibault** (University of Copenhagen, Denmark):
     > "I’ve been playing a lot with the excellent _**Acycle**_ package for Matlab that Mingsong developed. Congratulations, this is a very nice interface that simplifies a lot our work and makes it truly faster to analyse a time-series."
+
+---
+### _Acycle_ has been used in
+*   > Li, M., Hinnov, L.A., Huang, C., Ogg, J.G., 2018. Sedimentary noise and sea levels linked to land–ocean water exchange and obliquity forcing. Nature communications 9, 1004. https://doi.org/10.1038/s41467-018-03454-y
+*   > Li, M., Kump, L.R., Hinnov, L.A., Mann, M.E., 2018. Tracking variable sedimentation rates and astronomical forcing in Phanerozoic paleoclimate proxy series with evolutionary correlation coefficients and hypothesis testing. Earth and Planetary Science Letters 501, 165-179. https://doi.org/10.1016/j.epsl.2018.08.041
+*   > Chen, G., Gang, W., Liu, Y., Wang, N., Guo, Y., Zhu, C., Cao, Q., 2019. High-resolution sediment accumulation rate determined by cyclostratigraphy and its impact on the organic matter abundance of the hydrocarbon source rock in the Yanchang Formation, Ordos Basin, China. Marine and Petroleum Geology 103, 1-11. https://doi.org/10.1016/j.marpetgeo.2019.01.044
+*   > Li, M., Huang, C., Ogg, J., Zhang, Y., Hinnov, L., Wu, H., Chen, Z.-Q., Zou, Z., 2019. Paleoclimate proxies for cyclostratigraphy: Comparative analysis using a Lower Triassic marine section in South China. Earth-Science Reviews. https://doi.org/10.1016/j.earscirev.2019.01.011
+*   > Shi, J., Jin, Z., Liu, Q., Zhang, R., Huang, Z., 2019. Cyclostratigraphy and astronomical tuning of the middle eocene terrestrial successions in the Bohai Bay Basin, Eastern China. Global and Planetary Change 174, 115-126. https://doi.org/10.1016/j.gloplacha.2019.01.001
 
 ---
 ## Read more

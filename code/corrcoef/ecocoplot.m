@@ -79,7 +79,7 @@ colorbar('southoutside',...
 colormap(jet)
 shading interp
 xlabel('Sedimentation rate (cm/kyr)')
-ylabel('Depth (m)')
+%ylabel('Depth (m)')
 zlabel('H_0 significance level (%)')
 figurename ='eH_0 SL (%)';
 title(figurename)
@@ -106,7 +106,7 @@ colormap(jet)
 shading interp
 colorbar('southoutside')
 xlabel('Sedimentation rate (cm/kyr)')
-ylabel('Depth (m)')
+%ylabel('Depth (m)')
 zlabel('#')
 figurename ='No. of orbital parameters';
 title(figurename)

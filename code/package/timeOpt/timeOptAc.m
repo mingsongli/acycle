@@ -1,4 +1,4 @@
-function [xx,datopt,xcl] =timeOptAc(dat,sedmin,sedmax,numsed,nsim,linLog,fit,fl,fh,roll,targetE,targetP,detrend,cormethod,genplot)
+function [xx,datopt,xcl,sr_p] =timeOptAc(dat,sedmin,sedmax,numsed,nsim,linLog,fit,fl,fh,roll,targetE,targetP,detrend,cormethod,genplot)
 
 %% timeOpt script to conduct the timeOpt analysis
 %   to evaluate the most likely sedimentation rate from a data series.
@@ -44,6 +44,8 @@ function [xx,datopt,xcl] =timeOptAc(dat,sedmin,sedmax,numsed,nsim,linLog,fit,fl,
 %       3rd: r^2_power at the corresponding sed. rate
 %       4th: r^2_opt at the corresponding sed. rate
 %   datopt: optimal time series, bandpassed series, envelope, reconstructed eccentricity model
+%   xcl:
+%   sr_p: output optimal sed. rate for xx
 %
 %% Calls for
 %
@@ -129,7 +131,7 @@ datx = dat(:,1);  % unit should be cm
 daty = dat(:,2);
 diffx = diff(datx);
 npts = length(datx);
-
+sr_p =[];
 % cormethod = 2;
 fc=(fh+fl)/2;
 % precession amplitude modulation
@@ -232,6 +234,7 @@ disp(['>>  Maximum envelope r^2 = ',num2str(maxr2env)])
 disp(['>>       at sedimentation rate of ',num2str(sedrate(locj(1))),' cm/kyr'])
 disp(['>>  Maximum (envelope r^2) x (spectral power r^2) = ',num2str(maxr2opt)])
 disp(['>>       at sedimentation rate of ', num2str(sedrate(loci(1))),' cm/kyr'])
+sr_p = [sedrate(locm(1)), maxr2pwr, sedrate(locj(1)), maxr2env, sedrate(loci(1)), maxr2opt];
 %
 data(:,1) = dat(:,1)/sedrate(loci(1));
 [tanhilb,~,~] = tanerhilbertML(data,fc,fl,fh,roll);

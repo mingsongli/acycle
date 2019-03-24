@@ -206,7 +206,7 @@ set(handles.radiobutton5,'Value',1)
 set(handles.radiobutton6,'Value',0)
 set(handles.radiobutton7,'Value',1)
 set(handles.radiobutton8,'Value',0)
-set(handles.checkbox1,'Value',1)
+set(handles.checkbox1,'Value',0)
 set(handles.checkbox2,'Value',1)
 set(handles.radiobutton9,'Value',1)
 set(handles.radiobutton10,'Value',0)
@@ -252,12 +252,12 @@ handles.dtr = dtr;
 handles.nsim = 0;
 handles.linLog = 2;
 handles.fit = 1;
-handles.roll = 10^3;
+handles.roll = 10^12;
 handles.detrend = 1;
 handles.cormethod = 2;
 handles.genplot = 1;
 handles.flipy = 1;
-handles.normal = 1;
+handles.normal = 0;
 handles.age = 0;
 handles.plot_2d = 1;
 %
@@ -330,7 +330,7 @@ else
 end
 %dat
 %window,step
-[senv,spow,sopt,x_grid,y_grid] = ...
+[senv,spow,sopt,x_grid,y_grid,sr_p] = ...
     eTimeOpt(dat,window,step,sedmin,sedmax,numsed,0,linLog,fit,fl,fh,roll,...
     targetE,targetP,normal,detrend,cormethod,0);
 %
@@ -384,7 +384,7 @@ end
 if handles.flipy == 1;
     set(gca,'Ydir','reverse')
 end
-colorbar
+colorbar('southoutside')
 
 subplot(1,3,2)
 if handles.plot_2d == 1
@@ -402,7 +402,7 @@ title('r^2_p_o_w_e_r')
 if handles.flipy == 1;
     set(gca,'Ydir','reverse')
 end
-colorbar
+colorbar('southoutside')
 
 subplot(1,3,3)
 if handles.plot_2d == 1
@@ -420,27 +420,39 @@ title('r^2_o_p_t')
 if handles.flipy == 1;
     set(gca,'Ydir','reverse')
 end
-colorbar
+%colorbar
+colorbar('southoutside')
 
 dat_name = handles.dat_name;
 acfig_name = [dat_name,'-',num2str(window),handles.unit,'win-',num2str(sedmin),'-',num2str(sedmax),'SAR-eTimeOpt.AC.fig'];
 % Log name
 eTimeOpt_name = [dat_name,'-',num2str(window),handles.unit,'win-',num2str(sedmin),'-',num2str(sedmax),'SAR-eTimeOpt.fig'];
+savefile_name = [dat_name,'-',num2str(window),handles.unit,'win-',num2str(sedmin),'-',num2str(sedmax),'SAR-eTimeOpt.txt'];
 
-if exist([pwd,handles.slash_v,acfig_name]) || exist([pwd,handles.slash_v,eTimeOpt_name])
+CDac_pwd;
+
+if exist([pwd,handles.slash_v,acfig_name]) || exist([pwd,handles.slash_v,eTimeOpt_name])|| exist([pwd,handles.slash_v,savefile_name])
     for i = 1:100
         acfig_name = [dat_name,'-',num2str(window),handles.unit,'win-',num2str(sedmin),'-',num2str(sedmax),'SAR-eTimeOpt-',num2str(i),'.AC.fig'];
         eTimeOpt_name   = [dat_name,'-',num2str(window),handles.unit,'win-',num2str(sedmin),'-',num2str(sedmax),'SAR-eTimeOpt-',num2str(i),'.fig'];
-        if exist([pwd,handles.slash_v,acfig_name]) || exist([pwd,handles.slash_v,eTimeOpt_name])
+        savefile_name = [dat_name,'-',num2str(window),handles.unit,'win-',num2str(sedmin),'-',num2str(sedmax),'SAR-eTimeOpt-',num2str(i),'.txt'];
+
+        if exist([pwd,handles.slash_v,acfig_name]) || exist([pwd,handles.slash_v,eTimeOpt_name])|| exist([pwd,handles.slash_v,savefile_name])
         else
             break
         end
     end
 end
 
-CDac_pwd;
 savefig(gcf,eTimeOpt_name)
 savefig(acfig_etimeopt,acfig_name)
+
+fileID = fopen(savefile_name,'w+');
+fprintf(fileID,'%s\n','%location,Optimal Sed.Rate,r^2power,Optimal Sed.Rate,r^2envelope,Optimal Sed.Rate,r^2opt'); 
+for row = 1: length(y_grid);
+    fprintf(fileID,'%s, %s, %s, %s, %s, %s, %s\n',y_grid(row),sr_p(row,1),sr_p(row,2),sr_p(row,3),sr_p(row,4),sr_p(row,5),sr_p(row,6));
+end
+fclose(fileID);
 disp('>> Done. See Acycle main window for the output figures')
 figure(handles.acfigmain);
 refreshcolor;
@@ -828,14 +840,14 @@ if val == 1
     handles.fit = 1;
     handles.fl = 0.035;
     handles.fh = 0.065;
-    handles.roll = 10^3;
+    handles.roll = 10^12;
 else
     % fit short eccentricity
     set (handles.radiobutton6, 'Value', 1);
     handles.fit = 2;
     handles.fl = 0.007;
     handles.fh = 0.0115;
-    handles.roll = 10^5;
+    handles.roll = 10^12;
 end
 set(handles.edit7, 'String', num2str(handles.fl));
 set(handles.edit8, 'String', num2str(handles.fh));
@@ -855,13 +867,13 @@ if val == 1
     handles.fit = 2;
     handles.fl = 0.007;
     handles.fh = 0.0115;
-    handles.roll = 10^5;
+    handles.roll = 10^12;
 else
     set (handles.radiobutton5, 'Value', 1);
     handles.fit = 1;
     handles.fl = 0.035;
     handles.fh = 0.065;
-    handles.roll = 10^3;
+    handles.roll = 10^12;
 end
 set(handles.edit7, 'String', num2str(handles.fl));
 set(handles.edit8, 'String', num2str(handles.fh));
