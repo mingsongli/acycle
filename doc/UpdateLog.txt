@@ -11,6 +11,8 @@ By      : Mingsong Li
 	1. eCOCO: save optimal sed. rate as a text file: "*.ECOCO.Optimal.txt"
     2. eTimeOpt: save optimal sed. rate as a text file: "*.eTimeOpt.txt"
     3. TimeOpt and eTimeOpt use Taner roll-off rate of 10^12 now.
+    4. put back lost smoothci.m and smoothciML.m files
+
 _____________________________________
 
 Version : ACycle_v1.0.2

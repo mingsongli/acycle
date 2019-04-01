@@ -51,6 +51,9 @@ function DataExtractTab_OpeningFcn(hObject, eventdata, handles, varargin)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to DataExtractTab (see VARARGIN)
+set(0,'Units','normalized') % set units as normalized
+set(gcf,'units','norm') % set location
+set(handles.uitable1,'position',[0.011,0.012,0.97,0.984])
 
 % Choose default command line output for DataExtractTab
 handles.output = hObject;

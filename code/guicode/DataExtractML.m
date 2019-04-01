@@ -53,6 +53,11 @@ function DataExtractML_OpeningFcn(hObject, eventdata, handles, varargin)
 % varargin   command line arguments to DataExtractML (see VARARGIN)
 
 % Choose default command line output for DataExtractML
+set(0,'Units','normalized') % set units as normalized
+set(gcf,'units','norm') % set location
+h=get(gcf,'Children');  % get all content
+%h1=findobj(h,'FontUnits','norm');  % find all font units as points
+
 handles.output = hObject;
 handles.DataExtractMain = gcf;
 set(handles.DataExtractMain,'position',[0,0.95,0.5,0.11]) % set position
@@ -85,6 +90,30 @@ handles.DataExtractFig = figure;
 imshow(handles.figname);
 set(handles.DataExtractFig,'units','norm') % set location
 set(handles.DataExtractFig,'position',[0.0,0.0,0.8,0.75]) % set position
+
+set(handles.text5,'position',[0.018,0.03,0.687,0.129])
+set(handles.uipanel2,'position',[0.354,0.208,0.344,0.723])
+set(handles.text6,'position',[0.028,0.692,0.274,0.2])
+set(handles.text7,'position',[0.028,0.197,0.274,0.2])
+set(handles.edit3,'position',[0.306,0.615,0.282,0.338])
+set(handles.edit4,'position',[0.306,0.108,0.282,0.338])
+set(handles.radiobutton3,'position',[0.597,0.646,0.306,0.354])
+set(handles.radiobutton4,'position',[0.597,0.138,0.359,0.354])
+
+set(handles.uipanel3,'position',[0.007,0.208,0.344,0.723])
+set(handles.text8,'position',[0.028,0.692,0.274,0.2])
+set(handles.text9,'position',[0.028,0.197,0.274,0.2])
+set(handles.edit1,'position',[0.306,0.615,0.282,0.338])
+set(handles.edit2,'position',[0.306,0.108,0.282,0.338])
+set(handles.radiobutton1,'position',[0.597,0.646,0.306,0.354])
+set(handles.radiobutton2,'position',[0.597,0.138,0.359,0.354])
+
+set(handles.push_calibrate,'position',[0.713,0.683,0.117,0.208])
+set(handles.PushDigitize,'position',[0.713,0.376,0.117,0.208])
+set(handles.push_auto,'position',[0.713,0.069,0.117,0.208])
+set(handles.push_undo,'position',[0.843,0.683,0.096,0.208])
+set(handles.push_grid,'position',[0.843,0.376,0.096,0.208])
+set(handles.pushsave,'position',[0.843,0.069,0.096,0.208])
 
 set(handles.text5, 'string', 'Input the values in EditBoxs. Click Calibrate axis to set axis!');
 

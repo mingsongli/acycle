@@ -373,7 +373,7 @@ end
 colormap parula
 shading interp
 xlabel('Sedimentation rate (cm/kyr)')
-title('r^2_e_n_v_e_l_o_p')
+title('r^2_e_n_v_e_l_o_p_e')
 if handles.unit_type == 0;
     ylabel(['Unit (',handles.unit,')'])
 elseif handles.unit_type == 1;

@@ -471,7 +471,7 @@ elseif  strcmp(method,'Periodogram')
         plot(fd1,tabtchired90,'r-','LineWidth',1)
         plot(fd1,tabtchired95,'r--','LineWidth',2)
         plot(fd1,tabtchired99,'b-.','LineWidth',1)
-        plot(fd1,tabtchired999,'g.','LineWidth',1)
+        plot(fd1,tabtchired999,'g:','LineWidth',1)
         legend('Power','Mean','90%','95%','99%','99.9')
         hold off
     end
@@ -1021,7 +1021,7 @@ elseif  strcmp(method,'Periodogram')
         plot(fd1,tabtchired90,'r-','LineWidth',1)
         plot(fd1,tabtchired95,'r--','LineWidth',2)
         plot(fd1,tabtchired99,'b-.','LineWidth',1)
-        plot(fd1,tabtchired999,'g.','LineWidth',1)
+        plot(fd1,tabtchired999,'g:','LineWidth',1)
         legend('Power','Mean','90%','95%','99%','99.9')
     end
 else

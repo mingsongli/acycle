@@ -119,11 +119,11 @@ if plot == 1
     semilogy(ft,theored1,'k-','LineWidth',2);
     semilogy(ft,chi90,'r-');
     semilogy(ft,chi95,'r--','LineWidth',2);
-    semilogy(ft,chi99,'r-.');
-    semilogy(ft,chi999,'r.','LineWidth',1);
+    semilogy(ft,chi99,'b-.');
+    semilogy(ft,chi999,'g:','LineWidth',1);
     xlabel('Frequency')
     ylabel('Power')
-    smthwin = ['Median-smoothing ',num2str(smoothwin*100),'%'];
+    smthwin = [num2str(smoothwin*100),'%', ' median-smoothed'];
     legend('Power',smthwin,'Robust AR(1) median',...
         'Robust AR(1) 90%','Robust AR(1) 95%','Robust AR(1) 99%','Robust AR(1) 99.9%')
 %     legend('Power',smthwin,'Conventional AR(1)','Robust AR(1) median',...
