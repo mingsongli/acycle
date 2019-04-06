@@ -110,15 +110,69 @@ set(gcf,'DockControls', 'off')
 set(gcf,'Color', 'white')
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
-%
-set(handles.push_up,'position',    [0.02,0.945,0.06,0.05])
-set(handles.push_folder,'position',[0.106,0.945,0.065,0.05])
-set(handles.push_plot,'position',  [0.2,0.945,0.06,0.05])
-set(handles.push_populate,'position',[0.28,0.945,0.06,0.05])
-set(handles.push_refresh,'position',[0.36,0.945,0.06,0.05])
-set(handles.push_openfolder,'position',[0.02,0.902,0.05,0.035])
-set(handles.push_robot,'position',  [0.44,0.945,0.06,0.05])
+set(gcf,'ResizeFcn',@Resize_clbk);
 
+%% push_up
+h_push_up = uicontrol('Style','pushbutton','Tag','push_up');  % set style, Tag
+jEdit = findjobj(h_push_up);   % find java
+jEdit.Border = [];  % hide border
+set(h_push_up,'Units','normalized') % set units as normalized
+set(h_push_up,'Position', [0.02,0.945,0.06,0.05]) % set position
+tooltip = '<html>Up<br>one level';  % tooltip
+set(h_push_up,'tooltip',tooltip,'CData',imread('menu_up.jpg'))  % set tooltip and button image
+set(h_push_up,'Callback',@push_up_clbk)  % set callback function
+
+%% push_folder
+h_push_folder = uicontrol('Style','pushbutton','Tag','push_folder');  % set style, Tag
+jEdit = findjobj(h_push_folder);   % find java
+jEdit.Border = [];  % hide border
+set(h_push_folder,'Units','normalized') % set units as normalized
+set(h_push_folder,'Position', [0.106,0.945,0.065,0.05]) % set position
+tooltip = '<html>Open<br>working folder';  % tooltip
+set(h_push_folder,'tooltip',tooltip,'CData',imread('menu_folder.jpg'))  % set tooltip and button image
+set(h_push_folder,'Callback',@push_folder_clbk)  % set callback function
+
+%% push_plot
+h_push_plot = uicontrol('Style','pushbutton','Tag','push_plot');  % set style, Tag
+jEdit = findjobj(h_push_plot);   % find java
+jEdit.Border = [];  % hide border
+set(h_push_plot,'Units','normalized') % set units as normalized
+set(h_push_plot,'Position', [0.2,0.945,0.06,0.05]) % set position
+tooltip = '<html>Plot Pro';  % tooltip
+set(h_push_plot,'tooltip',tooltip,'CData',imread('menu_plot.jpg'))  % set tooltip and button image
+set(h_push_plot,'Callback',@push_plot_clbk)  % set callback function
+
+%% push_refresh
+h_push_refresh = uicontrol('Style','pushbutton','Tag','push_refresh');  % set style, Tag
+jEdit = findjobj(h_push_refresh);   % find java
+jEdit.Border = [];  % hide border
+set(h_push_refresh,'Units','normalized') % set units as normalized
+set(h_push_refresh,'Position', [0.28,0.945,0.06,0.05]) % set position
+tooltip = '<html>Refresh<br>list box';  % tooltip
+set(h_push_refresh,'tooltip',tooltip,'CData',imread('menu_refresh.jpg'))  % set tooltip and button image
+set(h_push_refresh,'Callback',@push_refresh_clbk)  % set callback function
+
+%% push_robot
+h_push_robot = uicontrol('Style','pushbutton','Tag','push_robot');  % set style, Tag
+jEdit = findjobj(h_push_robot);   % find java
+jEdit.Border = [];  % hide border
+set(h_push_robot,'Units','normalized') % set units as normalized
+set(h_push_robot,'Position', [0.36,0.945,0.06,0.05]) % set position
+tooltip = '<html>Mini-robot';  % tooltip
+set(h_push_robot,'tooltip',tooltip,'CData',imread('menu_robot.jpg'))  % set tooltip and button image
+set(h_push_robot,'Callback',@push_robot_clbk)  % set callback function
+
+%% push_openfolder
+h_push_openfolder = uicontrol('Style','pushbutton','Tag','push_openfolder');  % set style, Tag
+jEdit = findjobj(h_push_openfolder);   % find java
+jEdit.Border = [];  % hide border
+set(h_push_openfolder,'Units','normalized') % set units as normalized
+set(h_push_openfolder,'Position', [0.015,0.897,0.06,0.05]) % set position
+tooltip = '<html>Change<br>directory';  % tooltip
+set(h_push_openfolder,'tooltip',tooltip,'CData',imread('menu_open.jpg'))  % set tooltip and button image
+set(h_push_openfolder,'Callback',@push_openfolder_clbk)  % set callback function
+
+%%
 set(handles.popupmenu1,'position', [0.75,0.945,0.24,0.04])
 set(handles.edit_acfigmain_dir,'position',       [0.07,0.9,0.91,0.04])
 set(handles.listbox_acmain,'position',    [0.02,0.008,0.96,0.884])
@@ -136,38 +190,6 @@ h1=findobj(h,'FontUnits','norm');  % find all font units as points
 set(h1,'FontUnits','points','FontSize',12);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
-%
-s_push_up = sprintf('Up one level');
-set(handles.push_up,'TooltipString',s_push_up)
-
-s_push_folder = sprintf('Open \nworking folder');
-set(handles.push_folder,'TooltipString',s_push_folder)
-
-s_push_plot = sprintf('Plot Pro');
-set(handles.push_plot,'TooltipString',s_push_plot)
-
-s_push_populate = sprintf('Expand / collapse\nselected folder');
-set(handles.push_populate,'TooltipString',s_push_populate)
-
-s_push_refresh = sprintf('Refresh\nlist box');
-set(handles.push_refresh,'TooltipString',s_push_refresh)
-
-s_push_robot = sprintf('Refresh\nlist box');
-set(handles.push_robot,'TooltipString',s_push_robot)
-
-s_push_robot = sprintf('Mini-robot');
-set(handles.push_robot,'TooltipString',s_push_robot)
-
-s_push_openfolder = sprintf('Change directory');
-set(handles.push_openfolder,'TooltipString',s_push_openfolder)
-% read image
-set(handles.push_up,'CData',imread('menu_up.jpg'))
-set(handles.push_folder,'CData',imread('menu_folder.jpg'))
-set(handles.push_plot,'CData',imread('menu_plot.jpg'))
-set(handles.push_populate,'CData',imread('menu_expand.jpg'))
-set(handles.push_refresh,'CData',imread('menu_refresh.jpg'))
-set(handles.push_openfolder,'CData',imread('menu_open.jpg'))
-set(handles.push_robot,'CData',imread('menu_robot.jpg'))
 
 % Choose default command line output for AC
 handles.output = hObject;
@@ -231,6 +253,7 @@ handles.math_deleteempty = 1;
 handles.math_derivative = 1;
 assignin('base','unit',handles.unit)
 assignin('base','unit_type',handles.unit_type)
+
 % Update handles structure
 guidata(hObject, handles);
 % Update reminder
@@ -243,6 +266,7 @@ try
 catch
 end
 
+
 % --- Outputs from this function are returned to the command line.
 function varargout = AC_OutputFcn(hObject, eventdata, handles) 
 % varargout  cell array for returning output args (see VARARGOUT);
@@ -252,6 +276,575 @@ function varargout = AC_OutputFcn(hObject, eventdata, handles)
 
 % Get default command line output from handles structure
 varargout{1} = handles.output;
+
+function Resize_clbk(hObject, eventdata)
+
+try j = findobj(gcf,'Tag','push_up');           jEdit = findjobj(j); jEdit.Border = []; catch; end
+try j = findobj(gcf,'Tag','push_folder');       jEdit = findjobj(j); jEdit.Border = []; catch; end
+try j = findobj(gcf,'Tag','push_plot');         jEdit = findjobj(j); jEdit.Border = []; catch; end
+try j = findobj(gcf,'Tag','push_refresh');      jEdit = findjobj(j); jEdit.Border = []; catch; end
+try j = findobj(gcf,'Tag','push_robot');        jEdit = findjobj(j); jEdit.Border = []; catch; end
+try j = findobj(gcf,'Tag','push_openfolder');   jEdit = findjobj(j); jEdit.Border = []; catch; end
+
+function push_up_clbk(hObject, handles)
+handles = guidata(hObject);
+CDac_pwd; % cd working dir
+cd ..;
+refreshcolor;
+cd(pre_dirML); % return view dir
+guidata(hObject,handles)
+
+
+function push_folder_clbk(hObject, handles)
+fileID = fopen('ac_pwd.txt','r');
+formatSpec = '%s';
+ac_pwd = fscanf(fileID,formatSpec);   % AC window folder dir
+fclose(fileID);
+if ismac
+    system(['open ',ac_pwd]);
+elseif ispc
+    winopen(ac_pwd);
+end
+
+
+function push_plot_clbk(hObject, handles)
+handles = guidata(hObject);
+
+contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox_acmain,'Value');
+nplot = length(plot_selected);   % length
+% check
+for i = 1:nplot
+    plot_no = plot_selected(i);
+    if plot_no > 2
+        plot_filter_s = char(contents(plot_no));
+        plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
+        GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
+        if isdir(plot_filter_s)
+            return
+        else
+            [~,~,ext] = fileparts(plot_filter_s);
+            check = 0;
+            if sum(strcmp(ext,handles.filetype)) > 0
+                check = 1; % selection can be executed 
+            elseif sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
+                try 
+                    im_name = imread(plot_filter_s);
+                    figure;
+                    imshow(im_name)
+                    %set(gcf,'Name',[dat_name,ext])
+                catch
+                    warndlg('Image color space not supported. Convert to RGB or Grayscale')
+                end
+            end
+        end
+    else
+        return
+    end
+end
+
+if check == 1
+    for i = 1: nplot
+        plot_no = plot_selected(i);
+        handles.plot_s{i} = fullfile(ac_pwd,char(contents(plot_no)));
+    end
+    handles.nplot = nplot;
+    guidata(hObject, handles);
+    PlotAdv(handles);
+end
+
+% --- Executes on button press in push_refresh.
+function push_refresh_clbk(hObject, handles)
+handles = guidata(hObject);
+CDac_pwd; % cd working dir
+refreshcolor;
+cd(pre_dirML); % return view dir
+
+
+% --- Executes on button press in push_openfolder.
+function push_openfolder_clbk(hObject, eventdata, handles)
+handles = guidata(hObject);
+pre_dirML = pwd;
+fileID = fopen('ac_pwd.txt','r');
+formatSpec = '%s';
+ac_pwd = fscanf(fileID,formatSpec);   % AC window folder dir
+fclose(fileID);
+selpath = uigetdir(ac_pwd);
+if selpath == 0
+else
+    if isdir(selpath)
+        disp(['>>  Change working folder to ',selpath])
+        cd(selpath)
+        refreshcolor;
+        cd(pre_dirML); % return view dir
+    end
+end
+
+
+% --- Executes on button press in push_robot.
+function push_robot_clbk(hObject, eventdata, handles)
+% hObject    handle to push_robot (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles = guidata(hObject);
+unit = handles.unit;
+unit_type = handles.unit_type;
+contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox_acmain,'Value');
+nplot = length(plot_selected);   % length
+check = 0;
+% check
+for i = 1:nplot
+    plot_no = plot_selected(i);
+    if plot_no > 2
+        plot_filter_s = char(contents(plot_no));
+        plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
+        GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
+        if isdir(plot_filter_s)
+        else
+            [~,dat_name,ext] = fileparts(plot_filter_s);
+            if sum(strcmp(ext,handles.filetype)) > 0
+                check = 1; % selection can be executed 
+            end
+        end
+    else
+    end
+end
+
+if check == 1
+    for i = 1:nplot
+        plot_no = plot_selected(i);
+        plot_filter_s1 = char(contents(plot_no));
+        GETac_pwd; 
+        plot_filter_s = fullfile(ac_pwd,plot_filter_s1);
+        try
+            data_filterout = load(plot_filter_s);
+        catch       
+            fid = fopen(plot_filter_s);
+            data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
+            fclose(fid);
+            if iscell(data_ft)
+                try
+                    data_filterout = cell2mat(data_ft);
+                catch
+                    fid = fopen(plot_filter_s,'at');
+                    fprintf(fid,'%d\n',[]);
+                    fclose(fid);
+                    fid = fopen(plot_filter_s);
+                    data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
+                    disp(['>>  Read data: ', dat_name, '. Okay!'])
+                    fclose(fid);
+                    try
+                        data_filterout = cell2mat(data_ft);
+                    catch
+                        warndlg(['Check selected data: ',dat_name],'Data Error!')
+                    end
+                end
+            end
+        end
+
+        ddd = data_filterout; ddd = ddd(:,1); window = 0.25 * (max(ddd)-min(ddd));
+
+        dlg_title = 'Acycle: Robot';
+        prompt = {...
+            'Preparation check: NaN, Sort, Unique, Remove-empty'; ...
+            'Interpolation: mean, median, max, min, value';...
+            'Detrend: lowess/rlowess/loess/rloess/linear/no, window';...
+            'Power Spectrum & robustAR(1) noise';...
+            'Evolutionary FFT: window or 0 (skip)';...
+            'Wavelet transform';...
+            'Save results';...
+            'Pause (second)'};
+        num_lines = 1;
+        defaultans = {...
+            '1, 1, 1, 1',...
+            'median',...
+            'lowess, 0.25',...
+            '1',...
+            num2str(window),...
+            '1',...
+            '1',...
+            '0.5'};
+        options.Resize='on';
+        answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+
+        if ~isempty(answer)
+
+            answer1 = textscan(answer{1},'%f%f%f%f','Delimiter',',');
+            check_nan = answer1{1};
+            check_sort = answer1{2};
+            check_unique = answer1{3};
+            check_empty = answer1{4};
+
+            answer11  = textscan(answer{2},'%s');
+            robot_sr = answer11{1};
+
+            answer2 = textscan(answer{3},'%s%f','Delimiter',{';','*',',','\t','\b',' '});
+            answer2 = answer2{1};
+            robot_detrend = answer2{1};
+            robot_detrendwin = str2double(answer2{2});
+
+            robot_power  = str2double(answer{4});
+            robot_evofft  = str2double(answer{5});
+            robot_wavelet  = str2double(answer{6});
+            robot_savedata  = str2double(answer{7});
+            robot_pause  = str2double(answer{8});
+            disp('>>  ==================================================')
+            disp('>>  ==================================================')
+            disp('>>  Hi, this is ~  acycle robot ')
+            disp('>>      by Mingsong Li')
+            disp('>>  It was born on Dec. 25, 2018 at Penn State')
+            disp('>>  MatXmas ... ')
+            disp('>>')
+            disp(['>>  ==========   ',dat_name])
+            disp('>>')
+            disp('>>  ==========      starting ...')
+            disp('>>')
+            disp('>>  ==========    Step 1: check data    ==========')
+            disp('>>')
+            if unit_type == 0
+                warndlg(['Waning: Unit is "',unit,'".'])
+            end
+
+            name1 = dat_name;
+            dat = data_filterout(~any(isnan(data_filterout),2),:);
+
+            % check NaN
+            datx = dat(:,1); 
+            daty = dat(:,2);
+            if check_nan == 1
+                if length(data_filterout(:,1)) > length(datx)
+                    warndlg('Data: NaN numbers removed.')
+                    disp('>>  ==========        removing NaNs')
+                    name1 = [name1,'NaN'];  % New name
+                end
+            end
+
+            % check empty
+            if check_empty == 1
+                dat(any(isinf(dat),2),:) = [];
+                if length(dat(:,1)) < length(datx)
+                    warndlg('Data: Empty numbers removed.')
+                    disp('>>  ==========        removing Empty numbers')
+                    name1 = [name1,'e'];  % New name
+                end
+            end
+
+            % check order
+            diffx = diff(dat(:,1));
+            if check_sort == 1
+                if any(diffx(:) < 0)
+                     warndlg('Data: Not sorted. Now sorting ... ')
+                     disp('>>  ==========        sorting')
+                     dat = sortrows(dat);
+                     name1 = [name1,'s'];  % New name
+                end
+            end
+            % duplicate
+            diffx = diff(dat(:,1));
+            if check_unique == 1
+                if any(diffx(:) == 0)
+                     warndlg('Data: duplicated x. Now replace duplicate numbers with their mean')
+                     disp('>>  ==========        duplicate numbers are replaced by mean')
+                     name1 = [name1,'u'];  % New name
+                     dat=findduplicate(dat);
+                end
+            end
+
+            % save data
+            if robot_savedata == 1
+                CDac_pwd
+                dlmwrite([name1,ext], dat, 'delimiter', ',', 'precision', 9);
+                disp(['>>  Saving data. See main window: ', name1,ext])
+                d = dir; %get files
+                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+                refreshcolor;
+                cd(pre_dirML); % return to matlab view folder
+            end
+
+            % plot data
+            figf = figure;
+            disp('>>  Plot data')
+            subplot(3,1,1)
+            try plot(dat(:,1),dat(:,2:end),'LineWidth',1,'Color','k')
+                plotsucess = 1;
+                set(gca,'XMinorTick','on','YMinorTick','on')
+                if unit_type == 0;
+                    xlabel(['Unit (',unit,')'])
+                elseif unit_type == 1;
+                    xlabel(['Depth (',unit,')'])
+                else
+                    xlabel(['Time (',unit,')'])
+                end
+                title(['Data:', name1])
+                xlim([min(dat(:,1)),max(dat(:,1))])
+            catch
+                plotsucess = 0;
+                errordlg([name1,': data error.'],'Data Error')
+                if plotsucess > 0
+                else
+                    close(figf)
+                    continue
+                end   
+            end
+
+            % Sampling rate
+            datx = dat(:,1);
+            daty = dat(:,2);
+            diffx = diff(datx);
+            len_x = length(datx);
+            datasamp = [datx(1:len_x-1),diffx];
+            datasamp = datasamp(~any(isnan(datasamp),2),:);
+            % Plot sampling rate
+            subplot(3,1,2)
+            stairs(datasamp(:,1),datasamp(:,2),'LineWidth',1,'Color','k');
+            set(gca,'XMinorTick','on','YMinorTick','on')
+            if handles.unit_type == 0;
+                xlabel(['Unit (',handles.unit,')'])
+                ylabel('Unit')
+            elseif handles.unit_type == 1;
+                xlabel(['Depth (',handles.unit,')'])
+                ylabel(handles.unit)
+            else
+                xlabel(['Time (',handles.unit,')'])
+                ylabel(handles.unit)
+            end
+            title([name1,': sampling rate'])
+            xlim([min(datasamp(:,1)),max(datasamp(:,1))])
+            ylim([0.9*min(diffx) max(diffx)*1.1])
+
+            subplot(3,1,3)
+            histfit(diffx,[],'kernel')
+            title([name1,': kernel fit of the sampling rate'])
+            if handles.unit_type == 0;
+                xlabel(['Sampling rate (',handles.unit,')'])
+            elseif handles.unit_type == 1;
+                xlabel(['Sampling rate (',handles.unit,')'])
+            else
+                xlabel(['Sampling rate (',handles.unit,')'])
+            end
+            ylabel('Number')
+            note = ['max: ',num2str(max(diffx)),'; mean: ',num2str(mean(diffx)),...
+                '; median: ',num2str(median(diffx)),'; min: ',num2str(min(diffx))];
+            text(mean(diffx),len_x/10,note);
+            % pause
+            pause(robot_pause);
+            % interpolation
+            if nanmax(diffx) - nanmin(diffx) > eps('single')
+                warndlg('Warning: Data may not be evenly spaced. Interpolation ...')
+                disp('>>')
+                disp('>>  ==========    Step 2: Interpolation    ==========')
+                disp('>>')
+                disp('>>  ==========        Sampling rates are not even')
+                if strcmp(robot_sr,'mean')
+                    interpolate_rate = nanmean(diffx);
+                    name1 = [name1,'-rsp',num2str(interpolate_rate)];
+                    dati = interpolate(dat,interpolate_rate);
+                elseif strcmp(robot_sr,'median')
+                    interpolate_rate = nanmedian(diffx);
+                    name1 = [name1,'-rsp',num2str(interpolate_rate)];
+                    dati = interpolate(dat,interpolate_rate);
+                elseif strcmp(robot_sr,'max')
+                    interpolate_rate = nanmax(diffx);
+                    name1 = [name1,'-rsp',num2str(interpolate_rate)];
+                    dati = interpolate(dat,interpolate_rate);
+                elseif strcmp(robot_sr,'min')
+                    interpolate_rate = nanmin(diffx);
+                    name1 = [name1,'-rsp',num2str(interpolate_rate)];
+                    dati = interpolate(dat,interpolate_rate);
+                else
+                    try str2double(robot_sr)
+                        if isnumeric(str2double(robot_sr))
+                            interpolate_rate = str2double(robot_sr);
+                            name1 = [name1,'-rsp',num2str(num2str(interpolate_rate))];
+                            dati = interpolate(dat,interpolate_rate);
+                        end
+                    end
+                end
+                clear dat; dat = dati;
+                disp(['>>  ==========        interpolating using ', num2str(interpolate_rate),' sampling rate'])
+                % save data
+                if robot_savedata == 1
+                    CDac_pwd
+                    dlmwrite([name1,ext], dati, 'delimiter', ',', 'precision', 9);
+                    disp(['>>  Saving data. See main window: ', name1,ext])
+                    d = dir; %get files
+                    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+                    refreshcolor;
+                    cd(pre_dirML); % return to matlab view folder
+
+                end
+
+            else
+            end
+
+            % detrend
+            % pause
+            pause(robot_pause);
+            datx = dat(:,1);
+            daty = dat(:,2);
+            if strcmp(robot_detrend,'no')
+                dats = dat;
+            elseif strcmp(robot_detrend,'linear')
+                disp('>>')
+                disp('>>  ==========    Step 3: Detrend    ==========')
+                disp('>>')
+                name1 = [name1,'-',robot_detrend];
+                sdat=polyfit(datx,daty,1);
+                datalinear = datx * sdat(1) + sdat(2);
+                dats = [datx,daty-datalinear];
+            else
+                disp('>>')
+                disp('>>  ==========    Step 3: Detrend    ==========')
+                disp('>>')
+                name1 = [name1,'-',num2str(robot_detrendwin),robot_detrend];
+                datxsmth = smooth(datx,daty, robot_detrendwin,robot_detrend);
+                dats = [datx,daty-datxsmth];
+            end
+            % plot
+            figure; 
+            plot(dat(:,1),dat(:,2));hold on;
+            plot(dats(:,1),dats(:,2));
+            set(gca,'XMinorTick','on','YMinorTick','on')
+            %legend('Raw data','detrended data')
+            if strcmp(robot_detrend,'no')
+            else
+                plot(dats(:,1),daty-dats(:,2));
+                legend('Raw data','detrended data',[num2str(robot_detrendwin*100),'% ',robot_detrend,' trend'])
+            end
+
+            clear dat;
+            dat = dats;
+            datx = dat(:,1);
+            daty = dat(:,2);
+            dt = median(diff(datx));
+
+            % save data
+            if robot_savedata == 1
+                CDac_pwd
+                dlmwrite([name1,ext], dat, 'delimiter', ',', 'precision', 9);
+                disp(['>>  Saving data. See main window: ', name1,ext])
+                d = dir; %get files
+                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+                refreshcolor;
+                cd(pre_dirML); % return to matlab view folder
+            end
+            % pause
+            pause(robot_pause);
+            % power spectrum
+            if robot_power == 1
+                disp('>>')
+                disp('>>  ==========    Step 4: Power spctra & robustAR(1) noise   ==========')
+                disp('>>')
+
+                [rhoM, s0M,redconfAR1,redconfML96]=redconfML(dat(:,2),dt,2);
+                % save data
+                if robot_savedata == 1
+
+                    name11 = [name1,'-',num2str(2),'piMTM-RobustAR1',ext];
+                    data11 = redconfML96;
+                    name2 = [name1,'-',num2str(2),'piMTM-ConvenAR1',ext];
+                    data2 = redconfAR1;
+
+                    CDac_pwd
+                    dlmwrite(name11, data11, 'delimiter', ',', 'precision', 9);
+                    dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9);
+                    disp(['>>  Saving data. See main window: ', name11,ext])
+                    disp(['>>  Saving data. See main window: ', name2,ext])
+                    d = dir; %get files
+                    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+                    refreshcolor;
+                    cd(pre_dirML); % return to matlab view folder
+                end
+            end
+            % pause
+            pause(robot_pause);
+            % evofft
+            if robot_evofft > 0
+                disp('>>')
+                disp('>>  ==========    Step 5: Evolutionary FFT   ==========')
+                disp('>>')
+
+                fn = 1/(2*dt);
+                npts = length(dat(:,1));
+                if npts < 300
+                    step = dt;
+                else
+                    step = round(npts/300)*dt;
+                end
+                [s,x_grid,y_grid] = evofft(dat,robot_evofft,step,dt,0,fn,1);
+                % plot
+
+                figure
+                subplot(2,1,1)
+                whitebg('white');
+                plot(dat(:,1),dat(:,2));
+                ylim([0.9* min(dat(:,2)), 1.1*max(dat(:,2))])
+                xlim([min(dat(:,1)),max(dat(:,1))])
+                ylabel('Value')
+                if handles.unit_type == 0;
+                    xlabel(['Unit (',handles.unit,')'])
+                elseif handles.unit_type == 1;
+                    xlabel(['Depth (',handles.unit,')'])
+                else
+                    xlabel(['Time (',handles.unit,')'])
+                end
+                set(gca,'XMinorTick','on','YMinorTick','on')
+                subplot(2,1,2)
+                whitebg('white');
+                try pcolor(y_grid,x_grid,s')
+                colormap(jet)
+                shading interp
+                title(['EvoFFT. Window',' = ',num2str(robot_evofft),' ',unit,'; step = ',num2str(step),' ', unit])
+                ylabel(['Frequency ( cycles per ',unit,' )'])
+                if handles.unit_type == 0;
+                    xlabel(['Unit (',handles.unit,')'])
+                elseif handles.unit_type == 1;
+                    xlabel(['Depth (',handles.unit,')'])
+                else
+                    xlabel(['Time (',handles.unit,')'])
+                end
+                set(gcf,'Name',[num2str(name1),': Running Periodogram'])
+                ylim([0 fn])
+                xlim([min(dat(:,1)),max(dat(:,1))])
+                set(gca,'XMinorTick','on','YMinorTick','on')
+                set(gca, 'TickDir', 'out')
+                catch
+                    errordlg('EvoFFT: Sampling rate or something else is incorrect.')
+                end
+            end
+            % pause
+            pause(robot_pause);
+            % wavelet
+            if robot_wavelet ==1
+                disp('>>')
+                disp('>>  ==========    Step 6: Wavelet transform   ==========')
+                disp('>>')
+                figwave = figure;
+                try [~,~,~]= waveletML(daty,datx,1,0.1,2*dt,datx(end)-datx(1));
+                    set(gca,'XMinorTick','on','YMinorTick','on')
+                catch
+                    try [~,~,~]= waveletML(daty,datx,1,0.1,2*dt,1/2*(datx(end)-datx(1)));
+                        set(gca,'XMinorTick','on','YMinorTick','on')
+                    catch
+                        errordlg('Error. Please try with other parameters')
+                        disp('>>  ==========    Error in wavelet transform')
+                    end
+                end
+            end
+            disp('')
+            disp('>>  ==========    Done   ==========')
+            disp('>>  ==================================================')
+        end
+    end
+else
+    warndlg({'No selected data';'';...
+        'Please first select at leaset one *.txt data file.';...
+        '';'FORMAT:';'';'<No header>';'';...
+        '1st column: depth or time';'';'2nd column: value';''})
+end
+
+
 
 % --- Executes on selection change in listbox_acmain.
 function listbox_acmain_Callback(hObject, eventdata, handles)
@@ -1384,89 +1977,6 @@ if and ((min(plot_selected) > 2), (nplot == 1))
         end
 end
 guidata(hObject, handles);
-
-% % --------------------------------------------------------------------
-% function menu_gp_Callback(hObject, eventdata, handles)
-% % hObject    handle to menu_smooth (see GCBO)
-% % eventdata  reserved - to be defined in a future version of MATLAB
-% % handles    structure with handles and user data (see GUIDATA)
-% contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-% plot_selected = get(handles.listbox_acmain,'Value');
-% nplot = length(plot_selected);   % length
-% if and ((min(plot_selected) > 2), (nplot == 1))
-%     data_name = char(contents(plot_selected));
-%     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
-%     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
-%         if isdir(data_name) == 1
-%         else
-%             [~,dat_name,ext] = fileparts(data_name);
-%         if sum(strcmp(ext,handles.filetype)) > 0
-% 
-%         try
-%             fid = fopen(data_name);
-%             data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
-%             fclose(fid);
-%             if iscell(data_ft)
-%                 data = cell2mat(data_ft);
-%             end
-%         catch
-%             data = load(data_name);
-%         end 
-%         
-%             x = data(:,1);
-%             y = data(:,2);
-%                 
-%             dlg_title = 'Gaussian Process';
-%             prompt = {'X_1','X_n','Sampling rate (default = median)'};
-%             num_lines = 1;
-%             defaultans = {num2str(min(x)),num2str(max(x)),num2str(median(diff(x)))};
-%             options.Resize='on';
-%             answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-%             if ~isempty(answer)
-%                 x_1 = str2double(answer{1});
-%                 x_2 = str2double(answer{2});
-%                 sr = str2double(answer{3});
-%                 x_n = (x_2-x_1)/sr; 
-%                 % gaussian process
-%                 
-%                 z = linspace(x_1,x_2,round(x_n))';
-%                 %
-%                 meanfunc = {@meanSum, {@meanLinear, @meanConst}}; 
-%                 covfunc = @covSEiso;
-%                 likfunc = @likGauss;
-%                 % hyp
-%                 hyp.cov = [0; 0]; 
-%                 hyp.mean = [0; 0]; 
-%                 hyp.lik = log(0.1);
-%                 disp('>>  Minimize hyperparameters ...')
-%                 hyp = minimize(hyp, @gp, -100, @infGaussLik, meanfunc, covfunc, likfunc, x, y);
-%                 % gp
-%                 [m s2] = gp(hyp, @infGaussLik, meanfunc, covfunc, likfunc, x, y, z);
-%                 
-%                 data1 = [z,m,sqrt(s2)];
-%                 name1 = [dat_name,'-gp-meanstd',ext];  % New name
-%                 % plot
-%                 figure;
-%                 f = [m+2*sqrt(s2); flip(m-2*sqrt(s2),1)];
-%                 f1 = [m+sqrt(s2); flip(m-sqrt(s2),1)];
-%                 fill([z; flip(z,1)], f, [7 7 7]/8,'LineStyle','none')
-%                 hold on;
-%                 fill([z; flip(z,1)], f1, [6 6 6]/8,'LineStyle','none')
-%                 plot(z, m,'k'); plot(x, y, 'b+');
-%                 xlabel(handles.unit);ylabel('Value');title([dat_name,'-gp-mean+-std'])
-%                 
-%                 disp(['>>  Save [mean, std] as :',name1])
-%                 CDac_pwd
-%                 dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9); 
-%                 d = dir; %get files
-%                 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-%                 refreshcolor;
-%                 cd(pre_dirML); % return to matlab view folder
-%             end
-%         end
-%         end
-% end
-% guidata(hObject, handles);
 
 
 % --------------------------------------------------------------------
@@ -5538,665 +6048,6 @@ if and ((min(plot_selected) > 2), (nplot == 1))
         end
 end
 guidata(hObject, handles);
-
-
-% --- Executes on button press in push_up.
-function push_up_Callback(hObject, eventdata, handles)
-% hObject    handle to push_up (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-CDac_pwd; % cd working dir
-cd ..;
-refreshcolor;
-cd(pre_dirML); % return view dir
-guidata(hObject,handles)
-
-% --- If Enable == 'on', executes on mouse press in 5 pixel border.
-% --- Otherwise, executes on mouse press in 5 pixel border or over push_up.
-function push_up_ButtonDownFcn(hObject, eventdata, handles)
-% hObject    handle to push_up (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-%handles = guidata(hObject);
-CDac_pwd; % cd working dir
-cd ..;
-refreshcolor;
-cd(pre_dirML); % return view dir
-guidata(hObject,handles)
-
-
-% --- Executes on button press in push_folder.
-function push_folder_Callback(hObject, eventdata, handles)
-% hObject    handle to push_folder (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-fileID = fopen('ac_pwd.txt','r');
-formatSpec = '%s';
-ac_pwd = fscanf(fileID,formatSpec);   % AC window folder dir
-fclose(fileID);
-if ismac
-    system(['open ',ac_pwd]);
-elseif ispc
-    winopen(ac_pwd);
-end
-
-% --- Executes on button press in push_plot.
-function push_plot_Callback(hObject, eventdata, handles)
-% hObject    handle to push_plot (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-handles = guidata(hObject);
-
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
-nplot = length(plot_selected);   % length
-
-% check
-for i = 1:nplot
-    plot_no = plot_selected(i);
-    if plot_no > 2
-        plot_filter_s = char(contents(plot_no));
-        plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
-        GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
-        if isdir(plot_filter_s)
-            return
-        else
-            [~,~,ext] = fileparts(plot_filter_s);
-            check = 0;
-            if sum(strcmp(ext,handles.filetype)) > 0
-                check = 1; % selection can be executed 
-            elseif sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
-                try 
-                    im_name = imread(plot_filter_s);
-                    figure;
-                    imshow(im_name)
-                    %set(gcf,'Name',[dat_name,ext])
-                catch
-                    warndlg('Image color space not supported. Convert to RGB or Grayscale')
-                end
-            end
-        end
-    else
-        return
-    end
-end
-
-if check == 1
-    for i = 1: nplot
-        plot_no = plot_selected(i);
-        handles.plot_s{i} = fullfile(ac_pwd,char(contents(plot_no)));
-    end
-    handles.nplot = nplot;
-    guidata(hObject, handles);
-    PlotAdv(handles);
-end
-
-
-% --- Executes on button press in push_populate.
-function push_populate_Callback(hObject, eventdata, handles)
-% hObject    handle to push_populate (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-handles = guidata(hObject);
-
-% FULL VERSION
-% Cannot use CDac_pwd here!!!
-pre  = '<HTML><FONT color="blue">';
-post = '</FONT></HTML>';
-fileID = fopen('ac_pwd.txt','r');
-formatSpec = '%s';
-ac_pwd = fscanf(fileID,formatSpec);
-fclose(fileID);
-pre_dirML = pwd;
-
-% get what is inside the folder
-Infolder = dir(ac_pwd);
-% Initialize the cell of string that will be update in the list box
-MyListOfFiles = [];
-% EXPEND SELECTED FOLDER
-
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
-%plot_selected = handles.index_selected;  % read selection in listbox 1
-nplot = length(plot_selected);   % length
-
-for i = 1:length(Infolder)
-    if i > 2
-        for m = 1:nplot
-            plot_no = plot_selected(m);
-            if plot_no > 2
-                if isdir([ac_pwd,handles.slash_v,Infolder(plot_no).name])
-                    cd(ac_pwd);
-                    if i == plot_selected(m)
-                        MyListOfFiles{end+1,1} = [pre Infolder(i).name post];
-                        Infolder_i = dir([ac_pwd,handles.slash_v,Infolder(i).name]);
-                        for j = 3:length(Infolder_i);  % don't pick the first two elements
-                            if Infolder_i(j).isdir == 1
-                                MyListOfFiles{end+1,1} = [pre '> ', Infolder_i(j).name post];
-                                Infolder_j = dir([ac_pwd,handles.slash_v,Infolder(i).name,handles.slash_v,Infolder_i(j).name]);
-                                for k = 3:length(Infolder_j)
-                                    if Infolder_j(k).isdir == 1
-                                        MyListOfFiles{end+1,1} = [pre '> > ', Infolder_j(k).name post];
-                                    else
-                                        MyListOfFiles{end+1,1} = ['----- ', Infolder_j(k).name];
-                                    end
-                                end
-                            else
-                                MyListOfFiles{end+1,1} = ['-- ',Infolder_i(j).name];
-                            end
-                        end
-                    elseif Infolder(i).isdir == 1
-                        if m == 1; MyListOfFiles{end+1,1} = [pre Infolder(i).name post]; end
-                    else
-                        MyListOfFiles{end+1,1} = Infolder(i).name;
-                    end
-                else
-                    return
-                end
-            end
-        end
-    else
-         MyListOfFiles{end+1,1} = Infolder(i).name;
-    end
-end
-if and(nplot > 0, plot_selected(max(nplot))>2)
-  set(handles.listbox_acmain,'String',MyListOfFiles,'Value',1) %set string   
-end
-cd(pre_dirML); % cd view dir
-
-
-% --- Executes on button press in push_refresh.
-function push_refresh_Callback(hObject, eventdata, handles)
-% hObject    handle to push_refresh (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-CDac_pwd; % cd working dir
-refreshcolor;
-cd(pre_dirML); % return view dir
-
-% --- Executes on button press in push_robot.
-function push_robot_Callback(hObject, eventdata, handles)
-% hObject    handle to push_robot (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-unit = handles.unit;
-unit_type = handles.unit_type;
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
-nplot = length(plot_selected);   % length
-check = 0;
-% check
-for i = 1:nplot
-    plot_no = plot_selected(i);
-    if plot_no > 2
-        plot_filter_s = char(contents(plot_no));
-        plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
-        GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
-        if isdir(plot_filter_s)
-        else
-            [~,dat_name,ext] = fileparts(plot_filter_s);
-            if sum(strcmp(ext,handles.filetype)) > 0
-                check = 1; % selection can be executed 
-            end
-        end
-    else
-    end
-end
-
-if check == 1
-    for i = 1:nplot
-        plot_no = plot_selected(i);
-        plot_filter_s1 = char(contents(plot_no));
-        GETac_pwd; 
-        plot_filter_s = fullfile(ac_pwd,plot_filter_s1);
-        try
-            data_filterout = load(plot_filter_s);
-        catch       
-            fid = fopen(plot_filter_s);
-            data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
-            fclose(fid);
-            if iscell(data_ft)
-                try
-                    data_filterout = cell2mat(data_ft);
-                catch
-                    fid = fopen(plot_filter_s,'at');
-                    fprintf(fid,'%d\n',[]);
-                    fclose(fid);
-                    fid = fopen(plot_filter_s);
-                    data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
-                    disp(['>>  Read data: ', dat_name, '. Okay!'])
-                    fclose(fid);
-                    try
-                        data_filterout = cell2mat(data_ft);
-                    catch
-                        warndlg(['Check selected data: ',dat_name],'Data Error!')
-                    end
-                end
-            end
-        end
-
-        ddd = data_filterout; ddd = ddd(:,1); window = 0.25 * (max(ddd)-min(ddd));
-
-        dlg_title = 'Acycle: Robot';
-        prompt = {...
-            'Preparation check: NaN, Sort, Unique, Remove-empty'; ...
-            'Interpolation: mean, median, max, min, value';...
-            'Detrend: lowess/rlowess/loess/rloess/linear/no, window';...
-            'Power Spectrum & robustAR(1) noise';...
-            'Evolutionary FFT: window or 0 (skip)';...
-            'Wavelet transform';...
-            'Save results';...
-            'Pause (second)'};
-        num_lines = 1;
-        defaultans = {...
-            '1, 1, 1, 1',...
-            'median',...
-            'lowess, 0.25',...
-            '1',...
-            num2str(window),...
-            '1',...
-            '1',...
-            '0.5'};
-        options.Resize='on';
-        answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-
-        if ~isempty(answer)
-
-            answer1 = textscan(answer{1},'%f%f%f%f','Delimiter',',');
-            check_nan = answer1{1};
-            check_sort = answer1{2};
-            check_unique = answer1{3};
-            check_empty = answer1{4};
-
-            answer11  = textscan(answer{2},'%s');
-            robot_sr = answer11{1};
-
-            answer2 = textscan(answer{3},'%s%f','Delimiter',{';','*',',','\t','\b',' '});
-            answer2 = answer2{1};
-            robot_detrend = answer2{1};
-            robot_detrendwin = str2double(answer2{2});
-
-            robot_power  = str2double(answer{4});
-            robot_evofft  = str2double(answer{5});
-            robot_wavelet  = str2double(answer{6});
-            robot_savedata  = str2double(answer{7});
-            robot_pause  = str2double(answer{8});
-            disp('>>  ==================================================')
-            disp('>>  ==================================================')
-            disp('>>  Hi, this is ~  acycle robot ')
-            disp('>>      by Mingsong Li')
-            disp('>>  It was born on Dec. 25, 2018 at Penn State')
-            disp('>>  MatXmas ... ')
-            disp('>>')
-            disp(['>>  ==========   ',dat_name])
-            disp('>>')
-            disp('>>  ==========      starting ...')
-            disp('>>')
-            disp('>>  ==========    Step 1: check data    ==========')
-            disp('>>')
-            if unit_type == 0
-                warndlg(['Waning: Unit is "',unit,'".'])
-            end
-
-            name1 = dat_name;
-            dat = data_filterout(~any(isnan(data_filterout),2),:);
-
-            % check NaN
-            datx = dat(:,1); 
-            daty = dat(:,2);
-            if check_nan == 1
-                if length(data_filterout(:,1)) > length(datx)
-                    warndlg('Data: NaN numbers removed.')
-                    disp('>>  ==========        removing NaNs')
-                    name1 = [name1,'NaN'];  % New name
-                end
-            end
-
-            % check empty
-            if check_empty == 1
-                dat(any(isinf(dat),2),:) = [];
-                if length(dat(:,1)) < length(datx)
-                    warndlg('Data: Empty numbers removed.')
-                    disp('>>  ==========        removing Empty numbers')
-                    name1 = [name1,'e'];  % New name
-                end
-            end
-
-            % check order
-            diffx = diff(dat(:,1));
-            if check_sort == 1
-                if any(diffx(:) < 0)
-                     warndlg('Data: Not sorted. Now sorting ... ')
-                     disp('>>  ==========        sorting')
-                     dat = sortrows(dat);
-                     name1 = [name1,'s'];  % New name
-                end
-            end
-            % duplicate
-            diffx = diff(dat(:,1));
-            if check_unique == 1
-                if any(diffx(:) == 0)
-                     warndlg('Data: duplicated x. Now replace duplicate numbers with their mean')
-                     disp('>>  ==========        duplicate numbers are replaced by mean')
-                     name1 = [name1,'u'];  % New name
-                     dat=findduplicate(dat);
-                end
-            end
-
-            % save data
-            if robot_savedata == 1
-                CDac_pwd
-                dlmwrite([name1,ext], dat, 'delimiter', ',', 'precision', 9);
-                disp(['>>  Saving data. See main window: ', name1,ext])
-                d = dir; %get files
-                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-                refreshcolor;
-                cd(pre_dirML); % return to matlab view folder
-            end
-
-            % plot data
-            figf = figure;
-            disp('>>  Plot data')
-            subplot(3,1,1)
-            try plot(dat(:,1),dat(:,2:end),'LineWidth',1,'Color','k')
-                plotsucess = 1;
-                set(gca,'XMinorTick','on','YMinorTick','on')
-                if unit_type == 0;
-                    xlabel(['Unit (',unit,')'])
-                elseif unit_type == 1;
-                    xlabel(['Depth (',unit,')'])
-                else
-                    xlabel(['Time (',unit,')'])
-                end
-                title(['Data:', name1])
-                xlim([min(dat(:,1)),max(dat(:,1))])
-            catch
-                plotsucess = 0;
-                errordlg([name1,': data error.'],'Data Error')
-                if plotsucess > 0
-                else
-                    close(figf)
-                    continue
-                end   
-            end
-
-            % Sampling rate
-            datx = dat(:,1);
-            daty = dat(:,2);
-            diffx = diff(datx);
-            len_x = length(datx);
-            datasamp = [datx(1:len_x-1),diffx];
-            datasamp = datasamp(~any(isnan(datasamp),2),:);
-            % Plot sampling rate
-            subplot(3,1,2)
-            stairs(datasamp(:,1),datasamp(:,2),'LineWidth',1,'Color','k');
-            set(gca,'XMinorTick','on','YMinorTick','on')
-            if handles.unit_type == 0;
-                xlabel(['Unit (',handles.unit,')'])
-                ylabel('Unit')
-            elseif handles.unit_type == 1;
-                xlabel(['Depth (',handles.unit,')'])
-                ylabel(handles.unit)
-            else
-                xlabel(['Time (',handles.unit,')'])
-                ylabel(handles.unit)
-            end
-            title([name1,': sampling rate'])
-            xlim([min(datasamp(:,1)),max(datasamp(:,1))])
-            ylim([0.9*min(diffx) max(diffx)*1.1])
-
-            subplot(3,1,3)
-            histfit(diffx,[],'kernel')
-            title([name1,': kernel fit of the sampling rate'])
-            if handles.unit_type == 0;
-                xlabel(['Sampling rate (',handles.unit,')'])
-            elseif handles.unit_type == 1;
-                xlabel(['Sampling rate (',handles.unit,')'])
-            else
-                xlabel(['Sampling rate (',handles.unit,')'])
-            end
-            ylabel('Number')
-            note = ['max: ',num2str(max(diffx)),'; mean: ',num2str(mean(diffx)),...
-                '; median: ',num2str(median(diffx)),'; min: ',num2str(min(diffx))];
-            text(mean(diffx),len_x/10,note);
-            % pause
-            pause(robot_pause);
-            % interpolation
-            if nanmax(diffx) - nanmin(diffx) > eps('single')
-                warndlg('Warning: Data may not be evenly spaced. Interpolation ...')
-                disp('>>')
-                disp('>>  ==========    Step 2: Interpolation    ==========')
-                disp('>>')
-                disp('>>  ==========        Sampling rates are not even')
-                if strcmp(robot_sr,'mean')
-                    interpolate_rate = nanmean(diffx);
-                    name1 = [name1,'-rsp',num2str(interpolate_rate)];
-                    dati = interpolate(dat,interpolate_rate);
-                elseif strcmp(robot_sr,'median')
-                    interpolate_rate = nanmedian(diffx);
-                    name1 = [name1,'-rsp',num2str(interpolate_rate)];
-                    dati = interpolate(dat,interpolate_rate);
-                elseif strcmp(robot_sr,'max')
-                    interpolate_rate = nanmax(diffx);
-                    name1 = [name1,'-rsp',num2str(interpolate_rate)];
-                    dati = interpolate(dat,interpolate_rate);
-                elseif strcmp(robot_sr,'min')
-                    interpolate_rate = nanmin(diffx);
-                    name1 = [name1,'-rsp',num2str(interpolate_rate)];
-                    dati = interpolate(dat,interpolate_rate);
-                else
-                    try str2double(robot_sr)
-                        if isnumeric(str2double(robot_sr))
-                            interpolate_rate = str2double(robot_sr);
-                            name1 = [name1,'-rsp',num2str(num2str(interpolate_rate))];
-                            dati = interpolate(dat,interpolate_rate);
-                        end
-                    end
-                end
-                clear dat; dat = dati;
-                disp(['>>  ==========        interpolating using ', num2str(interpolate_rate),' sampling rate'])
-                % save data
-                if robot_savedata == 1
-                    CDac_pwd
-                    dlmwrite([name1,ext], dati, 'delimiter', ',', 'precision', 9);
-                    disp(['>>  Saving data. See main window: ', name1,ext])
-                    d = dir; %get files
-                    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-                    refreshcolor;
-                    cd(pre_dirML); % return to matlab view folder
-
-                end
-
-            else
-            end
-
-            % detrend
-            % pause
-            pause(robot_pause);
-            datx = dat(:,1);
-            daty = dat(:,2);
-            if strcmp(robot_detrend,'no')
-                dats = dat;
-            elseif strcmp(robot_detrend,'linear')
-                disp('>>')
-                disp('>>  ==========    Step 3: Detrend    ==========')
-                disp('>>')
-                name1 = [name1,'-',robot_detrend];
-                sdat=polyfit(datx,daty,1);
-                datalinear = datx * sdat(1) + sdat(2);
-                dats = [datx,daty-datalinear];
-            else
-                disp('>>')
-                disp('>>  ==========    Step 3: Detrend    ==========')
-                disp('>>')
-                name1 = [name1,'-',num2str(robot_detrendwin),robot_detrend];
-                datxsmth = smooth(datx,daty, robot_detrendwin,robot_detrend);
-                dats = [datx,daty-datxsmth];
-            end
-            % plot
-            figure; 
-            plot(dat(:,1),dat(:,2));hold on;
-            plot(dats(:,1),dats(:,2));
-            set(gca,'XMinorTick','on','YMinorTick','on')
-            %legend('Raw data','detrended data')
-            if strcmp(robot_detrend,'no')
-            else
-                plot(dats(:,1),daty-dats(:,2));
-                legend('Raw data','detrended data',[num2str(robot_detrendwin*100),'% ',robot_detrend,' trend'])
-            end
-
-            clear dat;
-            dat = dats;
-            datx = dat(:,1);
-            daty = dat(:,2);
-            dt = median(diff(datx));
-
-            % save data
-            if robot_savedata == 1
-                CDac_pwd
-                dlmwrite([name1,ext], dat, 'delimiter', ',', 'precision', 9);
-                disp(['>>  Saving data. See main window: ', name1,ext])
-                d = dir; %get files
-                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-                refreshcolor;
-                cd(pre_dirML); % return to matlab view folder
-            end
-            % pause
-            pause(robot_pause);
-            % power spectrum
-            if robot_power == 1
-                disp('>>')
-                disp('>>  ==========    Step 4: Power spctra & robustAR(1) noise   ==========')
-                disp('>>')
-
-                [rhoM, s0M,redconfAR1,redconfML96]=redconfML(dat(:,2),dt,2);
-                % save data
-                if robot_savedata == 1
-
-                    name11 = [name1,'-',num2str(2),'piMTM-RobustAR1',ext];
-                    data11 = redconfML96;
-                    name2 = [name1,'-',num2str(2),'piMTM-ConvenAR1',ext];
-                    data2 = redconfAR1;
-
-                    CDac_pwd
-                    dlmwrite(name11, data11, 'delimiter', ',', 'precision', 9);
-                    dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9);
-                    disp(['>>  Saving data. See main window: ', name11,ext])
-                    disp(['>>  Saving data. See main window: ', name2,ext])
-                    d = dir; %get files
-                    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-                    refreshcolor;
-                    cd(pre_dirML); % return to matlab view folder
-                end
-            end
-            % pause
-            pause(robot_pause);
-            % evofft
-            if robot_evofft > 0
-                disp('>>')
-                disp('>>  ==========    Step 5: Evolutionary FFT   ==========')
-                disp('>>')
-
-                fn = 1/(2*dt);
-                npts = length(dat(:,1));
-                if npts < 300
-                    step = dt;
-                else
-                    step = round(npts/300)*dt;
-                end
-                [s,x_grid,y_grid] = evofft(dat,robot_evofft,step,dt,0,fn,1);
-                % plot
-
-                figure
-                subplot(2,1,1)
-                whitebg('white');
-                plot(dat(:,1),dat(:,2));
-                ylim([0.9* min(dat(:,2)), 1.1*max(dat(:,2))])
-                xlim([min(dat(:,1)),max(dat(:,1))])
-                ylabel('Value')
-                if handles.unit_type == 0;
-                    xlabel(['Unit (',handles.unit,')'])
-                elseif handles.unit_type == 1;
-                    xlabel(['Depth (',handles.unit,')'])
-                else
-                    xlabel(['Time (',handles.unit,')'])
-                end
-                set(gca,'XMinorTick','on','YMinorTick','on')
-                subplot(2,1,2)
-                whitebg('white');
-                try pcolor(y_grid,x_grid,s')
-                colormap(jet)
-                shading interp
-                title(['EvoFFT. Window',' = ',num2str(robot_evofft),' ',unit,'; step = ',num2str(step),' ', unit])
-                ylabel(['Frequency ( cycles per ',unit,' )'])
-                if handles.unit_type == 0;
-                    xlabel(['Unit (',handles.unit,')'])
-                elseif handles.unit_type == 1;
-                    xlabel(['Depth (',handles.unit,')'])
-                else
-                    xlabel(['Time (',handles.unit,')'])
-                end
-                set(gcf,'Name',[num2str(name1),': Running Periodogram'])
-                ylim([0 fn])
-                xlim([min(dat(:,1)),max(dat(:,1))])
-                set(gca,'XMinorTick','on','YMinorTick','on')
-                set(gca, 'TickDir', 'out')
-                catch
-                    errordlg('EvoFFT: Sampling rate or something else is incorrect.')
-                end
-            end
-            % pause
-            pause(robot_pause);
-            % wavelet
-            if robot_wavelet ==1
-                disp('>>')
-                disp('>>  ==========    Step 6: Wavelet transform   ==========')
-                disp('>>')
-                figwave = figure;
-                try [~,~,~]= waveletML(daty,datx,1,0.1,2*dt,datx(end)-datx(1));
-                    set(gca,'XMinorTick','on','YMinorTick','on')
-                catch
-                    try [~,~,~]= waveletML(daty,datx,1,0.1,2*dt,1/2*(datx(end)-datx(1)));
-                        set(gca,'XMinorTick','on','YMinorTick','on')
-                    catch
-                        errordlg('Error. Please try with other parameters')
-                        disp('>>  ==========    Error in wavelet transform')
-                    end
-                end
-            end
-            disp('')
-            disp('>>  ==========    Done   ==========')
-            disp('>>  ==================================================')
-        end
-    end
-else
-    warndlg({'No selected data';'';...
-        'Please first select at leaset one *.txt data file.';...
-        '';'FORMAT:';'';'<No header>';'';...
-        '1st column: depth or time';'';'2nd column: value';''})
-end
-
-% --- Executes on button press in push_openfolder.
-function push_openfolder_Callback(hObject, eventdata, handles)
-% hObject    handle to push_openfolder (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-%handles = guidata(hObject);
-pre_dirML = pwd;
-fileID = fopen('ac_pwd.txt','r');
-formatSpec = '%s';
-ac_pwd = fscanf(fileID,formatSpec);   % AC window folder dir
-fclose(fileID);
-selpath = uigetdir(ac_pwd);
-if selpath == 0
-else
-    if isdir(selpath)
-        disp(['>>  Change working folder to ',selpath])
-        cd(selpath)
-        refreshcolor;
-        cd(pre_dirML); % return view dir
-    end
-end
 
 
 % --------------------------------------------------------------------
