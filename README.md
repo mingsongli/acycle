@@ -29,6 +29,20 @@
 
 ### Please cite
 > Mingsong Li, Linda A. Hinnov, Lee R. Kump, 2019. _Acycle_: Time-series analysis software for paleoclimate research and education. Computers & Geosciences. 127: 12-22. https://doi.org/10.1016/j.cageo.2019.02.011.
+
+
+### Download
+
+<a href="https://www.dropbox.com/sh/t53vjs539gmixnm/AAC0BqTR0U5xghKwuVc1Iwbma?dl=0">
+    <img src="https://github.com/mingsongli/acycleFig/blob/master/dropbox-logo.png" alt="Dropbox" title="Download Acycle in Dropbox" width="88" height="88">
+</a>
+<a href="https://pan.baidu.com/s/1D2iISOOhoYCUvMg9csKKTg">
+    <img src="https://github.com/mingsongli/acycleFig/blob/master/Baidu-logo.png" alt="Baidu Cloud" title="Download Acycle in Baidu Cloud" width="88" height="88">
+</a>
+<a href="https://github.com/mingsongli/acycle/archive/master.zip">
+    <img src="https://github.com/mingsongli/acycleFig/blob/master/github-icon-for-resume-14.jpg" alt="GitHub" title="Download Acycle in GitHub" width="88" height="88">
+</a>
+
 ---
 ### Contact
 <a href="https://mingsongli.com/">
