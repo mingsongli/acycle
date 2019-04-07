@@ -60,7 +60,7 @@ h=get(gcf,'Children');  % get all content
 
 handles.output = hObject;
 handles.DataExtractMain = gcf;
-set(handles.DataExtractMain,'position',[0,0.95,0.5,0.11]) % set position
+set(handles.DataExtractMain,'position',[0.02,0.85,0.5,0.11]) % set position
 set(gcf,'Name','Acycle: Plot Digitizer')
 handles.x00 = 0;
 handles.x01 = 1;

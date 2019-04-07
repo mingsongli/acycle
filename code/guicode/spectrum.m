@@ -61,7 +61,7 @@ set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
 if ismac
     set(gcf,'position',[0.45,0.5,0.28,0.3]) % set position
 elseif ispc
-    set(gcf,'position',[0.45,0.5,0.4,0.4]) % set position
+    set(gcf,'position',[0.45,0.5,0.3,0.33]) % set position
 end
 set(handles.text7,'position', [0.05,0.875,0.235,0.06])
 set(handles.popupmenu2,'position', [0.3,0.823,0.62,0.12])
@@ -498,8 +498,8 @@ try figure(figwarn);
 catch
 end
 try figure(figdata);
-    set(figdata,'units','norm') % set location
-    set(figdata,'position',[0.05,0.4,0.45,0.45]) % set position
+    set(figdata,'Units','normalized') % set location
+    set(figdata,'position',[0.02,0.4,0.45,0.45]) % set position
 catch
 end% return plot
 guidata(hObject,handles);
@@ -1038,7 +1038,7 @@ catch
 end
 try figure(figdata); 
     set(figdata,'units','norm') % set location
-    set(figdata,'position',[0.05,0.4,0.45,0.45]) % set position
+    set(figdata,'position',[0.0,0.4,0.45,0.45]) % set position
 catch
 end
 guidata(hObject,handles);

@@ -253,6 +253,7 @@ datopt(:,4) = tanhilb(:,3);
 
 if genplot == 1
     figure;
+    set(gcf,'Units','normalized','Position',[0.33, 0.5, 0.33, 0.4])
     subplot(2,1,1)
     plot(tanhilb(:,1),tanhilb(:,2),'b-','LineWidth',2);hold on;
     plot(tanhilb(:,1),tanhilb(:,3),'r','LineWidth',3);
@@ -279,6 +280,7 @@ end
 %% generate plot
 if genplot == 1
     figure;
+    set(gcf,'Units','normalized','Position',[0.66, 0.5, 0.33, 0.4])
     subplot(3,1,1)
     plot(sedrate,xx(:,2),'ro','LineWidth',2);
     legend('r^2_e_n_v_e_l_o_p_e')
@@ -322,6 +324,7 @@ if nsim > 1
     disp(['>>       (Envelope r^2) x (spectral power r^2) p-value = ',num2str(xcl(4),'%.5f')])
     
     figure;
+    set(gcf,'Units','normalized','Position',[0.0, 0.05, 0.33, 0.4])
     subplot(3,1,1)
     [f,xi] = ksdensity(xsim(:,1));
     X1 = [maxr2env,maxr2env];

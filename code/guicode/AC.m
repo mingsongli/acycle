@@ -103,9 +103,8 @@ function AC_OpeningFcn(hObject, eventdata, handles, varargin)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to AC (see VARARGIN)
-
 set(gcf,'position',[0.5,0.1,0.45,0.8]) % set position
-set(gcf,'Name','Acycle v1.0.3')
+set(gcf,'Name','Acycle v1.1')
 set(gcf,'DockControls', 'off')
 set(gcf,'Color', 'white')
 set(0,'Units','normalized') % set units as normalized
@@ -113,9 +112,9 @@ set(gcf,'units','norm') % set location
 set(gcf,'ResizeFcn',@Resize_clbk);
 
 %% push_up
-h_push_up = uicontrol('Style','pushbutton','Tag','push_up');  % set style, Tag
-jEdit = findjobj(h_push_up);   % find java
-jEdit.Border = [];  % hide border
+h_push_up = uicontrol('Style','pushbutton','Tag','push_up');%,'BackgroundColor','white','ForegroundColor','white');  % set style, Tag
+%jEdit = findjobj(h_push_up);   % find java
+%jEdit.Border = [];  % hide border
 set(h_push_up,'Units','normalized') % set units as normalized
 set(h_push_up,'Position', [0.02,0.945,0.06,0.05]) % set position
 tooltip = '<html>Up<br>one level';  % tooltip
@@ -123,9 +122,9 @@ set(h_push_up,'tooltip',tooltip,'CData',imread('menu_up.jpg'))  % set tooltip an
 set(h_push_up,'Callback',@push_up_clbk)  % set callback function
 
 %% push_folder
-h_push_folder = uicontrol('Style','pushbutton','Tag','push_folder');  % set style, Tag
-jEdit = findjobj(h_push_folder);   % find java
-jEdit.Border = [];  % hide border
+h_push_folder = uicontrol('Style','pushbutton','Tag','push_folder');%,'BackgroundColor','white');  % set style, Tag
+% jEdit = findjobj(h_push_folder);   % find java
+% jEdit.Border = [];  % hide border
 set(h_push_folder,'Units','normalized') % set units as normalized
 set(h_push_folder,'Position', [0.106,0.945,0.065,0.05]) % set position
 tooltip = '<html>Open<br>working folder';  % tooltip
@@ -133,9 +132,9 @@ set(h_push_folder,'tooltip',tooltip,'CData',imread('menu_folder.jpg'))  % set to
 set(h_push_folder,'Callback',@push_folder_clbk)  % set callback function
 
 %% push_plot
-h_push_plot = uicontrol('Style','pushbutton','Tag','push_plot');  % set style, Tag
-jEdit = findjobj(h_push_plot);   % find java
-jEdit.Border = [];  % hide border
+h_push_plot = uicontrol('Style','pushbutton','Tag','push_plot');%,'BackgroundColor','white');  % set style, Tag
+% jEdit = findjobj(h_push_plot);   % find java
+% jEdit.Border = [];  % hide border
 set(h_push_plot,'Units','normalized') % set units as normalized
 set(h_push_plot,'Position', [0.2,0.945,0.06,0.05]) % set position
 tooltip = '<html>Plot Pro';  % tooltip
@@ -143,9 +142,9 @@ set(h_push_plot,'tooltip',tooltip,'CData',imread('menu_plot.jpg'))  % set toolti
 set(h_push_plot,'Callback',@push_plot_clbk)  % set callback function
 
 %% push_refresh
-h_push_refresh = uicontrol('Style','pushbutton','Tag','push_refresh');  % set style, Tag
-jEdit = findjobj(h_push_refresh);   % find java
-jEdit.Border = [];  % hide border
+h_push_refresh = uicontrol('Style','pushbutton','Tag','push_refresh');%,'BackgroundColor','white');  % set style, Tag
+% jEdit = findjobj(h_push_refresh);   % find java
+% jEdit.Border = [];  % hide border
 set(h_push_refresh,'Units','normalized') % set units as normalized
 set(h_push_refresh,'Position', [0.28,0.945,0.06,0.05]) % set position
 tooltip = '<html>Refresh<br>list box';  % tooltip
@@ -153,9 +152,9 @@ set(h_push_refresh,'tooltip',tooltip,'CData',imread('menu_refresh.jpg'))  % set 
 set(h_push_refresh,'Callback',@push_refresh_clbk)  % set callback function
 
 %% push_robot
-h_push_robot = uicontrol('Style','pushbutton','Tag','push_robot');  % set style, Tag
-jEdit = findjobj(h_push_robot);   % find java
-jEdit.Border = [];  % hide border
+h_push_robot = uicontrol('Style','pushbutton','Tag','push_robot');%,'BackgroundColor','white');  % set style, Tag
+% jEdit = findjobj(h_push_robot);   % find java
+% jEdit.Border = [];  % hide border
 set(h_push_robot,'Units','normalized') % set units as normalized
 set(h_push_robot,'Position', [0.36,0.945,0.06,0.05]) % set position
 tooltip = '<html>Mini-robot';  % tooltip
@@ -163,18 +162,26 @@ set(h_push_robot,'tooltip',tooltip,'CData',imread('menu_robot.jpg'))  % set tool
 set(h_push_robot,'Callback',@push_robot_clbk)  % set callback function
 
 %% push_openfolder
-h_push_openfolder = uicontrol('Style','pushbutton','Tag','push_openfolder');  % set style, Tag
-jEdit = findjobj(h_push_openfolder);   % find java
-jEdit.Border = [];  % hide border
+h_push_openfolder = uicontrol('Style','pushbutton','Tag','push_openfolder');%,'BackgroundColor','white');  % set style, Tag
+% jEdit = findjobj(h_push_openfolder);   % find java
+% jEdit.Border = [];  % hide border
 set(h_push_openfolder,'Units','normalized') % set units as normalized
-set(h_push_openfolder,'Position', [0.015,0.897,0.06,0.05]) % set position
+set(h_push_openfolder,'Position', [0.02,0.9,0.06,0.04]) % set position
 tooltip = '<html>Change<br>directory';  % tooltip
 set(h_push_openfolder,'tooltip',tooltip,'CData',imread('menu_open.jpg'))  % set tooltip and button image
 set(h_push_openfolder,'Callback',@push_openfolder_clbk)  % set callback function
-
 %%
+if ispc
+    set(h_push_folder,'BackgroundColor','white') % 
+    set(h_push_up,'BackgroundColor','white') % 
+    set(h_push_plot,'BackgroundColor','white') % 
+    set(h_push_refresh,'BackgroundColor','white') % 
+    set(h_push_robot,'BackgroundColor','white') % 
+    set(h_push_openfolder,'BackgroundColor','white') % 
+end
+
 set(handles.popupmenu1,'position', [0.75,0.945,0.24,0.04])
-set(handles.edit_acfigmain_dir,'position',       [0.07,0.9,0.91,0.04])
+set(handles.edit_acfigmain_dir,'position',       [0.081,0.9,0.91,0.04])
 set(handles.listbox_acmain,'position',    [0.02,0.008,0.96,0.884])
 
 if ismac
@@ -278,13 +285,15 @@ function varargout = AC_OutputFcn(hObject, eventdata, handles)
 varargout{1} = handles.output;
 
 function Resize_clbk(hObject, eventdata)
+% if ismac
+%     try j = findobj(gcf,'Tag','push_up');           jEdit = findjobj(j); jEdit.Border = []; catch; end
+%     try j = findobj(gcf,'Tag','push_folder');       jEdit = findjobj(j); jEdit.Border = []; catch; end
+%     try j = findobj(gcf,'Tag','push_plot');         jEdit = findjobj(j); jEdit.Border = []; catch; end
+%     try j = findobj(gcf,'Tag','push_refresh');      jEdit = findjobj(j); jEdit.Border = []; catch; end
+%     try j = findobj(gcf,'Tag','push_robot');        jEdit = findjobj(j); jEdit.Border = []; catch; end
+%     try j = findobj(gcf,'Tag','push_openfolder');   jEdit = findjobj(j); jEdit.Border = []; catch; end
+% end
 
-try j = findobj(gcf,'Tag','push_up');           jEdit = findjobj(j); jEdit.Border = []; catch; end
-try j = findobj(gcf,'Tag','push_folder');       jEdit = findjobj(j); jEdit.Border = []; catch; end
-try j = findobj(gcf,'Tag','push_plot');         jEdit = findjobj(j); jEdit.Border = []; catch; end
-try j = findobj(gcf,'Tag','push_refresh');      jEdit = findjobj(j); jEdit.Border = []; catch; end
-try j = findobj(gcf,'Tag','push_robot');        jEdit = findjobj(j); jEdit.Border = []; catch; end
-try j = findobj(gcf,'Tag','push_openfolder');   jEdit = findjobj(j); jEdit.Border = []; catch; end
 
 function push_up_clbk(hObject, handles)
 handles = guidata(hObject);
@@ -442,400 +451,11 @@ if check == 1
                 end
             end
         end
-
-        ddd = data_filterout; ddd = ddd(:,1); window = 0.25 * (max(ddd)-min(ddd));
-
-        dlg_title = 'Acycle: Robot';
-        prompt = {...
-            'Preparation check: NaN, Sort, Unique, Remove-empty'; ...
-            'Interpolation: mean, median, max, min, value';...
-            'Detrend: lowess/rlowess/loess/rloess/linear/no, window';...
-            'Power Spectrum & robustAR(1) noise';...
-            'Evolutionary FFT: window or 0 (skip)';...
-            'Wavelet transform';...
-            'Save results';...
-            'Pause (second)'};
-        num_lines = 1;
-        defaultans = {...
-            '1, 1, 1, 1',...
-            'median',...
-            'lowess, 0.25',...
-            '1',...
-            num2str(window),...
-            '1',...
-            '1',...
-            '0.5'};
-        options.Resize='on';
-        answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-
-        if ~isempty(answer)
-
-            answer1 = textscan(answer{1},'%f%f%f%f','Delimiter',',');
-            check_nan = answer1{1};
-            check_sort = answer1{2};
-            check_unique = answer1{3};
-            check_empty = answer1{4};
-
-            answer11  = textscan(answer{2},'%s');
-            robot_sr = answer11{1};
-
-            answer2 = textscan(answer{3},'%s%f','Delimiter',{';','*',',','\t','\b',' '});
-            answer2 = answer2{1};
-            robot_detrend = answer2{1};
-            robot_detrendwin = str2double(answer2{2});
-
-            robot_power  = str2double(answer{4});
-            robot_evofft  = str2double(answer{5});
-            robot_wavelet  = str2double(answer{6});
-            robot_savedata  = str2double(answer{7});
-            robot_pause  = str2double(answer{8});
-            disp('>>  ==================================================')
-            disp('>>  ==================================================')
-            disp('>>  Hi, this is ~  acycle robot ')
-            disp('>>      by Mingsong Li')
-            disp('>>  It was born on Dec. 25, 2018 at Penn State')
-            disp('>>  MatXmas ... ')
-            disp('>>')
-            disp(['>>  ==========   ',dat_name])
-            disp('>>')
-            disp('>>  ==========      starting ...')
-            disp('>>')
-            disp('>>  ==========    Step 1: check data    ==========')
-            disp('>>')
-            if unit_type == 0
-                warndlg(['Waning: Unit is "',unit,'".'])
-            end
-
-            name1 = dat_name;
-            dat = data_filterout(~any(isnan(data_filterout),2),:);
-
-            % check NaN
-            datx = dat(:,1); 
-            daty = dat(:,2);
-            if check_nan == 1
-                if length(data_filterout(:,1)) > length(datx)
-                    warndlg('Data: NaN numbers removed.')
-                    disp('>>  ==========        removing NaNs')
-                    name1 = [name1,'NaN'];  % New name
-                end
-            end
-
-            % check empty
-            if check_empty == 1
-                dat(any(isinf(dat),2),:) = [];
-                if length(dat(:,1)) < length(datx)
-                    warndlg('Data: Empty numbers removed.')
-                    disp('>>  ==========        removing Empty numbers')
-                    name1 = [name1,'e'];  % New name
-                end
-            end
-
-            % check order
-            diffx = diff(dat(:,1));
-            if check_sort == 1
-                if any(diffx(:) < 0)
-                     warndlg('Data: Not sorted. Now sorting ... ')
-                     disp('>>  ==========        sorting')
-                     dat = sortrows(dat);
-                     name1 = [name1,'s'];  % New name
-                end
-            end
-            % duplicate
-            diffx = diff(dat(:,1));
-            if check_unique == 1
-                if any(diffx(:) == 0)
-                     warndlg('Data: duplicated x. Now replace duplicate numbers with their mean')
-                     disp('>>  ==========        duplicate numbers are replaced by mean')
-                     name1 = [name1,'u'];  % New name
-                     dat=findduplicate(dat);
-                end
-            end
-
-            % save data
-            if robot_savedata == 1
-                CDac_pwd
-                dlmwrite([name1,ext], dat, 'delimiter', ',', 'precision', 9);
-                disp(['>>  Saving data. See main window: ', name1,ext])
-                d = dir; %get files
-                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-                refreshcolor;
-                cd(pre_dirML); % return to matlab view folder
-            end
-
-            % plot data
-            figf = figure;
-            disp('>>  Plot data')
-            subplot(3,1,1)
-            try plot(dat(:,1),dat(:,2:end),'LineWidth',1,'Color','k')
-                plotsucess = 1;
-                set(gca,'XMinorTick','on','YMinorTick','on')
-                if unit_type == 0;
-                    xlabel(['Unit (',unit,')'])
-                elseif unit_type == 1;
-                    xlabel(['Depth (',unit,')'])
-                else
-                    xlabel(['Time (',unit,')'])
-                end
-                title(['Data:', name1])
-                xlim([min(dat(:,1)),max(dat(:,1))])
-            catch
-                plotsucess = 0;
-                errordlg([name1,': data error.'],'Data Error')
-                if plotsucess > 0
-                else
-                    close(figf)
-                    continue
-                end   
-            end
-
-            % Sampling rate
-            datx = dat(:,1);
-            daty = dat(:,2);
-            diffx = diff(datx);
-            len_x = length(datx);
-            datasamp = [datx(1:len_x-1),diffx];
-            datasamp = datasamp(~any(isnan(datasamp),2),:);
-            % Plot sampling rate
-            subplot(3,1,2)
-            stairs(datasamp(:,1),datasamp(:,2),'LineWidth',1,'Color','k');
-            set(gca,'XMinorTick','on','YMinorTick','on')
-            if handles.unit_type == 0;
-                xlabel(['Unit (',handles.unit,')'])
-                ylabel('Unit')
-            elseif handles.unit_type == 1;
-                xlabel(['Depth (',handles.unit,')'])
-                ylabel(handles.unit)
-            else
-                xlabel(['Time (',handles.unit,')'])
-                ylabel(handles.unit)
-            end
-            title([name1,': sampling rate'])
-            xlim([min(datasamp(:,1)),max(datasamp(:,1))])
-            ylim([0.9*min(diffx) max(diffx)*1.1])
-
-            subplot(3,1,3)
-            histfit(diffx,[],'kernel')
-            title([name1,': kernel fit of the sampling rate'])
-            if handles.unit_type == 0;
-                xlabel(['Sampling rate (',handles.unit,')'])
-            elseif handles.unit_type == 1;
-                xlabel(['Sampling rate (',handles.unit,')'])
-            else
-                xlabel(['Sampling rate (',handles.unit,')'])
-            end
-            ylabel('Number')
-            note = ['max: ',num2str(max(diffx)),'; mean: ',num2str(mean(diffx)),...
-                '; median: ',num2str(median(diffx)),'; min: ',num2str(min(diffx))];
-            text(mean(diffx),len_x/10,note);
-            % pause
-            pause(robot_pause);
-            % interpolation
-            if nanmax(diffx) - nanmin(diffx) > eps('single')
-                warndlg('Warning: Data may not be evenly spaced. Interpolation ...')
-                disp('>>')
-                disp('>>  ==========    Step 2: Interpolation    ==========')
-                disp('>>')
-                disp('>>  ==========        Sampling rates are not even')
-                if strcmp(robot_sr,'mean')
-                    interpolate_rate = nanmean(diffx);
-                    name1 = [name1,'-rsp',num2str(interpolate_rate)];
-                    dati = interpolate(dat,interpolate_rate);
-                elseif strcmp(robot_sr,'median')
-                    interpolate_rate = nanmedian(diffx);
-                    name1 = [name1,'-rsp',num2str(interpolate_rate)];
-                    dati = interpolate(dat,interpolate_rate);
-                elseif strcmp(robot_sr,'max')
-                    interpolate_rate = nanmax(diffx);
-                    name1 = [name1,'-rsp',num2str(interpolate_rate)];
-                    dati = interpolate(dat,interpolate_rate);
-                elseif strcmp(robot_sr,'min')
-                    interpolate_rate = nanmin(diffx);
-                    name1 = [name1,'-rsp',num2str(interpolate_rate)];
-                    dati = interpolate(dat,interpolate_rate);
-                else
-                    try str2double(robot_sr)
-                        if isnumeric(str2double(robot_sr))
-                            interpolate_rate = str2double(robot_sr);
-                            name1 = [name1,'-rsp',num2str(num2str(interpolate_rate))];
-                            dati = interpolate(dat,interpolate_rate);
-                        end
-                    end
-                end
-                clear dat; dat = dati;
-                disp(['>>  ==========        interpolating using ', num2str(interpolate_rate),' sampling rate'])
-                % save data
-                if robot_savedata == 1
-                    CDac_pwd
-                    dlmwrite([name1,ext], dati, 'delimiter', ',', 'precision', 9);
-                    disp(['>>  Saving data. See main window: ', name1,ext])
-                    d = dir; %get files
-                    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-                    refreshcolor;
-                    cd(pre_dirML); % return to matlab view folder
-
-                end
-
-            else
-            end
-
-            % detrend
-            % pause
-            pause(robot_pause);
-            datx = dat(:,1);
-            daty = dat(:,2);
-            if strcmp(robot_detrend,'no')
-                dats = dat;
-            elseif strcmp(robot_detrend,'linear')
-                disp('>>')
-                disp('>>  ==========    Step 3: Detrend    ==========')
-                disp('>>')
-                name1 = [name1,'-',robot_detrend];
-                sdat=polyfit(datx,daty,1);
-                datalinear = datx * sdat(1) + sdat(2);
-                dats = [datx,daty-datalinear];
-            else
-                disp('>>')
-                disp('>>  ==========    Step 3: Detrend    ==========')
-                disp('>>')
-                name1 = [name1,'-',num2str(robot_detrendwin),robot_detrend];
-                datxsmth = smooth(datx,daty, robot_detrendwin,robot_detrend);
-                dats = [datx,daty-datxsmth];
-            end
-            % plot
-            figure; 
-            plot(dat(:,1),dat(:,2));hold on;
-            plot(dats(:,1),dats(:,2));
-            set(gca,'XMinorTick','on','YMinorTick','on')
-            %legend('Raw data','detrended data')
-            if strcmp(robot_detrend,'no')
-            else
-                plot(dats(:,1),daty-dats(:,2));
-                legend('Raw data','detrended data',[num2str(robot_detrendwin*100),'% ',robot_detrend,' trend'])
-            end
-
-            clear dat;
-            dat = dats;
-            datx = dat(:,1);
-            daty = dat(:,2);
-            dt = median(diff(datx));
-
-            % save data
-            if robot_savedata == 1
-                CDac_pwd
-                dlmwrite([name1,ext], dat, 'delimiter', ',', 'precision', 9);
-                disp(['>>  Saving data. See main window: ', name1,ext])
-                d = dir; %get files
-                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-                refreshcolor;
-                cd(pre_dirML); % return to matlab view folder
-            end
-            % pause
-            pause(robot_pause);
-            % power spectrum
-            if robot_power == 1
-                disp('>>')
-                disp('>>  ==========    Step 4: Power spctra & robustAR(1) noise   ==========')
-                disp('>>')
-
-                [rhoM, s0M,redconfAR1,redconfML96]=redconfML(dat(:,2),dt,2);
-                % save data
-                if robot_savedata == 1
-
-                    name11 = [name1,'-',num2str(2),'piMTM-RobustAR1',ext];
-                    data11 = redconfML96;
-                    name2 = [name1,'-',num2str(2),'piMTM-ConvenAR1',ext];
-                    data2 = redconfAR1;
-
-                    CDac_pwd
-                    dlmwrite(name11, data11, 'delimiter', ',', 'precision', 9);
-                    dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9);
-                    disp(['>>  Saving data. See main window: ', name11,ext])
-                    disp(['>>  Saving data. See main window: ', name2,ext])
-                    d = dir; %get files
-                    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-                    refreshcolor;
-                    cd(pre_dirML); % return to matlab view folder
-                end
-            end
-            % pause
-            pause(robot_pause);
-            % evofft
-            if robot_evofft > 0
-                disp('>>')
-                disp('>>  ==========    Step 5: Evolutionary FFT   ==========')
-                disp('>>')
-
-                fn = 1/(2*dt);
-                npts = length(dat(:,1));
-                if npts < 300
-                    step = dt;
-                else
-                    step = round(npts/300)*dt;
-                end
-                [s,x_grid,y_grid] = evofft(dat,robot_evofft,step,dt,0,fn,1);
-                % plot
-
-                figure
-                subplot(2,1,1)
-                whitebg('white');
-                plot(dat(:,1),dat(:,2));
-                ylim([0.9* min(dat(:,2)), 1.1*max(dat(:,2))])
-                xlim([min(dat(:,1)),max(dat(:,1))])
-                ylabel('Value')
-                if handles.unit_type == 0;
-                    xlabel(['Unit (',handles.unit,')'])
-                elseif handles.unit_type == 1;
-                    xlabel(['Depth (',handles.unit,')'])
-                else
-                    xlabel(['Time (',handles.unit,')'])
-                end
-                set(gca,'XMinorTick','on','YMinorTick','on')
-                subplot(2,1,2)
-                whitebg('white');
-                try pcolor(y_grid,x_grid,s')
-                colormap(jet)
-                shading interp
-                title(['EvoFFT. Window',' = ',num2str(robot_evofft),' ',unit,'; step = ',num2str(step),' ', unit])
-                ylabel(['Frequency ( cycles per ',unit,' )'])
-                if handles.unit_type == 0;
-                    xlabel(['Unit (',handles.unit,')'])
-                elseif handles.unit_type == 1;
-                    xlabel(['Depth (',handles.unit,')'])
-                else
-                    xlabel(['Time (',handles.unit,')'])
-                end
-                set(gcf,'Name',[num2str(name1),': Running Periodogram'])
-                ylim([0 fn])
-                xlim([min(dat(:,1)),max(dat(:,1))])
-                set(gca,'XMinorTick','on','YMinorTick','on')
-                set(gca, 'TickDir', 'out')
-                catch
-                    errordlg('EvoFFT: Sampling rate or something else is incorrect.')
-                end
-            end
-            % pause
-            pause(robot_pause);
-            % wavelet
-            if robot_wavelet ==1
-                disp('>>')
-                disp('>>  ==========    Step 6: Wavelet transform   ==========')
-                disp('>>')
-                figwave = figure;
-                try [~,~,~]= waveletML(daty,datx,1,0.1,2*dt,datx(end)-datx(1));
-                    set(gca,'XMinorTick','on','YMinorTick','on')
-                catch
-                    try [~,~,~]= waveletML(daty,datx,1,0.1,2*dt,1/2*(datx(end)-datx(1)));
-                        set(gca,'XMinorTick','on','YMinorTick','on')
-                    catch
-                        errordlg('Error. Please try with other parameters')
-                        disp('>>  ==========    Error in wavelet transform')
-                    end
-                end
-            end
-            disp('')
-            disp('>>  ==========    Done   ==========')
-            disp('>>  ==================================================')
-        end
+        handles.data_filterout = data_filterout;
+        handles.dat_name = dat_name;
+        guidata(hObject, handles);
+        RobotGUI(handles)
+        
     end
 else
     warndlg({'No selected data';'';...
@@ -843,7 +463,6 @@ else
         '';'FORMAT:';'';'<No header>';'';...
         '1st column: depth or time';'';'2nd column: value';''})
 end
-
 
 
 % --- Executes on selection change in listbox_acmain.
@@ -1037,19 +656,6 @@ function edit_acfigmain_dir_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-% --- Executes on button press in pushbutton4.
-function pushbutton4_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes on button press in pushbutton5.
-function pushbutton5_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton5 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
 
 % --- Executes during object creation, after setting all properties.
@@ -3795,10 +3401,10 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                     I = imread(data_name);
                     figI = figure;
                     imshow(I);
-                    set(gcf,'Name',[dat_name,ext,': Press "ALT" & select cursors now'])
+                    set(gcf,'Name',[dat_name,ext,': Press "SHIFT"or"ALT" & select cursors now'])
 
                     choice = questdlg('Steps: 1) click the "DataCursor" tool; 2) select two cursors; 3) press "Enter"', ...
-                        'Press "ALT" key & select 2 cursors', 'Continue','Cancel','Continue');
+                        'Press "SHIFT"or"ALT" key & select 2 cursors', 'Continue','Cancel','Continue');
 
                     switch choice
                         case 'Continue'
@@ -4935,7 +4541,7 @@ if check == 1;
             set(gcf,'Color', 'white')
             set(0,'Units','normalized') % set units as normalized
             set(gcf,'units','norm') % set location
-            set(gcf,'position',[0.1,0.5,0.45,0.45]) % set position
+            set(gcf,'position',[0.1,0.4,0.45,0.45]) % set position
             set(gcf,'Name', 'Sampling rate (original domain)')
             if handles.unit_type == 0;
                 xlabel(['Unit (',handles.unit,')'])
@@ -4957,7 +4563,7 @@ if check == 1;
             set(gcf,'Color', 'white')
             set(0,'Units','normalized') % set units as normalized
             set(gcf,'units','norm') % set location
-            set(gcf,'position',[0.55,0.5,0.45,0.45]) % set position
+            set(gcf,'position',[0.55,0.4,0.45,0.45]) % set position
             title([[dat_name,ext],': kernel fit of sampling rates'])
             set(gcf,'Name', 'Sampling rate: distribution')
             if handles.unit_type == 0;

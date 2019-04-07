@@ -62,7 +62,7 @@ set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
 if ismac
     set(gcf,'position',[0.45,0.4,0.4,0.35]) % set position
 elseif ispc
-    set(gcf,'position',[0.45,0.4,0.5,0.5]) % set position
+    set(gcf,'position',[0.45,0.4,0.4,0.35]) % set position
 end
 set(handles.text5,'position',[0.018,0.856,0.2,0.06])
 set(handles.popupmenu2,'position',[0.26,0.856,0.68,0.06])

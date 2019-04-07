@@ -913,7 +913,7 @@ end
 ylabel('Value')
 title('Raw data & trend')
 fig = gcf;
-
+set(gcf,'Units','normalized','position',[0.09,0.3,0.35,0.4]) % set position
 hold on;
 prewhiten_list = 1;
 prewhiten = {};

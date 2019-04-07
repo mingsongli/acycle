@@ -2,7 +2,7 @@
     <img src="https://github.com/mingsongli/acycleFig/blob/master/default_icon_1024-git.gif" alt="homepage" title="Acycle GitHub homepage">
 </a>
 
-[![](https://img.shields.io/badge/version-v1.0.3-blue.svg)]()
+[![](https://img.shields.io/badge/version-v1.1-blue.svg)]()
 [![](https://img.shields.io/badge/license-GPL-brightgreen.svg)](https://www.gnu.org/licenses/)
 [![](https://img.shields.io/badge/platform-Mac_Win-green.svg)]()
 ![](https://img.shields.io/badge/language-MatLab-red.svg)
@@ -35,7 +35,7 @@
     <img src="https://github.com/mingsongli/acycleFig/blob/master/WechatIMG17.jpeg" alt="MingsongLi.com" title="Mingsong Li homepage" width="100" height="100">
 </a>
 <br>
-Mingsong Li, Penn State. Mar. 19, 2019 <br>
+Mingsong Li, Penn State. April 7, 2019 <br>
 E-mail: <i> mul450 {at} psu.edu;  limingsonglms {at} gmail.com </i> <br><br>
 
 <a href="https://scholar.google.com/citations?user=NYUXDW0AAAAJ&hl=en&inst=4855597776033322861">
@@ -43,6 +43,9 @@ E-mail: <i> mul450 {at} psu.edu;  limingsonglms {at} gmail.com </i> <br><br>
 </a>
 <a href="https://www.researchgate.net/profile/Mingsong_Li">
     <img src="https://github.com/mingsongli/acycleFig/blob/master/RG.jpeg" alt="ResearchGate" title="Mingsong Li ResearchGate homepage" width="48" height="48">
+</a>
+<a href="https://www.linkedin.com/in/mingsongli/">
+    <img src="https://github.com/mingsongli/acycleFig/blob/master/LinkedIn-icon.png" alt="linkedin" title="Mingsong Li linkedin" width="48" height="48">
 </a>
 <a href="https://github.com/mingsongli/">
     <img src="https://github.com/mingsongli/acycleFig/blob/master/github-icon-for-resume-14.jpg" alt="GitHub" title="Mingsong Li GitHub homepage" width="48" height="48">
@@ -74,6 +77,8 @@ E-mail: <i> mul450 {at} psu.edu;  limingsonglms {at} gmail.com </i> <br><br>
     * Many of the functions are specific to cyclostratigraphy and astrochronology, and are not found in standard, statistical packages.
 
 ![gui](https://github.com/mingsongli/acycleFig/blob/master/Fig.1-GUI.jpg)
+
+![](https://github.com/mingsongli/acycleFig/blob/master/acycle-demo-gif/1.-acycle-menuscutslow.gif)
 
 ![structure](https://github.com/mingsongli/acycleFig/blob/master/Fig.2-design-201902.jpg)
 
@@ -172,7 +177,7 @@ _2π multi-taper method power spectrum of the gamma ray series is shown with `20
 ---
 ## What they say
 
-* **Dr. James G. Ogg** (Professor, DEPT. EARTH ,ATMOS. & PLANET. SCI., Purdue University, USA):
+* **Dr. James G. Ogg** (Professor, DEPT. EARTH, ATMOS. & PLANET. SCI., Purdue University, USA):
 
     > "Mingsong Li's _**Acycle**_ software enables us to quickly analyze the potential of new outcrops and boreholes, and then to determine the sedimentation rates and elapsed time. His _**Acycle**_ software will become the standard tool for time-scale applications by all international workers."
 

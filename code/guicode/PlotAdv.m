@@ -608,7 +608,7 @@ plotprofig = figure;
 
 set(0,'Units','normalized') % set units as normalized
 set(plotprofig,'units','norm') % set location
-set(plotprofig,'position',[0.03,0.5,0.42,0.45]) % set position
+set(plotprofig,'position',[0.03,0.4,0.42,0.45]) % set position
 set(plotprofig,'Name', 'Acycle: Plot Pro')
 
 

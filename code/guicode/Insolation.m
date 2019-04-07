@@ -64,6 +64,7 @@ set(h1,'FontUnits','points','FontSize',12);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',12);  % set as norm
 set(gcf,'Name','Acycle: Insolation')
+set(gcf,'position',[0.5,0.1,0.35,0.65])
 %type
 set(handles.uibuttongroup1,'position',[0.03,0.852,0.386,0.107])
 set(handles.radiobutton1,'position',[0.089,0.244,0.384,0.561])
@@ -218,13 +219,6 @@ else
 end
 qinso = handles.qinso;
 
-% disp(t)
-% disp(day)
-% disp(lat)
-% disp(qinso)
-% disp(author)
-% disp(res)
-% disp(L)
 figmsgbox = msgbox('Please wait','Wait');
 
 try

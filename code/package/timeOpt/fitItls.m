@@ -56,6 +56,7 @@ end
 
 if genplot == 1
     figure;
+    set(gcf,'Units','normalized','Position',[0.0, 0.5, 0.33, 0.4])
     subplot(2,1,1)
     plot(timeSeries(:,1), y,'r','LineWidth',3);
     hold on;
