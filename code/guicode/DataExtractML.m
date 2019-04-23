@@ -85,9 +85,20 @@ handles.acfigmain = varargin{1}.acfigmain;
 handles.listbox_acmain = varargin{1}.listbox_acmain;
 handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
 
-%handles.figname = 'testData.jpg';
+hwarn = warndlg('Wait, large image can be very slow');
 handles.DataExtractFig = figure;
+lastwarn('') % Clear last warning message
 imshow(handles.figname);
+[warnMsg, warnId] = lastwarn;
+if ~isempty(warnMsg)
+    close(handles.DataExtractFig)
+    imscrollpanel_acDig(handles.figname);
+    handles.DataExtractFig = gcf;
+end
+try close(hwarn)
+catch
+end
+
 set(handles.DataExtractFig,'units','norm') % set location
 set(handles.DataExtractFig,'position',[0.0,0.0,0.8,0.75]) % set position
 
@@ -116,7 +127,7 @@ set(handles.push_grid,'position',[0.843,0.376,0.096,0.208])
 set(handles.pushsave,'position',[0.843,0.069,0.096,0.208])
 
 set(handles.text5, 'string', 'Input the values in EditBoxs. Click Calibrate axis to set axis!');
-
+handles.warnMsg = warnMsg;
 guidata(hObject, handles);
 
 % UIWAIT makes DataExtractML wait for user response (see UIRESUME)
@@ -152,13 +163,16 @@ if handles.recalibrate == 1
     end
     if recalibratePoint == 1
         try figure(handles.DataExtractFig)
+            close(gcf);
         catch
+        end
+        if ~isempty(handles.warnMsg)
+            imscrollpanel_acDig(handles.figname);
+            handles.DataExtractFig = gcf;
+        else
             handles.DataExtractFig = figure;
             imshow(handles.figname);
         end
-        close(gcf);
-        handles.DataExtractFig = figure;
-        imshow(handles.figname);
         set(gcf,'units','norm') % set location
         set(gcf,'position',[0.0,0.0,0.8,0.75]) % set position
         set(handles.text5, 'string', 'Input the values in EditBoxs. Click Calibrate axis to set axis!');
@@ -241,7 +255,7 @@ y03 = handles.y03;
 
 figure(DataExtractTab)
 set(gcf,'units','norm') % set location
-set(gcf,'position',[0.8,0.0,0.2,1]) % set position
+set(gcf,'position',[0.8,0.2,0.2,0.8]) % set position
 hguiTable = findobj('Tag','DataExtractTable1');
 gui1data  = guidata(hguiTable(1));
 figure(handles.DataExtractFig)
@@ -259,7 +273,8 @@ scale1 = get(handles.radiobutton1, 'value');
 scale2 = get(handles.radiobutton3, 'value');
 hold on
 while con == 1    
-    [x, y, con] = ginput(1);
+    %[x, y, con] = ginput(1);
+    [x, y, con] = myginput(1,'crosshair');
     if con == 1
         line(x, y, 'marker', '+', 'color', 'r', 'markersize', 10);
         if scale1 == 1
@@ -280,9 +295,12 @@ while con == 1
         tableDatai{i, 2} = x;
         tableDatai{i, 3} = y;
         set(gui1data.uitable1, 'data', tableData);
+        disp(['>>  data info: i = ',num2str(i), ', x = ', num2str(x), ', y = ',num2str(y)])
         %plot(tableData{:, 2},tableData{:, 3},'r-');
         i = i + 1;
+        set(gcf,'Pointer','arrow');
     end
+    set(gcf,'Pointer','arrow');
 end
 handles.i = i;
 handles.tableData = tableData;
@@ -307,11 +325,17 @@ if i > 1
     try figure(handles.DataExtractFig)
         clf('reset')
     catch
+        %handles.DataExtractFig = figure;
+        %imshow(handles.figname);
+        %clf('reset')
+    end
+    if ~isempty(handles.warnMsg)
+        imscrollpanel_acDig(handles.figname);
+        handles.DataExtractFig = gcf;
+    else
         handles.DataExtractFig = figure;
         imshow(handles.figname);
-        clf('reset')
     end
-    imshow(handles.figname);
     set(gcf,'units','norm') % set location
     set(gcf,'position',[0.0,0.0,0.8,0.75]) % set position
     x00 = handles.x00;
@@ -612,6 +636,8 @@ if ndims(I) == 3
             end
             YYY0 = YYY1; % undo-1 step
             YYY1 = [YYY1;YYY];
+        else
+            set(gcf,'Pointer','arrow');
         end
     end
     
@@ -632,25 +658,11 @@ if ndims(I) == 3
     handles.srsh = srsh;
 end
 
-
 guidata(hObject, handles);
 
 %function mouseMove (object, eventdata)
-function mouseMove (hObject, eventdata, handles)
-C = get(gca, 'CurrentPoint');
-title(gca, ['(X,Y) = (', num2str(C(1,1)), ', ',num2str(C(1,2)), ')']);
-%srsh = handles.srsh;
-srsh = 10;
-hl1 = line([C(1,1)-srsh, C(1,1)+srsh], [C(1,2)-srsh, C(1,2)-srsh], 'color', 'k');
-hl2 = line([C(1,1)-srsh, C(1,1)+srsh], [C(1,2)+srsh, C(1,2)+srsh], 'color', 'k');
-hl3 = line([C(1,1)-srsh, C(1,1)-srsh], [C(1,2)-srsh, C(1,2)+srsh], 'color', 'k');
-hl4 = line([C(1,1)+srsh, C(1,1)+srsh], [C(1,2)-srsh, C(1,2)+srsh], 'color', 'k');
-
-pause(.01)
-try
-    delete(hl1);
-    delete(hl2);
-    delete(hl3);
-    delete(hl4);
-catch
-end
+function mouseMove(hObject, eventdata, handles)
+%C = get(gca, 'CurrentPoint');
+%set(gcf,'Pointer','crosshair');
+%drawnow;  % Cursor won't change right away unless you do this.
+%guidata(hObject, handles);

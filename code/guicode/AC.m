@@ -338,10 +338,20 @@ for i = 1:nplot
                 check = 1; % selection can be executed 
             elseif sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
                 try 
+                    hwarn = warndlg('Wait, large image? can be very slow ...');
+
                     im_name = imread(plot_filter_s);
-                    figure;
-                    imshow(im_name)
-                    %set(gcf,'Name',[dat_name,ext])
+                    hFig1 = figure;
+                    lastwarn('') % Clear last warning message
+                    imshow(im_name);
+                    [warnMsg, warnId] = lastwarn;
+                    if ~isempty(warnMsg)
+                        close(hFig1)
+                        imscrollpanel_ac(plot_filter_s);
+                    end
+                    try close(hwarn)
+                    catch
+                    end
                 catch
                     warndlg('Image color space not supported. Convert to RGB or Grayscale')
                 end
@@ -557,10 +567,21 @@ if handles.doubleclick
                
             elseif sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
                 try 
+                    hwarn = warndlg('Wait, large image? can be very slow ...');
                     im_name = imread(filename);
-                    figure;
-                    imshow(im_name)
+                    hFig1 = figure;
+                    lastwarn('') % Clear last warning message
+                    imshow(im_name);
                     set(gcf,'Name',[dat_name,ext])
+                    [warnMsg, warnId] = lastwarn;
+                    if ~isempty(warnMsg)
+                        close(hFig1)
+                        imscrollpanel_ac(filename);
+                    end
+                    %hwarn = warndlg('Wait, large image? can be very slow ...');
+                    try close(hwarn)
+                    catch
+                    end
                 catch
                     warndlg('Image color space not supported. Convert to RGB or Grayscale')
                 end
@@ -725,10 +746,21 @@ for i = 1:nplot
                 open(plot_filter_s);
             elseif sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
                 try 
+                    hwarn = warndlg('Wait, large image? can be very slow ...');
+                    
                     im_name = imread(plot_filter_s);
-                    figure;
-                    imshow(im_name)
+                    hFig1 = figure;
+                    lastwarn('') % Clear last warning message
+                    imshow(im_name);
                     set(gcf,'Name',[dat_name,ext])
+                    [warnMsg, warnId] = lastwarn;
+                    if ~isempty(warnMsg)
+                        close(hFig1)
+                        imscrollpanel_ac(plot_filter_s);
+                    end
+                    try close(hwarn)
+                    catch
+                    end
                 catch
                     warndlg('Image color space not supported. Convert to RGB or Grayscale')
                 end
@@ -3325,10 +3357,20 @@ if and ((min(plot_selected) > 2), (nplot == 1))
             if sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
                 try
                     % GRB and Grayscale supported here
+                    hwarn = warndlg('Wait, large image? can be very slow ...');
                     im_name = imread(data_name);
-                    figure;
-                    imshow(im_name)
+                    hFig1 = figure;
+                    lastwarn('') % Clear last warning message
+                    imshow(im_name);
                     set(gcf,'Name',[dat_name,ext])
+                    [warnMsg, warnId] = lastwarn;
+                    if ~isempty(warnMsg)
+                        close(hFig1)
+                        imscrollpanel_ac(data_name);
+                    end
+                    try close(hwarn)
+                    catch
+                    end
                 catch
                     warndlg('Image color space not supported. Convert to RGB or Grayscale')
                 end
@@ -3398,9 +3440,23 @@ if and ((min(plot_selected) > 2), (nplot == 1))
             [~,dat_name,ext] = fileparts(data_name);
             if sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
                 try
+                    hwarn = warndlg('Wait, large image? can be very slow ...');
                     I = imread(data_name);
                     figI = figure;
+                    lastwarn('') % Clear last warning message
                     imshow(I);
+
+                    [warnMsg, warnId] = lastwarn;
+                    
+                    if ~isempty(warnMsg)
+                        close(figI)
+                        imscrollpanel_ac(data_name);
+                        figI = gcf;
+                    end
+                    try close(hwarn)
+                    catch
+                    end
+                    
                     set(gcf,'Name',[dat_name,ext,': Press "SHIFT"or"ALT" & select cursors now'])
 
                     choice = questdlg('Steps: 1) click the "DataCursor" tool; 2) select two cursors; 3) press "Enter"', ...
@@ -4146,11 +4202,20 @@ for i = 1:nplot
                 check = 1; % selection can be executed 
             elseif sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
                 try 
+                    hwarn = warndlg('Wait, large image? can be very slow ...');
                     im_name = imread(plot_filter_s);
-                    figure;
-                    imshow(im_name)
-                    %set(gcf,'Name',[dat_name,ext])
-                    %set(gcf,'color','w');
+                    hFig1 = figure;
+                    lastwarn('') % Clear last warning message
+                    imshow(im_name);
+                    set(gcf,'Name',[dat_name,ext])
+                    [warnMsg, warnId] = lastwarn;
+                    if ~isempty(warnMsg)
+                        close(hFig1)
+                        imscrollpanel_ac(plot_filter_s);
+                    end
+                    try close(hwarn)
+                    catch
+                    end
                 catch
                     warndlg('Image color space not supported. Convert to RGB or Grayscale')
                 end
@@ -5643,7 +5708,6 @@ if and ((min(plot_selected) > 2), (nplot == 1))
             [~,dat_name,ext] = fileparts(data_name);
             if sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
                 try
-                    I = imread(data_name);
                     handles.figname = data_name;
                     guidata(hObject, handles);
                     DataExtractML(handles);
