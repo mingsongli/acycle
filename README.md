@@ -32,12 +32,12 @@
 </a>
 
 * **Dr. J. Fred Read** (Emeritus Professor of Sedimentary Geology, Virginia Tech):
-    > "It is truly an amazing contribution to the geosciences community. ... I was blown away by the power of the Acycle software. ... You should all feel very proud of this contribution. It opens up much needed access to these powerful tools for a wide audience in the sedimentary geology and paleoclimate community. Thanks again for all your efforts. A really marvellous job."<br>
+    > "It is truly an amazing contribution to the geosciences community. As someone who has spent much of the last 50 years trying to understand cyclic carbonates on shallow platforms, and having been involved with my students in some of the early work on stratigraphic modelling of the effects of Milankovitch forcing of carbonate platform stratigraphy, I was blown away by the power of the Acycle software. ... You should all feel very proud of this contribution. It opens up much needed access to these powerful tools for a wide audience in the sedimentary geology and paleoclimate community. Thanks again for all your efforts. A really marvellous job."<br>
 * [Read More](https://github.com/mingsongli/acycle#what-they-say-1)
 
 ### Has been used in
-* Li, M., Hinnov, L.A., Huang, C., Ogg, J.G., 2018. Nature communications. https://doi.org/10.1038/s41467-018-03454-y
-* Shi, J., Jin, Z., Liu, Q., Zhang, R., Huang, Z., 2019. Cyclostratigraphy and astronomical tuning of the middle eocene terrestrial successions in the Bohai Bay Basin, Eastern China. Global and Planetary Change 174, 115-126. https://doi.org/10.1016/j.gloplacha.2019.01.001
+* Li, M., Hinnov, L.A., Huang, C., Ogg, J.G., 2018. Nature Commun. https://doi.org/10.1038/s41467-018-03454-y
+* Shi, J., Jin, Z., Liu, Q., Zhang, R., Huang, Z., 2019. Glob. Planet. Change 174, 115-126. https://doi.org/10.1016/j.gloplacha.2019.01.001
 * [Find More](https://github.com/mingsongli/acycle#acycle-has-been-used-in)
 
 ### Please cite
