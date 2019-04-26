@@ -19,13 +19,26 @@
 * [Read More](https://github.com/mingsongli/acycle#wiki-table-of-content-1)
 
 ### What they say
+
+<a href="https://www.eaps.purdue.edu/people/faculty-pages/ogg.html">
+    <img src="https://www.eaps.purdue.edu/images/people/faculty/ogg1.jpg" alt="James Ogg" title="James Ogg">
+</a>
+
 * **Dr. James G. Ogg** (Professor, Purdue University, USA):
     > "His _**Acycle**_ software will become the standard tool for time-scale applications by all international workers."<br>
+
+<a href="https://geos.vt.edu/people/emeritus-faculty/fred-read.html">
+    <img src="https://geos.vt.edu/content/geos_vt_edu/en/people/emeritus-faculty/fred-read/jcr:content/bio-image.transform/xl-medium/image.jpg" alt="JF Read" title="J. Fred Read" width="111" height="111">
+</a>
+
+* **Dr. J. Fred Read** (Emeritus Professor of Sedimentary Geology, Virginia Tech):
+    > "It is truly an amazing contribution to the geosciences community. ... I was blown away by the power of the Acycle software. ... You should all feel very proud of this contribution. It opens up much needed access to these powerful tools for a wide audience in the sedimentary geology and paleoclimate community. Thanks again for all your efforts. A really marvellous job."<br>
 * [Read More](https://github.com/mingsongli/acycle#what-they-say-1)
 
 ### Has been used in
 * Li, M., Hinnov, L.A., Huang, C., Ogg, J.G., 2018. Nature communications. https://doi.org/10.1038/s41467-018-03454-y
-* [Read More](https://github.com/mingsongli/acycle#acycle-has-been-used-in)
+* Shi, J., Jin, Z., Liu, Q., Zhang, R., Huang, Z., 2019. Cyclostratigraphy and astronomical tuning of the middle eocene terrestrial successions in the Bohai Bay Basin, Eastern China. Global and Planetary Change 174, 115-126. https://doi.org/10.1016/j.gloplacha.2019.01.001
+* [Find More](https://github.com/mingsongli/acycle#acycle-has-been-used-in)
 
 ### Please cite
 > Mingsong Li, Linda A. Hinnov, Lee R. Kump, 2019. _Acycle_: Time-series analysis software for paleoclimate research and education. Computers & Geosciences. 127: 12-22. https://doi.org/10.1016/j.cageo.2019.02.011.
@@ -191,27 +204,59 @@ _2π multi-taper method power spectrum of the gamma ray series is shown with `20
 ---
 ## What they say
 
-* **Dr. James G. Ogg** (Professor, DEPT. EARTH, ATMOS. & PLANET. SCI., Purdue University, USA):
+<a href="https://geos.vt.edu/people/emeritus-faculty/fred-read.html">
+    <img src="https://geos.vt.edu/content/geos_vt_edu/en/people/emeritus-faculty/fred-read/jcr:content/bio-image.transform/xl-medium/image.jpg" alt="JF Read" title="J. Fred Read" width="111" height="111">
+</a>
 
-    > "Mingsong Li's _**Acycle**_ software enables us to quickly analyze the potential of new outcrops and boreholes, and then to determine the sedimentation rates and elapsed time. His _**Acycle**_ software will become the standard tool for time-scale applications by all international workers."
+* **Dr. [J. Fred Read](https://geos.vt.edu/people/emeritus-faculty/fred-read.html)** (Emeritus Professor of Sedimentary Geology, Dept of Geosciences, Virginia Tech)
 
-* **Dr. Paul E. Olsen** (Professor of Earth and Environmental Sciences, Columbia University; Member, National Academy of Sciences of the USA):
+    > I am writing to express my appreciation for all the hard work and thought that has gone into the development of the _Acycle_ software program.  **It is truly an amazing contribution to the geosciences community.** As someone who has spent much of the last 50 years trying to understand cyclic carbonates on shallow platforms, and having been involved with my students in some of the early work on stratigraphic modelling of the effects of Milankovitch forcing of carbonate platform stratigraphy, **I was blown away by the power of the _Acycle_ software.**
 
-    > "Not only is this software powerful and effective, it is also simple to use and therefore benefits researchers and at all levels within the paleoclimatology community, from novices to experts."
+    > In the old days we used in house programs from our geophysicist Cahit Coruh, and recently I have used Analyseries, kSpectra and Timefrq43, moving from Dos to Windows to Mac, jumping from one to the other to get the job done.  _Acycle_ has done away with the need for this, and I have been impressed with how very user friendly the program is – an indication of the tremendous effort and thought that has gone into putting this together.
 
-* **Dr. Arsenio Muñoz de la Peña** (Professor, Department of Analytical Chemistry, University of Zaragoza, Spain):
+    > You should all feel very proud of this contribution.  It opens up much needed access to these powerful tools for a wide audience in the sedimentary geology and paleoclimate community.  Thanks again for all your efforts. **A really marvellous job.**
+
+
+
+<a href="https://www.eaps.purdue.edu/people/faculty-pages/ogg.html">
+    <img src="https://www.eaps.purdue.edu/images/people/faculty/ogg1.jpg" alt="James Ogg" title="James Ogg">
+</a>
+
+* **Dr. [James Ogg](https://www.eaps.purdue.edu/people/faculty-pages/ogg.html)** (Professor, DEPT. EARTH, ATMOS. & PLANET. SCI., Purdue University, USA):
+
+    > "Mingsong Li's _**Acycle**_ software enables us to quickly analyze the potential of new outcrops and boreholes, and then to determine the sedimentation rates and elapsed time. **His _**Acycle**_ software will become the standard tool for time-scale applications by all international workers."**
+
+
+
+<a href="https://eesc.columbia.edu/faculty/paul-e-olsen">
+    <img src="https://eesc.columbia.edu/sites/default/files/styles/profile_thumb_100x150/public/bio/olsen_p.jpg?itok=X8DlX5ax" alt="Paul Olsen" title="Paul Olsen">
+</a>
+
+* **Dr. [Paul E. Olsen](https://eesc.columbia.edu/faculty/paul-e-olsen)** (Professor of Earth and Environmental Sciences, Columbia University; Member, National Academy of Sciences of the USA):
+
+    > Not only is this software powerful and effective, it is also simple to use and therefore benefits researchers and at all levels within the paleoclimatology community, from novices to experts.
+
+
+<a href="https://www.unex.es/organizacion/servicios-universitarios/servicios/comunicacion/archivo/2012/noviembre-de-2012/5-de-noviembre-de-2012/arsenio-munoz-de-la-pena-obtiene-un-premio-del-gobierno-argentino-en-cooperacion-internacional#.XMJMspNKh24">
+    <img src="https://www.unex.es/organizacion/servicios-universitarios/servicios/comunicacion/archivo/2012/noviembre-de-2012/5-de-noviembre-de-2012/arsenio-munoz-de-la-pena-obtiene-un-premio-del-gobierno-argentino-en-cooperacion-internacional/images/arsenio.jpg/pa_thumb/imagex300x200.jpeg" alt="Arsenio Muñoz de la Peña" title="Arsenio Muñoz de la Peña" width="90" height="111">
+</a>
+
+* **Dr. [Arsenio Muñoz de la Peña](https://www.unex.es/organizacion/servicios-universitarios/servicios/comunicacion/archivo/2012/noviembre-de-2012/5-de-noviembre-de-2012/arsenio-munoz-de-la-pena-obtiene-un-premio-del-gobierno-argentino-en-cooperacion-internacional#.XMJMspNKh24)** (Professor, Department of Analytical Chemistry, University of Zaragoza, Spain):
+
     > "Thank you very much and congratulations for the _**acycle**_ software. I am using it and it is very very useful
 and interesting."
 
 * **Dr. Marco Franceschi** (Professor, Department of Geosciences, University of Padova, Italy):
 
-    > "Dr. Li’s software is being immensely valuable to my work. Some of the stratigraphic series I am studying display a prominent cyclicity, but were deposited in contexts characterized by relevant changes in sedimentation rates and often lack accurate geochronological constraints. _**Acycle**_ has been designed specifically for dealing with similar cases, by tackling them with a rigorous statistical approach, and therefore is providing an invaluable tool for their investigation."
+    > Dr. Li’s software is being immensely valuable to my work. Some of the stratigraphic series I am studying display a prominent cyclicity, but were deposited in contexts characterized by relevant changes in sedimentation rates and often lack accurate geochronological constraints. _**Acycle**_ has been designed specifically for dealing with similar cases, by tackling them with a rigorous statistical approach, and therefore is providing an invaluable tool for their investigation.
 
 * **Dr. Xu Yao** (School of Earth Sciences, Lanzhou University, China):
-    > "I am working on cyclostratigraphy and paleoclimate study of ancient strata and rocks (270 million years ago) with assistance from _**Acycle**_ software. I also introduced this software to my colleagues whose research areas are paleoclimate implications of Quaternary loess (several thousand years ago). My colleagues have given me really good feedbacks about _**Acycle**_ software."
+
+    > I am working on cyclostratigraphy and paleoclimate study of ancient strata and rocks (270 million years ago) with assistance from _**Acycle**_ software. I also introduced this software to my colleagues whose research areas are paleoclimate implications of Quaternary loess (several thousand years ago). My colleagues have given me really good feedbacks about _**Acycle**_ software.
 
 * **Dr. Christian Zeeden** (IMCCE, Observatoire de Paris, France):
-    > "Dr. Li’s software is novel and valuable in this context, especially because it facilitates the easy application of otherwise complex calculations."
+    > Dr. Li’s software is novel and valuable in this context, especially because it facilitates the easy application of otherwise complex calculations.
+
 
 * **Dr. Nicolas R. Thibault** (University of Copenhagen, Denmark):
     > "I’ve been playing a lot with the excellent _**Acycle**_ package for Matlab that Mingsong developed. Congratulations, this is a very nice interface that simplifies a lot our work and makes it truly faster to analyse a time-series."
@@ -223,6 +268,7 @@ and interesting."
 *   > Chen, G., Gang, W., Liu, Y., Wang, N., Guo, Y., Zhu, C., Cao, Q., 2019. High-resolution sediment accumulation rate determined by cyclostratigraphy and its impact on the organic matter abundance of the hydrocarbon source rock in the Yanchang Formation, Ordos Basin, China. Marine and Petroleum Geology 103, 1-11. https://doi.org/10.1016/j.marpetgeo.2019.01.044
 *   > Li, M., Huang, C., Ogg, J., Zhang, Y., Hinnov, L., Wu, H., Chen, Z.-Q., Zou, Z., 2019. Paleoclimate proxies for cyclostratigraphy: Comparative analysis using a Lower Triassic marine section in South China. Earth-Science Reviews. https://doi.org/10.1016/j.earscirev.2019.01.011
 *   > Shi, J., Jin, Z., Liu, Q., Zhang, R., Huang, Z., 2019. Cyclostratigraphy and astronomical tuning of the middle eocene terrestrial successions in the Bohai Bay Basin, Eastern China. Global and Planetary Change 174, 115-126. https://doi.org/10.1016/j.gloplacha.2019.01.001
+*   > Lu, Y., Huang, C., Jiang, S., Zhang, J., Lu, Y., Liu, Y., 2019. Cyclic late Katian through Hirnantian glacioeustasy and its control of the development of the organic-rich Wufeng and Longmaxi shales, South China. Palaeogeography, Palaeoclimatology, Palaeoecology. https://doi.org/10.1016/j.palaeo.2019.04.012
 
 ---
 ## Read more
