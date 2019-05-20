@@ -2,6 +2,27 @@
 
 Update Log
 
+
+_____________________________________
+
+Version : ACycle_v1.2
+Date    : May 20, 2019; 7:11 pm
+By      : Mingsong Li
+
+	1. Signal/Noise generator: GUI to replace old sine wave, red noise and white noise
+
+	2. Evolutionary spectral analysis: add one option for zero-padding top and bottom of series, this is to add back the missed half-window due to the sliding window methods. However, this might add additional incorrect cycles for a series with trend at either end of the series.
+
+		Thanks Dr. Nicolas R. Thibault (University of Copenhagen, Denmark) for this wonderful suggestion.
+
+	3. Evolutionary spectral analysis: add panels showing 2-pi-MTM power spectrum and data-series itself
+
+		Thanks Daniel R. Franco (Department of Geophysics, National Observatory, Brazil) for this wonderful suggestion.
+
+	4. Support SPACE in file name and folder name.
+
+	5. COCO: detect test limits of sedimentation rate automatically.
+
 _____________________________________
 
 Version : ACycle_v1.1
@@ -10,17 +31,17 @@ By      : Mingsong Li
 
 	1. eCOCO: save optimal sed. rate as a text file: "*.ECOCO.Optimal.txt"
 
-    2. eTimeOpt: save optimal sed. rate as a text file: "*.eTimeOpt.txt"
+    	2. eTimeOpt: save optimal sed. rate as a text file: "*.eTimeOpt.txt"
 
-    3. TimeOpt and eTimeOpt use Taner roll-off rate of 10^12 now.
+    	3. TimeOpt and eTimeOpt use Taner roll-off rate of 10^12 now.
 
-    4. put back lost smoothci.m and smoothciML.m files
+    	4. put back lost smoothci.m and smoothciML.m files
 
-    5. Icons in the main window: remove borders of each button
+    	5. Icons in the main window: remove borders of each button
 
-    6. Fix a bug in Plot Digitizer
+    	6. Fix a bug in Plot Digitizer
 
-    7. Mini-robot GUI
+    	7. Mini-robot GUI
 _____________________________________
 
 Version : ACycle_v1.0.2

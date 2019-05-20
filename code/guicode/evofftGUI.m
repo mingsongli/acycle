@@ -22,7 +22,7 @@ function varargout = evofftGUI(varargin)
 
 % Edit the above text to modify the response to help evofftGUI
 
-% Last Modified by GUIDE v2.5 11-Jan-2019 19:30:40
+% Last Modified by GUIDE v2.5 19-May-2019 16:13:23
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -71,12 +71,17 @@ set(handles.uipanel2,'position',[0.029,0.553,0.454,0.42])
 set(handles.uipanel5,'position',[0.496,0.559,0.239,0.419])
 set(handles.uipanel3,'position',[0.738,0.559,0.257,0.419])
 
-set(handles.checkbox2,'position',[0.293,0.4,0.36,0.1])
-set(handles.checkbox3,'position',[0.293,0.3,0.36,0.1])
-set(handles.checkbox5,'position',[0.293,0.2,0.36,0.1])
-set(handles.checkbox4,'position',[0.293,0.1,0.36,0.1])
+set(handles.checkbox2,'position',[0.293,0.45,0.36,0.1])
+set(handles.checkbox3,'position',[0.293,0.35,0.36,0.1])
+set(handles.checkbox5,'position',[0.293,0.25,0.36,0.1])
+set(handles.checkbox4,'position',[0.293,0.15,0.36,0.1])
+set(handles.checkbox6,'position',[0.293,0.05,0.36,0.1])
+set(handles.checkbox7,'position',[0.029,0.35,0.25,0.08])
+set(handles.checkbox7,'Value',0)
+set(handles.checkbox8,'position',[0.029,0.45,0.25,0.08])
+set(handles.checkbox8,'Value',1)
 
-set(handles.uipanel6,'position',[0.029,0.1,0.251,0.42])
+set(handles.uipanel6,'position',[0.029,0.05,0.251,0.28])
 set(handles.uipanel10,'position',[0.637,0.1,0.251,0.42])
 set(handles.popupmenu3,'position',[0.02,0.5,0.95,0.36])
 set(handles.text8,'position',[0.0637,0.22,0.371,0.173])
@@ -129,6 +134,7 @@ handles.window = 0.2*(xmax-xmin);
 handles.rotate = 0;
 handles.method = 'Fast Fourier transform (LAH)';
 handles.lenthx = xmax-xmin;
+handles.time_0pad = 1;
 % if number of calculations is larger than 500;
 % then, a large step is recommended. This way, the ncal is ~500.
 ncal = (xmax-xmin - handles.window)/mean1;
@@ -153,6 +159,7 @@ set(handles.checkbox2, 'Value',1);
 set(handles.checkbox3, 'Value',1);
 set(handles.checkbox4, 'Value',0);
 set(handles.checkbox5, 'Value',0);
+set(handles.checkbox6, 'Value',1);
 set(handles.popupmenu3, 'Value',1);
 set(handles.edit9, 'String', '');
 % Update handles structure
@@ -160,10 +167,12 @@ guidata(hObject, handles);
 
 diffx = diff(data_s(:,1));
 if max(diffx) - min(diffx) > eps('single')
-    hwarn = warndlg('Warning: the data may not be evenly spaced.');
+    hwarn = warndlg('Not equally spaced data. Interpolated using mean sampling rate!');
+    interpolate_rate = mean(diffx);
+    handles.current_data = interpolate(data_s,interpolate_rate);
     %set(0,'Units','normalized') % set units as normalized
     set(gcf,'units','norm') % set location
-    set(gcf,'position',[0.25,0.6,0.2,0.1])
+    set(gcf,'position',[0.15,0.6,0.25,0.1])
     figure(hwarn);
 end
 
@@ -210,12 +219,54 @@ function checkbox3_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles.flipy = (get(hObject,'Value'));
+
+MTMred = get(handles.checkbox7,'Value');
+plotseries = get(handles.checkbox8,'Value');
+
 try figure(handles.evofftfig)
-    if handles.flipy == 1;
-        set(gca,'Ydir','reverse')
+    
+    if and(MTMred == 1, plotseries == 1)
+        subplot(4,4,[5 9 13])
+        if handles.flipy == 1;
+            set(gca,'Ydir','reverse')
+        else
+            set(gca,'Ydir','normal')
+        end
+        subplot(4,4,[6,7,8,10,11,12,14,15,16])
+        if handles.flipy == 1;
+            set(gca,'Ydir','reverse')
+        else
+            set(gca,'Ydir','normal')
+        end
+        
+    elseif and(MTMred == 1, plotseries == 0)
+        subplot(4,1,[2 3 4])
+        if handles.flipy == 1;
+            set(gca,'Ydir','reverse')
+        else
+            set(gca,'Ydir','normal')
+        end
+    elseif and(MTMred == 0, plotseries == 1)
+        subplot(1,4,1)
+        if handles.flipy == 1;
+            set(gca,'Ydir','reverse')
+        else
+            set(gca,'Ydir','normal')
+        end
+        subplot(1,4,[2 3 4])
+        if handles.flipy == 1;
+            set(gca,'Ydir','reverse')
+        else
+            set(gca,'Ydir','normal')
+        end
     else
-        set(gca,'Ydir','normal')
+        if handles.flipy == 1;
+            set(gca,'Ydir','reverse')
+        else
+            set(gca,'Ydir','normal')
+        end
     end
+    
 catch
 end
 guidata(hObject, handles);
@@ -234,14 +285,66 @@ function checkbox5_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles.freq_log = (get(hObject,'Value'));
-try figure(handles.evofftfig)
-    if handles.freq_log == 1;
-        set(gca, 'XScale', 'log')
-    else
-        set(gca, 'XScale', 'linear')
-    end
+try
+    set(handles.edit7,'String',num2str(handles.fmingrid))
+    fmin = handles.fmingrid;
 catch
 end
+MTMred = get(handles.checkbox7,'Value');
+plotseries = get(handles.checkbox8,'Value');
+
+try figure(handles.evofftfig)
+    fmax = str2double(get(handles.evofft_fmax_edit,'String'));
+    if and(MTMred == 1, plotseries == 1)
+        subplot(4,4,[2 3 4])
+        xlim([fmin fmax])
+        if handles.freq_log == 1;
+            set(gca, 'XScale', 'log')
+        else
+            set(gca, 'XScale', 'linear')
+        end
+        subplot(4,4,[6,7,8,10,11,12,14,15,16])
+        xlim([fmin fmax])
+        if handles.freq_log == 1;
+            set(gca, 'XScale', 'log')
+        else
+            set(gca, 'XScale', 'linear')
+        end
+        
+    elseif and(MTMred == 1, plotseries == 0)
+        subplot(4,1,1)
+        xlim([fmin fmax])
+        if handles.freq_log == 1;
+            set(gca, 'XScale', 'log')
+        else
+            set(gca, 'XScale', 'linear')
+        end
+        subplot(4,1,[2 3 4])
+        xlim([fmin fmax])
+        if handles.freq_log == 1;
+            set(gca, 'XScale', 'log')
+        else
+            set(gca, 'XScale', 'linear')
+        end
+    elseif and(MTMred == 0, plotseries == 1)
+        subplot(1,4,[2 3 4])
+        %xlim([fmin fmax])
+        if handles.freq_log == 1;
+            set(gca, 'XScale', 'log')
+        else
+            set(gca, 'XScale', 'linear')
+        end
+    else
+        if handles.freq_log == 1;
+            set(gca, 'XScale', 'log')
+        else
+            set(gca, 'XScale', 'linear')
+        end
+    end
+    
+catch
+end
+
 guidata(hObject, handles);
 
 % --------------------------------------------------------------------
@@ -399,10 +502,28 @@ else
     handles.evofft_fmax = fmax;
 end
 
+MTMred = get(handles.checkbox7,'Value');
+plotseries = get(handles.checkbox8,'Value');
 
 try figure(handles.evofftfig)
     fmin = str2double(get(handles.edit7,'String'));
-    xlim([fmin fmax])
+    if and(MTMred == 1, plotseries == 1)
+        subplot(4,4,[2 3 4])
+        xlim([fmin fmax])
+        subplot(4,4,[6,7,8,10,11,12,14,15,16])
+        xlim([fmin fmax])
+    elseif and(MTMred == 1, plotseries == 0)
+        subplot(4,1,1)
+        xlim([fmin fmax])
+        subplot(4,1,[2 3 4])
+        xlim([fmin fmax])
+    elseif and(MTMred == 0, plotseries == 1)
+        subplot(1,4,[2 3 4])
+        xlim([fmin fmax])
+    else
+        xlim([fmin fmax])
+    end
+    
 catch
 end
 
@@ -461,17 +582,6 @@ function evofft_Nyquist_radiobutton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of evofft_Nyquist_radiobutton
-% val = get(handles.evofft_Nyquist_radiobutton,'Value')
-% if val > 0
-%     set(handles.evofft_fmax_edit, 'Enable', 'off');
-%     handles.evofft_fmax = handles.nyquist;
-%     set(handles.radiobutton2, 'Value', 0);
-% else
-%     set(handles.evofft_Nyquist_radiobutton,'Value',1)
-%     set(handles.radiobutton2, 'Value', 0);
-%     handles.evofft_fmax = handles.nyquist;
-% end
 
 % --- Executes on button press in radiobutton2.
 function radiobutton2_Callback(hObject, eventdata, handles)
@@ -518,18 +628,31 @@ function evofft_ok_pushbutton_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 % handles = findobj('Tag','AutoC_main_figure');
 data =  handles.current_data;
+dataraw = data;
 window = handles.window;
 step = str2double(get(handles.edit_step,'String'));
 fmax_select = get(handles.evofft_Nyquist_radiobutton,'Value');
 freq_log = get(handles.checkbox5,'Value');
 method = handles.method;
-
+MTMred = get(handles.checkbox7,'Value');
+plotseries = get(handles.checkbox8,'Value');
 fmin = str2double(get(handles.edit7,'String'));
 unit = get(handles.edit8,'String');
 filename =  handles.filename;
 [~,dat_name,ext] = fileparts(filename);
-%norm = get(handles.radiobutton5,'Value');
 norm = handles.normal;
+if fmax_select == 1
+    fmax = handles.nyquist;
+else
+    fmax = str2double(get(handles.evofft_fmax_edit,'String'));
+end
+    
+if handles.time_0pad == 1
+    % restore time/depth
+    data = zeropad2(data,window);
+else
+    data(:,2) = data(:,2) - mean(data(:,2));
+end
 % Evofft Plot
 if strcmp(method,'Periodogram')
     [s,x_grid,y_grid]=evoperiodogram(data,window,step,fmin,handles.nyquist,norm);
@@ -545,6 +668,8 @@ elseif strcmp(method,'Fast Fourier transform (LAH)')
     %[s,x_grid,y_grid]=evofftLAH(data,window,step,dt,fmin,fmax,norm);
     [s,x_grid,y_grid]=evofft(data,window,step,dt,fmin,handles.nyquist,norm);
 end
+fmingrid = x_grid(2) - x_grid(1);
+handles.fmingrid = fmingrid;
 
 assignin('base','s',s);
 assignin('base','x',x_grid);
@@ -553,13 +678,200 @@ evofftfig = figure;
 whitebg('white');
 
 if handles.plot_2d == 1
-    if handles.plot_log == 1;
-        s = log10(s); 
-        pcolor(x_grid(2:end),y_grid,s(:,2:end))
-    else
-        pcolor(x_grid,y_grid,s)
+    if and(MTMred == 1, plotseries ==0)
+        % show MTM red noise, no data series is shown
+        dt = median(diff(data(:,1)));
+        nfft = length(data(:,1));
+        [~, ~,~,redconfML96]=redconfML(data(:,2),dt,2,5*nfft,2,0.25,fmax,0);
+        
+        subplot(4,1,1)
+        if handles.plot_log == 1
+            % log power
+            semilogy(redconfML96(:,1),redconfML96(:,2),'k')
+            hold on;
+            semilogy(redconfML96(:,1),redconfML96(:,3),'m-.');
+            semilogy(redconfML96(:,1),redconfML96(:,5),'r--','LineWidth',2);
+            semilogy(redconfML96(:,1),redconfML96(:,6),'b-.');
+        else
+            plot(redconfML96(:,1),redconfML96(:,2),'k')
+            hold on; 
+            plot(redconfML96(:,1),redconfML96(:,3),'m-.');
+            plot(redconfML96(:,1),redconfML96(:,5),'r--','LineWidth',2);
+            plot(redconfML96(:,1),redconfML96(:,6),'b-.');
+            ylabel('Power')
+            legend('Power','Robust AR(1) median','Robust AR(1) 95%','Robust AR(1) 99%')
+        end
+        xlim([fmin fmax])
+        if freq_log == 1;
+            xlim([fmingrid fmax])
+            set(gca, 'XScale', 'log')
+        end
+        
+        subplot(4,1,[2 3 4])
+        if handles.plot_log == 0;
+            pcolor(x_grid,y_grid,s)
+        else
+            s = log10(s);
+            pcolor(x_grid(2:end),y_grid,s(:,2:end))
+        end
+        shading interp
+        xlim([fmin fmax])
+        xlabel(['Frequency ( cycles per ',unit,' )'])
+        if handles.flipy == 1;
+            set(gca,'Ydir','reverse')
+        end
+        if freq_log == 1;
+            xlim([fmingrid fmax])
+            set(gca, 'XScale', 'log')
+        end
+        
+    elseif and(MTMred == 1, plotseries == 1)
+        % working
+        dt = median(diff(dataraw(:,1)));
+        nfft = length(dataraw(:,1));
+        [~, ~,~,redconfML96]=redconfML(data(:,2),dt,2,5*nfft,2,0.25,fmax,0);
+        subplot(4,4,[2 3 4])
+        if handles.plot_log == 1
+            % log power
+            semilogy(redconfML96(:,1),redconfML96(:,2),'k')
+            hold on; 
+            semilogy(redconfML96(:,1),redconfML96(:,3),'m-.');
+            semilogy(redconfML96(:,1),redconfML96(:,5),'r--','LineWidth',2);
+            semilogy(redconfML96(:,1),redconfML96(:,6),'b-.');
+        elseif handles.plot_log == 0
+            plot(redconfML96(:,1),redconfML96(:,2),'k')
+            hold on; 
+            plot(redconfML96(:,1),redconfML96(:,3),'m-.');
+            plot(redconfML96(:,1),redconfML96(:,5),'r--','LineWidth',2);
+            plot(redconfML96(:,1),redconfML96(:,6),'b-.');
+            ylabel('Power')
+            legend('Power','Robust AR(1) median','Robust AR(1) 95%','Robust AR(1) 99%')
+        end
+        xlim([fmin fmax])
+        if freq_log == 1;
+            xlim([fmingrid fmax])
+            set(gca, 'XScale', 'log')
+        end
+        
+        subplot(4,4,[5 9 13])
+        plot(dataraw(:,2),dataraw(:,1), 'k')
+        ylim([dataraw(1,1) dataraw(end,1)])
+        xlim([min(dataraw(:,2)) max(dataraw(:,2))])
+        if handles.flipy == 1;
+            set(gca,'Ydir','reverse')
+        end
+        
+        subplot(4,4,[6,7,8,10,11,12,14,15,16])
+        if handles.plot_log == 0;
+            pcolor(x_grid,y_grid,s)
+        else
+            s = log10(s);
+            pcolor(x_grid,y_grid,s)
+            %pcolor(x_grid(2:end),y_grid,s(:,2:end))
+        end
+        shading interp
+        ylim([dataraw(1,1) dataraw(end,1)])
+        xlim([fmin fmax])
+        xlabel(['Frequency ( cycles per ',unit,' )'])
+        if handles.flipy == 1;
+            set(gca,'Ydir','reverse')
+        end
+        if freq_log == 1;
+            xlim([fmingrid fmax])
+            set(gca, 'XScale', 'log')
+        end
+        
+    elseif and(MTMred == 0, plotseries == 1)
+        % done...
+        subplot(1,4,1)
+        plot(dataraw(:,2),dataraw(:,1), 'k')
+        ylim([dataraw(1,1) dataraw(end,1)])
+        xlim([min(dataraw(:,2)) max(dataraw(:,2))])
+        if handles.flipy == 1;
+            set(gca,'Ydir','reverse')
+        end
+        if handles.unit_type == 0;
+            ylabel(['Unit (',handles.unit,')'])
+        elseif handles.unit_type == 1;
+            ylabel(['Depth (',handles.unit,')'])
+        else
+            ylabel(['Time (',handles.unit,')'])
+        end
+        
+        subplot(1,4,[2 3 4])
+        if handles.plot_log == 0;
+            pcolor(x_grid,y_grid,s)
+        else
+            s = log10(s);
+            pcolor(x_grid(2:end),y_grid,s(:,2:end))
+        end
+        shading interp
+        xlabel(['Frequency ( cycles per ',unit,' )'])
+        xlim([fmin fmax])
+        ylim([dataraw(1,1) dataraw(end,1)])
+        if handles.flipy == 1;
+            set(gca,'Ydir','reverse')
+        end
+        if freq_log == 1;
+            xlim([fmingrid fmax])
+            set(gca, 'XScale', 'log')
+        end
+        
+    elseif and(MTMred == 0, plotseries == 0)
+        % done
+        if handles.plot_log == 0;
+            pcolor(x_grid,y_grid,s)
+        else
+            s = log10(s);
+            pcolor(x_grid(2:end),y_grid,s(:,2:end))
+        end
+        shading interp
+        xlabel(['Frequency ( cycles per ',unit,' )'])
+        xlim([fmin fmax])
+        if handles.flipy == 1;
+            set(gca,'Ydir','reverse')
+        end
+        if freq_log == 1;
+            xlim([fmingrid fmax])
+            set(gca, 'XScale', 'log')
+        end
     end
+    
+    if plotseries == 0
+        if handles.unit_type == 0;
+            ylabel(['Unit (',handles.unit,')'])
+        elseif handles.unit_type == 1;
+            ylabel(['Depth (',handles.unit,')'])
+        else
+            ylabel(['Time (',handles.unit,')'])
+        end
+    else
+        if MTMred == 0
+            subplot(1,4,[2 3 4])
+            set(gca,'YTickLabel',[]);
+        else
+            subplot(4,4,[6,7,8,10,11,12,14,15,16])
+            set(gca,'YTickLabel',[]);
+        end
+    end
+    
+    % set
+    if MTMred == 0
+        title([method,'. Window',' = ',num2str(window),' ',unit,'; step = ',num2str(step),' ', unit])
+    else
+        if plotseries == 0
+            subplot(4,1,1)
+            title([method,'. Window',' = ',num2str(window),' ',unit,'; step = ',num2str(step),' ', unit])
+        else
+            subplot(4,4,[2 3 4])
+            title([method,'. Window',' = ',num2str(window),' ',unit,'; step = ',num2str(step),' ', unit])
+        end
+        set(gca,'XTickLabel',[]);
+    end
+
+    
 else
+    % 3D
     if handles.plot_log == 1;
         s = log10(s); 
         handles.rotate = get(handles.rotation,'Value');
@@ -568,7 +880,18 @@ else
         handles.rotate = get(handles.rotation,'Value');
         surf(x_grid,y_grid,s)
     end
-end 
+    shading interp
+    xlabel(['Frequency ( cycles per ',unit,' )'])
+    xlim([fmin fmax])
+    if handles.flipy == 1;
+        set(gca,'Ydir','reverse')
+    end
+    if freq_log == 1;
+        xlim([fmingrid fmax])
+        set(gca, 'XScale', 'log')
+    end
+end
+
     %colormap(jet)
     if isempty(handles.colorgrid)
         % no grid
@@ -576,37 +899,15 @@ end
     else
         setcolor = [handles.color,'(',round(num2str(handles.colorgrid)),')'];
     end
+    
     try colormap(setcolor)
     catch
         colormap default
     end
     shading interp
-    title([method,'. Window',' = ',num2str(window),' ',unit,'; step = ',num2str(step),' ', unit])
-    xlabel(['Frequency ( cycles per ',unit,' )'])
-    if handles.unit_type == 0;
-        ylabel(['Unit (',handles.unit,')'])
-    elseif handles.unit_type == 1;
-        ylabel(['Depth (',handles.unit,')'])
-    else
-        ylabel(['Time (',handles.unit,')'])
-    end
     set(gcf,'Name',[dat_name,ext,': Running Periodogram'])
     
-    if fmax_select == 1
-        fmax = handles.nyquist;
-    else
-        fmax = str2double(get(handles.evofft_fmax_edit,'String'));
-    end
 
-    xlim([fmin fmax])
-    
-    if handles.flipy == 1;
-        set(gca,'Ydir','reverse')
-    end
-    
-    if freq_log == 1;
-        set(gca, 'XScale', 'log')
-    end
     if handles.plot_2d == 1
         set(gca,'XMinorTick','on','YMinorTick','on')
         set(gca, 'TickDir', 'out')
@@ -622,7 +923,7 @@ end
        end
     end
 handles.evofftfig = evofftfig;
-colorbar
+%
 guidata(hObject, handles);
 
 % --------------------------------------------------------------------
@@ -703,10 +1004,14 @@ if val == 1
     set (handles.radiobutton_3d, 'Value', 0);
     set (handles.rotation, 'Value', 0);
     handles.plot_2d = 1;
+    set (handles.checkbox7, 'Enable', 'on');
+    set (handles.checkbox8, 'Enable', 'on');
 else
     set (handles.radiobutton_3d, 'Value', 1);
     set (handles.rotation, 'Value', 1);
     handles.plot_2d = 0;
+    set (handles.checkbox7, 'Enable', 'off');
+    set (handles.checkbox8, 'Enable', 'off');
 end
 guidata(hObject, handles);
 
@@ -720,11 +1025,15 @@ function radiobutton_3d_Callback(hObject, eventdata, handles)
 val = get(handles.radiobutton_3d,'Value');
 if val == 1
     set (handles.radiobutton_2d, 'Value', 0);
+    set (handles.checkbox7, 'Enable', 'off');
+    set (handles.checkbox8, 'Enable', 'off');
     handles.plot_2d = 0;
     set (handles.rotation, 'Value', 1);
 else
     set (handles.radiobutton_2d, 'Value', 1);
     handles.plot_2d = 1;
+    set (handles.checkbox7, 'Enable', 'on');
+    set (handles.checkbox8, 'Enable', 'on');
     set (handles.rotation, 'Value', 0);
 end
 guidata(hObject, handles);
@@ -769,76 +1078,6 @@ function pushbutton16_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-
-% 
-% % --- Executes on button press in radiobutton6.
-% function radiobutton6_Callback(hObject, eventdata, handles)
-% % hObject    handle to radiobutton6 (see GCBO)
-% % eventdata  reserved - to be defined in a future version of MATLAB
-% % handles    structure with handles and user data (see GUIDATA)
-% 
-% % Hint: get(hObject,'Value') returns toggle state of radiobutton6
-% val = get(handles.radiobutton6,'Value');
-% if val == 1
-%     set (handles.radiobutton5, 'Value', 0);
-%     handles.normal = 0;
-% else
-%     set (handles.radiobutton5, 'Value', 1);
-%     handles.normal = 1;
-% end
-% guidata(hObject, handles);
-
-% % --- Executes on button press in radiobutton5.
-% function radiobutton5_Callback(hObject, eventdata, handles)
-% % hObject    handle to radiobutton5 (see GCBO)
-% % eventdata  reserved - to be defined in a future version of MATLAB
-% % handles    structure with handles and user data (see GUIDATA)
-% 
-% % Hint: get(hObject,'Value') returns toggle state of radiobutton5
-% val = get(handles.radiobutton5,'Value');
-% if val == 1
-%     set (handles.radiobutton6, 'Value', 0);
-%     handles.normal = 1;
-% else
-%     set (handles.radiobutton6, 'Value', 1);
-%     handles.normal = 0;
-% end
-% guidata(hObject, handles);
-
-% 
-% % --- Executes on button press in radiobutton8.
-% function radiobutton8_Callback(hObject, eventdata, handles)
-% % hObject    handle to radiobutton8 (see GCBO)
-% % eventdata  reserved - to be defined in a future version of MATLAB
-% % handles    structure with handles and user data (see GUIDATA)
-% 
-% % Hint: get(hObject,'Value') returns toggle state of radiobutton8
-% val = get(hObject,'Value');
-% if val == 1
-%     set (handles.radiobutton7, 'Value', 0);
-%     handles.flipy = 1;
-% else
-%     set (handles.radiobutton7, 'Value', 1);
-%     handles.flipy = 0;
-% end
-% guidata(hObject, handles);
-% 
-% % --- Executes on button press in radiobutton7.
-% function radiobutton7_Callback(hObject, eventdata, handles)
-% % hObject    handle to radiobutton7 (see GCBO)
-% % eventdata  reserved - to be defined in a future version of MATLAB
-% % handles    structure with handles and user data (see GUIDATA)
-% 
-% % Hint: get(hObject,'Value') returns toggle state of radiobutton7
-% val = get(hObject,'Value');
-% if val == 1
-%     set (handles.radiobutton8, 'Value', 0);
-%     handles.flipy = 0;
-% else
-%     set (handles.radiobutton8, 'Value', 1);
-%     handles.flipy = 1;
-% end
-% guidata(hObject, handles);
 
 
 % --- Executes on button press in rotation.
@@ -885,11 +1124,31 @@ function edit7_Callback(hObject, eventdata, handles)
 % Hints: get(hObject,'String') returns contents of edit7 as text
 %        str2double(get(hObject,'String')) returns contents of edit7 as a double
 fmin = str2double(get(handles.edit7,'String'));
+MTMred = get(handles.checkbox7,'Value');
+plotseries = get(handles.checkbox8,'Value');
 try figure(handles.evofftfig)
     fmax = str2double(get(handles.evofft_fmax_edit,'String'));
-    xlim([fmin fmax])
+    if and(MTMred == 1, plotseries == 1)
+        subplot(4,4,[2 3 4])
+        xlim([fmin fmax])
+        subplot(4,4,[6,7,8,10,11,12,14,15,16])
+        xlim([fmin fmax])
+    elseif and(MTMred == 1, plotseries == 0)
+        subplot(4,1,1)
+        xlim([fmin fmax])
+        subplot(4,1,[2 3 4])
+        xlim([fmin fmax])
+    elseif and(MTMred == 0, plotseries == 1)
+        subplot(1,4,[2 3 4])
+        xlim([fmin fmax])
+    else
+        xlim([fmin fmax])
+    end
 catch
 end
+
+guidata(hObject,handles)
+
 
 % --- Executes during object creation, after setting all properties.
 function edit7_CreateFcn(hObject, eventdata, handles)
@@ -951,3 +1210,33 @@ function edit9_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in checkbox6.
+function checkbox6_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox6 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox6
+
+handles.time_0pad = get(hObject,'Value');
+guidata(hObject, handles);
+
+
+% --- Executes on button press in checkbox7.
+function checkbox7_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox7 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox7
+
+
+% --- Executes on button press in checkbox8.
+function checkbox8_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox8 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox8

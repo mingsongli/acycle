@@ -228,15 +228,16 @@ if length(loci) > 1
 end
 
 %% display
-disp(['>>  Maximum spectral power r^2 = ',num2str(maxr2pwr)])
-disp(['>>       at sedimentation rate of ', num2str(sedrate(locm(1))),' cm/kyr'])
 disp(['>>  Maximum envelope r^2 = ',num2str(maxr2env)])
 disp(['>>       at sedimentation rate of ',num2str(sedrate(locj(1))),' cm/kyr'])
+disp(['>>  Maximum spectral power r^2 = ',num2str(maxr2pwr)])
+disp(['>>       at sedimentation rate of ', num2str(sedrate(locm(1))),' cm/kyr'])
 disp(['>>  Maximum (envelope r^2) x (spectral power r^2) = ',num2str(maxr2opt)])
 disp(['>>       at sedimentation rate of ', num2str(sedrate(loci(1))),' cm/kyr'])
 sr_p = [sedrate(locm(1)), maxr2pwr, sedrate(locj(1)), maxr2env, sedrate(loci(1)), maxr2opt];
 %
 data(:,1) = dat(:,1)/sedrate(loci(1));
+data(:,1) = data(:,1) - min(data(:,1));
 [tanhilb,~,~] = tanerhilbertML(data,fc,fl,fh,roll);
 
 timeSeries(:,1) = tanhilb(:,1);
@@ -257,8 +258,8 @@ if genplot == 1
     subplot(2,1,1)
     plot(tanhilb(:,1),tanhilb(:,2),'b-','LineWidth',2);hold on;
     plot(tanhilb(:,1),tanhilb(:,3),'r','LineWidth',3);
-    legend('Taner filtered','Envolope')
-    title('Filtered (blue) vs. Envolope (red)')
+    %legend('Taner filtered','Envolope')
+    title(['Taner Filtered (blue) vs. Envolope (red) @', num2str(sedrate(loci(1))), ' cm/kyr'])
     xlabel('Time (kyr)')
     ylabel('Std. Value')
     xlim([min(tanhilb(:,1)), max(tanhilb(:,1))])
@@ -283,21 +284,24 @@ if genplot == 1
     set(gcf,'Units','normalized','Position',[0.66, 0.5, 0.33, 0.4])
     subplot(3,1,1)
     plot(sedrate,xx(:,2),'ro','LineWidth',2);
-    legend('r^2_e_n_v_e_l_o_p_e')
+    line([sedrate(locj(1)) sedrate(locj(1))],[min(xx(:,2)) max(xx(:,2))],'Color','red','LineStyle','--')
+    %legend('r^2_e_n_v_e_l_o_p_e')
     xlabel('Sedimentation rate (cm/kyr)')
     ylabel('r^2_e_n_v_e_l_o_p_e')
     xlim([sedmin,sedmax])
     
     subplot(3,1,2)
     plot(sedrate,xx(:,3),'-','color',[0,0,0]+.5,'LineWidth',2);
-    legend('r^2_p_o_w_e_r')
+    line([sedrate(locm(1)) sedrate(locm(1))],[min(xx(:,3)) max(xx(:,3))],'Color','red','LineStyle','--')
+    %legend('r^2_p_o_w_e_r')
     xlabel('Sedimentation rate (cm/kyr)')
     ylabel('r^2_p_o_w_e_r')
     xlim([sedmin,sedmax])
     
     subplot(3,1,3)
     plot(sedrate,xx(:,4),'k-','LineWidth',3);
-    legend('r^2_o_p_t')
+    line([sedrate(loci(1)) sedrate(loci(1))],[min(xx(:,4)) max(xx(:,4))],'Color','red','LineStyle','--')
+    %legend('r^2_o_p_t')
     xlabel('Sedimentation rate (cm/kyr)')
     ylabel('r^2_o_p_t')
     xlim([sedmin,sedmax])

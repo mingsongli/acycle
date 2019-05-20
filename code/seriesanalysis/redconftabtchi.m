@@ -1,8 +1,8 @@
-function [f,p,theored,tabtchi90,tabtchi95,tabtchi99]=redconftabtchi(datax,nw,dt,pad,method)
+function [f,p,theored,tabtchi90,tabtchi95,tabtchi99,tabtchi999]=redconftabtchi(datax,nw,dt,pad,method)
 % Calls for 
 %   rhoAR1
 %   
-% Dorothée Husson, december 2012
+% Doroth?e Husson, december 2012
 % Mingsong Li, 2017
 % Calculate rho for AR(1). Estimate 90% CI.
 rho = rhoAR1(datax);
@@ -34,6 +34,8 @@ nw2=2*(2*nw-1);
 facchi90 = 2*gammaincinv(0.90,nw)/(nw2);
 facchi95 = 2*gammaincinv(0.95,nw)/(nw2);
 facchi99 = 2*gammaincinv(0.99,nw)/(nw2);
+facchi999 = 2*gammaincinv(0.999,nw)/(nw2);
 tabtchi90 = theored*facchi90;
 tabtchi95 = theored*facchi95;
 tabtchi99 = theored*facchi99;
+tabtchi999 = theored*facchi999;

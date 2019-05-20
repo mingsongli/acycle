@@ -55,14 +55,15 @@ elseif cormethod == 2
 end
 
 if genplot == 1
+    timeSeries(:,1) = timeSeries(:,1) - min(timeSeries(:,1));
     figure;
     set(gcf,'Units','normalized','Position',[0.0, 0.5, 0.33, 0.4])
     subplot(2,1,1)
     plot(timeSeries(:,1), y,'r','LineWidth',3);
     hold on;
     plot(timeSeries(:,1), fy,'k','LineWidth',2);
-    legend('Envolope','Reconstructed')
-    title('Envolope vs. reconstructed model')
+    %legend('Envolope','Reconstructed')
+    title(['Envolope (red) vs. reconstructed model (black) @', num2str(sedrate1),' cm/kyr'])
     xlabel('Time (kyr)')
     ylabel('Std. Value')
     xlim([min(timeSeries(:,1)), max(timeSeries(:,1))])

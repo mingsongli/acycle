@@ -108,6 +108,8 @@ handles.listbox_acmain = varargin{1}.listbox_acmain;
 handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
 %
 data_s = varargin{1}.current_data;
+data_s = sortrows(data_s);
+data_s(:,2) = data_s(:,2) - mean(data_s(:,2));
 handles.current_data = data_s;
 handles.data_name = varargin{1}.data_name;
 handles.unit = varargin{1}.unit;

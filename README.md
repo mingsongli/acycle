@@ -2,7 +2,7 @@
     <img src="https://github.com/mingsongli/acycleFig/blob/master/default_icon_1024-git.gif" alt="homepage" title="Acycle GitHub homepage">
 </a>
 
-[![](https://img.shields.io/badge/version-v1.1-blue.svg)]()
+[![](https://img.shields.io/badge/version-v1.2-blue.svg)]()
 [![](https://img.shields.io/badge/license-GPL-brightgreen.svg)](https://www.gnu.org/licenses/)
 [![](https://img.shields.io/badge/platform-Mac_Win-green.svg)]()
 ![](https://img.shields.io/badge/language-MatLab-red.svg)
@@ -263,12 +263,15 @@ and interesting."
 
 ---
 ### _Acycle_ has been used in
-*   > Li, M., Hinnov, L.A., Huang, C., Ogg, J.G., 2018. Sedimentary noise and sea levels linked to land–ocean water exchange and obliquity forcing. Nature communications 9, 1004. https://doi.org/10.1038/s41467-018-03454-y
-*   > Li, M., Kump, L.R., Hinnov, L.A., Mann, M.E., 2018. Tracking variable sedimentation rates and astronomical forcing in Phanerozoic paleoclimate proxy series with evolutionary correlation coefficients and hypothesis testing. Earth and Planetary Science Letters 501, 165-179. https://doi.org/10.1016/j.epsl.2018.08.041
-*   > Chen, G., Gang, W., Liu, Y., Wang, N., Guo, Y., Zhu, C., Cao, Q., 2019. High-resolution sediment accumulation rate determined by cyclostratigraphy and its impact on the organic matter abundance of the hydrocarbon source rock in the Yanchang Formation, Ordos Basin, China. Marine and Petroleum Geology 103, 1-11. https://doi.org/10.1016/j.marpetgeo.2019.01.044
-*   > Li, M., Huang, C., Ogg, J., Zhang, Y., Hinnov, L., Wu, H., Chen, Z.-Q., Zou, Z., 2019. Paleoclimate proxies for cyclostratigraphy: Comparative analysis using a Lower Triassic marine section in South China. Earth-Science Reviews. https://doi.org/10.1016/j.earscirev.2019.01.011
-*   > Shi, J., Jin, Z., Liu, Q., Zhang, R., Huang, Z., 2019. Cyclostratigraphy and astronomical tuning of the middle eocene terrestrial successions in the Bohai Bay Basin, Eastern China. Global and Planetary Change 174, 115-126. https://doi.org/10.1016/j.gloplacha.2019.01.001
-*   > Lu, Y., Huang, C., Jiang, S., Zhang, J., Lu, Y., Liu, Y., 2019. Cyclic late Katian through Hirnantian glacioeustasy and its control of the development of the organic-rich Wufeng and Longmaxi shales, South China. Palaeogeography, Palaeoclimatology, Palaeoecology. https://doi.org/10.1016/j.palaeo.2019.04.012
+*   > _1._ Li, M., Hinnov, L.A., Huang, C., Ogg, J.G., 2018. Sedimentary noise and sea levels linked to land–ocean water exchange and obliquity forcing. Nature communications 9, 1004. https://doi.org/10.1038/s41467-018-03454-y
+*   > _2._ Li, M., Kump, L.R., Hinnov, L.A., Mann, M.E., 2018. Tracking variable sedimentation rates and astronomical forcing in Phanerozoic paleoclimate proxy series with evolutionary correlation coefficients and hypothesis testing. Earth and Planetary Science Letters 501, 165-179. https://doi.org/10.1016/j.epsl.2018.08.041
+*   > _3._ Chen, G., Gang, W., Liu, Y., Wang, N., Guo, Y., Zhu, C., Cao, Q., 2019. High-resolution sediment accumulation rate determined by cyclostratigraphy and its impact on the organic matter abundance of the hydrocarbon source rock in the Yanchang Formation, Ordos Basin, China. Marine and Petroleum Geology 103, 1-11. https://doi.org/10.1016/j.marpetgeo.2019.01.044
+*   > _4._ Li, M., Huang, C., Ogg, J., Zhang, Y., Hinnov, L., Wu, H., Chen, Z.-Q., Zou, Z., 2019. Paleoclimate proxies for cyclostratigraphy: Comparative analysis using a Lower Triassic marine section in South China. Earth-Science Reviews. https://doi.org/10.1016/j.earscirev.2019.01.011
+*   > _5._ Shi, J., Jin, Z., Liu, Q., Zhang, R., Huang, Z., 2019. Cyclostratigraphy and astronomical tuning of the middle eocene terrestrial successions in the Bohai Bay Basin, Eastern China. Global and Planetary Change 174, 115-126. https://doi.org/10.1016/j.gloplacha.2019.01.001
+*    > _6._ Lu, Y., Huang, C., Jiang, S., Zhang, J., Lu, Y., Liu, Y., 2019. Cyclic late Katian through Hirnantian glacioeustasy and its control of the development of the organic-rich Wufeng and Longmaxi shales, South China. Palaeogeography, Palaeoclimatology, Palaeoecology. https://doi.org/10.1016/j.palaeo.2019.04.012
+*    > _7._ Zhang, Y., Yi, L., Ogg, J.G., 2019. Pliocene-Pleistocene magneto-cyclostratigraphy of IODP Site U1499 and implications for climate-driven sedimentation in the northern South China Sea. Palaeogeography, Palaeoclimatology, Palaeoecology. https://doi.org/10.1016/j.palaeo.2019.04.030
+*    > _8._ Zhang, R., Jin, Z., Liu, Q., Li, P., Huang, Z., Shi, J., Ge, Y., Du, K., 2019. Astronomical constraints on deposition of the Middle Triassic Chang 7 lacustrine shales in the Ordos Basin, Central China. Palaeogeography, Palaeoclimatology, Palaeoecology. https://doi.org/10.1016/j.palaeo.2019.04.030
+*    > _9._ Zhao, K., Du, X., Lu, Y., Xiong, S., Wang, Y., 2019. Are light-dark coupled laminae in lacustrine shale seasonally controlled? A case study using astronomical tuning from 42.2 to 45.4 Ma in the Dongying Depression, Bohai Bay Basin, eastern China. Palaeogeography, Palaeoclimatology, Palaeoecology 528, 35-49. https://doi.org/10.1016/j.palaeo.2019.04.034
 
 ---
 ## Read more

@@ -74,7 +74,7 @@ function varargout = AC(varargin)
 
 % Edit the above text to modify the response to help AC
 
-% Last Modified by GUIDE v2.5 24-Feb-2019 23:15:03
+% Last Modified by GUIDE v2.5 16-May-2019 13:25:21
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -104,7 +104,7 @@ function AC_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to AC (see VARARGIN)
 set(gcf,'position',[0.5,0.1,0.45,0.8]) % set position
-set(gcf,'Name','Acycle v1.1')
+set(gcf,'Name','Acycle v1.2')
 set(gcf,'DockControls', 'off')
 set(gcf,'Color', 'white')
 set(0,'Units','normalized') % set units as normalized
@@ -208,13 +208,10 @@ handles.path_temp = [path_root,handles.slash_v,'temp'];
 handles.working_folder = [handles.path_temp,handles.slash_v,handles.foldname];
 % if ad_pwd.txt exist; then go to this folder
 if exist('ac_pwd.txt', 'file') == 2
-    fileID = fopen('ac_pwd.txt','r');
-    formatSpec = '%s';
-    ac_pwd = fscanf(fileID,formatSpec);
+    GETac_pwd;
     if isdir(ac_pwd)
         cd(ac_pwd)
     end
-    fclose(fileID);
 else
     ac_pwd_str = which('refreshcolor.m');
     [ac_pwd_dir,~,~] = fileparts(ac_pwd_str);
@@ -305,10 +302,7 @@ guidata(hObject,handles)
 
 
 function push_folder_clbk(hObject, handles)
-fileID = fopen('ac_pwd.txt','r');
-formatSpec = '%s';
-ac_pwd = fscanf(fileID,formatSpec);   % AC window folder dir
-fclose(fileID);
+GETac_pwd;
 if ismac
     system(['open ',ac_pwd]);
 elseif ispc
@@ -379,15 +373,11 @@ CDac_pwd; % cd working dir
 refreshcolor;
 cd(pre_dirML); % return view dir
 
-
 % --- Executes on button press in push_openfolder.
 function push_openfolder_clbk(hObject, eventdata, handles)
 handles = guidata(hObject);
 pre_dirML = pwd;
-fileID = fopen('ac_pwd.txt','r');
-formatSpec = '%s';
-ac_pwd = fscanf(fileID,formatSpec);   % AC window folder dir
-fclose(fileID);
+GETac_pwd;
 selpath = uigetdir(ac_pwd);
 if selpath == 0
 else
@@ -521,10 +511,7 @@ if handles.doubleclick
                 end
             % Deployed gui will die if one want to double click to open a csv file. 
             elseif strcmp(ext,'.csv')
-                fileID = fopen('ac_pwd.txt','r');
-                formatSpec = '%s';
-                ac_pwd = fscanf(fileID,formatSpec);   % AC window folder dir
-                fclose(fileID);
+                GETac_pwd;
                 if ispc
                     winopen(ac_pwd);
                 elseif ismac
@@ -538,20 +525,14 @@ if handles.doubleclick
                         catch
                             try uiopen(filename,1)
                             catch
-                                fileID = fopen('ac_pwd.txt','r');
-                                formatSpec = '%s';
-                                ac_pwd = fscanf(fileID,formatSpec);   % AC window folder dir
-                                fclose(fileID);
+                                GETac_pwd;
                                 winopen(ac_pwd);
                             end
                         end
                     elseif ismac
                         try system(['open ',filename]);
                         catch
-                            fileID = fopen('ac_pwd.txt','r');
-                            formatSpec = '%s';
-                            ac_pwd = fscanf(fileID,formatSpec);   % AC window folder dir
-                            fclose(fileID);
+                            GETac_pwd;
                             system(['open ',ac_pwd]);
                         end
                     end
@@ -603,10 +584,7 @@ if handles.doubleclick
             else
                 try uiopen(filename,1);
                 catch
-                    fileID = fopen('ac_pwd.txt','r');
-                    formatSpec = '%s';
-                    ac_pwd = fscanf(fileID,formatSpec);   % AC window folder dir
-                    fclose(fileID);
+                    GETac_pwd;
                     if ispc
                         winopen(ac_pwd);
                     elseif ismac
@@ -802,7 +780,11 @@ if check == 1;
                 end
             end
         catch
-            warndlg({'Cannot find the data.'; 'Folder Name may NOT include any space'})
+            warndlg({'Cannot find the data.'; 'Folder Name may contain NO language other than ENGLISH'})
+            try
+                close(figf);
+            catch
+            end
         end
         
     end     
@@ -1573,7 +1555,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
 
             time = data(:,1);
             value = data(:,2);
-            span_d = (time(end)-time(1))*.3;
+            span_d = (time(end)-time(1))*.5;
             dlg_title = 'Bootstrap';
             prompt = {'Window (unit)','Method: "loess/lowess/rloess/rlowess"',...
                 'Number of bootstrap'};
@@ -2025,6 +2007,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
             time = data(:,1);
             npts = length(time);
             sr_all = diff(time);
+            
             sr_equal = abs((max(sr_all)-min(sr_all))/2);
             if sr_equal > eps('single')
                 warndlg({'Data problem detected.';...
@@ -2039,25 +2022,30 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                 handles.pad = fix(npts/5000) * 5000 + 5000;
             end
             if strcmp(handles.unit,'m')
+                dt = median(sr_all);
             elseif strcmp(handles.unit, 'unit')
                 warndlg({'Unit of the selected data is "unit"'; ...
                     '(see pop-up menu at top right corner of Acycle main window)';...
                     'Acycle assumes the real UNIT is "m"';'If this is not true, please correct.'},'Unit Warning');
+                dt = median(sr_all);
             elseif strcmp(handles.unit,'dm')
                 warndlg({'Unit of the selected data is "dm"'; ...
                     '(see pop-up menu at top right corner of Acycle main window)';...
                     'Acycle transformed the data, now the unit of "m"'},'Unit transformed');
                 data(:,1) = data(:,1) * 0.1; % dm to m
+                dt = median(sr_all) * 0.1;
             elseif strcmp(handles.unit,'cm')
                 warndlg({'Unit of the selected data is "cm"'; ...
                     '(see pop-up menu at top right corner of Acycle main window)';...
                     'Acycle transformed the data, now the unit of "m"'},'Unit transformed');
                 data(:,1) = data(:,1) * 0.01; % cm to m
+                dt = median(sr_all) * 0.01;
             elseif strcmp(handles.unit,'mm')
                 warndlg({'Unit of the selected data is "mm"'; ...
                     '(see pop-up menu at top right corner of Acycle main window)';...
                     'Acycle transformed the data, now the unit of "m"'},'Unit transformed');
                 data(:,1) = data(:,1) * 0.001; % cm to m
+                dt = median(sr_all) * 0.001;
             else
                 warndlg('UNIT of the data MUST be "m/dm/cm/mm"!.','Unit Error')
             end
@@ -2142,11 +2130,22 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                     end
                 end
                 
+                % added to set sedimentation rate
+                fnyq = handles.sr1/(200*dt);
+                if f2 > fnyq
+                    handles.sr1 = 200 * dt * f2;
+                end
+                fray = handles.sr2/(npts * dt);
+                flow = 1/max(orbit7);
+                if fray > flow
+                    handles.sr2 = 100 * npts * dt * flow; % unit = cm / kyr
+                end
+                
                 prompt = {'DATA: MIN  sedimentation rate (cm/kyr)',...
                     'DATA: MAX  sedimentation rate (cm/kyr)',...
                     'DATA: STEP sedimentation rate (cm/kyr)',...
                     'Number of simulations (e.g., 200, 600, 2000)',...
-                    'Remove red noise: 0 = No, 1 = x/AR(1), 2 = x-AR(1)',...
+                    'Remove red: 0=No, 1=x/AR(1), 2=x-AR(1), 3=x-robustAR1',...
                     'Split series: 1, 2, 3, ...'};
                 if t1 >= 249
                     dlg_title = 'STEP 3: DATA: Correlation coefficient';
@@ -3719,86 +3718,6 @@ if deletefile == 1
     guidata(hObject,handles)
 end
 
-% --------------------------------------------------------------------
-function menu_noise_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_noise (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-prompt = {'Start time (t1)',...
-        'End time (t2, and t2 > t1)',...
-        'Sample rates',...
-        'Standard deviation','Type: 0 = random; 1 = normal distribution'};
-dlg_title = 'White noise series';
-num_lines = 1;
-defaultans = {'1','1000','1','1','0'};
-options.Resize='on';
-answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-if ~isempty(answer)
-t1 = str2double(answer{1});
-t2 = str2double(answer{2});
-sr = str2double(answer{3});
-amp = str2double(answer{4});
-type = str2double(answer{5});
-
-t = t1:sr:t2;
-data(:,1) = t';
-if type == 1
-    data(:,2) = amp * randn(length(t),1);
-    dat_name = 'rand-n';
-else
-    data(:,2) = amp * rand(length(t),1);
-    dat_name = 'rand';
-end
-CDac_pwd
-dlmwrite([dat_name,'-noise.txt'], data, 'delimiter', ',', 'precision', 9);
-end
-d = dir; %get files
-set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-refreshcolor;
-cd(pre_dirML); % return to matlab view folder
-
-
-% --- Executes during object creation, after setting all properties.
-function menu_red_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to axes_refresh (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-
-% --------------------------------------------------------------------
-function menu_red_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_red (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-prompt = {'Start time (t1)',...
-        'End time (t2, and t2 > t1)',...
-        'Sample rates',...
-        'Standard deviation',...
-        'RHO-1 (from 0 to 1)'};
-dlg_title = 'Red noise series';
-num_lines = 1;
-defaultans = {'1','1000','1','1','0.5'};
-options.Resize='on';
-answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-if ~isempty(answer)
-t1 = str2double(answer{1});
-t2 = str2double(answer{2});
-sr = str2double(answer{3});
-amp = str2double(answer{4});
-rho1 = str2double(answer{5});
-
-t = t1:sr:t2;
-data(:,1) = t';
-data(:,2) = amp * zscore(redmark(rho1,length(t)));
-CDac_pwd
-dlmwrite(['rednoise',num2str(rho1),'.txt'], data, 'delimiter', ',', 'precision', 9);
-
-d = dir; %get files
-set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-refreshcolor;
-cd(pre_dirML); % return to matlab view folder
-end
-
 
 % --------------------------------------------------------------------
 function menu_add_Callback(hObject, eventdata, handles)
@@ -3893,8 +3812,9 @@ if plot_selected > 2
                     data_name_all = (contents(plot_selected));
                     data_name = char(data_name_all{nploti});
                     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+                    GETac_pwd; 
+                    data_name = fullfile(ac_pwd,data_name);
                     disp(['>>  Processing ', data_name]);
-                    GETac_pwd; data_name = fullfile(ac_pwd,data_name);
                     data_error = 0;
                     if isdir(data_name) == 1
                     else
@@ -3973,8 +3893,9 @@ if plot_selected > 2
                 data_name_all = (contents(plot_selected));
                 data_name = char(data_name_all{nploti});
                 data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+                GETac_pwd;
+                data_name = fullfile(ac_pwd,data_name);
                 disp(['>>  Processing ', data_name]);
-                GETac_pwd; data_name = fullfile(ac_pwd,data_name);
                 data_error = 0;
                 if isdir(data_name) == 1
                 else
@@ -4226,7 +4147,7 @@ for i = 1:nplot
     end
 end
 if check == 1
-    GETac_pwd; %plot_filter_s = fullfile(ac_pwd,plot_filter_s);
+    GETac_pwd; 
     for i = 1: nplot
         plot_no = plot_selected(i);
         handles.plot_s{i} = fullfile(ac_pwd,char(contents(plot_no)));
@@ -4500,48 +4421,6 @@ end
 
 
 % --------------------------------------------------------------------
-function sinewave_Callback(hObject, eventdata, handles)
-% hObject    handle to sinewave (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-prompt = {'Start time (t1)',...
-        'End time (t2, and t2 > t1)',...
-        'Sampling rates (<< t2-t1)',...
-        'Amplitude',...
-        'Period (T)',...
-        'Phase (pi, 0.25*pi, etc.)',...
-        'Signal bias'};
-dlg_title = 'Sine wave: Y=A*sin(2*pi/T*X+Ph)+bias';
-num_lines = 1;
-defaultans = {'1','1000','1','1','100','0','0'};
-options.Resize='on';
-answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-if ~isempty(answer)
-    
-t1 = str2double(answer{1});
-t2 = str2double(answer{2});
-sr = str2double(answer{3});
-A = str2double(answer{4});
-T = str2double(answer{5});
-Ph = str2double(answer{6});
-B = str2double(answer{7});
-
-x = t1:sr:t2;
-x = x';
-y = A * sin(2*pi/T*x + Ph) + B;
-data(:,1) = x;
-data(:,2) = y;
-
-CDac_pwd  % cd ac_pwd dir
-dlmwrite(['sineA',num2str(A),'T',num2str(T),'Ph',num2str(Ph),'B',num2str(B),'.txt'],...
-    data, 'delimiter', ',', 'precision', 9);
-d = dir; %get files
-set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-refreshcolor;
-cd(pre_dirML); % return to matlab view folder
-end
-
-% --------------------------------------------------------------------
 function menu_email_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_email (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -4681,7 +4560,6 @@ if check == 1;
         plot_no = plot_selected(i);
             plot_filter_s = char(contents(plot_no));
             GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
-     %       data_filterout = load(plot_filter_s); % load data
     try
         fid = fopen(plot_filter_s);
         data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
@@ -5766,5 +5644,42 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                 eTimeOptGUI(handles);
             end
         end
+end
+guidata(hObject, handles);
+
+
+% --------------------------------------------------------------------
+function linegenerator_Callback(hObject, eventdata, handles)
+% hObject    handle to linegenerator (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox_acmain,'Value');
+nplot = length(plot_selected);   % length
+if and ((min(plot_selected) > 2), (nplot == 1))
+    data_name = char(contents(plot_selected));
+    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; data_name = fullfile(ac_pwd,data_name);
+    if isdir(data_name) == 1
+        handles.current_data = [];
+        guidata(hObject, handles);
+        linegenerator(handles);
+    else
+        [~,~,ext] = fileparts(data_name);
+        if sum(strcmp(ext,handles.filetype)) > 0
+
+            current_data = load(data_name);
+            handles.current_data = current_data;
+            handles.data_name = data_name;
+            guidata(hObject, handles);
+
+            linegenerator(handles);
+        end
+    end        
+else
+    handles.current_data = [];
+    guidata(hObject, handles);
+    linegenerator(handles);
 end
 guidata(hObject, handles);

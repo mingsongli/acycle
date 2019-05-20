@@ -65,7 +65,7 @@ try
     eval(['cd ',path_root])
     cd(pwd_init)
 catch
-    errordlg('Directory may NOT contain SPACE, non-English or non-numeric characters',...
+    errordlg('Directory may NOT contain non-English or non-numeric characters',...
         'Path Error')
 end
 % add path

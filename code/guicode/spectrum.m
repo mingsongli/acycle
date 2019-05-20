@@ -22,7 +22,7 @@ function varargout = spectrum(varargin)
 
 % Edit the above text to modify the response to help spectrum
 
-% Last Modified by GUIDE v2.5 01-Jan-2018 16:12:13
+% Last Modified by GUIDE v2.5 19-May-2019 23:46:36
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -78,7 +78,7 @@ set(handles.edit4,'position', [0.664,0.089,0.3,0.23])
 
 set(handles.uipanel3,'position', [0.05,0.082,0.445,0.32])
 set(handles.checkbox_robust,'position', [0.2,0.516,0.75,0.37])
-set(handles.checkbox_tabtchi,'position', [0.2,0.177,0.75,0.37])
+set(handles.checkbox_ar1_check,'position', [0.2,0.177,0.75,0.37])
 
 set(handles.uibuttongroup1,'position', [0.5,0.31,0.45,0.47])
 set(handles.radiobutton_fmax,'position', [0.089,0.638,0.473,0.324])
@@ -91,13 +91,13 @@ set(handles.checkbox5,'position', [0.541,0.07,0.507,0.267])
 set(handles.pushbutton17,'position', [0.5,0.082,0.166,0.12])
 set(handles.pushbutton3,'position', [0.67,0.082,0.282,0.12])
 
-set(handles.checkbox_tabtchi,'String','Classical AR(1)')
+set(handles.checkbox_ar1_check,'String','Classical AR(1)')
 % Choose default command line output for spectrum
 handles.output = hObject;
 
 set(gcf,'Name','Acycle: Spectral Analysis')
 set(handles.checkbox_robust,'Value',1)
-set(handles.checkbox_tabtchi,'Value',0)
+set(handles.checkbox_ar1_check,'Value',0)
 set(handles.radiobutton4,'Value',1)
 set(handles.radiobutton3,'Value',0)
 set(handles.checkbox4,'Value',0)
@@ -110,13 +110,14 @@ handles.listbox_acmain = varargin{1}.listbox_acmain;
 handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
 %
 data_s = varargin{1}.current_data;
+data_s = sortrows(data_s);
 handles.current_data = data_s;
 handles.filename = varargin{1}.data_name;
 handles.unit = varargin{1}.unit;
 handles.path_temp = varargin{1}.path_temp;
 handles.linlogY = 1;
 handles.pad = 1;
-handles.checkbox_tabtchi_v = 0;
+handles.checkbox_ar1_v = 0;
 handles.checkbox_robustAR1_v = 1;
 handles.ntapers = 2;
 handles.datasample = 0;  % warning of sampling rate: uneven = 1
@@ -128,8 +129,8 @@ if max(Dt) - min(Dt) > 10 * eps('single')
     set(handles.popupmenu_tapers,'Enable','off')
     set(handles.checkbox_robust,'Enable','off')
     set(handles.checkbox_robust,'Value',0)
-    set(handles.checkbox_tabtchi,'Value',0)
-    set(handles.checkbox_tabtchi,'String','White noise')
+    set(handles.checkbox_ar1_check,'Value',0)
+    set(handles.checkbox_ar1_check,'String','White noise')
 else
     handles.method ='Multi-taper method';
     set(handles.popupmenu2, 'Value', 1);
@@ -337,7 +338,7 @@ if strcmp(method,'Multi-taper method')
         end
     end
     
-if handles.checkbox_tabtchi_v == 1
+if handles.checkbox_ar1_v == 1
     % Waitbar
     hwaitbar = waitbar(0,'Conventional red noise estimation may take a few minutes...',...    
        'WindowStyle','modal');
@@ -367,18 +368,21 @@ step = 1.5;
 
 step = 2;
     waitbar(step / steps)
-%     if strcmp(handles.checkbox_tabtchi,'tabtchi')
+%     if strcmp(handles.checkbox_ar1_check,'tabtchi')
         step = 2.5;
         waitbar(step / steps)
-        [fd,po,theored,tabtchi90,tabtchi95,tabtchi99]=redconftabtchi(datax,nw,dt,nzeropad,2);
+        [fd,po,theored,tabtchi90,tabtchi95,tabtchi99,tabtchi999]=redconftabtchi(datax,nw,dt,nzeropad,2);
 
 step = 4.5;
     waitbar(step / steps)
-        figure(figHandle);
+        figure;
+        set(gcf,'Color', 'white')
+        plot(fd,po,'LineWidth',1);
         hold all; plot(fd,theored,'LineWidth',1);
-        hold all; plot(fd,[tabtchi90,tabtchi95,tabtchi99],'LineWidth',1);
-        legend('Power','bw','Mean','90%','95%','99%')
+        hold all; plot(fd,[tabtchi90,tabtchi95,tabtchi99,tabtchi999],'LineWidth',1);
+        legend('Power','AR1','90%','95%','99%','99.9%','99.9%')
         set(gca,'XMinorTick','on','YMinorTick','on')
+        xlim([0 fmax]);
 step = 5.5;
     waitbar(step / steps)
     delete(hwaitbar)
@@ -391,7 +395,7 @@ step = 5.5;
     %filename_mtm = [dat_name,'-',num2str(nw),'piMTMspectrum.txt'];
     filename_mtm_cl = [dat_name,'-',num2str(nw),'piMTM-CL.txt'];
     CDac_pwd; % cd ac_pwd dir
-    dlmwrite(filename_mtm_cl, [fd,po,theored,tabtchi90,tabtchi95,tabtchi99], 'delimiter', ',', 'precision', 9);
+    dlmwrite(filename_mtm_cl, [fd,po,theored,tabtchi90,tabtchi95,tabtchi99,tabtchi999], 'delimiter', ',', 'precision', 9);
     disp('>>  Refresh the Main Window to see output data')
     %disp(filename_mtm)
     disp(filename_mtm_cl)
@@ -408,7 +412,7 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
     [po,fd1,pth] = plomb(datax,timex,fmax,'Pd',pd);
     figdata = figure;  
     set(gcf,'Color', 'white')
-    if handles.checkbox_tabtchi_v == 1
+    if handles.checkbox_ar1_v == 1
         plot(fd1,po,fd1,pth*ones(size(fd1')),'LineWidth',1); 
         text(0.3*fmax*[1 1 1 1],pth-.5,[repmat('P_{fa} = ',[4 1]) num2str(pfa')])
     else
@@ -456,7 +460,7 @@ elseif  strcmp(method,'Periodogram')
     else
         set(gca, 'YScale', 'linear')
     end
-    if handles.checkbox_tabtchi_v == 1
+    if handles.checkbox_ar1_v == 1
         [theored]=theoredar1ML(datax,fd1,mean(po),dt);
         tabtchired90 = theored * chi2inv(90/100,2)/2;
         tabtchired95 = theored * chi2inv(95/100,2)/2;
@@ -540,16 +544,15 @@ else
 end
 guidata(hObject, handles);
 
-% --- Executes on button press in checkbox_tabtchi.
-function checkbox_tabtchi_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox_tabtchi (see GCBO)
+% --- Executes on button press in checkbox_ar1_check.
+function checkbox_ar1_check_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_ar1_check (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of checkbox_tabtchi
+% Hint: get(hObject,'Value') returns toggle state of checkbox_ar1_check
 
-checkbox_tabtchi_v = get(hObject,'Value');
-handles.checkbox_tabtchi_v = checkbox_tabtchi_v;
+handles.checkbox_ar1_v = get(hObject,'Value');
 guidata(hObject, handles);
 
 % --- Executes on button press in checkbox_robustAR1.
@@ -558,7 +561,7 @@ function checkbox_robust_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of checkbox_tabtchi
+% Hint: get(hObject,'Value') returns toggle state of checkbox_ar1_check
 checkbox_robustAR1 = get(hObject,'Value');
 handles.checkbox_robustAR1_v = checkbox_robustAR1;
 guidata(hObject, handles);
@@ -759,22 +762,22 @@ if strcmp(method,'Multi-taper method')
     end
     set(handles.popupmenu_tapers,'Enable','on')
     set(handles.checkbox_robust,'Enable','on')
-    set(handles.checkbox_tabtchi,'Enable','on')
-    set(handles.checkbox_tabtchi,'String','Classical AR(1)')
+    set(handles.checkbox_ar1_check,'Enable','on')
+    set(handles.checkbox_ar1_check,'String','Classical AR(1)')
 elseif strcmp(method,'Periodogram')
     if handles.datasample == 1
         msgbox('Sampling rate may not be uneven! Ignore if this is not ture.','Waning')
     end
     set(handles.popupmenu_tapers,'Enable','off')
     set(handles.checkbox_robust,'Enable','off')
-    set(handles.checkbox_tabtchi,'Enable','on')
-    set(handles.checkbox_tabtchi,'String','Classical AR(1)')
+    set(handles.checkbox_ar1_check,'Enable','on')
+    set(handles.checkbox_ar1_check,'String','Classical AR(1)')
 elseif strcmp(method,'Lomb-Scargle spectrum')
     set(handles.popupmenu_tapers,'Enable','off')
     set(handles.checkbox_robust,'Enable','off')
     set(handles.checkbox_robust,'Value',0)
-    set(handles.checkbox_tabtchi,'Value',0)
-    set(handles.checkbox_tabtchi,'String','White noise')
+    set(handles.checkbox_ar1_check,'Value',0)
+    set(handles.checkbox_ar1_check,'String','White noise')
 else
     
 end
@@ -901,7 +904,7 @@ if strcmp(method,'Multi-taper method')
         end
     end 
 
-if handles.checkbox_tabtchi_v == 1
+if handles.checkbox_ar1_v == 1
     % Waitbar
     hwaitbar = waitbar(0,'Conventional red noise estimation may take a few minutes...',...    
        'WindowStyle','modal');
@@ -925,22 +928,23 @@ step = 1.5;
     col9='Mean';
     title0 = {col1;col2;col3;col4;col6;col7;col8;col9}';
     Redconf_out1=[fd1,po];
-
     handles.title0 = title0;
     handles.Redconf_out1 = Redconf_out1;
 
 step = 2;
     waitbar(step / steps)
-        step = 2.5;
-        waitbar(step / steps)
-        [fd,po,theored,tabtchi90,tabtchi95,tabtchi99]=redconftabtchi(datax,nw,dt,nzeropad,2);
+    step = 2.5;
+    waitbar(step / steps)
+    [fd,po,theored,tabtchi90,tabtchi95,tabtchi99,tabtchi999]=redconftabtchi(datax,nw,dt,nzeropad,2);
 step = 4.5;
     waitbar(step / steps)
-
-        figure(figHandle);
-        hold all; plot(fd,theored,'LineWidth',1);
-        hold all; plot(fd,[tabtchi90,tabtchi95,tabtchi99],'LineWidth',1);
-        legend('Power','bw','Mean','90%','95%','99%')
+    figdata = figure;  
+    set(gcf,'Color', 'white')
+    plot(fd,po,'LineWidth',1);
+    hold all; plot(fd,theored,'LineWidth',1);
+    hold all; plot(fd,[tabtchi90,tabtchi95,tabtchi99,tabtchi999],'LineWidth',1);
+    xlim([0 fmax]);
+    legend('Power','AR1','90%','95%','99%','99.9%','99.9%')
 step = 5.5;
 waitbar(step / steps)
 delete(hwaitbar)
@@ -961,7 +965,7 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
     [po,fd1,pth] = plomb(datax,timex,fmax,'Pd',pd);
     figdata = figure;
     colordef white;
-    if handles.checkbox_tabtchi_v == 1
+    if handles.checkbox_ar1_v == 1
         plot(fd1,po,fd1,pth*ones(size(fd1')),'LineWidth',1); 
         text(0.3*fmax*[1 1 1 1],pth-.5,[repmat('P_{fa} = ',[4 1]) num2str(pfa')])
     else
@@ -1006,16 +1010,12 @@ elseif  strcmp(method,'Periodogram')
     else
         set(gca, 'YScale', 'linear')
     end
-    if handles.checkbox_tabtchi_v == 1
+    if handles.checkbox_ar1_v == 1
         [theored]=theoredar1ML(datax,fd1,mean(po),dt);
         tabtchired90 = theored * chi2inv(90/100,2)/2;
         tabtchired95 = theored * chi2inv(95/100,2)/2;
         tabtchired99 = theored * chi2inv(99/100,2)/2;
         tabtchired999 = theored * chi2inv(99.9/100,2)/2;
-%         tabtchired90 = theored * 2*gammaincinv(90/100,2)/(2*2);
-%         tabtchired95 = theored * 2*gammaincinv(95/100,2)/(2*2);
-%         tabtchired99 = theored * 2*gammaincinv(99/100,2)/(2*2);
-%         tabtchired999 = theored * 2*gammaincinv(99.9/100,2)/(2*2);
         hold on
         plot(fd1,theored,'k-','LineWidth',2)
         plot(fd1,tabtchired90,'r-','LineWidth',1)

@@ -123,6 +123,11 @@ for j = 1: slices
         [theored]=theoredar1ML(dat(:,2),f,mean(p),dt);
         p = p - theored;
         p(p<0) = 0;   % power removing AR(1) noise
+    elseif red == 3
+        % robust
+        theored = redconf_any(f,p,dt,0.25,2);
+        p = p - theored;
+        p(p<0) = 0;   % power removing AR(1) noise
     elseif and (red >= 50, red < 100)
         [theored]=theoredar1ML(dat(:,2),f,mean(p),dt);
         facchired = 2*gammaincinv(red/100,2)/(2*2);

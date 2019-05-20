@@ -11,11 +11,11 @@ edit_acfigmain_dir= varargin{1}.edit_acfigmain_dir;
 %%
 x = data(:,1);
 y = data(:,2);
-dtmean = nanmean(diff(x));
+dtmean = nanmean(diff(sort(x)));
 robot_sr = dtmean;
-dtmedian = nanmedian(diff(x));
-dtmax = nanmax(diff(x));
-dtmin = nanmin(diff(x));
+dtmedian = nanmedian(diff(sort(x)));
+dtmax = nanmax(diff(sort(x)));
+dtmin = nanmin(diff(sort(x)));
 fnyq = 1/(2*dtmean);
 winevofft = 0.35 * (nanmax(x)-nanmin(x));
 wavep1 = 2*dtmean;  % default wavelet period 1
@@ -294,8 +294,9 @@ set(runbt,'CData',imread('menu_robot.jpg'))
             warndlg(['Waning: Unit is "',unit,'". You may choose the correct unit.'])
         end
         name1 = dat_name;
-        dat = data(~any(isnan(data),2),:);
+        
 %% Prepare
+        dat = data(~any(isnan(data),2),:);
         % check NaN
         datx = dat(:,1); 
         daty = dat(:,2);
@@ -342,16 +343,10 @@ set(runbt,'CData',imread('menu_robot.jpg'))
         %% save data
         if robot_savedata == 1
             pre_dirML = pwd;
-            fileID = fopen('ac_pwd.txt','r');
-            formatSpec = '%s';
-            ac_pwd = fscanf(fileID,formatSpec);
-
+            ac_pwd = fileread('ac_pwd.txt');
             if isdir(ac_pwd)
                 cd(ac_pwd)
             end
-
-            fclose(fileID);
-            %CDac_pwd
             dlmwrite([name1,ext], dat, 'delimiter', ',', 'precision', 9);
             disp(['>>  Saving data. See main window: ', name1,ext])
             d = dir; %get files
@@ -385,6 +380,7 @@ set(runbt,'CData',imread('menu_robot.jpg'))
         end
 %% Plot & Interpolation
         % plot data
+        disp('>>')
         figf = figure;
         set(figf,'Units','normalized','position',[0.0,0.5,0.33,0.4])
         disp('>>  Plot data')
@@ -468,14 +464,10 @@ set(runbt,'CData',imread('menu_robot.jpg'))
                 % save data
                 if robot_savedata == 1
                     pre_dirML = pwd;
-                    fileID = fopen('ac_pwd.txt','r');
-                    formatSpec = '%s';
-                    ac_pwd = fscanf(fileID,formatSpec);
+                    ac_pwd = fileread('ac_pwd.txt');
                     if isdir(ac_pwd)
                         cd(ac_pwd)
                     end
-                    fclose(fileID);
-            
                     dlmwrite([name1,ext], dati, 'delimiter', ',', 'precision', 9);
                     disp(['>>  Saving data. See main window: ', name1,ext])
                     d = dir; %get files
@@ -558,13 +550,10 @@ set(runbt,'CData',imread('menu_robot.jpg'))
             % save data
             if robot_savedata == 1
                 pre_dirML = pwd;
-                fileID = fopen('ac_pwd.txt','r');
-                formatSpec = '%s';
-                ac_pwd = fscanf(fileID,formatSpec);
+                ac_pwd = fileread('ac_pwd.txt');
                 if isdir(ac_pwd)
                     cd(ac_pwd)
                 end
-                fclose(fileID);
                 dlmwrite([name1,ext], dat, 'delimiter', ',', 'precision', 9);
                 disp(['>>  Saving data. See main window: ', name1,ext])
                 d = dir; %get files
@@ -599,6 +588,7 @@ set(runbt,'CData',imread('menu_robot.jpg'))
 
 %% power spectrum
         if check_spectral_v == 1
+            dt = median(diff(dat(:,1)));
             if robot_spectralmethod == 1
                 disp('>>')
                 disp('>>  ==========    Step 4: Power spctra & robustAR(1) noise   ==========')
@@ -620,13 +610,10 @@ set(runbt,'CData',imread('menu_robot.jpg'))
                     data2 = redconfAR1;
 
                     pre_dirML = pwd;
-                    fileID = fopen('ac_pwd.txt','r');
-                    formatSpec = '%s';
-                    ac_pwd = fscanf(fileID,formatSpec);
+                    ac_pwd = fileread('ac_pwd.txt');
                     if isdir(ac_pwd)
                         cd(ac_pwd)
                     end
-                    fclose(fileID);
                     dlmwrite(name11, data11, 'delimiter', ',', 'precision', 9);
                     dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9);
                     disp(['>>  Saving data. See main window: ', name11,ext])
@@ -662,7 +649,7 @@ set(runbt,'CData',imread('menu_robot.jpg'))
                 disp('>>')
                 disp('>>  ==========    Step 4: Power spctra & noise   ==========')
                 disp('>>')
-                [f,p,theored,tabtchi90,tabtchi95,tabtchi99]=redconftabtchi(dat(:,2),2,dt);
+                [f,p,theored,tabtchi90,tabtchi95,tabtchi99,tabtchi999]=redconftabtchi(dat(:,2),2,dt);
                 figure; semilogy(f,p,'k')
                 set(gcf,'Units','normalized','position',[0.66,0.5,0.33,0.4])
                 hold on; 
@@ -670,22 +657,20 @@ set(runbt,'CData',imread('menu_robot.jpg'))
                 semilogy(ft,tabtchi90,'r-');
                 semilogy(ft,tabtchi95,'r--','LineWidth',2);
                 semilogy(ft,tabtchi99,'b-.');
+                semilogy(ft,tabtchi999,'g.');
                 xlabel('Frequency')
                 ylabel('Power')
                 xlim([0,fmax])
-                legend('Power','Median','AR(1) 90%','AR(1) 95%','AR(1) 99%')
+                legend('Power','Median','AR(1) 90%','AR(1) 95%','AR(1) 99%','AR(1) 99.9%')
                 % save data
                 if robot_savedata == 1
                     name11 = [name1,'-peirodogram-AR1.txt'];
-                    data11 = [f,p,theored,tabtchi90,tabtchi95,tabtchi99];
+                    data11 = [f,p,theored,tabtchi90,tabtchi95,tabtchi99,tabtchi999];
                     pre_dirML = pwd;
-                    fileID = fopen('ac_pwd.txt','r');
-                    formatSpec = '%s';
-                    ac_pwd = fscanf(fileID,formatSpec);
+                    ac_pwd = fileread('ac_pwd.txt');
                     if isdir(ac_pwd)
                         cd(ac_pwd)
                     end
-                    fclose(fileID);
                     dlmwrite(name11, data11, 'delimiter', ',', 'precision', 9);
                     disp(['>>  Saving data. See main window: ', name11,ext])
                     d = dir; %get files
@@ -721,10 +706,13 @@ set(runbt,'CData',imread('menu_robot.jpg'))
         
 %% evofft
         if check_evofft_v == 1
+            
             disp('>>')
             disp('>>  ==========    Step 5: Evolutionary FFT   ==========')
             disp('>>')
-
+            datraw = dat;
+            dat = zeropad2(dat,winevofft);
+            dt = median(diff(dat(:,1)));
             fn = 1/(2*dt);
             npts = length(dat(:,1));
             if npts < 300
@@ -739,9 +727,9 @@ set(runbt,'CData',imread('menu_robot.jpg'))
             set(gcf,'Units','normalized','position',[0.0,0.05,0.33,0.4])
             subplot(2,1,1)
             whitebg('white');
-            plot(dat(:,1),dat(:,2));
-            ylim([0.9* min(dat(:,2)), 1.1*max(dat(:,2))])
-            xlim([min(dat(:,1)),max(dat(:,1))])
+            plot(datraw(:,1),datraw(:,2));
+            ylim([0.9* min(datraw(:,2)), 1.1*max(datraw(:,2))])
+            xlim([min(datraw(:,1)),max(datraw(:,1))])
             ylabel('Value')
             if unit_type == 0;
                 xlabel(['Unit (',unit,')'])
@@ -768,7 +756,7 @@ set(runbt,'CData',imread('menu_robot.jpg'))
                 set(gcf,'Name',[num2str(name1),': Running Periodogram'])
                 %ylim([0 fn])
                 ylim([0 fmax])
-                xlim([min(dat(:,1)),max(dat(:,1))])
+                xlim([min(datraw(:,1)),max(datraw(:,1))])
                 set(gca,'XMinorTick','on','YMinorTick','on')
                 set(gca, 'TickDir', 'out')
             catch
