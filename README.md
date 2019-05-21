@@ -103,14 +103,16 @@ E-mail: <i> mul450 {at} psu.edu;  limingsonglms {at} gmail.com </i> <br><br>
 
     * Many of the functions are specific to cyclostratigraphy and astrochronology, and are not found in standard, statistical packages.
 
-![gui](https://github.com/mingsongli/acycleFig/blob/master/Fig.1-GUI.jpg)
+![gui](https://github.com/mingsongli/acycleFig/blob/master/acycle1.2-GUI.png)
 
 ![](https://github.com/mingsongli/acycleFig/blob/master/acycle-demo-gif/1.-acycle-menuscutslow.gif)
 
-![structure](https://github.com/mingsongli/acycleFig/blob/master/Fig.2-design-201902.jpg)
+![structure](https://github.com/mingsongli/acycleFig/blob/master/acycle1.2-design-201905.png)
 
 _The structure of the Acycle program_
 
+![](https://github.com/mingsongli/acycleFig/blob/master/acycle-demo-gif/2.acycle-insolationS.gif)
+_Mean insolation map from March 21 to Sept. 23 for the past 100 kyr (1-100) at 50-80°N using the Laskar et al. (2004) solutions. The calculate uses a solar constant of 1365 w/m^2._
 
 ![](https://github.com/mingsongli/acycleFig/blob/master/chapter6/6.2.la04-evofft.result.png)
 
@@ -147,10 +149,8 @@ _2π multi-taper method power spectrum of the gamma ray series is shown with `20
 * [4.5 Basic Series](https://github.com/mingsongli/acycle/wiki/4.5-Basic-Series) <br>
     * [Insolation](https://github.com/mingsongli/acycle/wiki/4.5-Basic-Series#insolation)
     * [Astronomical solution](https://github.com/mingsongli/acycle/wiki/4.5-Basic-Series#astronomical-solution)
+    * [Signal/Noise Generator](https://github.com/mingsongli/acycle/wiki/4.5-Basic-Series#signalnoise-generator-since-acycle-v12)
     * [LR04 stack](https://github.com/mingsongli/acycle/wiki/4.5-Basic-Series#lr04-stack)
-    * [Sine wave](https://github.com/mingsongli/acycle/wiki/4.5-Basic-Series#sine-wave)
-    * [White noise](https://github.com/mingsongli/acycle/wiki/4.5-Basic-Series#white-noise)
-    * [Red noise](https://github.com/mingsongli/acycle/wiki/4.5-Basic-Series#red-noise)
     * [Examples](https://github.com/mingsongli/acycle/wiki/4.5-Basic-Series#examples)
 
 * [4.6 Math](https://github.com/mingsongli/acycle/wiki/4.6-Math)
