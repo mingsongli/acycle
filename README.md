@@ -14,6 +14,9 @@
 > * Acycle runs either in the MATLAB environment or as a stand-alone application on Mac and Windows
 * [Read More](https://github.com/mingsongli/acycle#abstract)
 
+### Please cite
+* Mingsong Li, Linda A. Hinnov, Lee R. Kump, 2019. _Acycle_: Time-series analysis software for paleoclimate research and education. Computers & Geosciences. 127: 12-22. https://doi.org/10.1016/j.cageo.2019.02.011.
+
 ### Wiki: Table of Content
 * [**Getting Started**](https://github.com/mingsongli/acycle/wiki/3.-Getting-Started) <br>
 * [Read More](https://github.com/mingsongli/acycle#wiki-table-of-content-1)
@@ -40,9 +43,6 @@
 * Shi, J., Jin, Z., Liu, Q., Zhang, R., Huang, Z., 2019. Glob. Planet. Change 174, 115-126. https://doi.org/10.1016/j.gloplacha.2019.01.001
 * [Find More](https://github.com/mingsongli/acycle#acycle-has-been-used-in)
 
-### Please cite
-> Mingsong Li, Linda A. Hinnov, Lee R. Kump, 2019. _Acycle_: Time-series analysis software for paleoclimate research and education. Computers & Geosciences. 127: 12-22. https://doi.org/10.1016/j.cageo.2019.02.011.
-
 
 ### Download
 
@@ -62,8 +62,10 @@
     <img src="https://github.com/mingsongli/acycleFig/blob/master/WechatIMG17.jpeg" alt="MingsongLi.com" title="Mingsong Li homepage" width="100" height="100">
 </a>
 <br>
-Mingsong Li, Penn State. April 7, 2019 <br>
+Mingsong Li, Penn State. May 20, 2019 <br>
 E-mail: <i> mul450 {at} psu.edu;  limingsonglms {at} gmail.com </i> <br><br>
+
+Website: https://mingsongli.com/
 
 <a href="https://scholar.google.com/citations?user=NYUXDW0AAAAJ&hl=en&inst=4855597776033322861">
     <img src="https://github.com/mingsongli/acycleFig/blob/master/google-scholar-icon-1.jpg" alt="Google Scholar" title="Google Scholar homepage" width="48" height="48">
