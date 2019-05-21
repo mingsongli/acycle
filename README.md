@@ -105,7 +105,13 @@ E-mail: <i> mul450 {at} psu.edu;  limingsonglms {at} gmail.com </i> <br><br>
 
 ![gui](https://github.com/mingsongli/acycleFig/blob/master/acycle1.2-GUI.png)
 
+_Acycle Graphical User Interface (GUI)_
+
+[Read More](https://github.com/mingsongli/acycle/wiki/4.-Graphical-User-Interface)
+
 ![](https://github.com/mingsongli/acycleFig/blob/master/acycle-demo-gif/1.-acycle-menuscutslow.gif)
+
+_Acycle menu_
 
 ![structure](https://github.com/mingsongli/acycleFig/blob/master/acycle1.2-design-201905.png)
 
@@ -113,23 +119,33 @@ _The structure of the Acycle program_
 
 ![](https://github.com/mingsongli/acycleFig/blob/master/acycle-demo-gif/2.acycle-insolationS.gif)
 
+_Acycle insolation toolbox_
+
+[Read More](https://github.com/mingsongli/acycle/wiki/4.5-Basic-Series#insolation)
+
 ![](https://github.com/mingsongli/acycleFig/blob/master/chapter4/Insol-t-1-100ka-day-80-264-lat-50-80-meandaily-La04.gif)
 
 _Mean insolation map from March 21 to Sept. 23 for the past 100 kyr (1-100) at 50-80°N using the Laskar et al. (2004) solutions. The calculate uses a solar constant of 1365 w/m^2._
 
+[Read More](https://github.com/mingsongli/acycle/wiki/4.5-Basic-Series#insolation)
 
 ![](https://github.com/mingsongli/acycleFig/blob/master/chapter6/6.2.la04-evofft.result.png)
 
 _Evolutionary FFT of the astronomical solution._
 
+[Read More](https://github.com/mingsongli/acycle/wiki/Examples#example-2-la2004-astronomical-solution-etp)
 
 ![](https://github.com/mingsongli/acycleFig/blob/master/chapter6/6.3.wayao.detrend.set.png)
 
 _Detrending GUI and results_
 
+[Read More](https://github.com/mingsongli/acycle/wiki/4.7.1-Detrending)
+
 ![](https://github.com/mingsongli/acycleFig/blob/master/chapter6/6.3.wayao.spectral.result.png)
 
 _2π multi-taper method power spectrum of the gamma ray series is shown with `20%` median-smoothed spectrum, background AR(1) model, and 90%, 95%, 99%,  and 99.9% confidence levels._
+
+[Read More](https://github.com/mingsongli/acycle/wiki/4.7.3-Spectral-Analysis) and [example](https://github.com/mingsongli/acycle/wiki/Examples#example-3-carnian-cyclostratigraphy)
 
 ---
 ## Wiki: Table of Content
