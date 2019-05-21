@@ -112,7 +112,11 @@ E-mail: <i> mul450 {at} psu.edu;  limingsonglms {at} gmail.com </i> <br><br>
 _The structure of the Acycle program_
 
 ![](https://github.com/mingsongli/acycleFig/blob/master/acycle-demo-gif/2.acycle-insolationS.gif)
+
+![](https://github.com/mingsongli/acycleFig/blob/master/chapter4/Insol-t-1-100ka-day-80-264-lat-50-80-meandaily-La04.gif)
+
 _Mean insolation map from March 21 to Sept. 23 for the past 100 kyr (1-100) at 50-80°N using the Laskar et al. (2004) solutions. The calculate uses a solar constant of 1365 w/m^2._
+
 
 ![](https://github.com/mingsongli/acycleFig/blob/master/chapter6/6.2.la04-evofft.result.png)
 
