@@ -22,7 +22,7 @@ function varargout = evofftGUI(varargin)
 
 % Edit the above text to modify the response to help evofftGUI
 
-% Last Modified by GUIDE v2.5 19-May-2019 16:13:23
+% Last Modified by GUIDE v2.5 21-May-2019 11:37:51
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -75,11 +75,12 @@ set(handles.checkbox2,'position',[0.293,0.45,0.36,0.1])
 set(handles.checkbox3,'position',[0.293,0.35,0.36,0.1])
 set(handles.checkbox5,'position',[0.293,0.25,0.36,0.1])
 set(handles.checkbox4,'position',[0.293,0.15,0.36,0.1])
-set(handles.checkbox6,'position',[0.293,0.05,0.36,0.1])
+set(handles.checkbox6,'position',[0.293,0.05,0.2,0.1])
 set(handles.checkbox7,'position',[0.029,0.35,0.25,0.08])
 set(handles.checkbox7,'Value',0)
 set(handles.checkbox8,'position',[0.029,0.45,0.25,0.08])
 set(handles.checkbox8,'Value',1)
+set(handles.popupmenu4,'position',[0.46,0.03,0.18,0.11])
 
 set(handles.uipanel6,'position',[0.029,0.05,0.251,0.28])
 set(handles.uipanel10,'position',[0.637,0.1,0.251,0.42])
@@ -135,6 +136,7 @@ handles.rotate = 0;
 handles.method = 'Fast Fourier transform (LAH)';
 handles.lenthx = xmax-xmin;
 handles.time_0pad = 1;
+handles.padtype = 1;
 % if number of calculations is larger than 500;
 % then, a large step is recommended. This way, the ncal is ~500.
 ncal = (xmax-xmin - handles.window)/mean1;
@@ -649,7 +651,7 @@ end
     
 if handles.time_0pad == 1
     % restore time/depth
-    data = zeropad2(data,window);
+    data = zeropad2(data,window,handles.padtype);
 else
     data(:,2) = data(:,2) - mean(data(:,2));
 end
@@ -1240,3 +1242,41 @@ function checkbox8_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox8
+
+
+% --- Executes on selection change in popupmenu4.
+function popupmenu4_Callback(hObject, eventdata, handles)
+% hObject    handle to popupmenu4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu4 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popupmenu4
+contents = cellstr(get(hObject,'String'));
+val = contents{get(hObject,'Value')};
+if strcmp(val,'zero')
+    %disp('zero')
+    handles.padtype = 1;
+elseif strcmp(val,'mirror')
+    %disp('mirror')
+    handles.padtype = 2;
+elseif strcmp(val,'mean')
+    %disp('mean')
+    handles.padtype = 3;
+elseif strcmp(val,'random')
+    %disp('random')
+    handles.padtype = 4;
+end
+guidata(hObject, handles);
+
+% --- Executes during object creation, after setting all properties.
+function popupmenu4_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popupmenu4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
