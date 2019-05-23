@@ -356,25 +356,29 @@ function edit9_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 try
-    colorgrid = str2double(get(hObject,'String'));
+    colorgrid = str2double(get(handles.edit9,'String'));
     if colorgrid > 0
-        handles.colorgrid = round(colorgrid);
+        handles.colorgrid = colorgrid;
+        %disp('set grid')
     else
         handles.colorgrid = [];
     end
 catch
     msgbox('Grid # should be a positive integer','Error')
 end
-
+disp(handles.colorgrid);
 try figure(handles.evofftfig)
     %colormap(jet)
     if isempty(handles.colorgrid)
         % no grid
         setcolor = handles.color;
+        %disp('no set grid')
     else
         setcolor = [handles.color,'(',round(num2str(handles.colorgrid)),')'];
+        %disp('1 set grid')
     end
     try colormap(setcolor)
+        %disp('set grid ok')
     catch
         colormap default
     end

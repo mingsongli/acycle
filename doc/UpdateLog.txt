@@ -13,13 +13,15 @@ By      : Mingsong Li
 
 	2. Evolutionary spectral analysis: add one option for zero-padding top and bottom of series, this is to add back the missed half-window due to the sliding window methods. However, this might add additional incorrect cycles for a series with trend at either end of the series.
 
-		Thanks Dr. Nicolas R. Thibault (University of Copenhagen, Denmark) for this wonderful suggestion.
+		Thanks Dr. Nicolas R. Thibault (University of Copenhagen, Denmark) for this suggestion.
 
 	3. Evolutionary spectral analysis: add panels showing 2-pi-MTM power spectrum and data-series itself
 
-		Thanks Daniel R. Franco (Department of Geophysics, National Observatory, Brazil) for this wonderful suggestion.
+		Thanks Dr. Daniel R. Franco (Department of Geophysics, National Observatory, Brazil) for this suggestion.
 
-	4. Support SPACE in file name and folder name.
+	4. Support SPACE in file name and folder name. 
+
+		Thanks Dr. Feng Cheng (Earth and Environmental Sciences, University of Rochester) for this suggestion.
 
 	5. COCO: detect test limits of sedimentation rate automatically.
 
@@ -109,7 +111,7 @@ By      : Mingsong Li (Penn State)
 	1. fix a bug in the "Basic Series" - "Astronomical solution" GUI
 
         Thanks Xiaoni Hu at Penn State for her help 
-            to identify this bug before my departure
+            to identify this bug before my departure to China for visa
 
     2. Remove GAUSSIAN PROCESS REGRESSION AND CLASSIFICATION Toolbox 
 

@@ -2,7 +2,7 @@
     <img src="https://github.com/mingsongli/acycleFig/blob/master/default_icon_1024-git.gif" alt="homepage" title="Acycle GitHub homepage">
 </a>
 
-[![](https://img.shields.io/badge/version-v1.2-blue.svg)]()
+[![](https://img.shields.io/badge/version-v1.2.1-blue.svg)]()
 [![](https://img.shields.io/badge/license-GPL-brightgreen.svg)](https://www.gnu.org/licenses/)
 [![](https://img.shields.io/badge/platform-Mac_Win-green.svg)]()
 ![](https://img.shields.io/badge/language-MatLab-red.svg)
@@ -259,14 +259,9 @@ _2π multi-taper method power spectrum of the gamma ray series is shown with `20
     > Not only is this software powerful and effective, it is also simple to use and therefore benefits researchers and at all levels within the paleoclimatology community, from novices to experts.
 
 
-<a href="https://www.unex.es/organizacion/servicios-universitarios/servicios/comunicacion/archivo/2012/noviembre-de-2012/5-de-noviembre-de-2012/arsenio-munoz-de-la-pena-obtiene-un-premio-del-gobierno-argentino-en-cooperacion-internacional#.XMJMspNKh24">
-    <img src="https://www.unex.es/organizacion/servicios-universitarios/servicios/comunicacion/archivo/2012/noviembre-de-2012/5-de-noviembre-de-2012/arsenio-munoz-de-la-pena-obtiene-un-premio-del-gobierno-argentino-en-cooperacion-internacional/images/arsenio.jpg/pa_thumb/imagex300x200.jpeg" alt="Arsenio Muñoz de la Peña" title="Arsenio Muñoz de la Peña" width="90" height="111">
-</a>
+* **Dr. Arsenio Muñoz Jiménez** (Department of Earth Sciences, University of Zaragoza, Spain):
 
-* **Dr. [Arsenio Muñoz de la Peña](https://www.unex.es/organizacion/servicios-universitarios/servicios/comunicacion/archivo/2012/noviembre-de-2012/5-de-noviembre-de-2012/arsenio-munoz-de-la-pena-obtiene-un-premio-del-gobierno-argentino-en-cooperacion-internacional#.XMJMspNKh24)** (Professor, Department of Analytical Chemistry, University of Zaragoza, Spain):
-
-    > "Thank you very much and congratulations for the _**acycle**_ software. I am using it and it is very very useful
-and interesting."
+    > "Thank you very much and congratulations for the _**acycle**_ software. I am using it and it is very very useful and interesting."
 
 * **Dr. Marco Franceschi** (Professor, Department of Geosciences, University of Padova, Italy):
 

@@ -54,7 +54,7 @@ function prewhiten_OpeningFcn(hObject, eventdata, handles, varargin)
 
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
-set(gcf,'Name','Acycle: Detrending')
+set(gcf,'Name','Acycle: Curve Fitting | Detrending | Smoothing')
 h=get(gcf,'Children');  % get all content
 h1=findobj(h,'FontUnits','norm');  % find all font units as points
 set(h1,'FontUnits','points','FontSize',12);  % set as norm

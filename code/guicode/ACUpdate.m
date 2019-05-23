@@ -46,6 +46,8 @@ function ACUpdate(ac_version_offline,ac_date_offline,ac_verion_offline,ac_date_o
         web(url,'-browser')
         url = 'https://github.com/mingsongli/acycle';
         web(url,'-browser')
+        url = 'https://github.com/mingsongli/acycle/blob/master/doc/UpdateLog.txt';
+        web(url,'-browser')
         delete(gcf)
     end
 
@@ -53,6 +55,8 @@ function ACUpdate(ac_version_offline,ac_date_offline,ac_verion_offline,ac_date_o
         url = 'https://mingsongli.com/acycle';
         web(url,'-browser')
         url = 'https://github.com/mingsongli/acycle';
+        web(url,'-browser')
+        url = 'https://github.com/mingsongli/acycle/blob/master/doc/UpdateLog.txt';
         web(url,'-browser')
         delete(gcf)
         fileID = fopen(which('ac_date.txt'),'r');
