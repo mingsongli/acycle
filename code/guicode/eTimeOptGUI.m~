@@ -69,9 +69,8 @@ set(handles.hmain,'position',[0.2,0.3,0.35,0.6]) % set position
 
 set(handles.text2,'position',[0.044,0.91,0.1,0.05])
 set(handles.text3,'position',[0.16,0.91,0.6,0.05])
-set(handles.checkbox2,'position',[0.83,0.95,0.159,0.05])
-set(handles.checkbox6,'position',[0.662,0.892,0.165,0.05])
-set(handles.popupmenu1,'position',[0.83,0.878,0.159,0.056])
+set(handles.checkbox2,'position',[0.77,0.92,0.159,0.05])
+set(handles.checkbox6,'position',[0.49,0.92,0.159,0.05])
 
 set(handles.panel_sedrate,'position',[0.05,0.71,0.9,0.194])
 set(handles.radiobutton1,'position',[0.023,0.515,0.162,0.338])
@@ -121,7 +120,7 @@ set(handles.pushbutton1,'position',[0.84,0.06,0.11,0.1])
 set(handles.checkbox1,'position',[0.57,0.11,0.26,0.056])
 set(handles.checkbox4,'position',[0.57,0.05,0.26,0.056])
 
-set(handles.text16,'position',[0.05,0.96,0.78,0.04])
+set(handles.text16,'position',[0.05,0.96,0.9,0.04])
 set(handles.text16,'FontSize',10);  % set as norm
 
 set(gcf,'Name','Acycle: eTimeOpt')
@@ -262,8 +261,6 @@ handles.flipy = 1;
 handles.normal = 0;
 handles.age = 0;
 handles.plot_2d = 1;
-handles.time_0pad = 1;  % updated acycle v1.2.1
-handles.padtype = 1; % updated acycle v1.2.1
 %
 try figure(hwarn)
 catch
@@ -333,10 +330,6 @@ else
     end
 end
 %dat
-if handles.time_0pad == 1
-    % restore time/depth
-    dat = zeropad2(dat,window,handles.padtype);
-end
 %window,step
 [senv,spow,sopt,x_grid,y_grid,sr_p] = ...
     eTimeOpt(dat,window,step,sedmin,sedmax,numsed,0,linLog,fit,fl,fh,roll,...
@@ -1137,8 +1130,6 @@ function checkbox6_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox6
 
-handles.time_0pad = get(hObject,'Value');
-guidata(hObject, handles);
 
 % --- Executes on selection change in popupmenu1.
 function popupmenu1_Callback(hObject, eventdata, handles)
@@ -1148,22 +1139,7 @@ function popupmenu1_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns popupmenu1 contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupmenu1
-contents = cellstr(get(hObject,'String'));
-val = contents{get(hObject,'Value')};
-if strcmp(val,'zero')
-    %disp('zero')
-    handles.padtype = 1;
-elseif strcmp(val,'mirror')
-    %disp('mirror')
-    handles.padtype = 2;
-elseif strcmp(val,'mean')
-    %disp('mean')
-    handles.padtype = 3;
-elseif strcmp(val,'random')
-    %disp('random')
-    handles.padtype = 4;
-end
-guidata(hObject, handles);
+
 
 % --- Executes during object creation, after setting all properties.
 function popupmenu1_CreateFcn(hObject, eventdata, handles)
