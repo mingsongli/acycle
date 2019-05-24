@@ -138,7 +138,7 @@ xlabel('Sedimentation rate (cm/kyr)')
 ylabel('Depth (m)')
 zlabel('CHO')
 %figurename ='\rho * H_0 SL * # orbital parameters';
-figurename ='\rho * H_0 SL';
+figurename ='COCO * H_0 SL';
 title(figurename)
 if plotn < 0
     set(gca,'Ydir','reverse')

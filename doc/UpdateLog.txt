@@ -2,6 +2,16 @@
 
 Update Log
 
+_____________________________________
+
+Version : ACycle_v1.2.1
+Date    : May 23, 2019; 9:27 pm
+By      : Mingsong Li
+
+	1. Padding the first column of data:
+		Thanks Dr. Nicolas R. Thibault (University of Copenhagen, Denmark) for this suggestion.
+	    has also been used in eCOCO, power decomposition analysis, and XXX tools.
+
 
 _____________________________________
 

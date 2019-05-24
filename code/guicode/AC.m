@@ -2414,7 +2414,8 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                     'DATA: MAX  sedimentation rate (cm/kyr)',...
                     'DATA: STEP sedimentation rate (cm/kyr)',...
                     'Number of simulations (e.g., 200, 600, 2000)',...
-                    'Remove red noise: 0 = No, 1 = x/AR(1), 2 = x-AR(1)'};
+                    'Remove red noise: 0 = No, 1 = x/AR(1), 2 = x-AR(1)',...
+                    'Depth Padding: 0=No, 1=zero, 2=mirror; 3=mean; 4=random'};
                 dlg_title = 'Evolutionary Correlation Coefficient (eCOCO): DATA';
                 num_lines = 1;
                 eCOCO_win = 0.25*(data(end,1)-data(1,1));
@@ -2422,7 +2423,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                 
                 defaultans = {num2str(eCOCO_win),num2str(step),...
                     num2str(handles.sr1),num2str(handles.sr2),num2str(handles.srstep),...
-                    num2str(handles.nsim),num2str(handles.red)};
+                    num2str(handles.nsim),num2str(handles.red),'0'};
                 
                 options.Resize='on';
                 answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
@@ -2437,11 +2438,16 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                     srstep = str2double(answer{5});
                     nsim = str2double(answer{6});
                     red = str2double(answer{7});
+                    padtype = str2double(answer{8});
                     delinear = 0;
                     adjust = 0;
                     slices = 1;
                     plotn = 1;
                     disp('>> Wait ...')
+                    
+                    if padtype > 0
+                        data = zeropad2(data,window,padtype);
+                    end
                     
                     handles.acfig = gcf; % read info of AC main window
                     
@@ -2454,6 +2460,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                     param2 = ['Tested sedimentation rate: from ',num2str(sr1),' to ',num2str(sr2),' with a step of ', num2str(srstep), ' cm/kyr'];
                     param3 = ['Number of Monte Carlo simulations ',num2str(nsim), '. Remove red noise: ',num2str(red),'. Zero padding is ',num2str(pad1)];
                     param4 = ['Data: ',num2str(data(1,1)),' to ',num2str(data(end,1)),'m. Sampling rate: ', num2str(srm),'. Number of data points: ', num2str(npts)];
+                    param5 = ['The 1st column Padding type: ',num2str(padtype),' (0=No, 1=zero padding, 2=mirror padding; 3=mean padding; 4=random padding)'];
                     disp('')
                     disp(' - - - - - - - - - - - - - Summary - - - - - - - - - - - ')
                     disp(data_name);
@@ -2464,6 +2471,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                     disp(param2);
                     disp(param3);
                     disp(param4);
+                    disp(param5)
                     disp(' - - - - - - - - - - - - - - End - - - - - - - - - - - - ')
                     toc
                     
@@ -2497,6 +2505,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                     fprintf(fileID,'%s\n',param2);
                     fprintf(fileID,'%s\n',param3);
                     fprintf(fileID,'%s\n',param4);
+                    fprintf(fileID,'%s\n',param5);
                     fprintf(fileID,'%s\n',' - - - - - - - - - - - - - - End - - - - - - - - - - - -');
                     fclose(fileID);
                     
@@ -4182,7 +4191,7 @@ if nsim_yes < 2
     plot_selected = get(handles.listbox_acmain,'Value');
     nplot = length(plot_selected);   % length
 if nplot > 1
-    warndlg('Select 1 data','Error');
+    warndlg('Select 1 data only','Error');
 end
 if and ((min(plot_selected) > 2), (nplot == 1))
     data_name = char(contents(plot_selected));
@@ -4647,10 +4656,11 @@ if check == 1;
         'Upper cutoff frequency (<= nyquist)',...
         'Step of calculations:',...
         'Zero-padding number:',...
-        'Save Results (1 = Yes; 0 = No):'};
+        'Save Results (1 = Yes; 0 = No):',...
+        'Padding Depth: 0=No, 1=zero, 2=mirror; 3=mean; 4=random'};
     dlg_title = 'Power Decomposition analysis';
     num_lines = 1;
-    defaultans = {'1/45 1/25','500','2',num2str(handles.f1),num2str(handles.f2),'1','5000','0'};
+    defaultans = {'1/45 1/25','500','2',num2str(handles.f1),num2str(handles.f2),'1','5000','0','0'};
     options.Resize='on';
     answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
     if ~isempty(answer)
@@ -4662,6 +4672,7 @@ if check == 1;
         step = str2double(answer{6});
         pad = str2double(answer{7});
         savedata = str2double(answer{8});
+        padtype = str2double(answer{9});
         for i = 1:nplot
             
             figure;
@@ -4671,7 +4682,25 @@ if check == 1;
             GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
             [~,dat_name,ext] = fileparts(plot_filter_s);
             data = load(plot_filter_s);
+            
             data = data(~any(isnan(data),2),:);
+            diffx = diff(data(:,1));
+            if any(diffx(:) < 0)
+                 warndlg('Warning: data not sorted. Now sorting ... ')
+                 disp('>>  ==========        sorting')
+                 data = sortrows(data); % sort data
+            end
+            if any(diffx(:) == 0)
+                warndlg('Warning: duplicated numbers are replaced with the mean')
+                data=findduplicate(data); % find duplicate
+            end
+            if max(diffx)-min(diffx) <= eps(5)
+                warndlg('Warning: Data may not be evenly spaced. Interpolation using median sampling rate')
+                data = interpolate(data,median(diffx));
+            end
+            if padtype > 0
+                data = zeropad2(data,window,padtype);
+            end
             
             disp1 = ['Data: ',plot_filter_s, 'Window = ',num2str(window),' kyr; NW =',num2str(nw)];
             disp2 = ['    cutoff freqency:',num2str(ftmin),'-',num2str(fterm),'; Step =',num2str(step),'; Pad = ',num2str(pad)];
