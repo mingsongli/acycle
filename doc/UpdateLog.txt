@@ -16,6 +16,8 @@ By      : Mingsong Li
 
 	    has also been used in eCOCO, power decomposition analysis, and eTimeOpt tools.
 
+	3. Refine noise model for rho1
+
 
 _____________________________________
 

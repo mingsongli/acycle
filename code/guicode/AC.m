@@ -4205,16 +4205,24 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                 samplerate = diff(data(:,1));
                 ndata = length(data(:,1));
                 datalength = data(length(data(:,1)),1)-data(1,1);
-                samp1 = min(samplerate);
-                samp2 = max(samplerate);
-                sampmedian = median(samplerate);
+                %samp1 = min(samplerate);  % old version
+                %samp2 = max(samplerate);  % old version
+                samp95 = prctile(samplerate,95);  % new version; 1-2 * sample 95% percentile
+                %sampmedian = median(samplerate);
 
                 if nsim_yes == 0
+                    
+                    if .3 * datalength > 400
+                        window1 = 400;
+                    else
+                        window1 = .3 * datalength;
+                    end
+                    
                     prompt = {'Window',...
-                    'Sample rate (Default = median)'};
+                    'Sample rate (Default = 95% percentile)'};
                     dlg_title = 'Evolutionary RHO in AR(1)';
                     num_lines = 1;
-                    defaultans = {num2str(.3 * datalength),num2str(sampmedian)};
+                    defaultans = {num2str(window1),num2str(samp95)};
                     options.Resize='on';
                     answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
                     if ~isempty(answer)
@@ -4265,8 +4273,17 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                 else
                     interpn = ndata;
                 end
-                defaultans = {'1000',num2str(.3 * datalength),num2str(.4 * datalength),...
-                    num2str(samp1),num2str(samp2),num2str(interpn),'15'};
+                
+                if .3 * datalength > 400
+                    window1 = 400;
+                    window2 = 500;
+                else
+                    window1 = .3 * datalength;
+                    window2 = .4 * datalength;
+                end
+                
+                defaultans = {'1000',num2str(window1),num2str(window2),...
+                    num2str(samp95),num2str(2*samp95),num2str(interpn),'15'};
                 options.Resize='on';
                 answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
                 if ~isempty(answer)
