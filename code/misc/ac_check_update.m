@@ -2,8 +2,7 @@
 ac_date_offline = load('ac_date.txt');
 
 fileID = fopen('ac_version.txt','r');
-formatSpec = '%s';
-ac_version_offline = fscanf(fileID,formatSpec);
+ac_version_offline = fscanf(fileID,'%d');
 fclose(fileID);
 
 ac_v_link = 'https://raw.githubusercontent.com/mingsongli/acycle/master/code/bin/ac_date.txt';

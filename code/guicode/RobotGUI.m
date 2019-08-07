@@ -606,7 +606,7 @@ set(runbt,'CData',imread('menu_robot.jpg'))
                 if robot_savedata == 1
                     name11 = [name1,'-',num2str(2),'piMTM-RobustAR1.txt'];
                     data11 = redconfML96;
-                    name2 = [name1,'-',num2str(2),'piMTM-ConvenAR1.txt'];
+                    name2 = [name1,'-',num2str(2),'piMTM-ClassicAR1.txt'];
                     data2 = redconfAR1;
 
                     pre_dirML = pwd;

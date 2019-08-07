@@ -22,7 +22,7 @@ function varargout = spectrum(varargin)
 
 % Edit the above text to modify the response to help spectrum
 
-% Last Modified by GUIDE v2.5 19-May-2019 23:46:36
+% Last Modified by GUIDE v2.5 07-Aug-2019 18:42:16
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -67,12 +67,18 @@ set(handles.text7,'position', [0.05,0.875,0.235,0.06])
 set(handles.popupmenu2,'position', [0.3,0.823,0.62,0.12])
 
 set(handles.uipanel2,'position', [0.05,0.41,0.445,0.37])
-set(handles.text3,'position', [0.04,0.8,0.483,0.176])
-set(handles.popupmenu_tapers,'position', [0.523,0.635,0.443,0.365])
-set(handles.text5,'position', [0.055,0.486,0.436,0.176])
-set(handles.radiobutton3,'position', [0.503,0.405,0.195,0.311])
-set(handles.edit3,'position', [0.664,0.419,0.154,0.23])
-set(handles.text6,'position', [0.859,0.446,0.081,0.176])
+set(handles.text3,'position', [0.04,0.6,0.6,0.38])
+set(handles.popupmenu_tapers,'position', [0.6,0.635,0.38,0.365])
+set(handles.text5,'position', [0.055,0.38,0.436,0.176])
+set(handles.radiobutton5,'position', [0.503,0.5,0.12,0.2])
+set(handles.radiobutton5,'Value', 0)
+set(handles.edit7,'position', [0.664,0.5,0.3,0.2])
+set(handles.edit7,'String', '2.0')
+set(handles.edit7,'Enable', 'off')
+
+set(handles.radiobutton3,'position', [0.05,0.054,0.14,0.311])
+set(handles.edit3,'position', [0.19,0.089,0.154,0.23])
+set(handles.text6,'position', [0.35,0.12,0.081,0.176])
 set(handles.radiobutton4,'position', [0.503,0.054,0.195,0.365])
 set(handles.edit4,'position', [0.664,0.089,0.3,0.23])
 
@@ -80,18 +86,21 @@ set(handles.uipanel3,'position', [0.05,0.082,0.445,0.32])
 set(handles.checkbox_robust,'position', [0.2,0.516,0.75,0.37])
 set(handles.checkbox_ar1_check,'position', [0.2,0.177,0.75,0.37])
 
-set(handles.uibuttongroup1,'position', [0.5,0.31,0.45,0.47])
-set(handles.radiobutton_fmax,'position', [0.089,0.638,0.473,0.324])
-set(handles.text_nyquist,'position', [0.541,0.723,0.356,0.183])
-set(handles.radiobutton_input,'position', [0.089,0.349,0.4,0.325])
-set(handles.edit_fmax_input,'position', [0.541,0.384,0.356,0.267])
-set(handles.checkbox4,'position', [0.089,0.07,0.507,0.267])
-set(handles.checkbox5,'position', [0.541,0.07,0.507,0.267])
+set(handles.uibuttongroup1,'position', [0.5,0.25,0.45,0.52])
+set(handles.radiobutton_fmax,'position', [0.089,0.75,0.473,0.2])
+set(handles.text_nyquist,'position', [0.541,0.76,0.356,0.13])
+set(handles.radiobutton_input,'position', [0.089,0.5,0.4,0.2])
+set(handles.edit_fmax_input,'position', [0.541,0.52,0.356,0.2])
+
+set(handles.checkbox4,'position', [0.089,0.25,0.507,0.2])
+set(handles.checkbox5,'position', [0.541,0.25,0.507,0.2])
+set(handles.checkbox6,'position', [0.089,0.05,0.8,0.2])
+set(handles.checkbox6,'String', 'log(frequency)')
 
 set(handles.pushbutton17,'position', [0.5,0.082,0.166,0.12])
 set(handles.pushbutton3,'position', [0.67,0.082,0.282,0.12])
 
-set(handles.checkbox_ar1_check,'String','Classical AR(1)')
+set(handles.checkbox_ar1_check,'String','Classic AR(1)')
 % Choose default command line output for spectrum
 handles.output = hObject;
 
@@ -102,6 +111,7 @@ set(handles.radiobutton4,'Value',1)
 set(handles.radiobutton3,'Value',0)
 set(handles.checkbox4,'Value',0)
 set(handles.checkbox5,'Value',1)
+set(handles.checkbox6,'Value', 0)
 set(handles.radiobutton_fmax,'Value',1)
 set(handles.radiobutton_input,'Value',0)
 % contact with acycle main window
@@ -116,10 +126,11 @@ handles.filename = varargin{1}.data_name;
 handles.unit = varargin{1}.unit;
 handles.path_temp = varargin{1}.path_temp;
 handles.linlogY = 1;
+handles.logfreq = 0;
 handles.pad = 1;
 handles.checkbox_ar1_v = 0;
 handles.checkbox_robustAR1_v = 1;
-handles.ntapers = 2;
+handles.timebandwidth = 2;
 handles.datasample = 0;  % warning of sampling rate: uneven = 1
 Dt = diff(data_s(:,1));
 if max(Dt) - min(Dt) > 10 * eps('single')
@@ -169,8 +180,8 @@ function popupmenu_tapers_Callback(hObject, eventdata, handles)
 % Hints: contents = cellstr(get(hObject,'String')) returns popupmenu_tapers contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupmenu_tapers
 contents = cellstr(get(hObject,'String'));
-handles.ntapers = str2num(contents{get(hObject,'Value')});
-% handles.ntapers = str2num(get(hObject, 'String'));
+handles.timebandwidth = str2num(contents{get(hObject,'Value')});
+% handles.timebandwidth = str2num(get(hObject, 'String'));
  guidata(hObject, handles);
 
 % --- Executes during object creation, after setting all properties.
@@ -237,7 +248,7 @@ method = handles.method;
 df = 1/(timex(nlength)-timex(1));
 check_plot_fmax = get(handles.radiobutton_fmax,'Value');
 plot_fmax_input = str2double(get(handles.edit_fmax_input,'String'));
-nw = handles.ntapers;
+nw = handles.timebandwidth;
 bw=2*nw*df;
 
 if handles.pad > 0
@@ -281,7 +292,7 @@ if strcmp(method,'Multi-taper method')
             end
             name1 = [dat_name,'-',num2str(nw),'piMTM-RobustAR1',ext];
             data1 = redconfML96;
-            name2 = [dat_name,'-',num2str(nw),'piMTM-ConvenAR1',ext];
+            name2 = [dat_name,'-',num2str(nw),'piMTM-ClassicAR1',ext];
             data2 = redconfAR1;
             
             title([dat_name,'-',num2str(nw),'\pi-MTM-Robust-AR1: \rho = ',num2str(rhoM),'. S0 =',num2str(s0M)])
@@ -294,6 +305,9 @@ if strcmp(method,'Multi-taper method')
                 set(gca, 'YScale', 'log')
             else
                 set(gca, 'YScale', 'linear')
+            end
+            if handles.logfreq == 1
+                set(gca,'xscale','log')
             end
             figdata = gcf;
             CDac_pwd;
@@ -314,10 +328,10 @@ if strcmp(method,'Multi-taper method')
     else 
         [po,w]=pmtm(datax,nw);
     end
-        fd1=w/(2*pi*dt);
-        % Plot figure MTM
+    fd1=w/(2*pi*dt);
+    % Plot figure MTM
         
-    if handles.checkbox_robustAR1_v == 0
+    if and( handles.checkbox_robustAR1_v == 0, handles.checkbox_ar1_v == 0)
         figdata = figure;
         figHandle = gcf;
         set(gcf,'Color', 'white')
@@ -336,73 +350,80 @@ if strcmp(method,'Multi-taper method')
         else
             set(gca, 'YScale', 'linear')
         end
+        if handles.logfreq == 1
+            set(gca,'xscale','log')
+        end
     end
     
-if handles.checkbox_ar1_v == 1
-    % Waitbar
-    hwaitbar = waitbar(0,'Conventional red noise estimation may take a few minutes...',...    
-       'WindowStyle','modal');
-    hwaitbar_find = findobj(hwaitbar,'Type','Patch');
-    set(hwaitbar_find,'EdgeColor',[0 0.9 0],'FaceColor',[0 0.9 0]) % changes the color to blue
-    setappdata(hwaitbar,'canceling',0)
-    steps = 6;
-    step = 1;
-    waitbar(step / steps)
-
-step = 1.5;
-    waitbar(step / steps)
-    % Prepare redconfidence level data for excel output
-    col1='Frequency(cycles/)';
-    col2='Power';
-    col3='Frequency(cycles/)';
-    col4='TheoreticalRed';
-    col6='90%tchi2';
-    col7='95%tchi2';
-    col8='99%tchi2';
-    col9='Mean';
-    title0 = {col1;col2;col3;col4;col6;col7;col8;col9}';
-    Redconf_out1=[fd1,po];
-
-    handles.title0 = title0;
-    handles.Redconf_out1 = Redconf_out1;
-
-step = 2;
-    waitbar(step / steps)
-%     if strcmp(handles.checkbox_ar1_check,'tabtchi')
-        step = 2.5;
+    if handles.checkbox_ar1_v == 1
+        % Waitbar
+        hwaitbar = waitbar(0,'Classic red noise estimation may take a few minutes...',...    
+           'WindowStyle','modal');
+        hwaitbar_find = findobj(hwaitbar,'Type','Patch');
+        set(hwaitbar_find,'EdgeColor',[0 0.9 0],'FaceColor',[0 0.9 0]) % changes the color to blue
+        setappdata(hwaitbar,'canceling',0)
+        steps = 6;
+        step = 1;
         waitbar(step / steps)
-        [fd,po,theored,tabtchi90,tabtchi95,tabtchi99,tabtchi999]=redconftabtchi(datax,nw,dt,nzeropad,2);
 
-step = 4.5;
-    waitbar(step / steps)
-        figure;
-        set(gcf,'Color', 'white')
-        plot(fd,po,'LineWidth',1);
-        hold all; plot(fd,theored,'LineWidth',1);
-        hold all; plot(fd,[tabtchi90,tabtchi95,tabtchi99,tabtchi999],'LineWidth',1);
-        legend('Power','AR1','90%','95%','99%','99.9%','99.9%')
-        set(gca,'XMinorTick','on','YMinorTick','on')
+    step = 1.5;
+        waitbar(step / steps)
+        % Prepare redconfidence level data for excel output
+        col1='Frequency(cycles/)';
+        col2='Power';
+        col3='Frequency(cycles/)';
+        col4='TheoreticalRed';
+        col6='90%tchi2';
+        col7='95%tchi2';
+        col8='99%tchi2';
+        col9='Mean';
+        title0 = {col1;col2;col3;col4;col6;col7;col8;col9}';
+        Redconf_out1=[fd1,po];
+
+        handles.title0 = title0;
+        handles.Redconf_out1 = Redconf_out1;
+
+    step = 2;
+        waitbar(step / steps)
+    %     if strcmp(handles.checkbox_ar1_check,'tabtchi')
+            step = 2.5;
+            waitbar(step / steps)
+            [fd,po,theored,tabtchi90,tabtchi95,tabtchi99,tabtchi999]=redconftabtchi(datax,nw,dt,nzeropad,2);
+
+    step = 4.5;
+        waitbar(step / steps)
+            figHandle = figure;
+            set(gcf,'Color', 'white')
+            plot(fd,po,'LineWidth',1);
+            hold on; plot(fd,theored,'LineWidth',1);
+            hold on; plot(fd,[tabtchi90,tabtchi95,tabtchi99,tabtchi999],'LineWidth',1);
+            legend('Power','AR1','90%','95%','99%','99.9%')
+            set(gca,'XMinorTick','on','YMinorTick','on')
+            xlim([0 fmax]);
+            title([num2str(nw),'\pi MTM classic AR1',' ','; Sampling rate = ',num2str(dt),' ', unit])
+    step = 5.5;
+        waitbar(step / steps)
+        delete(hwaitbar)
         xlim([0 fmax]);
-step = 5.5;
-    waitbar(step / steps)
-    delete(hwaitbar)
-    xlim([0 fmax]);
-    if handles.linlogY == 1;
-        set(gca, 'YScale', 'log')
+        if handles.linlogY == 1;
+            set(gca, 'YScale', 'log')
+        else
+            set(gca, 'YScale', 'linear')
+        end
+        if handles.logfreq == 1
+            set(gca,'xscale','log')
+        end
+        %filename_mtm = [dat_name,'-',num2str(nw),'piMTMspectrum.txt'];
+        filename_mtm_cl = [dat_name,'-',num2str(nw),'piMTM-ClassicAR1.txt'];
+        CDac_pwd; % cd ac_pwd dir
+        dlmwrite(filename_mtm_cl, [fd,po,theored,tabtchi90,tabtchi95,tabtchi99,tabtchi999], 'delimiter', ',', 'precision', 9);
+        disp('>>  Refresh the Main Window to see output data')
+        %disp(filename_mtm)
+        disp(filename_mtm_cl)
+        cd(pre_dirML); % return to matlab view folder
+        figdata = figHandle;
     else
-        set(gca, 'YScale', 'linear')
-    end
-    %filename_mtm = [dat_name,'-',num2str(nw),'piMTMspectrum.txt'];
-    filename_mtm_cl = [dat_name,'-',num2str(nw),'piMTM-CL.txt'];
-    CDac_pwd; % cd ac_pwd dir
-    dlmwrite(filename_mtm_cl, [fd,po,theored,tabtchi90,tabtchi95,tabtchi99,tabtchi999], 'delimiter', ',', 'precision', 9);
-    disp('>>  Refresh the Main Window to see output data')
-    %disp(filename_mtm)
-    disp(filename_mtm_cl)
-    cd(pre_dirML); % return to matlab view folder
-    figdata = figHandle;
-else
-end  
+    end  
 
 elseif strcmp(method,'Lomb-Scargle spectrum')
     pfa = [50 10 1 0.01]/100;
@@ -428,6 +449,9 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
         set(gca, 'YScale', 'log')
     else
         set(gca, 'YScale', 'linear')
+    end
+    if handles.logfreq == 1
+        set(gca,'xscale','log')
     end
     filename_LS = [dat_name,'-Lomb-Scargle.txt'];
     CDac_pwd; % cd ac_pwd dir
@@ -460,6 +484,9 @@ elseif  strcmp(method,'Periodogram')
     else
         set(gca, 'YScale', 'linear')
     end
+    if handles.logfreq == 1
+        set(gca,'xscale','log')
+    end
     if handles.checkbox_ar1_v == 1
         [theored]=theoredar1ML(datax,fd1,mean(po),dt);
         tabtchired90 = theored * chi2inv(90/100,2)/2;
@@ -479,14 +506,17 @@ elseif  strcmp(method,'Periodogram')
         legend('Power','Mean','90%','95%','99%','99.9')
         hold off
     end
-    filename_Periodogram = [dat_name,'-Periodogram.txt'];
+    
     CDac_pwd; % cd ac_pwd dir
-try    dlmwrite(filename_Periodogram, [fd1,po,theored,tabtchired90,tabtchired95,tabtchired99,tabtchired999], ...
-        'delimiter', ',', 'precision', 9);
-catch
-    dlmwrite(filename_Periodogram, [fd1,po], ...
-        'delimiter', ',', 'precision', 9);
-end
+    
+    try filename_Periodogram = [dat_name,'-PeriodogramAR1.txt'];   
+        dlmwrite(filename_Periodogram, [fd1,po,theored,tabtchired90,tabtchired95,tabtchired99,tabtchired999], ...
+            'delimiter', ',', 'precision', 9);
+    catch
+        filename_Periodogram = [dat_name,'-Periodogram.txt'];
+        dlmwrite(filename_Periodogram, [fd1,po], ...
+            'delimiter', ',', 'precision', 9);
+    end
     cd(pre_dirML); % return to matlab view folder
     disp(filename_Periodogram)
 else
@@ -818,7 +848,7 @@ method = handles.method;
 df = 1/(timex(nlength)-timex(1));
 check_plot_fmax = get(handles.radiobutton_fmax,'Value');
 plot_fmax_input = str2double(get(handles.edit_fmax_input,'String'));
-nw = handles.ntapers;
+nw = handles.timebandwidth;
 bw=2*nw*df;
 if handles.pad > 0
     padtimes = str2double(get(handles.edit3,'String'));
@@ -871,6 +901,9 @@ if strcmp(method,'Multi-taper method')
             else
                 set(gca, 'YScale', 'linear')
             end
+            if handles.logfreq == 1
+                set(gca,'xscale','log')
+            end
             figdata = gcf;
         else
             return
@@ -884,7 +917,7 @@ if strcmp(method,'Multi-taper method')
     end
         fd1=w/(2*pi*dt);
         % Plot figure MTM handles.checkbox_robustAR1_v = checkbox_robustAR1;
-    if handles.checkbox_robustAR1_v == 0
+    if and(handles.checkbox_robustAR1_v == 0,handles.checkbox_ar1_v == 0)
         figdata = figure;  
         figHandle = gcf;
         set(gcf,'Color', 'white')
@@ -902,11 +935,14 @@ if strcmp(method,'Multi-taper method')
         else
             set(gca, 'YScale', 'linear')
         end
+        if handles.logfreq == 1
+            set(gca,'xscale','log')
+        end
     end 
 
 if handles.checkbox_ar1_v == 1
     % Waitbar
-    hwaitbar = waitbar(0,'Conventional red noise estimation may take a few minutes...',...    
+    hwaitbar = waitbar(0,'Classic red noise estimation may take a few minutes...',...    
        'WindowStyle','modal');
     hwaitbar_find = findobj(hwaitbar,'Type','Patch');
     set(hwaitbar_find,'EdgeColor',[0 0.9 0],'FaceColor',[0 0.9 0]) % changes the color to blue
@@ -915,7 +951,7 @@ if handles.checkbox_ar1_v == 1
     step = 1;
     waitbar(step / steps)
 
-step = 1.5;
+    step = 1.5;
     waitbar(step / steps)
     % Prepare redconfidence level data for excel output
     col1='Frequency(cycles/)';
@@ -931,28 +967,32 @@ step = 1.5;
     handles.title0 = title0;
     handles.Redconf_out1 = Redconf_out1;
 
-step = 2;
+    step = 2;
     waitbar(step / steps)
     step = 2.5;
     waitbar(step / steps)
     [fd,po,theored,tabtchi90,tabtchi95,tabtchi99,tabtchi999]=redconftabtchi(datax,nw,dt,nzeropad,2);
-step = 4.5;
+    step = 4.5;
     waitbar(step / steps)
     figdata = figure;  
     set(gcf,'Color', 'white')
     plot(fd,po,'LineWidth',1);
-    hold all; plot(fd,theored,'LineWidth',1);
-    hold all; plot(fd,[tabtchi90,tabtchi95,tabtchi99,tabtchi999],'LineWidth',1);
+    hold on; plot(fd,theored,'LineWidth',1);
+    hold on; plot(fd,[tabtchi90,tabtchi95,tabtchi99,tabtchi999],'LineWidth',1);
     xlim([0 fmax]);
-    legend('Power','AR1','90%','95%','99%','99.9%','99.9%')
-step = 5.5;
-waitbar(step / steps)
-delete(hwaitbar)
-if handles.linlogY == 1;
-    set(gca, 'YScale', 'log')
-else
-    set(gca, 'YScale', 'linear')
-end
+    title([num2str(nw),'\pi MTM classic AR1',' ','; Sampling rate = ',num2str(dt),' ', unit])
+    legend('Power','AR1','90%','95%','99%','99.9%')
+    step = 5.5;
+    waitbar(step / steps)
+    delete(hwaitbar)
+    if handles.linlogY == 1;
+        set(gca, 'YScale', 'log')
+    else
+        set(gca, 'YScale', 'linear')
+    end
+    if handles.logfreq == 1
+        set(gca,'xscale','log')
+    end
 else
     figdata = gcf;
 end  
@@ -983,8 +1023,10 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
     else
         set(gca, 'YScale', 'linear')
     end
-%     filename_mtm = [dat_name,'-Lomb-Scargle.txt'];
-%     dlmwrite(filename_mtm, [fd1,po], 'delimiter', ',', 'precision', 9);
+    if handles.logfreq == 1
+        set(gca,'xscale','log')
+    end
+    
 elseif  strcmp(method,'Periodogram')
     
     if max(diffx) - min(diffx) > 10 * eps('single')
@@ -1009,6 +1051,9 @@ elseif  strcmp(method,'Periodogram')
         set(gca, 'YScale', 'log')
     else
         set(gca, 'YScale', 'linear')
+    end
+    if handles.logfreq == 1
+        set(gca,'xscale','log')
     end
     if handles.checkbox_ar1_v == 1
         [theored]=theoredar1ML(datax,fd1,mean(po),dt);
@@ -1042,3 +1087,68 @@ try figure(figdata);
 catch
 end
 guidata(hObject,handles);
+
+
+% --- Executes on button press in checkbox6.
+function checkbox6_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox6 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox6
+logfreq = get(handles.checkbox6,'Value');
+if logfreq == 1
+    handles.logfreq = 1;
+    set(handles.checkbox6,'Value',1)
+    %disp('yes')
+else
+    handles.logfreq = 0;
+    set(handles.checkbox6,'Value',0)
+    %disp('no')
+end
+guidata(hObject, handles);
+
+
+% --- Executes on button press in radiobutton5.
+function radiobutton5_Callback(hObject, eventdata, handles)
+% hObject    handle to radiobutton5 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of radiobutton5
+timebandwidthselection = get(hObject,'Value');
+if timebandwidthselection == 1
+    handles.timebandwidth = str2num( get(handles.edit7,'String') );
+    set(handles.edit7, 'Enable', 'on')
+    set(handles.popupmenu_tapers, 'Enable', 'off')
+else
+    set(handles.edit7, 'Enable', 'off')
+    set(handles.popupmenu_tapers, 'Enable', 'on')
+    contents = cellstr(get(handles.popupmenu_tapers,'String'));
+    handles.timebandwidth = str2num(contents{get(handles.popupmenu_tapers,'Value')});
+end
+guidata(hObject, handles);
+
+
+function edit7_Callback(hObject, eventdata, handles)
+% hObject    handle to edit7 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit7 as text
+%        str2double(get(hObject,'String')) returns contents of edit7 as a double
+handles.timebandwidth = str2num( get(handles.edit7,'String') );
+guidata(hObject, handles);
+
+
+% --- Executes during object creation, after setting all properties.
+function edit7_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit7 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

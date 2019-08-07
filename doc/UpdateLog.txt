@@ -2,6 +2,37 @@
 
 Update Log
 
+
+_____________________________________
+
+Version : ACycle_v1.3
+Date    : Aug 6, 2019; 11:20 am
+By      : Mingsong Li
+
+	1. Spectral Analysis toolbox: Add more flexibility to MTM analysis:
+			increase ability from integer numbers 2pi, 3pi, etc. to include any numbers, e.g., 2.45pi, 6.1pi, etc.
+			add log(frequency) plot option;
+			change the name of output files;
+			bugs in the plot fixed
+
+		Thanks Prof. Linda Hinnov (George Mason University) for the comment.
+
+	2. Wavelet toolbox: fix a bug in standalone versions of Acycle
+
+		Thank Dr. Xu Yao (Lanzhou University, China) for this suggestion.
+
+
+	3. Automatic update: check the last open date and update frequency of the software
+
+		If the software has not been used for 30 days, it will check whether there is a newer version.
+		If the last update occurred more than 90 days, it will check whether there is a newer version.
+		Warning: If the access to GitHub is slow, this automatic check process can be very slow.
+			
+			It does happen in mainland China for some reasons (you know). 
+			And the start-up of Acycle can take up to 2 minutes ...
+
+		Thank Dr. Xu Yao (Lanzhou University, China) for this suggestion.
+
 _____________________________________
 
 Version : ACycle_v1.2.1

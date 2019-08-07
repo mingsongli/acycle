@@ -104,7 +104,7 @@ function AC_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to AC (see VARARGIN)
 set(gcf,'position',[0.5,0.1,0.45,0.8]) % set position
-set(gcf,'Name','Acycle v1.2.1')
+set(gcf,'Name','Acycle v1.3')
 set(gcf,'DockControls', 'off')
 set(gcf,'Color', 'white')
 set(0,'Units','normalized') % set units as normalized
@@ -266,7 +266,8 @@ pause(0.0001);%
 %     copyright;
 % end
 try 
-    ac_check_update;
+    % If the software has not been used for 30 days, checking updates
+    ac_check_opendate;
 catch
 end
 
@@ -403,6 +404,12 @@ plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
 check = 0;
 % check
+
+% fix a bug in wavelet ...
+%
+%#function fminbnd
+%#function chisquare_solve
+
 for i = 1:nplot
     plot_no = plot_selected(i);
     if plot_no > 2
@@ -1790,6 +1797,19 @@ function menu_wavelet_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_clip (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+% This menu doesn't work in a standalone application
+%
+% Error message:
+% Undefined function or variable "chisquare_solve"
+% Error in fminbnd (lin 34)
+%
+% Potential solution is to add %#function fminbnd
+% Read more: https://www.mathworks.com/help/compiler/limitations-about-what-may-be-compiled.html
+
+%#function fminbnd
+%#function chisquare_solve
+
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
@@ -1830,7 +1850,7 @@ for nploti = 1:nplot
                 end
                 
                 time = data(:,1);
-                timelen = time(end)-time(1);
+                timelen = 0.5 * (time(end)-time(1));
                 sst = data(:,2);
                 dt = mean(diff(time));
                 prompt = {['Period range from (',handles.unit,')']; ['Period range to (',handles.unit,')'];...
@@ -1841,7 +1861,7 @@ for nploti = 1:nplot
                 options.Resize='on';
                 answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
                     if ~isempty(answer)
-
+                        figwarnwave = warndlg('Wavelet may take a few minutes ...','Warning: Slow Process!');
                         pt1 = str2double(answer{1});
                         pt2 = str2double(answer{2});
                         pad  = str2double(answer{3});
@@ -1849,12 +1869,18 @@ for nploti = 1:nplot
                         figwave = figure;
                         [~,~,~]= waveletML(sst,time,pad,dss,pt1,pt2);
                         name1 = [dat_name,'-wavelet.fig'];
-                        disp(['>>  Save as: ',name1])
+                        
                         CDac_pwd
                         try savefig(figwave,name1)
+                            disp(['>>  Save as: ',name1, '. Folder: '])
+                            disp(pwd)
                         catch
-                            disp('>>  Eh ... Wavelet figure unsaved ...')
+                            disp('>>  Wavelet figure unsaved ...')
                         end
+                        try close(figwarnwave)
+                        catch
+                        end
+                        
                         d = dir; %get files
                         set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                         refreshcolor;
@@ -4545,7 +4571,8 @@ if check == 1;
             end
             ylabel('Number')
             note = ['max: ',num2str(max(dt)),'; mean: ',num2str(mean(dt)),...
-                '; median: ',num2str(median(dt)),'; min: ',num2str(min(dt))];
+                '; median: ',num2str(median(dt)),'; min: ',num2str(min(dt)),...
+                '; variance: ',num2str(var(dt))];
             legend(note)
             %text(mean(dt),len_t/10,note);
     end
@@ -4604,7 +4631,8 @@ if check == 1;
             title([[dat_name,ext],': kernel fit of the data'])
             xlabel('Data')
             note = ['max: ',num2str(max(datax)),'; mean: ',num2str(mean(datax)),...
-                '; median: ',num2str(median(datax)),'; min: ',num2str(min(datax))];
+                '; median: ',num2str(median(datax)),'; min: ',num2str(min(datax)),...
+                '; variance: ',num2str(var(datax))];
             legend(note)
     end
 end
