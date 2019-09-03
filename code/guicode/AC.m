@@ -74,7 +74,7 @@ function varargout = AC(varargin)
 
 % Edit the above text to modify the response to help AC
 
-% Last Modified by GUIDE v2.5 16-May-2019 13:25:21
+% Last Modified by GUIDE v2.5 30-Aug-2019 13:56:27
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -104,7 +104,7 @@ function AC_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to AC (see VARARGIN)
 set(gcf,'position',[0.5,0.1,0.45,0.8]) % set position
-set(gcf,'Name','Acycle v1.3')
+set(gcf,'Name','Acycle v2.0')
 set(gcf,'DockControls', 'off')
 set(gcf,'Color', 'white')
 set(0,'Units','normalized') % set units as normalized
@@ -270,7 +270,17 @@ try
     ac_check_opendate;
 catch
 end
-
+% bug fixed: window system32 may be the default working folder, but not
+% writable.
+try
+    tempname1 = 'temp_test_acycle.txt';
+    fileID = fopen(fullfile(pwd,tempname1),'w+');
+    fprintf(fileID,'%s\n',datestr(datetime('now')));
+    fclose(fileID);
+    delete temp_test_acycle.txt
+catch
+    errordlg('Change working folder. \nCurrent working folder is not writable!','Folder error');
+end
 
 % --- Outputs from this function are returned to the command line.
 function varargout = AC_OutputFcn(hObject, eventdata, handles) 
@@ -511,49 +521,81 @@ if handles.doubleclick
     catch
         [~,dat_name,ext] = fileparts(filename);
         filetype = handles.filetype;
+        disp(ext)
         if isdeployed
+            % bug start:   Warning: The Open function cannot be used in compiled applications.
             if strcmp(ext,'.fig')
-                try uiopen(filename,1);
+                try openfig(filename)
                 catch
+                    GETac_pwd;
+                    if ispc
+                        winopen(ac_pwd);
+                    elseif ismac
+                        system(['open ',ac_pwd]);
+                    end
                 end
-            % Deployed gui will die if one want to double click to open a csv file. 
-            elseif strcmp(ext,'.csv')
-                GETac_pwd;
+            elseif ismember(ext,{'.txt','.csv'})
+                [data1,~] = importdata(filename);
+                nlen = length(data1(:,1));
+                if nlen> 10
+                    msgbox('See Terminal/Command Window for details')
+                    disp('>> First 10 lines of data:')
+                    disp(data1(1:10,:))
+                else
+                    msgbox('See Terminal/Command Window for details')
+                    disp('>> Data:')
+                    disp(data1)
+                end
+            elseif ismember(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})
+                try
+                    hwarn = warndlg('Wait, large image? can be very slow ...');
+                    im_name = imread(filename);
+                    hFig1 = figure;
+                    lastwarn('') % Clear last warning message
+                    imshow(im_name);
+                    set(gcf,'Name',[dat_name,ext])
+                    [warnMsg, warnId] = lastwarn;
+                    if ~isempty(warnMsg)
+                        close(hFig1)
+                        imscrollpanel_ac(filename);
+                    end
+                    try close(hwarn)
+                    catch
+                    end
+                catch
+                    warndlg('Image color space not supported. Convert to RGB or Grayscale')
+                end
+            elseif ismember(ext,{'.pdf'})
+                openpdf(filename)
+            else
                 if ispc
                     winopen(ac_pwd);
                 elseif ismac
                     system(['open ',ac_pwd]);
-                end
-            else
-                try open(filename)
-                catch
-                    if ispc
-                        try winopen(filename)
-                        catch
-                            try uiopen(filename,1)
-                            catch
-                                GETac_pwd;
-                                winopen(ac_pwd);
-                            end
-                        end
-                    elseif ismac
-                        try system(['open ',filename]);
-                        catch
-                            GETac_pwd;
-                            system(['open ',ac_pwd]);
-                        end
-                    end
+                else
                 end
             end
+            % bug end:   Warning: The Open function cannot be used in compiled applications.
         else
             if strcmp(ext,'.fig')
                 try
-                    uiopen(filename,1);
+                    openfig(filename)
                     set(gcf,'Name',[dat_name,ext])
                 catch
                 end
-               
-            elseif sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
+            elseif ismember(ext,{'.txt','.csv'})
+                [data1,~] = importdata(filename);
+                nlen = length(data1(:,1));
+                if nlen> 10
+                    msgbox('See Terminal/Command Window for details')
+                    disp('>> First 10 lines of data:')
+                    disp(data1(1:10,:))
+                else
+                    msgbox('See Terminal/Command Window for details')
+                    disp('>> Data:')
+                    disp(data1)
+                end
+            elseif ismember(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})
                 try 
                     hwarn = warndlg('Wait, large image? can be very slow ...');
                     im_name = imread(filename);
@@ -573,32 +615,23 @@ if handles.doubleclick
                 catch
                     warndlg('Image color space not supported. Convert to RGB or Grayscale')
                 end
-            elseif strcmp(ext,{'.pdf','.ai','.ps'})
+            elseif ismember(ext,{'.pdf','.ai','.ps'})
                 try
                     uiopen(filename,1);
                 catch
                 end
-            elseif strcmp(ext,{'.doc','.docx','.ppt','.pptx','.xls','.xlsx'})
-                try
-                    uiopen(filename,1);
-                catch
-                end
-            elseif sum(strcmp(ext,filetype)) > 0
+            elseif ismember(ext,{'.doc','.docx','.ppt','.pptx','.xls','.xlsx'})
                 try
                     uiopen(filename,1);
                 catch
                 end
             else
-                try uiopen(filename,1);
-                catch
-                    GETac_pwd;
-                    if ispc
-                        winopen(ac_pwd);
-                    elseif ismac
-                        system(['open ',ac_pwd]);
-                    else
-                        
-                    end
+                GETac_pwd;
+                if ispc
+                    winopen(ac_pwd);
+                elseif ismac
+                    system(['open ',ac_pwd]);
+                else
                 end
             end
         end
@@ -1052,34 +1085,12 @@ function menu_manuals_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-filename = 'AC_Users_Guide.pdf';
-%url = 'https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf';
+filename = which('AC_Users_Guide.pdf');
+%ur2 = 'https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf';
 url = 'https://github.com/mingsongli/acycle/wiki';
 
-try uiopen(filename,1);
-    web(url,'-browser')
-catch
-    try open(filename)
-    catch
-        if ispc
-            try winopen(filename)
-                web(url,'-browser')
-            catch
-                try web(url,'-browser')
-                catch
-                end
-            end
-        elseif ismac
-            try system(['open ',filename]);
-                web(url,'-browser')
-            catch
-                try web(url,'-browser')
-                catch
-                end
-            end
-        end
-    end
-end
+openpdf(filename);
+web(url,'-browser')
 
 
 % --------------------------------------------------------------------
@@ -1579,8 +1590,11 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                 end
                 
                 span = span_v/(time(end)-time(1));
+                hwarn1 = warndlg('Slow process. Wait ...','Smoothing');
                 [meanboot,bootstd,bootprt] = smoothciML(time,value,method,span,bootn);
-                
+                try close(hwarn1)
+                catch
+                end
                 data(:,2) = meanboot;
                 data(:,3) = bootstd;
                 data(:,4) = 2*bootstd;
@@ -2014,600 +2028,32 @@ end
 guidata(hObject, handles);
 
 % --------------------------------------------------------------------
-function menu_corrcoef_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_corrcoef (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
-nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
-    data_name = char(contents(plot_selected));
-    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
-    GETac_pwd; data_name = fullfile(ac_pwd,data_name);
-    if isdir(data_name) == 1
-    else
-        [dat_dir,dat_name,ext] = fileparts(data_name);
-        if sum(strcmp(ext,handles.filetype)) > 0
-            data = load(data_name);
-            time = data(:,1);
-            npts = length(time);
-            sr_all = diff(time);
-            
-            sr_equal = abs((max(sr_all)-min(sr_all))/2);
-            if sr_equal > eps('single')
-                warndlg({'Data problem detected.';...
-                    'Try "Math->Sort&Unique" or "Math->Interpolation" first...'},'Data: Warning');
-            end
-            % set zeropadding
-            if npts <= 2500
-                handles.pad = 5000;
-            elseif npts <= 5000 && npts > 2500
-                handles.pad = 10000;
-            else
-                handles.pad = fix(npts/5000) * 5000 + 5000;
-            end
-            if strcmp(handles.unit,'m')
-                dt = median(sr_all);
-            elseif strcmp(handles.unit, 'unit')
-                warndlg({'Unit of the selected data is "unit"'; ...
-                    '(see pop-up menu at top right corner of Acycle main window)';...
-                    'Acycle assumes the real UNIT is "m"';'If this is not true, please correct.'},'Unit Warning');
-                dt = median(sr_all);
-            elseif strcmp(handles.unit,'dm')
-                warndlg({'Unit of the selected data is "dm"'; ...
-                    '(see pop-up menu at top right corner of Acycle main window)';...
-                    'Acycle transformed the data, now the unit of "m"'},'Unit transformed');
-                data(:,1) = data(:,1) * 0.1; % dm to m
-                dt = median(sr_all) * 0.1;
-            elseif strcmp(handles.unit,'cm')
-                warndlg({'Unit of the selected data is "cm"'; ...
-                    '(see pop-up menu at top right corner of Acycle main window)';...
-                    'Acycle transformed the data, now the unit of "m"'},'Unit transformed');
-                data(:,1) = data(:,1) * 0.01; % cm to m
-                dt = median(sr_all) * 0.01;
-            elseif strcmp(handles.unit,'mm')
-                warndlg({'Unit of the selected data is "mm"'; ...
-                    '(see pop-up menu at top right corner of Acycle main window)';...
-                    'Acycle transformed the data, now the unit of "m"'},'Unit transformed');
-                data(:,1) = data(:,1) * 0.001; % cm to m
-                dt = median(sr_all) * 0.001;
-            else
-                warndlg('UNIT of the data MUST be "m/dm/cm/mm"!.','Unit Error')
-            end
-            
-            prompt = {'DATA: Middle Age of the data (Ma)',...
-                'TARGET: MAX frequency (default)',...
-                'TARGET: Zero padding: (default)'};
-            dlg_title = 'STEP 1: TARGET: Correlation coefficient';
-            num_lines = 1;
-            defaultans = {num2str(handles.t1),num2str(handles.f2),num2str(handles.pad)};
-            options.Resize='on';
-            answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-            if ~isempty(answer)
-                t1 = 1000 * str2double(answer{1});
-                f1 = handles.f1;
-                f2 = str2double(answer{2});
-                pad = str2double(answer{3});
-                p1 = 1;  % power of eccentricity
-                p2 = .6;  % power of obliquity
-                p3 = .5;  % power of precession
-                if t1 < 0
-                    errordlg('Error: Age of the data must be no smaller than 0')
-                    return;
-                elseif t1 == 0 
-                    t1 = 1;
-                elseif t1 > 4500000
-                    errordlg('Error: Age of the data is too large')
-                end
-                    age = t1;
-                    
-                if t1 > 249000
-                    %%
-                    prompt = {'Orbital solutions: Berger89 = 1; La04/La10 = 2; User-defined = 3',...
-                        'OR user defined 7 orbital parameters, space delimited',...
-                        'Online resource for user-defined parameters'};
-                    waltham15 = 'http://nm2.rhul.ac.uk/wp-content/uploads/2015/01/Milankovitch.html';
-                    dlg_title = 'STEP 2: t2 >= 249 Ma, choose orbital options';
-                    num_lines = 1;
-                    defaultans = {'1','405 125 95 ',waltham15};
-                    options.Resize='on';
-                    answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-                    if ~isempty(answer)
-                        optionOS = str2double(answer{1});
-                        optionUD = str2num(answer{2});
-                        if optionOS == 2
-                            % Ages for orbit7, equations follow Yao et al., 2015
-                            % EPSL and Laskar et al., 2004 A&A                        
-                            age_obl = 41 - 0.0332 * age/1000;
-                            age_p1 = 22.43 - 0.0108 * age/1000;
-                            age_p2 = 23.75 - 0.0121 * age/1000;
-                            age_p3 = 19.18 - 0.0079 * age/1000;
-                            orbit7 = [405 125 95 age_obl age_p2 age_p1 age_p3];
-                            target = period2spectrum(orbit7,t1-1000,t1+1000,1,f1,f2,1,pad);
-                        elseif optionOS == 3 || length(optionUD) == 7
-                            if length(optionUD) < 4
-                                errorlog('Error: too few parameters!')
-                            elseif length(optionUD) > 7
-                                errorlog('Error: too many parameters!')
-                            else
-                                orbit7 = optionUD;
-                                target = period2spectrum(orbit7,t1-1000,t1+1000,1,f1,f2,1,pad);
-                            end
-                        else
-                            orbit7 = getBerger89Period(age/1000);
-                            target = period2spectrumB(orbit7,t1-1000,t1+1000,1,f1,f2,1,pad);
-                        end
-
-                    end
-                else
-                    % Generate target using La2004 solution
-                    age_obl = 41 - 0.0332 * age/1000;
-                    age_p1 = 22.43 - 0.0108 * age/1000;
-                    age_p2 = 23.75 - 0.0121 * age/1000;
-                    age_p3 = 19.18 - 0.0079 * age/1000;
-                    orbit7 = [405 125 95 age_obl age_p2 age_p1 age_p3];
-                    if and(t1 <= 248000,t1 > 1000)
-                        target = gentarget(4,t1-1000,t1+1000,f1,f2,p1,p2,p3,pad,1);
-                    elseif t1 > 248000
-                        target = gentarget(4,247000,249000,f1,f2,p1,p2,p3,pad,1);
-                    elseif t1 <= 1000
-                        target = gentarget(4,1,2000,f1,f2,p1,p2,p3,pad,1);
-                    end
-                end
-                
-                % added to set sedimentation rate
-                fnyq = handles.sr1/(200*dt);
-                if f2 > fnyq
-                    handles.sr1 = 200 * dt * f2;
-                end
-                fray = handles.sr2/(npts * dt);
-                flow = 1/max(orbit7);
-                if fray > flow
-                    handles.sr2 = 100 * npts * dt * flow; % unit = cm / kyr
-                end
-                
-                prompt = {'DATA: MIN  sedimentation rate (cm/kyr)',...
-                    'DATA: MAX  sedimentation rate (cm/kyr)',...
-                    'DATA: STEP sedimentation rate (cm/kyr)',...
-                    'Number of simulations (e.g., 200, 600, 2000)',...
-                    'Remove red: 0=No, 1=x/AR(1), 2=x-AR(1), 3=x-robustAR1',...
-                    'Split series: 1, 2, 3, ...'};
-                if t1 >= 249
-                    dlg_title = 'STEP 3: DATA: Correlation coefficient';
-                else
-                    dlg_title = 'STEP 2: DATA: Correlation coefficient';
-                end
-                num_lines = 1;
-                defaultans = {num2str(handles.sr1),num2str(handles.sr2),num2str(handles.srstep),...
-                   num2str(handles.nsim),num2str(handles.red),num2str(handles.slices)};
-               
-                options.Resize='on';
-                answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-                if ~isempty(answer)
-                    srm = mean(diff(data(:,1)));
-                    pad1 = pad;
-                    sr1 = str2double(answer{1});
-                    sr2 = str2double(answer{2});
-                    srstep = str2double(answer{3});
-                    nsim = str2double(answer{4});
-                    red = str2double(answer{5});
-                    adjust = 0;
-                    slices = str2double(answer{6});
-                    plotn = 1;
-                    %corrmethod = str2double(answer{9});
-                    corrmethod = 1;  % 1= 'Pearson'; else = 'Spearman'
-                    
-                    handles.t1 = t1/1000;
-                    handles.f1 = f1;
-                    handles.f2 = f2;
-                    handles.srm = srm;
-                    handles.sr1 = sr1;
-                    handles.sr2 = sr2;
-                    handles.srstep = srstep;
-                    handles.nsim = nsim;
-                    handles.red = red;
-                    handles.adjust = adjust;
-                    handles.slices = slices;
-                    handles.pad = pad1;
-
-                    f = figure;
-                    ax1 = subplot(2,1,1);   % plot power spectrum of target series
-                    % subplot 2 will be spectra of slices see below "corrcoefslices_rank" line
-                    plot(ax1,target(:,1),target(:,2),'LineWidth',1)
-                    xlim(ax1,[f1 f2])
-                    xlabel(ax1,'Frequency (cycle/kyr)')
-                    ylabel(ax1,'Power')
-                    set(ax1,'XMinorTick','on','YMinorTick','on')
-                    title(ax1,'Target power spectrum')
-                    assignin('base','target',target)
-                    if corrmethod == 1
-                        method = 'Pearson';
-                    else
-                        method = 'Spearman';
-                    end
-                    disp('>> Wait ...')
-                    tic
-                    [corrCI,corr_h0,corry] = corrcoefslices_rank(data,target,orbit7,srm,pad1,sr1,sr2,srstep,adjust,red,nsim,plotn,slices,method);
-                    assignin('base','corrCI',corrCI)
-                    assignin('base','corr_h0',corr_h0)
-                    assignin('base','corry',corry)
-                    
-                    param0 = ['Target age is ',num2str(t1),' ka. Zero padding is ',num2str(pad), '. Freq. is ',num2str(f1),'-',num2str(f2),' cycles/kyr'];
-                    param1 = ['Tested sedimentation rate step is ', num2str(srstep),' cm/kyr from ',num2str(sr1),' to ',num2str(sr2),' cm/kyr'];
-                    param2 = ['Data: number of slices is ', num2str(slices),'. Number of simulations is ',num2str(nsim),'. Zero padding is ',num2str(pad1)];
-                    if corrmethod == 1
-                        param3 = ['Adjust: ', num2str(adjust),'. Remove red: ',num2str(red),'. Correlation method: Pearson'];
-                    else
-                        param3 = ['Adjust: ', num2str(adjust),'. Remove red: ',num2str(red),'. Correlation method: Spearman'];
-                    end
-                    param4 = ['Data: ',num2str(data(1,1)),' to ',num2str(data(end,1)),'m. Sampling rate: ', num2str(srm),'. Number of data points: ', num2str(npts)];
-                    disp('')
-                    disp(' - - - - - - - - - - - - - Summary - - - - - - - - - - - ')
-                    disp(data_name);
-                    disp(param0);
-                    disp('Seven astronomical cycles are:')
-                    disp(orbit7);
-                    disp(param1);
-                    disp(param2);
-                    disp(param3);
-                    disp(param4);
-                    disp(' - - - - - - - - - - - - - - End - - - - - - - - - - - - ')
-                    disp('>> Writing log file ...')
-                    disp('>> Done')
-                    toc
-                    CDac_pwd;
-                    % Log name
-                    log_name = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-COCO-log',ext];
-                    log_name_coco = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-COCO.fig'];
-                    %log_file_exist = which(log_name); 
-                    if exist([pwd,handles.slash_v,log_name]) || exist([pwd,handles.slash_v,log_name_coco])
-                        for i = 1:100
-                            log_name = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-COCO-log-',num2str(i),ext];
-                            log_name_coco = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-COCO-',num2str(i),'.fig'];
-                            if exist([pwd,handles.slash_v,log_name]) || exist([pwd,handles.slash_v,log_name_coco])
-                            else
-                                break
-                            end
-                        end
-                    end
-                    savefig(log_name_coco) % save ac.fig automatically
-                    % open and write log into log_name file
-                    fileID = fopen(fullfile(dat_dir,log_name),'w+');
-                    fprintf(fileID,'%s\n',' - - - - - - - - - - - - - Summary - - - - - - - - - - -');
-                    fprintf(fileID,'%s\n',datestr(datetime('now')));
-                    fprintf(fileID,'%s\n',log_name);
-                    fprintf(fileID,'%s\n',param0);
-                    fprintf(fileID,'%s\n','Seven astronomical cycles are:');
-                    fprintf(fileID,'%s\n\n',mat2str(orbit7));
-                    fprintf(fileID,'%s\n',param1);
-                    fprintf(fileID,'%s\n',param2);
-                    fprintf(fileID,'%s\n',param3);
-                    fprintf(fileID,'%s\n',param4);
-                    fprintf(fileID,'%s\n',' - - - - - - - - - - - - - - End - - - - - - - - - - - -');
-                    fclose(fileID);
-                    
-                    d = dir; %get files
-                    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-                    refreshcolor;
-                    cd(pre_dirML);
-                end
-            end
-        end
-    end
-end
-guidata(hObject, handles);
-
-% --------------------------------------------------------------------
 function menu_ecoco_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_ecoco (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-saveacfigyes = 0;
 if and ((min(plot_selected) > 2), (nplot == 1))
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
         if isdir(data_name) == 1
         else
-        [dat_dir,dat_name,ext] = fileparts(data_name);
-        handles.dat_name = dat_name;
-        handles.ext = ext;
-        if sum(strcmp(handles.ext,handles.filetype)) > 0
-            
-            data = load(data_name);
-            time = data(:,1);
-            npts = length(time);
-            sr_all = diff(time);
-            sr_equal = abs((max(sr_all)-min(sr_all))/2);
-            if sr_equal > eps('single')
-                warndlg('Data problem detected. Try "Math->Sort&Unique" and "Math->Interpolation" first ...','Warning');
+            [~,dat_name,ext] = fileparts(data_name);
+            if sum(strcmp(ext,handles.filetype)) > 0
+                current_data = load(data_name);
+                handles.current_data = current_data;
+                handles.data_name = data_name;
+                handles.dat_name = dat_name;
+                guidata(hObject, handles);
+                eCOCOGUI(handles);
             end
-            
-            % check unit
-            if strcmp(handles.unit,'m')
-            elseif strcmp(handles.unit, 'unit')
-                warndlg({'Unit of the selected data is "unit"'; ...
-                    '(see pop-up menu at top right corner of Acycle main window)';...
-                    'Acycle assumes the real UNIT is "m"';'If this is not true, please correct.'},'Unit Warning');
-            elseif strcmp(handles.unit,'dm')
-                warndlg({'Unit of the selected data is "dm"'; ...
-                    '(see pop-up menu at top right corner of Acycle main window)';...
-                    'Acycle transformed the data, now the unit of "m"'},'Unit transformed');
-                data(:,1) = data(:,1) * 0.1; % dm to m
-            elseif strcmp(handles.unit,'cm')
-                warndlg({'Unit of the selected data is "cm"'; ...
-                    '(see pop-up menu at top right corner of Acycle main window)';...
-                    'Acycle transformed the data, now the unit of "m"'},'Unit transformed');
-                data(:,1) = data(:,1) * 0.01; % cm to m
-            elseif strcmp(handles.unit,'mm')
-                warndlg({'Unit of the selected data is "mm"'; ...
-                    '(see pop-up menu at top right corner of Acycle main window)';...
-                    'Acycle transformed the data, now the unit of "m"'},'Unit transformed');
-                data(:,1) = data(:,1) * 0.001; % cm to m
-            else
-                warndlg('UNIT of the data MUST be "m/dm/cm/mm"!.','Unit Error')
-            end
-            
-            prompt = {'DATA: Middle Age of the data (Ma) (e.g., 55):',...
-                'TARGET: Maximum frequency (default)',...
-                'TARGET: Zero-padding: (default)'};
-            dlg_title = 'Evolutionary COrrelation COefficient: TARGET';
-            num_lines = 1;
-            defaultans = {num2str(handles.t1),num2str(handles.f2),'5000'};
-            options.Resize='on';
-            answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-            if ~isempty(answer)
-                t1 = 1000*str2double(answer{1});
-                f1 = handles.f1;
-                f2 = str2double(answer{2});
-                pad = str2double(answer{3});
-                p1 = 1; % 
-                p2 = .6;
-                p3 = .5;
-                if t1 < 0
-                    errordlg('Error: Age of the data must be no smaller than 0')
-                    return;
-                elseif t1 == 0 
-                    t1 = 1;
-                elseif t1 > 4500000
-                    errordlg('Error: Age of the data is too large')
-                    return;
-                end
-                % age for orbit7
-                age = t1;
-                
-                if age > 249000
-                    prompt = {'Orbital solutions: Berger89 = 1; La04/La10 = 2; User-defined = 3',...
-                        'OR user defined 7 orbital parameters, space delimited',...
-                        'Online resource for user-defined parameters'};
-                    waltham15 = 'http://nm2.rhul.ac.uk/wp-content/uploads/2015/01/Milankovitch.html';
-                    dlg_title = 'Note: t2 >= 249 Ma, choose orbital options';
-                    num_lines = 1;
-                    defaultans = {'1','405 125 95 ',waltham15};
-                    options.Resize='on';
-                    
-                    answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-                    if ~isempty(answer)
-                        optionOS = str2double(answer{1});
-                        optionUD = str2num(answer{2});
-                        if optionOS == 2
-                            % Ages for orbit7, equations follow Yao et al., 2015
-                            % EPSL and Laskar et al., 2004 A&A                        
-                            age_obl = 41 - 0.0332 * age/1000;
-                            age_p1 = 22.43 - 0.0108 * age/1000;
-                            age_p2 = 23.75 - 0.0121 * age/1000;
-                            age_p3 = 19.18 - 0.0079 * age/1000;
-                            orbit7 = [405 125 95 age_obl age_p2 age_p1 age_p3];
-                            target = period2spectrum(orbit7,t1-1000,t1+1000,1,f1,f2,1,pad);
-                        elseif optionOS == 3 || length(optionUD) == 7
-                            if length(optionUD) < 4
-                                errorlog('Error: too few parameters!')
-                            elseif length(optionUD) > 7
-                                errorlog('Error: too many parameters!')
-                            else
-                                orbit7 = optionUD;
-                                target = period2spectrum(orbit7,t1-1000,t1+1000,1,f1,f2,1,pad);
-                            end
-                        else
-                            orbit7 = getBerger89Period(age/1000);
-                            target = period2spectrumB(orbit7,t1-1000,t1+1000,1,f1,f2,1,pad);
-                        end
-
-                    end
-                else
-                    % Generate target using La2004 solution
-                    age_obl = 41 - 0.0332 * age/1000;
-                    age_p1 = 22.43 - 0.0108 * age/1000;
-                    age_p2 = 23.75 - 0.0121 * age/1000;
-                    age_p3 = 19.18 - 0.0079 * age/1000;
-                    orbit7 = [405 125 95 age_obl age_p2 age_p1 age_p3];
-                    if and(t1 <= 248000,t1 > 1000)
-                        target = gentarget(4,t1-1000,t1+1000,f1,f2,p1,p2,p3,pad,1);
-                    elseif t1 > 248000
-                        target = gentarget(4,247000,249000,f1,f2,p1,p2,p3,pad,1);
-                    elseif t1 <= 1000
-                        target = gentarget(4,1,2000,f1,f2,p1,p2,p3,pad,1);
-                    end
-                end
-
-                prompt = {'DATA: Running window (m)',...
-                    'DATA: Number of sliding steps (#)',...
-                    'DATA: MIN  sedimentation rate (cm/kyr)',...
-                    'DATA: MAX  sedimentation rate (cm/kyr)',...
-                    'DATA: STEP sedimentation rate (cm/kyr)',...
-                    'Number of simulations (e.g., 200, 600, 2000)',...
-                    'Remove red noise: 0 = No, 1 = x/AR(1), 2 = x-AR(1)',...
-                    'Depth Padding: 0=No, 1=zero, 2=mirror; 3=mean; 4=random'};
-                dlg_title = 'Evolutionary Correlation Coefficient (eCOCO): DATA';
-                num_lines = 1;
-                eCOCO_win = 0.25*(data(end,1)-data(1,1));
-                step = ceil(npts/300); % number of sliding windows
-                
-                defaultans = {num2str(eCOCO_win),num2str(step),...
-                    num2str(handles.sr1),num2str(handles.sr2),num2str(handles.srstep),...
-                    num2str(handles.nsim),num2str(handles.red),'0'};
-                
-                options.Resize='on';
-                answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-                
-                if ~isempty(answer)
-                    window = str2double(answer{1});
-                    srm = mean(diff(data(:,1)));
-                    step = str2double(answer{2});
-                    pad1 = pad;
-                    sr1 = str2double(answer{3});
-                    sr2 = str2double(answer{4});
-                    srstep = str2double(answer{5});
-                    nsim = str2double(answer{6});
-                    red = str2double(answer{7});
-                    padtype = str2double(answer{8});
-                    delinear = 0;
-                    adjust = 0;
-                    slices = 1;
-                    plotn = 1;
-                    disp('>> Wait ...')
-                    
-                    if padtype > 0
-                        data = zeropad2(data,window,padtype);
-                    end
-                    
-                    handles.acfig = gcf; % read info of AC main window
-                    
-                    tic
-                    [prt_sr,out_depth,out_ecc,out_ep,out_eci,out_ecoco,out_ecocorb,out_norbit,sr_p] = ...
-                        ecoco(data,target,orbit7,window,srm,step,delinear,red,pad1,sr1,sr2,srstep,nsim,adjust,slices,plotn);
-
-                    param0 = ['Target age is ',num2str(t1),' ka. Zero padding is ',num2str(pad),'. Frequency: ',num2str(f1),'-',num2str(f2),' cycles/kyr'];
-                    param1 = ['Sliding window is ',num2str(window),' m. Number of sliding steps is ', num2str(step),'. Sliding step is',num2str(srm*step),' m'];
-                    param2 = ['Tested sedimentation rate: from ',num2str(sr1),' to ',num2str(sr2),' with a step of ', num2str(srstep), ' cm/kyr'];
-                    param3 = ['Number of Monte Carlo simulations ',num2str(nsim), '. Remove red noise: ',num2str(red),'. Zero padding is ',num2str(pad1)];
-                    param4 = ['Data: ',num2str(data(1,1)),' to ',num2str(data(end,1)),'m. Sampling rate: ', num2str(srm),'. Number of data points: ', num2str(npts)];
-                    param5 = ['The 1st column Padding type: ',num2str(padtype),' (0=No, 1=zero padding, 2=mirror padding; 3=mean padding; 4=random padding)'];
-                    disp('')
-                    disp(' - - - - - - - - - - - - - Summary - - - - - - - - - - - ')
-                    disp(data_name);
-                    disp(param0);
-                    disp('Seven astronomical cycles are:')
-                    disp(orbit7);
-                    disp(param1);
-                    disp(param2);
-                    disp(param3);
-                    disp(param4);
-                    disp(param5)
-                    disp(' - - - - - - - - - - - - - - End - - - - - - - - - - - - ')
-                    toc
-                    
-                    CDac_pwd;
-                    % ac.fig file name
-                    acfig_name = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-',num2str(window),'win-ECOCO.AC.fig'];
-                    % Log name
-                    log_name = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-',num2str(window),'win-ECOCO-log',ext];
-                    savefile_name =[dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-',num2str(window),'win-ECOCO.Optimal',ext];
-                    if exist([pwd,handles.slash_v,acfig_name]) || exist([pwd,handles.slash_v,log_name]) || exist([pwd,handles.slash_v,savefile_name])
-                        for i = 1:100
-                            acfig_name = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-',num2str(window),'win-ECOCO-',num2str(i),'.AC.fig'];
-                            log_name   = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-',num2str(window),'win-ECOCO-',num2str(i),'.log',ext];
-                            savefile_name =[dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-',num2str(window),'win-ECOCO-',num2str(i),'.Optimal',ext];
-                            if exist([pwd,handles.slash_v,acfig_name]) || exist([pwd,handles.slash_v,log_name]) || exist([pwd,handles.slash_v,savefile_name])
-                            else
-                                break
-                            end
-                        end
-                    end
-
-                    % open and write log into log_name file
-                    fileID = fopen(fullfile(dat_dir,log_name),'w+');
-                    fprintf(fileID,'%s\n',' - - - - - - - - - - - - - Summary - - - - - - - - - - -');
-                    fprintf(fileID,'%s\n',datestr(datetime('now')));
-                    fprintf(fileID,'%s\n',log_name);
-                    fprintf(fileID,'%s\n',param0);
-                    fprintf(fileID,'%s\n','Seven astronomical cycles are:');
-                    fprintf(fileID,'%s\n\n',mat2str(orbit7));
-                    fprintf(fileID,'%s\n',param1);
-                    fprintf(fileID,'%s\n',param2);
-                    fprintf(fileID,'%s\n',param3);
-                    fprintf(fileID,'%s\n',param4);
-                    fprintf(fileID,'%s\n',param5);
-                    fprintf(fileID,'%s\n',' - - - - - - - - - - - - - - End - - - - - - - - - - - -');
-                    fclose(fileID);
-                    
-                    fileID = fopen(fullfile(dat_dir,savefile_name),'w+');
-                    fprintf(fileID,'%s\n','%location, Optimal Sed.Rate, CorrCoef, H0-SL, #Orbits, COCOxH0x#Orbits');                    
-                    %fprintf(fileID,'%s\n\n',mat2str(sr_p));
-                    for row = 1: length(prt_sr);
-                        fprintf(fileID,'%s, %s, %s, %s, %d, %s\n',sr_p(row,1),sr_p(row,2),sr_p(row,3),sr_p(row,4),sr_p(row,5),sr_p(row,6));
-                    end
-                    fclose(fileID);
-                    
-                    handles.t1 = t1/1000;
-                    %handles.t2 = t2/1000;
-                    handles.f1 = f1;
-                    handles.f2 = f2;
-                    handles.window = window;
-                    handles.sr1 = sr1;
-                    handles.sr2 = sr2;
-                    handles.srm = srm;
-                    handles.step = step;
-                    handles.srstep = srstep;
-                    handles.nsim = nsim;
-                    handles.red = red;
-                    handles.adjust = adjust;
-                    handles.slices = slices;
-                    handles.prt_sr = prt_sr;
-                    handles.out_depth = out_depth;
-                    handles.out_ecc = out_ecc;
-                    handles.out_ep = out_ep;
-                    handles.out_eci = out_eci;
-                    handles.out_ecoco = out_ecoco;
-                    handles.out_ecocorb = out_ecocorb;
-                    handles.out_norbit = out_norbit;
-                    handles.target = target;
-                    %
-                    assignin('base','prt_sr',prt_sr)
-                    assignin('base','out_depth',out_depth)
-                    assignin('base','out_ecc',out_ecc)
-                    assignin('base','out_ep',out_ep)
-                    assignin('base','out_eci',out_eci)
-                    assignin('base','out_ecoco',out_ecoco)
-                    assignin('base','out_ecocorb',out_ecocorb)
-                    assignin('base','out_norbit',out_norbit)
-                    
-                    d = dir; %get files
-                    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-                    refreshcolor;
-                    
-                    saveacfigyes = 1;
-                    set(handles.menu_etrack,'Enable','On')
-                    set(handles.menu_ecocoplot,'Enable','On')
-                    figure(handles.acfig)
-                    cd(pre_dirML);
-                    
-                    disp('>>  *ECOCO.AC.fig file:')
-                    disp(acfig_name)
-                    disp('>>  *ECOCO-log.txt file:')
-                    disp(log_name)
-                    disp('>>  *ECOCO.Optimal.txt file:')
-                    disp(savefile_name)
-                end
-            end
-        end
         end
 end
-
 guidata(hObject, handles);
-
-if saveacfigyes == 1
-    CDac_pwd;
-    savefig(gcf,acfig_name)
-    d = dir; %get files
-    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-    refreshcolor;
-    cd(pre_dirML);
-end
 
 
 % --- Executes during object creation, after setting all properties.
@@ -2982,150 +2428,6 @@ end
 guidata(hObject, handles);
 
 
-
-% --------------------------------------------------------------------
-function menu_etrack_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_etrack (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-prompt = {'How many peaks within each window?',...
-    'Threshold H0 significant level',...
-    'Threshold correlation coefficient',...
-    'Threshold number of orbital parameters',...
-    'Threshold sedimentation rate searching radius',...
-    'How many intervals to cut the series?',...
-    'Plot? 1 = Yes, 0 = No',...
-    'Optional: sedimentation rate ranges from',...
-    'Optional: sedimentation rate ranges to'};
-dlg_title = 'Track sedimentation rates';
-num_lines = 1;
-defaultans = {'3','5','0.3','4','2','3','1',num2str(handles.sr1),num2str(handles.sr2)};
-options.Resize='on';
-answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-if ~isempty(answer)
-    n = str2double(answer{1});
-    ci = str2double(answer{2});
-    corrcf = str2double(answer{3});
-    sh_norb = str2double(answer{4});
-    srsh = str2double(answer{5});
-    srslice = str2double(answer{6});
-    plotn = str2double(answer{7});
-    sr1 = str2double(answer{8});
-    sr2 = str2double(answer{9});
-
-    %
-    ecc = handles.out_ecc;  % matrix
-    eci = handles.out_eci;  % matrix
-    norbit = handles.out_norbit; % matrix
-    ecoco = handles.out_ecoco;
-    % cut using given sedimentation range
-    srstep = handles.srstep;
-    if or(sr1 ~= handles.sr1, sr2~= handles.sr2)
-        %srshrange = round((sr1:srsh:sr2)/srstep);
-        srsh_1 = round((sr1-handles.sr1)/srstep); % start number of selected sed. rate
-        if srsh_1 == 0; srsh_1 = 1; end
-        srsh_n = round(abs(sr2-sr1)/srstep); % end number of selected sed. rate
-        ecc = ecc(srsh_1:srsh_n,:); % selected data
-        eci = eci(srsh_1:srsh_n,:); % selected data
-        norbit = norbit(srsh_1:srsh_n,:); % selected data
-        ecoco = ecoco(srsh_1:srsh_n,:); % selected data
-    end
-    [Y] = ebrief(ecc,2,-2); % brief ecoco
-    [Ypcc,locatcc] = eccpeaks(Y,ecc,eci,norbit,corrcf,ci,sh_norb,n,1,NaN); % get peaks
-
-    [~,~,srn_best,~] = ecocotrack(locatcc,ecc,eci,ecoco,...
-    norbit,handles.out_depth,sr1,sr2,srstep,...
-    srsh,srslice,corrcf,ci,plotn,sh_norb);
-
-    assignin('base','Y',Y)
-    assignin('base','Ypcc',Ypcc)
-    
-    name0 = [handles.dat_name,'-',num2str(n),'pk-',num2str(ci),'%H0SL',...
-        num2str(corrcf),'co-',num2str(srslice),'sl','-SR'];  % New name
-    name1 = [name0,handles.ext];  % name for sedrate file
-    if exist([pwd,handles.slash_v,name1])
-        for i = 1:100
-            name1 = [name0,num2str(i),handles.ext];
-            if exist([pwd,handles.slash_v,name1])
-            else
-                break
-            end
-        end
-    end
-    srn_map(:,2) = (sr1+handles.srstep*(srn_best(1,:)-1))';
-    srn_map(:,1) = handles.out_depth;
-    CDac_pwd
-    dlmwrite(name1, srn_map, 'delimiter', ',', 'precision', 9);
-    disp(['>> Sedimentation rate file: ',name1])
-    % Log name
-    log_name = [name0,'-log',handles.ext]; 
-    if exist([pwd,handles.slash_v,log_name])
-        for i = 1:100
-            log_name = [name0,'-log',num2str(i),'.txt'];
-            if exist([pwd,handles.slash_v,log_name])
-            else
-                break
-            end
-        end
-    end
-    disp(['>> Log file: ',log_name])
-    % open and write log into log_name file
-    fileID = fopen(fullfile(pwd,handles.slash_v,log_name),'w+');
-    fprintf(fileID,'%s\n',' - - - - - - - - - - - - - Summary - - - - - - - - - - -');
-    fprintf(fileID,'%s\n\n',datestr(datetime('now')));
-    fprintf(fileID,'%s\n\n',log_name);
-    fprintf(fileID,'%s\n','How many peaks each window?');
-    fprintf(fileID,'%s\n',num2str(n));
-    fprintf(fileID,'%s\n','Threshold H0 significant level');
-    fprintf(fileID,'%s\n',num2str(ci));
-    fprintf(fileID,'%s\n','Threshold correlation coefficient');
-    fprintf(fileID,'%s\n',num2str(corrcf));
-    fprintf(fileID,'%s\n','Threshold number of orbital parameters?');
-    fprintf(fileID,'%s\n',num2str(sh_norb));
-    fprintf(fileID,'%s\n','Threshold sedimentation rate');
-    fprintf(fileID,'%s\n',num2str(srsh));
-    fprintf(fileID,'%s\n','How many intervals to cut the series?');
-    fprintf(fileID,'%s\n',num2str(srslice));
-    fprintf(fileID,'%s\n','Optional: sedimentation rate ranges from');
-    fprintf(fileID,'%s\n',num2str(sr1));
-    fprintf(fileID,'%s\n','Optional: sedimentation rate ranges to');
-    fprintf(fileID,'%s\n',num2str(sr2));
-    fprintf(fileID,'%s\n',' - - - - - - - - - - - - - - End - - - - - - - - - - - -');
-    fclose(fileID);
-    
-    d = dir; %get files
-    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-    refreshcolor;
-    cd(pre_dirML); % return to matlab view folder
-end
-
-guidata(hObject, handles);
-
-% --------------------------------------------------------------------
-function menu_ecocoplot_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_ecocoplot (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-prompt = {'Plot: 1 = 1 fig; 2 = multi-figs; 3 = 3D figs; reverse Y-axis = (-1,-2,or -3)'};
-dlg_title = 'Plot ecoco results';
-num_lines = 1;
-defaultans = {'1'};
-options.Resize='on';
-answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-if ~isempty(answer)
-    hwarn = warndlg('Wait, eCOCO plot ...');
-    plotn = str2double(answer{1});
-    [~] = ecocoplot(handles.prt_sr,handles.out_depth,...
-    handles.out_ecc,handles.out_ep,handles.out_eci,handles.out_ecoco,handles.out_ecocorb,handles.out_norbit,plotn);
-    try 
-        close(hwarn)
-    catch
-    end
-    
-end
-
-
 % --------------------------------------------------------------------
 function menu_agebuild_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_agebuild (see GCBO)
@@ -3493,13 +2795,15 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                     
                     set(gcf,'Name',[dat_name,ext,': Press "SHIFT"or"ALT" & select cursors now'])
 
-                    choice = questdlg('Steps: 1) click the "DataCursor" tool; 2) select two cursors; 3) press "Enter"', ...
+                    choice = questdlg('Steps: 1) click the "DataCursor" tool; 2) select two cursors; 3) press "Enter" in the COMMAND window', ...
                         'Press "SHIFT"or"ALT" key & select 2 cursors', 'Continue','Cancel','Continue');
 
                     switch choice
                         case 'Continue'
                             figure(figI)
+                            
                             dcm_obj = datacursormode(figI);
+                            set(dcm_obj,'DisplayStyle','datatip','SnapToDataVertex','off','Enable','on')
                             Sure = input('>>  Press "Enter"');
                             c_info = getCursorInfo(dcm_obj);
                             m = length(c_info);
@@ -3811,6 +3115,65 @@ cd(pre_dirML); % return to matlab view folder
 end
 guidata(hObject,handles)
 
+
+% --------------------------------------------------------------------
+function menu_multiply_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_multiply (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+plot_selected = handles.index_selected;  % read selection in listbox 1
+nplot = length(plot_selected);   % length
+% check
+check = 0;
+for i = 1:nplot
+    plot_no = plot_selected(i);
+    if plot_no > 2
+        plot_filter_s = char(contents(plot_no));
+        plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
+        GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
+        if isdir(plot_filter_s)
+            return
+        else
+            [~,~,ext] = fileparts(plot_filter_s);
+            if sum(strcmp(ext,handles.filetype)) > 0
+                if nplot == 2
+                check = 1; % selection can be executed 
+                end
+            else
+                return
+            end
+        end
+    else
+        return
+    end
+end
+
+if check == 1
+    plot_filter_s2 = char(contents(plot_selected(1)));
+    GETac_pwd; plot_filter_s2 = fullfile(ac_pwd,plot_filter_s2);
+    dat_new = load(plot_filter_s2);
+    dat_new1 = dat_new;
+    dat_new2 = dat_new;
+    if i > 1
+        for i = 2:nplot
+            plot_no = plot_selected(i);
+            plot_filter_s = char(contents(plot_no));
+            data_filterout = load(fullfile(ac_pwd,plot_filter_s));
+            dat_new1 = [dat_new(:,1),  dat_new1(:,2).* data_filterout(:,2)];
+            dat_new2 = [data_filterout(:,1),  dat_new2(:,2).* data_filterout(:,2)];
+        end
+    else
+    end
+    CDac_pwd
+    dlmwrite('multipliedseries1.txt', dat_new1, 'delimiter', ',', 'precision', 9);
+    dlmwrite('multipliedseries2.txt', dat_new2, 'delimiter', ',', 'precision', 9);
+    d = dir; %get files
+set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+refreshcolor;
+cd(pre_dirML); % return to matlab view folder
+end
+guidata(hObject,handles)
 
 % --- Executes during object creation, after setting all properties.
 function menu_sort_CreateFcn(hObject, eventdata, handles)
@@ -4465,7 +3828,10 @@ if ~isempty(answer)
     
     CDac_pwd;   
     mkdir([ac_pwd,handles.slash_v,foldername]);
-    addpath(genpath([ac_pwd,handles.slash_v,foldername]));
+    if ~isdeployed
+        % add path for MatLab version
+        addpath(genpath([ac_pwd,handles.slash_v,foldername]));
+    end  
     cd(ac_pwd);
     refreshcolor;
     cd(pre_dirML);
@@ -4637,29 +4003,6 @@ if check == 1;
     end
 end
 guidata(hObject,handles)
-
-
-% --------------------------------------------------------------------
-function menu_addPath_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_addPath (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = handles.index_selected;  % read selection in listbox 1
-nplot = length(plot_selected);   % length
-% check
-for i = 1:nplot
-    plot_no = plot_selected(i);
-    if plot_no > 2
-        plot_filter_s = char(contents(plot_no));
-        plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
-        if isdir(plot_filter_s)
-            addpath(genpath(plot_filter_s));
-        end
-    else
-        return
-    end
-end
 
 
 % --------------------------------------------------------------------
@@ -5338,6 +4681,9 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                 handles.dat_name = dat_name;
                 guidata(hObject, handles);
                 timeOptGUI(handles);
+                h=warndlg(['(e)TimeOpt may have advanced version in astrochron. ',...
+                'Visit https://cran.r-project.org/package=astrochron',' for more infomation'],...
+                '(e)TimeOpt');
             end
         end
 end
@@ -5716,6 +5062,9 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                 handles.dat_name = dat_name;
                 guidata(hObject, handles);
                 eTimeOptGUI(handles);
+                h=warndlg(['(e)TimeOpt may have advanced version in astrochron. ',...
+                'Visit https://cran.r-project.org/package=astrochron',' for more infomation'],...
+                '(e)TimeOpt');
             end
         end
 end
@@ -5757,3 +5106,35 @@ else
     linegenerator(handles);
 end
 guidata(hObject, handles);
+
+
+% --------------------------------------------------------------------
+function menu_specmoments_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_specmoments (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+%#function bsxfun
+contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox_acmain,'Value');
+nplot = length(plot_selected);   % length
+if and ((min(plot_selected) > 2), (nplot == 1))
+    data_name = char(contents(plot_selected));
+    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; data_name = fullfile(ac_pwd,data_name);
+        if isdir(data_name) == 1
+        else
+            [~,dat_name,ext] = fileparts(data_name);
+            if sum(strcmp(ext,handles.filetype)) > 0
+                
+                current_data = load(data_name);
+                handles.current_data = current_data;
+                handles.data_name = data_name;
+                handles.dat_name = dat_name;
+                guidata(hObject, handles);
+                SpectralMomentsGUI(handles);
+            end
+        end
+end
+guidata(hObject, handles);
+

@@ -1,7 +1,45 @@
-- - - - - -    READ ME    - - - - - -
+- - - - - -    What's New   - - - - - -
+_______________________________________
 
-Update Log
+Version : ACycle_v2.0
+Date    : Aug 25, 2019 - Sept 2, 2019
+By      : Mingsong Li
+NOTE    : ask for MatLab RUNTIME 2019a
 
+    1. Completely redesign the GUI for the COCO and eCOCO tool
+
+        a, allow spearman correlation method for spectral correlation
+        b, combine COCO and eCOCO tools into one GUI
+        c, show data, its periodogram and red noise spectrum as a seperated plot
+        d, show test sed. rates and number of test rates
+        e, show astronomical cycles of selected solution for the given age
+        f, eCOCO: padding edge option
+
+    2. Move eCOCO plot to the COCO/eCOCO GUI
+
+    3. Move "track sed. rate" tool to the COCO/eCOCO GUI
+
+    4. Test default working folder writable or not. Warning if not writable.
+
+    5. Add Spectral Moments by Sinnesael, M., Zivanovic, M., De Vleeschouwer, D.,
+         Claeys, P. (2018)
+
+    6. Fix a bug of legend in "Math - Smoothing - Bootstrap"; add warning
+
+    7. TimeOpt/eTimeOpt add a warning dlg to direct users for advanced version
+        of (e)TimeOpt in astrochron
+
+    8. Update the "copyright" and acknowledgment
+
+    9. Include ZB18a solution
+
+    10. Update Users Guide
+
+    11. LR04 Stack data cleaned.
+
+    12. Fix many bugs due to MatLab RUNTIME 2019a Compiler.
+
+    13. This standalone version 1.4 only works with runtime 2019a.
 
 _____________________________________
 
@@ -10,7 +48,8 @@ Date    : Aug 6, 2019; 11:20 am
 By      : Mingsong Li
 
 	1. Spectral Analysis toolbox: Add more flexibility to MTM analysis:
-			increase ability from integer numbers 2pi, 3pi, etc. to include any numbers, e.g., 2.45pi, 6.1pi, etc.
+			increase ability from integer numbers 2pi, 3pi, etc. to 
+            include any numbers, e.g., 2.45pi, 6.1pi, etc.
 			add log(frequency) plot option;
 			change the name of output files;
 			bugs in the plot fixed
@@ -21,12 +60,14 @@ By      : Mingsong Li
 
 		Thank Dr. Xu Yao (Lanzhou University, China) for this suggestion.
 
-
 	3. Automatic update: check the last open date and update frequency of the software
 
-		If the software has not been used for 30 days, it will check whether there is a newer version.
-		If the last update occurred more than 90 days, it will check whether there is a newer version.
-		Warning: If the access to GitHub is slow, this automatic check process can be very slow.
+		If the software has not been used for 30 days, 
+            it will check whether there is a newer version.
+		If the last update occurred more than 90 days, 
+            it will check whether there is a newer version.
+		Warning: If the access to GitHub is slow, 
+            this automatic check process can be very slow.
 			
 			It does happen in mainland China for some reasons (you know). 
 			And the start-up of Acycle can take up to 2 minutes ...
@@ -43,12 +84,11 @@ By      : Mingsong Li
 
 	2. Padding the first column of data:
 
-		Thank Dr. Nicolas R. Thibault (University of Copenhagen, Denmark) again for this suggestion.
+		Thank Dr. Nicolas R. Thibault (University of Copenhagen) for this suggestion.
 
 	    has also been used in eCOCO, power decomposition analysis, and eTimeOpt tools.
 
 	3. Refine noise model for rho1
-
 
 _____________________________________
 
@@ -56,19 +96,27 @@ Version : ACycle_v1.2
 Date    : May 20, 2019; 7:11 pm
 By      : Mingsong Li
 
-	1. Signal/Noise generator: GUI to replace old sine wave, red noise and white noise
+	1. Signal/Noise generator: GUI to replace old sine wave, red noise and
+         white noise
 
-	2. Evolutionary spectral analysis: add one option for zero-padding top and bottom of series, this is to add back the missed half-window due to the sliding window methods. However, this might add additional incorrect cycles for a series with trend at either end of the series.
+	2. Evolutionary spectral analysis: add one option for zero-padding top 
+        and bottom of series, this is to add back the missed half-window 
+        due to the sliding window methods. However, this might add additional 
+        incorrect cycles for a series with trend at either end of the series.
 
-		Thanks Dr. Nicolas R. Thibault (University of Copenhagen, Denmark) for this suggestion.
+		Thanks Dr. Nicolas R. Thibault (University of Copenhagen, Denmark) 
+        for this suggestion.
 
-	3. Evolutionary spectral analysis: add panels showing 2-pi-MTM power spectrum and data-series itself
+	3. Evolutionary spectral analysis: add panels showing 2-pi-MTM 
+        power spectrum and data-series itself
 
-		Thanks Dr. Daniel R. Franco (Department of Geophysics, National Observatory, Brazil) for this suggestion.
+		Thanks Dr. Daniel R. Franco (Department of Geophysics, 
+        National Observatory, Brazil) for this suggestion.
 
 	4. Support SPACE in file name and folder name. 
 
-		Thanks Dr. Feng Cheng (Earth and Environmental Sciences, University of Rochester) for this suggestion.
+		Thanks Dr. Feng Cheng (Earth and Environmental Sciences, University
+         of Rochester) for this suggestion.
 
 	5. COCO: detect test limits of sedimentation rate automatically.
 
@@ -357,17 +405,6 @@ The code is released under the FreeBSD License.
 
 Copyright (c) 2005-2018 Carl Edward Rasmussen & Hannes Nickisch. All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
-
-   1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-
-   2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-
-THIS SOFTWARE IS PROVIDED BY CARL EDWARD RASMUSSEN & HANNES NICKISCH ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL CARL EDWARD RASMUSSEN & HANNES NICKISCH OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-The views and conclusions contained in the software and documentation are those of the authors and should not be interpreted as representing official policies, either expressed or implied, of Carl Edward Rasmussen & Hannes Nickisch.
-
-The code and associated documentation is available from http://gaussianprocess.org/gpml/code.
 _____________________________________
 
 Version : ACycle_v0.2.4.20181012

@@ -2,7 +2,7 @@ function BP89PP = getBerger89Period(t)
 B89P = load('Berger1989Periods.txt');
 
 if t < 0
-    errorlog('Time (t) must be no less than 0 with unit of Ma!')
+    errorlog('Time (t) must be no less than 0 with a unit of Ma!')
 end
 
 loc = B89P(:,1);

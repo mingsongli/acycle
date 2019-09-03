@@ -47,5 +47,7 @@ h3 = line(X, meanboot + 1 * bootstd,'color','r','linestyle','-','linewidth',1);
 h2 = line(X, meanboot + 2 * bootstd,'color','r','linestyle','--','linewidth',.5);
 h4 = line(X, meanboot - 1 * bootstd,'color','r','linestyle','-','linewidth',1);
 h5 = line(X, meanboot - 2 * bootstd,'color','r','linestyle','--','linewidth',.5);
-L5 = legend('Data',[num2str(span*100),'% ',method,' regression'],...
-    '1\sigma confidence intervals','2\sigma confidence intervals',4);
+legend('Data',[num2str(span*100),'% ',method,' regression'],...
+    '1\sigma confidence intervals','2\sigma confidence intervals','Location','NorthEast');
+%L5 = legend('Data',[num2str(span*100),'% ',method,' regression'],...
+%    '1\sigma confidence intervals','2\sigma confidence intervals',4);

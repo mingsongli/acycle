@@ -1,7 +1,7 @@
 function ac
 
-%% ACYCLE
-%% time-series analysis software for paleoclimate projects and education
+%% ACYCLE v2.0
+%% time-series analysis software for paleoclimate research and education
 %%
 % This is a start-up script for the Acycle software (MatLab version)
 %
@@ -10,6 +10,7 @@ function ac
 % Option 2: In MatLab Command Window, type:
 %           ac
 %           then press the "Enter" key. All set.
+%
 %%
 %**************************************************************************
 % Please acknowledge the program author on any publication of scientific 
@@ -30,16 +31,24 @@ function ac
 % https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf
 %
 % Program Author:
-%           Mingsong Li, PhD
-%           Department of Geosciences
-%           Pennsylvania State University
-%           410 Deike Bldg, 
-%           University Park, PA 16801, USA
 %
-% Email:    mul450@psu.edu; limingsonglms@gmail.com
-% Website:  https://github.com/mingsongli/acycle
-%           https://github.com/mingsongli/acycle/wiki
-%           http://mingsongli.com
+%   Mingsong Li, PhD
+%   Department of Geosciences
+%   Pennsylvania State University
+%   410 Deike Bldg, 
+%   University Park, PA 16801, USA
+%   Contact:  mul450@psu.edu; limingsonglms@gmail.com
+%   Website:  https://github.com/mingsongli/acycle
+%             https://github.com/mingsongli/acycle/wiki
+%             http://mingsongli.com
+% 
+%   Linda A. Hinnov
+%   Department of Atmospheric, Oceanic and Earth Sciences
+%   George Mason University
+%   3454 Exploratory Hall
+%   Fairfax, Virginia 22030, USA
+%   Email: lhinnov@gmu.edu
+%   Website: http://mason.gmu.edu/~lhinnov/
 %
 % Copyright (C) 2017-2019
 %
@@ -56,20 +65,25 @@ function ac
 %
 %**************************************************************************
 %%
-
+%help ac
 ac_dir_str = which('ac.m');
 [path_root,~,~] = fileparts(ac_dir_str);
 % Test valid directory
 pwd_init = pwd;
-try 
-    eval(['cd ',path_root])
-    cd(pwd_init)
-catch
-    errordlg('Directory may NOT contain non-English or non-numeric characters',...
-        'Path Error')
+
+if ~isdeployed
+    % add path for MatLab version
+    addpath(genpath(path_root));
+    % Please don't remove the following "Acknowledgment"
+    help ac_acknowledgment
+    try
+        eval(['cd ',path_root])
+        cd(pwd_init)
+    catch
+        errordlg('Directory may NOT contain non-English or non-numeric characters',...
+            'Path Error')
+    end
 end
-% add path
-addpath(genpath(path_root));
 % start up Acycle GUI
 AC
 end

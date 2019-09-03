@@ -243,9 +243,9 @@ if type == 1
     name_insold = [name_insold,num2str(dayi2),'-'];
 end
 % name with latitude
-name_insol = [name_insold,'lat-',num2str(lat1),'-'];
+name_insol = [name_insold,'lat-(',num2str(lat1),')-'];
 if handles.latrange == 1
-    name_insol = [name_insol,num2str(lat2),'-'];
+    name_insol = [name_insol,'(',num2str(lat2),')-'];
 end
 % name with type
 if qinso == -1

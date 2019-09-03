@@ -70,7 +70,6 @@ set(handles.text20,'position',[0.538,0.873,0.13,0.07])
 set(handles.edit11,'position',[0.69,0.852,0.18,0.1])
 set(handles.text23,'position',[0.871,0.852,0.13,0.07])
 set(handles.slider4,'position',[0.03,0.729,0.94,0.09])
-%set(handles.text24,'position',[0.423,0.659,0.466,0.07])
 set(handles.uipanel8,'position',[0.413,0.249,0.606,0.485])
 
 set(handles.prewhiten_lowess_checkbox,'position',[0.043,0.61,0.4,0.1])

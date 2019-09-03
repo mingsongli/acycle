@@ -92,23 +92,6 @@ set(handles.edit5,'position', [0.6,0.143,0.3,0.222])
 
 % Choose default command line output for basicseries
 handles.output = hObject;
-
-% existdata = evalin('base','who');
-% 
-% if ismember('filename',existdata)
-%     handles.filename = evalin('base','filename');
-% else
-%     handles.filename = 'filename';
-% end
-% 
-% if ismember('path_temp',existdata)
-%     handles.path_temp = evalin('base','path_temp');
-% else
-%     temp_dir = what('temp');
-%     handles.path_temp = temp_dir.path;
-% end
-% handles.working_folder = [handles.path_temp,'/',handles.filename];
-
 %
 handles.solution = 'La2004';
 handles.parameter = 'ETP';
@@ -129,6 +112,9 @@ handles.notewu13 = ['Wu, H., Zhang, S., Jiang, G., Hinnov, L., Yang, T., Li, H.'
 handles.noteZB17 = ['Zeebe, R.E., 2017. Numerical Solutions for the ',...
     'orbital motion of the Solar System over the Past 100 Myr: ',...
     'Limits and new results. The Astronomical Journal 154:193'];
+handles.noteZB18a = ['Zeebe, R.E., Lourens, L.J. (2019)',...
+    ' Solar System chaos and the Paleocene?Eocene boundary age ',...
+    'constrained by geology and astronomy. Science 365, 926-929.'];
 set(handles.textref,'String',char(handles.notela04),'Value',1)
 % Update handles structure
 guidata(hObject, handles);
@@ -220,6 +206,9 @@ elseif strcmp(solution, 'ZB17k')
 elseif strcmp(solution, 'ZB17p')
     handles.basicseries = load('ZB17p.dat');
     ref = 3;
+elseif strcmp(solution, 'ZB18a')
+    handles.basicseries = load('ZB18a.dat');
+    ref = 4;
 end
 
 if ref == 1
@@ -232,6 +221,10 @@ elseif ref == 2
 elseif ref == 3
     handles.parameter = 'Eccentricity';
     set(handles.textref,'String',char(handles.noteZB17),'Value',1)
+    set(handles.popupmenu3,'String',parameters_list2,'Value',1);
+elseif ref == 4
+    handles.parameter = 'Eccentricity';
+    set(handles.textref,'String',char(handles.noteZB18a),'Value',1)
     set(handles.popupmenu3,'String',parameters_list2,'Value',1);
 elseif ref == 0
     set(handles.popupmenu3,'String',parameters_list0,'Value',1);
@@ -363,6 +356,10 @@ if ref == 3 && t2 > 1.0e+05
     error('Error: t2 must be less than 100,000')
     return;
 end
+if ref == 4 && t2 > 1.0e+05
+    error('Error: t2 must be less than 100,000')
+    return;
+end
 if (ref == 1 || ref == 2) && t2 >= 249000
     error('Error: t2 must be less than 249,000')
     return;
@@ -376,8 +373,6 @@ if strcmp(parameter,'ETP')
     wE = str2double(get(handles.edit3,'String'));
     wT = str2double(get(handles.edit4,'String'));
     wP = str2double(get(handles.edit5,'String'));
-    %data(:,5)=zscore(data(:,2))+.75*zscore(data(:,3))-zscore(data(:,4));
-    %data(:,5)=zscore(data(:,2))+.4*zscore(data(:,3))-.5*zscore(data(:,4));
     data(:,5)=wE * zscore(data(:,2))+ wT * zscore(data(:,3)) + wP * zscore(data(:,4));
     dat(:,1)=data(:,1);
     dat(:,2)=data(:,5);

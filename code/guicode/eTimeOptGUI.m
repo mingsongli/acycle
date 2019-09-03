@@ -145,7 +145,7 @@ if sum(diffx <= 0) > 0
     dat = sortrows(dat);
 end
 % check data
-if abs((max(diffx)-min(diffx))/2) > eps('single');
+if abs((max(diffx)-min(diffx))/2) > 10*eps('single')
     hwarn1 = warndlg('Data may not be evenly spaced!');
 end
 %
@@ -160,7 +160,7 @@ handles.step = 0.65 * abs(datx(end)-datx(1))/200;
 set(handles.edit10,'String',num2str(handles.window))
 set(handles.edit11,'String',num2str(handles.step))
 
-if handles.step <= dt;
+if handles.step <= dt
     handles.step = dt;
 end
 % check unit, set to cm

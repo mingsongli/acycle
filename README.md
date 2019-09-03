@@ -2,7 +2,7 @@
     <img src="https://github.com/mingsongli/acycleFig/blob/master/default_icon_1024-git.gif" alt="homepage" title="Acycle GitHub homepage">
 </a>
 
-[![](https://img.shields.io/badge/version-v1.3-blue.svg)]()
+[![](https://img.shields.io/badge/version-v2.0-blue.svg)]()
 [![](https://img.shields.io/badge/license-GPL-brightgreen.svg)](https://www.gnu.org/licenses/)
 [![](https://img.shields.io/badge/platform-Mac_Win-green.svg)]()
 ![](https://img.shields.io/badge/language-MatLab-red.svg)
@@ -65,7 +65,7 @@
     <img src="https://github.com/mingsongli/acycleFig/blob/master/WechatIMG17.jpeg" alt="MingsongLi.com" title="Mingsong Li homepage" width="100" height="100">
 </a>
 <br>
-Mingsong Li, Penn State. August 7, 2019 <br>
+Mingsong Li, Penn State. Sept. 2, 2019 <br>
 E-mail: <i> mul450 {at} psu.edu;  limingsonglms {at} gmail.com </i> <br><br>
 
 Website: https://mingsongli.com/
@@ -292,6 +292,11 @@ _2π multi-taper method power spectrum of the gamma ray series is shown with `20
 *    > _7._ Zhang, Y., Yi, L., Ogg, J.G., 2019. Pliocene-Pleistocene magneto-cyclostratigraphy of IODP Site U1499 and implications for climate-driven sedimentation in the northern South China Sea. Palaeogeography, Palaeoclimatology, Palaeoecology. https://doi.org/10.1016/j.palaeo.2019.04.030
 *    > _8._ Zhang, R., Jin, Z., Liu, Q., Li, P., Huang, Z., Shi, J., Ge, Y., Du, K., 2019. Astronomical constraints on deposition of the Middle Triassic Chang 7 lacustrine shales in the Ordos Basin, Central China. Palaeogeography, Palaeoclimatology, Palaeoecology. https://doi.org/10.1016/j.palaeo.2019.04.030
 *    > _9._ Zhao, K., Du, X., Lu, Y., Xiong, S., Wang, Y., 2019. Are light-dark coupled laminae in lacustrine shale seasonally controlled? A case study using astronomical tuning from 42.2 to 45.4 Ma in the Dongying Depression, Bohai Bay Basin, eastern China. Palaeogeography, Palaeoclimatology, Palaeoecology 528, 35-49. https://doi.org/10.1016/j.palaeo.2019.04.034
+*    > _10._ Zhang, R., Li, L., Nai, W., Gu, Y., Huang, C., Ogg, J., Li, Q., Lu, C. and Wang, Z., 2019. Astronomical forcing of terrestrial climate recorded in the Pleistocene of the western Tarim Basin, NW China. Palaeogeography, Palaeoclimatology, Palaeoecology.
+*    > _11._ Xu, K., Chen, H., Huang, C., Ogg, J.G., Zhu, J., Lin, S., Yang, D., Zhao, P. and Kong, L., 2019. Astronomical time scale of the Paleogene lacustrine paleoclimate record from the Nanxiang Basin, central China. Palaeogeography, Palaeoclimatology, Palaeoecology, 532, p.109253.
+*    > _12._ ZHONG, Y., CHEN, D., FAN, J., WU, H., FANG, Q. and SHI, M., 2019. Cyclostratigraphic Calibration of the Upper Ordovician (Sandbian–Katian) Pagoda and Linhsiang Formations in the Yichang Area, South China. Acta Geologica Sinica‐English Edition, 93(S3), pp.177-180.
+*    > _13._ Su, Q., Nie, J., Luo, Z., Li, M., Heermance, R. and Garzione, C., 2019. Detection of Strong Precession Cycles from the Late Pliocene Sedimentary Records of Northeastern Tibetan Plateau. Geochemistry, Geophysics, Geosystems.
+*    > _14._ Oehlert, A.M. and Swart, P.K., Rolling Window Regression of δ13C and δ18O Values in Carbonate Sediments: Implications for Source and Diagenesis. The Depositional Record.
 
 ---
 ## Read more

@@ -61,7 +61,7 @@ set(h2,'FontUnits','points','FontSize',12);  % set as norm
 
 set(gcf,'position',[0.5,0.1,0.45,0.5]) % set position
 set(handles.logo_axes1,'position',[0.02,0.78,0.2,0.2]) % set position
-set(handles.text5,'position',[0.25,0.762,0.35,0.2]) % set position
+set(handles.text5,'position',[0.25,0.762,0.65,0.23]) % set position
 set(handles.edit1,'position',[0.02,0.02,0.96,0.74]) % set position
 
 set(gcf,'Name','Acycle: Copyright')
