@@ -277,9 +277,9 @@ try
     fileID = fopen(fullfile(pwd,tempname1),'w+');
     fprintf(fileID,'%s\n',datestr(datetime('now')));
     fclose(fileID);
-    delete temp_test_acycle.txt
+    delete(tempname1)
 catch
-    errordlg('Change working folder. \nCurrent working folder is not writable!','Folder error');
+    msgbox(['Change working folder. ','Current working folder may be not writable!'],'Folder');
 end
 
 % --- Outputs from this function are returned to the command line.
