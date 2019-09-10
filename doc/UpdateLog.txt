@@ -1,6 +1,16 @@
 - - - - - -    What's New   - - - - - -
 _______________________________________
 
+Version : ACycle_v2.0.1
+Date    : Sept 9, 2019
+By      : Mingsong Li
+NOTE    : ask for MatLab RUNTIME 2019a
+
+    1. Update Spectral Moments section in the Users' Guide of Acycle 2.0
+
+	Thanks Matthias Sinnesael for the suggestions.
+_______________________________________
+
 Version : ACycle_v2.0
 Date    : Aug 25, 2019 - Sept 2, 2019
 By      : Mingsong Li
@@ -9,7 +19,7 @@ NOTE    : ask for MatLab RUNTIME 2019a
     1. Completely redesign the GUI for the COCO and eCOCO tool
 
         a, allow spearman correlation method for spectral correlation
-        b, combine COCO and eCOCO tools into one GUI
+        b, combine COCO and eCOCO tools into one GUI.
         c, show data, its periodogram and red noise spectrum as a seperated plot
         d, show test sed. rates and number of test rates
         e, show astronomical cycles of selected solution for the given age
@@ -21,26 +31,25 @@ NOTE    : ask for MatLab RUNTIME 2019a
 
     4. Test default working folder writable or not. Warning if not writable.
 
-    5. Add Spectral Moments by Sinnesael, M., Zivanovic, M., De Vleeschouwer, D.,
+    5. Add the "Spectral Moments" tool by Sinnesael, M., Zivanovic, M., De Vleeschouwer, D.,
          Claeys, P. (2018)
 
-    6. Fix a bug of legend in "Math - Smoothing - Bootstrap"; add warning
+    6. Fix a bug of legend in "Math - Smoothing - Bootstrap"; add warning msgbox
 
-    7. TimeOpt/eTimeOpt add a warning dlg to direct users for advanced version
+    7. TimeOpt/eTimeOpt add a msgbox to direct users for advanced version
         of (e)TimeOpt in astrochron
 
     8. Update the "copyright" and acknowledgment
 
-    9. Include ZB18a solution
+    9. Include ZB18a astronomical solution
 
-    10. Update Users Guide
+    10. Update Users' Guide v2.0
 
     11. LR04 Stack data cleaned.
 
     12. Fix many bugs due to MatLab RUNTIME 2019a Compiler.
 
-    13. This standalone version 1.4 only works with runtime 2019a.
-
+    The standalone version of Acycle 2.0 may only work with MatLab runtime 2019a.
 _____________________________________
 
 Version : ACycle_v1.3
