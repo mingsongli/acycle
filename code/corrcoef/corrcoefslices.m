@@ -190,7 +190,7 @@ if nsim > 0
             if rem(i,nmc_n) == 0
                 waitbarstep = waitbarstep+1; 
                 if waitbarstep > steps; waitbarstep = steps; end
-                pause(0.001);%
+                pause(0.0001);%
                 waitbar(waitbarstep / steps)
             end
         end

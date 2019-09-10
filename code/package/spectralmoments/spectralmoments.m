@@ -89,6 +89,8 @@ if padedge == 1
     data = zeropad2(data,window,1);
 end
 
+controlbar = 1; % show control bar
+
 x = data(:,1); % depth 
 y = data(:,2); % value
 
@@ -135,14 +137,38 @@ for i = 1: n_step : npts
     end
 end
 
+if controlbar
+    % Waitbar
+    hwaitbar = waitbar(0,'Sliding window processing ...[CTRL + C to quit]',...    
+       'WindowStyle','modal');
+    hwaitbar_find = findobj(hwaitbar,'Type','Patch');
+    set(hwaitbar_find,'EdgeColor',[0 0.9 0],'FaceColor',[0 0.9 0]) % changes the color to blue
+    steps = 100;
+    % step estimation for waitbar
+    nmc_n = round(npts_new/steps);
+    waitbarstep = 1;
+    waitbar(waitbarstep / steps)
+end
+    
 for i =1:npts_new
     d = z(i,:);
     [pxx,f] = periodogram(d,[],pad*n_win,1/dt);
     uf(i) = sum(f.*pxx./sum(pxx));
     BW2 = sum((f-uf(i)).^2 .* pxx / sum(pxx));
     Bw(i) = sqrt(BW2);
+    
+    if rem(i,nmc_n) == 0
+        waitbarstep = waitbarstep+1; 
+        if waitbarstep > steps; waitbarstep = steps; end
+        pause(0.0001);%
+        waitbar(waitbarstep / steps)
+    end
 end
 
+if ishandle(hwaitbar)
+    close(hwaitbar);
+end
+        
 depth = linspace((x(1)+window/2), (x(end)-window/2), npts_new);
 depth = depth';
 

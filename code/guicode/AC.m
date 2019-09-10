@@ -521,7 +521,7 @@ if handles.doubleclick
     catch
         [~,dat_name,ext] = fileparts(filename);
         filetype = handles.filetype;
-        disp(ext)
+        %disp(ext)
         if isdeployed
             % bug start:   Warning: The Open function cannot be used in compiled applications.
             if strcmp(ext,'.fig')
@@ -537,10 +537,13 @@ if handles.doubleclick
             elseif ismember(ext,{'.txt','.csv'})
                 [data1,~] = importdata(filename);
                 nlen = length(data1(:,1));
-                if nlen> 10
+                if nlen > 15
                     msgbox('See Terminal/Command Window for details')
-                    disp('>> First 10 lines of data:')
+                    disp(['>> Total rows: ', num2str(nlen)])
+                    disp('>> First 10 and last 5 rows of data:')
                     disp(data1(1:10,:))
+                    disp('       ... ...')
+                    disp(data1(end-4:end,:))
                 else
                     msgbox('See Terminal/Command Window for details')
                     disp('>> Data:')
@@ -586,10 +589,14 @@ if handles.doubleclick
             elseif ismember(ext,{'.txt','.csv'})
                 [data1,~] = importdata(filename);
                 nlen = length(data1(:,1));
-                if nlen> 10
+                if nlen> 15
                     msgbox('See Terminal/Command Window for details')
-                    disp('>> First 10 lines of data:')
+                    disp(['>> Total rows: ', num2str(nlen)])
+                    disp('>> First 10 and last 5 rows of data:')
                     disp(data1(1:10,:))
+                    disp('                  ... ...')
+                    disp(data1(end-4:end,:))
+                    
                 else
                     msgbox('See Terminal/Command Window for details')
                     disp('>> Data:')
@@ -2976,21 +2983,25 @@ for i = 1:nplot
         end
     elseif strcmp(copycut,'copy')
         % paste copied files
-        new_name = handles.data_name{i};
-        new_name_w_dir = [ac_pwd,handles.slash_v,new_name];
-        if exist(new_name_w_dir)
-            [~,dat_name,ext] = fileparts(new_name);
-            for i = 1:100
-                new_name = [dat_name,'_copy',num2str(i),ext];
-                if exist([ac_pwd,handles.slash_v,new_name])
-                else
-                    break
+        try
+            new_name = handles.data_name{i};
+            new_name_w_dir = [ac_pwd,handles.slash_v,new_name];
+            if exist(new_name_w_dir)
+                [~,dat_name,ext] = fileparts(new_name);
+                for i = 1:100
+                    new_name = [dat_name,'_copy',num2str(i),ext];
+                    if exist([ac_pwd,handles.slash_v,new_name])
+                    else
+                        break
+                    end
                 end
             end
+            new_file = [ac_pwd,handles.slash_v,new_name];
+            file_list = handles.file;
+            copyfile(file_list{1}, new_file)
+        catch
+            disp('No data copied')
         end
-        new_file = [ac_pwd,handles.slash_v,new_name];
-        file_list = handles.file;
-        copyfile(file_list{1}, new_file)
     end
 end
 d = dir; %get files
