@@ -13,6 +13,8 @@ NOTE    : ask for MatLab RUNTIME 2019a
     2. Include f-test and amplitude spectrum for the MTM power spectrum
         using Linda Hinnov's ftestmtm.m and mtmdofs.m scripts
         Please cite: Kodama and Hinnov (2015).
+
+        Thank Kunyuan Ma for the bug report.
 _______________________________________
 
 Version : ACycle_v2.0

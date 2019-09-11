@@ -322,19 +322,7 @@ if strcmp(method,'Multi-taper method')
         end
     
     end
-    [freq,ftest,fsig,Amp,Faz,Sig,Noi,dof,wt]=ftestmtmML(data,nw,padtimes,1);
-    nameftest = [dat_name,'-',num2str(nw),'piMTM-ftest',ext];
-    namefsig = [dat_name,'-',num2str(nw),'piMTM-fsig',ext];
-    namefamp = [dat_name,'-',num2str(nw),'piMTM-amp',ext];
-    CDac_pwd;
-    dlmwrite(nameftest, [freq',ftest'], 'delimiter', ',', 'precision', 9);
-    dlmwrite(namefsig, [freq',fsig'], 'delimiter', ',', 'precision', 9);
-    dlmwrite(namefamp, [freq',Amp'], 'delimiter', ',', 'precision', 9);
-    %disp('>>  Refresh main window to see red noise estimation data files: ')
-    disp(nameftest)
-    disp(namefsig)
-    disp(namefamp)
-    cd(pre_dirML);
+    
 
     if padtimes > 1
         [po,w]=pmtm(datax,nw,nzeropad);
@@ -437,7 +425,28 @@ if strcmp(method,'Multi-taper method')
         figdata = figHandle;
     else
     end  
-
+    
+    [freq,ftest,fsig,Amp,Faz,Sig,Noi,dof,wt]=ftestmtmML(data,nw,padtimes,1);
+    fnyq = 1/(2*dt);
+    nameftest = [dat_name,'-',num2str(nw),'piMTM-ftest',ext];
+    namefsig = [dat_name,'-',num2str(nw),'piMTM-fsig',ext];
+    namefamp = [dat_name,'-',num2str(nw),'piMTM-amp',ext];
+    CDac_pwd;
+    dataftest = [freq',ftest'];
+    datafsig  = [freq',fsig'];
+    dataamp  = [freq',Amp'];
+    [dataftest] = select_interval(dataftest,0,fnyq);
+    [datafsig] = select_interval(datafsig,0,fnyq);
+    [dataamp] = select_interval(dataamp,0,fnyq);
+    dlmwrite(nameftest, dataftest, 'delimiter', ',', 'precision', 9);
+    dlmwrite(namefsig, datafsig, 'delimiter', ',', 'precision', 9);
+    dlmwrite(namefamp, dataamp, 'delimiter', ',', 'precision', 9);
+    %disp('>>  Refresh main window to see red noise estimation data files: ')
+    disp(nameftest)
+    disp(namefsig)
+    disp(namefamp)
+    cd(pre_dirML);
+    
 elseif strcmp(method,'Lomb-Scargle spectrum')
     pfa = [50 10 1 0.01]/100;
     pd = 1 - pfa;
@@ -923,7 +932,8 @@ if strcmp(method,'Multi-taper method')
             return
         end
     end
-    [freq,ftest,fsig,Amp,Faz,Sig,Noi,dof,wt]=ftestmtmML(data,nw,padtimes,1);
+    
+    
     if padtimes > 1
         [po,w]=pmtm(datax,nw,nzeropad);
     else 
@@ -954,63 +964,64 @@ if strcmp(method,'Multi-taper method')
         end
     end 
 
-if handles.checkbox_ar1_v == 1
-    % Waitbar
-    hwaitbar = waitbar(0,'Classic red noise estimation may take a few minutes...',...    
-       'WindowStyle','modal');
-    hwaitbar_find = findobj(hwaitbar,'Type','Patch');
-    set(hwaitbar_find,'EdgeColor',[0 0.9 0],'FaceColor',[0 0.9 0]) % changes the color to blue
-    %setappdata(hwaitbar,'canceling',0)
-    steps = 6;
-    step = 1;
-    waitbar(step / steps)
+    if handles.checkbox_ar1_v == 1
+        % Waitbar
+        hwaitbar = waitbar(0,'Classic red noise estimation may take a few minutes...',...    
+           'WindowStyle','modal');
+        hwaitbar_find = findobj(hwaitbar,'Type','Patch');
+        set(hwaitbar_find,'EdgeColor',[0 0.9 0],'FaceColor',[0 0.9 0]) % changes the color to blue
+        %setappdata(hwaitbar,'canceling',0)
+        steps = 6;
+        step = 1;
+        waitbar(step / steps)
 
-    step = 1.5;
-    waitbar(step / steps)
-    % Prepare redconfidence level data for excel output
-    col1='Frequency(cycles/)';
-    col2='Power';
-    col3='Frequency(cycles/)';
-    col4='TheoreticalRed';
-    col6='90%tchi2';
-    col7='95%tchi2';
-    col8='99%tchi2';
-    col9='Mean';
-    title0 = {col1;col2;col3;col4;col6;col7;col8;col9}';
-    Redconf_out1=[fd1,po];
-    handles.title0 = title0;
-    handles.Redconf_out1 = Redconf_out1;
+        step = 1.5;
+        waitbar(step / steps)
+        % Prepare redconfidence level data for excel output
+        col1='Frequency(cycles/)';
+        col2='Power';
+        col3='Frequency(cycles/)';
+        col4='TheoreticalRed';
+        col6='90%tchi2';
+        col7='95%tchi2';
+        col8='99%tchi2';
+        col9='Mean';
+        title0 = {col1;col2;col3;col4;col6;col7;col8;col9}';
+        Redconf_out1=[fd1,po];
+        handles.title0 = title0;
+        handles.Redconf_out1 = Redconf_out1;
 
-    step = 2;
-    waitbar(step / steps)
-    step = 2.5;
-    waitbar(step / steps)
-    [fd,po,theored,tabtchi90,tabtchi95,tabtchi99,tabtchi999]=redconftabtchi(datax,nw,dt,nzeropad,2);
-    step = 4.5;
-    waitbar(step / steps)
-    figdata = figure;  
-    set(gcf,'Color', 'white')
-    plot(fd,po,'LineWidth',1);
-    hold on; plot(fd,theored,'LineWidth',1);
-    hold on; plot(fd,[tabtchi90,tabtchi95,tabtchi99,tabtchi999],'LineWidth',1);
-    xlim([0 fmax]);
-    title([num2str(nw),'\pi MTM classic AR1',' ','; Sampling rate = ',num2str(dt),' ', unit])
-    legend('Power','AR1','90%','95%','99%','99.9%')
-    step = 5.5;
-    waitbar(step / steps)
-    delete(hwaitbar)
-    if handles.linlogY == 1;
-        set(gca, 'YScale', 'log')
+        step = 2;
+        waitbar(step / steps)
+        step = 2.5;
+        waitbar(step / steps)
+        [fd,po,theored,tabtchi90,tabtchi95,tabtchi99,tabtchi999]=redconftabtchi(datax,nw,dt,nzeropad,2);
+        step = 4.5;
+        waitbar(step / steps)
+        figdata = figure;  
+        set(gcf,'Color', 'white')
+        plot(fd,po,'LineWidth',1);
+        hold on; plot(fd,theored,'LineWidth',1);
+        hold on; plot(fd,[tabtchi90,tabtchi95,tabtchi99,tabtchi999],'LineWidth',1);
+        xlim([0 fmax]);
+        title([num2str(nw),'\pi MTM classic AR1',' ','; Sampling rate = ',num2str(dt),' ', unit])
+        legend('Power','AR1','90%','95%','99%','99.9%')
+        step = 5.5;
+        waitbar(step / steps)
+        delete(hwaitbar)
+        if handles.linlogY == 1;
+            set(gca, 'YScale', 'log')
+        else
+            set(gca, 'YScale', 'linear')
+        end
+        if handles.logfreq == 1
+            set(gca,'xscale','log')
+        end
     else
-        set(gca, 'YScale', 'linear')
-    end
-    if handles.logfreq == 1
-        set(gca,'xscale','log')
-    end
-else
-    figdata = gcf;
-end  
-
+        figdata = gcf;
+    end  
+    
+    [freq,ftest,fsig,Amp,Faz,Sig,Noi,dof,wt]=ftestmtmML(data,nw,padtimes,1);
 
 elseif strcmp(method,'Lomb-Scargle spectrum')
     pfa = [50 10 1 0.01]/100;

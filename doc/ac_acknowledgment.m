@@ -38,9 +38,11 @@
 % Acknowledgment:
 %   Feng Cheng, Anne-Christine Da Silva, Hewei Duan, Yanan Fang, 
 %   Marco Franceschi, Daniel R. Franco, Xiaoni Hu, Dorothée Husson, 
-%   Arsenio Muñoz Jiménez, Lee R. Kump, Dongyang Liu, James Ogg, 
-%   Paul Olsen, J. Fred Read, Chen Shen, Chuanyue Wang, Mathieu Martinez, 
-%   Meng Wang, Xu Yao, Qiyan Zhang, Yang (Wendy) Zhang, Christian Zeeden
+%   Arsenio Muñoz Jiménez, Lee R. Kump, Dongyang Liu, Kunyuan Ma, 
+%   Mathieu Martinez, James Ogg, Paul Olsen, J. Fred Read, Chen Shen,   
+%   Chuanyue Wang, Meng Wang, Xu Yao, Qiyan Zhang, Yang (Wendy) Zhang, 
+%   Christian Zeeden
+
 %**************************************************************************
 % Copyright (C) 2017-2019
 % This program is a free software; you can redistribute it and/or modify it
