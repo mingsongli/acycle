@@ -1,7 +1,7 @@
 - - - - - -    What's New   - - - - - -
 _______________________________________
 
-Version : ACycle_v2.0.1
+Version : ACycle_v2.1
 Date    : Sept 9, 2019
 By      : Mingsong Li
 NOTE    : ask for MatLab RUNTIME 2019a
@@ -9,6 +9,10 @@ NOTE    : ask for MatLab RUNTIME 2019a
     1. Update Spectral Moments section in the Users' Guide of Acycle 2.0
 
 	Thanks Matthias Sinnesael for the suggestions.
+
+    2. Include f-test and amplitude spectrum for the MTM power spectrum
+        using Linda Hinnov's ftestmtm.m and mtmdofs.m scripts
+        Please cite: Kodama and Hinnov (2015).
 _______________________________________
 
 Version : ACycle_v2.0

@@ -322,7 +322,20 @@ if strcmp(method,'Multi-taper method')
         end
     
     end
-    
+    [freq,ftest,fsig,Amp,Faz,Sig,Noi,dof,wt]=ftestmtmML(data,nw,padtimes,1);
+    nameftest = [dat_name,'-',num2str(nw),'piMTM-ftest',ext];
+    namefsig = [dat_name,'-',num2str(nw),'piMTM-fsig',ext];
+    namefamp = [dat_name,'-',num2str(nw),'piMTM-amp',ext];
+    CDac_pwd;
+    dlmwrite(nameftest, [freq',ftest'], 'delimiter', ',', 'precision', 9);
+    dlmwrite(namefsig, [freq',fsig'], 'delimiter', ',', 'precision', 9);
+    dlmwrite(namefamp, [freq',Amp'], 'delimiter', ',', 'precision', 9);
+    %disp('>>  Refresh main window to see red noise estimation data files: ')
+    disp(nameftest)
+    disp(namefsig)
+    disp(namefamp)
+    cd(pre_dirML);
+
     if padtimes > 1
         [po,w]=pmtm(datax,nw,nzeropad);
     else 
@@ -870,6 +883,7 @@ if strcmp(method,'Multi-taper method')
         set(figwarn,'units','norm') % set location
         set(figwarn,'position',[0.5,0.8,0.225,0.09]) % set position
     end
+    
     if handles.checkbox_robustAR1_v == 1
         dlg_title = 'Robust AR(1) Estimation';
         prompt = {'Median smoothing window: default 0.2 = 20%';...
@@ -886,7 +900,7 @@ if strcmp(method,'Multi-taper method')
             if length(datax)>2000
                 hwarn = warndlg('Large dataset, wait ...');
             end
-                [rhoM, s0M,redconfAR1,redconfML96]=redconfML(datax,dt,nw,nzeropad,linlog,smoothwin,fmax,1);
+            [rhoM, s0M,redconfAR1,redconfML96]=redconfML(datax,dt,nw,nzeropad,linlog,smoothwin,fmax,1);
             try close(hwarn)
             catch
             end
@@ -909,7 +923,7 @@ if strcmp(method,'Multi-taper method')
             return
         end
     end
-    
+    [freq,ftest,fsig,Amp,Faz,Sig,Noi,dof,wt]=ftestmtmML(data,nw,padtimes,1);
     if padtimes > 1
         [po,w]=pmtm(datax,nw,nzeropad);
     else 
@@ -996,6 +1010,7 @@ if handles.checkbox_ar1_v == 1
 else
     figdata = gcf;
 end  
+
 
 elseif strcmp(method,'Lomb-Scargle spectrum')
     pfa = [50 10 1 0.01]/100;
