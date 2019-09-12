@@ -1427,6 +1427,7 @@ else
     
     param4 = ['Zero padding for each window is ',num2str(pad),'; Zero padding for the edge of data: ',padedgemodel];
 end
+
 CDac_pwd;
 if handles.ecocoS == 0
     
@@ -1496,7 +1497,11 @@ if handles.ecocoS == 1
         fprintf(fileID,'%s, %s, %s, %s, %d, %s\n',sr_p(row,1),sr_p(row,2),sr_p(row,3),sr_p(row,4),sr_p(row,5),sr_p(row,6));
     end
     fclose(fileID);
+    figure(handles.hmain)
+    savefig(acfig_name)
 end
+
+
 
 % update acycle main figure for both COCO and eCOCO
 d = dir; %get files

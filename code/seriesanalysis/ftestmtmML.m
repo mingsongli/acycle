@@ -40,10 +40,9 @@ dt = median(diff(t));
 [freq,ftest,fsig,Amp,Faz,Sig,Noi] = ftestmtm(t,detrend(w),NW,dof,npad);
 fnyq = 1/(2*dt);
 if plotn
-    
     figure; 
     yyaxis left
-    plot(freq, Amp,'color',[.5, .5, .5],'LineWidth',1.5)
+    plot(freq, Amp,'color',[0, 0.4470, 0.7410],'LineWidth',1.5)
     xlim([0, fnyq])
     title('Amplitude & F-test')
     ylabel('Amplitude')
@@ -54,7 +53,7 @@ if plotn
     plot(freq, fsig1,'color','red','LineWidth',1);
     ylim([fsigsh,1.5])
     xlim([0, fnyq])
-    line([0 fnyq],[.95 .95],'Color','blue','LineWidth',0.5,'LineStyle','-.')
+    line([0 fnyq],[.95 .95],'Color','r','LineWidth',0.5,'LineStyle','-.')
     line([0 fnyq],[.99 .99],'Color','m','LineWidth',0.5,'LineStyle','--')
     yticks([0.9 0.95 0.99 1])
     yticklabels({'0.9','0.95','0.99', '1'})

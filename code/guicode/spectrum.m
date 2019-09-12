@@ -22,7 +22,7 @@ function varargout = spectrum(varargin)
 
 % Edit the above text to modify the response to help spectrum
 
-% Last Modified by GUIDE v2.5 07-Aug-2019 18:42:16
+% Last Modified by GUIDE v2.5 11-Sep-2019 18:45:16
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -83,8 +83,10 @@ set(handles.radiobutton4,'position', [0.503,0.054,0.195,0.365])
 set(handles.edit4,'position', [0.664,0.089,0.3,0.23])
 
 set(handles.uipanel3,'position', [0.05,0.082,0.445,0.32])
-set(handles.checkbox_robust,'position', [0.2,0.516,0.75,0.37])
-set(handles.checkbox_ar1_check,'position', [0.2,0.177,0.75,0.37])
+set(handles.checkbox_robust,'position', [0.05,0.65,0.7,0.3])
+set(handles.checkbox_ar1_check,'position', [0.05,0.35,0.7,0.3])
+set(handles.check_ftest,'position', [0.05,0.05,0.9,0.3])
+set(handles.check_ftest,'Value', 1)
 
 set(handles.uibuttongroup1,'position', [0.5,0.25,0.45,0.52])
 set(handles.radiobutton_fmax,'position', [0.089,0.75,0.473,0.2])
@@ -130,6 +132,7 @@ handles.logfreq = 0;
 handles.pad = 1;
 handles.checkbox_ar1_v = 0;
 handles.checkbox_robustAR1_v = 1;
+handles.check_ftest_value = 1;
 handles.timebandwidth = 2;
 handles.datasample = 0;  % warning of sampling rate: uneven = 1
 Dt = diff(data_s(:,1));
@@ -425,27 +428,33 @@ if strcmp(method,'Multi-taper method')
         figdata = figHandle;
     else
     end  
+    if handles.check_ftest_value
+        [freq,ftest,fsig,Amp,Faz,Sig,Noi,dof,wt]=ftestmtmML(data,nw,padtimes,1);
+        colordef white;
+        set(gcf,'units','norm') % set location
+        set(gcf,'position',[0.0,0.05,0.45,0.45])
+        xlim([0 fmax]);
+        fnyq = 1/(2*dt);
+        nameftest = [dat_name,'-',num2str(nw),'piMTM-ftest',ext];
+        namefsig = [dat_name,'-',num2str(nw),'piMTM-fsig',ext];
+        namefamp = [dat_name,'-',num2str(nw),'piMTM-amp',ext];
+        CDac_pwd;
+        dataftest = [freq',ftest'];
+        datafsig  = [freq',fsig'];
+        dataamp  = [freq',Amp'];
+        [dataftest] = select_interval(dataftest,0,fnyq);
+        [datafsig] = select_interval(datafsig,0,fnyq);
+        [dataamp] = select_interval(dataamp,0,fnyq);
+        dlmwrite(nameftest, dataftest, 'delimiter', ',', 'precision', 9);
+        dlmwrite(namefsig, datafsig, 'delimiter', ',', 'precision', 9);
+        dlmwrite(namefamp, dataamp, 'delimiter', ',', 'precision', 9);
+        %disp('>>  Refresh main window to see red noise estimation data files: ')
+        disp(nameftest)
+        disp(namefsig)
+        disp(namefamp)
+        cd(pre_dirML);
     
-    [freq,ftest,fsig,Amp,Faz,Sig,Noi,dof,wt]=ftestmtmML(data,nw,padtimes,1);
-    fnyq = 1/(2*dt);
-    nameftest = [dat_name,'-',num2str(nw),'piMTM-ftest',ext];
-    namefsig = [dat_name,'-',num2str(nw),'piMTM-fsig',ext];
-    namefamp = [dat_name,'-',num2str(nw),'piMTM-amp',ext];
-    CDac_pwd;
-    dataftest = [freq',ftest'];
-    datafsig  = [freq',fsig'];
-    dataamp  = [freq',Amp'];
-    [dataftest] = select_interval(dataftest,0,fnyq);
-    [datafsig] = select_interval(datafsig,0,fnyq);
-    [dataamp] = select_interval(dataamp,0,fnyq);
-    dlmwrite(nameftest, dataftest, 'delimiter', ',', 'precision', 9);
-    dlmwrite(namefsig, datafsig, 'delimiter', ',', 'precision', 9);
-    dlmwrite(namefamp, dataamp, 'delimiter', ',', 'precision', 9);
-    %disp('>>  Refresh main window to see red noise estimation data files: ')
-    disp(nameftest)
-    disp(namefsig)
-    disp(namefamp)
-    cd(pre_dirML);
+    end
     
 elseif strcmp(method,'Lomb-Scargle spectrum')
     pfa = [50 10 1 0.01]/100;
@@ -555,7 +564,7 @@ catch
 end
 try figure(figdata);
     set(figdata,'Units','normalized') % set location
-    set(figdata,'position',[0.02,0.4,0.45,0.45]) % set position
+    set(figdata,'position',[0.0,0.5,0.45,0.45]) % set position
 catch
 end% return plot
 guidata(hObject,handles);
@@ -816,6 +825,8 @@ if strcmp(method,'Multi-taper method')
     set(handles.checkbox_robust,'Enable','on')
     set(handles.checkbox_ar1_check,'Enable','on')
     set(handles.checkbox_ar1_check,'String','Classical AR(1)')
+    set(handles.check_ftest,'Value', handles.check_ftest_value)
+    set(handles.check_ftest,'Visible','on')
 elseif strcmp(method,'Periodogram')
     if handles.datasample == 1
         msgbox('Sampling rate may not be uneven! Ignore if this is not ture.','Waning')
@@ -824,12 +835,14 @@ elseif strcmp(method,'Periodogram')
     set(handles.checkbox_robust,'Enable','off')
     set(handles.checkbox_ar1_check,'Enable','on')
     set(handles.checkbox_ar1_check,'String','Classical AR(1)')
+    set(handles.check_ftest,'Visible','off')
 elseif strcmp(method,'Lomb-Scargle spectrum')
     set(handles.popupmenu_tapers,'Enable','off')
     set(handles.checkbox_robust,'Enable','off')
     set(handles.checkbox_robust,'Value',0)
     set(handles.checkbox_ar1_check,'Value',0)
     set(handles.checkbox_ar1_check,'String','White noise')
+    set(handles.check_ftest,'Visible','off')
 else
     
 end
@@ -1020,9 +1033,13 @@ if strcmp(method,'Multi-taper method')
     else
         figdata = gcf;
     end  
-    
-    [freq,ftest,fsig,Amp,Faz,Sig,Noi,dof,wt]=ftestmtmML(data,nw,padtimes,1);
-
+    if handles.check_ftest_value
+        [freq,ftest,fsig,Amp,Faz,Sig,Noi,dof,wt]=ftestmtmML(data,nw,padtimes,1);
+        xlim([0 fmax]);
+        colordef white;
+        set(gcf,'units','norm') % set location
+        set(gcf,'position',[0.0,0.05,0.45,0.45])
+    end
 elseif strcmp(method,'Lomb-Scargle spectrum')
     pfa = [50 10 1 0.01]/100;
     pd = 1 - pfa;
@@ -1109,7 +1126,7 @@ catch
 end
 try figure(figdata); 
     set(figdata,'units','norm') % set location
-    set(figdata,'position',[0.0,0.4,0.45,0.45]) % set position
+    set(figdata,'position',[0.0,0.45,0.45,0.45]) % set position
 catch
 end
 guidata(hObject,handles);
@@ -1178,3 +1195,14 @@ function edit7_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in check_ftest.
+function check_ftest_Callback(hObject, eventdata, handles)
+% hObject    handle to check_ftest (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of check_ftest
+handles.check_ftest_value = get(hObject,'Value');
+guidata(hObject, handles);
