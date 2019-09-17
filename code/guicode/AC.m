@@ -1627,42 +1627,6 @@ end
 guidata(hObject, handles);
 
 
-% --------------------------------------------------------------------
-function menu_1stdiff_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_1stdiff (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
-nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
-    data_name = char(contents(plot_selected));
-    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
-    GETac_pwd; data_name = fullfile(ac_pwd,data_name);
-        if isdir(data_name) == 1
-        else
-            [~,dat_name,ext] = fileparts(data_name);
-            if sum(strcmp(ext,handles.filetype)) > 0
-                data = load(data_name);
-                time = data(:,1);
-                value = data(:,2);
-                npts = length(time);
-                time1 = time(1:npts-1,1);
-                value1 = diff(value);
-                data1 = [time1,value1];
-
-                name1 = [dat_name,'-1stdiff',ext];
-                CDac_pwd
-                dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9); 
-                d = dir; %get files
-                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-                refreshcolor;
-                cd(pre_dirML); % return to matlab view folder
-        end
-        end
-end
-guidata(hObject, handles);
-
 
 % --------------------------------------------------------------------
 function menu_derivative_Callback(hObject, eventdata, handles)
@@ -4663,6 +4627,27 @@ function menu_whiten_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox_acmain,'Value');
+nplot = length(plot_selected);   % length
+if and ((min(plot_selected) > 2), (nplot == 1))
+    data_name = char(contents(plot_selected));
+    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; data_name = fullfile(ac_pwd,data_name);
+        if isdir(data_name) == 1
+        else
+            [~,dat_name,ext] = fileparts(data_name);
+            if sum(strcmp(ext,handles.filetype)) > 0
+                current_data = load(data_name);
+                handles.current_data = current_data;
+                handles.data_name = data_name;
+                handles.dat_name = dat_name;
+                guidata(hObject, handles);
+                prewhitenGUI(handles);
+            end
+        end
+end
+guidata(hObject, handles);
 % --------------------------------------------------------------------
 function menu_sednoise_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_utilities (see GCBO)
