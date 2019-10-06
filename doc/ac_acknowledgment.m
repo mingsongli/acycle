@@ -1,5 +1,5 @@
 %**************************************************************************
-% Acycle v1.4:
+% Acycle v2.1:
 % Time-series analysis software for paleoclimate research and education
 %
 % Please acknowledge the program author on any publication of scientific 

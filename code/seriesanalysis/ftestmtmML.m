@@ -1,17 +1,27 @@
 function [freq,ftest,fsig,Amp,Faz,Sig,Noi,dof,wt]=ftestmtmML(data,NW,npad,plotn)
 % ftestmtmML.m
 %
-% by Mingsong Li for Acycle 2.1
-% Sept. 10, 2019 @ Penn State
+% This script is based on an educational SCILAB script provided by 
+% Jeffrey Park (Yale University), who has given permission for its
+% adaptation into Matlab for Acycle by:
+%
+% Linda Hinnov (George Mason University)
+% Mingsong Li (Penn State University)
+% October 6, 2019
+%
+% CALLS:
+%  mtmdofs.m  - function by L. Hinnov, included below
+%  ftestmtm.m - function by L. Hinnov, included below
+%  dpss.m - discrete prolate spheroidal sequences, Matlab's Signal Processing Toolbox 
+%  fcdf.m - Fisher cumulative distribution, MATLAB Statistics Toolbox
 %
 % INPUT
 %   data: n-by-2 dataset, must be uniformly sampled.
 %   NW:   time-bandwidth product to use (e.g. NW=2 for 2pi multitapers)
-%   npad: zero pad to npad * length of y 
-%   plotn: plot or not?
+%   npad: zero pad to npad * length of y (1 for no padding)
+%   plotn: 1 for plot, 0 for no plot.
 %
 % OUTPUT
-%
 %	Freq = vector of frequencies
 %	ftest = vector with F-ratios
 %	fsig = vector of 1-alpha probability for the F-ratios
@@ -22,20 +32,36 @@ function [freq,ftest,fsig,Amp,Faz,Sig,Noi,dof,wt]=ftestmtmML(data,NW,npad,plotn)
 %   dof = adaptive weighted dofs (NOTE: input to ftestmtm.m)
 %   wt(n,k) = adaptive weights for each of k eigenspectra
 %
+% EXAMPLE:
+% time=0:1:8191;time=time'; % create time scale
+% value=randn(8192,1)+sin(2*pi*time/4); %create sine curve+noise
+% data=[time,value];plot(data(:,1),data(:,2)); % store in "data" and plot
+% [freq,ftest,fsig,Amp,Faz,Sig,Noi,dof,wt]=ftestmtmML(data,2,20,1);
+% xlim([0.248, 0.252]); % zoom in on the peak
+% This last command might take a few minutes to run.
+% A plot of 2pi MTM amplitude and f-test spectra will appear.
+% Change NW from 2 to 10 in the last command and run again.    
+% Zoom in on the peak and surrounding band and compare.
+%
+% REFERENCE:
+% Thomson, D.J., 1982. Spectrum estimation and harmonic analysis. 
+%      Proceedings of the IEEE, 70, 1055-1096.
+%
 t = data(:,1);
 w = data(:,2);
 dt = median(diff(t));
+% 
 % Harmonic analysis of w
 %
 % Apply mtmdofs.m to analyze adaptive weights wt
 % and degrees of freedom dof vs. frequency freq;
 % zero pad x 20 (npad=20); remove (mean and) linear trend;
-% use 2pi multitapers (NW=2)
+% to use 2pi multitapers, NW=2
 %
 [~,dof,wt] = mtmdofs(t,detrend(w),NW,npad);
 %
 % Apply ftestmtm.m to compute Amp, ftest, etc. 
-% using output dof from mtmdofs.m
+% using output dof from mtmdofs.m with same NW and npad
 %
 [freq,ftest,fsig,Amp,Faz,Sig,Noi] = ftestmtm(t,detrend(w),NW,dof,npad);
 fnyq = 1/(2*dt);
@@ -44,7 +70,7 @@ if plotn
     yyaxis left
     plot(freq, Amp,'color',[0, 0.4470, 0.7410],'LineWidth',1.5)
     xlim([0, fnyq])
-    title('Amplitude & F-test')
+    title(['Amplitude & F-test : ', num2str(NW), '\pi'])
     ylabel('Amplitude')
     fsigsh = 0.9;
     fsig1 = fsig;
@@ -80,7 +106,10 @@ function [freq,dof,wt] = mtmdofs(t,y,NW,npad)
 %	dof = adaptive weighted dofs (NOTE: input to ftestmtm.m)
 %	wt(n,k) = adaptive weights for each of k eigenspectra
 %
-% By Linda A. Hinnov
+% 
+%   REFERENCE:
+%   Thomson, D.J., 1982. Spectrum estimation and harmonic analysis. 
+%      Proceedings of the IEEE, 70, 1055-1096.
 %
 dof=[ ]; wt=[ ]; evals=[ ]; bias=[ ]; spw=[ ]; 
 N = length(y);
@@ -102,16 +131,16 @@ tol=0.0003;
 % Equations 5.3 and 5.4 in Thomson (1982)
 for n=1:nfft % end at line 62
 % Analyze current frequency using all K tapers
-for k=1:K % end at line 38
+for k=1:K 
 spw(k)=real(Yk(n,k)*conj(Yk(n,k)))/sig2;
 end
 as = (spw(1)+spw(2))/2.0;
 iflag=0;
 % Convergence to tol usually in a few steps
-for j=1:jj % end at line 53
+for j=1:jj 
 fn=0.;
 fx=0.;
-for k=1:K % end at line 49
+for k=1:K 
 a1=sqrt(evals(k))*as/(evals(k)*as + bias(k));
 a1=a1^2;
 fn=fn+a1*spw(k);
@@ -173,15 +202,17 @@ function [freq,ftest,fsig,Amp,Faz,Sig,Noi] = ftestmtm(t,y,NW,dof,npad)
 %   Sig = vector of signal (F-ratio nominator)
 %   Noi = vector of noise (F-ratio denominator)
 %  
-% By Linda A. Hinnov
-
+%   REFERENCE:
+%   Thomson, D.J., 1982. Spectrum estimation and harmonic analysis. 
+%      Proceedings of the IEEE, 70, 1055-1096.
+% 
 Amp=[ ];Noi=[ ];Sig=[ ];ftest=[ ];fsig=[ ];freq=[ ];Faz=[ ];
 N = length(y);
 if nargin<4, disp('NOTE: using high-resolution option'); end
 K = 2*NW - 1; % total number of dpss tapers 
 h = dpss(N,NW);	% get the dpss tapers 
-k = 1;	% index, dpss taper; maybe comment out???
-f = 1;	% index, frequency; maybe comment out???
+k = 1;	% dpss taper index
+f = 1;	% frequency index
 % get K sets of dpss-tapered Fourier coefficients of y;
 % pad to  npad x length of y 
 for k = 1:K
@@ -210,11 +241,9 @@ if nargin>3, fsig(f) = fcdf(ftest(f),2,dof(f)-2.0); end
 Sig(f)=(((K-1)*(abs(mu)).^2*Usum));
 Noi(f)=(sum((abs(Yk(f,:)-mu*U0)).^2));
 end
-% create frequency scale; first nfft/2+1 frequencies are 0 and positive
+% create frequency scale; first nfft/2+1  0 + positive frequencies
 dt= t(2)-t(1);
 fnyq = 1/(2*dt);
 M = length(Amp);
 df=fnyq/(M/2);
-freq =(0:df:(M-1)*df);
-%disp('Real-valued time series spectra valid from f=0 to 1/(2*dt) only')
-% Note: dof=dof(1:(M/2+1)) are the positive frequencies
+freq =0:df:(M-1)*df;

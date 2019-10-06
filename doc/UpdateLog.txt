@@ -2,7 +2,7 @@
 _______________________________________
 
 Version : ACycle_v2.1
-Date    : Sept 9-17, 2019
+Date    : Sept 17, 2019
 By      : Mingsong Li
 NOTE    : ask for MatLab RUNTIME 2019a
 
@@ -12,12 +12,16 @@ NOTE    : ask for MatLab RUNTIME 2019a
 
     2. Include f-test and amplitude spectrum for the MTM power spectrum
         using Linda Hinnov's ftestmtm.m and mtmdofs.m scripts
-        Please cite: Kodama and Hinnov (2015).
+        Please cite: Kodama, K.P., Hinnov, L.A., 2015. Rock Magnetic Cyclostratigraphy.
+			Wiley-Blackwell.
 
         Thank Kunyuan Ma for the bug report.
 
     3. Prewhitening GUI
         Thank Zheng Gong for this reminder.
+
+    4. Spectral Moments: bug fixed.
+	Now polynomial model of smoothing can produce correct results.
 _______________________________________
 
 Version : ACycle_v2.0

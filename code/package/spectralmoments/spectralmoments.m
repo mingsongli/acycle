@@ -174,8 +174,9 @@ depth = depth';
 
 if nargout > 3
     if strcmp(smoothmodel, 'poly')
-        windowsize = round(window/dt);
-        [~,Bwtrend] = DetrendSignalPP(Bw,windowsize,dt,2);
+        %windowsize = round(window/dt);
+        windowsize = round(window/n_step);
+        [~,Bwtrend] = DetrendSignalPP(Bw,windowsize,n_step,2);
     else
         span = window/abs(depth(end)-depth(1));
         Bwtrend = smooth(depth,Bw, span,smoothmodel);
