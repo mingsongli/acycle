@@ -39,9 +39,9 @@
 %   Feng Cheng, Anne-Christine Da Silva, Hewei Duan, Yanan Fang, 
 %   Marco Franceschi, Daniel R. Franco, Xiaoni Hu, Dorothée Husson, 
 %   Arsenio Muñoz Jiménez, Lee R. Kump, Dongyang Liu, Kunyuan Ma, 
-%   Mathieu Martinez, James Ogg, Paul Olsen, J. Fred Read, Chen Shen,   
-%   Chuanyue Wang, Meng Wang, Xu Yao, Qiyan Zhang, Yang (Wendy) Zhang, 
-%   Christian Zeeden
+%   Mathieu Martinez, James Ogg, Paul Olsen, Jeffrey Park, J. Fred Read,
+%   Chen Shen, Chuanyue Wang, Meng Wang, Xu Yao, Qiyan Zhang,
+%   Yang (Wendy) Zhang, Christian Zeeden
 
 %**************************************************************************
 % Copyright (C) 2017-2019
