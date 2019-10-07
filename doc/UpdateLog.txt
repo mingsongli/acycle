@@ -22,6 +22,10 @@ NOTE    : ask for MatLab RUNTIME 2019a
 
     4. Spectral Moments: bug fixed.
 	Now polynomial model of smoothing can produce correct results.
+
+    5. Fix a bug in filter.
+        Thank Victor A. Piedrahita Velez (Australian National University) for this bug report.
+
 _______________________________________
 
 Version : ACycle_v2.0

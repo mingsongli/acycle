@@ -245,16 +245,16 @@ curvepmtm = handles.curvepmtm;
 pomax = max(curvepmtm(:,2));
 fwidth = abs(handles.filt_fmid - handles.filt_fmin);
 try
-gauss_mf = pomax*gaussmf(curvepmtm(:,1),[fwidth handles.filt_fmid]);
-      
-axes(handles.ft_axes3);
-plot(curvepmtm(:,1),curvepmtm(:,2))
-hold on
-plot(curvepmtm(:,1),gauss_mf,'r-')
-axis([handles.x_1 handles.x_2 handles.y_1 handles.y_2])
-hold off
-set(handles.popupmenu4,'Value',1)
-set(handles.filt_fmax_edit3,'String',num2str(fwidth+handles.filt_fmid))
+    gauss_mf = pomax*gaussmf(curvepmtm(:,1),[fwidth handles.filt_fmid]);
+
+    axes(handles.ft_axes3);
+    plot(curvepmtm(:,1),curvepmtm(:,2))
+    hold on
+    plot(curvepmtm(:,1),gauss_mf,'r-')
+    axis([handles.x_1 handles.x_2 handles.y_1 handles.y_2])
+    hold off
+    set(handles.popupmenu4,'Value',1)
+    set(handles.filt_fmax_edit3,'String',num2str(fwidth+handles.filt_fmid))
 catch
     msgbox('Error')
 end
@@ -394,8 +394,19 @@ rayleigh = 1/(dt*npts);
 f1 = str2double(get(handles.filt_fmin_edit1,'string'));
 f2 = str2double(get(handles.filt_fmid_edit2,'string'));
 f3 = str2double(get(handles.filt_fmax_edit3,'string'));
-flch = [f1 f2 f3];
-flch = sort(flch);
+
+if f1 == f3
+    % in case fmin >= fmid
+    warndlg('Minimum freq. must be smaller than center freq. Min freq. revised')
+    f1 = f2 - abs(f3-f2);
+    flch = [f1 f2 f3];
+    flch = sort(flch);
+    set(handles.filt_fmin_edit1,'string',num2str(f1))
+else
+    flch = [f1 f2 f3];
+    flch = sort(flch);
+end
+
 handles.flch = flch;
 handles.ftmin = flch(1);
 handles.ftmid = flch(2);
