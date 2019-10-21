@@ -65,7 +65,7 @@
     <img src="https://github.com/mingsongli/acycleFig/blob/master/WechatIMG17.jpeg" alt="MingsongLi.com" title="Mingsong Li homepage" width="100" height="100">
 </a>
 <br>
-Mingsong Li, Penn State. Sept. 2, 2019 <br>
+Mingsong Li, Penn State. Oct. 20, 2019 <br>
 E-mail: <i> mul450 {at} psu.edu;  limingsonglms {at} gmail.com </i> <br><br>
 
 Website: https://mingsongli.com/
