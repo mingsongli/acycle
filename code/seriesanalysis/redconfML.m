@@ -120,7 +120,7 @@ if plot == 1
     semilogy(ft,chi90,'r-');
     semilogy(ft,chi95,'r--','LineWidth',2);
     semilogy(ft,chi99,'b-.');
-    semilogy(ft,chi999,'g:','LineWidth',1);
+    semilogy(ft,chi999,'g--','LineWidth',1);
     xlabel('Frequency')
     ylabel('Power')
     smthwin = [num2str(smoothwin*100),'%', ' median-smoothed'];

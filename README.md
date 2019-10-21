@@ -118,10 +118,6 @@ _Acycle Graphical User Interface (GUI)_
 
 _Acycle menu_
 
-![structure](https://github.com/mingsongli/acycleFig/blob/master/acycle1.2-design-201905.png)
-
-_The structure of the Acycle program_
-
 ![](https://github.com/mingsongli/acycleFig/blob/master/acycle-demo-gif/2.acycle-insolationS.gif)
 
 _Acycle insolation toolbox_

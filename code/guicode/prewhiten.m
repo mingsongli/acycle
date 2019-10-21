@@ -131,6 +131,7 @@ handles.prewhiten_loess = 'notloess';
 handles.prewhiten_rloess = 'notloess';
 handles.prewhiten_polynomial2 = 'not2nd';
 handles.prewhiten_polynomialmore = 'notmore';
+disp('>> load GUI')
 % Update handles structure
 guidata(hObject, handles);
 

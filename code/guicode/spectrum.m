@@ -123,6 +123,8 @@ handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
 %
 data_s = varargin{1}.current_data;
 data_s = sortrows(data_s);
+%
+data_s(:,2) = data_s(:,2) - mean(data_s(:,2));
 handles.current_data = data_s;
 handles.filename = varargin{1}.data_name;
 handles.unit = varargin{1}.unit;
@@ -155,6 +157,32 @@ handles.mean = mean(Dt);
 handles.nyquist = 1/(2*handles.mean);     % prepare nyquist
 set(handles.text_nyquist, 'String', num2str(handles.nyquist));
 set(handles.edit4, 'String', num2str(length(data_s(:,1))));
+
+%  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %
+% Oct, 15, 2019
+% Mingsong Li
+% Add some tricks for ultra-high resolution dataset, 
+% which suggest an inappropriate maximum frequency
+% Now only considers frequencies that contribute to 99.5% of the total power
+% But if the suggested max frequency is very similar to the default Nyquist
+% frequency, then the default Nyquist frequency is used.
+
+[po,w]=periodogram(data_s(:,2));
+fd1=w/(2*pi*handles.mean); 
+poc = cumsum(po); % cumsum of power
+pocnorm = 100*poc/max(poc); % normalized
+% the first elements at which the cumulated power exceed 99.5%
+poc1 = find( pocnorm > 99.5, 1); 
+% if the frequency detected is smaller than 90% of nyquist frequency
+% suggest a new input max freq.
+if fd1(poc1)/fd1(end) < 0.9
+    set(handles.edit_fmax_input,'String', num2str(fd1(poc1)))
+    set(handles.radiobutton_fmax,'Value',0)
+    set(handles.radiobutton_input,'Value',1)
+end
+%figure; subplot(2,1,1); plot(fd1,po); subplot(2,1,2); plot(fd1,pocnorm);ylim([90 100])
+%  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %
+
 % Update handles structure
 guidata(hObject, handles);
 
@@ -398,9 +426,13 @@ if strcmp(method,'Multi-taper method')
         waitbar(step / steps)
             figHandle = figure;
             set(gcf,'Color', 'white')
-            plot(fd,po,'LineWidth',1);
-            hold on; plot(fd,theored,'LineWidth',1);
-            hold on; plot(fd,[tabtchi90,tabtchi95,tabtchi99,tabtchi999],'LineWidth',1);
+            plot(fd,po,'k-','LineWidth',1);
+            hold on; 
+            plot(fd,theored,'k-','LineWidth',2);
+            plot(fd,tabtchi90,'r-','LineWidth',1);
+            plot(fd,tabtchi95,'r--','LineWidth',2);
+            plot(fd,tabtchi99,'b-.','LineWidth',1);
+            plot(fd,tabtchi999,'g--','LineWidth',1);
             legend('Power','AR1','90%','95%','99%','99.9%')
             set(gca,'XMinorTick','on','YMinorTick','on')
             xlim([0 fmax]);
@@ -503,7 +535,7 @@ elseif  strcmp(method,'Periodogram')
     end
     figdata = figure;  
     set(gcf,'Color', 'white')
-    plot(fd1,po,'k-','LineWidth',1);
+    plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
     xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
     ylabel('Power ')
     title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit])
@@ -533,7 +565,7 @@ elseif  strcmp(method,'Periodogram')
         plot(fd1,tabtchired90,'r-','LineWidth',1)
         plot(fd1,tabtchired95,'r--','LineWidth',2)
         plot(fd1,tabtchired99,'b-.','LineWidth',1)
-        plot(fd1,tabtchired999,'g:','LineWidth',1)
+        plot(fd1,tabtchired999,'g--','LineWidth',1)
         legend('Power','Mean','90%','95%','99%','99.9')
         hold off
     end
@@ -1013,9 +1045,13 @@ if strcmp(method,'Multi-taper method')
         waitbar(step / steps)
         figdata = figure;  
         set(gcf,'Color', 'white')
-        plot(fd,po,'LineWidth',1);
-        hold on; plot(fd,theored,'LineWidth',1);
-        hold on; plot(fd,[tabtchi90,tabtchi95,tabtchi99,tabtchi999],'LineWidth',1);
+        plot(fd,po,'k-','LineWidth',1);
+        hold on; 
+        plot(fd,theored,'k-','LineWidth',2);
+        plot(fd,tabtchi90,'r-','LineWidth',1);
+        plot(fd,tabtchi95,'r--','LineWidth',2);
+        plot(fd,tabtchi99,'b-.','LineWidth',1);
+        plot(fd,tabtchi999,'g--','LineWidth',1);
         xlim([0 fmax]);
         title([num2str(nw),'\pi MTM classic AR1',' ','; Sampling rate = ',num2str(dt),' ', unit])
         legend('Power','AR1','90%','95%','99%','99.9%')
@@ -1083,7 +1119,7 @@ elseif  strcmp(method,'Periodogram')
     end
     figdata = figure;  
     set(gcf,'Color', 'white')
-    plot(fd1,po,'k-','LineWidth',1);
+    plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
     xlabel(['Frequency (cycles/',num2str(unit),')']) 
     ylabel('Power ')
     title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit])
@@ -1109,7 +1145,7 @@ elseif  strcmp(method,'Periodogram')
         plot(fd1,tabtchired90,'r-','LineWidth',1)
         plot(fd1,tabtchired95,'r--','LineWidth',2)
         plot(fd1,tabtchired99,'b-.','LineWidth',1)
-        plot(fd1,tabtchired999,'g:','LineWidth',1)
+        plot(fd1,tabtchired999,'g--','LineWidth',1)
         legend('Power','Mean','90%','95%','99%','99.9')
     end
 else

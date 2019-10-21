@@ -67,25 +67,54 @@ dt = median(diff(t));
 fnyq = 1/(2*dt);
 if plotn
     figure; 
-    yyaxis left
+    subplot(3,1,1)
     plot(freq, Amp,'color',[0, 0.4470, 0.7410],'LineWidth',1.5)
     xlim([0, fnyq])
-    title(['Amplitude & F-test : ', num2str(NW), '\pi'])
+    title(['Amplitude, F-test & significance level : ', num2str(NW), '\pi'])
     ylabel('Amplitude')
+    
+    subplot(3,1,3)
     fsigsh = 0.9;
     fsig1 = fsig;
     fsig1(fsig1<fsigsh) = 0;
-    yyaxis right
+    %yyaxis right
     plot(freq, fsig1,'color','red','LineWidth',1);
-    ylim([fsigsh,1.5])
+    ylim([fsigsh,1.0])
     xlim([0, fnyq])
     line([0 fnyq],[.95 .95],'Color','r','LineWidth',0.5,'LineStyle','-.')
     line([0 fnyq],[.99 .99],'Color','m','LineWidth',0.5,'LineStyle','--')
     yticks([0.9 0.95 0.99 1])
     yticklabels({'0.9','0.95','0.99', '1'})
-    ylabel('F-test')
+    ylabel('Significance level')
     xlabel('Frequency')
+    
+    subplot(3,1,2)
+    plot(freq, ftest,'color','k','LineWidth',1);
+    xlim([0, fnyq])
+    ylabel('F-test')
+    
 end
+% if plotn
+%     figure; 
+%     yyaxis left
+%     plot(freq, Amp,'color',[0, 0.4470, 0.7410],'LineWidth',1.5)
+%     xlim([0, fnyq])
+%     title(['Amplitude & F-test : ', num2str(NW), '\pi'])
+%     ylabel('Amplitude')
+%     fsigsh = 0.9;
+%     fsig1 = fsig;
+%     fsig1(fsig1<fsigsh) = 0;
+%     yyaxis right
+%     plot(freq, fsig1,'color','red','LineWidth',1);
+%     ylim([fsigsh,1.5])
+%     xlim([0, fnyq])
+%     line([0 fnyq],[.95 .95],'Color','r','LineWidth',0.5,'LineStyle','-.')
+%     line([0 fnyq],[.99 .99],'Color','m','LineWidth',0.5,'LineStyle','--')
+%     yticks([0.9 0.95 0.99 1])
+%     yticklabels({'0.9','0.95','0.99', '1'})
+%     ylabel('F-test')
+%     xlabel('Frequency')
+% end
 
 
 function [freq,dof,wt] = mtmdofs(t,y,NW,npad)
