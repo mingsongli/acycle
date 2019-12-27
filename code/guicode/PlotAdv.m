@@ -733,7 +733,7 @@ if handles.swapxy == 1
 else
     view([0 90]);
 end
-legend(handles.plot_list)
+legend(handles.plot_list, 'Interpreter', 'none')
 hold off
 handles.plotprofig = plotprofig;
 set(gcf,'color','w');

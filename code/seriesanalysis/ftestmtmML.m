@@ -74,17 +74,18 @@ if plotn
     ylabel('Amplitude')
     
     subplot(3,1,3)
-    fsigsh = 0.9;
+    fsigsh = 0.85;
     fsig1 = fsig;
     fsig1(fsig1<fsigsh) = 0;
     %yyaxis right
     plot(freq, fsig1,'color','red','LineWidth',1);
     ylim([fsigsh,1.0])
     xlim([0, fnyq])
+    line([0 fnyq],[.9 .9],'Color','k','LineWidth',0.35,'LineStyle',':')
     line([0 fnyq],[.95 .95],'Color','r','LineWidth',0.5,'LineStyle','-.')
     line([0 fnyq],[.99 .99],'Color','m','LineWidth',0.5,'LineStyle','--')
-    yticks([0.9 0.95 0.99 1])
-    yticklabels({'0.9','0.95','0.99', '1'})
+    yticks([0.85, 0.9 0.95 0.99 1])
+    yticklabels({'0.85','0.9','0.95','0.99', '1'})
     ylabel('Significance level')
     xlabel('Frequency')
     

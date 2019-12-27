@@ -1013,7 +1013,7 @@ else
     plot(data(:,1),data(:,2),'k');hold on
     plot(data_filterout(:,1),data_filterout(:,2),'r')
     xlim([min(data(:,1)),max(data(:,1))])
-    title(add_list)
+    title(add_list, 'Interpreter', 'none')
     if handles.unit_type == 0;
         xlabel(['Unit (',handles.unit,')'])
     elseif handles.unit_type == 1;

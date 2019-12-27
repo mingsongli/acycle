@@ -326,7 +326,7 @@ if strcmp(method,'Multi-taper method')
             name2 = [dat_name,'-',num2str(nw),'piMTM-ClassicAR1',ext];
             data2 = redconfAR1;
             
-            title([dat_name,'-',num2str(nw),'\pi-MTM-Robust-AR1: \rho = ',num2str(rhoM),'. S0 =',num2str(s0M)])
+            title([dat_name,'-',num2str(nw),'\pi-MTM-Robust-AR1: \rho = ',num2str(rhoM),'. S0 =',num2str(s0M)], 'Interpreter', 'none')
             xlabel(['Frequency (cycles/',num2str(unit),')']) 
             set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'pi MTM'])
             set(gca,'XMinorTick','on','YMinorTick','on')
@@ -372,7 +372,7 @@ if strcmp(method,'Multi-taper method')
         xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
         ylabel('Power ')
         legend('Power','bw')
-        title([num2str(nw),'\pi MTM method',' ','; Sampling rate = ',num2str(dt),' ', unit])
+        title([num2str(nw),'\pi MTM method',' ','; Sampling rate = ',num2str(dt),' ', unit], 'Interpreter', 'none')
         set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'pi MTM'])
         xlim([0 fmax]);
         set(gca,'XMinorTick','on','YMinorTick','on')
@@ -436,7 +436,7 @@ if strcmp(method,'Multi-taper method')
             legend('Power','AR1','90%','95%','99%','99.9%')
             set(gca,'XMinorTick','on','YMinorTick','on')
             xlim([0 fmax]);
-            title([num2str(nw),'\pi MTM classic AR1',' ','; Sampling rate = ',num2str(dt),' ', unit])
+            title([num2str(nw),'\pi MTM classic AR1',' ','; Sampling rate = ',num2str(dt),' ', unit], 'Interpreter', 'none')
     step = 5.5;
         waitbar(step / steps)
         delete(hwaitbar)
@@ -465,7 +465,10 @@ if strcmp(method,'Multi-taper method')
         colordef white;
         set(gcf,'units','norm') % set location
         set(gcf,'position',[0.0,0.05,0.45,0.45])
-        xlim([0 fmax]);
+        %xlim([0 fmax]);
+        subplot(3,1,1); xlim([0 fmax])
+        subplot(3,1,2); xlim([0 fmax])
+        subplot(3,1,3); xlim([0 fmax])
         fnyq = 1/(2*dt);
         nameftest = [dat_name,'-',num2str(nw),'piMTM-ftest',ext];
         namefsig = [dat_name,'-',num2str(nw),'piMTM-fsig',ext];
@@ -504,7 +507,7 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
     end
     xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
     ylabel('Power ')
-    title(['Lomb-Scargle spectrum; Sampling rate = ',num2str(dt),' ', unit])
+    title(['Lomb-Scargle spectrum; Sampling rate = ',num2str(dt),' ', unit], 'Interpreter', 'none')
     set(gcf,'Name',[dat_name,ext,': Lomb-Scargle spectrum'])
     set(gca,'XMinorTick','on','YMinorTick','on')
     xlim([0 fmax]);
@@ -1071,7 +1074,9 @@ if strcmp(method,'Multi-taper method')
     end  
     if handles.check_ftest_value
         [freq,ftest,fsig,Amp,Faz,Sig,Noi,dof,wt]=ftestmtmML(data,nw,padtimes,1);
-        xlim([0 fmax]);
+        subplot(3,1,1); xlim([0 fmax])
+        subplot(3,1,2); xlim([0 fmax])
+        subplot(3,1,3); xlim([0 fmax])
         colordef white;
         set(gcf,'units','norm') % set location
         set(gcf,'position',[0.0,0.05,0.45,0.45])

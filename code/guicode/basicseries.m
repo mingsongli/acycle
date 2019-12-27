@@ -400,7 +400,7 @@ plot(dat(:,1),dat(:,2));
 set(gca,'XMinorTick','on','YMinorTick','on')
 xlim([min(dat(:,1)),max(dat(:,1))]);
 xlabel('Time (kyr)')
-title(name)
+title(name, 'Interpreter', 'none')
 % refresh AC main window
 figure(handles.acfigmain);
 CDac_pwd; % cd working dir

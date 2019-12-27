@@ -130,7 +130,7 @@ handles.spectralmomentsFig = figure;
     set(gcf,'units','norm') % set location
     set(handles.spectralmomentsFig,'position',[0.2,0.4,0.2,0.4]) % set position
     plot(datx,daty)
-    xlabel(handles.unit);ylabel('Value');title(handles.dat_name)
+    xlabel(handles.unit);ylabel('Value');title(handles.dat_name, 'Interpreter', 'none')
     xlim([min(datx) max(datx)])
 
 % set zeropadding
@@ -366,7 +366,7 @@ if get(hObject,'Value')
     handles.dat = dat;
     try figure( handles.spectralmomentsFig)
         plot(dat(:,1),dat(:,2))
-        xlabel(handles.unit);ylabel('Value');title(handles.dat_name)
+        xlabel(handles.unit);ylabel('Value');title(handles.dat_name, 'Interpreter', 'none')
         xlim([min(dat(:,1)) max(dat(:,1))])
     catch
         handles.spectralmomentsFig = figure;
@@ -374,7 +374,7 @@ if get(hObject,'Value')
         set(gcf,'units','norm') % set location
         set(handles.spectralmomentsFig,'position',[0.2,0.4,0.2,0.4]) % set position
         plot(dat(:,1),dat(:,2))
-        xlabel(handles.unit);ylabel('Value');title(handles.dat_name)
+        xlabel(handles.unit);ylabel('Value');title(handles.dat_name, 'Interpreter', 'none')
         xlim([min(dat(:,1)) max(dat(:,1))])
     end
 else
@@ -383,7 +383,7 @@ else
     set(handles.edit4,'String',num2str(handles.pad))
     try figure( handles.spectralmomentsFig)
         plot(dat(:,1),dat(:,2))
-        xlabel(handles.unit);ylabel('Value');title(handles.dat_name)
+        xlabel(handles.unit);ylabel('Value');title(handles.dat_name, 'Interpreter', 'none')
         xlim([min(dat(:,1)) max(dat(:,1))])
     catch
         handles.spectralmomentsFig = figure;
@@ -391,7 +391,7 @@ else
         set(gcf,'units','norm') % set location
         set(handles.spectralmomentsFig,'position',[0.2,0.4,0.2,0.4]) % set position
         plot(dat(:,1),dat(:,2))
-        xlabel(handles.unit);ylabel('Value');title(handles.dat_name)
+        xlabel(handles.unit);ylabel('Value');title(handles.dat_name, 'Interpreter', 'none')
         xlim([min(dat(:,1)) max(dat(:,1))])
     end
 end
@@ -412,7 +412,7 @@ handles.dat = dat;
 
 try figure( handles.spectralmomentsFig)
     plot(dat(:,1),dat(:,2))
-    xlabel(handles.unit);ylabel('Value');title(handles.dat_name)
+    xlabel(handles.unit);ylabel('Value');title(handles.dat_name, 'Interpreter', 'none')
     xlim([min(dat(:,1)) max(dat(:,1))])
 catch
     handles.spectralmomentsFig = figure;
@@ -420,7 +420,7 @@ catch
     set(gcf,'units','norm') % set location
     set(handles.spectralmomentsFig,'position',[0.2,0.4,0.2,0.4]) % set position
     plot(dat(:,1),dat(:,2))
-    xlabel(handles.unit);ylabel('Value');title(handles.dat_name)
+    xlabel(handles.unit);ylabel('Value');title(handles.dat_name, 'Interpreter', 'none')
     xlim([min(dat(:,1)) max(dat(:,1))])
 end
 % Update handles structure

@@ -395,7 +395,7 @@ set(runbt,'CData',imread('menu_robot.jpg'))
             else
                 xlabel(['Time (',unit,')'])
             end
-            title(['Data:', name1])
+            title(['Data:', name1], 'Interpreter', 'none')
             xlim([min(dat(:,1)),max(dat(:,1))])
         catch
             plotsucess = 0;
@@ -427,13 +427,13 @@ set(runbt,'CData',imread('menu_robot.jpg'))
             xlabel(['Time (',unit,')'])
             ylabel(unit)
         end
-        title([name1,': sampling rate'])
+        title([name1,': sampling rate'], 'Interpreter', 'none')
         xlim([min(datasamp(:,1)),max(datasamp(:,1))])
         ylim([0.9*min(diffx) max(diffx)*1.1])
 
         subplot(3,1,3)
         histfit(diffx,[],'kernel')
-        title([name1,': kernel fit of the sampling rate'])
+        title([name1,': kernel fit of the sampling rate'], 'Interpreter', 'none')
         if unit_type == 0;
             xlabel(['Sampling rate (',unit,')'])
         elseif unit_type == 1;
@@ -744,7 +744,7 @@ set(runbt,'CData',imread('menu_robot.jpg'))
             try pcolor(y_grid,x_grid,s')
                 colormap(jet)
                 shading interp
-                title(['EvoFFT. Window',' = ',num2str(winevofft),' ',unit,'; step = ',num2str(step),' ', unit])
+                title(['EvoFFT. Window',' = ',num2str(winevofft),' ',unit,'; step = ',num2str(step),' ', unit], 'Interpreter', 'none')
                 ylabel(['Frequency ( cycles per ',unit,' )'])
                 if unit_type == 0;
                     xlabel(['Unit (',unit,')'])

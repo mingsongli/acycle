@@ -26,6 +26,7 @@ NOTE    : ask for MatLab RUNTIME 2019a
     5. Fix a bug in filter.
         Thank Victor A. Piedrahita Velez (Australian National University) for this bug report.
 
+    6. Disabling printing underscore as subscript in figures
 _______________________________________
 
 Version : ACycle_v2.0

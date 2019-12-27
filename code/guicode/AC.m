@@ -866,7 +866,7 @@ if check == 1;
     else
         xlabel(['Time (',handles.unit,')'])
     end
-    title(plot_filter_s1)
+    title(plot_filter_s1, 'Interpreter', 'none')
     hold off
     set(gcf,'color','w');
 end
@@ -946,7 +946,7 @@ if check == 1;
     else
         ylabel(['Time (',handles.unit,')'])
     end
-    title(plot_filter_s1)
+    title(plot_filter_s1, 'Interpreter', 'none')
     set(gca,'XMinorTick','on','YMinorTick','on')
     hold off
 end
@@ -1538,7 +1538,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                 plot(time,value,'k')
                 hold on;
                 plot(time,data(:,2),'r','LineWidth',2.5)
-                title([dat_name,ext])
+                title([dat_name,ext], 'Interpreter', 'none')
                 xlabel(handles.unit)
                 ylabel('Value')
                 legend('Raw',[num2str(smooth_v),'points-smoothed'])
@@ -2138,7 +2138,7 @@ if check == 1;
     end
     set(gca,'XMinorTick','on','YMinorTick','on')
     hold off
-    title(contents(plot_selected))
+    title(contents(plot_selected), 'Interpreter', 'none')
     if handles.unit_type == 0;
         xlabel(['Unit (',handles.unit,')'])
     elseif handles.unit_type == 1;
@@ -2205,7 +2205,7 @@ if check == 1;
     end
     set(gca,'XMinorTick','on','YMinorTick','on')
     hold off
-    title(contents(plot_selected))
+    title(contents(plot_selected), 'Interpreter', 'none')
     xlim([min(xlimit(:,1)) max(xlimit(:,2))])
     if handles.unit_type == 0;
         xlabel(['Unit (',handles.unit,')'])
@@ -2821,7 +2821,9 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                                 refreshcolor;
                                 cd(pre_dirML); % return to matlab view folder
 
-                                figure;plot(cz,c);title(name); xlabel('Pixels'); 
+                                figure;plot(cz,c);
+                                title(name, 'Interpreter', 'none'); 
+                                xlabel('Pixels'); 
                                 set(gca,'XMinorTick','on','YMinorTick','on')
                                 if m == 2
                                     ylabel('Grayscale')
@@ -3459,7 +3461,7 @@ if check == 1
         else
             xlabel(['Time (',handles.unit,')'])
         end
-        title(plot_filter_s)
+        title(plot_filter_s, 'Interpreter', 'none')
 end
 guidata(hObject, handles);
 
@@ -3891,7 +3893,7 @@ if check == 1;
                 ylabel(handles.unit)
             end
             
-            title([[dat_name,ext],': sampling rate'])
+            title([[dat_name,ext],': sampling rate'], 'Interpreter', 'none')
             xlim([min(datasamp(:,1)),max(datasamp(:,1))])
             ylim([0.9*min(dt) max(dt)*1.1])
             
@@ -3901,7 +3903,7 @@ if check == 1;
             set(0,'Units','normalized') % set units as normalized
             set(gcf,'units','norm') % set location
             set(gcf,'position',[0.55,0.4,0.45,0.45]) % set position
-            title([[dat_name,ext],': kernel fit of sampling rates'])
+            title([[dat_name,ext],': kernel fit of sampling rates'], 'Interpreter', 'none')
             set(gcf,'Name', 'Sampling rate: distribution')
             if handles.unit_type == 0;
                 xlabel(['Sampling rate (',handles.unit,')'])
@@ -3969,7 +3971,7 @@ if check == 1;
             figure;
             histfit(datax,[],'kernel')
             set(gcf,'Name', 'Data Distribution')
-            title([[dat_name,ext],': kernel fit of the data'])
+            title([[dat_name,ext],': kernel fit of the data'], 'Interpreter', 'none')
             xlabel('Data')
             note = ['max: ',num2str(max(datax)),'; mean: ',num2str(mean(datax)),...
                 '; median: ',num2str(median(datax)),'; min: ',num2str(min(datax)),...
@@ -4078,7 +4080,7 @@ if check == 1;
             set(gca,'XMinorTick','on','YMinorTick','on')
             xlabel('Time (kyr)')
             ylabel('Power ratio')
-            title(plot_filter_s)
+            title(plot_filter_s, 'Interpreter', 'none')
             if savedata == 1
                 name1 = [dat_name,'-win',num2str(window),'-pda',ext];
                 CDac_pwd  % cd ac_pwd dir
@@ -4739,7 +4741,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                     plot(time,value,'k')
                     hold on;
                     plot(time,data(:,2),'r','LineWidth',2.5)
-                    title([dat_name,ext])
+                    title([dat_name,ext], 'Interpreter', 'none')
                     xlabel(handles.unit)
                     ylabel('Value')
                     legend('Raw',[num2str(smooth_v*100),'%-median smoothed'])
@@ -4774,7 +4776,7 @@ time = data(:,1);
 value = data(:,2);
 figure;
 plot(time,value)
-title([dat_name,ext])
+title([dat_name,ext], 'Interpreter', 'none')
 xlabel('Depth (m)')
 ylabel('Log(Fe)')
 CDac_pwd
@@ -4799,7 +4801,7 @@ time = data(:,1);
 value = data(:,2);
 figure;
 plot(time,value)
-title([dat_name,ext])
+title([dat_name,ext], 'Interpreter', 'none')
 xlabel('Depth (m)')
 ylabel('Gamma ray (cpm)')
 CDac_pwd
@@ -4824,7 +4826,7 @@ time = data(:,1);
 value = data(:,2);
 figure;
 plot(time,value)
-title([dat_name,ext])
+title([dat_name,ext], 'Interpreter', 'none')
 xlabel('Time (kyr)')
 ylabel('Insolation (W/m^{2})')
 CDac_pwd
@@ -4848,7 +4850,7 @@ time = data(:,1);
 value = data(:,2);
 figure;
 plot(time,value)
-title([dat_name,ext])
+title([dat_name,ext], 'Interpreter', 'none')
 xlabel('Age (ka)')
 ylabel('ETP')
 CDac_pwd
@@ -4872,7 +4874,7 @@ time = data(:,1);
 value = data(:,2);
 figure;
 plot(time,value)
-title([dat_name,ext])
+title([dat_name,ext], 'Interpreter', 'none')
 xlabel('Number (#)')
 ylabel('Value')
 CDac_pwd
@@ -4896,7 +4898,7 @@ time = data(:,1);
 value = data(:,2);
 figure;
 plot(time,value)
-title([dat_name,ext])
+title([dat_name,ext], 'Interpreter', 'none')
 xlabel('Depth (m)')
 ylabel('Gamma ray (cpm)')
 CDac_pwd
@@ -4921,7 +4923,7 @@ time = data(:,1);
 value = data(:,2);
 figure;
 plot(time,value)
-title([dat_name,ext])
+title([dat_name,ext], 'Interpreter', 'none')
 xlabel('Depth (m)')
 ylabel('Depth Rank')
 CDac_pwd
@@ -4971,7 +4973,7 @@ time = data(:,1);
 value = data(:,2);
 figure;
 plot(time,value)
-title([dat_name,ext])
+title([dat_name,ext], 'Interpreter', 'none')
 xlabel('Year')
 ylabel('pCO_2 (ppm)')
 
