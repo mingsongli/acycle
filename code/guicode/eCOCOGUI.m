@@ -340,12 +340,12 @@ dt = (median(diff(datx)));
 if red == 0
     theored = p1;
     p = p1;
-elseif red == 1
+elseif red == 2
     [theored]=theoredar1ML(daty,f,mean(p1),dt);
     p = p1 ./ theored;
     p = p - 1;
     p(p<0) = 0;   % power removing AR(1) noise
-elseif red == 2
+elseif red == 1
     [theored]=theoredar1ML(daty,f,mean(p1),dt);
     p = p1 - theored;
     p(p<0) = 0;   % power removing AR(1) noise
@@ -714,12 +714,12 @@ catch
     if red == 0
         theored = p1;
         p = p1;
-    elseif red == 1
+    elseif red == 2
         [theored]=theoredar1ML(daty,f,mean(p1),dt);
         p = p1 ./ theored;
         p = p - 1;
         p(p<0) = 0;   % power removing AR(1) noise
-    elseif red == 2
+    elseif red == 1
         [theored]=theoredar1ML(daty,f,mean(p1),dt);
         p = p1 - theored;
         p(p<0) = 0;   % power removing AR(1) noise
@@ -791,12 +791,12 @@ if handles.red > 0
     if red == 0
         theored = p1;
         p = p1;
-    elseif red == 1
+    elseif red == 2
         [theored]=theoredar1ML(daty,f,mean(p1),dt);
         p = p1 ./ theored;
         p = p - 1;
         p(p<0) = 0;   % power removing AR(1) noise
-    elseif red == 2
+    elseif red == 1
         [theored]=theoredar1ML(daty,f,mean(p1),dt);
         p = p1 - theored;
         p(p<0) = 0;   % power removing AR(1) noise
@@ -835,12 +835,12 @@ else
     if red == 0
         theored = p1;
         p = p1;
-    elseif red == 1
+    elseif red == 2
         [theored]=theoredar1ML(daty,f,mean(p1),dt);
         p = p1 ./ theored;
         p = p - 1;
         p(p<0) = 0;   % power removing AR(1) noise
-    elseif red == 2
+    elseif red == 1
         [theored]=theoredar1ML(daty,f,mean(p1),dt);
         p = p1 - theored;
         p(p<0) = 0;   % power removing AR(1) noise
@@ -906,12 +906,12 @@ if handles.red > 0
     if red == 0
         theored = p1;
         p = p1;
-    elseif red == 1
+    elseif red == 2
         [theored]=theoredar1ML(daty,f,mean(p1),dt);
         p = p1 ./ theored;
         p = p - 1;
         p(p<0) = 0;   % power removing AR(1) noise
-    elseif red == 2
+    elseif red == 1
         [theored]=theoredar1ML(daty,f,mean(p1),dt);
         p = p1 - theored;
         p(p<0) = 0;   % power removing AR(1) noise
@@ -1394,9 +1394,9 @@ end
 % for output
 if red == 0
     redmodel = 'no removal';
-elseif red == 1
-    redmodel = 'classic AR1 removed (F./Fred - 1)';
 elseif red == 2
+    redmodel = 'classic AR1 removed (F./Fred - 1)';
+elseif red == 1
     redmodel = 'classic AR1 removed (F - Fred)';
 elseif red == 3
     redmodel = 'robust AR1 removed (F - Fred)';

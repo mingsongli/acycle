@@ -107,11 +107,20 @@ for j = 1: slices
     dat_ray = 1/(length(dat_slice(:,2*j-1))*dt);  % rayleigh
     [p,f] = periodogram(dat_slice(:,2*j),[],pad,1/dt);  % power of dat
     % remove AR1 noise
-    if red == 1
-            [theored]=theoredar1ML(dat(:,2),f,mean(p),dt);
-            p = p ./ theored;
-            p = p - 1;
-            p(p<0) = 0;   % power removing AR(1) noise
+    if red == 2
+        [theored]=theoredar1ML(dat(:,2),f,mean(p),dt);
+        p = p ./ theored;
+        p = p - 1;
+        p(p<0) = 0;   % power removing AR(1) noise
+    elseif red == 1
+        [theored]=theoredar1ML(dat(:,2),f,mean(p),dt);
+        p = p - theored;
+        p(p<0) = 0;   % power removing AR(1) noise
+    elseif red == 3
+        % robust
+        theored = redconf_any(f,p,dt,0.25,2);
+        p = p - theored;
+        p(p<0) = 0;
     end
     % remove red% noise
     if and (red >= 50, red < 100)
