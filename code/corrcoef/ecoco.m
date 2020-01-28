@@ -137,12 +137,6 @@ waitbar(waitbarstep / steps)
          prints_ecc = prt_ecc(out_ecocorb(:,i) == prints_ecocorb);
          prints_ecoco = prt_ecc(out_ecocorb(:,i) == prints_ecocorb);
          prints_norbit = out_norbit(out_ecocorb(:,i) == prints_ecocorb);
-%          prints_ecoco = max(out_ecoco(:,i)); % max ecc value
-%          prints_sr = prt_sr(out_ecoco(:,i) == prints_ecoco);
-%          prints_eci = prt_eci(out_ecoco(:,i) == prints_ecoco);
-%          prints_ecc = prt_ecc(out_ecoco(:,i) == prints_ecoco);
-%          prints_ecoco = prt_ecc(out_ecoco(:,i) == prints_ecoco);
-%          prints_norbit = out_norbit(out_ecoco(:,i) == prints_ecoco);
          
          if length(prints_sr) > 1
              disp('Warning: multiple sedimentary rate options are :')
@@ -161,7 +155,7 @@ waitbar(waitbarstep / steps)
              break
          end
              disp(['    Correlation coeffcient ',num2str(prints_ecc(1)),...
-                 '. H0 significance level ',num2str(100*prints_eci(1)),'%']);
+                 '. H0 significance level ',num2str(prints_eci(1))]);
              disp(['    COCOxH0-SL value ',num2str(prints_ecoco(1)), 'COCOxH0-SLxOrbits',num2str(prints_ecocorb(1)) ])
              sr_p(i,1) = loci;
              sr_p(i,2) = prints_sr(1);
