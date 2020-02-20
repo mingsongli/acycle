@@ -733,7 +733,10 @@ if handles.swapxy == 1
 else
     view([0 90]);
 end
-legend(handles.plot_list, 'Interpreter', 'none')
+% MATLAB R2014b onwards there is a default legend interpreter property 
+% called "DefaultLegendInterpreter", which can be set to "none" as follows:
+set(groot, 'DefaultLegendInterpreter', 'none')
+legend(handles.plot_list)
 hold off
 handles.plotprofig = plotprofig;
 set(gcf,'color','w');

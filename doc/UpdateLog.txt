@@ -2,7 +2,7 @@
 _______________________________________
 
 Version : ACycle_v2.1
-Date    : Sept 17, 2019
+Date    : Sept 17, 2019 - Jan 27, 2020
 By      : Mingsong Li
 NOTE    : ask for MatLab RUNTIME 2019a
 
@@ -27,6 +27,10 @@ NOTE    : ask for MatLab RUNTIME 2019a
         Thank Victor A. Piedrahita Velez (Australian National University) for this bug report.
 
     6. Disabling printing underscore as subscript in figures
+
+    7. Clarify significance level in COCO and F-test
+
+    8. Turn on 'recycle' model for 'Delete' function
 _______________________________________
 
 Version : ACycle_v2.0

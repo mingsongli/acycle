@@ -169,7 +169,7 @@ if nsim > 0
         figure;
         semilogy(corrxch,corry_per,'r'); 
         xlabel('Sedimentation rates (cm/kyr)')
-        ylabel('H_0 significant level')
+        ylabel('H_0 significance level')
         title('Null hypothesis test')
         ylim([0.5*min(corry_per) 1])
         line([sr1, sr2],[.10, .10],'LineStyle',':','Color','k')
