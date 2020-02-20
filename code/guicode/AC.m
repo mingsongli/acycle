@@ -3022,6 +3022,7 @@ if deletefile == 1
                             status = rmdir(plot_filter_selection,'s');
                     end
                 else
+                    recycle on;
                     delete(plot_filter_selection);
                 end
             end
@@ -4453,18 +4454,17 @@ if check == 1;
         plot_filter_s = fullfile(ac_pwd,plot_filter_s);
         [~,dat_name,ext] = fileparts(plot_filter_s);
         
-        prompt = {'Original data: column #',...
-            '1st column:',...
-            '2nd column:'};
+        prompt = {'new 1st column = old column #',...
+            'new 2nd column = old column #'};
         dlg_title = 'Extract data';
         num_lines = 1;
-        defaultans = {'2','1','2'};
+        defaultans = {'1','2'};
         options.Resize='on';
         answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
         if ~isempty(answer)
-            c0 = str2double(answer{1});
-            c1 = str2double(answer{2});
-            c2 = str2double(answer{3});
+            c1 = str2double(answer{1});
+            c2 = str2double(answer{2});
+            c0 = c2;
             if or(c1> c0, c2> c0)
                 errordlg('Error: column is too large')
             elseif or(c1<1, c2<1)

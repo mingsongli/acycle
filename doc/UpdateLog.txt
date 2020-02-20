@@ -29,6 +29,8 @@ NOTE    : ask for MatLab RUNTIME 2019a
     6. Disabling printing underscore as subscript in figures
 
     7. Clarify significance level in COCO and F-test
+
+    8. Turn on 'recycle' model for 'Delete' function
 _______________________________________
 
 Version : ACycle_v2.0
