@@ -69,15 +69,18 @@ set(gcf,'position',[0.45,0.55,0.4,0.3]) % set position
 set(handles.text2,'position', [0.064,0.84,0.2,0.06])
 set(handles.text4,'position', [0.47,0.84,0.2,0.06])
 set(handles.popupmenu1,'position', [0.043,0.67,0.3,0.1])
+set(handles.popupmenu1,'value', 1)
 set(handles.text3,'position', [0.043,0.568,0.2,0.06])
 set(handles.popupmenu3,'position', [0.043,0.407,0.3,0.1])
-
+set(handles.popupmenu3,'value', 1)
 set(handles.text5,'position', [0.4,0.707,0.07,0.06])
 set(handles.text6,'position', [0.4,0.619,0.07,0.06])
 set(handles.text7,'position', [0.628,0.707,0.07,0.06])
 set(handles.text9,'position', [0.628,0.619,0.07,0.06])
 set(handles.edit1,'position', [0.48,0.69,0.13,0.09])
+set(handles.edit1,'string', '1')
 set(handles.edit2,'position', [0.48,0.585,0.13,0.09])
+set(handles.edit2,'string', '1000')
 set(handles.pushbutton1,'position', [0.4,0.407,0.25,0.1])
 set(handles.textref,'position', [0.064,0.013,0.915,0.35])
 
@@ -87,8 +90,11 @@ set(handles.text14,'position', [0.043,0.439,0.5,0.133])
 set(handles.text15,'position', [0.043,0.143,0.5,0.133])
 
 set(handles.edit3,'position', [0.6,0.735,0.3,0.222])
+set(handles.edit3,'string', '1')
 set(handles.edit4,'position', [0.6,0.439,0.3,0.222])
+set(handles.edit4,'string', '1')
 set(handles.edit5,'position', [0.6,0.143,0.3,0.222])
+set(handles.edit5,'string', '-1')
 
 % Choose default command line output for basicseries
 handles.output = hObject;

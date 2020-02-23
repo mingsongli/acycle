@@ -74,7 +74,7 @@ function varargout = AC(varargin)
 
 % Edit the above text to modify the response to help AC
 
-% Last Modified by GUIDE v2.5 30-Aug-2019 13:56:27
+% Last Modified by GUIDE v2.5 23-Feb-2020 13:25:33
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -1092,11 +1092,11 @@ function menu_manuals_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-filename = which('AC_Users_Guide.pdf');
-%ur2 = 'https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf';
+%filename = which('AC_Users_Guide.pdf');
+%openpdf(filename);
+url2 = 'https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf';
+web(url2,'-browser')
 url = 'https://github.com/mingsongli/acycle/wiki';
-
-openpdf(filename);
 web(url,'-browser')
 
 
@@ -2925,7 +2925,7 @@ function menu_paste_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 CDac_pwd;
-copycut = handles.copycut; % cut of copy
+copycut = handles.copycut; % cut or copy
 nplot = handles.nplot; % number of selected files
 if nplot == 0
     return
@@ -2937,7 +2937,7 @@ for i = 1:nplot
         if exist(new_name_w_dir)
             answer = questdlg(['Cover existed file ',new_name,'?'],...
                 'Warning',...
-                'Yes','No','Yes');
+                'Yes','No','No');
             % Handle response
             switch answer
                 case 'Yes'
@@ -2964,7 +2964,7 @@ for i = 1:nplot
             end
             new_file = [ac_pwd,handles.slash_v,new_name];
             file_list = handles.file;
-            copyfile(file_list{1}, new_file)
+            copyfile(file_list{i}, new_file)
         catch
             disp('No data copied')
         end
@@ -2974,9 +2974,9 @@ d = dir; %get files
 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
 if isdir(pre_dirML)
-cd(pre_dirML);
+    cd(pre_dirML);
 end
-
+guidata(hObject,handles)
 
 % --------------------------------------------------------------------
 function menu_delete_Callback(hObject, eventdata, handles)
@@ -5136,3 +5136,11 @@ if and ((min(plot_selected) > 2), (nplot == 1))
 end
 guidata(hObject, handles);
 
+
+
+% --------------------------------------------------------------------
+function menu_interpseries_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_interpseries (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+InterplationSeries(handles)

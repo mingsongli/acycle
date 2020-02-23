@@ -59,6 +59,7 @@ arg = (2.*abs(w-wc)/bw)^twod;
 darg=-1.0*arg;
 filter(n) =  ( amp * exp(darg));
 end
+
 ncut1 = ncut+1;
 %.....Filter for negative frequencies
 for n=ncut1:npts;
@@ -68,6 +69,9 @@ arg = (2.*abs(aw-wc)/bw)^twod;
 darg=-1.0*arg;
 filter(n) = (amp * exp(darg));
 end
+% below for acycle plot
+assignin('base','tanerfilterenv',filter)
+% up    for acycle plot
 %% Forward FFT data
 xftfor = fft(x,npts);
 %.....Apply the filter over all frequencies

@@ -69,16 +69,17 @@ fn = 1/(2*dt);
 [pxx,f] = pmtm(x,nw,nfft);
 % true frequencies
 ft = f/pi*fn;
+pxx0 = pxx;
+ft0 = ft;
 %
-%
-% testing fmax warning
 pxx = pxx(ft<=fmax);
 fn = fmax;
 ft = ft(ft<=fmax);
 % median-smoothing data numbers
 smoothn = round(smoothwin * length(pxx));
 % median-smoothing
-pxxsmooth = moveMedian(pxx,smoothn);
+pxxsmooth = moveMedian(pxx,smoothn);  % valid data; for rho evaluation
+pxxsmooth0 = moveMedian(pxx0,smoothn);  % all data;for plot only
 %
 %pxxsmooth = pxxsmooth(ft<= fmax);
 %
@@ -87,7 +88,8 @@ pxxsmooth = moveMedian(pxx,smoothn);
 % mean power of spectrum
 s0 = mean(pxxsmooth);
 % conventional median significance level
-theored = s0 * (1-rho^2)./(1-(2.*rho.*cos(pi.*ft./fn))+rho^2);
+%theored = s0 * (1-rho^2)./(1-(2.*rho.*cos(pi.*ft./fn))+rho^2);
+theored0 = mean(pxxsmooth) * (1-rho^2)./(1-(2.*rho.*cos(pi.*ft0./fmax)+rho^2));
 
 % Red-noise background fit
 % Get the best fit values of rho and s0 (see eq. (2) in Mann and Lees,
@@ -98,7 +100,7 @@ theored = s0 * (1-rho^2)./(1-(2.*rho.*cos(pi.*ft./fn))+rho^2);
 % minimize rho only!
 %[rhoM, s0M] = minirho(s0,fn,ft,pxxsmooth,linlog);
 % median-smoothing reshape significance level
-theored1 = s0M * (1-rhoM^2)./(1-(2.*rhoM.*cos(pi.*ft./fn))+rhoM^2);
+theored1 = s0M * (1-rhoM^2)./(1-(2.*rhoM.*cos(pi.*ft./fmax))+rhoM^2);
 
 K = 2*nw -1;
 nw2 = 2*(K);
@@ -107,15 +109,11 @@ chi90 = theored1 * chi2inv(0.90,nw2)/nw2;
 chi95 = theored1 * chi2inv(0.95,nw2)/nw2;
 chi99 = theored1 * chi2inv(0.99,nw2)/nw2;
 chi999 = theored1 * chi2inv(0.999,nw2)/nw2;
-% data for output
-redconfAR1 = [ft,pxx,pxxsmooth,theored];
-redconfML96 = [ft,pxx,theored1,chi90,chi95,chi99,chi999];
-% Plot
+
 if plot == 1
-    figure; semilogy(ft,pxx,'k')
+    figure; semilogy(ft0,pxx0,'k')
     hold on; 
-    semilogy(ft,pxxsmooth,'m-.');
-    %semilogy(ft,theored,'g-');
+    semilogy(ft0,pxxsmooth0,'m-.');
     semilogy(ft,theored1,'k-','LineWidth',2);
     semilogy(ft,chi90,'r-');
     semilogy(ft,chi95,'r--','LineWidth',2);
@@ -126,6 +124,8 @@ if plot == 1
     smthwin = [num2str(smoothwin*100),'%', ' median-smoothed'];
     legend('Power',smthwin,'Robust AR(1) median',...
         'Robust AR(1) 90%','Robust AR(1) 95%','Robust AR(1) 99%','Robust AR(1) 99.9%')
-%     legend('Power',smthwin,'Conventional AR(1)','Robust AR(1) median',...
-%         'Robust AR(1) 90%','Robust AR(1) 95%','Robust AR(1) 99%','Robust AR(1) 99.9%')
 end
+
+% data for output
+redconfAR1 = [ft0,pxx0,pxxsmooth0,theored0];
+redconfML96 = [ft,pxx,theored1,chi90,chi95,chi99,chi999];

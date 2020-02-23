@@ -2,7 +2,7 @@
     <img src="https://github.com/mingsongli/acycleFig/blob/master/default_icon_1024-git.gif" alt="homepage" title="Acycle GitHub homepage">
 </a>
 
-[![](https://img.shields.io/badge/version-v2.0.1-blue.svg)]()
+[![](https://img.shields.io/badge/version-v2.1-blue.svg)]()
 [![](https://img.shields.io/badge/license-GPL-brightgreen.svg)](https://www.gnu.org/licenses/)
 [![](https://img.shields.io/badge/platform-Mac_Win-green.svg)]()
 ![](https://img.shields.io/badge/language-MatLab-red.svg)
@@ -41,8 +41,8 @@
 ### Has been used in
 * Li, M., Hinnov, L.A., Huang, C., Ogg, J.G., 2018. Nature Commun. https://doi.org/10.1038/s41467-018-03454-y
 * Shi, J., Jin, Z., Liu, Q., Zhang, R., Huang, Z., 2019. Glob. Planet. Change 174, 115-126. https://doi.org/10.1016/j.gloplacha.2019.01.001
-* [Find More](https://github.com/mingsongli/acycle#acycle-has-been-used-in)
-
+* Kochhann, M.V.L., Cagliari, J., Kochhann, K.G.D., Franco, D.R., 2020. Geochemistry, Geophysics, Geosystems, https://doi.org/10.1029/2019GC008676
+* [Read More](https://github.com/mingsongli/acycle#acycle-has-been-used-in)
 
 ### Download
 
@@ -65,10 +65,10 @@
     <img src="https://github.com/mingsongli/acycleFig/blob/master/WechatIMG17.jpeg" alt="MingsongLi.com" title="Mingsong Li homepage" width="100" height="100">
 </a>
 <br>
-Mingsong Li, Penn State. Feb. 20, 2020 <br>
+Mingsong Li, Penn State. Feb. 23, 2020 <br>
 E-mail: <i> mul450 {at} psu.edu;  limingsonglms {at} gmail.com </i> <br><br>
 
-Website: https://mingsongli.com/
+Website: https://mingsongli.com/acycle
 
 <a href="https://scholar.google.com/citations?user=NYUXDW0AAAAJ&hl=en&inst=4855597776033322861">
     <img src="https://github.com/mingsongli/acycleFig/blob/master/google-scholar-icon-1.jpg" alt="Google Scholar" title="Google Scholar homepage" width="48" height="48">
@@ -91,7 +91,7 @@ Website: https://mingsongli.com/
 
 <br><br>
 <b> ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) &nbsp;
-`Please give it a " ⭐️Star" if you like this software. (top right corner of this page)`
+`Please give it a " ⭐️ Star" if you like this software 😁 🌹. (top right corner of this page)`
 
 <br>
 
@@ -293,6 +293,8 @@ _2π multi-taper method power spectrum of the gamma ray series is shown with `20
 *    > _12._ ZHONG, Y., CHEN, D., FAN, J., WU, H., FANG, Q. and SHI, M., 2019. Cyclostratigraphic Calibration of the Upper Ordovician (Sandbian–Katian) Pagoda and Linhsiang Formations in the Yichang Area, South China. Acta Geologica Sinica‐English Edition, 93(S3), pp.177-180.
 *    > _13._ Su, Q., Nie, J., Luo, Z., Li, M., Heermance, R. and Garzione, C., 2019. Detection of Strong Precession Cycles from the Late Pliocene Sedimentary Records of Northeastern Tibetan Plateau. Geochemistry, Geophysics, Geosystems.
 *    > _14._ Oehlert, A.M. and Swart, P.K., Rolling Window Regression of δ13C and δ18O Values in Carbonate Sediments: Implications for Source and Diagenesis. The Depositional Record.
+* [Read More - Google Scholar citations](https://scholar.google.com/scholar?oi=bibs&hl=en&cites=17133348578794397884)
+* [And papers that may use COCO/eCOCO methods](https://scholar.google.com/scholar?oi=bibs&hl=en&cites=9253375712480008123)
 
 ---
 ## Read more
@@ -305,5 +307,6 @@ _2π multi-taper method power spectrum of the gamma ray series is shown with `20
   /doc/AC_Users_Guide.pdf
 ```
 
+<br><br>
 <b> ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) &nbsp;
-`Please give it a " ⭐️Star" and "👁 Watch" if you like this software. (top right corner of this page)`
+`Please give it a " ⭐️ Star" if you like this software 😁 🌹. (top right corner of this page)`

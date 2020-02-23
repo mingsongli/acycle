@@ -2,35 +2,61 @@
 _______________________________________
 
 Version : ACycle_v2.1
-Date    : Sept 17, 2019 - Jan 27, 2020
+Date    : Sept 17, 2019 - Feb 23, 2020
 By      : Mingsong Li
 NOTE    : ask for MatLab RUNTIME 2019a
 
-    1. Update Spectral Moments section in the Users' Guide of Acycle 2.0
-
-	Thanks Matthias Sinnesael for the suggestions.
+    1. Update Spectral Moments section in the Users' Guide of Acycle
+        Thanks Matthias Sinnesael for the suggestions.
 
     2. Include f-test and amplitude spectrum for the MTM power spectrum
+        Allow to plot X-axis in either period domain or frequency domain
         using Linda Hinnov's ftestmtm.m and mtmdofs.m scripts
         Please cite: Kodama, K.P., Hinnov, L.A., 2015. Rock Magnetic Cyclostratigraphy.
 			Wiley-Blackwell.
 
-        Thank Kunyuan Ma for the bug report.
-
     3. Prewhitening GUI
+        refined rho1 of the robust AR1 model
         Thank Zheng Gong for this reminder.
 
     4. Spectral Moments: bug fixed.
-	Now polynomial model of smoothing can produce correct results.
+        Now the polynomial model of smoothing can produce correct results.
 
-    5. Fix a bug in filter.
+    5. Fix a display bug in the Filtering GUI.
         Thank Victor A. Piedrahita Velez (Australian National University) for this bug report.
 
-    6. Disabling printing underscore as subscript in figures
+    6. Disabling printing underscore as a subscript in figures
 
-    7. Clarify significance level in COCO and F-test
+    7. Clarify the significance level in COCO and F-test
 
     8. Turn on 'recycle' model for 'Delete' function
+
+    9. Update Users' Guide: required toolboxes; Acycle & macOS Catalina 10.15
+        Acycle software won't include Users Guide PDF file to save space.
+
+    10. Insolation: Restore default values for GUIs of Insolation and Astronomical Solutions
+
+    11. Update Plot Pro GUI
+
+    12. Update Filtering GUI
+        The frequency response of the Taner filter can be shown in the Filtering GUI.
+        Taner filter GUI includes a roll-off rate (c) option
+        Frequency responses of highpass, lowpass and bandstop can be shown also.
+        Thank Linda Hinnov and Kunyuan Ma.
+    
+    13. Add a new GUI: Interpolation Series, 
+        Changing sampling rates of a target series using a given reference series
+        Thank Daniel R. Franco!
+
+    14. Age Scale: change the name to "Age Scale | Tunning"
+        Preview model of tunning
+        Displaying Sediment Records with both Age and Depth Axis with MATLAB
+        Following code by MARTIN H. TRAUTH (Sept. 25, 2018)
+        http://mres.uni-potsdam.de/index.php/2018/09/25/displaying-sediment-records-with-both-age-and-depth-axis-with-matlab/
+
+    15. ZB18a solution was included and ZB17 solutions were removed to reduce the size of Acycle.
+        Find more at:
+        https://www.soest.hawaii.edu/oceanography/faculty/zeebe_files/Astro.html
 _______________________________________
 
 Version : ACycle_v2.0
