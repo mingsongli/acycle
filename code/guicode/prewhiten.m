@@ -89,7 +89,7 @@ set(handles.text25,'position',[0.5,0.123,0.321,0.123])
 
 set(handles.uipanel7,'position',[0.05,0.03,0.9,0.213])
 set(handles.prewhiten_select_popupmenu,'position',[0.043,0.2,0.9,0.5])
-
+set(handles.prewhiten_select_popupmenu,'String','Raw','Value',1);
 handles.smooth_win = 0.35;  % windows for smooth 
 % contact with acycle main window
 handles.acfigmain = varargin{1}.acfigmain;
@@ -104,7 +104,9 @@ handles.data_name = varargin{1}.data_name;
 xmin = min(handles.current_data(:,1));
 xmax = max(handles.current_data(:,1));
 handles.xrange = xmax -xmin; % length of data
-
+prewhiten={};
+prewhiten(1,1) = {'Raw'};
+handles.prewhiten_popupmenu_selection = prewhiten;
 handles.prewhiten_win = (xmax-xmin) * handles.smooth_win;
 set(handles.edit10,'String', num2str(handles.prewhiten_win));
 set(handles.edit11,'String', '35');
@@ -119,7 +121,6 @@ set(handles.prewhiten_all_checkbox,'Value', 0);
 set(handles.checkbox11,'Value', 0);
 set(handles.checkbox13,'Value', 0);
 set(handles.edit23,'String', '3');
-set(handles.prewhiten_select_popupmenu,'Value', 1);
 
 % Choose default command line output for prewhiten
 handles.output = hObject;
@@ -158,7 +159,7 @@ function prewhiten_select_popupmenu_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns prewhiten_select_popupmenu contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from prewhiten_select_popupmenu
-handles.prewhiten_select_popupmenu = 'No_prewhiten';
+handles.prewhiten_popupmenu_selection = 'Raw';
 
 str = get(hObject, 'String');
 val = get(hObject,'Value');
@@ -215,14 +216,12 @@ case '3+ order (Dashed blue)' % User selects.
    nametype = 3;
 end
 
-handles.prewhiten_select_popupmenu = prewhiten_s;
+handles.prewhiten_popupmenu_selection = prewhiten_s;
 new_data = [current_data1,current_data2];
 handles.new_data = new_data;
 current_trend = [current_data1,trend];
 win = handles.prewhiten_win;
-handles.prewhiten_select_popupmenu = {};
 
-% cd(handles.working_folder)
 data_name = handles.data_name;
 [~,dat_name,ext] = fileparts(data_name);
 if nametype == 1
@@ -690,7 +689,7 @@ set(handles.prewhiten_rloess_checkbox,'Value',0)
 set(handles.prewhiten_all_checkbox,'Value',0)
 set(handles.checkbox11,'Value',0)
 set(handles.checkbox13,'Value',0)
-set(handles.prewhiten_pushbutton,'Enable','off')
+%set(handles.prewhiten_pushbutton,'Enable','off')
 guidata(hObject, handles);
 
 % --- Executes on slider movement.
@@ -917,7 +916,7 @@ set(gcf,'Units','normalized','position',[0.09,0.3,0.35,0.4]) % set position
 hold on;
 prewhiten_list = 1;
 prewhiten = {};
-prewhiten(prewhiten_list,1)={'No_prewhiten (black)'};
+%prewhiten(prewhiten_list,1)={'No_prewhiten (black)'};
 prewhiten(prewhiten_list,1)={'Raw'};
 
 if strcmp(handles.prewhiten_mean,'Mean')

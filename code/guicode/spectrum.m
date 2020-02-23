@@ -22,7 +22,7 @@ function varargout = spectrum(varargin)
 
 % Edit the above text to modify the response to help spectrum
 
-% Last Modified by GUIDE v2.5 11-Sep-2019 18:45:16
+% Last Modified by GUIDE v2.5 22-Feb-2020 19:48:24
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -59,7 +59,7 @@ set(h1,'FontUnits','points','FontSize',11.5);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
 if ismac
-    set(gcf,'position',[0.45,0.5,0.28,0.3]) % set position
+    set(gcf,'position',[0.45,0.5,0.3,0.33]) % set position
 elseif ispc
     set(gcf,'position',[0.45,0.5,0.3,0.33]) % set position
 end
@@ -95,9 +95,11 @@ set(handles.radiobutton_input,'position', [0.089,0.5,0.4,0.2])
 set(handles.edit_fmax_input,'position', [0.541,0.52,0.356,0.2])
 
 set(handles.checkbox4,'position', [0.089,0.25,0.507,0.2])
-set(handles.checkbox5,'position', [0.541,0.25,0.507,0.2])
-set(handles.checkbox6,'position', [0.089,0.05,0.8,0.2])
-set(handles.checkbox6,'String', 'log(frequency)')
+set(handles.checkbox5,'position', [0.5,0.25,0.507,0.2])
+set(handles.checkbox6,'position', [0.089,0.05,0.4,0.2])
+set(handles.checkbox6,'String', 'log(freq.)')
+set(handles.checkbox8,'position', [0.5,0.05,0.48,0.2])
+set(handles.checkbox8,'value', 0)
 
 set(handles.pushbutton17,'position', [0.5,0.082,0.166,0.12])
 set(handles.pushbutton3,'position', [0.67,0.082,0.282,0.12])
@@ -171,15 +173,18 @@ set(handles.edit4, 'String', num2str(length(data_s(:,1))));
 fd1=w/(2*pi*handles.mean); 
 poc = cumsum(po); % cumsum of power
 pocnorm = 100*poc/max(poc); % normalized
-% the first elements at which the cumulated power exceed 99.5%
-poc1 = find( pocnorm > 99.5, 1); 
-% if the frequency detected is smaller than 90% of nyquist frequency
+% the first elements at which the cumulated power exceed 99%
+poc1 = find( pocnorm > 99, 1);
+handles.ValidNyqFreq = fd1(end);
+% if the frequency detected is smaller than 85% of nyquist frequency
 % suggest a new input max freq.
-if fd1(poc1)/fd1(end) < 0.9
+if fd1(poc1)/fd1(end) <= 0.85
+    handles.ValidNyqFreq = fd1(poc1);
     set(handles.edit_fmax_input,'String', num2str(fd1(poc1)))
     set(handles.radiobutton_fmax,'Value',0)
     set(handles.radiobutton_input,'Value',1)
 end
+
 %figure; subplot(2,1,1); plot(fd1,po); subplot(2,1,2); plot(fd1,pocnorm);ylim([90 100])
 %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %
 
@@ -295,6 +300,8 @@ else
     fmax = plot_fmax_input;
 end
 
+plot_x_period = get(handles.checkbox8,'value');
+
 if strcmp(method,'Multi-taper method')
     if max(diffx) - min(diffx) > 10 * eps('single')
         figwarn = warndlg({'Data may be interpolated to an uniform sampling interval';...
@@ -317,30 +324,36 @@ if strcmp(method,'Multi-taper method')
             if length(datax)>2000
                 hwarn = warndlg('Large dataset, wait ...');
             end
-            [rhoM, s0M,redconfAR1,redconfML96]=redconfML(datax,dt,nw,nzeropad,linlog,smoothwin,fmax,1);
+            [rhoM, s0M,redconfAR1,redconfML96]=redconfML(datax,dt,nw,nzeropad,linlog,smoothwin,handles.ValidNyqFreq,1);
             try close(hwarn)
             catch
             end
+            if plot_x_period
+                update_spectral_x_period_mtm
+            else
+                title([dat_name,'-',num2str(nw),'\pi-MTM-Robust-AR1: \rho = ',num2str(rhoM),'. S0 =',num2str(s0M)], 'Interpreter', 'none')
+                xlabel(['Frequency (cycles/',num2str(unit),')']) 
+                set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'pi MTM'])
+                set(gca,'XMinorTick','on','YMinorTick','on')
+                xlim([0 fmax]);
+                set(gcf,'Color', 'white')
+                if handles.linlogY == 1
+                    set(gca, 'YScale', 'log')
+                else
+                    set(gca, 'YScale', 'linear')
+                end
+                if handles.logfreq == 1
+                    set(gca,'xscale','log')
+                end
+                figdata = gcf;
+            end
+            
             name1 = [dat_name,'-',num2str(nw),'piMTM-RobustAR1',ext];
             data1 = redconfML96;
             name2 = [dat_name,'-',num2str(nw),'piMTM-ClassicAR1',ext];
             data2 = redconfAR1;
             
-            title([dat_name,'-',num2str(nw),'\pi-MTM-Robust-AR1: \rho = ',num2str(rhoM),'. S0 =',num2str(s0M)], 'Interpreter', 'none')
-            xlabel(['Frequency (cycles/',num2str(unit),')']) 
-            set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'pi MTM'])
-            set(gca,'XMinorTick','on','YMinorTick','on')
-            xlim([0 fmax]);
-            set(gcf,'Color', 'white')
-            if handles.linlogY == 1;
-                set(gca, 'YScale', 'log')
-            else
-                set(gca, 'YScale', 'linear')
-            end
-            if handles.logfreq == 1
-                set(gca,'xscale','log')
-            end
-            figdata = gcf;
+            
             CDac_pwd;
             dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
             dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9);
@@ -364,26 +377,30 @@ if strcmp(method,'Multi-taper method')
     % Plot figure MTM
         
     if and( handles.checkbox_robustAR1_v == 0, handles.checkbox_ar1_v == 0)
-        figdata = figure;
-        figHandle = gcf;
-        set(gcf,'Color', 'white')
-        plot(fd1,po,'LineWidth',1); 
-        line([0.7*fmax, 0.7*fmax+bw],[0.8*max(po), 0.8*max(po)],'Color','r')
-        xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
-        ylabel('Power ')
-        legend('Power','bw')
-        title([num2str(nw),'\pi MTM method',' ','; Sampling rate = ',num2str(dt),' ', unit], 'Interpreter', 'none')
-        set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'pi MTM'])
-        xlim([0 fmax]);
-        set(gca,'XMinorTick','on','YMinorTick','on')
-        
-        if handles.linlogY == 1;
-            set(gca, 'YScale', 'log')
+        if plot_x_period
+            update_spectral_x_period_mtm
         else
-            set(gca, 'YScale', 'linear')
-        end
-        if handles.logfreq == 1
-            set(gca,'xscale','log')
+            figdata = figure;
+            figHandle = gcf;
+            set(gcf,'Color', 'white')
+            plot(fd1,po,'LineWidth',1); 
+            line([0.7*fmax, 0.7*fmax+bw],[0.8*max(po), 0.8*max(po)],'Color','r')
+            xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
+            ylabel('Power ')
+            legend('Power','bw')
+            title([num2str(nw),'\pi MTM method',' ','; Sampling rate = ',num2str(dt),' ', unit], 'Interpreter', 'none')
+            set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'pi MTM'])
+            xlim([0 fmax]);
+            set(gca,'XMinorTick','on','YMinorTick','on')
+
+            if handles.linlogY == 1
+                set(gca, 'YScale', 'log')
+            else
+                set(gca, 'YScale', 'linear')
+            end
+            if handles.logfreq == 1
+                set(gca,'xscale','log')
+            end
         end
     end
     
@@ -436,6 +453,8 @@ if strcmp(method,'Multi-taper method')
             legend('Power','AR1','90%','95%','99%','99.9%')
             set(gca,'XMinorTick','on','YMinorTick','on')
             xlim([0 fmax]);
+            xlabel(['Frequency (cycles/',num2str(unit),')']) 
+            ylabel('Power ')
             title([num2str(nw),'\pi MTM classic AR1',' ','; Sampling rate = ',num2str(dt),' ', unit], 'Interpreter', 'none')
     step = 5.5;
         waitbar(step / steps)
@@ -458,17 +477,26 @@ if strcmp(method,'Multi-taper method')
         disp(filename_mtm_cl)
         cd(pre_dirML); % return to matlab view folder
         figdata = figHandle;
+        
+        if plot_x_period
+            update_spectral_x_period_mtm
+        end
     else
     end  
     if handles.check_ftest_value
-        [freq,ftest,fsig,Amp,Faz,Sig,Noi,dof,wt]=ftestmtmML(data,nw,padtimes,1);
-        colordef white;
-        set(gcf,'units','norm') % set location
-        set(gcf,'position',[0.0,0.05,0.45,0.45])
-        %xlim([0 fmax]);
-        subplot(3,1,1); xlim([0 fmax])
-        subplot(3,1,2); xlim([0 fmax])
-        subplot(3,1,3); xlim([0 fmax])
+        if plot_x_period
+            update_spectral_x_period_mtm
+        else
+            [freq,ftest,fsig,Amp,Faz,Sig,Noi,dof,wt]=ftestmtmML(data,nw,padtimes,1);
+            colordef white;
+            set(gcf,'units','norm') % set location
+            set(gcf,'position',[0.0,0.05,0.45,0.45])
+            %xlim([0 fmax]);
+            subplot(3,1,1); xlim([0 fmax])
+            subplot(3,1,2); xlim([0 fmax])
+            subplot(3,1,3); xlim([0 fmax])
+        end
+        
         fnyq = 1/(2*dt);
         nameftest = [dat_name,'-',num2str(nw),'piMTM-ftest',ext];
         namefsig = [dat_name,'-',num2str(nw),'piMTM-fsig',ext];
@@ -492,26 +520,43 @@ if strcmp(method,'Multi-taper method')
     end
     
 elseif strcmp(method,'Lomb-Scargle spectrum')
+    
     pfa = [50 10 1 0.01]/100;
     pd = 1 - pfa;
-    % timex must be larger than zero
     timex = timex + abs(min(timex));
+    %[po,fd1,pth] = plomb(datax,timex,fmax,'normalized','Pd',pd);
     [po,fd1,pth] = plomb(datax,timex,fmax,'Pd',pd);
-    figdata = figure;  
-    set(gcf,'Color', 'white')
-    if handles.checkbox_ar1_v == 1
-        plot(fd1,po,fd1,pth*ones(size(fd1')),'LineWidth',1); 
-        text(0.3*fmax*[1 1 1 1],pth-.5,[repmat('P_{fa} = ',[4 1]) num2str(pfa')])
-    else
-        plot(fd1,po,'LineWidth',1); 
+    if plot_x_period
+        pt1 = 1./fd1;
     end
-    xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
+    figdata = figure;
+    colordef white;
+    if plot_x_period
+        if handles.checkbox_ar1_v == 1
+            plot(pt1,po,pt1,pth*ones(size(pt1')),'LineWidth',1); 
+            text(10*(1/fmax)*[1 1 1 1],pth-.5,[repmat('P_{fa} = ',[4 1]) num2str(pfa')])
+        else
+            plot(pt1,po,'LineWidth',1); 
+        end
+        xlabel(['Period (',num2str(unit),')']) 
+        xlim([1/fmax, pt1(3)]);
+        set(gca, 'XDir','reverse')
+    else
+        if handles.checkbox_ar1_v == 1
+            plot(fd1,po,fd1,pth*ones(size(fd1')),'LineWidth',1); 
+            text(0.3*fmax*[1 1 1 1],pth-.5,[repmat('P_{fa} = ',[4 1]) num2str(pfa')])
+        else
+            plot(fd1,po,'LineWidth',1); 
+        end
+        xlabel(['Frequency (cycles/',num2str(unit),')']) 
+        xlim([0 fmax]);
+    end
     ylabel('Power ')
-    title(['Lomb-Scargle spectrum; Sampling rate = ',num2str(dt),' ', unit], 'Interpreter', 'none')
+    title(['Lomb-Scargle spectrum; Sampling rate = ',num2str(dt),' ', unit])
     set(gcf,'Name',[dat_name,ext,': Lomb-Scargle spectrum'])
     set(gca,'XMinorTick','on','YMinorTick','on')
-    xlim([0 fmax]);
-    if handles.linlogY == 1;
+    
+    if handles.linlogY == 1
         set(gca, 'YScale', 'log')
     else
         set(gca, 'YScale', 'linear')
@@ -519,6 +564,7 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
     if handles.logfreq == 1
         set(gca,'xscale','log')
     end
+    
     filename_LS = [dat_name,'-Lomb-Scargle.txt'];
     CDac_pwd; % cd ac_pwd dir
     dlmwrite(filename_LS, [fd1,po,(pth*ones(size(fd1')))'], 'delimiter', ',', 'precision', 9);
@@ -917,6 +963,7 @@ nlength = length(datax);
 method = handles.method;
 df = 1/(timex(nlength)-timex(1));
 check_plot_fmax = get(handles.radiobutton_fmax,'Value');
+plot_x_period = get(handles.checkbox8,'Value');
 plot_fmax_input = str2double(get(handles.edit_fmax_input,'String'));
 nw = handles.timebandwidth;
 bw=2*nw*df;
@@ -957,25 +1004,30 @@ if strcmp(method,'Multi-taper method')
             if length(datax)>2000
                 hwarn = warndlg('Large dataset, wait ...');
             end
-            [rhoM, s0M,redconfAR1,redconfML96]=redconfML(datax,dt,nw,nzeropad,linlog,smoothwin,fmax,1);
+            ValidNyqFreq = handles.ValidNyqFreq;
+            [rhoM, s0M,redconfAR1,redconfML96]=redconfML(datax,dt,nw,nzeropad,linlog,smoothwin,ValidNyqFreq,1);
             try close(hwarn)
             catch
             end
-            xlim([0 fmax]);
-            xlabel(['Frequency (cycles/',num2str(unit),')']) 
-            title([num2str(nw),'\pi-MTM-Robust-AR(1): \rho = ',num2str(rhoM),'. S0 = ',num2str(s0M)])
-            set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'pi MTM'])
-            set(gca,'XMinorTick','on','YMinorTick','on')
-            set(gcf,'Color', 'white')
-            if handles.linlogY == 1;
-                set(gca, 'YScale', 'log')
+            if plot_x_period
+                update_spectral_x_period_mtm
             else
-                set(gca, 'YScale', 'linear')
+                xlim([0 fmax]);
+                xlabel(['Frequency (cycles/',num2str(unit),')']) 
+                title([num2str(nw),'\pi-MTM-Robust-AR(1): \rho = ',num2str(rhoM),'. S0 = ',num2str(s0M)])
+                set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'pi MTM'])
+                set(gca,'XMinorTick','on','YMinorTick','on')
+                set(gcf,'Color', 'white')
+                if handles.linlogY == 1;
+                    set(gca, 'YScale', 'log')
+                else
+                    set(gca, 'YScale', 'linear')
+                end
+                if handles.logfreq == 1
+                    set(gca,'xscale','log')
+                end
             end
-            if handles.logfreq == 1
-                set(gca,'xscale','log')
-            end
-            figdata = gcf;
+            
         else
             return
         end
@@ -989,9 +1041,9 @@ if strcmp(method,'Multi-taper method')
     end
         fd1=w/(2*pi*dt);
         % Plot figure MTM handles.checkbox_robustAR1_v = checkbox_robustAR1;
-    if and(handles.checkbox_robustAR1_v == 0,handles.checkbox_ar1_v == 0)
-        figdata = figure;  
-        figHandle = gcf;
+        % neither robust AR1 nor conventional AR1
+    if and(get(handles.checkbox_ar1_check,'value') == 0, get(handles.checkbox_robust,'value') == 0)
+        figdata = figure;
         set(gcf,'Color', 'white')
         plot(fd1,po,'LineWidth',1); 
         line([0.7*fmax, 0.7*fmax+bw],[0.8*max(po), 0.8*max(po)],'Color','r')
@@ -1009,6 +1061,9 @@ if strcmp(method,'Multi-taper method')
         end
         if handles.logfreq == 1
             set(gca,'xscale','log')
+        end
+        if plot_x_period
+            update_spectral_x_period_mtm
         end
     end 
 
@@ -1056,12 +1111,14 @@ if strcmp(method,'Multi-taper method')
         plot(fd,tabtchi99,'b-.','LineWidth',1);
         plot(fd,tabtchi999,'g--','LineWidth',1);
         xlim([0 fmax]);
+        xlabel(['Frequency (cycles/',num2str(unit),')'])
+        ylabel('Power ')
         title([num2str(nw),'\pi MTM classic AR1',' ','; Sampling rate = ',num2str(dt),' ', unit])
         legend('Power','AR1','90%','95%','99%','99.9%')
         step = 5.5;
         waitbar(step / steps)
         delete(hwaitbar)
-        if handles.linlogY == 1;
+        if handles.linlogY == 1
             set(gca, 'YScale', 'log')
         else
             set(gca, 'YScale', 'linear')
@@ -1069,40 +1126,69 @@ if strcmp(method,'Multi-taper method')
         if handles.logfreq == 1
             set(gca,'xscale','log')
         end
+        
+        if plot_x_period
+            update_spectral_x_period_mtm
+        end
     else
         figdata = gcf;
-    end  
+    end 
+    
     if handles.check_ftest_value
-        [freq,ftest,fsig,Amp,Faz,Sig,Noi,dof,wt]=ftestmtmML(data,nw,padtimes,1);
-        subplot(3,1,1); xlim([0 fmax])
-        subplot(3,1,2); xlim([0 fmax])
-        subplot(3,1,3); xlim([0 fmax])
-        colordef white;
-        set(gcf,'units','norm') % set location
-        set(gcf,'position',[0.0,0.05,0.45,0.45])
+        if plot_x_period
+            update_spectral_x_period_mtm
+        else
+            [freq,ftest,fsig,Amp,Faz,Sig,Noi,dof,wt]=ftestmtmML(data,nw,padtimes,1);
+            subplot(3,1,1); xlim([0 fmax])
+            subplot(3,1,2); xlim([0 fmax])
+            subplot(3,1,3); xlim([0 fmax])
+            colordef white;
+            set(gcf,'units','norm') % set location
+            set(gcf,'position',[0.0,0.05,0.45,0.45])
+        end
     end
+    
 elseif strcmp(method,'Lomb-Scargle spectrum')
     pfa = [50 10 1 0.01]/100;
     pd = 1 - pfa;
     timex = timex + abs(min(timex));
     %[po,fd1,pth] = plomb(datax,timex,fmax,'normalized','Pd',pd);
     [po,fd1,pth] = plomb(datax,timex,fmax,'Pd',pd);
+    if plot_x_period
+        pt1 = 1./fd1;
+    end
     figdata = figure;
+    
     colordef white;
-    if handles.checkbox_ar1_v == 1
-        plot(fd1,po,fd1,pth*ones(size(fd1')),'LineWidth',1); 
-        text(0.3*fmax*[1 1 1 1],pth-.5,[repmat('P_{fa} = ',[4 1]) num2str(pfa')])
+    if plot_x_period
+        if handles.checkbox_ar1_v == 1
+            plot(pt1,po,pt1,pth*ones(size(pt1')),'LineWidth',1); 
+            text(10*(1/fmax)*[1 1 1 1],pth-.5,[repmat('P_{fa} = ',[4 1]) num2str(pfa')])
+        else
+            plot(pt1,po,'LineWidth',1); 
+        end
+        xlabel(['Period (',num2str(unit),')']) 
+        xlim([1/fmax, pt1(3)]);
+        set(gca, 'XDir','reverse')
     else
-        plot(fd1,po,'LineWidth',1); 
+        
+        if handles.checkbox_ar1_v == 1
+            plot(fd1,po,fd1,pth*ones(size(fd1')),'LineWidth',1); 
+            text(0.3*fmax*[1 1 1 1],pth-.5,[repmat('P_{fa} = ',[4 1]) num2str(pfa')])
+        else
+            plot(fd1,po,'LineWidth',1); 
+        end
+
+        xlabel(['Frequency (cycles/',num2str(unit),')']) 
+        xlim([0 fmax]);
     end
     
-    xlabel(['Frequency (cycles/',num2str(unit),')']) 
     ylabel('Power ')
     title(['Lomb-Scargle spectrum; Sampling rate = ',num2str(dt),' ', unit])
     set(gcf,'Name',[dat_name,ext,': Lomb-Scargle spectrum'])
     set(gca,'XMinorTick','on','YMinorTick','on')
-    xlim([0 fmax]);
-    if handles.linlogY == 1;
+    
+    if handles.linlogY == 1
         set(gca, 'YScale', 'log')
     else
         set(gca, 'YScale', 'linear')
@@ -1124,13 +1210,52 @@ elseif  strcmp(method,'Periodogram')
     end
     figdata = figure;  
     set(gcf,'Color', 'white')
-    plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
-    xlabel(['Frequency (cycles/',num2str(unit),')']) 
+    
+    if plot_x_period
+        pt1 = 1./fd1;
+        plot(pt1(2:end),po(2:end),'k-','LineWidth',1);
+        xlabel(['Period (',num2str(unit),')']) 
+        xlim([1/fmax, pt1(3)]);
+        set(gca, 'XDir','reverse')
+        if handles.checkbox_ar1_v == 1
+            [theored]=theoredar1ML(datax,fd1,mean(po),dt);
+            tabtchired90 = theored * chi2inv(90/100,2)/2;
+            tabtchired95 = theored * chi2inv(95/100,2)/2;
+            tabtchired99 = theored * chi2inv(99/100,2)/2;
+            tabtchired999 = theored * chi2inv(99.9/100,2)/2;
+            hold on
+            plot(pt1,theored,'k-','LineWidth',2)
+            plot(pt1,tabtchired90,'r-','LineWidth',1)
+            plot(pt1,tabtchired95,'r--','LineWidth',2)
+            plot(pt1,tabtchired99,'b-.','LineWidth',1)
+            plot(pt1,tabtchired999,'g--','LineWidth',1)
+            legend('Power','Mean','90%','95%','99%','99.9')
+        end
+    else
+        plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
+        xlabel(['Frequency (cycles/',num2str(unit),')']) 
+        xlim([0 fmax]);
+        if handles.checkbox_ar1_v == 1
+            [theored]=theoredar1ML(datax,fd1,mean(po),dt);
+            tabtchired90 = theored * chi2inv(90/100,2)/2;
+            tabtchired95 = theored * chi2inv(95/100,2)/2;
+            tabtchired99 = theored * chi2inv(99/100,2)/2;
+            tabtchired999 = theored * chi2inv(99.9/100,2)/2;
+            hold on
+            plot(fd1,theored,'k-','LineWidth',2)
+            plot(fd1,tabtchired90,'r-','LineWidth',1)
+            plot(fd1,tabtchired95,'r--','LineWidth',2)
+            plot(fd1,tabtchired99,'b-.','LineWidth',1)
+            plot(fd1,tabtchired999,'g--','LineWidth',1)
+            legend('Power','Mean','90%','95%','99%','99.9')
+        end
+    end
+    
     ylabel('Power ')
     title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit])
     set(gcf,'Name',[dat_name,ext,': periodogram'])
     set(gca,'XMinorTick','on','YMinorTick','on')
-    xlim([0 fmax]);
+    
     if handles.linlogY == 1;
         set(gca, 'YScale', 'log')
     else
@@ -1139,20 +1264,8 @@ elseif  strcmp(method,'Periodogram')
     if handles.logfreq == 1
         set(gca,'xscale','log')
     end
-    if handles.checkbox_ar1_v == 1
-        [theored]=theoredar1ML(datax,fd1,mean(po),dt);
-        tabtchired90 = theored * chi2inv(90/100,2)/2;
-        tabtchired95 = theored * chi2inv(95/100,2)/2;
-        tabtchired99 = theored * chi2inv(99/100,2)/2;
-        tabtchired999 = theored * chi2inv(99.9/100,2)/2;
-        hold on
-        plot(fd1,theored,'k-','LineWidth',2)
-        plot(fd1,tabtchired90,'r-','LineWidth',1)
-        plot(fd1,tabtchired95,'r--','LineWidth',2)
-        plot(fd1,tabtchired99,'b-.','LineWidth',1)
-        plot(fd1,tabtchired999,'g--','LineWidth',1)
-        legend('Power','Mean','90%','95%','99%','99.9')
-    end
+    
+    
 else
 end
 % refresh AC main window
@@ -1224,7 +1337,6 @@ function edit7_Callback(hObject, eventdata, handles)
 handles.timebandwidth = str2num( get(handles.edit7,'String') );
 guidata(hObject, handles);
 
-
 % --- Executes during object creation, after setting all properties.
 function edit7_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to edit7 (see GCBO)
@@ -1246,4 +1358,19 @@ function check_ftest_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of check_ftest
 handles.check_ftest_value = get(hObject,'Value');
+guidata(hObject, handles);
+
+
+% --- Executes on button press in checkbox8.
+function checkbox8_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox8 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox8
+if get(hObject,'Value')
+    set(handles.checkbox6, 'value', 1)
+    handles.logfreq = 1;
+else
+end
 guidata(hObject, handles);
