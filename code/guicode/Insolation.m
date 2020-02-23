@@ -64,67 +64,93 @@ set(h1,'FontUnits','points','FontSize',12);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',12);  % set as norm
 set(gcf,'Name','Acycle: Insolation')
-set(gcf,'position',[0.5,0.1,0.35,0.65])
+set(gcf,'position',[0.4,0.1,0.35,0.65])
 %type
 set(handles.uibuttongroup1,'position',[0.03,0.852,0.386,0.107])
 set(handles.radiobutton1,'position',[0.089,0.244,0.384,0.561])
+set(handles.radiobutton1,'value',1)
 set(handles.radiobutton2,'position',[0.502,0.244,0.399,0.561])
+set(handles.radiobutton2,'value',0)
 % solution
 set(handles.uibuttongroup2,'position',[0.46,0.852,0.48,0.107])
 set(handles.pop_solutions,'position',[0.083,0.075,0.888,0.675])
+set(handles.pop_solutions,'value',1)
 %time
 set(handles.uibuttongroup3,'position',[0.03,0.6,0.91,0.235])
 set(handles.text2,'position',[0.033,0.74,0.495,0.17])
 set(handles.text3,'position',[0.033,0.52,0.094,0.216])
 set(handles.edit1,'position',[0.143,0.52,0.179,0.216])
+set(handles.edit1,'string','1')
 set(handles.text5,'position',[0.51,0.558,0.089,0.216])
 set(handles.edit3,'position',[0.62,0.52,0.179,0.216])
+set(handles.edit3,'string','1')
 %
 set(handles.text4,'position',[0.033,0.244,0.054,0.216])
 set(handles.edit2,'position',[0.143,0.244,0.179,0.216])
+set(handles.edit2,'string','1000')
 set(handles.text6,'position',[0.439,0.244,0.161,0.216])
 set(handles.pop_unit,'position',[0.605,0.244,0.25,0.216])
+set(handles.pop_unit,'value',1)
 %
 set(handles.text19,'position',[0.033,0.033,0.296,0.15])
 set(handles.text20,'position',[0.324,0.033,0.133,0.15])
+set(handles.text20,'string','999')
 set(handles.text21,'position',[0.446,0.033,0.133,0.15])
 %parameters
 set(handles.uibuttongroup4,'position',[0.03,0.263,0.91,0.312])
 set(handles.text8,'position',[0.033,0.725,0.22,0.15])
 set(handles.edit_solconstant,'position',[0.26,0.725,0.129,0.15])
+set(handles.edit_solconstant,'string','1365')
 set(handles.text9,'position',[0.4,0.725,0.131,0.15])
 set(handles.radiobutton5,'position',[0.54,0.725,0.226,0.15])
+set(handles.radiobutton5,'value',1)
 set(handles.radiobutton6,'position',[0.789,0.725,0.208,0.15])
+set(handles.radiobutton6,'value',0)
 %
 set(handles.text11,'position',[0.033,0.465,0.22,0.15])
 set(handles.edit_dayi1,'position',[0.26,0.465,0.129,0.15])
+set(handles.edit_dayi1,'string','80')
 set(handles.text12,'position',[0.4,0.465,0.131,0.15])
 set(handles.pop_month1,'position',[0.54,0.465,0.26,0.15])
+set(handles.pop_month1,'value',3)
 set(handles.pop_days1,'position',[0.812,0.465,0.17,0.15])
+set(handles.pop_days1,'value',21)
 %
 set(handles.text13,'position',[0.033,0.2,0.22,0.15])
 set(handles.edit_dayi2,'position',[0.26,0.2,0.129,0.15])
+set(handles.edit_dayi2,'string','266')
+set(handles.edit_dayi2,'enable','off')
 set(handles.text14,'position',[0.4,0.2,0.131,0.15])
 set(handles.pop_month2,'position',[0.54,0.2,0.26,0.15])
+set(handles.pop_month2,'value',9)
+set(handles.pop_month2,'enable','off')
 set(handles.pop_days2,'position',[0.812,0.2,0.17,0.15])
+set(handles.pop_days2,'value',23)
+set(handles.pop_days2,'enable','off')
 %latitude
 set(handles.uibuttongroup5,'position',[0.03,0.085,0.91,0.172])
 set(handles.radiobutton3,'position',[0.033,0.521,0.3,0.3])
+set(handles.radiobutton3,'value',1)
 set(handles.text18,'position',[0.364,0.521,0.1,0.3])
 set(handles.edit7,'position',[0.47,0.521,0.13,0.3])
+set(handles.edit7,'string','65')
 set(handles.text15,'position',[0.63,0.521,0.3,0.3])
 %
 set(handles.radiobutton4,'position',[0.033,0.192,0.3,0.3])
+set(handles.radiobutton4,'value',0)
 set(handles.text17,'position',[0.364,0.192,0.1,0.3])
 set(handles.edit8,'position',[0.47,0.192,0.13,0.3])
+set(handles.edit8,'string','80')
+set(handles.edit8,'enable','off')
 set(handles.text16,'position',[0.63,0.192,0.1,0.3])
 set(handles.edit9,'position',[0.744,0.192,0.15,0.3])
+set(handles.edit9,'string','1')
+set(handles.edit9,'enable','off')
 %ok
 set(handles.push_OK,'position',[0.772,0.02,0.161,0.047])
 
 % Choose default command line output for Insolation
 handles.output = hObject;
-
 handles.type = 0; % 0 = daily; 1 = mean
 handles.author = 1; % 1= la04; 2 = la10a; 3 = la10b; 4 = la10c; 5 = la10d; 6 = BergerLoutre91
 handles.t1 = 1;   % starting time

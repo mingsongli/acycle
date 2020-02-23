@@ -30,21 +30,20 @@
 %   Jacques Laskar, Richard Zeebe (Astronomical solution)
 %   Eric Ruggieri (Bayesian Change Point)
 %   Jonathan Levine, Peter Huybers (Insolation)
-%   Nicolas R. Thibault (Padding)
 %   Matthias Sinnesael (Spectral Moments)
 %   Stephen Meyers (TimeOpt/eTimeOpt)
 %   Christopher Torrence, Gilbert Compo (Wavelet)
 %
 % Acknowledgment:
-%   Feng Cheng, Anne-Christine Da Silva, Hewei Duan, Yanan Fang, 
+%   Feng Cheng, Anne-Christine Da Silva, Hewei Duan, Zheng Gong, Yanan Fang, 
 %   Marco Franceschi, Daniel R. Franco, Xiaoni Hu, Dorothée Husson, 
-%   Arsenio Muñoz Jiménez, Lee R. Kump, Dongyang Liu, Kunyuan Ma, 
+%   Arsenio Muñoz Jiménez, Ilja Kocken, Lee R. Kump, Dongyang Liu, Kunyuan Ma, 
 %   Mathieu Martinez, James Ogg, Paul Olsen, Jeffrey Park, J. Fred Read,
-%   Chen Shen, Chuanyue Wang, Meng Wang, Xu Yao, Qiyan Zhang,
-%   Yang (Wendy) Zhang, Christian Zeeden
+%   Chen Shen, Victor A. Piedrahita Velez, Chuanyue Wang, Meng Wang, Xu Yao, 
+%   Qiyan Zhang, Yang (Wendy) Zhang, Christian Zeeden
 
 %**************************************************************************
-% Copyright (C) 2017-2019
+% Copyright (C) 2017-2020
 % This program is a free software; you can redistribute it and/or modify it
 % under the terms of the GNU GENERAL PUBLIC LICENSE as published by the 
 % Free Software Foundation < https://www.gnu.org/licenses/ >.

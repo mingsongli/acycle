@@ -84,8 +84,11 @@ end
 if axis_setting{1,5} < axis_setting{1,6}
     ylim([axis_setting{1,5} axis_setting{1,6}])
 end
-xlabel(handles.unit)
-ylabel('Value')
+%xlabel(handles.unit)
+xlabel(handles.xlabel)
+%ylabel('Value')
+ylabel(handles.ylabel)
+title(handles.title)
 set(gca,'XMinorTick','on','YMinorTick','on')
 
 %  settings for x-axis 1st row and y-axis 2nd row

@@ -22,7 +22,7 @@ function varargout = agescale(varargin)
 
 % Edit the above text to modify the response to help agescale
 
-% Last Modified by GUIDE v2.5 14-Jun-2017 22:14:18
+% Last Modified by GUIDE v2.5 23-Feb-2020 14:46:14
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -55,6 +55,7 @@ function agescale_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.acfigmain = varargin{1}.acfigmain;
 handles.listbox_acmain = varargin{1}.listbox_acmain;
 handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
+handles.unit = varargin{1}.unit;
 %
 % Choose default command line output for agescale
 handles.output = hObject;
@@ -74,6 +75,11 @@ set(handles.pushbutton3,'position',[0.1,0.84,0.06,0.06]) % set position
 set(handles.pushbutton4,'position',[0.485,0.732,0.06,0.06]) % set position
 set(handles.pushbutton7,'position',[0.485,0.527,0.06,0.06]) % set position
 set(handles.pushbutton8,'position',[0.465,0.114,0.1,0.06]) % set position
+
+set(handles.pushbutton11,'position',[0.465,0.366,0.11,0.06]) % set position
+set(handles.pushbutton12,'position',[0.465,0.293,0.11,0.06]) % set position
+set(handles.pushbutton13,'position',[0.465,0.221,0.11,0.06]) % set position
+
 set(handles.edit1,'position',[0.018,0.748,0.436,0.06]) % set position
 set(handles.edit2,'position',[0.58,0.738,0.4,0.06]) % set position
 set(handles.listbox1,'position',[0.018,0.114,0.436,0.634]) % set position
@@ -331,3 +337,257 @@ cd(pre_dirML); % return view dir
 figure(figagescale);
 figure(figdata); % return plot
 guidata(hObject,handles)
+
+
+% --- Executes on button press in pushbutton11.
+function pushbutton11_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton11 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+agemodelname = char(get(handles.edit2,'String'));
+tiepoints = load(agemodelname);
+x1 = min(tiepoints(:,1));  % depth
+x2 = max(tiepoints(:,1));  % depth
+y1 = min(tiepoints(:,2));  % time
+y2 = max(tiepoints(:,2));  % time
+
+figure('Position',[100 800 500 500],...
+  'Color',[1 1 1])
+axes('Position',[0.2 0.2 0.7 0.7],...
+  'XLim',[y1 y2],...
+  'YLim',[x1 x2],...
+  'YDir','Reverse',...
+  'Box','On',...
+  'FontSize',14)
+line(tiepoints(:,2),tiepoints(:,1),...
+  'LineWidth',1)
+xlabel('Age')
+ylabel(['Depth (',handles.unit,')'])
+set(gca,'XMinorTick','on','YMinorTick','on')
+title(['Age Model'])
+
+
+% --- Executes on button press in pushbutton12.
+function pushbutton12_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton12 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+agemodelname = char(get(handles.edit2,'String'));
+tiepoints = load(agemodelname);
+list_content = cellstr(get(handles.listbox2,'String')); % read contents of listbox 1 
+nrow = length(list_content);
+for i = 1:nrow
+    data_name = char(list_content(i,1));
+    data = load(data_name);
+    [~,dat_name,~] = fileparts(data_name);
+    [time,handles.sr] = depthtotime(data(:,1),tiepoints);
+    
+    t1 = min(time);  % time
+    t2 = max(time);  % time
+    y1 = min(data(:,2));  % value
+    y2 = max(data(:,2));  % value
+    d1 = min(data(:,1));  % value
+    d2 = max(data(:,1));  % value
+    
+    t = time; 
+    rec = data(:,2);
+
+    lenexp = fix(log10(t2-t1));  % exp
+    if lenexp >= 0 % length [1 10]
+        XTickStep = 0.05 * round(fix((t2-t1)/10^lenexp)) * 10^lenexp;
+        t1r = round(fix(t1/10^lenexp)) * 10^lenexp;
+        age = t1r:XTickStep:t2;
+        depthint = interp1(tiepoints(:,2),tiepoints(:,1),age,'linear','extrap');
+        depthintlabels = num2str(depthint,'%.0f\n');
+    else
+        XTickStep = (t2-t1)/20;
+        age = t1:XTickStep:t2;
+        depthint = interp1(tiepoints(:,2),tiepoints(:,1),age,'linear','extrap');
+        depthintlabels = num2str(depthint,'%.3f\n');
+    end
+    
+    %  display in a first diagram with two axes.
+    figure1 = figure('Position',[50 50 1000 400], 'Color',[1 1 1]) ;
+    ax(1) = axes('Position',[0.1 0.4 0.8 0.4],...
+      'Color','None',...
+      'XTick',age,...
+      'XLim',[t1 t2],...
+      'YLim',[y1 y2],...
+      'FontSize',14);
+    line1 = line(t,rec,...
+      'LineWidth',1);
+    xlabel(ax(1),'Age')
+    ylabel(ax(1),'Proxy Value')
+    title(ax(1),[dat_name,': Tuned'])
+    set(gca,'XMinorTick','on','YMinorTick','on')
+    ax(2) = axes('Position',[0.1 0.25 0.8 0.4],...
+      'Color','None',...
+      'XLim',[t1 t2],...
+      'XTickMode','Manual',...
+      'XTick',age,...
+      'XTickLabels',depthintlabels,...
+      'YLim',[y1 y2],...
+      'YTick',[],...
+      'YColor','None',...
+      'FontSize',14);
+    xlabel(ax(2),['Depth (',handles.unit,')'])
+    set(gca,'XMinorTick','on','YMinorTick','on')
+    
+    % Then we interpolate the  ages to an evenly-spaced depth scale
+    
+    lenexp = fix(log10(d2-d1));  % exp
+    if lenexp >= 0 % length [1 10]
+        XTickStep = 0.05 * round(fix((d2-d1)/10^lenexp)) * 10^lenexp;
+        if d1>=0
+            d1r = round(fix(d1/10^lenexp)) * 10^lenexp;
+        else
+            d1r = round(d1);
+        end
+        depth = d1r:XTickStep:d2;
+        ageint = interp1(depthint,age,depth,'linear','extrap');
+        depthlabels = num2str(depth,'%.0f\n');
+    else
+        XTickStep = (d2-d1)/20;
+        depth = d1:XTickStep:d2;
+        ageint = interp1(depthint,age,depth,'linear','extrap');
+        depthlabels = num2str(depth,'%.3f\n');
+    end
+
+    figure1 = figure('Position',[50 500 1000 400],...
+      'Color',[1 1 1]);
+    ax(1) = axes('Position',[0.1 0.4 0.8 0.4],...
+      'Color','None',...
+      'XLim',[t1 t2],...
+      'XTick',age,...
+      'YLim',[y1 y2],...
+      'FontSize',14);
+    line1 = line(t,rec,...
+      'LineWidth',1);
+    xlabel(ax(1),'Age')
+    ylabel(ax(1),'Proxy Value')
+    title(ax(1),[dat_name,': Tuned'])
+    set(gca,'XMinorTick','on','YMinorTick','on')
+    ax(2) = axes('Position',[0.1 0.25 0.8 0.4],...
+      'Color','None',...
+      'XLim',[t1 t2],...
+      'XTickMode','Manual',...
+      'XTick',ageint,...
+      'XTickLabels',depthlabels,...
+      'YLim',[y1 y2],...
+      'YTick',[],...
+      'YColor','None',...
+      'FontSize',14);
+    xlabel(ax(2),['Depth (',handles.unit,')'])
+    set(gca,'XMinorTick','on','YMinorTick','on')
+end
+
+% --- Executes on button press in pushbutton13.
+function pushbutton13_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton13 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+agemodelname = char(get(handles.edit2,'String'));
+tiepoints = load(agemodelname);
+list_content = cellstr(get(handles.listbox2,'String')); % read contents of listbox 1 
+nrow = length(list_content);
+for i = 1:nrow
+    data_name = char(list_content(i,1));
+    data = load(data_name);
+    [~,dat_name,~] = fileparts(data_name);
+    [time,handles.sr] = depthtotime(data(:,1),tiepoints);
+    
+    t1 = min(time);  % time
+    t2 = max(time);  % time
+    y1 = min(data(:,2));  % value
+    y2 = max(data(:,2));  % value
+    d1 = min(data(:,1));  % value
+    d2 = max(data(:,1));  % value
+    
+    t = time;
+    rec = data(:,2);
+    
+    lenexp = fix(log10(d2-d1));  % exp
+    if lenexp >= 0 % length [1 10]
+        XTickStep = 0.1 * round(fix((d2-d1)/10^lenexp)) * 10^lenexp;
+        if d1>=0
+            d1r = round(fix(d1/10^lenexp)) * 10^lenexp;
+        else
+            d1r = round(d1);
+        end
+        XTickListDepth = d1r:XTickStep:d2;
+        timeint = interp1(tiepoints(:,1),tiepoints(:,2),XTickListDepth,'linear','extrap');
+        timeintlabels = num2str(timeint,'%.0f\n');
+    else
+        XTickStep = (d2-d1)/20;
+        XTickListDepth = d1:XTickStep:d2;
+        timeint = interp1(tiepoints(:,1),tiepoints(:,2),XTickListDepth,'linear','extrap');
+        timeintlabels = num2str(timeint,'%3.3f\n');
+    end
+    figure1 = figure('Position',[50 50 1000 400], 'Color',[1 1 1]) ;
+    ax(1) = axes('Position',[0.1 0.4 0.8 0.4],...
+      'Color','None',...
+      'XTick',XTickListDepth,...
+      'XLim',[d1 d2],...
+      'YLim',[y1 y2],...
+      'FontSize',14);
+    line1 = line(data(:,1),rec,...
+      'LineWidth',1);
+    xlabel(ax(1),['Depth (',handles.unit,')'])
+    ylabel(ax(1),'Proxy Value')
+    title(ax(1),[dat_name,': Depth'])
+    set(gca,'XMinorTick','on','YMinorTick','on')
+    ax(2) = axes('Position',[0.1 0.25 0.8 0.4],...
+      'Color','None',...
+      'XLim',[d1 d2],...
+      'XTickMode','Manual',...
+      'XTick',XTickListDepth,...
+      'XTickLabels',timeintlabels,...
+      'YLim',[y1 y2],...
+      'YTick',[],...
+      'YColor','None',...
+      'FontSize',14);
+    xlabel(ax(2),'Age')
+    set(gca,'XMinorTick','on','YMinorTick','on')
+    
+    % Then we interpolate the  ages to an evenly-spaced depth scale
+    lenexp = fix(log10(t2-t1));  % exp
+    if lenexp >= 0 % length [1 10]
+        XTickStep = 0.05 * round(fix((t2-t1)/10^lenexp)) * 10^lenexp;
+        t1r = round(fix(t1/10^lenexp)) * 10^lenexp;
+        age = t1r:XTickStep:t2;
+        depthint = interp1(tiepoints(:,2),tiepoints(:,1),age,'linear','extrap');
+        depthintlabels = num2str(age,'%.0f\n');
+    else
+        XTickStep = (t2-t1)/20;
+        age = t1:XTickStep:t2;
+        depthint = interp1(tiepoints(:,2),tiepoints(:,1),age,'linear','extrap');
+        depthintlabels = num2str(age,'%.3f\n');
+    end
+
+    figure1 = figure('Position',[50 500 1000 400],'Color',[1 1 1]);
+    ax(1) = axes('Position',[0.1 0.4 0.8 0.4],...
+      'Color','None',...
+      'XTick',XTickListDepth,...
+      'XLim',[d1 d2],...
+      'YLim',[y1 y2],...
+      'FontSize',14);
+    line1 = line(data(:,1),rec,...
+      'LineWidth',1);
+    xlabel(ax(1),['Depth (',handles.unit,')'])
+    ylabel(ax(1),'Proxy Value')
+    title(ax(1),[dat_name,': Depth'])
+    set(gca,'XMinorTick','on','YMinorTick','on')
+    ax(2) = axes('Position',[0.1 0.25 0.8 0.4],...
+      'Color','None',...
+      'XLim',[d1 d2],...
+      'XTickMode','Manual',...
+      'XTick',depthint,...
+      'XTickLabels',depthintlabels,...
+      'YLim',[y1 y2],...
+      'YTick',[],...
+      'YColor','None',...
+      'FontSize',14);
+    xlabel(ax(2),'Age')
+    set(gca,'XMinorTick','on','YMinorTick','on')
+end

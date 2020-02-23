@@ -97,23 +97,37 @@ if abs((max(diffx)-min(diffx))/2) > 10*eps('single')
 end
 % convential rho1 (lag-1 autocorrelation coefficient)
 [rho]=rhoAR1ML(dat(:,2));
+
+% robust AR1: rho1
 dt = median(diff(dat(:,1)));
+[po,w]=periodogram(dat(:,2));
+fd1=w/(2*pi*dt);
+poc = cumsum(po); % cumsum of power
+pocnorm = 100*poc/max(poc); % normalized
+% the first elements at which the cumulated power exceed 99%
+poc1 = find( pocnorm > 99, 1);
+% if the frequency detected is smaller than 85% of nyquist frequency
+% suggest a new input max freq.
+if fd1(poc1)/fd1(end) <= 0.85
+    ValidNyqFreq = fd1(poc1);
+else
+    ValidNyqFreq = fd1(end);
+end
+% mean power of spectrum
+fmax = ValidNyqFreq;
 % Nyquist frequency
 fn = 1/(2*dt);
-[pxx,f] = pmtm(dat(:,2),2);
+% Multi-taper method power spectrum
+[pxx,f] = pmtm(dat(:,2),2,length(dat(:,2)));
+ft = f/pi*fn;
+ft = ft(ft<=fmax);
+pxx = pxx(ft<=fmax);
 % median-smoothing data numbers
 smoothn = round(0.2 * length(pxx));
 % median-smoothing
-pxxsmooth = moveMedian(pxx,smoothn);
-% true frequencies
-ft = f/pi*fn;
-% mean power of spectrum
+pxxsmooth = moveMedian(pxx,smoothn);  % valid data; for rho evaluation
 s0 = mean(pxxsmooth);
-% Red-noise background fit
-% Get the best fit values of rho and s0 (see eq. (2) in Mann and Lees,
-% 1996).
-% Here we use a naive grid search method.
-[rhoM, s0M] = minirhos0(s0,fn,ft,pxxsmooth,2);
+[rhoM, ~] = minirhos0(s0,fmax,ft,pxxsmooth,2);
 
 set(handles.edit1,'String',num2str(rho))
 set(handles.edit2,'String',num2str(rhoM))
@@ -231,10 +245,12 @@ if get(handles.radiobutton1,'Value')
 end
 if get(handles.radiobutton2,'Value')
     rho1 = handles.rhoM;
+  
 end
 if get(handles.radiobutton3,'Value')
     rho1 = str2double( get(handles.edit3,'String'));
 end
+
 data = handles.dat;
 datp = prewhitening(data,rho1);
 % plot data

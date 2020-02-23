@@ -90,7 +90,14 @@ set(handles.push_axis_log,'position',[0.677,0.271,0.095,0.088])
 set(handles.pushbutton_flipxy,'position',[0.779,0.271,0.122,0.088])
 set(handles.push_swap,'position',[0.907,0.271,0.084,0.088])
 
-set(handles.plot_done,'position',[0.035,0.056,0.294,0.143])
+set(handles.text11,'position',[0.03,0.14,0.15,0.088])
+set(handles.edit4,'position',[0.03,0.05,0.15,0.088])
+set(handles.text12,'position',[0.19,0.14,0.15,0.088])
+set(handles.edit5,'position',[0.19,0.05,0.15,0.088])
+set(handles.text13,'position',[0.35,0.14,0.45,0.088])
+set(handles.edit6,'position',[0.35,0.05,0.45,0.088])
+
+set(handles.plot_done,'position',[0.82,0.056,0.15,0.143])
 
 % tooltip
 s_push_axis = sprintf('Click to set Y (or X) axis');
@@ -116,10 +123,16 @@ plot_s = varargin{1}.plot_s;
 handles.plot_s = plot_s;
 handles.nplot = varargin{1}.nplot;
 handles.unit = varargin{1}.unit;
+set(handles.edit4,'string',handles.unit)
+set(handles.edit5,'string','value')
+
 % Choose default command line output for PlotAdv
 handles.output = hObject;
 handles.setseq = 1; % setting sequence, default from the first one
 handles.swapxy = 0; 
+colordef = [0 0 0]; % default color for the first line
+colordef_list = [1 0 0; 0 0 1; 0 1 0; 0 1 1; 1 0 1; 1 1 0]; 
+% default color styles for the first 2-7 lines
 
 % Settings for plot: 
 %   1 = line plots, 
@@ -132,11 +145,8 @@ handles.swapxy = 0;
 %   8 = maker show?, 
 %   9 = marker edge color, 
 %   10 = marker edge show?
-colordef = [0 0 0]; % default color for 1st line
-colordef_list = [1 0 0; 0 0 1; 0 1 0; 0 1 1; 1 0 1; 1 1 0]; % default color for 2-7 lines
-
-%                 1  2   3      4      5   6      7     8     9    10
-matrix_setting = {1, 1, 1.0, colordef, 3, 6.0, colordef, 1, colordef, 0};
+%                 1  2   3      4      5   6      7      8     9      10
+matrix_setting = {1, 1, 1.0, colordef, 1, 6.0, colordef, 1, colordef, 0};
 matrix_set = repmat(matrix_setting,handles.nplot,1);
 
 if handles.nplot > 1
@@ -152,6 +162,7 @@ if handles.nplot > 1
         end
     end
 end
+
 handles.matrix_set = matrix_set;
 
 % settings for x-axis 1st row and y-axis 2nd row
@@ -172,31 +183,32 @@ pop_linesize_ii = getlisti(pop_linesize_list,num2str(matrix_setting{3},'%2.1f'))
 pop_markersize_ii = getlisti(pop_markersize_list,num2str(matrix_setting{6},'%2.1f'));
 %
 for i = 1: handles.nplot
-        plot_no = plot_s{i};
-        plot_no = strrep2(plot_no, '<HTML><FONT color="blue">', '</FONT></HTML>');
-        if isdir(plot_no)
-            return
-        end
-        [~,plotseries,ext] = fileparts(plot_no);
-        handles.plot_list{i} = plotseries;
-        handles.plot_list_ext{i} = [plotseries,ext];
-        try dat = load(plot_no);
-        catch
-            errordlg([[plotseries,ext],' Error! try "Math -> Sort/Unique/Delete-empty" first'],'Data Error')
-        end
-        dat = dat(~any(isnan(dat),2),:);
-        if i == 1
-            axis_setting{1,1} = min(dat(:,1));
-            axis_setting{1,2} = max(dat(:,1));
-            axis_setting{1,5} = min(dat(:,2));
-            axis_setting{1,6} = max(dat(:,2));
-        end
-        % update plot value
-        axis_setting{1,1} = min(min(dat(:,1)), axis_setting{1,1});
-        axis_setting{1,2} = max(max(dat(:,1)), axis_setting{1,2});
-        axis_setting{1,5} = min(min(dat(:,2)), axis_setting{1,5});
-        axis_setting{1,6} = max(max(dat(:,2)), axis_setting{1,6});
+    plot_no = plot_s{i};
+    plot_no = strrep2(plot_no, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    if isdir(plot_no)
+        return
+    end
+    [~,plotseries,ext] = fileparts(plot_no);
+    handles.plot_list{i} = plotseries;
+    handles.plot_list_ext{i} = [plotseries,ext];
+    try dat = load(plot_no);
+    catch
+        errordlg([[plotseries,ext],' Error! try "Math -> Sort/Unique/Delete-empty" first'],'Data Error')
+    end
+    dat = dat(~any(isnan(dat),2),:);
+    if i == 1
+        axis_setting{1,1} = min(dat(:,1));
+        axis_setting{1,2} = max(dat(:,1));
+        axis_setting{1,5} = min(dat(:,2));
+        axis_setting{1,6} = max(dat(:,2));
+    end
+    % update plot value
+    axis_setting{1,1} = min(min(dat(:,1)), axis_setting{1,1});
+    axis_setting{1,2} = max(max(dat(:,1)), axis_setting{1,2});
+    axis_setting{1,5} = min(min(dat(:,2)), axis_setting{1,5});
+    axis_setting{1,6} = max(max(dat(:,2)), axis_setting{1,6});
 end
+set(handles.edit6,'string',plotseries)
 %axis_setting
 set(handles.pop_data,'String', handles.plot_list_ext);
 set(handles.pop_linestyle, 'Value', matrix_setting{2});
@@ -217,9 +229,16 @@ handles.pop_linesize_list = pop_linesize_list;
 handles.pop_markerstyle_list = pop_markerstyle_list;
 handles.pop_markersize_list = pop_markersize_list;
 handles.axis_setting = axis_setting;
+handles.xlabel = get(handles.edit4,'String');
+handles.ylabel = get(handles.edit5,'String');
+handles.title  = get(handles.edit6,'String');
 % Update handles structure
 handles.plotproGUIfig = gcf;
 guidata(hObject, handles);
+try figure(handles.plotprofig)
+    plotpro_plot_done;
+catch
+end
 %end
 % UIWAIT makes PlotAdv wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
@@ -611,7 +630,6 @@ set(plotprofig,'units','norm') % set location
 set(plotprofig,'position',[0.03,0.4,0.42,0.45]) % set position
 set(plotprofig,'Name', 'Acycle: Plot Pro')
 
-
 matrix_set = handles.matrix_set;
 axis_setting = handles.axis_setting;
 flipxy = handles.flipxy;
@@ -695,8 +713,9 @@ end
 if axis_setting{1,5} < axis_setting{1,6}
     ylim([axis_setting{1,5} axis_setting{1,6}])
 end
-xlabel(handles.unit)
-ylabel('Value')
+xlabel(handles.xlabel)
+ylabel(handles.ylabel)
+title(handles.title)
 set(gca,'XMinorTick','on','YMinorTick','on')
 
 %  settings for x-axis 1st row and y-axis 2nd row
@@ -1078,6 +1097,64 @@ function checkbox_basevalue_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox_basevalue
 handles.basevalue_check = get(hObject,'Value');
+% Update handles structure
+guidata(hObject, handles);
+try figure(handles.plotprofig)
+    plotpro_plot_done;
+catch
+end
+
+% --- Executes during object creation, after setting all properties.
+function edit4_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_basevalue (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in checkbox_basevalue.
+function edit4_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_basevalue (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_basevalue
+handles.xlabel = get(hObject,'String');
+% Update handles structure
+guidata(hObject, handles);
+try figure(handles.plotprofig)
+    plotpro_plot_done;
+catch
+end
+
+% --- Executes on button press in checkbox_basevalue.
+function edit5_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_basevalue (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_basevalue
+handles.ylabel = get(hObject,'String');
+% Update handles structure
+guidata(hObject, handles);
+try figure(handles.plotprofig)
+    plotpro_plot_done;
+catch
+end
+
+% --- Executes on button press in checkbox_basevalue.
+function edit6_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_basevalue (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_basevalue
+handles.title = get(hObject,'String');
 % Update handles structure
 guidata(hObject, handles);
 try figure(handles.plotprofig)

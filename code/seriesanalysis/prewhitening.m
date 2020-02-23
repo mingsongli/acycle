@@ -13,12 +13,10 @@ function datp = prewhitening(data,rho)
 %  By Mingsong Li
 %   Penn State, Sept. 17, 2019
 %
-if nargin < 2
-    [rho]=rhoAR1ML(data(:,2));
-end
-% if or(rho > 1, rho<-1)
-%     msgbox('AR1 may be within [-1,1]')
-% end
+%if nargin < 2
+%    [rho]=rhoAR1ML(data(:,2));
+%end
+
 datax = data(:,1);
 datay = data(:,2);
 
