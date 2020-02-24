@@ -59,6 +59,17 @@
     <img src="https://github.com/mingsongli/acycleFig/blob/master/github-icon-for-resume-14.jpg" alt="GitHub" title="Download Acycle in GitHub" width="88" height="88">
 </a>
 
+#### Apple's iCloud (BEST for Users in Mainland China):
+
+Acycle v2.1 Mac Green version: https://www.icloud.com/iclouddrive/0RbIzNhREBi9LoL--3LSmwVtw#Acycle2.1-mac-green
+
+Acycle v2.1 Win Green version: https://www.icloud.com/iclouddrive/0GmE4-bZZU2FDfZixMbNOMNMg#Acycle2.1-Win-green
+
+Acycle v2.1 Win Installer:     https://www.icloud.com/iclouddrive/0IXrU3c5Oe4H5eEsRI7TB5OTA#Acycle2.1-Win-Installer
+
+Acycle v2.1 MatLab version:    https://www.icloud.com/iclouddrive/07FM0ksPsXr9JmeovrPd3afAA#Acycle2.1-MatLab
+
+
 ---
 ### Contact
 <a href="https://mingsongli.com/">
