@@ -331,7 +331,7 @@ if strcmp(method,'Multi-taper method')
             if plot_x_period
                 update_spectral_x_period_mtm
             else
-                title([dat_name,'-',num2str(nw),'\pi-MTM-Robust-AR1: \rho = ',num2str(rhoM),'. S0 =',num2str(s0M)], 'Interpreter', 'none')
+                title([dat_name,'-',num2str(nw),'\pi-MTM-Robust-AR1: \rho = ',num2str(rhoM),'. S0 =',num2str(s0M)])
                 xlabel(['Frequency (cycles/',num2str(unit),')']) 
                 set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'pi MTM'])
                 set(gca,'XMinorTick','on','YMinorTick','on')
@@ -369,9 +369,17 @@ if strcmp(method,'Multi-taper method')
     
 
     if padtimes > 1
-        [po,w]=pmtm(datax,nw,nzeropad);
+        if nw == 1
+            [po,w]=pmtm(datax,nw,nzeropad,'DropLastTaper',false);
+        else
+            [po,w]=pmtm(datax,nw,nzeropad);
+        end
     else 
-        [po,w]=pmtm(datax,nw);
+        if nw == 1
+            [po,w]=pmtm(datax,nw,'DropLastTaper',false);
+        else
+            [po,w]=pmtm(datax,nw);
+        end
     end
     fd1=w/(2*pi*dt);
     % Plot figure MTM
@@ -388,7 +396,7 @@ if strcmp(method,'Multi-taper method')
             xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
             ylabel('Power ')
             legend('Power','bw')
-            title([num2str(nw),'\pi MTM method',' ','; Sampling rate = ',num2str(dt),' ', unit], 'Interpreter', 'none')
+            title([num2str(nw),'\pi MTM method',' ','; Sampling rate = ',num2str(dt),' ', unit])
             set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'pi MTM'])
             xlim([0 fmax]);
             set(gca,'XMinorTick','on','YMinorTick','on')
@@ -438,7 +446,7 @@ if strcmp(method,'Multi-taper method')
             step = 2.5;
             waitbar(step / steps)
             [fd,po,theored,tabtchi90,tabtchi95,tabtchi99,tabtchi999]=redconftabtchi(datax,nw,dt,nzeropad,2);
-
+            rho = rhoAR1(datax);
     step = 4.5;
         waitbar(step / steps)
             figHandle = figure;
@@ -455,7 +463,7 @@ if strcmp(method,'Multi-taper method')
             xlim([0 fmax]);
             xlabel(['Frequency (cycles/',num2str(unit),')']) 
             ylabel('Power ')
-            title([num2str(nw),'\pi MTM classic AR1',' ','; Sampling rate = ',num2str(dt),' ', unit], 'Interpreter', 'none')
+            title([num2str(nw),'\pi MTM classic AR1: \rho = ',num2str(rho),'; Sampling rate = ',num2str(dt),' ', unit])
     step = 5.5;
         waitbar(step / steps)
         delete(hwaitbar)
@@ -605,10 +613,6 @@ elseif  strcmp(method,'Periodogram')
         tabtchired95 = theored * chi2inv(95/100,2)/2;
         tabtchired99 = theored * chi2inv(99/100,2)/2;
         tabtchired999 = theored * chi2inv(99.9/100,2)/2;
-%         tabtchired90 = theored * 2*gammaincinv(90/100,2)/(2*2);
-%         tabtchired95 = theored * 2*gammaincinv(95/100,2)/(2*2);
-%         tabtchired99 = theored * 2*gammaincinv(99/100,2)/(2*2);
-%         tabtchired999 = theored * 2*gammaincinv(99.9/100,2)/(2*2);
         hold on
         plot(fd1,theored,'k-','LineWidth',2)
         plot(fd1,tabtchired90,'r-','LineWidth',1)
@@ -1035,9 +1039,17 @@ if strcmp(method,'Multi-taper method')
     
     
     if padtimes > 1
-        [po,w]=pmtm(datax,nw,nzeropad);
-    else 
-        [po,w]=pmtm(datax,nw);
+        if nw == 1
+            [po,w]=pmtm(datax,nw,nzeropad,'DropLastTaper',false);
+        else
+            [po,w]=pmtm(datax,nw,nzeropad);
+        end
+    else
+        if nw == 1
+            [po,w]=pmtm(datax,nw,'DropLastTaper',false);
+        else
+            [po,w]=pmtm(datax,nw);
+        end
     end
         fd1=w/(2*pi*dt);
         % Plot figure MTM handles.checkbox_robustAR1_v = checkbox_robustAR1;
@@ -1099,6 +1111,7 @@ if strcmp(method,'Multi-taper method')
         step = 2.5;
         waitbar(step / steps)
         [fd,po,theored,tabtchi90,tabtchi95,tabtchi99,tabtchi999]=redconftabtchi(datax,nw,dt,nzeropad,2);
+        rho = rhoAR1(datax);
         step = 4.5;
         waitbar(step / steps)
         figdata = figure;  
@@ -1113,7 +1126,7 @@ if strcmp(method,'Multi-taper method')
         xlim([0 fmax]);
         xlabel(['Frequency (cycles/',num2str(unit),')'])
         ylabel('Power ')
-        title([num2str(nw),'\pi MTM classic AR1',' ','; Sampling rate = ',num2str(dt),' ', unit])
+        title([num2str(nw),'\pi MTM classic AR1: \rho = ',num2str(rho),'; Sampling rate = ',num2str(dt),' ', unit])
         legend('Power','AR1','90%','95%','99%','99.9%')
         step = 5.5;
         waitbar(step / steps)
