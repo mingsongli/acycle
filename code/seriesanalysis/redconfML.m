@@ -43,7 +43,7 @@ function [rhoM, s0M,redconfAR1,redconfML96]=redconfML(x,dt,nw,nfft,linlog,smooth
 %
 if nargin < 8
     plot = 1;
-    if nargin < 7;
+    if nargin < 7
         fmax = 1/(2*dt);
     if nargin < 6
         smoothwin = 0.2;
@@ -66,7 +66,12 @@ end
 % Nyquist frequency
 fn = 1/(2*dt);
 % Multi-taper method power spectrum
-[pxx,f] = pmtm(x,nw,nfft);
+if nw == 1
+    [pxx,f] = pmtm(x,nw,nfft,'DropLastTaper',false);
+else
+    [pxx,f] = pmtm(x,nw,nfft);
+end
+
 % true frequencies
 ft = f/pi*fn;
 pxx0 = pxx;
