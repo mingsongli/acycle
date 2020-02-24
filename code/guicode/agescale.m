@@ -289,6 +289,7 @@ function pushbutton8_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton8 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+pre_dirML = pwd;
 CDac_pwd; % cd working dir
 
 agemodelname = char(get(handles.edit2,'String'));
@@ -344,6 +345,9 @@ function pushbutton11_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton11 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+pre_dirML = pwd;
+CDac_pwd; % cd working dir
+
 agemodelname = char(get(handles.edit2,'String'));
 tiepoints = load(agemodelname);
 x1 = min(tiepoints(:,1));  % depth
@@ -365,13 +369,15 @@ xlabel('Age')
 ylabel(['Depth (',handles.unit,')'])
 set(gca,'XMinorTick','on','YMinorTick','on')
 title(['Age Model'])
-
+cd(pre_dirML); % return view dir
 
 % --- Executes on button press in pushbutton12.
 function pushbutton12_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton12 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+pre_dirML = pwd;
+CDac_pwd; % cd working dir
 agemodelname = char(get(handles.edit2,'String'));
 tiepoints = load(agemodelname);
 list_content = cellstr(get(handles.listbox2,'String')); % read contents of listbox 1 
@@ -480,13 +486,16 @@ for i = 1:nrow
     xlabel(ax(2),['Depth (',handles.unit,')'])
     set(gca,'XMinorTick','on','YMinorTick','on')
 end
+cd(pre_dirML); % return view dir
+
 
 % --- Executes on button press in pushbutton13.
 function pushbutton13_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton13 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+pre_dirML = pwd;
+CDac_pwd; % cd working dir
 agemodelname = char(get(handles.edit2,'String'));
 tiepoints = load(agemodelname);
 list_content = cellstr(get(handles.listbox2,'String')); % read contents of listbox 1 
@@ -591,3 +600,4 @@ for i = 1:nrow
     xlabel(ax(2),'Age')
     set(gca,'XMinorTick','on','YMinorTick','on')
 end
+cd(pre_dirML); % return view dir
