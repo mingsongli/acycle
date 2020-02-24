@@ -48,8 +48,8 @@ NOTE    : ask for MatLab RUNTIME 2019a
         Changing sampling rates of a target series using a given reference series
         Thank Daniel R. Franco!
 
-    14. Age Scale: change the name to "Age Scale | Tunning"
-        Preview model of tunning
+    14. Age Scale: change the name to "Age Scale | Tuning"
+        Preview model of tuning
         Displaying Sediment Records with both Age and Depth Axis with MATLAB
         Following code by MARTIN H. TRAUTH (Sept. 25, 2018)
         http://mres.uni-potsdam.de/index.php/2018/09/25/displaying-sediment-records-with-both-age-and-depth-axis-with-matlab/
