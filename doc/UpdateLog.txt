@@ -1,7 +1,19 @@
 - - - - - -    What's New   - - - - - -
+
 _______________________________________
 
-Version : ACycle_v2.1
+Version : ACycle_v2.1.1 [PREVIEW; NOT OFFICIALLY RELEASED]
+Date    : Feb 24, 2020 - 
+By      : Mingsong Li
+NOTE    : ask for MatLab RUNTIME 2019a
+
+    1. Pre-whitenning GUI: add "\rho" to the text.
+
+    2. Spectral Analysis GUI: show \rho value in the title; allow nw = 1 for MTM
+
+_______________________________________
+
+Version : ACycle_v2.1.0
 Date    : Sept 17, 2019 - Feb 23, 2020
 By      : Mingsong Li
 NOTE    : ask for MatLab RUNTIME 2019a
