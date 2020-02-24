@@ -45,6 +45,7 @@ NOTE    : ask for MatLab RUNTIME 2019a
 
     9. Update Users' Guide: required toolboxes; Acycle & macOS Catalina 10.15
         Acycle software won't include Users Guide PDF file to save space.
+	Thank Ilja Kocken for this suggestion.
 
     10. Insolation: Restore default values for GUIs of Insolation and Astronomical Solutions
 
@@ -55,6 +56,7 @@ NOTE    : ask for MatLab RUNTIME 2019a
         Taner filter GUI includes a roll-off rate (c) option
         Frequency responses of highpass, lowpass and bandstop can be shown also.
         Thank Linda Hinnov and Kunyuan Ma.
+	Thank Ilja Kocken for this suggestion.
     
     13. Add a new GUI: Interpolation Series, 
         Changing sampling rates of a target series using a given reference series
@@ -69,6 +71,18 @@ NOTE    : ask for MatLab RUNTIME 2019a
     15. ZB18a solution was included and ZB17 solutions were removed to reduce the size of Acycle.
         Find more at:
         https://www.soest.hawaii.edu/oceanography/faculty/zeebe_files/Astro.html
+
+    16. Fix a couple of bugs:
+	https://github.com/mingsongli/acycle/issues/8
+	https://github.com/mingsongli/acycle/issues/9
+	https://github.com/mingsongli/acycle/issues/10
+	https://github.com/mingsongli/acycle/issues/11
+	https://github.com/mingsongli/acycle/issues/12
+	https://github.com/mingsongli/acycle/issues/13
+	https://github.com/mingsongli/acycle/issues/14
+	https://github.com/mingsongli/acycle/issues/15
+	hank Ilja Kocken for these suggestions.
+
 _______________________________________
 
 Version : ACycle_v2.0
