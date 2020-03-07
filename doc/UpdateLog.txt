@@ -11,6 +11,7 @@ NOTE    : ask for MatLab RUNTIME 2019a
 
     2. Spectral Analysis GUI: show \rho value in the title; allow nw = 1 for MTM
 
+    3. Plot stand. + 2: fit plot content to the order of title 
 _______________________________________
 
 Version : ACycle_v2.1.0

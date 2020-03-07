@@ -109,7 +109,6 @@ set(gcf,'DockControls', 'off')
 set(gcf,'Color', 'white')
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
-set(gcf,'ResizeFcn',@Resize_clbk);
 
 %% push_up
 h_push_up = uicontrol('Style','pushbutton','Tag','push_up');%,'BackgroundColor','white','ForegroundColor','white');  % set style, Tag
@@ -291,16 +290,6 @@ function varargout = AC_OutputFcn(hObject, eventdata, handles)
 
 % Get default command line output from handles structure
 varargout{1} = handles.output;
-
-function Resize_clbk(hObject, eventdata)
-% if ismac
-%     try j = findobj(gcf,'Tag','push_up');           jEdit = findjobj(j); jEdit.Border = []; catch; end
-%     try j = findobj(gcf,'Tag','push_folder');       jEdit = findjobj(j); jEdit.Border = []; catch; end
-%     try j = findobj(gcf,'Tag','push_plot');         jEdit = findjobj(j); jEdit.Border = []; catch; end
-%     try j = findobj(gcf,'Tag','push_refresh');      jEdit = findjobj(j); jEdit.Border = []; catch; end
-%     try j = findobj(gcf,'Tag','push_robot');        jEdit = findjobj(j); jEdit.Border = []; catch; end
-%     try j = findobj(gcf,'Tag','push_openfolder');   jEdit = findjobj(j); jEdit.Border = []; catch; end
-% end
 
 
 function push_up_clbk(hObject, handles)
@@ -582,7 +571,7 @@ if handles.doubleclick
         else
             if strcmp(ext,'.fig')
                 try
-                    openfig(filename)
+                    openfig(filename);
                     set(gcf,'Name',[dat_name,ext])
                 catch
                 end
@@ -2179,7 +2168,7 @@ for i = 1:nplot
     end
 end
 
-if check == 1;
+if check == 1
     xlimit = zeros(nplot,2);
     figure;
     hold on;
@@ -2187,29 +2176,29 @@ if check == 1;
         plot_no = plot_selected(i);
             plot_filter_s = char(contents(plot_no));
             GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
-     try
-        fid = fopen(plot_filter_s);
-        data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
-        fclose(fid);
-        if iscell(data_ft)
-            dat = cell2mat(data_ft);
-        end
-    catch
-        dat = load(plot_filter_s);
-    end 
+         try
+            fid = fopen(plot_filter_s);
+            data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
+            fclose(fid);
+            if iscell(data_ft)
+                dat = cell2mat(data_ft);
+            end
+        catch
+            dat = load(plot_filter_s);
+         end 
             
-            dat = dat(~any(isnan(dat),2),:);
-            dat(:,2) = (dat(:,2)-mean(dat(:,2)))/std(dat(:,2));
-            plot(dat(:,1),2*(i-1)+dat(:,2),'LineWidth',1);
-            xlimit(i,:) = [dat(1,1) dat(length(dat(:,1)),1)];
+        dat = dat(~any(isnan(dat),2),:);
+        dat(:,2) = (dat(:,2)-mean(dat(:,2)))/std(dat(:,2));
+        plot(dat(:,1),dat(:,2) - 2*(i-1),'LineWidth',1);  % modify to fit with the order of title
+        xlimit(i,:) = [dat(1,1) dat(length(dat(:,1)),1)];
     end
     set(gca,'XMinorTick','on','YMinorTick','on')
     hold off
     title(contents(plot_selected), 'Interpreter', 'none')
     xlim([min(xlimit(:,1)) max(xlimit(:,2))])
-    if handles.unit_type == 0;
+    if handles.unit_type == 0
         xlabel(['Unit (',handles.unit,')'])
-    elseif handles.unit_type == 1;
+    elseif handles.unit_type == 1
         xlabel(['Depth (',handles.unit,')'])
     else
         xlabel(['Time (',handles.unit,')'])
