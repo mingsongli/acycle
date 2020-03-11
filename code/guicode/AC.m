@@ -74,7 +74,7 @@ function varargout = AC(varargin)
 
 % Edit the above text to modify the response to help AC
 
-% Last Modified by GUIDE v2.5 23-Feb-2020 13:25:33
+% Last Modified by GUIDE v2.5 11-Mar-2020 17:02:26
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -109,7 +109,6 @@ set(gcf,'DockControls', 'off')
 set(gcf,'Color', 'white')
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
-set(gcf,'ResizeFcn',@Resize_clbk);
 
 %% push_up
 h_push_up = uicontrol('Style','pushbutton','Tag','push_up');%,'BackgroundColor','white','ForegroundColor','white');  % set style, Tag
@@ -291,16 +290,6 @@ function varargout = AC_OutputFcn(hObject, eventdata, handles)
 
 % Get default command line output from handles structure
 varargout{1} = handles.output;
-
-function Resize_clbk(hObject, eventdata)
-% if ismac
-%     try j = findobj(gcf,'Tag','push_up');           jEdit = findjobj(j); jEdit.Border = []; catch; end
-%     try j = findobj(gcf,'Tag','push_folder');       jEdit = findjobj(j); jEdit.Border = []; catch; end
-%     try j = findobj(gcf,'Tag','push_plot');         jEdit = findjobj(j); jEdit.Border = []; catch; end
-%     try j = findobj(gcf,'Tag','push_refresh');      jEdit = findjobj(j); jEdit.Border = []; catch; end
-%     try j = findobj(gcf,'Tag','push_robot');        jEdit = findjobj(j); jEdit.Border = []; catch; end
-%     try j = findobj(gcf,'Tag','push_openfolder');   jEdit = findjobj(j); jEdit.Border = []; catch; end
-% end
 
 
 function push_up_clbk(hObject, handles)
@@ -582,7 +571,7 @@ if handles.doubleclick
         else
             if strcmp(ext,'.fig')
                 try
-                    openfig(filename)
+                    openfig(filename);
                     set(gcf,'Name',[dat_name,ext])
                 catch
                 end
@@ -1592,9 +1581,9 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                 span_v = str2double(answer{1});
                 method = (answer{2});
                 bootn = str2double(answer{3});
-                if bootn*length(time) >= 100000
-                    warndlg('Large number of bootstrap simulations. Please Wait ...','Bootstrap');
-                end
+%                 if bootn*length(time) >= 100000
+%                     warndlg('Large number of bootstrap simulations. Please Wait ...','Bootstrap');
+%                 end
                 
                 span = span_v/(time(end)-time(1));
                 hwarn1 = warndlg('Slow process. Wait ...','Smoothing');
@@ -1602,17 +1591,19 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                 try close(hwarn1)
                 catch
                 end
-                data(:,2) = meanboot;
-                data(:,3) = bootstd;
-                data(:,4) = 2*bootstd;
+                data(:,4) = meanboot;
+                data(:,2) = meanboot - 2*bootstd;
+                data(:,3) = meanboot - bootstd;
+                data(:,5) = meanboot + bootstd;
+                data(:,6) = meanboot + 2*bootstd;
                 data1 = [time,bootprt];
-                name = [dat_name,'-',num2str(span_v),'-',method,'-',num2str(bootn),'-bootstp-meanstd',ext];  % New name
-                name1 = [dat_name,'-',num2str(span_v),'-',method,'-',num2str(bootn),'-bootstp-percentile',ext];
+                name = [dat_name,'_',num2str(span_v),'_',method,'_',num2str(bootn),'_bootstp_meanstd',ext];  % New name
+                name1 = [dat_name,'_',num2str(span_v),'_',method,'_',num2str(bootn),'_bootstp_percentile',ext];
                 
-                disp(['>>  Save [time, mean, std, 2std] as :',name])
+                disp(['>>  Save [time, mean-2std, mean-std, mean, mean+std, mean+2std] as :',name])
                 disp(['>>  Save [time, percentiles] as :',name1])
                 disp('>>        Percentiles are ')
-                disp('>>        [0.5,2.275,15.865,50,84.135,97.725,99.5]')
+                disp('>>        [0.5,2.5,5,25,50,75,95,97.5,99.5]')
                 CDac_pwd
                 dlmwrite(name, data, 'delimiter', ',', 'precision', 9); 
                 dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9); 
@@ -2179,7 +2170,7 @@ for i = 1:nplot
     end
 end
 
-if check == 1;
+if check == 1
     xlimit = zeros(nplot,2);
     figure;
     hold on;
@@ -2187,29 +2178,29 @@ if check == 1;
         plot_no = plot_selected(i);
             plot_filter_s = char(contents(plot_no));
             GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
-     try
-        fid = fopen(plot_filter_s);
-        data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
-        fclose(fid);
-        if iscell(data_ft)
-            dat = cell2mat(data_ft);
-        end
-    catch
-        dat = load(plot_filter_s);
-    end 
+         try
+            fid = fopen(plot_filter_s);
+            data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
+            fclose(fid);
+            if iscell(data_ft)
+                dat = cell2mat(data_ft);
+            end
+        catch
+            dat = load(plot_filter_s);
+         end 
             
-            dat = dat(~any(isnan(dat),2),:);
-            dat(:,2) = (dat(:,2)-mean(dat(:,2)))/std(dat(:,2));
-            plot(dat(:,1),2*(i-1)+dat(:,2),'LineWidth',1);
-            xlimit(i,:) = [dat(1,1) dat(length(dat(:,1)),1)];
+        dat = dat(~any(isnan(dat),2),:);
+        dat(:,2) = (dat(:,2)-mean(dat(:,2)))/std(dat(:,2));
+        plot(dat(:,1),dat(:,2) - 2*(i-1),'LineWidth',1);  % modify to fit with the order of title
+        xlimit(i,:) = [dat(1,1) dat(length(dat(:,1)),1)];
     end
     set(gca,'XMinorTick','on','YMinorTick','on')
     hold off
     title(contents(plot_selected), 'Interpreter', 'none')
     xlim([min(xlimit(:,1)) max(xlimit(:,2))])
-    if handles.unit_type == 0;
+    if handles.unit_type == 0
         xlabel(['Unit (',handles.unit,')'])
-    elseif handles.unit_type == 1;
+    elseif handles.unit_type == 1
         xlabel(['Depth (',handles.unit,')'])
     else
         xlabel(['Time (',handles.unit,')'])
@@ -5144,3 +5135,11 @@ function menu_interpseries_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 InterplationSeries(handles)
+
+
+% --------------------------------------------------------------------
+function menu_LOD_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_LOD (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+LODGUI(handles)
