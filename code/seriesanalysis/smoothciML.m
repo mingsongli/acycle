@@ -38,7 +38,8 @@ yboot2 = bootstrp(bootn,f,[X,Y])';
 meanboot = mean(yboot2,2);
 bootstd = std(yboot2,0,2);
 %percentile
-bootprt = prctile(yboot2, [.5,2.275,15.865,50,84.135,97.725,99.5],2);
+%bootprt = prctile(yboot2, [.5,2.275,15.865,50,84.135,97.725,99.5],2);
+bootprt = prctile(yboot2, [0.5,2.5,5,25,50,75,95,97.5,99.5],2);
 
 figure;
 scatter(X,Y)

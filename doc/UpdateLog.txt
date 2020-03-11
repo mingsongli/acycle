@@ -12,6 +12,12 @@ NOTE    : ask for MatLab RUNTIME 2019a
     2. Spectral Analysis GUI: show \rho value in the title; allow nw = 1 for MTM
 
     3. Plot stand. + 2: fit plot content to the order of title 
+
+    4. Add a new tool: Basic Series -> Length-of-day & day-of-year
+
+    5. "Math - Smooth - Bootstrap": change data saving style
+        Thanks Feng Cheng! Read more here:
+        https://github.com/mingsongli/acycle/issues/19
 _______________________________________
 
 Version : ACycle_v2.1.0
