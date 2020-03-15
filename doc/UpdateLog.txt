@@ -3,7 +3,7 @@
 _______________________________________
 
 Version : ACycle_v2.1.1 [PREVIEW; NOT OFFICIALLY RELEASED]
-Date    : Feb 24, 2020 - 
+Date    : Feb 24, 2020 - Mar. 14, 2020
 By      : Mingsong Li
 NOTE    : ask for MatLab RUNTIME 2019a
 
@@ -18,6 +18,12 @@ NOTE    : ask for MatLab RUNTIME 2019a
     5. "Math - Smooth - Bootstrap": change data saving style
         Thanks Feng Cheng! Read more here:
         https://github.com/mingsongli/acycle/issues/19
+
+    6. TimeOpt: plot all-in-one; Thank Wei Liu for this suggestion.
+
+    7. TimeOpt: null hypothesis testing for all given test sedimentation rate
+            plotted in the COCO H0-sig.level style.
+            null hypothesis testing for the optimal sedimentation rate is the default option.
 _______________________________________
 
 Version : ACycle_v2.1.0
