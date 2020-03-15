@@ -138,6 +138,7 @@ end
 % plot power spectra
     if plotn == 1
         figure;
+        set(gcf,'color','w');
         plot(f,data(:,2),'r','LineWidth',1);
         if slices > 1
             plot(f,datap,'LineWidth',.5); 
@@ -234,7 +235,7 @@ if nsim > 0
     if plotn == 1
         % plot H0 test of Monte carlo simulation
         figure;
-        
+        set(gcf,'color','w');
         ax1 = subplot(3,1,1) ;
         plot(ax1, corrxch,corry_rch,'r','LineWidth',1);
 %         hold on;

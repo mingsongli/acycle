@@ -121,7 +121,7 @@ if nargin < 5; nsim = 1000; end
 if nargin < 4; numsed = 100; end % tested 100 sed. rates
 if nargin < 3; sedmax = 30; end  % max sed. rate is 30 cm/kyr
 if nargin < 2; sedmin = 0.1;end % min sed. rate is 0.1 cm/kyr
-if nargin < 1; % if no input date ...
+if nargin < 1 % if no input date ...
     n = 300; dat(:,1) = (1:n)'; dat(:,2) = filter(1,[1;-0.5],randn(n,1));
 end 
 
@@ -250,7 +250,6 @@ elseif fit == 2
     [~, datay] = fitItls(timeSeries,sedrate(loci(1)), targetE(1), cormethod,lsmethod,genplot);
 end
 
-
 datopt = data;
 datopt(:,3) = tanhilb(:,2);
 datopt(:,4) = tanhilb(:,3);
@@ -263,9 +262,9 @@ if genplot == 1
     plot(tanhilb(:,1),tanhilb(:,2),'b-','LineWidth',2);hold on;
     plot(tanhilb(:,1),tanhilb(:,3),'r','LineWidth',3);
     %legend('Taner filtered','Envolope')
-    title(['Taner Filtered (blue) vs. Envelope (red) @ ', num2str(sedrate(loci(1))), ' cm/kyr'])
+    title(['Taner filtered (blue) vs. envelope (red) @ ', num2str(sedrate(loci(1))), ' cm/kyr'])
     xlabel('Time (kyr)')
-    ylabel('Std. Value')
+    ylabel('Std. value')
     xlim([min(tanhilb(:,1)), max(tanhilb(:,1))])
     
     subplot(2,1,2)
@@ -274,7 +273,7 @@ if genplot == 1
     plot(fd1,po,'k','LineWidth',1);
     xlabel('Frequency (cycles/kyr)') 
     ylabel('Power')
-    title('Periodogram')
+    title('Periodogram (black) vs. astronomical frequencies (dashed red)')
     xlim([0,.1])
     hold on;
     for i = 1: length(targetTot)
@@ -285,8 +284,11 @@ end
 %% generate plot
 if genplot == 1
     figure;
+    
     set(gcf,'Name','Acycle: TimeOpt #3')
     set(gcf,'Units','normalized','Position',[0.66, 0.5, 0.33, 0.4])
+    set(gcf,'color','w');
+    
     subplot(3,1,1)
     plot(sedrate,xx(:,2),'ro','LineWidth',2);
     line([sedrate(locj(1)) sedrate(locj(1))],[min(xx(:,2)) max(xx(:,2))],'Color','red','LineStyle','--')
@@ -316,28 +318,14 @@ if genplot == 2
     figure;
     set(gcf,'Name','Acycle: TimeOpt Plot')
     set(gcf,'Units','normalized','Position',[0.06, 0.1, 0.8, 0.8])
-    
-    subplot(3,2,3)
-    yyaxis left
-    plot(sedrate,xx(:,2),'ro','LineWidth',2);
-    line([sedrate(locj(1)) sedrate(locj(1))],[min(xx(:,2)) max(xx(:,2))],'Color','red','LineStyle','--')
-    %legend('r^2_e_n_v_e_l_o_p_e')
-    xlabel('Sedimentation rate (cm/kyr)')
-    ylabel('r^2_e_n_v_e_l_o_p_e')
-    xlim([sedmin,sedmax])
-    yyaxis right
-    plot(sedrate,xx(:,3),'-','color',[0,0,0]+.5,'LineWidth',2);
-    line([sedrate(locm(1)) sedrate(locm(1))],[min(xx(:,3)) max(xx(:,3))],'Color','red','LineStyle','--')
-    ylabel('r^2_p_o_w_e_r')
-    xlim([sedmin,sedmax])
-    title('Fit: r^2_e_n_v_e_l_o_p_e (red) vs. r^2_p_o_w_e_r (gray)')
+    set(gcf,'color','w');
     
     subplot(3,2,1)
     plot(sedrate,xx(:,4),'k-','LineWidth',3);
     line([sedrate(loci(1)) sedrate(loci(1))],[min(xx(:,4)) max(xx(:,4))],'Color','red','LineStyle','--')
-    %legend('r^2_o_p_t')
     xlabel('Sedimentation rate (cm/kyr)')
-    ylabel('r^2_o_p_t')
+    ylabel('r^2')
+    %ylabel('r^2_o_p_t')
     xlim([sedmin,sedmax])
     title('Optimal fit: r^2_o_p_t')
     %
@@ -345,10 +333,36 @@ if genplot == 2
     plot(datay(:,1), datay(:,2),'r','LineWidth',3);
     hold on;
     plot(datay(:,1), datay(:,3),'k','LineWidth',2);
-    title(['Envelope (red) & reconstructed model (black) @ ', num2str(sedrate(loci(1))),' cm/kyr'])
+    title(['Envelope (red) vs. reconstructed model (black) @ ', num2str(sedrate(loci(1))),' cm/kyr'])
     xlabel('Time (kyr)')
     ylabel('Std. value')
     xlim([min(datay(:,1)), max(datay(:,1))])
+    
+    subplot(3,2,3)
+    yyaxis left
+    plot(sedrate,xx(:,2),'ro','LineWidth',2);
+    line([sedrate(locj(1)) sedrate(locj(1))],[min(xx(:,2)) max(xx(:,2))],'Color','red','LineStyle','--')
+    xlabel('Sedimentation rate (cm/kyr)')
+    ylabel('r^2')
+    %ylabel('r^2_p_o_w_e_r')
+    xlim([sedmin,sedmax])
+    yyaxis right
+    plot(sedrate,xx(:,3),'-','color',[0,0,0]+.5,'LineWidth',2);
+    line([sedrate(locm(1)) sedrate(locm(1))],[min(xx(:,3)) max(xx(:,3))],'Color','red','LineStyle','--')
+    %ylabel('r^2_e_n_v_e_l_o_p_e')
+    xlim([sedmin,sedmax])
+    title('Fit: r^2_e_n_v_e_l_o_p_e (red) vs. r^2_p_o_w_e_r (gray)')
+    ax = gca;
+    ax.YAxis(1).Color = [0,0,0]+.5;
+    ax.YAxis(2).Color = 'r';
+  
+    subplot(3,2,4)
+    plot(tanhilb(:,1),tanhilb(:,2),'b-','LineWidth',2);hold on;
+    plot(tanhilb(:,1),tanhilb(:,3),'r','LineWidth',3);
+    title(['Taner filtered (blue) vs. envelope (red) @ ', num2str(sedrate(loci(1))), ' cm/kyr'])
+    xlabel('Time (kyr)')
+    ylabel('Std. value')
+    xlim([min(tanhilb(:,1)), max(tanhilb(:,1))])  
     
     subplot(3,2,5)
     plot(datay(:,2), datay(:,3),'ko','MarkerSize',10)
@@ -357,14 +371,6 @@ if genplot == 2
     xlabel('Envelope')
     ylabel('Reconstructed model')
     title(['Envelope vs. reconstructed model (dot) @ ', num2str(sedrate(loci(1))),' cm/kyr & linear fit (red)'])
-    
-    subplot(3,2,4)
-    plot(tanhilb(:,1),tanhilb(:,2),'b-','LineWidth',2);hold on;
-    plot(tanhilb(:,1),tanhilb(:,3),'r','LineWidth',3);
-    title(['Taner filtered (blue) vs. envelope (red) @ ', num2str(sedrate(loci(1))), ' cm/kyr'])
-    xlabel('Time (kyr)')
-    ylabel('Std. value')
-    xlim([min(tanhilb(:,1)), max(tanhilb(:,1))])
     
     subplot(3,2,6)
     dt = median(diff(data(:,1)));
@@ -456,8 +462,10 @@ if nsim > 1
         figure;
         set(gcf,'Units','normalized','Position',[0.1, 0.1, 0.4, 0.6])
         set(gcf,'Name','Acycle: TimeOpt Null Hypothesis Testing')
+        set(gcf,'color','w');
         sr1 = min(sedrate);
         sr2 = max(sedrate);
+        
         ax1 = subplot(3,1,1);
         semilogy(ax1, xcl(:,1),xcl(:,2),'r','LineWidth',1); 
         xlabel(ax1, 'Sedimentation rate (cm/kyr)')
@@ -522,6 +530,7 @@ if nsim > 1
         figure;
         set(gcf,'Units','normalized','Position',[0.0, 0.05, 0.33, 0.4])
         set(gcf,'Name','Acycle: TimeOpt Null Hypothesis Testing')
+        set(gcf,'color','w');
         subplot(3,1,1)
         [f,xi] = ksdensity(xsim(:,1));
         X1 = [maxr2env,maxr2env];
