@@ -101,7 +101,9 @@ function [xx,datopt,xcl,sr_p] =timeOptAc(dat,sedmin,sedmax,numsed,nsim,linLog,fi
 % genplot = 1;
 % [xx,datopt]=timeOptAc(dat,sedmin,sedmax,numsed,nsim,linLog,fit,fl,fh,roll,targetE,targetP,detrend,cormethod,genplot);
 %
-%% By Mingsong Li, Penn State, Jan. 5, 2019
+%% By Mingsong Li, Penn State
+%   Date:   Jan.  5, 2019
+%   update: Mar. 14, 2020
 %   mul450@psu.edu; www.mingsongli.com
 %
 %%
@@ -315,7 +317,7 @@ if genplot == 2
     set(gcf,'Name','Acycle: TimeOpt Plot')
     set(gcf,'Units','normalized','Position',[0.06, 0.1, 0.8, 0.8])
     
-    subplot(3,2,1)
+    subplot(3,2,3)
     yyaxis left
     plot(sedrate,xx(:,2),'ro','LineWidth',2);
     line([sedrate(locj(1)) sedrate(locj(1))],[min(xx(:,2)) max(xx(:,2))],'Color','red','LineStyle','--')
@@ -330,7 +332,7 @@ if genplot == 2
     xlim([sedmin,sedmax])
     title('Fit: r^2_e_n_v_e_l_o_p_e (red) vs. r^2_p_o_w_e_r (gray)')
     
-    subplot(3,2,2)
+    subplot(3,2,1)
     plot(sedrate,xx(:,4),'k-','LineWidth',3);
     line([sedrate(loci(1)) sedrate(loci(1))],[min(xx(:,4)) max(xx(:,4))],'Color','red','LineStyle','--')
     %legend('r^2_o_p_t')
@@ -339,7 +341,7 @@ if genplot == 2
     xlim([sedmin,sedmax])
     title('Optimal fit: r^2_o_p_t')
     %
-    subplot(3,2,3)
+    subplot(3,2,2)
     plot(datay(:,1), datay(:,2),'r','LineWidth',3);
     hold on;
     plot(datay(:,1), datay(:,3),'k','LineWidth',2);
@@ -379,67 +381,192 @@ if genplot == 2
     
 end
 %% Monte Carlo simulation
-xcl  = ones(1,4);
+xcl = [];
 if nsim > 1
     disp('>>  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *')
     disp(['>>  Wait, Monte Carlo # Simulations = ',num2str(nsim)])
     disp('>>  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *')
-    xsim = timeOptSimAc(dat,sedrate(loci(1)),nsim,fit,cormethod,targetE,targetP,fc,fl,fh,roll);
     
-    xcl(1) = sedrate(loci(1));
-    xs1 = xsim(:,1);
-    xcl(2) = length(xs1(xs1>r2env(loci(1))))/nsim;
-    xs2 = xsim(:,2);
-    xcl(3) = length(xs2(xs2>r2pwr(loci(1))))/nsim;
-    xs3 = xsim(:,3);
-    xcl(4) = length(xs3(xs3>r2opt(loci(1))))/nsim;
-    %
-    disp(['>>  At sedimentation rate of ', num2str(sedrate(loci(1)),'%.3f')])
-    disp(['>>       Envelope r^2 p-value = ',num2str(xcl(2),'%.5f')])    
-    disp(['>>       Spectral power r^2 p-value = ',num2str(xcl(3),'%.5f')])
-    disp(['>>       (Envelope r^2) x (spectral power r^2) p-value = ',num2str(xcl(4),'%.5f')])
+    choice = questdlg(['Full range of test sed. rate or the optimal sed. rate at ', num2str(sedrate(loci(1))), ' cm/kyr only?'], ...
+	'Acycle: TimeOpt Monte Carlo selection', 'Optimal sed. rate only','Full range of test sed. rate','Cancel','Optimal sed. rate only');
+    % Handle response
+    switch choice
+        case 'Optimal sed. rate only'
+            nsim_yes = 0;
+        case 'Full range of test sed. rate'
+            nsim_yes = 1;
+        case 'Cancel'
+            nsim_yes = 2;
+    end
+    if nsim_yes == 1
+        %hwarndlg = warndlg('Monte Carlo simulation. Very Slow. Please Wait ...');
+        xcl  = ones(numsed,4);
+        % Waitbar
+        hwaitbar = waitbar(0,'TimeOpt: Monte Carlo simulation. processing ...',...    
+           'WindowStyle','modal');
+        hwaitbar_find = findobj(hwaitbar,'Type','Patch');
+        set(hwaitbar_find,'EdgeColor',[0 0.9 0],'FaceColor',[0 0.9 0]) % changes the color to blue
+        setappdata(hwaitbar,'canceling',0)
+        steps = numsed;
+        % step estimation for waitbar
+        waitbarstep = 0;
+        waitbar(waitbarstep / steps)
+        defaultcl = 1/(nsim+1);
+        for i = 1:numsed
+            sedrate1 = sedrate(i);
+            xsim = timeOptSimAc(dat,sedrate1,nsim,fit,cormethod,targetE,targetP,fc,fl,fh,roll);
+            xcl(i,1) = sedrate1;
+            xs1 = xsim(:,1);
+            xcl(i,2) = length(xs1(xs1>r2env(i)))/nsim;
+            if xcl(i,2) == 0
+                xcl(i,2) = defaultcl;
+            end
+            xs2 = xsim(:,2);
+            xcl(i,3) = length(xs2(xs2>r2pwr(i)))/nsim;
+            if xcl(i,3) == 0
+                xcl(i,3) = defaultcl;
+            end
+            xs3 = xsim(:,3);
+            xcl(i,4) = length(xs3(xs3>r2opt(i)))/nsim;
+            if xcl(i,4) == 0
+                xcl(i,4) = defaultcl;
+            end
+            % waitbar
+            pause(0.0001);%
+            waitbar(i / steps)
+            if getappdata(hwaitbar,'canceling')
+                break
+            end
+            
+            % display
+            disp(' ')
+            disp(['>>  At sedimentation rate of ', num2str(sedrate1)])
+            disp(['>>    Envelope r^2 p-value = ',num2str(xcl(i,2),'%.5f')])    
+            disp(['>>    Power    r^2 p-value = ',num2str(xcl(i,3),'%.5f')])
+            disp(['>>    Optimal  r^2 p-value = ',num2str(xcl(i,4),'%.5f')])
+            
+        end
+        
+        % close hwaitbar
+        try close(hwaitbar)
+        catch
+        end
+        
+        % plot
+        figure;
+        set(gcf,'Units','normalized','Position',[0.1, 0.1, 0.4, 0.6])
+        set(gcf,'Name','Acycle: TimeOpt Null Hypothesis Testing')
+        sr1 = min(sedrate);
+        sr2 = max(sedrate);
+        ax1 = subplot(3,1,1);
+        semilogy(ax1, xcl(:,1),xcl(:,2),'r','LineWidth',1); 
+        xlabel(ax1, 'Sedimentation rate (cm/kyr)')
+        ylabel(ax1, 'H_0 significance level')
+        title(ax1, 'r^2_e_n_v_e_l_o_p_e null hypothesis')
+        ylim(ax1, [0.5*min(xcl(:,2)) 1])
+        line([sr1, sr2],[.10, .10],'LineStyle',':','Color','k')
+        line([sr1, sr2],[.05, .05],'LineStyle',':','Color','k')
+        line([sr1, sr2],[.01, .01],'LineStyle','--','Color','k')
+        line([sr1, sr2],[.001, .001],'LineStyle',':','Color','k')
+        xlim(ax1,[sr1, sr2])
+        %legend('H_0 Sig.level','10 %','5 %','1 %','0.1 %')
+        set(ax1,'Ydir','reverse')
+        
+        ax2 = subplot(3,1,2);
+        semilogy(ax2, xcl(:,1),xcl(:,3),'r','LineWidth',1); 
+        xlabel(ax2, 'Sedimentation rate (cm/kyr)')
+        ylabel(ax2, 'H_0 significance level')
+        title(ax2, 'r^2_p_o_w_e_r null hypothesis')
+        ylim(ax2, [0.5*min(xcl(:,3)) 1])
+        line([sr1, sr2],[.10, .10],'LineStyle',':','Color','k')
+        line([sr1, sr2],[.05, .05],'LineStyle',':','Color','k')
+        line([sr1, sr2],[.01, .01],'LineStyle','--','Color','k')
+        line([sr1, sr2],[.001, .001],'LineStyle',':','Color','k')
+        %legend('H_0 Sig.level','10 %','5 %','1 %','0.1 %')
+        xlim(ax2,[sr1, sr2])
+        set(ax2,'Ydir','reverse')
+        
+        ax3 = subplot(3,1,3);
+        semilogy(ax3, xcl(:,1),xcl(:,4),'r','LineWidth',1); 
+        xlabel(ax3, 'Sedimentation rate (cm/kyr)')
+        ylabel(ax3, 'H_0 significance level')
+        title(ax3, 'r^2_o_p_t null hypothesis')
+        ylim(ax3, [0.5*min(xcl(:,4)) 1])
+        line([sr1, sr2],[.10, .10],'LineStyle',':','Color','k')
+        line([sr1, sr2],[.05, .05],'LineStyle',':','Color','k')
+        line([sr1, sr2],[.01, .01],'LineStyle','--','Color','k')
+        line([sr1, sr2],[.001, .001],'LineStyle',':','Color','k')
+        legend('H_0 Sig.level','10 %','5 %','1 %','0.1 %')
+        xlim(ax3,[sr1, sr2])
+        set(ax3,'Ydir','reverse')
+    end
     
-    figure;
-    set(gcf,'Units','normalized','Position',[0.0, 0.05, 0.33, 0.4])
-    subplot(3,1,1)
-    [f,xi] = ksdensity(xsim(:,1));
-    X1 = [maxr2env,maxr2env];
-    X2 = [maxr2pwr,maxr2pwr];
-    Y = [0, 1.1*max(f)];
-    
-    plot(xi,f,'r','LineWidth',2);
-    %legend('r^2_e_n_v_e_l_o_p_e')
-    ylabel('# Simulations')
-    ylim(Y)
-    
-    line(X1,Y,'Color','r','LineStyle','--','LineWidth',2)
-    text(.6*maxr2env,.8*max(f),['r^2_e_n_v_e_l_o_p_e = ',num2str(maxr2env)],'Color','r')
-    text(.6*maxr2env,.6*max(f),[' p-value = ',num2str(xcl(2),'%.5f')],'Color','r')
-    title(['Null hypothesis at sedimentation rate of ', ...
-        num2str(sedrate(loci(1)),'%.3f'),' cm/kyr. # simulations = ',num2str(nsim)])
-    
-    subplot(3,1,2)
-    [f,xi] = ksdensity(xsim(:,2));
-    Y = [0, 1.1*max(f)];
-    plot(xi,f,'color',[0,0,0]+.5,'LineWidth',2);
-    %legend('r^2_p_o_w_e_r')
-    ylabel('# Simulations')
-    line(X2,Y,'Color',[0,0,0]+.5,'LineStyle','--','LineWidth',2)
-    text(.6*maxr2pwr,.8*max(f),['r^2_p_o_w_e_r = ',num2str(maxr2pwr)],'Color',[0,0,0]+.5)
-    text(.6*maxr2pwr,.6*max(f),[' p-value = ',num2str(xcl(3),'%.5f')],'Color',[0,0,0]+.5)
-    ylim(Y)
-    
-    subplot(3,1,3)
-    [f,xi] = ksdensity(xsim(:,3));
-    plot(xi,f,'k-','LineWidth',3);
-    hold on
-    %legend('r^2_o_p_t')
-    ylabel('# Simulations')
-    X = [maxr2opt, maxr2opt];
-    Y = [0, 1.1*max(f)];
-    line(X,Y,'Color','k','LineStyle','--')
-    text(.6*maxr2opt,.8*max(f), ['r^2_o_p_t = ',num2str(maxr2opt)],'Color','k')
-    text(.6*maxr2opt,.6*max(f),[' p-value = ',num2str(xcl(4),'%.5f')],'Color','k')
-    ylim(Y)
+    if nsim_yes == 0
+        xcl  = ones(1,4);
+        hwarndlg = warndlg('Monte Carlo simulation. Please Wait ...');
+        xsim = timeOptSimAc(dat,sedrate(loci(1)),nsim,fit,cormethod,targetE,targetP,fc,fl,fh,roll);
+
+        xcl(1) = sedrate(loci(1));
+        xs1 = xsim(:,1);
+        xcl(2) = length(xs1(xs1>r2env(loci(1))))/nsim;
+        xs2 = xsim(:,2);
+        xcl(3) = length(xs2(xs2>r2pwr(loci(1))))/nsim;
+        xs3 = xsim(:,3);
+        xcl(4) = length(xs3(xs3>r2opt(loci(1))))/nsim;
+        %
+        disp(['>>  At sedimentation rate of ', num2str(sedrate(loci(1)),'%.3f')])
+        disp(['>>       Envelope r^2 p-value = ',num2str(xcl(2),'%.5f')])    
+        disp(['>>       Power    r^2 p-value = ',num2str(xcl(3),'%.5f')])
+        disp(['>>       Optimal  r^2 p-value = ',num2str(xcl(4),'%.5f')])
+
+        figure;
+        set(gcf,'Units','normalized','Position',[0.0, 0.05, 0.33, 0.4])
+        set(gcf,'Name','Acycle: TimeOpt Null Hypothesis Testing')
+        subplot(3,1,1)
+        [f,xi] = ksdensity(xsim(:,1));
+        X1 = [maxr2env,maxr2env];
+        X2 = [maxr2pwr,maxr2pwr];
+        Y = [0, 1.1*max(f)];
+
+        plot(xi,f,'r','LineWidth',2);
+        %legend('r^2_e_n_v_e_l_o_p_e')
+        ylabel('# Simulations')
+        ylim(Y)
+
+        line(X1,Y,'Color','r','LineStyle','--','LineWidth',2)
+        text(.6*maxr2env,.8*max(f),['r^2_e_n_v_e_l_o_p_e = ',num2str(maxr2env)],'Color','r')
+        text(.6*maxr2env,.6*max(f),[' p-value = ',num2str(xcl(2),'%.5f')],'Color','r')
+        title(['Null hypothesis at sedimentation rate of ', ...
+            num2str(sedrate(loci(1)),'%.3f'),' cm/kyr. # simulations = ',num2str(nsim)])
+
+        subplot(3,1,2)
+        [f,xi] = ksdensity(xsim(:,2));
+        Y = [0, 1.1*max(f)];
+        plot(xi,f,'color',[0,0,0]+.5,'LineWidth',2);
+        %legend('r^2_p_o_w_e_r')
+        ylabel('# Simulations')
+        line(X2,Y,'Color',[0,0,0]+.5,'LineStyle','--','LineWidth',2)
+        text(.6*maxr2pwr,.8*max(f),['r^2_p_o_w_e_r = ',num2str(maxr2pwr)],'Color',[0,0,0]+.5)
+        text(.6*maxr2pwr,.6*max(f),[' p-value = ',num2str(xcl(3),'%.5f')],'Color',[0,0,0]+.5)
+        ylim(Y)
+
+        subplot(3,1,3)
+        [f,xi] = ksdensity(xsim(:,3));
+        plot(xi,f,'k-','LineWidth',3);
+        hold on
+        %legend('r^2_o_p_t')
+        ylabel('# Simulations')
+        X = [maxr2opt, maxr2opt];
+        Y = [0, 1.1*max(f)];
+        line(X,Y,'Color','k','LineStyle','--')
+        text(.6*maxr2opt,.8*max(f), ['r^2_o_p_t = ',num2str(maxr2opt)],'Color','k')
+        text(.6*maxr2opt,.6*max(f),[' p-value = ',num2str(xcl(4),'%.5f')],'Color','k')
+        ylim(Y)
+        
+        try
+            close(hwarndlg)
+        catch
+        end
+    end
     %%
 end

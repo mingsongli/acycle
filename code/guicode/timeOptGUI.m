@@ -293,7 +293,7 @@ if handles.savedata == 1
     log_name = [handles.dat_name,'-timeOpt-log','.txt'];
     name1 = [handles.dat_name,'-timeOpt-r^2env-pow-opt','.txt'];
     name2 = [handles.dat_name,'-timeOpt-opt-bp-env-model','.txt'];
-    
+    name3 = [handles.dat_name,'-timeOpt-H0-Sig.Level','.txt'];
     % Find max
     sedrate = xx(:,1);
     r2env = xx(:,2);
@@ -309,6 +309,7 @@ if handles.savedata == 1
     CDac_pwd
     dlmwrite(name1, xx, 'delimiter', ',', 'precision', 9); 
     dlmwrite(name2, datopt, 'delimiter', ',', 'precision', 9);
+    dlmwrite(name3, xcl, 'delimiter', ',', 'precision', 9); 
 
     [dat_dir,~,~] = fileparts(handles.filename);
     fileID = fopen(fullfile(dat_dir,log_name),'w+');
@@ -348,20 +349,22 @@ if handles.savedata == 1
     fprintf(fileID,'%s\n','RESULTS: ');
     
     % display
-    fprintf(fileID,'%s\n',['Maximum spectral power r^2 = ',num2str(maxr2pwr)]);
-    fprintf(fileID,'%s\n',['    at sedimentation rate of: ',num2str(sedrate(locm(1))),' cm/kyr']);
     fprintf(fileID,'%s\n',['Maximum envelope r^2 = ',num2str(maxr2env)]);
     fprintf(fileID,'%s\n',['    at sedimentation rate of: ',num2str(sedrate(locj(1))),' cm/kyr']);
-    fprintf(fileID,'%s\n',['Maximum (envelope r^2) x (spectral power r^2) = ',num2str(maxr2opt)]);
+    fprintf(fileID,'%s\n',['Maximum power    r^2 = ',num2str(maxr2pwr)]);
+    fprintf(fileID,'%s\n',['    at sedimentation rate of: ',num2str(sedrate(locm(1))),' cm/kyr']);
+    fprintf(fileID,'%s\n',['Maximum optimal  r^2 = ',num2str(maxr2opt)]);
     fprintf(fileID,'%s\n',['    at sedimentation rate of: ',num2str(sedrate(loci(1))),' cm/kyr']);
-    if nsim>1;
-    fprintf(fileID,'%s\n','');
-    fprintf(fileID,'%s\n',['Number of Monte Carlo simulations: ',num2str(nsim)]);
-    fprintf(fileID,'%s\n',['At sedimentation rate of ',num2str(sedrate(loci(1))),' cm/kyr']);
-    fprintf(fileID,'%s\n',['    Envelope r^2 p-value = ',num2str(xcl(2),'%.5f')]);
-    fprintf(fileID,'%s\n',['    Spectral power r^2 p-value = ',num2str(xcl(2),'%.5f')]);
-    fprintf(fileID,'%s\n',['    Envelope r^2 p-value = ',num2str(xcl(3),'%.5f')]);
-    fprintf(fileID,'%s\n',['    (Envelope r^2) x (spectral power r^2) p-value = ',num2str(xcl(4),'%.5f')]);
+    if nsim>1
+        [row, ~] = size(xcl);
+        if row == 1
+            fprintf(fileID,'%s\n','');
+            fprintf(fileID,'%s\n',['Number of Monte Carlo simulations: ',num2str(nsim)]);
+            fprintf(fileID,'%s\n',['At sedimentation rate of ',num2str(sedrate(loci(1))),' cm/kyr']);
+            fprintf(fileID,'%s\n',['    Envelope r^2 p-value = ',num2str(xcl(2),'%.5f')]);
+            fprintf(fileID,'%s\n',['    Power    r^2 p-value = ',num2str(xcl(3),'%.5f')]);
+            fprintf(fileID,'%s\n',['    Optimal  r^2 p-value = ',num2str(xcl(4),'%.5f')]);
+        end
     end
     fprintf(fileID,'%s\n','');
     fprintf(fileID,'%s\n',' - - - - - - - - - - - - - - End - - - - - - - - - - - -');
