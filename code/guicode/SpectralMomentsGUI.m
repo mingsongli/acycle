@@ -128,6 +128,7 @@ dt = median(diff(dat(:,1)));
 handles.spectralmomentsFig = figure;
     set(0,'Units','normalized') % set units as normalized
     set(gcf,'units','norm') % set location
+    set(gcf,'color','w');
     set(handles.spectralmomentsFig,'position',[0.2,0.4,0.2,0.4]) % set position
     plot(datx,daty)
     xlabel(handles.unit);ylabel('Value');title(handles.dat_name, 'Interpreter', 'none')
@@ -212,7 +213,9 @@ hwarn = warndlg('Please wait, this may take a couple of minutes ...','Warning: S
 if handles.sedrate == 0
     % model without input sed. rate
     [depth,uf,Bw] = spectralmoments(data,window,step,pad);
-    figure; plot(depth,uf,'r-',depth,Bw,'b-.');
+    figure; 
+    set(gcf,'color','w');
+    plot(depth,uf,'r-',depth,Bw,'b-.');
     xlabel(handles.unit); ylabel('Frequency (cycles/m)'); legend('\mu_f','B')
     
     name1 = [handles.dat_name,'-SpecMoments-depth-uf-bw-win',num2str(window),'.txt'];
@@ -225,9 +228,13 @@ if handles.sedrate == 0
 else
     % model with input sed. rate
     [depth,uf,Bw,Bwtrend,sr] = spectralmoments(data,window,step,pad,srmean,smoothmodel,0);
-    figure; plot(depth,uf,'r-',depth,Bw,'b-.',depth,Bwtrend,'g');
+    figure; 
+    set(gcf,'color','w');
+    plot(depth,uf,'r-',depth,Bw,'b-.',depth,Bwtrend,'g');
     xlabel(handles.unit); ylabel('Frequency (cycles/m)'); legend('\mu_f','B','B trend')
-    figure; plot(depth, sr); xlabel('Depth (m)'); ylabel('Sed. rate (cm/kyr)');
+    figure; 
+    set(gcf,'color','w');
+    plot(depth, sr); xlabel('Depth (m)'); ylabel('Sed. rate (cm/kyr)');
     
     name1 = [handles.dat_name,'-SpecMoments-depth-uf-Bw-Btrend-win',num2str(window),'.txt'];
     name2 = [handles.dat_name,'-SpecMoments-sedrate-win',num2str(window),smoothmodel,'-SR',num2str(srmean),'.txt'];
@@ -372,6 +379,7 @@ if get(hObject,'Value')
         handles.spectralmomentsFig = figure;
         set(0,'Units','normalized') % set units as normalized
         set(gcf,'units','norm') % set location
+        set(gcf,'color','w');
         set(handles.spectralmomentsFig,'position',[0.2,0.4,0.2,0.4]) % set position
         plot(dat(:,1),dat(:,2))
         xlabel(handles.unit);ylabel('Value');title(handles.dat_name, 'Interpreter', 'none')
@@ -389,6 +397,7 @@ else
         handles.spectralmomentsFig = figure;
         set(0,'Units','normalized') % set units as normalized
         set(gcf,'units','norm') % set location
+        set(gcf,'color','w');
         set(handles.spectralmomentsFig,'position',[0.2,0.4,0.2,0.4]) % set position
         plot(dat(:,1),dat(:,2))
         xlabel(handles.unit);ylabel('Value');title(handles.dat_name, 'Interpreter', 'none')
@@ -418,6 +427,7 @@ catch
     handles.spectralmomentsFig = figure;
     set(0,'Units','normalized') % set units as normalized
     set(gcf,'units','norm') % set location
+    set(gcf,'color','w');
     set(handles.spectralmomentsFig,'position',[0.2,0.4,0.2,0.4]) % set position
     plot(dat(:,1),dat(:,2))
     xlabel(handles.unit);ylabel('Value');title(handles.dat_name, 'Interpreter', 'none')

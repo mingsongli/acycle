@@ -367,7 +367,7 @@ else
 end
 
 eTimeOptfig = figure;
-whitebg('white');
+set(gcf,'color','w');
 
 subplot(1,3,1)
 if handles.plot_2d == 1

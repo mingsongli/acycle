@@ -151,6 +151,7 @@ if single0 == 1
 
         figure;
         set(gcf,'Name','Acycle: Lenght-of-day & Day-of-year | plot')
+        set(gcf,'color','w');
         subplot(2,1,1)
         plot(T,lod,'-ko')
         ylabel('length of day (hour)')
@@ -180,6 +181,7 @@ elseif single1 == 1
         
         figure;
         set(gcf,'Name','Acycle: Lenght-of-day & Day-of-year | plot')
+        set(gcf,'color','w');
         subplot(2,1,1)
         plot(T,lod,'-ko')
         ylabel('length of day (hours)')
