@@ -2402,11 +2402,11 @@ if and ((min(plot_selected) > 2), (nplot == 1))
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
-        if isdir(data_name) == 1
-        else
+    if isdir(data_name) == 1
+    else
         [~,dat_name,ext] = fileparts(data_name);
         if sum(strcmp(ext,handles.filetype)) > 0
-            
+
             data = load(data_name);
 
             prompt = {'Enter period (kyr):','Use 1 = peak; 0 = trough:'};
@@ -2416,31 +2416,88 @@ if and ((min(plot_selected) > 2), (nplot == 1))
             options.Resize='on';
             answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
             if ~isempty(answer)
-            period = str2double(answer{1});
-            pkstrough = str2double(answer{2});
-            if pkstrough == 1
-                [datapks,~] = getpks(data);
-                plot_filter_s ='max';
-            else
-                data(:,2) = -1*data(:,2);
-                [datapks,~] = getpks(data);
-                plot_filter_s ='min';
-            end
-            [nrow, ~] = size(datapks);
-            datapksperiod = 1:nrow;
-            datapksperiod = datapksperiod*period;
-            datapksperiod = datapksperiod';
-            handles.datapks_tie = [datapks(:,1),datapksperiod];
-            name1 = [dat_name,'-agemod-',num2str(period),'-',plot_filter_s,ext];
-            CDac_pwd
-            dlmwrite(name1, handles.datapks_tie, 'delimiter', ',', 'precision', 9);
-            d = dir; %get files
-            set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-            refreshcolor;
-            cd(pre_dirML); % return to matlab view folder
+                period = str2double(answer{1});
+                pkstrough = str2double(answer{2});
+                %
+                data = data(~any(isnan(data),2),:); % remove NaN values
+                data = sortrows(data);  % sort first column
+                data=findduplicate(data); % remove duplicate number
+                data(any(isinf(data),2),:) = []; % remove empty
+                %
+                if pkstrough == 1
+                    [datapks,~] = getpks(data);
+                    plot_filter_s ='max';
+                else
+                    data(:,2) = -1*data(:,2);
+                    [datapks,~] = getpks(data);
+                    plot_filter_s ='min';
+                end
+
+                [nrow, ~] = size(datapks);
+                
+                % age model
+                datapksperiod = 1:nrow;
+                datapksperiod = datapksperiod*period;
+                datapksperiod = datapksperiod';
+                agemodel = [datapks(:,1),datapksperiod];
+                
+                % sed. rate 
+                sedrate = zeros(nrow+2,2);
+                sedrate(1,1) = data(1,1);
+                sedrate(2:end-1,1) = datapks(:,1);
+                sedrate(end,1) = data(end,1);
+                sedrate0 = diff(agemodel(:,1))./diff(agemodel(:,2));
+                sedrate(2:end-2,2) = sedrate0;
+                sedrate(1,2) = sedrate(2,2);
+                sedrate(end-1,2) = sedrate(end-2,2);
+                sedrate(end,2) = sedrate(end-2,2);
+                % full age model
+                agemodelfull = zeros(nrow+2,2);
+                agemodelfull(2:end-1,:) = agemodel;
+                agemodelfull(1,1) = data(1,1);
+                agemodelfull(1,2) = datapksperiod(1) - (agemodelfull(2,1)-agemodelfull(1,1)) * sedrate(1,2);
+                agemodelfull(end,1) = data(end,1);
+                agemodelfull(end,2) = datapksperiod(end) + (agemodelfull(end,1)-agemodelfull(end-1,1)) * sedrate(end,2);
+
+                name1 = [dat_name,'-agemodel-',num2str(period),'-',plot_filter_s,ext];
+                name2 = [dat_name,'-sed.rate-',num2str(period),'-',plot_filter_s,ext];
+
+                CDac_pwd
+                dlmwrite(name1, agemodel, 'delimiter', ',', 'precision', 9);
+                dlmwrite(name2, sedrate,  'delimiter', ',', 'precision', 9);
+                d = dir; %get files
+                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+                refreshcolor;
+                cd(pre_dirML); % return to matlab view folder
+                
+                figure;
+                set(gcf,'units','norm') % set location
+                set(gcf,'position',[0.01,0.55,0.45,0.4]) % set position
+                set(gcf,'Name','Acycle: Build Age Model | Age Model')
+                set(gcf,'color','w');
+                plot(agemodelfull(:,1), agemodelfull(:,2),'k','LineWidth',1)
+                xlabel(['Depth (',handles.unit,')'])
+                ylabel('Time (kyr)')
+                title(['Age Model: ', num2str(period), ' kyr cycle: ', plot_filter_s])
+                set(gca,'XMinorTick','on','YMinorTick','on')
+                xlim([agemodelfull(1,1), agemodelfull(end,1)])
+                ylim([agemodelfull(1,2), agemodelfull(end,2)])
+                
+                figure;
+                set(gcf,'color','w');
+                set(gcf,'Name','Acycle: Build Age Model | Sedimentation Rate')
+                set(gcf,'units','norm') % set location
+                set(gcf,'position',[0.01,0.05,0.45,0.4]) % set position
+                stairs(sedrate(:,1), sedrate(:,2),'k','LineWidth',1)
+                xlabel(['Depth (',handles.unit,')'])
+                ylabel(['Sedimentation rate (',handles.unit,'/kyr)'])
+                xlim([sedrate(1,1), sedrate(end,1)])
+                ylim([0, max(sedrate(:,2)) * 2])
+                title(['Sedimentation rate: ', num2str(period), ' kyr cycle: ', plot_filter_s])
+                set(gca,'XMinorTick','on','YMinorTick','on')
             end
         end
-        end
+    end
 end
 guidata(hObject, handles);
 
