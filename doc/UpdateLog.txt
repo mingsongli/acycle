@@ -24,6 +24,8 @@ NOTE    : ask for MatLab RUNTIME 2019a
     7. TimeOpt: null hypothesis testing for all given test sedimentation rate
             plotted in the COCO H0-sig.level style.
             null hypothesis testing for the optimal sedimentation rate is the default option.
+
+    8. Build Age Model: save and plot sedimentation rate; plot age model
 _______________________________________
 
 Version : ACycle_v2.1.0
