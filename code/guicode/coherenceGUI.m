@@ -22,7 +22,7 @@ function varargout = coherenceGUI(varargin)
 
 % Edit the above text to modify the response to help coherenceGUI
 
-% Last Modified by GUIDE v2.5 16-Mar-2020 11:46:23
+% Last Modified by GUIDE v2.5 16-Mar-2020 15:43:13
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -379,8 +379,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
-
 function edit7_Callback(hObject, eventdata, handles)
 % hObject    handle to edit7 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -388,6 +386,11 @@ function edit7_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit7 as text
 %        str2double(get(hObject,'String')) returns contents of edit7 as a double
+if str2double(get(hObject,'String')) > 1
+    set(handles.edit7,'string','1')
+elseif str2double(get(hObject,'String')) < 0
+    set(handles.edit7,'string','0')
+end
 coherence_update;
 guidata(hObject,handles)
 
@@ -412,6 +415,9 @@ function edit8_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit8 as text
 %        str2double(get(hObject,'String')) returns contents of edit8 as a double
+if str2double(get(hObject,'String')) < 0
+    set(handles.edit7,'string','0')
+end
 coherence_update;
 guidata(hObject,handles)
 
@@ -499,7 +505,6 @@ if get(hObject,'Value') == 1
 end
 coherence_update;
 guidata(hObject,handles)
-
 
 % --- Executes on button press in radiobutton2.
 function radiobutton2_Callback(hObject, eventdata, handles)
