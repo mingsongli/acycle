@@ -80,6 +80,30 @@ for i = 1:nrow
             refreshcolor;
             cd(pre_dirML); % return view dir
         end
+        if qplot2 == 1
+            try figure(handles.polarfigure)
+                clf;
+            catch
+                handles.polarfigure = figure;
+                set(gcf,'units','norm') % set location
+                set(gcf,'position',[0.385,0.45,0.38,0.45]) % set position
+            end
+            set(gcf,'color','w');
+            set(gcf,'Name','Acycle: coherence and phase');
+            if forp == 1
+                polarscatter(angle(Pxy),F2,Cxy.^2*500,'filled','MarkerFaceAlpha',.5)
+            else
+                polarscatter(angle(Pxy(2:end)),1./F2(2:end),Cxy(2:end).^2*500,'filled','MarkerFaceAlpha',.5)
+            end
+            hold on
+            rlim([plotx1, plotx2])
+            title(['Phase lag (0-180',char(176),') and lead (180-360',char(176),')'])
+            hold off
+        else
+            try close handles.polarfigure
+            catch
+            end
+        end
         % coherence_update
         if qplot1 == 1
             % plot subplot
@@ -102,9 +126,11 @@ for i = 1:nrow
             end
             xlim([plotx1, plotx2])
             ylim([0 1])
-            yline(cohthreshold,'-.b');
+            hold on
+            plot(xlim, [1 1]*cohthreshold, '-.b')
             title('Magnitude-Squared Coherence')
             ylabel('Coherence')
+            hold off
 
             subplot(2,1,2)
             if forp == 1
@@ -116,40 +142,21 @@ for i = 1:nrow
             end
             xlim([plotx1, plotx2])
             ylim([-180 180])
-            yline(90,'--k');
-            yline(45,':k');
-            yline(0,'-k');
-            yline(-45,':k');
-            yline(-90,'--k');
+            hold on
+            plot(xlim, [1 1]*90, '--k')
+            plot(xlim, [1 1]*45, ':k')
+            plot(xlim, [1 1]*0, '-k')
+            plot(xlim, [1 1]*-45, ':k')
+            plot(xlim, [1 1]*-90, '--k')
             title('Cross Spectrum Phase')
             ylabel(['Lag (',char(176),')'])
+            hold off
         else
             try close handles.subfigure
             catch
             end
         end
-        if qplot2 == 1
-            try figure(handles.polarfigure)
-                clf;
-            catch
-                handles.polarfigure = figure;
-                set(gcf,'units','norm') % set location
-                set(gcf,'position',[0.385,0.45,0.38,0.45]) % set position
-            end
-            set(gcf,'color','w');
-            set(gcf,'Name','Acycle: coherence and phase');
-            if forp == 1
-                polarscatter(angle(Pxy),F2,Cxy.^2*500,'filled','MarkerFaceAlpha',.5)
-            else
-                polarscatter(angle(Pxy(2:end)),1./F2(2:end),Cxy(2:end).^2*500,'filled','MarkerFaceAlpha',.5)
-            end
-            rlim([plotx1, plotx2])
-            title(['Phase lag (0-180',char(176),') and lead (180-360',char(176),')'])
-        else
-            try close handles.polarfigure
-            catch
-            end
-        end
+        
     end
 end
 %% Plot
