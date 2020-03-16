@@ -74,7 +74,7 @@ function varargout = AC(varargin)
 
 % Edit the above text to modify the response to help AC
 
-% Last Modified by GUIDE v2.5 11-Mar-2020 17:02:26
+% Last Modified by GUIDE v2.5 15-Mar-2020 23:26:38
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -5200,3 +5200,12 @@ function menu_LOD_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 LODGUI(handles)
+
+
+% --------------------------------------------------------------------
+function menu_coh_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_coh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+guidata(hObject, handles);
+coherenceGUI(handles)
