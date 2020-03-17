@@ -74,7 +74,7 @@ function varargout = AC(varargin)
 
 % Edit the above text to modify the response to help AC
 
-% Last Modified by GUIDE v2.5 15-Mar-2020 23:26:38
+% Last Modified by GUIDE v2.5 17-Mar-2020 14:25:07
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -1161,7 +1161,7 @@ if min(plot_selected) > 2
                                     continue
                                 end
                                 [current_data] = select_interval(data,xmin_cut,xmax_cut); 
-                                name1 = [dat_name,'-',num2str(xmin_cut),'-',num2str(xmax_cut),ext];  % New name
+                                name1 = [dat_name,'_',num2str(xmin_cut),'_',num2str(xmax_cut),ext];  % New name
                                 CDac_pwd; % cd ac_pwd dir
                                 dlmwrite(name1, current_data, 'delimiter', ',', 'precision', 9);
                             end
@@ -1184,7 +1184,7 @@ if min(plot_selected) > 2
                         return
                     end
                     [current_data] = select_interval(data,xmin_cut,xmax_cut); 
-                    name1 = [dat_name,'-',num2str(xmin_cut),'-',num2str(xmax_cut),ext];  % New name
+                    name1 = [dat_name,'_',num2str(xmin_cut),'_',num2str(xmax_cut),ext];  % New name
 
                     CDac_pwd; % cd ac_pwd dir
                     dlmwrite(name1, current_data, 'delimiter', ',', 'precision', 9);
@@ -1493,16 +1493,16 @@ if and ((min(plot_selected) > 2), (nplot == 1))
             [~,dat_name,ext] = fileparts(data_name);
         if sum(strcmp(ext,handles.filetype)) > 0
 
-        try
-            fid = fopen(data_name);
-            data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
-            fclose(fid);
-            if iscell(data_ft)
-                data = cell2mat(data_ft);
-            end
-        catch
-            data = load(data_name);
-        end 
+            try
+                fid = fopen(data_name);
+                data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
+                fclose(fid);
+                if iscell(data_ft)
+                    data = cell2mat(data_ft);
+                end
+            catch
+                data = load(data_name);
+            end 
 
             time = data(:,1);
             value = data(:,2);
@@ -1516,7 +1516,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
             if ~isempty(answer)
                 smooth_v = str2double(answer{1});
                 data(:,2) = movemean(data(:,2),smooth_v,'omitnan');
-                name1 = [dat_name,'-',num2str(smooth_v),'ptsm',ext];  % New name
+                name1 = [dat_name,'_',num2str(smooth_v),'ptsm',ext];  % New name
                 CDac_pwd
                 dlmwrite(name1, data, 'delimiter', ',', 'precision', 9); 
                 d = dir; %get files
@@ -1569,7 +1569,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
 
             time = data(:,1);
             value = data(:,2);
-            span_d = (time(end)-time(1))*.5;
+            span_d = (time(end)-time(1))* 0.1;
             dlg_title = 'Bootstrap';
             prompt = {'Window (unit)','Method: "loess/lowess/rloess/rlowess"',...
                 'Number of bootstrap'};
@@ -1685,7 +1685,7 @@ if plot_selected > 2
                     data1 = [time,value];
                     % remember settings
                     handles.math_derivative = derivative_n;
-                    name1 = [dat_name,'-',num2str(derivative_n),'derv',ext];
+                    name1 = [dat_name,'_',num2str(derivative_n),'derv',ext];
                     CDac_pwd
                     dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
                     d = dir; %get files
@@ -2061,7 +2061,7 @@ if ~isempty(answer)
     plot(LR04stack_s(:,1),LR04stack_s(:,2),'LineWidth',1);
     xlabel('Time (kyr)')
     ylabel('Global Benthic \delta^{18}O')
-    title(['LR04 Stack: ',num2str(t1),'-',num2str(t2),' ka'])
+    title(['LR04 Stack: ',num2str(t1),'_',num2str(t2),' ka'])
     set(gca,'XMinorTick','on','YMinorTick','on')
     filename = ['LR04_Stack_',num2str(t1),'_',num2str(t2),'ka.txt'];
     % cd ac_pwd dir
@@ -2329,7 +2329,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                 ymax_cut = str2double(answer{2});
                 [current_data]=depeaks(data,ymin_cut,ymax_cut); 
 
-                name1 = [dat_name,'-dpks',num2str(ymin_cut),'-',num2str(ymax_cut),ext];  % New name
+                name1 = [dat_name,'-dpks',num2str(ymin_cut),'_',num2str(ymax_cut),ext];  % New name
                 CDac_pwd
                 dlmwrite(name1, current_data, 'delimiter', ',', 'precision', 9); 
                 d = dir; %get files
@@ -2459,8 +2459,8 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                 agemodelfull(end,1) = data(end,1);
                 agemodelfull(end,2) = datapksperiod(end) + (agemodelfull(end,1)-agemodelfull(end-1,1)) * sedrate(end,2);
 
-                name1 = [dat_name,'-agemodel-',num2str(period),'-',plot_filter_s,ext];
-                name2 = [dat_name,'-sed.rate-',num2str(period),'-',plot_filter_s,ext];
+                name1 = [dat_name,'-agemodel-',num2str(period),'_',plot_filter_s,ext];
+                name2 = [dat_name,'-sed.rate-',num2str(period),'_',plot_filter_s,ext];
 
                 CDac_pwd
                 dlmwrite(name1, agemodel, 'delimiter', ',', 'precision', 9);
@@ -3800,8 +3800,8 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                     set(gca,'XMinorTick','on','YMinorTick','on')
                     ylabel('RHO in AR(1)')
                     legend('2.5% - 97.5%', '5% - 95%', '10% - 90%','15.87% - 84.14%', '25% - 75%', 'Median')
-                    title(['Window: ',num2str(window1),'-',num2str(window2),...
-                        '. Sample rate: ',num2str(samprate1),'-',num2str(samprate2)])
+                    title(['Window: ',num2str(window1),'_',num2str(window2),...
+                        '. Sample rate: ',num2str(samprate1),'_',num2str(samprate2)])
 
                     name1 = [dat_name,'-rho1-median.txt'];
                     data1 = [y_grid_nan,powyad_p_nan(:,npercent2+1)];
@@ -4117,7 +4117,7 @@ if check == 1;
             end
             
             disp1 = ['Data: ',plot_filter_s, 'Window = ',num2str(window),' kyr; NW =',num2str(nw)];
-            disp2 = ['    cutoff freqency:',num2str(ftmin),'-',num2str(fterm),'; Step =',num2str(step),'; Pad = ',num2str(pad)];
+            disp2 = ['    cutoff freqency:',num2str(ftmin),'_',num2str(fterm),'; Step =',num2str(step),'; Pad = ',num2str(pad)];
             disp3 = ['    pairs of frequency bands:'];
             disp(disp1)
             disp(disp2)
@@ -4343,7 +4343,7 @@ if ~isempty(answer)
         warndlg('File name exists. An alternative name used','File Name Warning')
         
         for i = 1:100
-            filename = [filename(1:end-4),'-',num2str(i),'.txt'];
+            filename = [filename(1:end-4),'_',num2str(i),'.txt'];
             if exist([ac_pwd,handles.slash_v,filename])
             else
                 break
@@ -4778,7 +4778,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                 smoothn = round(smooth_v * npts);
                 % median-smoothing
                 try data(:,2) = moveMedian(data(:,2),smoothn);
-                    name1 = [dat_name,'-',num2str(smooth_v*100),'%-median',ext];  % New name
+                    name1 = [dat_name,'_',num2str(smooth_v*100),'%-median',ext];  % New name
                     CDac_pwd
                     dlmwrite(name1, data, 'delimiter', ',', 'precision', 9); 
                     d = dir; %get files

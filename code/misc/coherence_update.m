@@ -67,10 +67,10 @@ for i = 1:nrow
         [Cxy,F1,Pxy,F2] = cohac(x,y,sr_target,'hamming',windowsize,nooverlap,cohthreshold,0);
         Pxy = angle(Pxy);
         if save1 == 1
-            assignin('base','Cxy',Cxy)
-            assignin('base','F1',F1)
-            assignin('base','Pxy',Pxy)
-            assignin('base','F2',F2)
+            %assignin('base','Cxy',Cxy)
+            %assignin('base','F1',F1)
+            %assignin('base','Pxy',Pxy)
+            %assignin('base','F2',F2)
             pre_dirML = pwd;
             CDac_pwd; % cd working dir
             add_list = [dat_name,'-COH-',targetname];

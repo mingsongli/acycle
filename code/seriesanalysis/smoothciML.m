@@ -41,14 +41,36 @@ bootstd = std(yboot2,0,2);
 %bootprt = prctile(yboot2, [.5,2.275,15.865,50,84.135,97.725,99.5],2);
 bootprt = prctile(yboot2, [0.5,2.5,5,25,50,75,95,97.5,99.5],2);
 
+colorcode = [67/255,180/255,100/255];
+
 figure;
-scatter(X,Y)
-h1 = line(X, meanboot,'color','k','linestyle','-','linewidth',2);
-h3 = line(X, meanboot + 1 * bootstd,'color','r','linestyle','-','linewidth',1);
-h2 = line(X, meanboot + 2 * bootstd,'color','r','linestyle','--','linewidth',.5);
-h4 = line(X, meanboot - 1 * bootstd,'color','r','linestyle','-','linewidth',1);
-h5 = line(X, meanboot - 2 * bootstd,'color','r','linestyle','--','linewidth',.5);
-legend('Data',[num2str(span*100),'% ',method,' regression'],...
-    '1\sigma confidence intervals','2\sigma confidence intervals','Location','NorthEast');
-%L5 = legend('Data',[num2str(span*100),'% ',method,' regression'],...
-%    '1\sigma confidence intervals','2\sigma confidence intervals',4);
+set(gcf,'units','norm') % set location
+set(gcf,'position',[0.005,0.45,0.38,0.45]) % set position
+set(gcf,'color','w');
+hold on
+fill([X', fliplr(X')],[(meanboot + 2 * bootstd)', fliplr((meanboot - 2 * bootstd)')],colorcode,'LineStyle','none','facealpha',.2)
+fill([X', fliplr(X')],[(meanboot + bootstd)', fliplr((meanboot - bootstd)')],colorcode,'LineStyle','none','facealpha',.6)
+plot(X,meanboot,'Color',[0,120/255,0],'LineWidth',1.5,'LineStyle','-')
+scatter(X,Y,'b')
+title([num2str(span*100),' % ',method,' regression'])
+legend('2\sigma confidence intervals','1\sigma confidence intervals',...
+    'mean','Data',...
+    'Location','NorthEast');
+hold off
+
+figure;
+set(gcf,'units','norm') % set location
+set(gcf,'position',[0.385,0.45,0.38,0.45]) % set position
+set(gcf,'color','w');
+hold on
+fill([X', fliplr(X')],[(bootprt(:,end))', fliplr((bootprt(:,1))')],colorcode,'LineStyle','none','facealpha',.1)
+fill([X', fliplr(X')],[(bootprt(:,end-1))', fliplr((bootprt(:,2))')],colorcode,'LineStyle','none','facealpha',.3)
+fill([X', fliplr(X')],[(bootprt(:,end-2))', fliplr((bootprt(:,3))')],colorcode,'LineStyle','none','facealpha',.5)
+fill([X', fliplr(X')],[(bootprt(:,end-3))', fliplr((bootprt(:,4))')],colorcode,'LineStyle','none','facealpha',.9)
+plot(X,bootprt(:,5),'Color',[0,120/255,0],'LineWidth',1.5,'LineStyle','-')
+scatter(X,Y,'b')
+title([num2str(span*100),' % ',method,' regression'])
+legend('99% confidence intervals','95% confidence intervals','90% confidence intervals',...
+    '50% confidence intervals','median','Data',...
+    'Location','NorthEast');
+hold off
