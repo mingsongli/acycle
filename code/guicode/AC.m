@@ -191,6 +191,7 @@ end
 
 handles.acfigmain = gcf;  %handles of the ac main window
 figure(handles.acfigmain)
+set(handles.acfigmain, 'WindowKeyPressFcn', @KeyPress)
 h=get(gcf,'Children');  % get all content
 h1=findobj(h,'FontUnits','norm');  % find all font units as points
 set(h1,'FontUnits','points','FontSize',12);  % set as norm
@@ -290,6 +291,112 @@ function varargout = AC_OutputFcn(hObject, eventdata, handles)
 
 % Get default command line output from handles structure
 varargout{1} = handles.output;
+
+% Mar 17, 2020
+function KeyPress(hObject, EventData, handles)
+handles = guidata(hObject);
+if strcmp(EventData.Modifier,'control') 
+    if strcmp(EventData.Key,'c')
+    %disp('ctrl + c')
+    contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+    plot_selected = get(handles.listbox_acmain,'Value');
+    nplot = length(plot_selected);   % length
+    CDac_pwd;
+    handles.nplot = nplot;
+    if  min(plot_selected) > 2
+        handles.data_name = {};
+        handles.file = {};
+        for i = 1 : nplot
+           filename = char(contents(plot_selected(i)));
+           handles.data_name{i} = strrep2(filename, '<HTML><FONT color="blue">', '</FONT></HTML>');
+           handles.file{i} = [ac_pwd,handles.slash_v,handles.data_name{i}];
+        end
+    end
+    handles.copycut = 'copy';
+    cd(pre_dirML);
+    guidata(hObject, handles);
+    end
+end
+if strcmp(EventData.Modifier,'control')
+    if strcmp(EventData.Key,'x')
+    %disp('ctrl + x')
+    contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+    plot_selected = get(handles.listbox_acmain,'Value');
+    nplot = length(plot_selected);   % length
+    CDac_pwd;
+    handles.nplot = nplot;
+    if  min(plot_selected) > 2
+        handles.data_name = {};
+        handles.file = {};
+        for i = 1 : nplot
+           filename = char(contents(plot_selected(i)));
+           handles.data_name{i} = strrep2(filename, '<HTML><FONT color="blue">', '</FONT></HTML>');
+           handles.file{i} = [ac_pwd,handles.slash_v,handles.data_name{i}];
+        end
+    end
+    handles.copycut = 'cut';
+    cd(pre_dirML);
+    guidata(hObject, handles);
+    end
+end
+if strcmp(EventData.Modifier,'control')
+    if strcmp(EventData.Key,'v')
+    %disp('ctrl + v')
+    CDac_pwd;
+    copycut = handles.copycut; % cut or copy
+    nplot = handles.nplot; % number of selected files
+    if nplot == 0
+        return
+    end
+    for i = 1:nplot
+        if strcmp(copycut,'cut')
+            new_name = handles.data_name{i};
+            new_name_w_dir = [ac_pwd,handles.slash_v,new_name];
+            if exist(new_name_w_dir)
+                answer = questdlg(['Cover existed file ',new_name,'?'],...
+                    'Warning',...
+                    'Yes','No','No');
+                % Handle response
+                switch answer
+                    case 'Yes'
+                        movefile(handles.file{i}, ac_pwd)
+                    case 'No'
+                end
+            else
+                movefile(handles.file{i}, ac_pwd)
+            end
+        elseif strcmp(copycut,'copy')
+            % paste copied files
+            try
+                new_name = handles.data_name{i};
+                new_name_w_dir = [ac_pwd,handles.slash_v,new_name];
+                if exist(new_name_w_dir)
+                    [~,dat_name,ext] = fileparts(new_name);
+                    for i = 1:100
+                        new_name = [dat_name,'_copy',num2str(i),ext];
+                        if exist([ac_pwd,handles.slash_v,new_name])
+                        else
+                            break
+                        end
+                    end
+                end
+                new_file = [ac_pwd,handles.slash_v,new_name];
+                file_list = handles.file;
+                copyfile(file_list{i}, new_file)
+            catch
+                disp('No data copied')
+            end
+        end
+    end
+    d = dir; %get files
+    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+    refreshcolor;
+    if isdir(pre_dirML)
+        cd(pre_dirML);
+    end
+    guidata(hObject,handles)
+    end
+end
 
 
 function push_up_clbk(hObject, handles)
@@ -528,14 +635,15 @@ if handles.doubleclick
                 nlen = length(data1(:,1));
                 if nlen > 15
                     msgbox('See Terminal/Command Window for details')
-                    disp(['>> Total rows: ', num2str(nlen)])
-                    disp('>> First 10 and last 5 rows of data:')
+                    disp(['>>  ',dat_name,ext])
+                    disp(['>>  Total rows: ', num2str(nlen)])
+                    disp('>>  First 10 and last 5 rows:')
                     disp(data1(1:10,:))
                     disp('       ... ...')
                     disp(data1(end-4:end,:))
                 else
                     msgbox('See Terminal/Command Window for details')
-                    disp('>> Data:')
+                    disp('>>  Data:')
                     disp(data1)
                 end
             elseif ismember(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})
@@ -576,40 +684,54 @@ if handles.doubleclick
                 catch
                 end
             elseif ismember(ext,{'.txt','.csv'})
-                [data1,~] = importdata(filename);
-                nlen = length(data1(:,1));
-                if nlen> 15
-                    msgbox('See Terminal/Command Window for details')
-                    disp(['>> Total rows: ', num2str(nlen)])
-                    disp('>> First 10 and last 5 rows of data:')
-                    disp(data1(1:10,:))
-                    disp('                  ... ...')
-                    disp(data1(end-4:end,:))
-                    
-                else
-                    msgbox('See Terminal/Command Window for details')
-                    disp('>> Data:')
-                    disp(data1)
+                try
+                    system(['open ',filename]);
+                    [data1,~] = importdata(filename);
+                    nlen = length(data1(:,1));
+                    ncol = length(data1(1,:));
+                    disp(['>>  ',dat_name,ext])
+                    disp(['>>  Number of rows: ',    num2str(nlen)])
+                    disp(['>>  Number of columns: ', num2str(ncol)])
+                catch
+                    [data1,~] = importdata(filename);
+                    nlen = length(data1(:,1));
+                    if nlen> 15
+                        msgbox('See Terminal/Command Window for details')
+                        disp(['>>  ',dat_name,ext])
+                        disp(['>>  Total rows: ', num2str(nlen)])
+                        disp('>>  First 10 and last 5 rows:')
+                        disp(data1(1:10,:))
+                        disp('                  ... ...')
+                        disp(data1(end-4:end,:))
+                    else
+                        msgbox('See Terminal/Command Window for details')
+                        disp('>> Data:')
+                        disp(data1)
+                    end
                 end
             elseif ismember(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})
-                try 
-                    hwarn = warndlg('Wait, large image? can be very slow ...');
-                    im_name = imread(filename);
-                    hFig1 = figure;
-                    lastwarn('') % Clear last warning message
-                    imshow(im_name);
-                    set(gcf,'Name',[dat_name,ext])
-                    [warnMsg, warnId] = lastwarn;
-                    if ~isempty(warnMsg)
-                        close(hFig1)
-                        imscrollpanel_ac(filename);
-                    end
-                    %hwarn = warndlg('Wait, large image? can be very slow ...');
-                    try close(hwarn)
-                    catch
-                    end
+                try
+                    system(['open ',filename]);
                 catch
-                    warndlg('Image color space not supported. Convert to RGB or Grayscale')
+                    try 
+                        hwarn = warndlg('Wait, large image? can be very slow ...');
+                        im_name = imread(filename);
+                        hFig1 = figure;
+                        lastwarn('') % Clear last warning message
+                        imshow(im_name);
+                        set(gcf,'Name',[dat_name,ext])
+                        [warnMsg, warnId] = lastwarn;
+                        if ~isempty(warnMsg)
+                            close(hFig1)
+                            imscrollpanel_ac(filename);
+                        end
+                        %hwarn = warndlg('Wait, large image? can be very slow ...');
+                        try close(hwarn)
+                        catch
+                        end
+                    catch
+                        warndlg('Image color space not supported. Convert to RGB or Grayscale')
+                    end
                 end
             elseif ismember(ext,{'.pdf','.ai','.ps'})
                 try
@@ -791,39 +913,41 @@ if check == 1;
     for i = 1:nplot
         plot_no = plot_selected(i);
         plot_filter_s1 = char(contents(plot_no));
-        GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s1);
-    try
-        data_filterout = load(plot_filter_s);
-    catch       
-        fid = fopen(plot_filter_s);
-        try data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
-            fclose(fid);
-            if iscell(data_ft)
-                try
-                    data_filterout = cell2mat(data_ft);
-                catch
-                    fid = fopen(plot_filter_s,'at');
-                    fprintf(fid,'%d\n',[]);
-                    fclose(fid);
-                    fid = fopen(plot_filter_s);
-                    data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
-                    fclose(fid);
+        GETac_pwd; 
+        plot_filter_s = fullfile(ac_pwd,plot_filter_s1);
+        [~,plotseries,~] = fileparts(plot_filter_s);
+        handles.plot_list{i} = plotseries;
+        try
+            data_filterout = load(plot_filter_s);
+        catch       
+            fid = fopen(plot_filter_s);
+            try data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
+                fclose(fid);
+                if iscell(data_ft)
                     try
                         data_filterout = cell2mat(data_ft);
                     catch
-                        warndlg(['Check data: ',dat_name],'Data Error!')
+                        fid = fopen(plot_filter_s,'at');
+                        fprintf(fid,'%d\n',[]);
+                        fclose(fid);
+                        fid = fopen(plot_filter_s);
+                        data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
+                        fclose(fid);
+                        try
+                            data_filterout = cell2mat(data_ft);
+                        catch
+                            warndlg(['Check data: ',dat_name],'Data Error!')
+                        end
                     end
                 end
-            end
-        catch
-            warndlg({'Cannot find the data.'; 'Folder Name may contain NO language other than ENGLISH'})
-            try
-                close(figf);
             catch
+                warndlg({'Cannot find the data.'; 'Folder Name may contain NO language other than ENGLISH'})
+                try
+                    close(figf);
+                catch
+                end
             end
-        end
-        
-    end     
+        end     
 
         data_filterout = data_filterout(~any(isnan(data_filterout),2),:);
         
@@ -855,9 +979,11 @@ if check == 1;
     else
         xlabel(['Time (',handles.unit,')'])
     end
-    title(plot_filter_s1, 'Interpreter', 'none')
+    %title(plot_filter_s1, 'Interpreter', 'none')
+    legend(handles.plot_list, 'Interpreter', 'none')
     hold off
     set(gcf,'color','w');
+    set(gcf,'Name','Acycle: Plot Preview');
 end
 guidata(hObject,handles)
 

@@ -30,6 +30,8 @@ NOTE    : ask for MatLab RUNTIME 2019a
     9. NEW: Coherence and phase analysis
 
     10. Bootstrap: fill plot
+
+    11. Plot Preview: add legend.
 _______________________________________
 
 Version : ACycle_v2.1.0
