@@ -99,12 +99,13 @@ for i = 1:nrow
             end
             set(gcf,'color','w');
             set(gcf,'Name','Acycle: coherence and phase | coherence');
+            
             subplot(2,1,1)
             if forp == 1
-                plot(F1,Cxy,'k','LineWidth',2)
+                plot(F1,Cxy,'k-o','LineWidth',2)
                 xlabel('Frequency')
             else
-                plot(1./F1(2:end),Cxy(2:end),'k','LineWidth',2)
+                plot(1./F1(2:end),Cxy(2:end),'k-o','LineWidth',2)
                 xlabel('Period')
             end
             xlim([plotx1, plotx2])
@@ -118,7 +119,7 @@ for i = 1:nrow
 
             subplot(2,1,2)
             if forp == 1
-                plot(F2,Pxy/pi * 180,'r','LineWidth',2)
+                plot(F2,Pxy/pi * 180,'r-o','LineWidth',2)
                 xlabel('Frequency')
             else
                 plot(1./F2(2:end),Pxy(2:end)/pi * 180,'r','LineWidth',2)

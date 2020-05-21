@@ -907,7 +907,7 @@ for i = 1:nplot
     end
 end
 plotsucess = 0;
-if check == 1;
+if check == 1
     figf = figure;
     hold on;
     for i = 1:nplot
@@ -951,9 +951,10 @@ if check == 1;
 
         data_filterout = data_filterout(~any(isnan(data_filterout),2),:);
         
+        
         try plot(data_filterout(:,1),data_filterout(:,2:end),'LineWidth',1)
             plotsucess = 1;
-            % save current data for R 
+            % save current data for R
             assignin('base','currentdata',data_filterout);
             datar = num2str(data_filterout(1,2));
             for ii=2:length(data_filterout(:,1));
@@ -984,6 +985,133 @@ if check == 1;
     hold off
     set(gcf,'color','w');
     set(gcf,'Name','Acycle: Plot Preview');
+    
+    % multiple column data
+    if plotsucess > 0
+        
+        coln = length(data_filterout(1,:)); % 1: end
+        colnend = coln -1;
+        if and(nplot == 1, colnend > 1)
+            
+            if coln < 7
+                figf2 = figure;
+                for colni = 2:coln
+                    subplot(colnend,1,colni-1)
+                    plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
+                    set(gca,'XMinorTick','on','YMinorTick','on')
+                    title(['Column #', num2str(colni)])
+                
+                    if handles.unit_type == 0
+                        xlabel(['Unit (',handles.unit,')'])
+                    elseif handles.unit_type == 1
+                        xlabel(['Depth (',handles.unit,')'])
+                    else
+                        xlabel(['Time (',handles.unit,')'])
+                    end
+                end
+            elseif coln < 13
+                figf2 = figure;
+                colnhf= ceil(colnend/2);
+                for colni = 2:coln
+                    subplot(colnhf,2,colni-1)
+                    plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
+                    set(gca,'XMinorTick','on','YMinorTick','on')
+                    title(['Column #', num2str(colni)])
+
+                    if handles.unit_type == 0
+                        xlabel(['Unit (',handles.unit,')'])
+                    elseif handles.unit_type == 1
+                        xlabel(['Depth (',handles.unit,')'])
+                    else
+                        xlabel(['Time (',handles.unit,')'])
+                    end
+                end
+            elseif coln < 19
+                figf2 = figure;
+                colnhf= ceil(colnend/3);
+                for colni = 2:coln
+                    subplot(colnhf,3,colni-1)
+                    plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
+                    set(gca,'XMinorTick','on','YMinorTick','on')
+                    title(['Column #', num2str(colni)])
+
+                    if handles.unit_type == 0
+                        xlabel(['Unit (',handles.unit,')'])
+                    elseif handles.unit_type == 1
+                        xlabel(['Depth (',handles.unit,')'])
+                    else
+                        xlabel(['Time (',handles.unit,')'])
+                    end
+                end
+            elseif coln < 25
+                figf2 = figure;
+                colnhf= ceil(colnend/4);
+                for colni = 2:coln
+                    subplot(colnhf,4,colni-1)
+                    plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
+                    set(gca,'XMinorTick','on','YMinorTick','on')
+                    title(['Column #', num2str(colni)])
+
+                    if handles.unit_type == 0
+                        xlabel(['Unit (',handles.unit,')'])
+                    elseif handles.unit_type == 1
+                        xlabel(['Depth (',handles.unit,')'])
+                    else
+                        xlabel(['Time (',handles.unit,')'])
+                    end
+                end
+            else
+                colnhf= ceil(24/4);
+                figf2 = figure;
+                for colni = 2:25
+                    subplot(colnhf,4,colni-1)
+                    plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
+                    set(gca,'XMinorTick','on','YMinorTick','on')
+                    title(['Column #', num2str(colni)])
+
+                    if handles.unit_type == 0
+                        xlabel(['Unit (',handles.unit,')'])
+                    elseif handles.unit_type == 1
+                        xlabel(['Depth (',handles.unit,')'])
+                    else
+                        xlabel(['Time (',handles.unit,')'])
+                    end
+                end
+                if coln<50
+                    figf2 = figure;
+                    for colni = 26:coln
+                        subplot(colnhf,4,colni-25)
+                        plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
+                        set(gca,'XMinorTick','on','YMinorTick','on')
+                        title(['Column #', num2str(colni)])
+
+                        if handles.unit_type == 0
+                            xlabel(['Unit (',handles.unit,')'])
+                        elseif handles.unit_type == 1
+                            xlabel(['Depth (',handles.unit,')'])
+                        else
+                            xlabel(['Time (',handles.unit,')'])
+                        end
+                    end
+                else
+                    figf2 = figure;
+                    for colni = 26:49
+                        subplot(6,4,colni-25)
+                        plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
+                        set(gca,'XMinorTick','on','YMinorTick','on')
+                        title(['Column #', num2str(colni)])
+                        if handles.unit_type == 0
+                            xlabel(['Unit (',handles.unit,')'])
+                        elseif handles.unit_type == 1
+                            xlabel(['Depth (',handles.unit,')'])
+                        else
+                            xlabel(['Time (',handles.unit,')'])
+                        end
+                    end
+                end
+            end        
+        end
+    end
 end
 guidata(hObject,handles)
 
@@ -1707,9 +1835,6 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                 span_v = str2double(answer{1});
                 method = (answer{2});
                 bootn = str2double(answer{3});
-%                 if bootn*length(time) >= 100000
-%                     warndlg('Large number of bootstrap simulations. Please Wait ...','Bootstrap');
-%                 end
                 
                 span = span_v/(time(end)-time(1));
                 hwarn1 = warndlg('Slow process. Wait ...','Smoothing');

@@ -76,7 +76,7 @@ if strcmp(filter,'Gaussian')
     % update data and names
     [gaussbandx,filter,f]=gaussfilter(datax,dt,flch(2),flch(1),flch(3));
     data_filterout = [time,gaussbandx];
-    add_list = [handles.dat_name,'-Gau-',num2str(flch(2)),'±',num2str(abs(flch(2)-flch(3))),'.txt'];
+    add_list = [handles.dat_name,'-Gau-',num2str(flch(2)),char(177),num2str(abs(flch(2)-flch(3))),'.txt'];
     
 elseif strcmp(filter,'Taner-Hilbert')
     set(handles.edit18,'enable','on')
@@ -98,12 +98,12 @@ elseif strcmp(filter,'Taner-Hilbert')
     xlim([x_1, x_2])
     
     handles.filterdd = tanhilb;
-    add_list = [handles.dat_name,'-Tan-',num2str(flch(2)),'±',num2str(abs(flch(2)-flch(3))),'-e',num2str(log10(taner_c)),'.txt'];
-    add_list_am = [handles.dat_name,'-Tan-',num2str(flch(2)),'±',num2str(abs(flch(2)-flch(3))),'-e',num2str(log10(taner_c)),'-AM.txt'];
-    add_list_ufaze = [handles.dat_name,'-Tan-',num2str(flch(2)),'±',num2str(abs(flch(2)-flch(3))),'-e',num2str(log10(taner_c)),'-ufaze.txt'];
-    add_list_ufazedet = [handles.dat_name,'-Tan-',num2str(flch(2)),'±',num2str(abs(flch(2)-flch(3))),'-e',num2str(log10(taner_c)),'-ufazedet.txt'];
-    add_list_ifaze = [handles.dat_name,'-Tan-',num2str(flch(2)),'±',num2str(abs(flch(2)-flch(3))),'-e',num2str(log10(taner_c)),'-ifaze.txt'];
-    add_list_ifreq = [handles.dat_name,'-Tan-',num2str(flch(2)),'±',num2str(abs(flch(2)-flch(3))),'-e',num2str(log10(taner_c)),'-ifreq.txt'];
+    add_list = [handles.dat_name,'-Tan-',num2str(flch(2)),char(177),num2str(abs(flch(2)-flch(3))),'-e',num2str(log10(taner_c)),'.txt'];
+    add_list_am = [handles.dat_name,'-Tan-',num2str(flch(2)),char(177),num2str(abs(flch(2)-flch(3))),'-e',num2str(log10(taner_c)),'-AM.txt'];
+    add_list_ufaze = [handles.dat_name,'-Tan-',num2str(flch(2)),char(177),num2str(abs(flch(2)-flch(3))),'-e',num2str(log10(taner_c)),'-ufaze.txt'];
+    add_list_ufazedet = [handles.dat_name,'-Tan-',num2str(flch(2)),char(177),num2str(abs(flch(2)-flch(3))),'-e',num2str(log10(taner_c)),'-ufazedet.txt'];
+    add_list_ifaze = [handles.dat_name,'-Tan-',num2str(flch(2)),char(177),num2str(abs(flch(2)-flch(3))),'-e',num2str(log10(taner_c)),'-ifaze.txt'];
+    add_list_ifreq = [handles.dat_name,'-Tan-',num2str(flch(2)),char(177),num2str(abs(flch(2)-flch(3))),'-e',num2str(log10(taner_c)),'-ifreq.txt'];
     data_filterout = tanhilb;
     handles.add_list_am = add_list_am;
     handles.add_list_ufaze = add_list_ufaze;
