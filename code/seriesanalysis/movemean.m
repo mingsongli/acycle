@@ -1,66 +1,57 @@
-function B = movemean(A,n,option)
-
-% INPUT:
-% A: 1 column series
-% n: window
-% option:
-
+function y = movemean(x,w)
+%
+% movemean returns an array of local w-point mean values, 
+%   where each mean is calculated over a sliding window of length w 
+%   across neighboring elements of x. 
+%   When w is odd, the window is centered about the element in the current position. 
+%   When k is even, the window is centered about the left element near the center. 
+%   The window size is automatically truncated at the endpoints 
+%   when there are not enough elements to fill the window. 
+%    When the window is truncated, the mean is taken over only the elements that fill the window. 
+%   
+% INPUT
+% x: input vector (size: m x 1)
+% w: desired window size (either odd or even number)
 % OUTPUT
-% B: results
-if ~nargin
-    error('Error in movemean. No input data.')
-end
+% y: smoothed output signal; y is the same size as x.
+%
+% By Mingsong Li, Dec. 24, 2018, Penn State
+%   Email: limingsonglms@gmail.com
+%
 
-nptsA = length(A);
-if n >= nptsA
-    error('Error in movemean. n must be small than A.')
-end
+m=length(x);
+y=zeros(m,1);
 
-if nargin < 2
-    error('Error in movemean. No window.')
-end
+halfw = floor(w/2);
+idx1 = halfw + 1;    % starting index of input signal with moving window of size w
 
-if nargin < 3
-    option = 'regular';
-end
-if nargin >3
-    error('Error in movemean. Too much arguments.')
-end
-
-if mod(n,2) == 0
-    n = n-1;
-end
-
-nptsB = nptsA - (n-1); %  number of points of series B
-normalB = (n+1)/2; %
-B = zeros(nptsA,1);
-
-if strcmp(option, 'omitnan')
-    for i = 1:nptsB
-        C = A(i:(i+n-1));
-        C = C(~isnan(C));
-        B(normalB+i-1) = mean(C);
+if mod(w,2)
+    % odd number
+    %   first section
+    for i = 1: idx1-1
+        y(i) = nanmean(x(1: idx1-1+i));
     end
-   
-    for j = 1:(normalB-1)
-        C=A(1:normalB+j-1);
-        C = C(~isnan(C));
-        B(j) = mean(C);
-        k = nptsA-j-normalB+2;
-        D = A(k:nptsA);
-        D = D(~isnan(D));
-        B(nptsA-j+1) = mean(D);
+    %   body
+    for i = idx1 : m-idx1+1
+        y(i) = nanmean( x(i-halfw : i+halfw));
     end
-else
+    %   last section
+    for i = m-idx1+2 : m
+        y(i) = nanmean(x( i-halfw : m));
+    end
     
-    for i = 1:nptsB
-        B(normalB+i-1) = mean(A(i:(i+n-1)));
+else
+    % even number
+    %   first section
+    for i = 1: halfw-1
+        y(i) = nanmean(x(1: halfw+i));
     end
-
-    for j = 1:(normalB-1)
-        B(j) = mean(A(1:normalB+j-1));
-        k = nptsA-j-normalB+2;
-        B(nptsA-j+1) = mean(A(k:nptsA));
+    %   body
+    for i = halfw : m-idx1+1
+        y(i) = nanmean( x(i-(halfw-1) : i+halfw));
     end
-
+    %   last section
+    for i = m-idx1+2 : m
+         y(i) = nanmean(x(i-(halfw-1) : m));
+    end
 end

@@ -249,7 +249,7 @@ handles.MTMtabtchi = 'notabtchi';
 handles.nw = 2;
 handles.copycut = 'copy';
 handles.nplot = 0;
-handles.filetype = {'.txt','.csv','','.res'};
+handles.filetype = {'.txt','.csv','','.res','.dat'};
 handles.acfig = gcf;
 handles.math_sort = 1;
 handles.math_unique = 1;
@@ -260,6 +260,17 @@ assignin('base','unit_type',handles.unit_type)
 
 % Update handles structure
 guidata(hObject, handles);
+% logo
+if ispc
+    try
+        Ilogo = imread('acycle_logo.jpg');
+        javaImage = im2java(Ilogo);
+        newIcon = javax.swing.ImageIcon(javaImage);    
+        figFrame = get(handles.acfigmain,'JavaFrame');
+        figFrame.setFigureIcon(newIcon);
+    catch
+    end
+end
 % Update reminder
 pause(0.0001);%
 % if isdeployed
@@ -630,11 +641,25 @@ if handles.doubleclick
                         system(['open ',ac_pwd]);
                     end
                 end
-            elseif ismember(ext,{'.txt','.csv'})
+            elseif ismember(ext,{'.txt','.csv','.res','.dat'})
                 [data1,~] = importdata(filename);
+                if isstruct(data1)
+                    data1 = data1.data;
+                end
                 nlen = length(data1(:,1));
+                ncol = length(data1(1,:));
+                % open in GUI
+                    ftab = figure;%('Position',[200 200 400 150]);
+                    set(0,'Units','normalized') % set units as normalized
+                    set(gcf,'units','norm') % set location
+                    set(ftab,'Name',[dat_name,ext],'NumberTitle','off')
+                    widthtab = .05 + .05*ncol;
+                    if widthtab > 0.4; widthtab = 0.4; end                  
+                    set(ftab,'Position',[.3 .2 widthtab .7]) % set location
+                    t = uitable('Parent',ftab,'Data',data1,'Units','normalized','Position',[0.011,0.012,0.97,0.984]);
+                    
                 if nlen > 15
-                    msgbox('See Terminal/Command Window for details')
+                    %msgbox('See Terminal/Command Window for details')
                     disp(['>>  ',dat_name,ext])
                     disp(['>>  Total rows: ', num2str(nlen)])
                     disp('>>  First 10 and last 5 rows:')
@@ -642,7 +667,7 @@ if handles.doubleclick
                     disp('       ... ...')
                     disp(data1(end-4:end,:))
                 else
-                    msgbox('See Terminal/Command Window for details')
+                    %msgbox('See Terminal/Command Window for details')
                     disp('>>  Data:')
                     disp(data1)
                 end
@@ -653,7 +678,7 @@ if handles.doubleclick
                     hFig1 = figure;
                     lastwarn('') % Clear last warning message
                     imshow(im_name);
-                    set(gcf,'Name',[dat_name,ext])
+                    set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
                     [warnMsg, warnId] = lastwarn;
                     if ~isempty(warnMsg)
                         close(hFig1)
@@ -680,18 +705,28 @@ if handles.doubleclick
             if strcmp(ext,'.fig')
                 try
                     openfig(filename);
-                    set(gcf,'Name',[dat_name,ext])
+                    set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
                 catch
                 end
-            elseif ismember(ext,{'.txt','.csv'})
-                try
-                    system(['open ',filename]);
+            elseif ismember(ext,{'.txt','.csv','.res','.dat'})
+                 try
+                    %system(['open ',filename]);
                     [data1,~] = importdata(filename);
+                    if isstruct(data1)
+                        data1 = data1.data;
+                    end
                     nlen = length(data1(:,1));
                     ncol = length(data1(1,:));
-                    disp(['>>  ',dat_name,ext])
-                    disp(['>>  Number of rows: ',    num2str(nlen)])
-                    disp(['>>  Number of columns: ', num2str(ncol)])
+                    % open in GUI
+                    ftab = figure;%('Position',[200 200 400 150]);
+                    set(0,'Units','normalized') % set units as normalized
+                    set(gcf,'units','norm') % set location
+                    set(ftab,'Name',[dat_name,ext],'NumberTitle','off')
+                    widthtab = .05 + .05*ncol;
+                    if widthtab > 0.4; widthtab = 0.4; end                  
+                    set(ftab,'Position',[.3 .2 widthtab .7]) % set location
+                    t = uitable('Parent',ftab,'Data',data1,'Units','normalized','Position',[0.011,0.012,0.97,0.984]);
+                    
                 catch
                     [data1,~] = importdata(filename);
                     nlen = length(data1(:,1));
@@ -719,7 +754,7 @@ if handles.doubleclick
                         hFig1 = figure;
                         lastwarn('') % Clear last warning message
                         imshow(im_name);
-                        set(gcf,'Name',[dat_name,ext])
+                        set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
                         [warnMsg, warnId] = lastwarn;
                         if ~isempty(warnMsg)
                             close(hFig1)
@@ -888,7 +923,7 @@ for i = 1:nplot
                     hFig1 = figure;
                     lastwarn('') % Clear last warning message
                     imshow(im_name);
-                    set(gcf,'Name',[dat_name,ext])
+                    set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
                     [warnMsg, warnId] = lastwarn;
                     if ~isempty(warnMsg)
                         close(hFig1)
@@ -984,23 +1019,21 @@ if check == 1
     legend(handles.plot_list, 'Interpreter', 'none')
     hold off
     set(gcf,'color','w');
-    set(gcf,'Name','Acycle: Plot Preview');
+    set(gcf,'Name','Acycle: Plot Preview','NumberTitle','off');
     
     % multiple column data
-    if plotsucess > 0
-        
+    if plotsucess > 0        
         coln = length(data_filterout(1,:)); % 1: end
         colnend = coln -1;
-        if and(nplot == 1, colnend > 1)
-            
+        if and(nplot == 1, colnend > 1)            
             if coln < 7
                 figf2 = figure;
                 for colni = 2:coln
                     subplot(colnend,1,colni-1)
                     plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
                     set(gca,'XMinorTick','on','YMinorTick','on')
-                    title(['Column #', num2str(colni)])
-                
+                    title(['Column #', num2str(colni)], 'Interpreter', 'none')
+                    set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
                     if handles.unit_type == 0
                         xlabel(['Unit (',handles.unit,')'])
                     elseif handles.unit_type == 1
@@ -1016,7 +1049,8 @@ if check == 1
                     subplot(colnhf,2,colni-1)
                     plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
                     set(gca,'XMinorTick','on','YMinorTick','on')
-                    title(['Column #', num2str(colni)])
+                    title(['Column #', num2str(colni)], 'Interpreter', 'none')
+                    set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
 
                     if handles.unit_type == 0
                         xlabel(['Unit (',handles.unit,')'])
@@ -1033,7 +1067,8 @@ if check == 1
                     subplot(colnhf,3,colni-1)
                     plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
                     set(gca,'XMinorTick','on','YMinorTick','on')
-                    title(['Column #', num2str(colni)])
+                    title(['Column #', num2str(colni)], 'Interpreter', 'none')
+                    set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
 
                     if handles.unit_type == 0
                         xlabel(['Unit (',handles.unit,')'])
@@ -1050,7 +1085,8 @@ if check == 1
                     subplot(colnhf,4,colni-1)
                     plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
                     set(gca,'XMinorTick','on','YMinorTick','on')
-                    title(['Column #', num2str(colni)])
+                    title(['Column #', num2str(colni)], 'Interpreter', 'none')
+                    set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
 
                     if handles.unit_type == 0
                         xlabel(['Unit (',handles.unit,')'])
@@ -1067,7 +1103,8 @@ if check == 1
                     subplot(colnhf,4,colni-1)
                     plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
                     set(gca,'XMinorTick','on','YMinorTick','on')
-                    title(['Column #', num2str(colni)])
+                    set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
+                    title(['Column #', num2str(colni)], 'Interpreter', 'none')
 
                     if handles.unit_type == 0
                         xlabel(['Unit (',handles.unit,')'])
@@ -1083,7 +1120,8 @@ if check == 1
                         subplot(colnhf,4,colni-25)
                         plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
                         set(gca,'XMinorTick','on','YMinorTick','on')
-                        title(['Column #', num2str(colni)])
+                        title(['Column #', num2str(colni)], 'Interpreter', 'none')
+                        set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
 
                         if handles.unit_type == 0
                             xlabel(['Unit (',handles.unit,')'])
@@ -1099,7 +1137,8 @@ if check == 1
                         subplot(6,4,colni-25)
                         plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
                         set(gca,'XMinorTick','on','YMinorTick','on')
-                        title(['Column #', num2str(colni)])
+                        title(['Column #', num2str(colni)], 'Interpreter', 'none')
+                        set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
                         if handles.unit_type == 0
                             xlabel(['Unit (',handles.unit,')'])
                         elseif handles.unit_type == 1
@@ -1769,7 +1808,8 @@ if and ((min(plot_selected) > 2), (nplot == 1))
             answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
             if ~isempty(answer)
                 smooth_v = str2double(answer{1});
-                data(:,2) = movemean(data(:,2),smooth_v,'omitnan');
+                %data(:,2) = movemean(data(:,2),smooth_v,'omitnan');
+                data(:,2) = movemean(data(:,2),smooth_v);
                 name1 = [dat_name,'_',num2str(smooth_v),'ptsm',ext];  % New name
                 CDac_pwd
                 dlmwrite(name1, data, 'delimiter', ',', 'precision', 9); 
@@ -2724,7 +2764,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                 figure;
                 set(gcf,'units','norm') % set location
                 set(gcf,'position',[0.01,0.55,0.45,0.4]) % set position
-                set(gcf,'Name','Acycle: Build Age Model | Age Model')
+                set(gcf,'Name','Acycle: Build Age Model | Age Model','NumberTitle','off')
                 set(gcf,'color','w');
                 plot(agemodelfull(:,1), agemodelfull(:,2),'k','LineWidth',1)
                 xlabel(['Depth (',handles.unit,')'])
@@ -2968,7 +3008,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                     hFig1 = figure;
                     lastwarn('') % Clear last warning message
                     imshow(im_name);
-                    set(gcf,'Name',[dat_name,ext])
+                    set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
                     [warnMsg, warnId] = lastwarn;
                     if ~isempty(warnMsg)
                         close(hFig1)
@@ -3010,7 +3050,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                         figure
                         imshow(I)
                         dat_name = [dat_name,'-gray',ext];
-                        set(gcf,'Name',dat_name)
+                        set(gcf,'Name',dat_name,'NumberTitle','off')
                         CDac_pwd;
                         imwrite(I,dat_name)
                         d = dir; %get files
@@ -3063,7 +3103,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                     catch
                     end
                     
-                    set(gcf,'Name',[dat_name,ext,': Press "SHIFT"or"ALT" & select cursors now'])
+                    set(gcf,'Name',[dat_name,ext,': Press "SHIFT"or"ALT" & select cursors now'],'NumberTitle','off')
 
                     choice = questdlg('Steps: 1) click the "DataCursor" tool; 2) select two cursors; 3) press "Enter" in the COMMAND window', ...
                         'Press "SHIFT"or"ALT" key & select 2 cursors', 'Continue','Cancel','Continue');
@@ -3803,7 +3843,7 @@ for i = 1:nplot
                     hFig1 = figure;
                     lastwarn('') % Clear last warning message
                     imshow(im_name);
-                    set(gcf,'Name',[dat_name,ext])
+                    set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
                     [warnMsg, warnId] = lastwarn;
                     if ~isempty(warnMsg)
                         close(hFig1)
@@ -4181,7 +4221,7 @@ if check == 1;
             set(0,'Units','normalized') % set units as normalized
             set(gcf,'units','norm') % set location
             set(gcf,'position',[0.1,0.4,0.45,0.45]) % set position
-            set(gcf,'Name', 'Sampling rate (original domain)')
+            set(gcf,'Name', 'Sampling rate (original domain)','NumberTitle','off')
             if handles.unit_type == 0;
                 xlabel(['Unit (',handles.unit,')'])
                 ylabel('Unit')
@@ -4204,7 +4244,7 @@ if check == 1;
             set(gcf,'units','norm') % set location
             set(gcf,'position',[0.55,0.4,0.45,0.45]) % set position
             title([[dat_name,ext],': kernel fit of sampling rates'], 'Interpreter', 'none')
-            set(gcf,'Name', 'Sampling rate: distribution')
+            set(gcf,'Name', 'Sampling rate: distribution','NumberTitle','off')
             if handles.unit_type == 0;
                 xlabel(['Sampling rate (',handles.unit,')'])
             elseif handles.unit_type == 1;
@@ -4270,7 +4310,7 @@ if check == 1;
             datax = data_filterout(:,2);
             figure;
             histfit(datax,[],'kernel')
-            set(gcf,'Name', 'Data Distribution')
+            set(gcf,'Name', 'Data Distribution','NumberTitle','off')
             title([[dat_name,ext],': kernel fit of the data'], 'Interpreter', 'none')
             xlabel('Data')
             note = ['max: ',num2str(max(datax)),'; mean: ',num2str(mean(datax)),...
@@ -4694,7 +4734,7 @@ for i = 1:nplot
                     im_name = imread(plot_filter_s);
                     figure;
                     imshow(im_name)
-                    set(gcf,'Name',[dat_name,ext])
+                    set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
                 catch
                 end
             end
@@ -5244,7 +5284,7 @@ if sum(strcmp(ext,{'.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.TIF'})) 
     im_name = imread(data_name);
     figure;
     imshow(im_name)
-    set(gcf,'Name',[dat_name,ext])
+    set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
 end
 
 CDac_pwd
@@ -5326,7 +5366,7 @@ if sum(strcmp(ext,{'.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.TIF'})) 
     im_name = imread(data_name);
     figure;
     imshow(im_name)
-    set(gcf,'Name',[dat_name,ext])
+    set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
 end
 
 CDac_pwd
