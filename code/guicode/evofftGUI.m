@@ -681,7 +681,7 @@ assignin('base','s',s);
 assignin('base','x',x_grid);
 assignin('base','y',y_grid);
 evofftfig = figure;
-whitebg('white');
+set(gcf,'Color', 'white')
 
 if handles.plot_2d == 1
     if and(MTMred == 1, plotseries ==0)
@@ -722,7 +722,7 @@ if handles.plot_2d == 1
         end
         shading interp
         xlim([fmin fmax])
-        xlabel(['Frequency ( cycles per ',unit,' )'])
+        xlabel(['Frequency (cycles/',unit,')'])
         if handles.flipy == 1;
             set(gca,'Ydir','reverse')
         end
@@ -778,7 +778,7 @@ if handles.plot_2d == 1
         shading interp
         ylim([dataraw(1,1) dataraw(end,1)])
         xlim([fmin fmax])
-        xlabel(['Frequency ( cycles per ',unit,' )'])
+        xlabel(['Frequency (cycles/',unit,')'])
         if handles.flipy == 1;
             set(gca,'Ydir','reverse')
         end
@@ -812,7 +812,7 @@ if handles.plot_2d == 1
             pcolor(x_grid(2:end),y_grid,s(:,2:end))
         end
         shading interp
-        xlabel(['Frequency ( cycles per ',unit,' )'])
+        xlabel(['Frequency (cycles/',unit,')'])
         xlim([fmin fmax])
         ylim([dataraw(1,1) dataraw(end,1)])
         if handles.flipy == 1;
@@ -832,7 +832,7 @@ if handles.plot_2d == 1
             pcolor(x_grid(2:end),y_grid,s(:,2:end))
         end
         shading interp
-        xlabel(['Frequency ( cycles per ',unit,' )'])
+        xlabel(['Frequency (cycles/',unit,')'])
         xlim([fmin fmax])
         if handles.flipy == 1;
             set(gca,'Ydir','reverse')
@@ -863,14 +863,14 @@ if handles.plot_2d == 1
     
     % set
     if MTMred == 0
-        title([method,'. Window',' = ',num2str(window),' ',unit,'; step = ',num2str(step),' ', unit])
+        title([method,'; window',' = ',num2str(window),' ',unit,'; step = ',num2str(step),' ', unit])
     else
         if plotseries == 0
             subplot(4,1,1)
-            title([method,'. Window',' = ',num2str(window),' ',unit,'; step = ',num2str(step),' ', unit])
+            title([method,'; window',' = ',num2str(window),' ',unit,'; step = ',num2str(step),' ', unit])
         else
             subplot(4,4,[2 3 4])
-            title([method,'. Window',' = ',num2str(window),' ',unit,'; step = ',num2str(step),' ', unit])
+            title([method,'; window',' = ',num2str(window),' ',unit,'; step = ',num2str(step),' ', unit])
         end
         set(gca,'XTickLabel',[]);
     end
@@ -887,7 +887,7 @@ else
         surf(x_grid,y_grid,s)
     end
     shading interp
-    xlabel(['Frequency ( cycles per ',unit,' )'])
+    xlabel(['Frequency (cycles/',unit,')'])
     xlim([fmin fmax])
     if handles.flipy == 1;
         set(gca,'Ydir','reverse')

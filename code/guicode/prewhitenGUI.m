@@ -76,7 +76,6 @@ set(handles.edit3,'position',[0.68,0.243,0.331,0.18]) % COCO
 
 set(handles.pushbutton1,'position',[0.3,0.005,0.442,0.23]) % COCO
 
-
 set(handles.radiobutton1,'Value',0) % model = 2
 set(handles.radiobutton2,'Value',1) % model = 2
 set(handles.radiobutton3,'Value',0) % model = 2

@@ -1,4 +1,4 @@
-function [rsq, rval] = fitItls(timeSeries, sedrate1, targetIn, cormethod,lsmethod,genplot)
+function [rsq, datay] = fitItls(timeSeries, sedrate1, targetIn, cormethod,lsmethod,genplot)
 % fitIt least squares
 % input
 %   timeSeries: tested time series, unit: cm
@@ -9,7 +9,7 @@ function [rsq, rval] = fitItls(timeSeries, sedrate1, targetIn, cormethod,lsmetho
 %           2 = timeOpt linear fit
 % Output
 %   rsq: r^2
-%   rval: r
+%   datay: output data
 % calls for
 %   harm1ML.m % least squares estimate a and b:  fy = a*cos(w*t) + b*sin(w*t)
 %
@@ -54,22 +54,23 @@ elseif cormethod == 2
     rsq = rval^2;
 end
 
+sdat = polyfit(y,fy,1);
+datl = y * sdat(1) + sdat(2);
+    
 if genplot == 1
     timeSeries(:,1) = timeSeries(:,1) - min(timeSeries(:,1));
     figure;
+    set(gcf,'Name','Acycle: TimeOpt #1')
     set(gcf,'Units','normalized','Position',[0.0, 0.5, 0.33, 0.4])
     subplot(2,1,1)
     plot(timeSeries(:,1), y,'r','LineWidth',3);
     hold on;
     plot(timeSeries(:,1), fy,'k','LineWidth',2);
     %legend('Envolope','Reconstructed')
-    title(['Envolope (red) vs. reconstructed model (black) @', num2str(sedrate1),' cm/kyr'])
+    title(['Envelope (red) vs. reconstructed model (black) @ ', num2str(sedrate1),' cm/kyr'])
     xlabel('Time (kyr)')
     ylabel('Std. Value')
     xlim([min(timeSeries(:,1)), max(timeSeries(:,1))])
-    
-    sdat = polyfit(y,fy,1);
-    datl = y * sdat(1) + sdat(2);
     
     %figure;
     subplot(2,1,2)
@@ -79,3 +80,5 @@ if genplot == 1
     xlabel('Envelope')
     ylabel('Reconstructed Model')
 end
+
+datay = [timeSeries(:,1),y,fy,datl];

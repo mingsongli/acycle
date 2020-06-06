@@ -2,12 +2,12 @@
     <img src="https://github.com/mingsongli/acycleFig/blob/master/default_icon_1024-git.gif" alt="homepage" title="Acycle GitHub homepage">
 </a>
 
-[![](https://img.shields.io/badge/version-v2.1-blue.svg)]()
+[![](https://img.shields.io/badge/version-v2.1.2-blue.svg)]()
 [![](https://img.shields.io/badge/license-GPL-brightgreen.svg)](https://www.gnu.org/licenses/)
 [![](https://img.shields.io/badge/platform-Mac_Win-green.svg)]()
 ![](https://img.shields.io/badge/language-MatLab-red.svg)
 ---
-`Acycle is a time-series analysis software for paleoclimate research and education`
+`Acycle is a time-series analysis software for research and education`
 
 ### Highlights
 > * A fully implemented graphical user interface (GUI) facilitates operator use
@@ -27,14 +27,14 @@
     <img src="https://www.eaps.purdue.edu/images/people/faculty/ogg1.jpg" alt="James Ogg" title="James Ogg">
 </a>
 
-* **Dr. James G. Ogg** (Professor, Purdue University, USA):
+* **Dr. James G. Ogg** (Purdue University, USA):
     > "His _**Acycle**_ software will become the standard tool for time-scale applications by all international workers."<br>
 
 <a href="https://geos.vt.edu/people/emeritus-faculty/fred-read.html">
     <img src="https://geos.vt.edu/content/geos_vt_edu/en/people/emeritus-faculty/fred-read/jcr:content/bio-image.transform/xl-medium/image.jpg" alt="JF Read" title="J. Fred Read" width="111" height="111">
 </a>
 
-* **Dr. J. Fred Read** (Emeritus Professor of Sedimentary Geology, Virginia Tech):
+* **Dr. J. Fred Read** (Virginia Tech, USA):
     > "It is truly an amazing contribution to the geosciences community. As someone who has spent much of the last 50 years trying to understand cyclic carbonates on shallow platforms, and having been involved with my students in some of the early work on stratigraphic modelling of the effects of Milankovitch forcing of carbonate platform stratigraphy, I was blown away by the power of the Acycle software. ... You should all feel very proud of this contribution. It opens up much needed access to these powerful tools for a wide audience in the sedimentary geology and paleoclimate community. Thanks again for all your efforts. A really marvellous job."<br>
 * [Read More](https://github.com/mingsongli/acycle#what-they-say-1)
 
@@ -80,7 +80,7 @@ Acycle v2.1 MatLab version:    https://www.icloud.com/iclouddrive/07FM0ksPsXr9Jm
     <img src="https://github.com/mingsongli/acycleFig/blob/master/WechatIMG17.jpeg" alt="MingsongLi.com" title="Mingsong Li homepage" width="100" height="100">
 </a>
 <br>
-Mingsong Li, Penn State. Feb. 23, 2020 <br>
+Mingsong Li, Penn State. June 5, 2020 <br>
 E-mail: <i> mul450 {at} psu.edu;  limingsonglms {at} gmail.com </i> <br><br>
 
 Website: https://mingsongli.com/acycle
@@ -112,16 +112,14 @@ Website: https://mingsongli.com/acycle
 
 ---
 ### Abstract
-* _Acycle_ is a comprehensive, but "user-friendly" software package for analysis of time-series designed for paleoclimate research and education.
+* _Acycle_ is a comprehensive, but "user-friendly" software package for analysis of time-series designed for (but not limted to) climate research and education.
 * _Acycle_ runs either in the MATLAB environment or as a stand-alone application on Mac and Windows.
 * It is an open-source package and is available free of charge.
-    * _Acycle_ provides data preparation tools, detrending procedures with multiple options available to track or remove secular trends, and integrates various power spectral analysis approaches for detection and tracking of periodic signals.
+    * _Acycle_ provides data preparation tools, curve fitting, detrending procedures with multiple options available to track or remove secular trends, and integrates various power spectral analysis approaches for detection and tracking of periodic signals.
 
-    * _Acycle_ also provides a toolbox that evaluates astronomical signals in paleoclimate series, and estimates the most likely sedimentation rate by maximizing the correlation coefficient between power spectra of an astronomical solution and a paleoclimate series.
+    * _Acycle_ also provides a toolbox that evaluates astronomical signals in climate series, and estimates the most likely sedimentation rate by maximizing the correlation coefficient between power spectra of an astronomical solution and a paleoclimate series.
 
-    * Sedimentary noise models for sea-level variations are also included.
-
-    * Many of the functions are specific to cyclostratigraphy and astrochronology, and are not found in standard, statistical packages.
+    * Many of the functions are specific to paleoclimatology and cyclostratigraphy, and are not found in standard, statistical packages.
 
 ![gui](https://github.com/mingsongli/acycleFig/blob/master/acycle1.2-GUI.png)
 
@@ -244,7 +242,7 @@ _2π multi-taper method power spectrum of the gamma ray series is shown with `20
     <img src="https://geos.vt.edu/content/geos_vt_edu/en/people/emeritus-faculty/fred-read/jcr:content/bio-image.transform/xl-medium/image.jpg" alt="JF Read" title="J. Fred Read" width="111" height="111">
 </a>
 
-* **Dr. [J. Fred Read](https://geos.vt.edu/people/emeritus-faculty/fred-read.html)** (Emeritus Professor of Sedimentary Geology, Dept of Geosciences, Virginia Tech)
+* **Dr. [J. Fred Read](https://geos.vt.edu/people/emeritus-faculty/fred-read.html)** (Virginia Tech, USA)
 
     > I am writing to express my appreciation for all the hard work and thought that has gone into the development of the _Acycle_ software program.  **It is truly an amazing contribution to the geosciences community.** As someone who has spent much of the last 50 years trying to understand cyclic carbonates on shallow platforms, and having been involved with my students in some of the early work on stratigraphic modelling of the effects of Milankovitch forcing of carbonate platform stratigraphy, **I was blown away by the power of the _Acycle_ software.**
 
@@ -258,7 +256,7 @@ _2π multi-taper method power spectrum of the gamma ray series is shown with `20
     <img src="https://www.eaps.purdue.edu/images/people/faculty/ogg1.jpg" alt="James Ogg" title="James Ogg">
 </a>
 
-* **Dr. [James Ogg](https://www.eaps.purdue.edu/people/faculty-pages/ogg.html)** (Professor, DEPT. EARTH, ATMOS. & PLANET. SCI., Purdue University, USA):
+* **Dr. [James Ogg](https://www.eaps.purdue.edu/people/faculty-pages/ogg.html)** (Purdue University, USA):
 
     > "Mingsong Li's _**Acycle**_ software enables us to quickly analyze the potential of new outcrops and boreholes, and then to determine the sedimentation rates and elapsed time. **His _**Acycle**_ software will become the standard tool for time-scale applications by all international workers."**
 
@@ -273,15 +271,15 @@ _2π multi-taper method power spectrum of the gamma ray series is shown with `20
     > Not only is this software powerful and effective, it is also simple to use and therefore benefits researchers and at all levels within the paleoclimatology community, from novices to experts.
 
 
-* **Dr. Arsenio Muñoz Jiménez** (Department of Earth Sciences, University of Zaragoza, Spain):
+* **Dr. Arsenio Muñoz Jiménez** (University of Zaragoza, Spain):
 
     > "Thank you very much and congratulations for the _**acycle**_ software. I am using it and it is very very useful and interesting."
 
-* **Dr. Marco Franceschi** (Professor, Department of Geosciences, University of Padova, Italy):
+* **Dr. Marco Franceschi** (University of Padova, Italy):
 
     > Dr. Li’s software is being immensely valuable to my work. Some of the stratigraphic series I am studying display a prominent cyclicity, but were deposited in contexts characterized by relevant changes in sedimentation rates and often lack accurate geochronological constraints. _**Acycle**_ has been designed specifically for dealing with similar cases, by tackling them with a rigorous statistical approach, and therefore is providing an invaluable tool for their investigation.
 
-* **Dr. Xu Yao** (School of Earth Sciences, Lanzhou University, China):
+* **Dr. Xu Yao** (Lanzhou University, China):
 
     > I am working on cyclostratigraphy and paleoclimate study of ancient strata and rocks (270 million years ago) with assistance from _**Acycle**_ software. I also introduced this software to my colleagues whose research areas are paleoclimate implications of Quaternary loess (several thousand years ago). My colleagues have given me really good feedbacks about _**Acycle**_ software.
 
@@ -291,6 +289,22 @@ _2π multi-taper method power spectrum of the gamma ray series is shown with `20
 
 * **Dr. Nicolas R. Thibault** (University of Copenhagen, Denmark):
     > "I’ve been playing a lot with the excellent _**Acycle**_ package for Matlab that Mingsong developed. Congratulations, this is a very nice interface that simplifies a lot our work and makes it truly faster to analyse a time-series."
+
+<a href="https://www.uu.nl/staff/FJHilgen">
+    <img src="https://www.knaw.nl/en/members/members/15429/@@images/bigImage" alt="Frits Hilgen" title="Frits Hilgen">
+</a>
+
+* **Dr. Frits Hilgen** (Utrecht University, Netherlands):
+    > "I used it this academic year for the first time in my MSc course on Astronomical climate forcing 
+and time scales as replacement of the outdated Analyseries program. 
+The main advantages of _**Acycle**_ is that it is very user friendly, 
+has a lot of different options for the statistical analysis of paleoclimate records 
+and in addition first-rate plotting options. 
+For instance you can directly see the trend that you aim to remove and 
+then decide whether you want to continue with it. 
+It is further also very good to see the fast and almost continuous improvement of _**Acycle**_, 
+including the processing of reported bugs. And, not unimportantly, 
+also my students were very enthusiastic about _**Acycle**_ and I now use it now for my own research as well!"
 
 ---
 ### _Acycle_ has been used in

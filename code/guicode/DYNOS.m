@@ -82,7 +82,7 @@ set(handles.uipanel11,'position', [0.015,0.179,0.291,0.145])
 set(handles.uipanel12,'position', [0.014,0.005,0.291,0.175])
 % plot area
 set(handles.text2,'position', [0.36,0.914,0.588,0.052],'FontSize',16)
-set(handles.text51,'position', [0.36,0.902,0.588,0.025],'FontSize',12)
+set(handles.edit30,'position', [0.36,0.902,0.588,0.025],'FontSize',12)
 set(handles.uipanel2,'position', [0.321,0.47,0.669,0.43])
 set(handles.uipanel3,'position', [0.321,0.012,0.669,0.43])
 set(handles.axes1,'position', [0.1,0.159,0.94,0.8])

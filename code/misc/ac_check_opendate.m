@@ -10,10 +10,10 @@ try
     fprintf(fileID,'%d',now_val);
     fclose(fileID);
 
-    if now_val - ac_lastopendate > 30
+    if now_val - ac_lastopendate > 60
         
-        disp(' Acycle has not been used for 30 days.  Detecting new versions ...')
-        fupdate = warndlg('Acycle has not been used for 30 days.','Detecting new version');
+        disp(' Acycle has not been used for 60 days.  Detecting new versions ...')
+        fupdate = warndlg('Acycle has not been used for 60 days.','Detecting new version');
         ac_check_update;
         
         fileID = fopen(fullfile(ac_pwd_dir,'ac_opendate.txt'),'w');
@@ -30,9 +30,9 @@ try
         ac_versiondate = fscanf(fileID,'%d');
         fclose(fileID);
         
-        if now_val - ac_versiondate > 90
-            disp(' Acycle version has not been detected for 90 days.  Detecting new versions ...')
-            fupdate = warndlg('Acycle has not been updated for 90 days.','Checking');
+        if now_val - ac_versiondate > 180
+            disp(' Acycle version has not been detected for 180 days.  Detecting new versions ...')
+            fupdate = warndlg('Acycle version has not been updated for 180 days.','Checking');
             ac_check_update;
             try
                 close(fupdate)

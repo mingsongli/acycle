@@ -2,8 +2,27 @@
 
 _______________________________________
 
+Version : ACycle_v2.1.2 [PREVIEW; NOT OFFICIALLY RELEASED]
+Date    : Mar 24, 2020 - June 5, 2020
+By      : Mingsong Li
+NOTE    : ask for MatLab RUNTIME 2019a
+
+    1. Power spectral analysis
+        Add power law model
+        Add bending power law model
+        for MTM, periodogram, and Lomb methods
+
+    2. Add curve fitting method for robust AR1 conf. level estimation
+        This method is now the default method
+
+    3. Allowing more control: bias correction for the robust AR1 estimation 
+        designed for the ultra-high resolution data
+
+    4. Plot Preview: show multiple panels for multi-column data
+_______________________________________
+
 Version : ACycle_v2.1.1 [PREVIEW; NOT OFFICIALLY RELEASED]
-Date    : Feb 24, 2020 - 
+Date    : Feb 24, 2020 - Mar. 14, 2020
 By      : Mingsong Li
 NOTE    : ask for MatLab RUNTIME 2019a
 
@@ -11,6 +30,27 @@ NOTE    : ask for MatLab RUNTIME 2019a
 
     2. Spectral Analysis GUI: show \rho value in the title; allow nw = 1 for MTM
 
+    3. Plot stand. + 2: fit plot content to the order of title 
+
+    4. Add a new tool: Basic Series -> Length-of-day & day-of-year
+
+    5. "Math - Smooth - Bootstrap": change data saving style
+        Thanks Feng Cheng! Read more here:
+        https://github.com/mingsongli/acycle/issues/19
+
+    6. TimeOpt: plot all-in-one; Thank Wei Liu for this suggestion.
+
+    7. TimeOpt: null hypothesis testing for all given test sedimentation rate
+            plotted in the COCO H0-sig.level style.
+            null hypothesis testing for the optimal sedimentation rate is the default option.
+
+    8. Build Age Model: save and plot sedimentation rate; plot age model
+
+    9. NEW: Coherence and phase analysis
+
+    10. Bootstrap: fill plot
+
+    11. Plot Preview: add legend.
 _______________________________________
 
 Version : ACycle_v2.1.0

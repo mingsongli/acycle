@@ -322,6 +322,7 @@ handles.padtype = 1; % updated acycle v1.2.1
 handles.ecocofigdata = figure;
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
+set(gcf,'color','w');
 set(handles.ecocofigdata,'position',[0.01,0.01,0.2,0.9]) % set position
 if handles.flipy == 1
     plot(fliplr(daty),datx,'k')
@@ -333,6 +334,7 @@ xlabel('Value'); ylabel(['Depth (',handles.unit,')'])
 handles.ecocofigspectrum = figure;
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
+set(gcf,'color','w');
 set(handles.ecocofigspectrum,'position',[0.2,0.4,0.2,0.4]) % set position
 dt = (median(diff(datx)));
 [p1,f] = periodogram(daty,[],handles.pad,1/dt);  % power of dat
@@ -484,6 +486,7 @@ if get(hObject,'Value')
         handles.ecocofigdata = figure;
         set(0,'Units','normalized') % set units as normalized
         set(gcf,'units','norm') % set location
+        set(gcf,'color','w');
         set(handles.ecocofigdata,'position',[0.01,0.01,0.2,0.9]) % set position
         if handles.flipy == 1
             plot(fliplr(dat(:,2)),dat(:,1),'k')
@@ -509,6 +512,7 @@ else
         handles.ecocofigdata = figure;
         set(0,'Units','normalized') % set units as normalized
         set(gcf,'units','norm') % set location
+        set(gcf,'color','w');
         set(handles.ecocofigdata,'position',[0.01,0.01,0.2,0.9]) % set position
         if handles.flipy == 1
             plot(fliplr(dat(:,2)),dat(:,1),'k')
@@ -547,6 +551,7 @@ catch
     handles.ecocofigdata = figure;
     set(0,'Units','normalized') % set units as normalized
     set(gcf,'units','norm') % set location
+    set(gcf,'color','w');
     set(handles.ecocofigdata,'position',[0.01,0.01,0.2,0.9]) % set position
     if handles.flipy == 1
         plot(fliplr(dat(:,2)),dat(:,1),'k')
@@ -707,6 +712,7 @@ catch
     handles.ecocofigspectrum = figure;
     set(0,'Units','normalized') % set units as normalized
     set(gcf,'units','norm') % set location
+    set(gcf,'color','w');
     set(handles.ecocofigspectrum,'position',[0.2,0.4,0.2,0.4]) % set position
     dt = (median(diff(datx)));
     [p1,f] = periodogram(daty,[],handles.pad,1/dt);  % power of dat
@@ -784,6 +790,7 @@ if handles.red > 0
     handles.ecocofigspectrum = figure;
     set(0,'Units','normalized') % set units as normalized
     set(gcf,'units','norm') % set location
+    set(gcf,'color','w');
     set(handles.ecocofigspectrum,'position',[0.2,0.4,0.2,0.4]) % set position
     dt = (median(diff(datx)));
     [p1,f] = periodogram(daty,[],handles.pad,1/dt);  % power of dat
@@ -828,6 +835,7 @@ else
     handles.ecocofigspectrum = figure;
     set(0,'Units','normalized') % set units as normalized
     set(gcf,'units','norm') % set location
+    set(gcf,'color','w');
     set(handles.ecocofigspectrum,'position',[0.2,0.4,0.2,0.4]) % set position
     dt = (median(diff(datx)));
     [p1,f] = periodogram(daty,[],handles.pad,1/dt);  % power of dat
@@ -899,6 +907,7 @@ if handles.red > 0
     handles.ecocofigspectrum = figure;
     set(0,'Units','normalized') % set units as normalized
     set(gcf,'units','norm') % set location
+    set(gcf,'color','w');
     set(handles.ecocofigspectrum,'position',[0.2,0.4,0.2,0.4]) % set position
     dt = (median(diff(datx)));
     [p1,f] = periodogram(daty,[],handles.pad,1/dt);  % power of dat
@@ -1119,6 +1128,7 @@ catch
     handles.ecocofigdata = figure;
     set(0,'Units','normalized') % set units as normalized
     set(gcf,'units','norm') % set location
+    set(gcf,'color','w');
     set(handles.ecocofigdata,'position',[0.01,0.01,0.2,0.9]) % set position
     if handles.flipy == 1
         plot(fliplr(dat(:,2)),dat(:,1),'k')
@@ -1190,6 +1200,7 @@ catch
     handles.ecocofigdata = figure;
     set(0,'Units','normalized') % set units as normalized
     set(gcf,'units','norm') % set location
+    set(gcf,'color','w');
     set(handles.ecocofigdata,'position',[0.01,0.01,0.2,0.9]) % set position
     if handles.flipy == 1
         plot(fliplr(dat(:,2)),dat(:,1),'k')
@@ -1351,6 +1362,7 @@ if handles.ecocoS == 0
     % COCO model
     tic
     f = figure;
+    set(gcf,'color','w');
     ax1 = subplot(2,1,1);
     plot(ax1,target(:,1),target(:,2),'LineWidth',1)
     xlim(ax1,[f1 f2])
@@ -1494,14 +1506,15 @@ if handles.ecocoS == 1
     fprintf(fileID,'%s\n','%location, Optimal Sed.Rate, CorrCoef, H0-SL, #Orbits, COCOxH0x#Orbits');                    
     %fprintf(fileID,'%s\n\n',mat2str(sr_p));
     for row = 1: length(prt_sr)
-        fprintf(fileID,'%s, %s, %s, %s, %d, %s\n',sr_p(row,1),sr_p(row,2),sr_p(row,3),sr_p(row,4),sr_p(row,5),sr_p(row,6));
+        try
+            fprintf(fileID,'%s, %s, %s, %s, %d, %s\n',sr_p(row,1),sr_p(row,2),sr_p(row,3),sr_p(row,4),sr_p(row,5),sr_p(row,6));
+        catch
+        end
     end
     fclose(fileID);
     figure(handles.hmain)
     savefig(acfig_name)
 end
-
-
 
 % update acycle main figure for both COCO and eCOCO
 d = dir; %get files

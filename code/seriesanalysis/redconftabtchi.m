@@ -13,7 +13,11 @@ if method == 1
     meanp = mean(p);
 elseif method == 2
     % pmtm method
-    [p,w] = pmtm(datax,nw,pad);
+    if nw == 1
+        [p,w]=pmtm(datax,nw,pad,'DropLastTaper',false);
+    else
+        [p,w] = pmtm(datax,nw,pad);
+    end
     f = w/(2*pi*dt);
     meanp = mean(p);
 else

@@ -23,6 +23,7 @@ end
 
 %% figure 1 - eCOCO
 figure
+set(gcf,'color','w');
 if abs(plotn) == 1
     subplot(1,3,1)
 end
@@ -52,6 +53,7 @@ if abs(plotn) == 1
 end
 if abs(plotn) == 2
     figure;
+    set(gcf,'color','w');
 end
 
 PlotPower = 1.12;
@@ -69,6 +71,7 @@ if or((abs(plotn) == 1), (abs(plotn) == 2))
     h.LevelListMode = 'manual';
 else
     figure;
+    set(gcf,'color','w');
     surf(prt_sr,out_depth,z_h0/z_h0_max)
     view([10,80])
 end
@@ -99,6 +102,7 @@ if or((abs(plotn) == 1), (abs(plotn) == 2))
     h.Fill = 'on';
 else
     figure;
+    set(gcf,'color','w');
     surf(prt_sr,out_depth,out_norbit')
     view([10,80])
 end
@@ -117,9 +121,11 @@ end
 %% ecocob
 if abs(plotn) == 1
     figure;
+    set(gcf,'color','w');
 end
 if abs(plotn) == 2
     figure;
+    set(gcf,'color','w');
 end
 if or((abs(plotn) == 1), (abs(plotn) == 2))
     %[C,h]=contour(prt_sr,out_depth,out_ecocorb');
@@ -127,6 +133,7 @@ if or((abs(plotn) == 1), (abs(plotn) == 2))
     h.Fill = 'on';
 else
     figure;
+    set(gcf,'color','w');
     %surf(prt_sr,out_depth,out_ecocorb')
     surf(prt_sr,out_depth,out_ecoco')
     view([10,80])

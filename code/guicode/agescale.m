@@ -308,7 +308,7 @@ xmin2 = nan;
 for i = 1:nrow
     data_name = char(list_content(i,1));
     data = load(data_name);
-    [~,dat_name,ext] = fileparts(data_name);
+    [~,dat_name,~] = fileparts(data_name);
     subplot(2,1,1)
     plot(data(:,1),data(:,2)); hold on;
     set(gca,'XMinorTick','on','YMinorTick','on')

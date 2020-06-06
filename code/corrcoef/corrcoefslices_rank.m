@@ -253,6 +253,7 @@ if nsim > 0
     if plotn == 1
         
         figure;
+        set(gcf,'color','w');
         ax1 = subplot(3,1,1);
         plot(ax1,corrxch,corry_rch,'r','LineWidth',1);
         xlabel(ax1,'Sedimentation rate (cm/kyr)')

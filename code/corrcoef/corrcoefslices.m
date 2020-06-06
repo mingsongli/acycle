@@ -138,6 +138,7 @@ end
 % plot power spectra
     if plotn == 1
         figure;
+        set(gcf,'color','w');
         plot(f,data(:,2),'r','LineWidth',1);
         if slices > 1
             plot(f,datap,'LineWidth',.5); 
@@ -234,7 +235,7 @@ if nsim > 0
     if plotn == 1
         % plot H0 test of Monte carlo simulation
         figure;
-        
+        set(gcf,'color','w');
         ax1 = subplot(3,1,1) ;
         plot(ax1, corrxch,corry_rch,'r','LineWidth',1);
 %         hold on;
@@ -251,14 +252,14 @@ if nsim > 0
         ax2 = subplot(3,1,2);
         semilogy(ax2, corrxch,corry_per,'r','LineWidth',1); 
         xlabel(ax2, 'Sedimentation rate (cm/kyr)')
-        ylabel(ax2, 'H_0 significance level (%)')
+        ylabel(ax2, 'H_0 significance level')
         title(ax2, 'Null hypothesis')
         ylim(ax2, [0.5*min(corry_per) 1])
         line([sr1, sr2],[.10, .10],'LineStyle',':','Color','k')
         line([sr1, sr2],[.05, .05],'LineStyle',':','Color','k')
         line([sr1, sr2],[.01, .01],'LineStyle','--','Color','k')
         line([sr1, sr2],[.001, .001],'LineStyle',':','Color','k')
-        legend('H_0 Sig.level','10%','5%','1 %','0.1%')
+        legend('H_0 Sig.level','10 %','5 %','1 %','0.1 %')
         set(ax2,'Ydir','reverse')
         
         ax3 = subplot(3,1,3);

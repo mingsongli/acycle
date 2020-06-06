@@ -37,7 +37,7 @@ function varargout = AC(varargin)
 %           https://github.com/mingsongli/acycle/wiki
 %           http://mingsongli.com
 %
-% Copyright (C) 2017-2019
+% Copyright (C) 2017-2020
 %
 % This program is a free software; you can redistribute it and/or modify it
 % under the terms of the GNU GENERAL PUBLIC LICENSE as published by the 
@@ -74,7 +74,7 @@ function varargout = AC(varargin)
 
 % Edit the above text to modify the response to help AC
 
-% Last Modified by GUIDE v2.5 23-Feb-2020 13:25:33
+% Last Modified by GUIDE v2.5 17-Mar-2020 14:25:07
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -104,12 +104,11 @@ function AC_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to AC (see VARARGIN)
 set(gcf,'position',[0.5,0.1,0.45,0.8]) % set position
-set(gcf,'Name','Acycle v2.1')
+set(gcf,'Name','Acycle v2.1.2')
 set(gcf,'DockControls', 'off')
 set(gcf,'Color', 'white')
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
-set(gcf,'ResizeFcn',@Resize_clbk);
 
 %% push_up
 h_push_up = uicontrol('Style','pushbutton','Tag','push_up');%,'BackgroundColor','white','ForegroundColor','white');  % set style, Tag
@@ -180,9 +179,9 @@ if ispc
     set(h_push_openfolder,'BackgroundColor','white') % 
 end
 
-set(handles.popupmenu1,'position', [0.75,0.945,0.24,0.04])
-set(handles.edit_acfigmain_dir,'position',       [0.081,0.9,0.91,0.04])
-set(handles.listbox_acmain,'position',    [0.02,0.008,0.96,0.884])
+set(handles.popupmenu1,'position', [0.75,0.945,0.24,0.04],'tooltip','<html>Select unit<br>for dataset')
+set(handles.edit_acfigmain_dir,'position', [0.081,0.9,0.91,0.04],'tooltip','Working directory')
+set(handles.listbox_acmain,'position', [0.02,0.008,0.96,0.884])
 
 if ismac
     handles.slash_v = '/';
@@ -192,6 +191,7 @@ end
 
 handles.acfigmain = gcf;  %handles of the ac main window
 figure(handles.acfigmain)
+set(handles.acfigmain, 'WindowKeyPressFcn', @KeyPress)
 h=get(gcf,'Children');  % get all content
 h1=findobj(h,'FontUnits','norm');  % find all font units as points
 set(h1,'FontUnits','points','FontSize',12);  % set as norm
@@ -249,7 +249,7 @@ handles.MTMtabtchi = 'notabtchi';
 handles.nw = 2;
 handles.copycut = 'copy';
 handles.nplot = 0;
-handles.filetype = {'.txt','.csv','','.res'};
+handles.filetype = {'.txt','.csv','','.res','.dat'};
 handles.acfig = gcf;
 handles.math_sort = 1;
 handles.math_unique = 1;
@@ -260,6 +260,17 @@ assignin('base','unit_type',handles.unit_type)
 
 % Update handles structure
 guidata(hObject, handles);
+% logo
+if ispc
+    try
+        Ilogo = imread('acycle_logo.jpg');
+        javaImage = im2java(Ilogo);
+        newIcon = javax.swing.ImageIcon(javaImage);    
+        figFrame = get(handles.acfigmain,'JavaFrame');
+        figFrame.setFigureIcon(newIcon);
+    catch
+    end
+end
 % Update reminder
 pause(0.0001);%
 % if isdeployed
@@ -292,15 +303,111 @@ function varargout = AC_OutputFcn(hObject, eventdata, handles)
 % Get default command line output from handles structure
 varargout{1} = handles.output;
 
-function Resize_clbk(hObject, eventdata)
-% if ismac
-%     try j = findobj(gcf,'Tag','push_up');           jEdit = findjobj(j); jEdit.Border = []; catch; end
-%     try j = findobj(gcf,'Tag','push_folder');       jEdit = findjobj(j); jEdit.Border = []; catch; end
-%     try j = findobj(gcf,'Tag','push_plot');         jEdit = findjobj(j); jEdit.Border = []; catch; end
-%     try j = findobj(gcf,'Tag','push_refresh');      jEdit = findjobj(j); jEdit.Border = []; catch; end
-%     try j = findobj(gcf,'Tag','push_robot');        jEdit = findjobj(j); jEdit.Border = []; catch; end
-%     try j = findobj(gcf,'Tag','push_openfolder');   jEdit = findjobj(j); jEdit.Border = []; catch; end
-% end
+% Mar 17, 2020
+function KeyPress(hObject, EventData, handles)
+handles = guidata(hObject);
+if strcmp(EventData.Modifier,'control') 
+    if strcmp(EventData.Key,'c')
+    %disp('ctrl + c')
+    contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+    plot_selected = get(handles.listbox_acmain,'Value');
+    nplot = length(plot_selected);   % length
+    CDac_pwd;
+    handles.nplot = nplot;
+    if  min(plot_selected) > 2
+        handles.data_name = {};
+        handles.file = {};
+        for i = 1 : nplot
+           filename = char(contents(plot_selected(i)));
+           handles.data_name{i} = strrep2(filename, '<HTML><FONT color="blue">', '</FONT></HTML>');
+           handles.file{i} = [ac_pwd,handles.slash_v,handles.data_name{i}];
+        end
+    end
+    handles.copycut = 'copy';
+    cd(pre_dirML);
+    guidata(hObject, handles);
+    end
+end
+if strcmp(EventData.Modifier,'control')
+    if strcmp(EventData.Key,'x')
+    %disp('ctrl + x')
+    contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+    plot_selected = get(handles.listbox_acmain,'Value');
+    nplot = length(plot_selected);   % length
+    CDac_pwd;
+    handles.nplot = nplot;
+    if  min(plot_selected) > 2
+        handles.data_name = {};
+        handles.file = {};
+        for i = 1 : nplot
+           filename = char(contents(plot_selected(i)));
+           handles.data_name{i} = strrep2(filename, '<HTML><FONT color="blue">', '</FONT></HTML>');
+           handles.file{i} = [ac_pwd,handles.slash_v,handles.data_name{i}];
+        end
+    end
+    handles.copycut = 'cut';
+    cd(pre_dirML);
+    guidata(hObject, handles);
+    end
+end
+if strcmp(EventData.Modifier,'control')
+    if strcmp(EventData.Key,'v')
+    %disp('ctrl + v')
+    CDac_pwd;
+    copycut = handles.copycut; % cut or copy
+    nplot = handles.nplot; % number of selected files
+    if nplot == 0
+        return
+    end
+    for i = 1:nplot
+        if strcmp(copycut,'cut')
+            new_name = handles.data_name{i};
+            new_name_w_dir = [ac_pwd,handles.slash_v,new_name];
+            if exist(new_name_w_dir)
+                answer = questdlg(['Cover existed file ',new_name,'?'],...
+                    'Warning',...
+                    'Yes','No','No');
+                % Handle response
+                switch answer
+                    case 'Yes'
+                        movefile(handles.file{i}, ac_pwd)
+                    case 'No'
+                end
+            else
+                movefile(handles.file{i}, ac_pwd)
+            end
+        elseif strcmp(copycut,'copy')
+            % paste copied files
+            try
+                new_name = handles.data_name{i};
+                new_name_w_dir = [ac_pwd,handles.slash_v,new_name];
+                if exist(new_name_w_dir)
+                    [~,dat_name,ext] = fileparts(new_name);
+                    for i = 1:100
+                        new_name = [dat_name,'_copy',num2str(i),ext];
+                        if exist([ac_pwd,handles.slash_v,new_name])
+                        else
+                            break
+                        end
+                    end
+                end
+                new_file = [ac_pwd,handles.slash_v,new_name];
+                file_list = handles.file;
+                copyfile(file_list{i}, new_file)
+            catch
+                disp('No data copied')
+            end
+        end
+    end
+    d = dir; %get files
+    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+    refreshcolor;
+    if isdir(pre_dirML)
+        cd(pre_dirML);
+    end
+    guidata(hObject,handles)
+    end
+end
 
 
 function push_up_clbk(hObject, handles)
@@ -534,20 +641,44 @@ if handles.doubleclick
                         system(['open ',ac_pwd]);
                     end
                 end
-            elseif ismember(ext,{'.txt','.csv'})
-                [data1,~] = importdata(filename);
-                nlen = length(data1(:,1));
-                if nlen > 15
-                    msgbox('See Terminal/Command Window for details')
-                    disp(['>> Total rows: ', num2str(nlen)])
-                    disp('>> First 10 and last 5 rows of data:')
-                    disp(data1(1:10,:))
-                    disp('       ... ...')
-                    disp(data1(end-4:end,:))
-                else
-                    msgbox('See Terminal/Command Window for details')
-                    disp('>> Data:')
-                    disp(data1)
+            elseif ismember(ext,{'.txt','.csv','.res','.dat'})
+                try
+                    [data1,~] = importdata(filename);
+                    if isstruct(data1)
+                        data1 = data1.data;
+                    end
+                    nlen = length(data1(:,1));
+                    ncol = length(data1(1,:));
+                    % open in GUI
+                    ftab = figure;%('Position',[200 200 400 150]);
+                    set(0,'Units','normalized') % set units as normalized
+                    set(gcf,'units','norm') % set location
+                    set(ftab,'Name',[dat_name,ext],'NumberTitle','off')
+                    widthtab = .05 + .05*ncol;
+                    if widthtab > 0.4; widthtab = 0.4; end                  
+                    set(ftab,'Position',[.3 .2 widthtab .7]) % set location
+                    t = uitable('Parent',ftab,'Data',data1,'Units','normalized','Position',[0.011,0.012,0.97,0.984]);
+
+                    if nlen > 15
+                        %msgbox('See Terminal/Command Window for details')
+                        disp(['>>  ',dat_name,ext])
+                        disp(['>>  Total rows: ', num2str(nlen)])
+                        disp('>>  First 10 and last 5 rows:')
+                        disp(data1(1:10,:))
+                        disp('       ... ...')
+                        disp(data1(end-4:end,:))
+                    else
+                        %msgbox('See Terminal/Command Window for details')
+                        disp('>>  Data:')
+                        disp(data1)
+                    end
+                catch
+                    if ispc
+                        winopen(ac_pwd);
+                    elseif ismac
+                        system(['open ',ac_pwd]);
+                    else
+                    end
                 end
             elseif ismember(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})
                 try
@@ -556,7 +687,7 @@ if handles.doubleclick
                     hFig1 = figure;
                     lastwarn('') % Clear last warning message
                     imshow(im_name);
-                    set(gcf,'Name',[dat_name,ext])
+                    set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
                     [warnMsg, warnId] = lastwarn;
                     if ~isempty(warnMsg)
                         close(hFig1)
@@ -582,45 +713,85 @@ if handles.doubleclick
         else
             if strcmp(ext,'.fig')
                 try
-                    openfig(filename)
-                    set(gcf,'Name',[dat_name,ext])
+                    openfig(filename);
+                    set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
                 catch
                 end
-            elseif ismember(ext,{'.txt','.csv'})
-                [data1,~] = importdata(filename);
-                nlen = length(data1(:,1));
-                if nlen> 15
-                    msgbox('See Terminal/Command Window for details')
-                    disp(['>> Total rows: ', num2str(nlen)])
-                    disp('>> First 10 and last 5 rows of data:')
-                    disp(data1(1:10,:))
-                    disp('                  ... ...')
-                    disp(data1(end-4:end,:))
+            elseif ismember(ext,{'.txt','.csv','.res','.dat'})
+                try
+                    system(['open ',filename]);
+                catch
+                 try
                     
-                else
-                    msgbox('See Terminal/Command Window for details')
-                    disp('>> Data:')
-                    disp(data1)
+                    [data1,~] = importdata(filename);
+                    if isstruct(data1)
+                        data1 = data1.data;
+                    end
+                    nlen = length(data1(:,1));
+                    ncol = length(data1(1,:));
+                    % open in GUI
+                    ftab = figure;%('Position',[200 200 400 150]);
+                    set(0,'Units','normalized') % set units as normalized
+                    set(gcf,'units','norm') % set location
+                    set(ftab,'Name',[dat_name,ext],'NumberTitle','off')
+                    widthtab = .05 + .05*ncol;
+                    if widthtab > 0.4; widthtab = 0.4; end                  
+                    set(ftab,'Position',[.3 .2 widthtab .7]) % set location
+                    t = uitable('Parent',ftab,'Data',data1,'Units','normalized','Position',[0.011,0.012,0.97,0.984]);
+                    
+                catch
+                    [data1,~] = importdata(filename);
+                    try
+                        nlen = length(data1(:,1));
+                        if nlen> 15
+                            msgbox('See Terminal/Command Window for details')
+                            disp(['>>  ',dat_name,ext])
+                            disp(['>>  Total rows: ', num2str(nlen)])
+                            disp('>>  First 10 and last 5 rows:')
+                            disp(data1(1:10,:))
+                            disp('                  ... ...')
+                            disp(data1(end-4:end,:))
+                        else
+                            msgbox('See Terminal/Command Window for details')
+                            disp('>> Data:')
+                            disp(data1)
+                        end
+                    catch
+                        try system(['open ',filename]);
+                        catch
+                            if ispc
+                                winopen(ac_pwd);
+                            elseif ismac
+                                system(['open ',ac_pwd]);
+                            else
+                            end
+                        end
+                    end
+                 end
                 end
             elseif ismember(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})
-                try 
-                    hwarn = warndlg('Wait, large image? can be very slow ...');
-                    im_name = imread(filename);
-                    hFig1 = figure;
-                    lastwarn('') % Clear last warning message
-                    imshow(im_name);
-                    set(gcf,'Name',[dat_name,ext])
-                    [warnMsg, warnId] = lastwarn;
-                    if ~isempty(warnMsg)
-                        close(hFig1)
-                        imscrollpanel_ac(filename);
-                    end
-                    %hwarn = warndlg('Wait, large image? can be very slow ...');
-                    try close(hwarn)
-                    catch
-                    end
+                try
+                    system(['open ',filename]);
                 catch
-                    warndlg('Image color space not supported. Convert to RGB or Grayscale')
+                    try 
+                        hwarn = warndlg('Wait, large image? can be very slow ...');
+                        im_name = imread(filename);
+                        hFig1 = figure;
+                        lastwarn('') % Clear last warning message
+                        imshow(im_name);
+                        set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
+                        [warnMsg, warnId] = lastwarn;
+                        if ~isempty(warnMsg)
+                            close(hFig1)
+                            imscrollpanel_ac(filename);
+                        end
+                        %hwarn = warndlg('Wait, large image? can be very slow ...');
+                        try close(hwarn)
+                        catch
+                        end
+                    catch
+                        warndlg('Image color space not supported. Convert to RGB or Grayscale')
+                    end
                 end
             elseif ismember(ext,{'.pdf','.ai','.ps'})
                 try
@@ -777,7 +948,7 @@ for i = 1:nplot
                     hFig1 = figure;
                     lastwarn('') % Clear last warning message
                     imshow(im_name);
-                    set(gcf,'Name',[dat_name,ext])
+                    set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
                     [warnMsg, warnId] = lastwarn;
                     if ~isempty(warnMsg)
                         close(hFig1)
@@ -796,51 +967,54 @@ for i = 1:nplot
     end
 end
 plotsucess = 0;
-if check == 1;
+if check == 1
     figf = figure;
     hold on;
     for i = 1:nplot
         plot_no = plot_selected(i);
         plot_filter_s1 = char(contents(plot_no));
-        GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s1);
-    try
-        data_filterout = load(plot_filter_s);
-    catch       
-        fid = fopen(plot_filter_s);
-        try data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
-            fclose(fid);
-            if iscell(data_ft)
-                try
-                    data_filterout = cell2mat(data_ft);
-                catch
-                    fid = fopen(plot_filter_s,'at');
-                    fprintf(fid,'%d\n',[]);
-                    fclose(fid);
-                    fid = fopen(plot_filter_s);
-                    data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
-                    fclose(fid);
+        GETac_pwd; 
+        plot_filter_s = fullfile(ac_pwd,plot_filter_s1);
+        [~,plotseries,~] = fileparts(plot_filter_s);
+        handles.plot_list{i} = plotseries;
+        try
+            data_filterout = load(plot_filter_s);
+        catch       
+            fid = fopen(plot_filter_s);
+            try data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
+                fclose(fid);
+                if iscell(data_ft)
                     try
                         data_filterout = cell2mat(data_ft);
                     catch
-                        warndlg(['Check data: ',dat_name],'Data Error!')
+                        fid = fopen(plot_filter_s,'at');
+                        fprintf(fid,'%d\n',[]);
+                        fclose(fid);
+                        fid = fopen(plot_filter_s);
+                        data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
+                        fclose(fid);
+                        try
+                            data_filterout = cell2mat(data_ft);
+                        catch
+                            warndlg(['Check data: ',dat_name],'Data Error!')
+                        end
                     end
                 end
-            end
-        catch
-            warndlg({'Cannot find the data.'; 'Folder Name may contain NO language other than ENGLISH'})
-            try
-                close(figf);
             catch
+                warndlg({'Cannot find the data.'; 'Folder Name may contain NO language other than ENGLISH'})
+                try
+                    close(figf);
+                catch
+                end
             end
-        end
-        
-    end     
+        end     
 
         data_filterout = data_filterout(~any(isnan(data_filterout),2),:);
         
+        
         try plot(data_filterout(:,1),data_filterout(:,2:end),'LineWidth',1)
             plotsucess = 1;
-            % save current data for R 
+            % save current data for R
             assignin('base','currentdata',data_filterout);
             datar = num2str(data_filterout(1,2));
             for ii=2:length(data_filterout(:,1));
@@ -866,9 +1040,146 @@ if check == 1;
     else
         xlabel(['Time (',handles.unit,')'])
     end
-    title(plot_filter_s1, 'Interpreter', 'none')
+    %title(plot_filter_s1, 'Interpreter', 'none')
+    legend(handles.plot_list, 'Interpreter', 'none')
     hold off
     set(gcf,'color','w');
+    set(gcf,'Name','Acycle: Plot Preview','NumberTitle','off');
+    
+    % multiple column data
+    if plotsucess > 0
+        try
+        coln = length(data_filterout(1,:)); % 1: end
+        colnend = coln -1;
+        if and(nplot == 1, colnend > 1)            
+            if coln < 7
+                figf2 = figure;
+                for colni = 2:coln
+                    subplot(colnend,1,colni-1)
+                    plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
+                    set(gca,'XMinorTick','on','YMinorTick','on')
+                    title(['Column #', num2str(colni)], 'Interpreter', 'none')
+                    set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
+                    if handles.unit_type == 0
+                        xlabel(['Unit (',handles.unit,')'])
+                    elseif handles.unit_type == 1
+                        xlabel(['Depth (',handles.unit,')'])
+                    else
+                        xlabel(['Time (',handles.unit,')'])
+                    end
+                end
+            elseif coln < 13
+                figf2 = figure;
+                colnhf= ceil(colnend/2);
+                for colni = 2:coln
+                    subplot(colnhf,2,colni-1)
+                    plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
+                    set(gca,'XMinorTick','on','YMinorTick','on')
+                    title(['Column #', num2str(colni)], 'Interpreter', 'none')
+                    set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
+
+                    if handles.unit_type == 0
+                        xlabel(['Unit (',handles.unit,')'])
+                    elseif handles.unit_type == 1
+                        xlabel(['Depth (',handles.unit,')'])
+                    else
+                        xlabel(['Time (',handles.unit,')'])
+                    end
+                end
+            elseif coln < 19
+                figf2 = figure;
+                colnhf= ceil(colnend/3);
+                for colni = 2:coln
+                    subplot(colnhf,3,colni-1)
+                    plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
+                    set(gca,'XMinorTick','on','YMinorTick','on')
+                    title(['Column #', num2str(colni)], 'Interpreter', 'none')
+                    set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
+
+                    if handles.unit_type == 0
+                        xlabel(['Unit (',handles.unit,')'])
+                    elseif handles.unit_type == 1
+                        xlabel(['Depth (',handles.unit,')'])
+                    else
+                        xlabel(['Time (',handles.unit,')'])
+                    end
+                end
+            elseif coln < 25
+                figf2 = figure;
+                colnhf= ceil(colnend/4);
+                for colni = 2:coln
+                    subplot(colnhf,4,colni-1)
+                    plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
+                    set(gca,'XMinorTick','on','YMinorTick','on')
+                    title(['Column #', num2str(colni)], 'Interpreter', 'none')
+                    set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
+
+                    if handles.unit_type == 0
+                        xlabel(['Unit (',handles.unit,')'])
+                    elseif handles.unit_type == 1
+                        xlabel(['Depth (',handles.unit,')'])
+                    else
+                        xlabel(['Time (',handles.unit,')'])
+                    end
+                end
+            else
+                colnhf= ceil(24/4);
+                figf2 = figure;
+                for colni = 2:25
+                    subplot(colnhf,4,colni-1)
+                    plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
+                    set(gca,'XMinorTick','on','YMinorTick','on')
+                    set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
+                    title(['Column #', num2str(colni)], 'Interpreter', 'none')
+
+                    if handles.unit_type == 0
+                        xlabel(['Unit (',handles.unit,')'])
+                    elseif handles.unit_type == 1
+                        xlabel(['Depth (',handles.unit,')'])
+                    else
+                        xlabel(['Time (',handles.unit,')'])
+                    end
+                end
+                if coln<50
+                    figf2 = figure;
+                    for colni = 26:coln
+                        subplot(colnhf,4,colni-25)
+                        plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
+                        set(gca,'XMinorTick','on','YMinorTick','on')
+                        title(['Column #', num2str(colni)], 'Interpreter', 'none')
+                        set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
+
+                        if handles.unit_type == 0
+                            xlabel(['Unit (',handles.unit,')'])
+                        elseif handles.unit_type == 1
+                            xlabel(['Depth (',handles.unit,')'])
+                        else
+                            xlabel(['Time (',handles.unit,')'])
+                        end
+                    end
+                else
+                    figf2 = figure;
+                    for colni = 26:49
+                        subplot(6,4,colni-25)
+                        plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
+                        set(gca,'XMinorTick','on','YMinorTick','on')
+                        title(['Column #', num2str(colni)], 'Interpreter', 'none')
+                        set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
+                        if handles.unit_type == 0
+                            xlabel(['Unit (',handles.unit,')'])
+                        elseif handles.unit_type == 1
+                            xlabel(['Depth (',handles.unit,')'])
+                        else
+                            xlabel(['Time (',handles.unit,')'])
+                        end
+                    end
+                end
+            end        
+        end
+        catch
+            plot(data_filterout(:,1),data_filterout(:,2:end),'LineWidth',1)
+        end
+    end
 end
 guidata(hObject,handles)
 
@@ -1172,7 +1483,7 @@ if min(plot_selected) > 2
                                     continue
                                 end
                                 [current_data] = select_interval(data,xmin_cut,xmax_cut); 
-                                name1 = [dat_name,'-',num2str(xmin_cut),'-',num2str(xmax_cut),ext];  % New name
+                                name1 = [dat_name,'_',num2str(xmin_cut),'_',num2str(xmax_cut),ext];  % New name
                                 CDac_pwd; % cd ac_pwd dir
                                 dlmwrite(name1, current_data, 'delimiter', ',', 'precision', 9);
                             end
@@ -1195,7 +1506,7 @@ if min(plot_selected) > 2
                         return
                     end
                     [current_data] = select_interval(data,xmin_cut,xmax_cut); 
-                    name1 = [dat_name,'-',num2str(xmin_cut),'-',num2str(xmax_cut),ext];  % New name
+                    name1 = [dat_name,'_',num2str(xmin_cut),'_',num2str(xmax_cut),ext];  % New name
 
                     CDac_pwd; % cd ac_pwd dir
                     dlmwrite(name1, current_data, 'delimiter', ',', 'precision', 9);
@@ -1504,16 +1815,16 @@ if and ((min(plot_selected) > 2), (nplot == 1))
             [~,dat_name,ext] = fileparts(data_name);
         if sum(strcmp(ext,handles.filetype)) > 0
 
-        try
-            fid = fopen(data_name);
-            data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
-            fclose(fid);
-            if iscell(data_ft)
-                data = cell2mat(data_ft);
-            end
-        catch
-            data = load(data_name);
-        end 
+            try
+                fid = fopen(data_name);
+                data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
+                fclose(fid);
+                if iscell(data_ft)
+                    data = cell2mat(data_ft);
+                end
+            catch
+                data = load(data_name);
+            end 
 
             time = data(:,1);
             value = data(:,2);
@@ -1526,8 +1837,9 @@ if and ((min(plot_selected) > 2), (nplot == 1))
             answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
             if ~isempty(answer)
                 smooth_v = str2double(answer{1});
-                data(:,2) = movemean(data(:,2),smooth_v,'omitnan');
-                name1 = [dat_name,'-',num2str(smooth_v),'ptsm',ext];  % New name
+                %data(:,2) = movemean(data(:,2),smooth_v,'omitnan');
+                data(:,2) = movemean(data(:,2),smooth_v);
+                name1 = [dat_name,'_',num2str(smooth_v),'ptsm',ext];  % New name
                 CDac_pwd
                 dlmwrite(name1, data, 'delimiter', ',', 'precision', 9); 
                 d = dir; %get files
@@ -1580,7 +1892,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
 
             time = data(:,1);
             value = data(:,2);
-            span_d = (time(end)-time(1))*.5;
+            span_d = (time(end)-time(1))* 0.1;
             dlg_title = 'Bootstrap';
             prompt = {'Window (unit)','Method: "loess/lowess/rloess/rlowess"',...
                 'Number of bootstrap'};
@@ -1592,9 +1904,6 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                 span_v = str2double(answer{1});
                 method = (answer{2});
                 bootn = str2double(answer{3});
-                if bootn*length(time) >= 100000
-                    warndlg('Large number of bootstrap simulations. Please Wait ...','Bootstrap');
-                end
                 
                 span = span_v/(time(end)-time(1));
                 hwarn1 = warndlg('Slow process. Wait ...','Smoothing');
@@ -1602,17 +1911,19 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                 try close(hwarn1)
                 catch
                 end
-                data(:,2) = meanboot;
-                data(:,3) = bootstd;
-                data(:,4) = 2*bootstd;
+                data(:,4) = meanboot;
+                data(:,2) = meanboot - 2*bootstd;
+                data(:,3) = meanboot - bootstd;
+                data(:,5) = meanboot + bootstd;
+                data(:,6) = meanboot + 2*bootstd;
                 data1 = [time,bootprt];
-                name = [dat_name,'-',num2str(span_v),'-',method,'-',num2str(bootn),'-bootstp-meanstd',ext];  % New name
-                name1 = [dat_name,'-',num2str(span_v),'-',method,'-',num2str(bootn),'-bootstp-percentile',ext];
+                name = [dat_name,'_',num2str(span_v),'_',method,'_',num2str(bootn),'_bootstp_meanstd',ext];  % New name
+                name1 = [dat_name,'_',num2str(span_v),'_',method,'_',num2str(bootn),'_bootstp_percentile',ext];
                 
-                disp(['>>  Save [time, mean, std, 2std] as :',name])
+                disp(['>>  Save [time, mean-2std, mean-std, mean, mean+std, mean+2std] as :',name])
                 disp(['>>  Save [time, percentiles] as :',name1])
                 disp('>>        Percentiles are ')
-                disp('>>        [0.5,2.275,15.865,50,84.135,97.725,99.5]')
+                disp('>>        [0.5,2.5,5,25,50,75,95,97.5,99.5]')
                 CDac_pwd
                 dlmwrite(name, data, 'delimiter', ',', 'precision', 9); 
                 dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9); 
@@ -1694,7 +2005,7 @@ if plot_selected > 2
                     data1 = [time,value];
                     % remember settings
                     handles.math_derivative = derivative_n;
-                    name1 = [dat_name,'-',num2str(derivative_n),'derv',ext];
+                    name1 = [dat_name,'_',num2str(derivative_n),'derv',ext];
                     CDac_pwd
                     dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
                     d = dir; %get files
@@ -2070,7 +2381,7 @@ if ~isempty(answer)
     plot(LR04stack_s(:,1),LR04stack_s(:,2),'LineWidth',1);
     xlabel('Time (kyr)')
     ylabel('Global Benthic \delta^{18}O')
-    title(['LR04 Stack: ',num2str(t1),'-',num2str(t2),' ka'])
+    title(['LR04 Stack: ',num2str(t1),'_',num2str(t2),' ka'])
     set(gca,'XMinorTick','on','YMinorTick','on')
     filename = ['LR04_Stack_',num2str(t1),'_',num2str(t2),'ka.txt'];
     % cd ac_pwd dir
@@ -2179,7 +2490,7 @@ for i = 1:nplot
     end
 end
 
-if check == 1;
+if check == 1
     xlimit = zeros(nplot,2);
     figure;
     hold on;
@@ -2187,29 +2498,29 @@ if check == 1;
         plot_no = plot_selected(i);
             plot_filter_s = char(contents(plot_no));
             GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
-     try
-        fid = fopen(plot_filter_s);
-        data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
-        fclose(fid);
-        if iscell(data_ft)
-            dat = cell2mat(data_ft);
-        end
-    catch
-        dat = load(plot_filter_s);
-    end 
+         try
+            fid = fopen(plot_filter_s);
+            data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
+            fclose(fid);
+            if iscell(data_ft)
+                dat = cell2mat(data_ft);
+            end
+        catch
+            dat = load(plot_filter_s);
+         end 
             
-            dat = dat(~any(isnan(dat),2),:);
-            dat(:,2) = (dat(:,2)-mean(dat(:,2)))/std(dat(:,2));
-            plot(dat(:,1),2*(i-1)+dat(:,2),'LineWidth',1);
-            xlimit(i,:) = [dat(1,1) dat(length(dat(:,1)),1)];
+        dat = dat(~any(isnan(dat),2),:);
+        dat(:,2) = (dat(:,2)-mean(dat(:,2)))/std(dat(:,2));
+        plot(dat(:,1),dat(:,2) - 2*(i-1),'LineWidth',1);  % modify to fit with the order of title
+        xlimit(i,:) = [dat(1,1) dat(length(dat(:,1)),1)];
     end
     set(gca,'XMinorTick','on','YMinorTick','on')
     hold off
     title(contents(plot_selected), 'Interpreter', 'none')
     xlim([min(xlimit(:,1)) max(xlimit(:,2))])
-    if handles.unit_type == 0;
+    if handles.unit_type == 0
         xlabel(['Unit (',handles.unit,')'])
-    elseif handles.unit_type == 1;
+    elseif handles.unit_type == 1
         xlabel(['Depth (',handles.unit,')'])
     else
         xlabel(['Time (',handles.unit,')'])
@@ -2338,7 +2649,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                 ymax_cut = str2double(answer{2});
                 [current_data]=depeaks(data,ymin_cut,ymax_cut); 
 
-                name1 = [dat_name,'-dpks',num2str(ymin_cut),'-',num2str(ymax_cut),ext];  % New name
+                name1 = [dat_name,'-dpks',num2str(ymin_cut),'_',num2str(ymax_cut),ext];  % New name
                 CDac_pwd
                 dlmwrite(name1, current_data, 'delimiter', ',', 'precision', 9); 
                 d = dir; %get files
@@ -2411,11 +2722,11 @@ if and ((min(plot_selected) > 2), (nplot == 1))
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
-        if isdir(data_name) == 1
-        else
+    if isdir(data_name) == 1
+    else
         [~,dat_name,ext] = fileparts(data_name);
         if sum(strcmp(ext,handles.filetype)) > 0
-            
+
             data = load(data_name);
 
             prompt = {'Enter period (kyr):','Use 1 = peak; 0 = trough:'};
@@ -2425,31 +2736,88 @@ if and ((min(plot_selected) > 2), (nplot == 1))
             options.Resize='on';
             answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
             if ~isempty(answer)
-            period = str2double(answer{1});
-            pkstrough = str2double(answer{2});
-            if pkstrough == 1
-                [datapks,~] = getpks(data);
-                plot_filter_s ='max';
-            else
-                data(:,2) = -1*data(:,2);
-                [datapks,~] = getpks(data);
-                plot_filter_s ='min';
-            end
-            [nrow, ~] = size(datapks);
-            datapksperiod = 1:nrow;
-            datapksperiod = datapksperiod*period;
-            datapksperiod = datapksperiod';
-            handles.datapks_tie = [datapks(:,1),datapksperiod];
-            name1 = [dat_name,'-agemod-',num2str(period),'-',plot_filter_s,ext];
-            CDac_pwd
-            dlmwrite(name1, handles.datapks_tie, 'delimiter', ',', 'precision', 9);
-            d = dir; %get files
-            set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-            refreshcolor;
-            cd(pre_dirML); % return to matlab view folder
+                period = str2double(answer{1});
+                pkstrough = str2double(answer{2});
+                %
+                data = data(~any(isnan(data),2),:); % remove NaN values
+                data = sortrows(data);  % sort first column
+                data=findduplicate(data); % remove duplicate number
+                data(any(isinf(data),2),:) = []; % remove empty
+                %
+                if pkstrough == 1
+                    [datapks,~] = getpks(data);
+                    plot_filter_s ='max';
+                else
+                    data(:,2) = -1*data(:,2);
+                    [datapks,~] = getpks(data);
+                    plot_filter_s ='min';
+                end
+
+                [nrow, ~] = size(datapks);
+                
+                % age model
+                datapksperiod = 1:nrow;
+                datapksperiod = datapksperiod*period;
+                datapksperiod = datapksperiod';
+                agemodel = [datapks(:,1),datapksperiod];
+                
+                % sed. rate 
+                sedrate = zeros(nrow+2,2);
+                sedrate(1,1) = data(1,1);
+                sedrate(2:end-1,1) = datapks(:,1);
+                sedrate(end,1) = data(end,1);
+                sedrate0 = diff(agemodel(:,1))./diff(agemodel(:,2));
+                sedrate(2:end-2,2) = sedrate0;
+                sedrate(1,2) = sedrate(2,2);
+                sedrate(end-1,2) = sedrate(end-2,2);
+                sedrate(end,2) = sedrate(end-2,2);
+                % full age model
+                agemodelfull = zeros(nrow+2,2);
+                agemodelfull(2:end-1,:) = agemodel;
+                agemodelfull(1,1) = data(1,1);
+                agemodelfull(1,2) = datapksperiod(1) - (agemodelfull(2,1)-agemodelfull(1,1)) * sedrate(1,2);
+                agemodelfull(end,1) = data(end,1);
+                agemodelfull(end,2) = datapksperiod(end) + (agemodelfull(end,1)-agemodelfull(end-1,1)) * sedrate(end,2);
+
+                name1 = [dat_name,'-agemodel-',num2str(period),'_',plot_filter_s,ext];
+                name2 = [dat_name,'-sed.rate-',num2str(period),'_',plot_filter_s,ext];
+
+                CDac_pwd
+                dlmwrite(name1, agemodel, 'delimiter', ',', 'precision', 9);
+                dlmwrite(name2, sedrate,  'delimiter', ',', 'precision', 9);
+                d = dir; %get files
+                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+                refreshcolor;
+                cd(pre_dirML); % return to matlab view folder
+                
+                figure;
+                set(gcf,'units','norm') % set location
+                set(gcf,'position',[0.01,0.55,0.45,0.4]) % set position
+                set(gcf,'Name','Acycle: Build Age Model | Age Model','NumberTitle','off')
+                set(gcf,'color','w');
+                plot(agemodelfull(:,1), agemodelfull(:,2),'k','LineWidth',1)
+                xlabel(['Depth (',handles.unit,')'])
+                ylabel('Time (kyr)')
+                title(['Age Model: ', num2str(period), ' kyr cycle: ', plot_filter_s])
+                set(gca,'XMinorTick','on','YMinorTick','on')
+                xlim([agemodelfull(1,1), agemodelfull(end,1)])
+                ylim([agemodelfull(1,2), agemodelfull(end,2)])
+                
+                figure;
+                set(gcf,'color','w');
+                set(gcf,'Name','Acycle: Build Age Model | Sedimentation Rate')
+                set(gcf,'units','norm') % set location
+                set(gcf,'position',[0.01,0.05,0.45,0.4]) % set position
+                stairs(sedrate(:,1), sedrate(:,2),'k','LineWidth',1)
+                xlabel(['Depth (',handles.unit,')'])
+                ylabel(['Sedimentation rate (',handles.unit,'/kyr)'])
+                xlim([sedrate(1,1), sedrate(end,1)])
+                ylim([0, max(sedrate(:,2)) * 2])
+                title(['Sedimentation rate: ', num2str(period), ' kyr cycle: ', plot_filter_s])
+                set(gca,'XMinorTick','on','YMinorTick','on')
             end
         end
-        end
+    end
 end
 guidata(hObject, handles);
 
@@ -2669,7 +3037,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                     hFig1 = figure;
                     lastwarn('') % Clear last warning message
                     imshow(im_name);
-                    set(gcf,'Name',[dat_name,ext])
+                    set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
                     [warnMsg, warnId] = lastwarn;
                     if ~isempty(warnMsg)
                         close(hFig1)
@@ -2711,7 +3079,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                         figure
                         imshow(I)
                         dat_name = [dat_name,'-gray',ext];
-                        set(gcf,'Name',dat_name)
+                        set(gcf,'Name',dat_name,'NumberTitle','off')
                         CDac_pwd;
                         imwrite(I,dat_name)
                         d = dir; %get files
@@ -2764,7 +3132,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                     catch
                     end
                     
-                    set(gcf,'Name',[dat_name,ext,': Press "SHIFT"or"ALT" & select cursors now'])
+                    set(gcf,'Name',[dat_name,ext,': Press "SHIFT"or"ALT" & select cursors now'],'NumberTitle','off')
 
                     choice = questdlg('Steps: 1) click the "DataCursor" tool; 2) select two cursors; 3) press "Enter" in the COMMAND window', ...
                         'Press "SHIFT"or"ALT" key & select 2 cursors', 'Continue','Cancel','Continue');
@@ -3504,7 +3872,7 @@ for i = 1:nplot
                     hFig1 = figure;
                     lastwarn('') % Clear last warning message
                     imshow(im_name);
-                    set(gcf,'Name',[dat_name,ext])
+                    set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
                     [warnMsg, warnId] = lastwarn;
                     if ~isempty(warnMsg)
                         close(hFig1)
@@ -3752,8 +4120,8 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                     set(gca,'XMinorTick','on','YMinorTick','on')
                     ylabel('RHO in AR(1)')
                     legend('2.5% - 97.5%', '5% - 95%', '10% - 90%','15.87% - 84.14%', '25% - 75%', 'Median')
-                    title(['Window: ',num2str(window1),'-',num2str(window2),...
-                        '. Sample rate: ',num2str(samprate1),'-',num2str(samprate2)])
+                    title(['Window: ',num2str(window1),'_',num2str(window2),...
+                        '. Sample rate: ',num2str(samprate1),'_',num2str(samprate2)])
 
                     name1 = [dat_name,'-rho1-median.txt'];
                     data1 = [y_grid_nan,powyad_p_nan(:,npercent2+1)];
@@ -3882,7 +4250,7 @@ if check == 1;
             set(0,'Units','normalized') % set units as normalized
             set(gcf,'units','norm') % set location
             set(gcf,'position',[0.1,0.4,0.45,0.45]) % set position
-            set(gcf,'Name', 'Sampling rate (original domain)')
+            set(gcf,'Name', 'Sampling rate (original domain)','NumberTitle','off')
             if handles.unit_type == 0;
                 xlabel(['Unit (',handles.unit,')'])
                 ylabel('Unit')
@@ -3905,7 +4273,7 @@ if check == 1;
             set(gcf,'units','norm') % set location
             set(gcf,'position',[0.55,0.4,0.45,0.45]) % set position
             title([[dat_name,ext],': kernel fit of sampling rates'], 'Interpreter', 'none')
-            set(gcf,'Name', 'Sampling rate: distribution')
+            set(gcf,'Name', 'Sampling rate: distribution','NumberTitle','off')
             if handles.unit_type == 0;
                 xlabel(['Sampling rate (',handles.unit,')'])
             elseif handles.unit_type == 1;
@@ -3971,7 +4339,7 @@ if check == 1;
             datax = data_filterout(:,2);
             figure;
             histfit(datax,[],'kernel')
-            set(gcf,'Name', 'Data Distribution')
+            set(gcf,'Name', 'Data Distribution','NumberTitle','off')
             title([[dat_name,ext],': kernel fit of the data'], 'Interpreter', 'none')
             xlabel('Data')
             note = ['max: ',num2str(max(datax)),'; mean: ',num2str(mean(datax)),...
@@ -4069,7 +4437,7 @@ if check == 1;
             end
             
             disp1 = ['Data: ',plot_filter_s, 'Window = ',num2str(window),' kyr; NW =',num2str(nw)];
-            disp2 = ['    cutoff freqency:',num2str(ftmin),'-',num2str(fterm),'; Step =',num2str(step),'; Pad = ',num2str(pad)];
+            disp2 = ['    cutoff freqency:',num2str(ftmin),'_',num2str(fterm),'; Step =',num2str(step),'; Pad = ',num2str(pad)];
             disp3 = ['    pairs of frequency bands:'];
             disp(disp1)
             disp(disp2)
@@ -4295,7 +4663,7 @@ if ~isempty(answer)
         warndlg('File name exists. An alternative name used','File Name Warning')
         
         for i = 1:100
-            filename = [filename(1:end-4),'-',num2str(i),'.txt'];
+            filename = [filename(1:end-4),'_',num2str(i),'.txt'];
             if exist([ac_pwd,handles.slash_v,filename])
             else
                 break
@@ -4395,7 +4763,7 @@ for i = 1:nplot
                     im_name = imread(plot_filter_s);
                     figure;
                     imshow(im_name)
-                    set(gcf,'Name',[dat_name,ext])
+                    set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
                 catch
                 end
             end
@@ -4730,7 +5098,7 @@ if and ((min(plot_selected) > 2), (nplot == 1))
                 smoothn = round(smooth_v * npts);
                 % median-smoothing
                 try data(:,2) = moveMedian(data(:,2),smoothn);
-                    name1 = [dat_name,'-',num2str(smooth_v*100),'%-median',ext];  % New name
+                    name1 = [dat_name,'_',num2str(smooth_v*100),'%-median',ext];  % New name
                     CDac_pwd
                     dlmwrite(name1, data, 'delimiter', ',', 'precision', 9); 
                     d = dir; %get files
@@ -4945,7 +5313,7 @@ if sum(strcmp(ext,{'.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.TIF'})) 
     im_name = imread(data_name);
     figure;
     imshow(im_name)
-    set(gcf,'Name',[dat_name,ext])
+    set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
 end
 
 CDac_pwd
@@ -5027,7 +5395,7 @@ if sum(strcmp(ext,{'.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.TIF'})) 
     im_name = imread(data_name);
     figure;
     imshow(im_name)
-    set(gcf,'Name',[dat_name,ext])
+    set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
 end
 
 CDac_pwd
@@ -5144,3 +5512,20 @@ function menu_interpseries_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 InterplationSeries(handles)
+
+
+% --------------------------------------------------------------------
+function menu_LOD_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_LOD (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+LODGUI(handles)
+
+
+% --------------------------------------------------------------------
+function menu_coh_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_coh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+guidata(hObject, handles);
+coherenceGUI(handles)
