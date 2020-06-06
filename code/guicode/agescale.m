@@ -424,7 +424,7 @@ for i = 1:nrow
       'LineWidth',1);
     xlabel(ax(1),'Age')
     ylabel(ax(1),'Proxy Value')
-    title(ax(1),[dat_name,': Tuned'])
+    title(ax(1),[dat_name,': Tuned'], 'Interpreter', 'none')
     set(gca,'XMinorTick','on','YMinorTick','on')
     ax(2) = axes('Position',[0.1 0.25 0.8 0.4],...
       'Color','None',...
@@ -471,7 +471,7 @@ for i = 1:nrow
       'LineWidth',1);
     xlabel(ax(1),'Age')
     ylabel(ax(1),'Proxy Value')
-    title(ax(1),[dat_name,': Tuned'])
+    title(ax(1),[dat_name,': Tuned'], 'Interpreter', 'none')
     set(gca,'XMinorTick','on','YMinorTick','on')
     ax(2) = axes('Position',[0.1 0.25 0.8 0.4],...
       'Color','None',...
@@ -544,7 +544,7 @@ for i = 1:nrow
       'LineWidth',1);
     xlabel(ax(1),['Depth (',handles.unit,')'])
     ylabel(ax(1),'Proxy Value')
-    title(ax(1),[dat_name,': Depth'])
+    title(ax(1),[dat_name,': Depth'], 'Interpreter', 'none')
     set(gca,'XMinorTick','on','YMinorTick','on')
     ax(2) = axes('Position',[0.1 0.25 0.8 0.4],...
       'Color','None',...
@@ -585,7 +585,7 @@ for i = 1:nrow
       'LineWidth',1);
     xlabel(ax(1),['Depth (',handles.unit,')'])
     ylabel(ax(1),'Proxy Value')
-    title(ax(1),[dat_name,': Depth'])
+    title(ax(1),[dat_name,': Depth'], 'Interpreter', 'none')
     set(gca,'XMinorTick','on','YMinorTick','on')
     ax(2) = axes('Position',[0.1 0.25 0.8 0.4],...
       'Color','None',...
