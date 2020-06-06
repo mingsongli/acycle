@@ -61,7 +61,7 @@
 
 #### Apple's iCloud (BEST for users in Mainland China):
 
-<a href="https://www.icloud.com/iclouddrive/07FM0ksPsXr9JmeovrPd3afAA#Acycle2.1-MatLab">
+<a href="https://www.icloud.com/iclouddrive/0lS56NrnVTArRB0mQ1rdQemeg#Acycle2.2-MatLab-version">
     <img src="https://github.com/mingsongli/acycleFig/blob/master/icloud-mail.png" alt="Apple's iCloud" title="Download Acycle in Apple's iCloud" width="110" height="88">
 </a>
 
@@ -151,69 +151,63 @@ _Evolutionary FFT of the astronomical solution._
 
 [Read More](https://github.com/mingsongli/acycle/wiki/Examples#example-2-la2004-astronomical-solution-etp)
 
-![](https://github.com/mingsongli/acycleFig/blob/master/chapter6/6.3.wayao.detrend.set.png)
-
-_Detrending GUI and results_
-
-[Read More](https://github.com/mingsongli/acycle/wiki/4.7.1-Detrending)
-
 ![](https://github.com/mingsongli/acycleFig/blob/master/chapter6/6.3.wayao.spectral.result.png)
 
 _2π multi-taper method power spectrum of the gamma ray series is shown with `20%` median-smoothed spectrum, background AR(1) model, and 90%, 95%, 99%,  and 99.9% confidence levels._
 
 ![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide1.jpeg)
 
-_Examples #1_
+_Examples #1 Curve fitting | detrending | smoothing_
 
 ![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide2.jpeg)
 
-_Examples #2_
+_Examples #2 Power spectral analysis_
 
 ![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide3.jpeg)
 
-_Examples #3_
+_Examples #3 Evolutionary power spectral analysis and Wavelet analysis_
 
 ![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide4.jpeg)
 
-_Examples #4_
+_Examples #4 COCO of sedimentation rate evaluation_
 
 ![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide5.jpeg)
 
-_Examples #5_
+_Examples #5 eCOCO of sedimentation rate evaluation_
 
 ![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide6.jpeg)
 
-_Examples #6_
+_Examples #6 Filtering_
 
 ![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide7.jpeg)
 
-_Examples #7_
+_Examples #7 Tuning_
 
 ![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide8.jpeg)
 
-_Examples #8_
+_Examples #8 DYNOT sedimentary noise model_
 
 ![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide9.jpeg)
 
-_Examples #9_
+_Examples #9 Smoothed bootstrap_
 
 ![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide10.jpeg)
 
-_Examples #10_
+_Examples #10 Coherence and phase_
 
 ![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide11.jpeg)
 
-_Examples #11_
+_Examples #11 Plot Pro_
 
 ![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide12.jpeg)
 
-_Examples #12_
+_Examples #12 Image profile_
 
 ![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide13.jpeg)
 
-_Examples #13_
+_Examples #13 Plot Digitizer_
 
-[Read More](https://github.com/mingsongli/acycle/wiki/4.7.3-Spectral-Analysis) and [example](https://github.com/mingsongli/acycle/wiki/Examples#example-3-carnian-cyclostratigraphy)
+[Read More](https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf) and [example](https://github.com/mingsongli/acycle/wiki/Examples#example-3-carnian-cyclostratigraphy)
 
 ---
 ## Wiki: Table of Content
