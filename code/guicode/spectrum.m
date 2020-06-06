@@ -22,7 +22,7 @@ function varargout = spectrum(varargin)
 
 % Edit the above text to modify the response to help spectrum
 
-% Last Modified by GUIDE v2.5 22-Feb-2020 19:48:24
+% Last Modified by GUIDE v2.5 05-Jun-2020 14:14:21
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -86,7 +86,12 @@ set(handles.uipanel3,'position', [0.05,0.082,0.445,0.32])
 set(handles.checkbox_robust,'position', [0.05,0.65,0.7,0.3])
 set(handles.checkbox_ar1_check,'position', [0.05,0.35,0.7,0.3])
 set(handles.check_ftest,'position', [0.05,0.05,0.9,0.3])
-set(handles.check_ftest,'Value', 1)
+set(handles.check_ftest,'Value', 0, 'tooltip','F-test and amplitude spectrum')
+set(handles.checkbox9,'position',  [0.65,0.65,0.35,0.3])
+set(handles.checkbox10,'position', [0.65,0.35,0.35,0.3])
+%
+set(handles.checkbox9,'tooltip','Power Law')
+set(handles.checkbox10,'tooltip','Bending Power Law')
 
 set(handles.uibuttongroup1,'position', [0.5,0.25,0.45,0.52])
 set(handles.radiobutton_fmax,'position', [0.089,0.75,0.473,0.2])
@@ -116,6 +121,8 @@ set(handles.radiobutton3,'Value',0)
 set(handles.checkbox4,'Value',0)
 set(handles.checkbox5,'Value',1)
 set(handles.checkbox6,'Value', 0)
+set(handles.checkbox9,'Value', 0)
+set(handles.checkbox10,'Value', 0)
 set(handles.radiobutton_fmax,'Value',1)
 set(handles.radiobutton_input,'Value',0)
 % contact with acycle main window
@@ -136,7 +143,10 @@ handles.logfreq = 0;
 handles.pad = 1;
 handles.checkbox_ar1_v = 0;
 handles.checkbox_robustAR1_v = 1;
-handles.check_ftest_value = 1;
+handles.check_ftest_value = 0;
+handles.checkPL = 0;
+handles.checkBPL= 0;
+
 handles.timebandwidth = 2;
 handles.datasample = 0;  % warning of sampling rate: uneven = 1
 Dt = diff(data_s(:,1));
@@ -149,10 +159,12 @@ if max(Dt) - min(Dt) > 10 * eps('single')
     set(handles.checkbox_robust,'Value',0)
     set(handles.checkbox_ar1_check,'Value',0)
     set(handles.checkbox_ar1_check,'String','White noise')
+    set(handles.check_ftest,'Visible', 'off')
 else
     handles.method ='Multi-taper method';
     set(handles.popupmenu2, 'Value', 1);
     set(handles.popupmenu_tapers, 'Value', 1);
+    set(handles.check_ftest,'Visible', 'on')
 end
 
 handles.mean = mean(Dt);
@@ -171,23 +183,21 @@ set(handles.edit4, 'String', num2str(length(data_s(:,1))));
 
 [po,w]=periodogram(data_s(:,2));
 fd1=w/(2*pi*handles.mean); 
+handles.ValidNyqFreq = fd1(end);
+
 poc = cumsum(po); % cumsum of power
 pocnorm = 100*poc/max(poc); % normalized
 % the first elements at which the cumulated power exceed 99%
 poc1 = find( pocnorm > 99, 1);
-handles.ValidNyqFreq = fd1(end);
 % if the frequency detected is smaller than 85% of nyquist frequency
 % suggest a new input max freq.
 if fd1(poc1)/fd1(end) <= 0.85
-    handles.ValidNyqFreq = fd1(poc1);
+    handles.ValidNyqFreqR = fd1(poc1);
     set(handles.edit_fmax_input,'String', num2str(fd1(poc1)))
     set(handles.radiobutton_fmax,'Value',0)
     set(handles.radiobutton_input,'Value',1)
 end
-
-%figure; subplot(2,1,1); plot(fd1,po); subplot(2,1,2); plot(fd1,pocnorm);ylim([90 100])
 %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %
-
 % Update handles structure
 guidata(hObject, handles);
 
@@ -312,22 +322,71 @@ if strcmp(method,'Multi-taper method')
     if handles.checkbox_robustAR1_v == 1
         dlg_title = 'Robust AR(1) Estimation';
         prompt = {'Median smoothing window: default 0.2 = 20%';...
-            'AR1 best fit model? 1 = linear; 2 = log power'};
+            'AR1 best fit model? 1 = linear; 2 = log power (default)';...
+            'Bias correction for ultra-high resolution data'};
         num_lines = 1;
-        defaultans = {num2str(0.2),num2str(2)};
+        defaultans = {num2str(0.2),num2str(2),num2str(0)};
         options.Resize='on';
         answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-        
+
         if ~isempty(answer)
             smoothwin = str2double(answer{1});
             linlog = str2double(answer{2});
+            biascorr = str2double(answer{3});
+            
             if length(datax)>2000
                 hwarn = warndlg('Large dataset, wait ...');
             end
-            [rhoM, s0M,redconfAR1,redconfML96]=redconfML(datax,dt,nw,nzeropad,linlog,smoothwin,handles.ValidNyqFreq,1);
+
+            if biascorr == 1
+                ValidNyqFreq = handles.ValidNyqFreqR;
+                [rhoM, s0M,redconfAR1,redconfML96]=redconfML(datax,dt,nw,nzeropad,linlog,smoothwin,ValidNyqFreq,0);
+            else
+                ValidNyqFreq = handles.ValidNyqFreq;
+                [rhoM, s0M,redconfAR1,redconfML96]=redconfML(datax,dt,nw,nzeropad,linlog,smoothwin,ValidNyqFreq,1);
+            end
             try close(hwarn)
             catch
             end
+            %if biascorr == 1
+            % Multi-taper method power spectrum
+            if nw == 1
+                [pxx,w] = pmtm(datax,nw,nzeropad,'DropLastTaper',false);
+            else
+                [pxx,w] = pmtm(datax,nw,nzeropad);
+            end
+            % Nyquist frequency
+            fn = 1/(2*dt);
+            % true frequencies
+            f = w/pi*fn;
+            % median-smoothing data numbers
+            smoothn = round(smoothwin * length(pxx));
+            pxxsmooth0 = moveMedian(pxx,smoothn);
+            theored1 = s0M * (1-rhoM^2)./(1-(2.*rhoM.*cos(pi.*f./fmax))+rhoM^2);
+            K = 2*nw -1;
+            nw2 = 2*(K);
+            % Chi-square inversed distribution
+            chi90 = theored1 * chi2inv(0.90,nw2)/nw2;
+            chi95 = theored1 * chi2inv(0.95,nw2)/nw2;
+            chi99 = theored1 * chi2inv(0.99,nw2)/nw2;
+            
+            figdata = figure; 
+            set(gcf,'Color', 'white')
+            semilogy(f,pxx,'k')
+            hold on; 
+            semilogy(f,pxxsmooth0,'m-.');
+            semilogy(f,theored1,'k-','LineWidth',2);
+            semilogy(f,chi90,'r-');
+            semilogy(f,chi95,'r--','LineWidth',2);
+            semilogy(f,chi99,'b-.');
+            ylabel('Power')
+            smthwin = [num2str(smoothwin*100),'%', ' median-smoothed'];
+            legend('Power',smthwin,'Robust AR(1) median',...
+                'Robust AR(1) 90%','Robust AR(1) 95%','Robust AR(1) 99%')
+            set(gcf,'units','norm') % set location
+            set(gcf,'position',[0.0,0.45,0.45,0.45]) % set position
+            %end
+            
             if plot_x_period
                 update_spectral_x_period_mtm
             else
@@ -345,14 +404,12 @@ if strcmp(method,'Multi-taper method')
                 if handles.logfreq == 1
                     set(gca,'xscale','log')
                 end
-                figdata = gcf;
             end
             
             name1 = [dat_name,'-',num2str(nw),'piMTM-RobustAR1',ext];
             data1 = redconfML96;
             name2 = [dat_name,'-',num2str(nw),'piMTM-ClassicAR1',ext];
             data2 = redconfAR1;
-            
             
             CDac_pwd;
             dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
@@ -367,7 +424,6 @@ if strcmp(method,'Multi-taper method')
     
     end
     
-
     if padtimes > 1
         if nw == 1
             [po,w]=pmtm(datax,nw,nzeropad,'DropLastTaper',false);
@@ -382,6 +438,175 @@ if strcmp(method,'Multi-taper method')
         end
     end
     fd1=w/(2*pi*dt);
+    
+    % power law
+    if handles.checkPL == 1
+        K = 2*nw -1;
+        nw2 = 2*(K);
+        N = length(datax);
+        % With no padding or smoothing applied
+        % Number of independent Fourier frequencies
+        Nf = N/2; 
+        pf = polyfit(log(fd1(2:end)),log(po(2:end)),1);
+        % Evaluating Coefficients
+        a = pf(1);
+        % Accounting for the log transformation
+        k = exp(pf(2));
+        %ezplot(@(X) k*X.^a,[X(1) X(end)])
+        pl = k * fd1.^a;
+        % local c.l.
+        red90 = pl * chi2inv(0.9,nw2)/nw2;
+        red95 = pl * chi2inv(0.95,nw2)/nw2;
+        red99 = pl * chi2inv(0.99,nw2)/nw2;
+        % periodogram method global
+        alpha90 = 0.1/Nf;
+        alpha95 = 0.05/Nf;
+        alpha99 = 0.01/Nf;
+        red90global = pl * chi2inv((1-alpha90),nw2)/nw2;
+        red95global = pl * chi2inv((1-alpha95),nw2)/nw2;
+        red99global = pl * chi2inv((1-alpha99),nw2)/nw2;
+        
+        name1 = [dat_name,'-',num2str(nw),'piMTM-PL-local',ext];
+        data1 = [fd1,po,pl,red90,red95,red99];
+        name2 = [dat_name,'-',num2str(nw),'piMTM-PL-global',ext];
+        data2 = [fd1,po,pl,red90global,red95global,red99global];
+        CDac_pwd;
+        dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
+        dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9);
+        disp('>>  Refresh main window to see red noise estimation data files: ')
+        disp(name1)
+        disp(name2)
+        cd(pre_dirML);
+        
+        figpl = figure;
+        set(gcf,'Color', 'white')
+        if plot_x_period
+            pt1 = 1./fd1;
+            plot(pt1(2:end),po(2:end),'k-','LineWidth',1);
+            xlabel(['Period (',num2str(unit),')']) 
+            xlim([1/fmax, pt1(3)]);
+            set(gca, 'XDir','reverse')
+            hold on
+            plot(pt1,red99global,'r-.','LineWidth',1)
+            plot(pt1,red95global,'r--','LineWidth',2)
+            plot(pt1,red90global,'r-','LineWidth',1)
+            plot(pt1,red99,'b-.','LineWidth',1)
+            plot(pt1,red95,'b--','LineWidth',2)
+            plot(pt1,red90,'b-','LineWidth',1)
+            plot(pt1,pl,'k-','LineWidth',2)
+        else
+            plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
+            xlim([0 fmax]);
+            xlabel(['Frequency (cycles/',num2str(unit),')']) 
+            hold on
+            plot(fd1,red99global,'r-.','LineWidth',1)
+            plot(fd1,red95global,'r--','LineWidth',2)
+            plot(fd1,red90global,'r-','LineWidth',1)
+            plot(fd1,red99,'b-.','LineWidth',1)
+            plot(fd1,red95,'b--','LineWidth',2)
+            plot(fd1,red90,'b-','LineWidth',1)
+            plot(fd1,pl,'k-','LineWidth',2)
+        end
+        legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','Power law')
+        ylabel('Power')
+        title([num2str(nw),'\pi MTM & power law'])
+        set(gcf,'Name',[num2str(nw),'\pi MTM & power law: ',dat_name,ext])
+        set(gca,'XMinorTick','on','YMinorTick','on')
+        
+        if handles.linlogY == 1
+            set(gca, 'YScale', 'log')
+        else
+            set(gca, 'YScale', 'linear')
+        end
+        if handles.logfreq == 1
+            set(gca,'xscale','log')
+        end
+    end
+    
+    % bending power law
+    if handles.checkBPL == 1
+        N = length(datax);
+        % With no padding or smoothing applied
+        % Number of independent Fourier frequencies
+        Nf = N/2;
+        pol = log(po);
+        pol = real(pol);
+        fun = @(v,f)(v(1) * f .^(-1 * v(2)))./(1 + (f / v(4)) .^ (v(3)-v(2)));
+        v0 = [100,0.5,3,0.5*fd1(end)];
+        x = lsqcurvefit(fun,v0,fd1(2:end),pol(2:end));
+        theored1 = exp(fun(x,fd1)); % bending power law fit
+        K = 2*nw -1;
+        nw2 = 2*(K);
+        % Chi-square inversed distribution
+        % local c.l.
+        red90 = theored1 * chi2inv(0.90,nw2)/nw2;
+        red95 = theored1 * chi2inv(0.95,nw2)/nw2;
+        red99 = theored1 * chi2inv(0.99,nw2)/nw2;
+        
+        % periodogram method global
+        alpha90 = 0.10/Nf;
+        alpha95 = 0.05/Nf;
+        alpha99 = 0.01/Nf;
+        red90global = theored1 * chi2inv((1-alpha90),nw2)/nw2;
+        red95global = theored1 * chi2inv((1-alpha95),nw2)/nw2;
+        red99global = theored1 * chi2inv((1-alpha99),nw2)/nw2;
+        name1 = [dat_name,'-',num2str(nw),'piMTM-BPL-local',ext];
+        data1 = [fd1,po,theored1,red90,red95,red99];
+        name2 = [dat_name,'-',num2str(nw),'piMTM-BPL-global',ext];
+        data2 = [fd1,po,theored1,red90global,red95global,red99global];
+        CDac_pwd;
+        dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
+        dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9);
+        disp('>>  Refresh main window to see red noise estimation data files: ')
+        disp(name1)
+        disp(name2)
+        cd(pre_dirML);
+        
+        figbpl = figure;
+        set(gcf,'Color', 'white')
+        if plot_x_period
+            pt1 = 1./fd1;
+            plot(pt1(2:end),po(2:end),'k-','LineWidth',1);
+            xlabel(['Period (',num2str(unit),')']) 
+            xlim([1/fmax, pt1(3)]);
+            set(gca, 'XDir','reverse')
+            hold on
+            plot(pt1,red99global,'r-.','LineWidth',1)
+            plot(pt1,red95global,'r--','LineWidth',2)
+            plot(pt1,red90global,'r-','LineWidth',1)
+            plot(pt1,red99,'b-.','LineWidth',1)
+            plot(pt1,red95,'b--','LineWidth',2)
+            plot(pt1,red90,'b-','LineWidth',1)
+            plot(pt1,theored1,'k-','LineWidth',2)
+        else
+            plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
+            xlim([0 fmax]);
+            xlabel(['Frequency (cycles/',num2str(unit),')']) 
+            hold on
+            plot(fd1,red99global,'r-.','LineWidth',1)
+            plot(fd1,red95global,'r--','LineWidth',2)
+            plot(fd1,red90global,'r-','LineWidth',1)
+            plot(fd1,red99,'b-.','LineWidth',1)
+            plot(fd1,red95,'b--','LineWidth',2)
+            plot(fd1,red90,'b-','LineWidth',1)
+            plot(fd1,theored1,'k-','LineWidth',2)
+        end
+        legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','BPL')
+        ylabel('Power')
+        title([num2str(nw),'\pi MTM & bending power law'])
+        set(gcf,'Name',[num2str(nw),'\pi MTM & bending power law: ',dat_name,ext])
+        set(gca,'XMinorTick','on','YMinorTick','on')
+        
+        if handles.linlogY == 1
+            set(gca, 'YScale', 'log')
+        else
+            set(gca, 'YScale', 'linear')
+        end
+        if handles.logfreq == 1
+            set(gca,'xscale','log')
+        end
+    end
+    
     % Plot figure MTM
         
     if and( handles.checkbox_robustAR1_v == 0, handles.checkbox_ar1_v == 0)
@@ -496,29 +721,46 @@ if strcmp(method,'Multi-taper method')
             update_spectral_x_period_mtm
         else
             [freq,ftest,fsig,Amp,Faz,Sig,Noi,dof,wt]=ftestmtmML(data,nw,padtimes,1);
-            colordef white;
+            set(gcf,'color','white');
             set(gcf,'units','norm') % set location
             set(gcf,'position',[0.0,0.05,0.45,0.45])
             %xlim([0 fmax]);
             subplot(3,1,1); xlim([0 fmax])
             subplot(3,1,2); xlim([0 fmax])
             subplot(3,1,3); xlim([0 fmax])
+            
+            fig2 = figure;
+            set(gcf,'color','white');
+            set(gcf,'units','norm') % set location
+            set(gcf,'position',[0.2,0.05,0.45,0.45])
+            subplot(2,1,1); 
+            plot(freq,dof,'color','k','LineWidth',1)
+            xlim([0 fmax])
+            title('Adaptive weighted degrees of freedom')
+            subplot(2,1,2); 
+            plot(freq,Faz,'color','k','LineWidth',1)
+            xlim([0 fmax])
+            title('Harmonic phase')
+            ylabel('Frequency')
         end
         
         fnyq = 1/(2*dt);
         nameftest = [dat_name,'-',num2str(nw),'piMTM-ftest',ext];
         namefsig = [dat_name,'-',num2str(nw),'piMTM-fsig',ext];
         namefamp = [dat_name,'-',num2str(nw),'piMTM-amp',ext];
+        namefrest = [dat_name,'-',num2str(nw),'piMTM-Faz-Sig-Noi-Dof',ext];
         CDac_pwd;
         dataftest = [freq',ftest'];
         datafsig  = [freq',fsig'];
         dataamp  = [freq',Amp'];
+        datarest  = [freq',Faz',Sig',Noi',dof'];
         [dataftest] = select_interval(dataftest,0,fnyq);
         [datafsig] = select_interval(datafsig,0,fnyq);
         [dataamp] = select_interval(dataamp,0,fnyq);
         dlmwrite(nameftest, dataftest, 'delimiter', ',', 'precision', 9);
         dlmwrite(namefsig, datafsig, 'delimiter', ',', 'precision', 9);
         dlmwrite(namefamp, dataamp, 'delimiter', ',', 'precision', 9);
+        dlmwrite(namefrest, datarest, 'delimiter', ',', 'precision', 9);
         %disp('>>  Refresh main window to see red noise estimation data files: ')
         disp(nameftest)
         disp(namefsig)
@@ -538,7 +780,7 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
         pt1 = 1./fd1;
     end
     figdata = figure;
-    colordef white;
+    set(gcf,'Color', 'white')
     if plot_x_period
         if handles.checkbox_ar1_v == 1
             plot(pt1,po,pt1,pth*ones(size(pt1')),'LineWidth',1); 
@@ -560,7 +802,7 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
         xlim([0 fmax]);
     end
     ylabel('Power ')
-    title(['Lomb-Scargle spectrum; Sampling rate = ',num2str(dt),' ', unit])
+    title('Lomb-Scargle spectrum')
     set(gcf,'Name',[dat_name,ext,': Lomb-Scargle spectrum'])
     set(gca,'XMinorTick','on','YMinorTick','on')
     
@@ -571,6 +813,168 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
     end
     if handles.logfreq == 1
         set(gca,'xscale','log')
+    end
+    
+    % power law
+    if handles.checkPL == 1
+        N = length(datax);
+        % With no padding or smoothing applied
+        % Number of independent Fourier frequencies
+        Nf = N/2;
+        pf = polyfit(log(fd1(2:end)),log(po(2:end)),1);
+        % Evaluating Coefficients
+        a = pf(1);
+        % Accounting for the log transformation
+        k = exp(pf(2));
+        %ezplot(@(X) k*X.^a,[X(1) X(end)])
+        pl = k * fd1.^a;
+        % local c.l.
+        red90 = pl * chi2inv(0.9,2)/2;
+        red95 = pl * chi2inv(0.95,2)/2;
+        red99 = pl * chi2inv(0.99,2)/2;
+        % periodogram method global
+        alpha90 = 0.1/Nf;
+        alpha95 = 0.05/Nf;
+        alpha99 = 0.01/Nf;
+        red90global = pl * chi2inv((1-alpha90),2)/2;
+        red95global = pl * chi2inv((1-alpha95),2)/2;
+        red99global = pl * chi2inv((1-alpha99),2)/2;
+        name1 = [dat_name,'-Lomb-PL-local',ext];
+        data1 = [fd1,po,pl,red90,red95,red99];
+        name2 = [dat_name,'-Lomb-PL-global',ext];
+        data2 = [fd1,po,pl,red90global,red95global,red99global];
+        CDac_pwd;
+        dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
+        dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9);
+        disp('>>  Refresh main window to see red noise estimation data files: ')
+        disp(name1)
+        disp(name2)
+        cd(pre_dirML);
+        
+        figpl = figure;
+        set(gcf,'Color', 'white')
+        if plot_x_period
+            pt1 = 1./fd1;
+            plot(pt1(2:end),po(2:end),'k-','LineWidth',1);
+            xlabel(['Period (',num2str(unit),')']) 
+            xlim([1/fmax, pt1(3)]);
+            set(gca, 'XDir','reverse')
+            hold on
+            plot(pt1,red99global,'r-.','LineWidth',1)
+            plot(pt1,red95global,'r--','LineWidth',2)
+            plot(pt1,red90global,'r-','LineWidth',1)
+            plot(pt1,red99,'b-.','LineWidth',1)
+            plot(pt1,red95,'b--','LineWidth',2)
+            plot(pt1,red90,'b-','LineWidth',1)
+            plot(pt1,pl,'k-','LineWidth',2)
+        else
+            plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
+            xlim([0 fmax]);
+            xlabel(['Frequency (cycles/',num2str(unit),')']) 
+            hold on
+            plot(fd1,red99global,'r-.','LineWidth',1)
+            plot(fd1,red95global,'r--','LineWidth',2)
+            plot(fd1,red90global,'r-','LineWidth',1)
+            plot(fd1,red99,'b-.','LineWidth',1)
+            plot(fd1,red95,'b--','LineWidth',2)
+            plot(fd1,red90,'b-','LineWidth',1)
+            plot(fd1,pl,'k-','LineWidth',2)
+        end
+        legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','Power law')
+        ylabel('Power')
+        title('Lomb-Scargle spectrum & power law')
+        set(gcf,'Name',['Lomb-Scargle spectrum & power law: ',dat_name,ext])
+        set(gca,'XMinorTick','on','YMinorTick','on')
+        
+        if handles.linlogY == 1;
+            set(gca, 'YScale', 'log')
+        else
+            set(gca, 'YScale', 'linear')
+        end
+        if handles.logfreq == 1
+            set(gca,'xscale','log')
+        end
+    end
+    
+    % bending power law
+    if handles.checkBPL == 1
+        N = length(datax);
+        % With no padding or smoothing applied
+        % Number of independent Fourier frequencies
+        Nf = N/2;
+        pol = log(po);
+        pol = real(pol);
+        fun = @(v,f)(v(1) * f .^(-1 * v(2)))./(1 + (f / v(4)) .^ (v(3)-v(2)));
+        v0 = [100,0.5,3,0.5*fd1(end)];
+        x = lsqcurvefit(fun,v0,fd1(2:end),pol(2:end));
+        pl = exp(fun(x,fd1));
+        % local c.l.
+        red90 = pl * chi2inv(0.9,2)/2;
+        red95 = pl * chi2inv(0.95,2)/2;
+        red99 = pl * chi2inv(0.99,2)/2;
+        % periodogram method global
+        alpha90 = 0.1/Nf;
+        alpha95 = 0.05/Nf;
+        alpha99 = 0.01/Nf;
+        red90global = pl * chi2inv((1-alpha90),2)/2;
+        red95global = pl * chi2inv((1-alpha95),2)/2;
+        red99global = pl * chi2inv((1-alpha99),2)/2;
+            
+        name1 = [dat_name,'-Lomb-BPL-local',ext];
+        data1 = [fd1,po,pl,red90,red95,red99];
+        name2 = [dat_name,'-Lomb-BPL-global',ext];
+        data2 = [fd1,po,pl,red90global,red95global,red99global];
+        CDac_pwd;
+        dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
+        dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9);
+        disp('>>  Refresh main window to see red noise estimation data files: ')
+        disp(name1)
+        disp(name2)
+        cd(pre_dirML);
+        
+        figbpl = figure;
+        set(gcf,'Color', 'white')
+        if plot_x_period
+            pt1 = 1./fd1;
+            plot(pt1(2:end),po(2:end),'k-','LineWidth',1);
+            xlabel(['Period (',num2str(unit),')']) 
+            xlim([1/fmax, pt1(3)]);
+            set(gca, 'XDir','reverse')
+            hold on
+            plot(pt1,red99global,'r-.','LineWidth',1)
+            plot(pt1,red95global,'r--','LineWidth',2)
+            plot(pt1,red90global,'r-','LineWidth',1)
+            plot(pt1,red99,'b-.','LineWidth',1)
+            plot(pt1,red95,'b--','LineWidth',2)
+            plot(pt1,red90,'b-','LineWidth',1)
+            plot(pt1,pl,'k-','LineWidth',2)
+        else
+            plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
+            xlim([0 fmax]);
+            xlabel(['Frequency (cycles/',num2str(unit),')']) 
+            hold on
+            plot(fd1,red99global,'r-.','LineWidth',1)
+            plot(fd1,red95global,'r--','LineWidth',2)
+            plot(fd1,red90global,'r-','LineWidth',1)
+            plot(fd1,red99,'b-.','LineWidth',1)
+            plot(fd1,red95,'b--','LineWidth',2)
+            plot(fd1,red90,'b-','LineWidth',1)
+            plot(fd1,pl,'k-','LineWidth',2)
+        end
+        legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','BPL')
+        ylabel('Power')
+        title('Lomb-Scargle spectrum & bending power law')
+        set(gcf,'Name',['Lomb-Scargle spectrum & bending power law: ',dat_name,ext])
+        set(gca,'XMinorTick','on','YMinorTick','on')
+        
+        if handles.linlogY == 1
+            set(gca, 'YScale', 'log')
+        else
+            set(gca, 'YScale', 'linear')
+        end
+        if handles.logfreq == 1
+            set(gca,'xscale','log')
+        end
     end
     
     filename_LS = [dat_name,'-Lomb-Scargle.txt'];
@@ -623,6 +1027,170 @@ elseif  strcmp(method,'Periodogram')
         hold off
     end
     
+    % power law
+    if handles.checkPL == 1
+        N = length(datax);
+        % With no padding or smoothing applied
+        % Number of independent Fourier frequencies
+        Nf = N/2; 
+        pf = polyfit(log(fd1(2:end)),log(po(2:end)),1);
+        % Evaluating Coefficients
+        a = pf(1);
+        % Accounting for the log transformation
+        k = exp(pf(2));
+        %ezplot(@(X) k*X.^a,[X(1) X(end)])
+        pl = k * fd1.^a;
+        % local c.l.
+        red90 = pl * chi2inv(0.9,2)/2;
+        red95 = pl * chi2inv(0.95,2)/2;
+        red99 = pl * chi2inv(0.99,2)/2;
+        % periodogram method global
+        alpha90 = 0.1/Nf;
+        alpha95 = 0.05/Nf;
+        alpha99 = 0.01/Nf;
+        red90global = pl * chi2inv((1-alpha90),2)/2;
+        red95global = pl * chi2inv((1-alpha95),2)/2;
+        red99global = pl * chi2inv((1-alpha99),2)/2;
+        name1 = [dat_name,'-Periodogram-PL-local',ext];
+        data1 = [fd1,po,pl,red90,red95,red99];
+        name2 = [dat_name,'-Periodogram-PL-global',ext];
+        data2 = [fd1,po,pl,red90global,red95global,red99global];
+        CDac_pwd;
+        dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
+        dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9);
+        disp('>>  Refresh main window to see red noise estimation data files: ')
+        disp(name1)
+        disp(name2)
+        cd(pre_dirML);
+            
+        figpl = figure;
+        set(gcf,'Color', 'white')
+        if plot_x_period
+            pt1 = 1./fd1;
+            plot(pt1(2:end),po(2:end),'k-','LineWidth',1);
+            xlabel(['Period (',num2str(unit),')']) 
+            xlim([1/fmax, pt1(3)]);
+            set(gca, 'XDir','reverse')
+            hold on
+            plot(pt1,red99global,'r-.','LineWidth',1)
+            plot(pt1,red95global,'r--','LineWidth',2)
+            plot(pt1,red90global,'r-','LineWidth',1)
+            plot(pt1,red99,'b-.','LineWidth',1)
+            plot(pt1,red95,'b--','LineWidth',2)
+            plot(pt1,red90,'b-','LineWidth',1)
+            plot(pt1,pl,'k-','LineWidth',2)
+        else
+            plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
+            xlim([0 fmax]);
+            xlabel(['Frequency (cycles/',num2str(unit),')']) 
+            hold on
+            plot(fd1,red99global,'r-.','LineWidth',1)
+            plot(fd1,red95global,'r--','LineWidth',2)
+            plot(fd1,red90global,'r-','LineWidth',1)
+            plot(fd1,red99,'b-.','LineWidth',1)
+            plot(fd1,red95,'b--','LineWidth',2)
+            plot(fd1,red90,'b-','LineWidth',1)
+            plot(fd1,pl,'k-','LineWidth',2)
+        end
+        %legend('Power','95% global','99% local','95% local','90% local','Power law')
+        legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','Power law')
+        ylabel('Power')
+        title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit])
+        set(gcf,'Name',['Periodogram & power law: ',dat_name,ext])
+        set(gca,'XMinorTick','on','YMinorTick','on')
+        
+        if handles.linlogY == 1;
+            set(gca, 'YScale', 'log')
+        else
+            set(gca, 'YScale', 'linear')
+        end
+        if handles.logfreq == 1
+            set(gca,'xscale','log')
+        end
+    end
+    
+    % bending power law
+    if handles.checkBPL == 1
+        N = length(datax);
+        % With no padding or smoothing applied
+        % Number of independent Fourier frequencies
+        Nf = N/2;
+        
+        pol = log(po);
+        pol = real(pol);
+        
+        fun = @(v,f)(v(1) * f .^(-1 * v(2)))./(1 + (f / v(4)) .^ (v(3)-v(2)));
+        v0 = [100,0.5,3,0.5*fd1(end)];
+        x = lsqcurvefit(fun,v0,fd1(2:end),pol(2:end));
+        pl = exp(fun(x,fd1));
+        % local c.l.
+        red90 = pl * chi2inv(0.9,2)/2;
+        red95 = pl * chi2inv(0.95,2)/2;
+        red99 = pl * chi2inv(0.99,2)/2;
+        % periodogram method global
+        alpha90 = 0.1/Nf;
+        alpha95 = 0.05/Nf;
+        alpha99 = 0.01/Nf;
+        red90global = pl * chi2inv((1-alpha90),2)/2;
+        red95global = pl * chi2inv((1-alpha95),2)/2;
+        red99global = pl * chi2inv((1-alpha99),2)/2;
+        name1 = [dat_name,'-Periodogram-BPL-local',ext];
+        data1 = [fd1,po,pl,red90,red95,red99];
+        name2 = [dat_name,'-Periodogram-BPL-global',ext];
+        data2 = [fd1,po,pl,red90global,red95global,red99global];
+        CDac_pwd;
+        dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
+        dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9);
+        disp('>>  Refresh main window to see red noise estimation data files: ')
+        disp(name1)
+        disp(name2)
+        cd(pre_dirML);
+        
+        figbpl = figure;
+        set(gcf,'Color', 'white')
+        if plot_x_period
+            pt1 = 1./fd1;
+            plot(pt1(2:end),po(2:end),'k-','LineWidth',1);
+            xlabel(['Period (',num2str(unit),')']) 
+            xlim([1/fmax, pt1(3)]);
+            set(gca, 'XDir','reverse')
+            hold on
+            plot(pt1,red99global,'r-.','LineWidth',1)
+            plot(pt1,red95global,'r--','LineWidth',2)
+            plot(pt1,red90global,'r-','LineWidth',1)
+            plot(pt1,red99,'b-.','LineWidth',1)
+            plot(pt1,red95,'b--','LineWidth',2)
+            plot(pt1,red90,'b-','LineWidth',1)
+            plot(pt1,pl,'k-','LineWidth',2)
+        else
+            plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
+            xlim([0 fmax]);
+            xlabel(['Frequency (cycles/',num2str(unit),')']) 
+            hold on
+            plot(fd1,red99global,'r-.','LineWidth',1)
+            plot(fd1,red95global,'r--','LineWidth',2)
+            plot(fd1,red90global,'r-','LineWidth',1)
+            plot(fd1,red99,'b-.','LineWidth',1)
+            plot(fd1,red95,'b--','LineWidth',2)
+            plot(fd1,red90,'b-','LineWidth',1)
+            plot(fd1,pl,'k-','LineWidth',2)
+        end
+        legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','BPL')
+        ylabel('Power')
+        title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit])
+        set(gcf,'Name',['Periodogram & bending power law: ',dat_name,ext])
+        set(gca,'XMinorTick','on','YMinorTick','on')
+        
+        if handles.linlogY == 1
+            set(gca, 'YScale', 'log')
+        else
+            set(gca, 'YScale', 'linear')
+        end
+        if handles.logfreq == 1
+            set(gca,'xscale','log')
+        end
+    end
+    
     CDac_pwd; % cd ac_pwd dir
     
     try filename_Periodogram = [dat_name,'-PeriodogramAR1.txt'];   
@@ -652,6 +1220,16 @@ try figure(figdata);
     set(figdata,'position',[0.0,0.5,0.45,0.45]) % set position
 catch
 end% return plot
+try figure(figpl); 
+    set(figpl,'units','norm') % set location
+    set(figpl,'position',[0.2,0.45,0.45,0.45]) % set position
+catch
+end
+try figure(figbpl); 
+    set(figbpl,'units','norm') % set location
+    set(figbpl,'position',[0.4,0.45,0.45,0.45]) % set position
+catch
+end
 guidata(hObject,handles);
     
 
@@ -924,7 +1502,7 @@ elseif strcmp(method,'Periodogram')
 elseif strcmp(method,'Lomb-Scargle spectrum')
     set(handles.popupmenu_tapers,'Enable','off')
     set(handles.checkbox_robust,'Enable','off')
-    set(handles.checkbox_robust,'Value',0)
+    set(handles.checkbox_robust,'Value',1)
     set(handles.checkbox_ar1_check,'Value',0)
     set(handles.checkbox_ar1_check,'String','White noise')
     set(handles.check_ftest,'Visible','off')
@@ -995,24 +1573,68 @@ if strcmp(method,'Multi-taper method')
     if handles.checkbox_robustAR1_v == 1
         dlg_title = 'Robust AR(1) Estimation';
         prompt = {'Median smoothing window: default 0.2 = 20%';...
-            'AR1 best fit model? 1 = linear; 2 = log power'};
+            'AR1 best fit model? 1 = linear; 2 = log power (default)';...
+            'Bias correction for ultra-high resolution data'};
         num_lines = 1;
-        defaultans = {num2str(0.2),num2str(2)};
+        defaultans = {num2str(0.2),num2str(2),num2str(0)};
         options.Resize='on';
         answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
 
         if ~isempty(answer)
             smoothwin = str2double(answer{1});
             linlog = str2double(answer{2});
+            biascorr = str2double(answer{3});
             
             if length(datax)>2000
                 hwarn = warndlg('Large dataset, wait ...');
             end
-            ValidNyqFreq = handles.ValidNyqFreq;
-            [rhoM, s0M,redconfAR1,redconfML96]=redconfML(datax,dt,nw,nzeropad,linlog,smoothwin,ValidNyqFreq,1);
+            if biascorr == 1
+                ValidNyqFreq = handles.ValidNyqFreqR;
+                [rhoM, s0M,redconfAR1,redconfML96]=redconfML(datax,dt,nw,nzeropad,linlog,smoothwin,ValidNyqFreq,0);
+            else
+                ValidNyqFreq = handles.ValidNyqFreq;
+                [rhoM, s0M,redconfAR1,redconfML96]=redconfML(datax,dt,nw,nzeropad,linlog,smoothwin,ValidNyqFreq,0);
+            end
             try close(hwarn)
             catch
             end
+            
+            % Multi-taper method power spectrum
+            if nw == 1
+                [pxx,w] = pmtm(datax,nw,nzeropad,'DropLastTaper',false);
+            else
+                [pxx,w] = pmtm(datax,nw,nzeropad);
+            end
+            % Nyquist frequency
+            fn = 1/(2*dt);
+            % true frequencies
+            f = w/pi*fn;
+            % median-smoothing data numbers
+            smoothn = round(smoothwin * length(pxx));
+            pxxsmooth0 = moveMedian(pxx,smoothn);
+            theored1 = s0M * (1-rhoM^2)./(1-(2.*rhoM.*cos(pi.*f./fmax))+rhoM^2);
+            K = 2*nw -1;
+            nw2 = 2*(K);
+            % Chi-square inversed distribution
+            chi90 = theored1 * chi2inv(0.90,nw2)/nw2;
+            chi95 = theored1 * chi2inv(0.95,nw2)/nw2;
+            chi99 = theored1 * chi2inv(0.99,nw2)/nw2;
+            figdata = figure; 
+            set(gcf,'Color', 'white')
+            semilogy(f,pxx,'k')
+            hold on; 
+            semilogy(f,pxxsmooth0,'m-.');
+            semilogy(f,theored1,'k-','LineWidth',2);
+            semilogy(f,chi90,'r-');
+            semilogy(f,chi95,'r--','LineWidth',2);
+            semilogy(f,chi99,'b-.');
+            ylabel('Power')
+            smthwin = [num2str(smoothwin*100),'%', ' median-smoothed'];
+            legend('Power',smthwin,'Robust AR(1) median',...
+                'Robust AR(1) 90%','Robust AR(1) 95%','Robust AR(1) 99%')
+            set(gcf,'units','norm') % set location
+            set(gcf,'position',[0.0,0.45,0.45,0.45]) % set position
+            
             if plot_x_period
                 update_spectral_x_period_mtm
             else
@@ -1022,7 +1644,7 @@ if strcmp(method,'Multi-taper method')
                 set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'pi MTM'])
                 set(gca,'XMinorTick','on','YMinorTick','on')
                 set(gcf,'Color', 'white')
-                if handles.linlogY == 1;
+                if handles.linlogY == 1
                     set(gca, 'YScale', 'log')
                 else
                     set(gca, 'YScale', 'linear')
@@ -1037,7 +1659,6 @@ if strcmp(method,'Multi-taper method')
         end
     end
     
-    
     if padtimes > 1
         if nw == 1
             [po,w]=pmtm(datax,nw,nzeropad,'DropLastTaper',false);
@@ -1051,9 +1672,156 @@ if strcmp(method,'Multi-taper method')
             [po,w]=pmtm(datax,nw);
         end
     end
-        fd1=w/(2*pi*dt);
-        % Plot figure MTM handles.checkbox_robustAR1_v = checkbox_robustAR1;
-        % neither robust AR1 nor conventional AR1
+    fd1=w/(2*pi*dt);
+    
+    % power law
+    if handles.checkPL == 1
+        K = 2*nw -1;
+        nw2 = 2*(K);
+        
+        N = length(datax);
+        % With no padding or smoothing applied
+        % Number of independent Fourier frequencies
+        Nf = N/2; 
+        pf = polyfit(log(fd1(2:end)),log(po(2:end)),1);
+        % Evaluating Coefficients
+        a = pf(1);
+        % Accounting for the log transformation
+        k = exp(pf(2));
+        %ezplot(@(X) k*X.^a,[X(1) X(end)])
+        pl = k * fd1.^a;
+        % local c.l.
+        red90 = pl * chi2inv(0.9,nw2)/nw2;
+        red95 = pl * chi2inv(0.95,nw2)/nw2;
+        red99 = pl * chi2inv(0.99,nw2)/nw2;
+        % periodogram method global
+        alpha90 = 0.1/Nf;
+        alpha95 = 0.05/Nf;
+        alpha99 = 0.01/Nf;
+        red90global = pl * chi2inv((1-alpha90),nw2)/nw2;
+        red95global = pl * chi2inv((1-alpha95),nw2)/nw2;
+        red99global = pl * chi2inv((1-alpha99),nw2)/nw2;
+        
+        figpl = figure;
+        set(gcf,'Color', 'white')
+        if plot_x_period
+            pt1 = 1./fd1;
+            plot(pt1(2:end),po(2:end),'k-','LineWidth',1);
+            xlabel(['Period (',num2str(unit),')']) 
+            xlim([1/fmax, pt1(3)]);
+            set(gca, 'XDir','reverse')
+            hold on
+            plot(pt1,red99global,'r-.','LineWidth',1)
+            plot(pt1,red95global,'r--','LineWidth',2)
+            plot(pt1,red90global,'r-','LineWidth',1)
+            plot(pt1,red99,'b-.','LineWidth',1)
+            plot(pt1,red95,'b--','LineWidth',2)
+            plot(pt1,red90,'b-','LineWidth',1)
+            plot(pt1,pl,'k-','LineWidth',2)
+        else
+            plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
+            xlim([0 fmax]);
+            xlabel(['Frequency (cycles/',num2str(unit),')']) 
+            hold on
+            plot(fd1,red99global,'r-.','LineWidth',1)
+            plot(fd1,red95global,'r--','LineWidth',2)
+            plot(fd1,red90global,'r-','LineWidth',1)
+            plot(fd1,red99,'b-.','LineWidth',1)
+            plot(fd1,red95,'b--','LineWidth',2)
+            plot(fd1,red90,'b-','LineWidth',1)
+            plot(fd1,pl,'k-','LineWidth',2)
+        end
+        %legend('Power','95% global','99% local','95% local','90% local','Power law')
+        legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','Power law')
+        ylabel('Power')
+        title([num2str(nw),'\pi MTM & power law'])
+        set(gcf,'Name',[num2str(nw),'\pi MTM & power law: ',dat_name,ext])
+        set(gca,'XMinorTick','on','YMinorTick','on')
+        
+        if handles.linlogY == 1
+            set(gca, 'YScale', 'log')
+        else
+            set(gca, 'YScale', 'linear')
+        end
+        if handles.logfreq == 1
+            set(gca,'xscale','log')
+        end
+    end
+    
+    % bending power law
+    if handles.checkBPL == 1
+        N = length(datax);
+        % With no padding or smoothing applied
+        % Number of independent Fourier frequencies
+        Nf = N/2;
+        pol = log(po);
+        pol = real(pol);
+        fun = @(v,f)(v(1) * f .^(-1 * v(2)))./(1 + (f / v(4)) .^ (v(3)-v(2)));
+        v0 = [100,0.5,3,0.5*fd1(end)];
+        x = lsqcurvefit(fun,v0,fd1(2:end),pol(2:end));
+        theored1 = exp(fun(x,fd1)); % bending power law fit
+        K = 2*nw -1;
+        nw2 = 2*(K);
+        % Chi-square inversed distribution
+        % local c.l.
+        red90 = theored1 * chi2inv(0.90,nw2)/nw2;
+        red95 = theored1 * chi2inv(0.95,nw2)/nw2;
+        red99 = theored1 * chi2inv(0.99,nw2)/nw2;
+        
+        % periodogram method global
+        alpha90 = 0.10/Nf;
+        alpha95 = 0.05/Nf;
+        alpha99 = 0.01/Nf;
+        red90global = theored1 * chi2inv((1-alpha90),nw2)/nw2;
+        red95global = theored1 * chi2inv((1-alpha95),nw2)/nw2;
+        red99global = theored1 * chi2inv((1-alpha99),nw2)/nw2;
+        
+        figbpl = figure;
+        set(gcf,'Color', 'white')
+        if plot_x_period
+            pt1 = 1./fd1;
+            plot(pt1(2:end),po(2:end),'k-','LineWidth',1);
+            xlabel(['Period (',num2str(unit),')']) 
+            xlim([1/fmax, pt1(3)]);
+            set(gca, 'XDir','reverse')
+            hold on
+            plot(pt1,red99global,'r-.','LineWidth',1)
+            plot(pt1,red95global,'r--','LineWidth',2)
+            plot(pt1,red90global,'r-','LineWidth',1)
+            plot(pt1,red99,'b-.','LineWidth',1)
+            plot(pt1,red95,'b--','LineWidth',2)
+            plot(pt1,red90,'b-','LineWidth',1)
+            plot(pt1,theored1,'k-','LineWidth',2)
+        else
+            plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
+            xlim([0 fmax]);
+            xlabel(['Frequency (cycles/',num2str(unit),')']) 
+            hold on
+            plot(fd1,red99global,'r-.','LineWidth',1)
+            plot(fd1,red95global,'r--','LineWidth',2)
+            plot(fd1,red90global,'r-','LineWidth',1)
+            plot(fd1,red99,'b-.','LineWidth',1)
+            plot(fd1,red95,'b--','LineWidth',2)
+            plot(fd1,red90,'b-','LineWidth',1)
+            plot(fd1,theored1,'k-','LineWidth',2)
+        end
+        legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','BPL')
+        ylabel('Power')
+        title([num2str(nw),'\pi MTM & bending power law'])
+        set(gcf,'Name',[num2str(nw),'\pi MTM & bending power law: ',dat_name,ext])
+        set(gca,'XMinorTick','on','YMinorTick','on')
+        
+        if handles.linlogY == 1
+            set(gca, 'YScale', 'log')
+        else
+            set(gca, 'YScale', 'linear')
+        end
+        if handles.logfreq == 1
+            set(gca,'xscale','log')
+        end
+    end
+    % Plot figure MTM handles.checkbox_robustAR1_v = checkbox_robustAR1;
+    % neither robust AR1 nor conventional AR1
     if and(get(handles.checkbox_ar1_check,'value') == 0, get(handles.checkbox_robust,'value') == 0)
         figdata = figure;
         set(gcf,'Color', 'white')
@@ -1155,9 +1923,23 @@ if strcmp(method,'Multi-taper method')
             subplot(3,1,1); xlim([0 fmax])
             subplot(3,1,2); xlim([0 fmax])
             subplot(3,1,3); xlim([0 fmax])
-            colordef white;
+            set(gcf,'color','white');
             set(gcf,'units','norm') % set location
             set(gcf,'position',[0.0,0.05,0.45,0.45])
+            
+            fig2 = figure;
+            set(gcf,'color','white');
+            set(gcf,'units','norm') % set location
+            set(gcf,'position',[0.2,0.05,0.45,0.45])
+            subplot(2,1,1); 
+            plot(freq,dof,'color','k','LineWidth',1)
+            xlim([0 fmax])
+            title('Adaptive weighted degrees of freedom')
+            subplot(2,1,2); 
+            plot(freq,Faz,'color','k','LineWidth',1)
+            xlim([0 fmax])
+            title('Harmonic phase')
+            ylabel('Frequency')
         end
     end
     
@@ -1171,25 +1953,23 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
         pt1 = 1./fd1;
     end
     figdata = figure;
-    
-    colordef white;
+    set(gcf,'Color', 'white')
     if plot_x_period
         if handles.checkbox_ar1_v == 1
             plot(pt1,po,pt1,pth*ones(size(pt1')),'LineWidth',1); 
             text(10*(1/fmax)*[1 1 1 1],pth-.5,[repmat('P_{fa} = ',[4 1]) num2str(pfa')])
         else
-            plot(pt1,po,'LineWidth',1); 
+            plot(pt1,po,'k-','LineWidth',1); 
         end
         xlabel(['Period (',num2str(unit),')']) 
         xlim([1/fmax, pt1(3)]);
         set(gca, 'XDir','reverse')
     else
-        
         if handles.checkbox_ar1_v == 1
             plot(fd1,po,fd1,pth*ones(size(fd1')),'LineWidth',1); 
             text(0.3*fmax*[1 1 1 1],pth-.5,[repmat('P_{fa} = ',[4 1]) num2str(pfa')])
         else
-            plot(fd1,po,'LineWidth',1); 
+            plot(fd1,po,'k-','LineWidth',1); 
         end
 
         xlabel(['Frequency (cycles/',num2str(unit),')']) 
@@ -1197,7 +1977,7 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
     end
     
     ylabel('Power ')
-    title(['Lomb-Scargle spectrum; Sampling rate = ',num2str(dt),' ', unit])
+    title('Lomb-Scargle spectrum')
     set(gcf,'Name',[dat_name,ext,': Lomb-Scargle spectrum'])
     set(gca,'XMinorTick','on','YMinorTick','on')
     
@@ -1208,6 +1988,146 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
     end
     if handles.logfreq == 1
         set(gca,'xscale','log')
+    end
+    
+    % power law
+    if handles.checkPL == 1
+        N = length(datax);
+        % With no padding or smoothing applied
+        % Number of independent Fourier frequencies
+        Nf = N/2;
+        pf = polyfit(log(fd1(2:end)),log(po(2:end)),1);
+        % Evaluating Coefficients
+        a = pf(1);
+        % Accounting for the log transformation
+        k = exp(pf(2));
+        %ezplot(@(X) k*X.^a,[X(1) X(end)])
+        pl = k * fd1.^a;
+        % local c.l.
+        red90 = pl * chi2inv(0.9,2)/2;
+        red95 = pl * chi2inv(0.95,2)/2;
+        red99 = pl * chi2inv(0.99,2)/2;
+        % periodogram method global
+        alpha90 = 0.1/Nf;
+        alpha95 = 0.05/Nf;
+        alpha99 = 0.01/Nf;
+        red90global = pl * chi2inv((1-alpha90),2)/2;
+        red95global = pl * chi2inv((1-alpha95),2)/2;
+        red99global = pl * chi2inv((1-alpha99),2)/2;
+        
+        figpl = figure;
+        set(gcf,'Color', 'white')
+        if plot_x_period
+            pt1 = 1./fd1;
+            plot(pt1(2:end),po(2:end),'k-','LineWidth',1);
+            xlabel(['Period (',num2str(unit),')']) 
+            xlim([1/fmax, pt1(3)]);
+            set(gca, 'XDir','reverse')
+            hold on
+            plot(pt1,red99global,'r-.','LineWidth',1)
+            plot(pt1,red95global,'r--','LineWidth',2)
+            plot(pt1,red90global,'r-','LineWidth',1)
+            plot(pt1,red99,'b-.','LineWidth',1)
+            plot(pt1,red95,'b--','LineWidth',2)
+            plot(pt1,red90,'b-','LineWidth',1)
+            plot(pt1,pl,'k-','LineWidth',2)
+        else
+            plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
+            xlim([0 fmax]);
+            xlabel(['Frequency (cycles/',num2str(unit),')']) 
+            hold on
+            plot(fd1,red99global,'r-.','LineWidth',1)
+            plot(fd1,red95global,'r--','LineWidth',2)
+            plot(fd1,red90global,'r-','LineWidth',1)
+            plot(fd1,red99,'b-.','LineWidth',1)
+            plot(fd1,red95,'b--','LineWidth',2)
+            plot(fd1,red90,'b-','LineWidth',1)
+            plot(fd1,pl,'k-','LineWidth',2)
+        end
+        %legend('Power','95% global','99% local','95% local','90% local','Power law')
+        legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','Power law')
+        ylabel('Power')
+        title('Lomb-Scargle spectrum & power law')
+        set(gcf,'Name',['Lomb-Scargle spectrum & power law: ',dat_name,ext])
+        set(gca,'XMinorTick','on','YMinorTick','on')
+        
+        if handles.linlogY == 1;
+            set(gca, 'YScale', 'log')
+        else
+            set(gca, 'YScale', 'linear')
+        end
+        if handles.logfreq == 1
+            set(gca,'xscale','log')
+        end
+    end
+    
+    % bending power law
+    if handles.checkBPL == 1
+        N = length(datax);
+        % With no padding or smoothing applied
+        % Number of independent Fourier frequencies
+        Nf = N/2;
+        pol = log(po);
+        pol = real(pol);
+        fun = @(v,f)(v(1) * f .^(-1 * v(2)))./(1 + (f / v(4)) .^ (v(3)-v(2)));
+        v0 = [100,0.5,3,0.5*fd1(end)];
+        x = lsqcurvefit(fun,v0,fd1(2:end),pol(2:end));
+        pl = exp(fun(x,fd1));
+        % local c.l.
+        red90 = pl * chi2inv(0.9,2)/2;
+        red95 = pl * chi2inv(0.95,2)/2;
+        red99 = pl * chi2inv(0.99,2)/2;
+        % periodogram method global
+        alpha90 = 0.1/Nf;
+        alpha95 = 0.05/Nf;
+        alpha99 = 0.01/Nf;
+        red90global = pl * chi2inv((1-alpha90),2)/2;
+        red95global = pl * chi2inv((1-alpha95),2)/2;
+        red99global = pl * chi2inv((1-alpha99),2)/2;
+        
+        figbpl = figure;
+        set(gcf,'Color', 'white')
+        if plot_x_period
+            pt1 = 1./fd1;
+            plot(pt1(2:end),po(2:end),'k-','LineWidth',1);
+            xlabel(['Period (',num2str(unit),')']) 
+            xlim([1/fmax, pt1(3)]);
+            set(gca, 'XDir','reverse')
+            hold on
+            plot(pt1,red99global,'r-.','LineWidth',1)
+            plot(pt1,red95global,'r--','LineWidth',2)
+            plot(pt1,red90global,'r-','LineWidth',1)
+            plot(pt1,red99,'b-.','LineWidth',1)
+            plot(pt1,red95,'b--','LineWidth',2)
+            plot(pt1,red90,'b-','LineWidth',1)
+            plot(pt1,pl,'k-','LineWidth',2)
+        else
+            plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
+            xlim([0 fmax]);
+            xlabel(['Frequency (cycles/',num2str(unit),')']) 
+            hold on
+            plot(fd1,red99global,'r-.','LineWidth',1)
+            plot(fd1,red95global,'r--','LineWidth',2)
+            plot(fd1,red90global,'r-','LineWidth',1)
+            plot(fd1,red99,'b-.','LineWidth',1)
+            plot(fd1,red95,'b--','LineWidth',2)
+            plot(fd1,red90,'b-','LineWidth',1)
+            plot(fd1,pl,'k-','LineWidth',2)
+        end
+        legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','BPL')
+        ylabel('Power')
+        title('Lomb-Scargle spectrum & bending power law')
+        set(gcf,'Name',['Lomb-Scargle spectrum & bending power law: ',dat_name,ext])
+        set(gca,'XMinorTick','on','YMinorTick','on')
+        
+        if handles.linlogY == 1
+            set(gca, 'YScale', 'log')
+        else
+            set(gca, 'YScale', 'linear')
+        end
+        if handles.logfreq == 1
+            set(gca,'xscale','log')
+        end
     end
     
 elseif  strcmp(method,'Periodogram')
@@ -1235,14 +2155,15 @@ elseif  strcmp(method,'Periodogram')
             tabtchired90 = theored * chi2inv(90/100,2)/2;
             tabtchired95 = theored * chi2inv(95/100,2)/2;
             tabtchired99 = theored * chi2inv(99/100,2)/2;
-            tabtchired999 = theored * chi2inv(99.9/100,2)/2;
+            %tabtchired999 = theored * chi2inv(99.9/100,2)/2;
             hold on
             plot(pt1,theored,'k-','LineWidth',2)
             plot(pt1,tabtchired90,'r-','LineWidth',1)
             plot(pt1,tabtchired95,'r--','LineWidth',2)
             plot(pt1,tabtchired99,'b-.','LineWidth',1)
-            plot(pt1,tabtchired999,'g--','LineWidth',1)
-            legend('Power','Mean','90%','95%','99%','99.9')
+            %plot(pt1,tabtchired999,'g--','LineWidth',1)
+            %legend('Power','Mean','90%','95%','99%','99.9')
+            legend('Power','Mean','90%','95%','99%')
         end
     else
         plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
@@ -1253,20 +2174,21 @@ elseif  strcmp(method,'Periodogram')
             tabtchired90 = theored * chi2inv(90/100,2)/2;
             tabtchired95 = theored * chi2inv(95/100,2)/2;
             tabtchired99 = theored * chi2inv(99/100,2)/2;
-            tabtchired999 = theored * chi2inv(99.9/100,2)/2;
+            %tabtchired999 = theored * chi2inv(99.9/100,2)/2;
             hold on
             plot(fd1,theored,'k-','LineWidth',2)
             plot(fd1,tabtchired90,'r-','LineWidth',1)
             plot(fd1,tabtchired95,'r--','LineWidth',2)
             plot(fd1,tabtchired99,'b-.','LineWidth',1)
-            plot(fd1,tabtchired999,'g--','LineWidth',1)
-            legend('Power','Mean','90%','95%','99%','99.9')
+            %plot(fd1,tabtchired999,'g--','LineWidth',1)
+            %legend('Power','Mean','90%','95%','99%','99.9%')
+            legend('Power','Mean','90%','95%','99%')
         end
     end
     
     ylabel('Power ')
     title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit])
-    set(gcf,'Name',[dat_name,ext,': periodogram'])
+    set(gcf,'Name',['Periodogram & AR1: ',dat_name,ext])
     set(gca,'XMinorTick','on','YMinorTick','on')
     
     if handles.linlogY == 1;
@@ -1278,6 +2200,148 @@ elseif  strcmp(method,'Periodogram')
         set(gca,'xscale','log')
     end
     
+    % power law
+    if handles.checkPL == 1
+        N = length(datax);
+        % With no padding or smoothing applied
+        % Number of independent Fourier frequencies
+        Nf = N/2; 
+        pf = polyfit(log(fd1(2:end)),log(po(2:end)),1);
+        % Evaluating Coefficients
+        a = pf(1);
+        % Accounting for the log transformation
+        k = exp(pf(2));
+        %ezplot(@(X) k*X.^a,[X(1) X(end)])
+        pl = k * fd1.^a;
+        % local c.l.
+        red90 = pl * chi2inv(0.9,2)/2;
+        red95 = pl * chi2inv(0.95,2)/2;
+        red99 = pl * chi2inv(0.99,2)/2;
+        % periodogram method global
+        alpha90 = 0.1/Nf;
+        alpha95 = 0.05/Nf;
+        alpha99 = 0.01/Nf;
+        red90global = pl * chi2inv((1-alpha90),2)/2;
+        red95global = pl * chi2inv((1-alpha95),2)/2;
+        red99global = pl * chi2inv((1-alpha99),2)/2;
+        
+        figpl = figure;
+        set(gcf,'Color', 'white')
+        if plot_x_period
+            pt1 = 1./fd1;
+            plot(pt1(2:end),po(2:end),'k-','LineWidth',1);
+            xlabel(['Period (',num2str(unit),')']) 
+            xlim([1/fmax, pt1(3)]);
+            set(gca, 'XDir','reverse')
+            hold on
+            plot(pt1,red99global,'r-.','LineWidth',1)
+            plot(pt1,red95global,'r--','LineWidth',2)
+            plot(pt1,red90global,'r-','LineWidth',1)
+            plot(pt1,red99,'b-.','LineWidth',1)
+            plot(pt1,red95,'b--','LineWidth',2)
+            plot(pt1,red90,'b-','LineWidth',1)
+            plot(pt1,pl,'k-','LineWidth',2)
+        else
+            plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
+            xlim([0 fmax]);
+            xlabel(['Frequency (cycles/',num2str(unit),')']) 
+            hold on
+            plot(fd1,red99global,'r-.','LineWidth',1)
+            plot(fd1,red95global,'r--','LineWidth',2)
+            plot(fd1,red90global,'r-','LineWidth',1)
+            plot(fd1,red99,'b-.','LineWidth',1)
+            plot(fd1,red95,'b--','LineWidth',2)
+            plot(fd1,red90,'b-','LineWidth',1)
+            plot(fd1,pl,'k-','LineWidth',2)
+        end
+        %legend('Power','95% global','99% local','95% local','90% local','Power law')
+        legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','Power law')
+        ylabel('Power')
+        title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit])
+        set(gcf,'Name',['Periodogram & power law: ',dat_name,ext])
+        set(gca,'XMinorTick','on','YMinorTick','on')
+        
+        if handles.linlogY == 1;
+            set(gca, 'YScale', 'log')
+        else
+            set(gca, 'YScale', 'linear')
+        end
+        if handles.logfreq == 1
+            set(gca,'xscale','log')
+        end
+    end
+    
+    % bending power law
+    if handles.checkBPL == 1
+        N = length(datax);
+        % With no padding or smoothing applied
+        % Number of independent Fourier frequencies
+        Nf = N/2;
+        
+        pol = log(po);
+        pol = real(pol);
+        
+        fun = @(v,f)(v(1) * f .^(-1 * v(2)))./(1 + (f / v(4)) .^ (v(3)-v(2)));
+        v0 = [100,0.5,3,0.5*fd1(end)];
+        x = lsqcurvefit(fun,v0,fd1(2:end),pol(2:end));
+        pl = exp(fun(x,fd1));
+        % local c.l.
+        red90 = pl * chi2inv(0.9,2)/2;
+        red95 = pl * chi2inv(0.95,2)/2;
+        red99 = pl * chi2inv(0.99,2)/2;
+        % periodogram method global
+        alpha90 = 0.1/Nf;
+        alpha95 = 0.05/Nf;
+        alpha99 = 0.01/Nf;
+        red90global = pl * chi2inv((1-alpha90),2)/2;
+        red95global = pl * chi2inv((1-alpha95),2)/2;
+        red99global = pl * chi2inv((1-alpha99),2)/2;
+        
+        
+        figbpl = figure;
+        set(gcf,'Color', 'white')
+        if plot_x_period
+            pt1 = 1./fd1;
+            plot(pt1(2:end),po(2:end),'k-','LineWidth',1);
+            xlabel(['Period (',num2str(unit),')']) 
+            xlim([1/fmax, pt1(3)]);
+            set(gca, 'XDir','reverse')
+            hold on
+            plot(pt1,red99global,'r-.','LineWidth',1)
+            plot(pt1,red95global,'r--','LineWidth',2)
+            plot(pt1,red90global,'r-','LineWidth',1)
+            plot(pt1,red99,'b-.','LineWidth',1)
+            plot(pt1,red95,'b--','LineWidth',2)
+            plot(pt1,red90,'b-','LineWidth',1)
+            plot(pt1,pl,'k-','LineWidth',2)
+        else
+            plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
+            xlim([0 fmax]);
+            xlabel(['Frequency (cycles/',num2str(unit),')']) 
+            hold on
+            plot(fd1,red99global,'r-.','LineWidth',1)
+            plot(fd1,red95global,'r--','LineWidth',2)
+            plot(fd1,red90global,'r-','LineWidth',1)
+            plot(fd1,red99,'b-.','LineWidth',1)
+            plot(fd1,red95,'b--','LineWidth',2)
+            plot(fd1,red90,'b-','LineWidth',1)
+            plot(fd1,pl,'k-','LineWidth',2)
+        end
+        legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','BPL')
+        ylabel('Power')
+        title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit])
+        set(gcf,'Name',['Periodogram & bending power law: ',dat_name,ext])
+        set(gca,'XMinorTick','on','YMinorTick','on')
+        
+        if handles.linlogY == 1
+            set(gca, 'YScale', 'log')
+        else
+            set(gca, 'YScale', 'linear')
+        end
+        if handles.logfreq == 1
+            set(gca,'xscale','log')
+        end
+    end
     
 else
 end
@@ -1294,6 +2358,16 @@ end
 try figure(figdata); 
     set(figdata,'units','norm') % set location
     set(figdata,'position',[0.0,0.45,0.45,0.45]) % set position
+catch
+end
+try figure(figpl); 
+    set(figpl,'units','norm') % set location
+    set(figpl,'position',[0.2,0.45,0.45,0.45]) % set position
+catch
+end
+try figure(figbpl); 
+    set(figbpl,'units','norm') % set location
+    set(figbpl,'position',[0.4,0.45,0.45,0.45]) % set position
 catch
 end
 guidata(hObject,handles);
@@ -1385,5 +2459,34 @@ if get(hObject,'Value')
     set(handles.checkbox6, 'value', 1)
     handles.logfreq = 1;
 else
+end
+guidata(hObject, handles);
+
+
+% --- Executes on button press in checkbox9.
+function checkbox9_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox9 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox9
+if get(handles.checkbox9,'Value')
+    handles.checkPL = 1;
+else
+    handles.checkPL = 0;
+end
+guidata(hObject, handles);
+
+% --- Executes on button press in checkbox10.
+function checkbox10_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox10 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox10
+if get(handles.checkbox10,'Value')
+    handles.checkBPL = 1;
+else
+    handles.checkBPL = 0;
 end
 guidata(hObject, handles);

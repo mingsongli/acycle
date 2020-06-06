@@ -99,8 +99,24 @@ theored0 = mean(pxxsmooth) * (1-rho^2)./(1-(2.*rho.*cos(pi.*ft0./fmax)+rho^2));
 % Red-noise background fit
 % Get the best fit values of rho and s0 (see eq. (2) in Mann and Lees,
 % 1996).
-% Here we use a naive grid search method.
-[rhoM, s0M] = minirhos0(s0,fn,ft,pxxsmooth,linlog);
+    % % % % % % % % % % % % % % % % % %
+    % Solve nonlinear curve-fitting (data-fitting) problems in least-squares sense
+    % Mingsong Li, Penn State
+    % June 5, 2020
+try
+    cospara = cos(pi.*ft./fmax);
+    funrobust = @(v,f)v(1) * (1-v(2)^2)./(1-(2.*v(2).*cospara)+v(2)^2);
+    v1 = [s0,rho];
+    x = lsqcurvefit(funrobust,v1,ft,pxxsmooth);
+    rhoM = x(2);
+    s0M = x(1);
+    disp('>>  MTM rho and S0 estimation: curve fitting method')
+    % % % % % % % % % % % % % % % % % %
+catch
+    % Alternatively, I use a naive grid search method.
+    [rhoM, s0M] = minirhos0(s0,fn,ft,pxxsmooth,linlog);
+    disp('>>  MTM rho and S0 estimation: grid search method')
+end
 %
 % minimize rho only!
 %[rhoM, s0M] = minirho(s0,fn,ft,pxxsmooth,linlog);
@@ -116,7 +132,8 @@ chi99 = theored1 * chi2inv(0.99,nw2)/nw2;
 chi999 = theored1 * chi2inv(0.999,nw2)/nw2;
 
 if plot == 1
-    figure; semilogy(ft0,pxx0,'k')
+    figure; 
+    semilogy(ft0,pxx0,'k')
     hold on; 
     semilogy(ft0,pxxsmooth0,'m-.');
     semilogy(ft,theored1,'k-','LineWidth',2);
@@ -129,6 +146,8 @@ if plot == 1
     smthwin = [num2str(smoothwin*100),'%', ' median-smoothed'];
     legend('Power',smthwin,'Robust AR(1) median',...
         'Robust AR(1) 90%','Robust AR(1) 95%','Robust AR(1) 99%','Robust AR(1) 99.9%')
+    set(gcf,'units','norm') % set location
+    set(gcf,'position',[0.0,0.45,0.45,0.45]) % set position
 end
 
 % data for output

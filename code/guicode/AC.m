@@ -104,7 +104,7 @@ function AC_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to AC (see VARARGIN)
 set(gcf,'position',[0.5,0.1,0.45,0.8]) % set position
-set(gcf,'Name','Acycle v2.1.1')
+set(gcf,'Name','Acycle v2.1.2')
 set(gcf,'DockControls', 'off')
 set(gcf,'Color', 'white')
 set(0,'Units','normalized') % set units as normalized
@@ -179,9 +179,9 @@ if ispc
     set(h_push_openfolder,'BackgroundColor','white') % 
 end
 
-set(handles.popupmenu1,'position', [0.75,0.945,0.24,0.04])
-set(handles.edit_acfigmain_dir,'position',       [0.081,0.9,0.91,0.04])
-set(handles.listbox_acmain,'position',    [0.02,0.008,0.96,0.884])
+set(handles.popupmenu1,'position', [0.75,0.945,0.24,0.04],'tooltip','<html>Select unit<br>for dataset')
+set(handles.edit_acfigmain_dir,'position', [0.081,0.9,0.91,0.04],'tooltip','Working directory')
+set(handles.listbox_acmain,'position', [0.02,0.008,0.96,0.884])
 
 if ismac
     handles.slash_v = '/';
@@ -642,13 +642,14 @@ if handles.doubleclick
                     end
                 end
             elseif ismember(ext,{'.txt','.csv','.res','.dat'})
-                [data1,~] = importdata(filename);
-                if isstruct(data1)
-                    data1 = data1.data;
-                end
-                nlen = length(data1(:,1));
-                ncol = length(data1(1,:));
-                % open in GUI
+                try
+                    [data1,~] = importdata(filename);
+                    if isstruct(data1)
+                        data1 = data1.data;
+                    end
+                    nlen = length(data1(:,1));
+                    ncol = length(data1(1,:));
+                    % open in GUI
                     ftab = figure;%('Position',[200 200 400 150]);
                     set(0,'Units','normalized') % set units as normalized
                     set(gcf,'units','norm') % set location
@@ -657,19 +658,27 @@ if handles.doubleclick
                     if widthtab > 0.4; widthtab = 0.4; end                  
                     set(ftab,'Position',[.3 .2 widthtab .7]) % set location
                     t = uitable('Parent',ftab,'Data',data1,'Units','normalized','Position',[0.011,0.012,0.97,0.984]);
-                    
-                if nlen > 15
-                    %msgbox('See Terminal/Command Window for details')
-                    disp(['>>  ',dat_name,ext])
-                    disp(['>>  Total rows: ', num2str(nlen)])
-                    disp('>>  First 10 and last 5 rows:')
-                    disp(data1(1:10,:))
-                    disp('       ... ...')
-                    disp(data1(end-4:end,:))
-                else
-                    %msgbox('See Terminal/Command Window for details')
-                    disp('>>  Data:')
-                    disp(data1)
+
+                    if nlen > 15
+                        %msgbox('See Terminal/Command Window for details')
+                        disp(['>>  ',dat_name,ext])
+                        disp(['>>  Total rows: ', num2str(nlen)])
+                        disp('>>  First 10 and last 5 rows:')
+                        disp(data1(1:10,:))
+                        disp('       ... ...')
+                        disp(data1(end-4:end,:))
+                    else
+                        %msgbox('See Terminal/Command Window for details')
+                        disp('>>  Data:')
+                        disp(data1)
+                    end
+                catch
+                    if ispc
+                        winopen(ac_pwd);
+                    elseif ismac
+                        system(['open ',ac_pwd]);
+                    else
+                    end
                 end
             elseif ismember(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})
                 try
@@ -709,8 +718,11 @@ if handles.doubleclick
                 catch
                 end
             elseif ismember(ext,{'.txt','.csv','.res','.dat'})
+                try
+                    system(['open ',filename]);
+                catch
                  try
-                    %system(['open ',filename]);
+                    
                     [data1,~] = importdata(filename);
                     if isstruct(data1)
                         data1 = data1.data;
@@ -729,20 +741,33 @@ if handles.doubleclick
                     
                 catch
                     [data1,~] = importdata(filename);
-                    nlen = length(data1(:,1));
-                    if nlen> 15
-                        msgbox('See Terminal/Command Window for details')
-                        disp(['>>  ',dat_name,ext])
-                        disp(['>>  Total rows: ', num2str(nlen)])
-                        disp('>>  First 10 and last 5 rows:')
-                        disp(data1(1:10,:))
-                        disp('                  ... ...')
-                        disp(data1(end-4:end,:))
-                    else
-                        msgbox('See Terminal/Command Window for details')
-                        disp('>> Data:')
-                        disp(data1)
+                    try
+                        nlen = length(data1(:,1));
+                        if nlen> 15
+                            msgbox('See Terminal/Command Window for details')
+                            disp(['>>  ',dat_name,ext])
+                            disp(['>>  Total rows: ', num2str(nlen)])
+                            disp('>>  First 10 and last 5 rows:')
+                            disp(data1(1:10,:))
+                            disp('                  ... ...')
+                            disp(data1(end-4:end,:))
+                        else
+                            msgbox('See Terminal/Command Window for details')
+                            disp('>> Data:')
+                            disp(data1)
+                        end
+                    catch
+                        try system(['open ',filename]);
+                        catch
+                            if ispc
+                                winopen(ac_pwd);
+                            elseif ismac
+                                system(['open ',ac_pwd]);
+                            else
+                            end
+                        end
                     end
+                 end
                 end
             elseif ismember(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})
                 try
@@ -1022,7 +1047,8 @@ if check == 1
     set(gcf,'Name','Acycle: Plot Preview','NumberTitle','off');
     
     % multiple column data
-    if plotsucess > 0        
+    if plotsucess > 0
+        try
         coln = length(data_filterout(1,:)); % 1: end
         colnend = coln -1;
         if and(nplot == 1, colnend > 1)            
@@ -1149,6 +1175,9 @@ if check == 1
                     end
                 end
             end        
+        end
+        catch
+            plot(data_filterout(:,1),data_filterout(:,2:end),'LineWidth',1)
         end
     end
 end

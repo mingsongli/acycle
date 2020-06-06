@@ -55,7 +55,7 @@ scatter(X,Y,'b')
 title([num2str(span*100),' % ',method,' regression'])
 legend('2\sigma confidence intervals','1\sigma confidence intervals',...
     'mean','Data',...
-    'Location','NorthEast');
+    'Location','NorthEast','Interpreter','tex');
 hold off
 
 figure;

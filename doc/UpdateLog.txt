@@ -2,6 +2,25 @@
 
 _______________________________________
 
+Version : ACycle_v2.1.2 [PREVIEW; NOT OFFICIALLY RELEASED]
+Date    : Mar 24, 2020 - June 5, 2020
+By      : Mingsong Li
+NOTE    : ask for MatLab RUNTIME 2019a
+
+    1. Power spectral analysis
+        Add power law model
+        Add bending power law model
+        for MTM, periodogram, and Lomb methods
+
+    2. Add curve fitting method for robust AR1 conf. level estimation
+        This method is now the default method
+
+    3. Allowing more control: bias correction for the robust AR1 estimation 
+        designed for the ultra-high resolution data
+
+    4. Plot Preview: show multiple panels for multi-column data
+_______________________________________
+
 Version : ACycle_v2.1.1 [PREVIEW; NOT OFFICIALLY RELEASED]
 Date    : Feb 24, 2020 - Mar. 14, 2020
 By      : Mingsong Li
