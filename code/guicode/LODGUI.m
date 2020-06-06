@@ -169,8 +169,8 @@ elseif single1 == 1
     if isempty(T) == 0
         [lod, doy] = lodla04(T/-1000);
         
-        name1 = ['LOD_',num2str(age1),':',num2str(step),':',num2str(age2),'Ma.txt'];
-        name2 = ['LOD_DOY_',num2str(age1),':',num2str(step),':',num2str(age2),'Ma.txt'];
+        name1 = ['LOD_',num2str(age1),'_',num2str(step),'_',num2str(age2),'Ma.txt'];
+        name2 = ['LOD_DOY_',num2str(age1),'_',num2str(step),'_',num2str(age2),'Ma.txt'];
         CDac_pwd
         dlmwrite(name1, [T,lod], 'delimiter', ',', 'precision', 9);
         dlmwrite(name2, [T,doy], 'delimiter', ',', 'precision', 9);

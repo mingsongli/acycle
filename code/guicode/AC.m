@@ -104,7 +104,7 @@ function AC_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to AC (see VARARGIN)
 set(gcf,'position',[0.5,0.1,0.45,0.8]) % set position
-set(gcf,'Name','Acycle v2.1.2')
+set(gcf,'Name','Acycle v2.2')
 set(gcf,'DockControls', 'off')
 set(gcf,'Color', 'white')
 set(0,'Units','normalized') % set units as normalized
@@ -260,6 +260,8 @@ assignin('base','unit_type',handles.unit_type)
 
 % Update handles structure
 guidata(hObject, handles);
+
+% Deployment doesn't work
 % logo
 if ispc
     try
@@ -271,6 +273,9 @@ if ispc
     catch
     end
 end
+% Deployment doesn't work
+
+
 % Update reminder
 pause(0.0001);%
 % if isdeployed

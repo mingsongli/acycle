@@ -2,7 +2,7 @@
     <img src="https://github.com/mingsongli/acycleFig/blob/master/default_icon_1024-git.gif" alt="homepage" title="Acycle GitHub homepage">
 </a>
 
-[![](https://img.shields.io/badge/version-v2.1.2-blue.svg)]()
+[![](https://img.shields.io/badge/version-v2.2-blue.svg)]()
 [![](https://img.shields.io/badge/license-GPL-brightgreen.svg)](https://www.gnu.org/licenses/)
 [![](https://img.shields.io/badge/platform-Mac_Win-green.svg)]()
 ![](https://img.shields.io/badge/language-MatLab-red.svg)
@@ -59,19 +59,21 @@
     <img src="https://github.com/mingsongli/acycleFig/blob/master/github-icon-for-resume-14.jpg" alt="GitHub" title="Download Acycle in GitHub" width="88" height="88">
 </a>
 
-#### Apple's iCloud (BEST for Users in Mainland China):
+#### Apple's iCloud (BEST for users in Mainland China):
 
 <a href="https://www.icloud.com/iclouddrive/07FM0ksPsXr9JmeovrPd3afAA#Acycle2.1-MatLab">
-    <img src="https://github.com/mingsongli/acycleFig/blob/master/icloud-mail.png" alt="Apple's iCloud" title="Download Acycle in Apple's iCloud" width="128" height="88">
+    <img src="https://github.com/mingsongli/acycleFig/blob/master/icloud-mail.png" alt="Apple's iCloud" title="Download Acycle in Apple's iCloud" width="110" height="88">
 </a>
 
-Acycle v2.1 Mac Green version: https://www.icloud.com/iclouddrive/0RbIzNhREBi9LoL--3LSmwVtw#Acycle2.1-mac-green
+Acycle v2.2 Mac Green version: https://www.icloud.com/iclouddrive/0z960AtbnkbrXj83DiLCkpI2A#Acycle2.2-mac-green
 
-Acycle v2.1 Win Green version: https://www.icloud.com/iclouddrive/0GmE4-bZZU2FDfZixMbNOMNMg#Acycle2.1-Win-green
+Acycle v2.2 Mac Installer:     https://www.icloud.com/iclouddrive/0va13wQtAxivIWKyt9TKeTuwQ#Acycle2.2-mac-Installer
 
-Acycle v2.1 Win Installer:     https://www.icloud.com/iclouddrive/0IXrU3c5Oe4H5eEsRI7TB5OTA#Acycle2.1-Win-Installer
+Acycle v2.2 Win Green version: https://www.icloud.com/iclouddrive/0c5ERPmHJISJA_JS0XOXjh-6w#Acycle2.2-win-green.exe
 
-Acycle v2.1 MatLab version:    https://www.icloud.com/iclouddrive/07FM0ksPsXr9JmeovrPd3afAA#Acycle2.1-MatLab
+Acycle v2.2 Win Installer:     https://www.icloud.com/iclouddrive/03gggCPE1IgzaLm8kMx0MGULQ#Acycle2.2-win-Installer.exe
+
+Acycle v2.2 MatLab version:    https://www.icloud.com/iclouddrive/0lS56NrnVTArRB0mQ1rdQemeg#Acycle2.2-MatLab-version
 
 
 ---
@@ -80,7 +82,7 @@ Acycle v2.1 MatLab version:    https://www.icloud.com/iclouddrive/07FM0ksPsXr9Jm
     <img src="https://github.com/mingsongli/acycleFig/blob/master/WechatIMG17.jpeg" alt="MingsongLi.com" title="Mingsong Li homepage" width="100" height="100">
 </a>
 <br>
-Mingsong Li, Penn State. June 5, 2020 <br>
+Mingsong Li, Penn State. June 6, 2020 <br>
 E-mail: <i> mul450 {at} psu.edu;  limingsonglms {at} gmail.com </i> <br><br>
 
 Website: https://mingsongli.com/acycle
@@ -158,6 +160,58 @@ _Detrending GUI and results_
 ![](https://github.com/mingsongli/acycleFig/blob/master/chapter6/6.3.wayao.spectral.result.png)
 
 _2π multi-taper method power spectrum of the gamma ray series is shown with `20%` median-smoothed spectrum, background AR(1) model, and 90%, 95%, 99%,  and 99.9% confidence levels._
+
+![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide1.jpeg)
+
+_Examples #1_
+
+![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide2.jpeg)
+
+_Examples #2_
+
+![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide3.jpeg)
+
+_Examples #3_
+
+![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide4.jpeg)
+
+_Examples #4_
+
+![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide5.jpeg)
+
+_Examples #5_
+
+![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide6.jpeg)
+
+_Examples #6_
+
+![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide7.jpeg)
+
+_Examples #7_
+
+![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide8.jpeg)
+
+_Examples #8_
+
+![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide9.jpeg)
+
+_Examples #9_
+
+![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide10.jpeg)
+
+_Examples #10_
+
+![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide11.jpeg)
+
+_Examples #11_
+
+![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide12.jpeg)
+
+_Examples #12_
+
+![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide13.jpeg)
+
+_Examples #13_
 
 [Read More](https://github.com/mingsongli/acycle/wiki/4.7.3-Spectral-Analysis) and [example](https://github.com/mingsongli/acycle/wiki/Examples#example-3-carnian-cyclostratigraphy)
 

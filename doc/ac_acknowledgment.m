@@ -1,5 +1,5 @@
 %**************************************************************************
-% Acycle v2.1:
+% Acycle:
 % Time-series analysis software for paleoclimate research and education
 %
 % Please acknowledge the program author on any publication of scientific 
@@ -36,7 +36,7 @@
 %
 % Acknowledgment:
 %   Feng Cheng, Anne-Christine Da Silva, Hewei Duan, Zheng Gong, Yanan Fang, 
-%   Marco Franceschi, Daniel R. Franco, Xiaoni Hu, Dorothée Husson, 
+%   Marco Franceschi, Daniel R. Franco, Frits Hilgen, Xiaoni Hu, Dorothée Husson, 
 %   Arsenio Muñoz Jiménez, Ilja Kocken, Lee R. Kump, Dongyang Liu, Kunyuan Ma, 
 %   Mathieu Martinez, James Ogg, Paul Olsen, Jeffrey Park, J. Fred Read,
 %   Chen Shen, Victor A. Piedrahita Velez, Chuanyue Wang, Meng Wang, Xu Yao, 
