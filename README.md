@@ -266,7 +266,7 @@ _2π multi-taper method power spectrum of the gamma ray series is shown with `20
     <img src="https://eesc.columbia.edu/sites/default/files/styles/profile_thumb_100x150/public/bio/olsen_p.jpg?itok=X8DlX5ax" alt="Paul Olsen" title="Paul Olsen">
 </a>
 
-* **Dr. [Paul E. Olsen](https://eesc.columbia.edu/faculty/paul-e-olsen)** (Professor of Earth and Environmental Sciences, Columbia University; Member, National Academy of Sciences of the USA):
+* **Dr. [Paul E. Olsen](https://eesc.columbia.edu/faculty/paul-e-olsen)** (Columbia University, USA):
 
     > Not only is this software powerful and effective, it is also simple to use and therefore benefits researchers and at all levels within the paleoclimatology community, from novices to experts.
 
