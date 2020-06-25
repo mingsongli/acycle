@@ -159,53 +159,66 @@ _2π multi-taper method power spectrum of the gamma ray series is shown with `20
 
 _Examples #1 Curve fitting | detrending | smoothing_
 
+
 ![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide2.jpeg)
 
 _Examples #2 Power spectral analysis_
+
 
 ![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide3.jpeg)
 
 _Examples #3 Evolutionary power spectral analysis and Wavelet analysis_
 
+
 ![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide4.jpeg)
 
 _Examples #4 COCO of sedimentation rate evaluation_
+
 
 ![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide5.jpeg)
 
 _Examples #5 eCOCO of sedimentation rate evaluation_
 
+
 ![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide6.jpeg)
 
 _Examples #6 Filtering_
+
 
 ![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide7.jpeg)
 
 _Examples #7 Tuning_
 
+
 ![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide8.jpeg)
 
 _Examples #8 DYNOT sedimentary noise model_
+
 
 ![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide9.jpeg)
 
 _Examples #9 Smoothed bootstrap_
 
+
 ![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide10.jpeg)
 
 _Examples #10 Coherence and phase_
+
 
 ![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide11.jpeg)
 
 _Examples #11 Plot Pro_
 
+
 ![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide12.jpeg)
 
 _Examples #12 Image profile_
 
+
 ![](https://github.com/mingsongli/acycleFig/blob/master/MainFunctions/Slide13.jpeg)
 
 _Examples #13 Plot Digitizer_
+
 
 [Read More](https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf) and [example](https://github.com/mingsongli/acycle/wiki/Examples#example-3-carnian-cyclostratigraphy)
 
