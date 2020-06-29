@@ -295,14 +295,14 @@ fprintf(fileID,'\n');
 fprintf(fileID,'%s\n','%lower frequency boundary');
 fprintf(fileID,'\n');
 for ii = 1:size(freqboundlow,1)
-    fprintf(fileID,'%g\t',freqboundlow(ii,:));
+    fprintf(fileID,'%f\t',freqboundlow(ii,:));
     fprintf(fileID,'\n');
 end
 fprintf(fileID,'\n');
 fprintf(fileID,'%s\n','%higher frequency boundary');
 fprintf(fileID,'\n');
 for ii = 1:size(freqboundlow,1)
-    fprintf(fileID,'%g\t',freqboundhigh(ii,:));
+    fprintf(fileID,'%f\t',freqboundhigh(ii,:));
     fprintf(fileID,'\n');
 end
 fclose(fileID);
