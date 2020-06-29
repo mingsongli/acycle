@@ -114,7 +114,6 @@ handles.unit = varargin{1}.unit;
 handles.unit_type = varargin{1}.unit_type;
 handles.current_data = data_s;
 handles.filename = varargin{1}.data_name;
-handles.unit = varargin{1}.unit;
 handles.path_temp = varargin{1}.path_temp;
 
 handles.plot_2d = 1;
@@ -164,8 +163,7 @@ set(handles.checkbox5, 'Value',0);
 set(handles.checkbox6, 'Value',1);
 set(handles.popupmenu3, 'Value',1);
 set(handles.edit9, 'String', '');
-% Update handles structure
-guidata(hObject, handles);
+
 
 diffx = diff(data_s(:,1));
 if max(diffx) - min(diffx) > eps('single')
@@ -177,7 +175,8 @@ if max(diffx) - min(diffx) > eps('single')
     set(gcf,'position',[0.15,0.6,0.25,0.1])
     figure(hwarn);
 end
-
+% Update handles structure
+guidata(hObject, handles);
 % UIWAIT makes evofftGUI wait for user response (see UIRESUME)
 % uiwait(handles.evofftGUI_figure);
 
@@ -499,14 +498,13 @@ function evofft_fmax_edit_Callback(hObject, eventdata, handles)
 %        str2double(get(hObject,'String')) returns contents of evofft_fmax_edit as a double
 fmax = str2double(get(handles.evofft_fmax_edit,'String'));
 if isnan(fmax)
-    set(handles.radiobutton2, 'Value', 0);
-    set(handles.evofft_Nyquist_radiobutton, 'Value', 1);
     handles.evofft_fmax = handles.nyquist;
 else
-    set(handles.radiobutton2, 'Value', 1);
-    set(handles.evofft_Nyquist_radiobutton, 'Value', 0);
     handles.evofft_fmax = fmax;
 end
+
+set(handles.evofft_Nyquist_radiobutton, 'Value', 0);
+set(handles.radiobutton2, 'Value', 1);
 
 MTMred = get(handles.checkbox7,'Value');
 plotseries = get(handles.checkbox8,'Value');

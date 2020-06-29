@@ -74,7 +74,7 @@ function varargout = AC(varargin)
 
 % Edit the above text to modify the response to help AC
 
-% Last Modified by GUIDE v2.5 17-Mar-2020 14:25:07
+% Last Modified by GUIDE v2.5 29-Jun-2020 01:24:49
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -104,7 +104,7 @@ function AC_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to AC (see VARARGIN)
 set(gcf,'position',[0.5,0.1,0.45,0.8]) % set position
-set(gcf,'Name','Acycle v2.2')
+set(gcf,'Name','Acycle v2.3 preview')
 set(gcf,'DockControls', 'off')
 set(gcf,'Color', 'white')
 set(0,'Units','normalized') % set units as normalized
@@ -5534,3 +5534,33 @@ function menu_coh_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 guidata(hObject, handles);
 coherenceGUI(handles)
+
+
+% --------------------------------------------------------------------
+function menu_dynfilter_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_dynfilter (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox_acmain,'Value');
+nplot = length(plot_selected);   % length
+if and ((min(plot_selected) > 2), (nplot == 1))
+    data_name = char(contents(plot_selected));
+    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; 
+    filename = fullfile(ac_pwd,data_name);
+        if isdir(filename) == 1
+        else
+            [~,~,ext] = fileparts(filename);
+            if sum(strcmp(ext,handles.filetype)) > 0
+                current_data = load(filename);
+                handles.current_data = current_data;
+                handles.filename = filename;
+                handles.data_name = data_name;
+                handles.ext = ext;
+                guidata(hObject, handles);
+                DynamicFilter(handles);
+            end
+        end
+end
+guidata(hObject, handles);

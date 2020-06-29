@@ -2,6 +2,19 @@
 
 _______________________________________
 
+Version : Acycle_v2.3_preview
+Date    : June 10, 2020 - June 29, 2020
+By      : Mingsong Li
+NOTE    : ask for MatLab RUNTIME 2019a
+
+    1. Dynamic filtering of a frequency in the depth domain with user-defined 
+       lower boundary, average frequency, and upper boundary.
+       written by Nicolas Thibault and Giovanni Rizzi
+       
+       Modified by Mingsong Li for Acycle
+
+_______________________________________
+
 Version : Acycle_v2.2
 Date    : Mar 24, 2020 - June 6, 2020
 By      : Mingsong Li
