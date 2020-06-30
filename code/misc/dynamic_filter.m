@@ -44,26 +44,51 @@ function [xdata_filtered,time,freqboundlow,freqboundhigh]=dynamic_filter(data,wi
     figure(evofftfig)
     % get user-defined frequency boundaries
     % lower boundary
-    msg1 = '\fontsize{16}\color{blue}Select \color{red}lower \color{blue}frequency boundary and press enter';
-    %msgbox1 = msgbox(msg1);
+    msg1 = '\fontsize{16}\color{blue}Select \color{red}lower \color{blue}frequency boundary; right click to stop';
     title(msg1);
-    [x_min,y_min]=ginput();
+    con = 1;
+    i = 1;
+    while con == 1   
+        [x, y, con] = ginput(1);
+        if con == 1
+            x_min(i,1) = x;
+            y_min(i,1) = y;
+            i = i + 1;
+            figure(evofftfig)
+            hold on
+            plot(x,y,'ok','markersize', 8)
+            set(gcf,'Pointer','arrow');
+        end
+    end
     [y_min,I] = sort(y_min);
     x_min=x_min(I);
     figure(evofftfig)
     hold on
-    plot(x_min,y_min,'o-k')
+    plot(x_min,y_min,'-k')
     freqboundlow = [y_min,x_min];
     
     % upper boundary
-    msg2 = '\fontsize{16}\color{blue}Select \color{red}higher \color{blue}frequency boundary and press enter';
+    msg2 = '\fontsize{16}\color{blue}Select \color{red}higher \color{blue}frequency boundary; right click to stop';
     title(msg2);
-    [x_max,y_max]=ginput();
+    con = 1;
+    i = 1;
+    while con == 1   
+        [x, y, con] = ginput(1);
+        if con == 1
+            x_max(i,1) = x;
+            y_max(i,1) = y;
+            i = i + 1;
+            figure(evofftfig)
+            hold on
+            plot(x,y,'ok','markersize', 8)
+            set(gcf,'Pointer','arrow');
+        end
+    end
     [y_max,I] = sort(y_max);
     x_max=x_max(I);
     figure(evofftfig)
     hold on
-    plot(x_max,y_max,'o-k')
+    plot(x_max,y_max,'-k')
     freqboundhigh = [y_max,x_max];
     msgbox1 = msgbox({'Dynamic Filtering';'Please wait ...'});
     figure(evofftfig)
