@@ -86,6 +86,9 @@ set(handles.checkbox2,'position',[0.5,0.2,0.275,0.7])
 set(handles.popupmenu1,'position',[0.75,0.2,0.23,0.7])
 
 data_s = varargin{1}.current_data;
+% remove mean value
+data_s(:,2) = data_s(:,2) - mean(data_s(:,2));
+%
 handles.acfigmain = varargin{1}.acfigmain;
 handles.listbox_acmain = varargin{1}.listbox_acmain; % save path
 handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
