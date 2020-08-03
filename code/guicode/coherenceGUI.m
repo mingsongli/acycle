@@ -265,7 +265,7 @@ if index_selected > 2
         target    = load(fullfile(targetdir,targetname));
         target = datapreproc(target);
         t1 = target(:,1);
-        segs = 8;
+        segs = 2;  % 2 segements
         winoverlap = 0.5; % 50% overlap
         sr_target = median(diff(target(:,1)));
         windowsize = round(abs(t1(end)-t1(1))/segs);
