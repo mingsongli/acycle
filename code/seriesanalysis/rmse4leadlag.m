@@ -95,6 +95,7 @@ end
 
 RMSEj = RMSE(RMSE==min(RMSE));
 llgridj = llgrid(RMSE==min(RMSE));
+
 if llgridj > 0
     leadlagid = 'leads';
 elseif llgridj == 0
@@ -102,13 +103,14 @@ elseif llgridj == 0
 else
     leadlagid = 'lags behind';
 end
-
+max(RMSE)
 if plotn == 1
     figure;
     set(gcf,'color','white')
     plot(llgrid,RMSE,'k');
     hold on
-    xline(llgridj,'r-.');
+    ylimhere = ylim;
+    plot([llgridj llgridj],[ylimhere(1) ylimhere(2)],'r-.')
     xlabel('lead (+) / lag (-)')
     ylabel('RMSE')
     title(['Min RMSE @ ', num2str(llgridj),'. Series ',leadlagid,' reference.'])
