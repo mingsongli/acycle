@@ -74,7 +74,7 @@ function varargout = AC(varargin)
 
 % Edit the above text to modify the response to help AC
 
-% Last Modified by GUIDE v2.5 29-Jun-2020 01:24:49
+% Last Modified by GUIDE v2.5 03-Aug-2020 23:17:01
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -5564,3 +5564,11 @@ if and ((min(plot_selected) > 2), (nplot == 1))
         end
 end
 guidata(hObject, handles);
+
+
+% --------------------------------------------------------------------
+function menu_leadlag_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_leadlag (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+leadlagGUI(handles)
