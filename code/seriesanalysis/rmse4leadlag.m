@@ -103,7 +103,7 @@ elseif llgridj == 0
 else
     leadlagid = 'lags behind';
 end
-max(RMSE)
+
 if plotn == 1
     figure;
     set(gcf,'color','white')
