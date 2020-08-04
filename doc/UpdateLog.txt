@@ -3,7 +3,7 @@
 _______________________________________
 
 Version : Acycle_v2.3_preview
-Date    : June 10, 2020 - June 29, 2020
+Date    : June 10, 2020 - Aug 4, 2020
 By      : Mingsong Li
 NOTE    : ask for MatLab RUNTIME 2019a
 
@@ -12,6 +12,13 @@ NOTE    : ask for MatLab RUNTIME 2019a
        written by Nicolas Thibault and Giovanni Rizzi
        
        Modified by Mingsong Li for Acycle
+
+    2. Lead/lag: a new tool to determine the phase lead/lag between a 'reference' 
+        and a 'series'.
+
+    3. Insolation:
+        A winter-spring time range is allowed, i.e., 
+        the ending day smaller than the starting day.
 
 _______________________________________
 

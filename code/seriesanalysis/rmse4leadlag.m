@@ -100,7 +100,7 @@ if llgridj > 0
 elseif llgridj == 0
     leadlagid = 'is in-phase with';
 else
-    leadlagid = 'lags';
+    leadlagid = 'lags behind';
 end
 
 if plotn == 1

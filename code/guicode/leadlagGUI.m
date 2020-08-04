@@ -161,18 +161,21 @@ dat2(any(isinf(dat1),2),:) = [];
 %
 ll = str2double(get(handles.edit3,'string'));
 step = str2double(get(handles.edit4,'string'));
-plotn = 1;
+plotn = 1; % plot
 try
     [llgrid,RMSE] = rmse4leadlag(dat1,dat2,ll,step,plotn);
 catch
-    errordlg('Error. Check selected datasets and settings','Acycle: lead/lag error')
+    errordlg('Error. Check selected datasets and settings','Acycle: lead/lag')
 end
 
 CDac_pwd; % cd ac_pwd dir
 [~,name1,~] = fileparts(handles.plot_s{1});
 [~,name2,ext2] = fileparts(handles.plot_s{2});
 name1 = [name2,'-LeadLag-',name1,ext2];
-dlmwrite(name1, [llgrid',RMSE'], 'delimiter', ',', 'precision', 9);
+try
+    dlmwrite(name1, [llgrid',RMSE'], 'delimiter', ',', 'precision', 9);
+catch
+end
 d = dir; %get files
 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
