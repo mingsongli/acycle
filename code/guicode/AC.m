@@ -1528,47 +1528,6 @@ end
 guidata(hObject, handles);
 
 
-% --------------------------------------------------------------------
-function menu_oversampling_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_interp (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
-nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
-    data_name = char(contents(plot_selected));
-    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
-        if isdir(data_name) == 1
-        else
-        [~,~,ext] = fileparts(data_name);
-        if sum(strcmp(ext,handles.filetype)) > 0
-            GETac_pwd; data_name = fullfile(ac_pwd,data_name);
-            data = load(data_name);
-            time = data(:,1);
-            %dt = median(diff(time));
-            dtmin = min(diff(time));
-            dtmax = max(diff(time));
-            dlg_title = 'Interpolation';
-            prompt = {'Tested sampling rate 1:','Tested sampling rate 2:',...
-                'Number of tested sampling rates','Number of simulation'};
-            num_lines = 1;
-            defaultans = {num2str(0.5*dtmin),num2str(5*dtmax),'100','1000'};
-            options.Resize='on';
-            answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-            
-            if ~isempty(answer)
-                sr1 = str2double(answer{1});
-                sr2 = str2double(answer{2});
-                raten = str2double(answer{3});
-                nsim = str2double(answer{4});
-                [sr_sh_5] = OversamplingTest(data,sr1,sr2,raten,nsim);
-            end
-        end
-        end
-end
-guidata(hObject, handles);
-
 % --- Executes during object creation, after setting all properties.
 function menu_interp_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to axes_refresh (see GCBO)
@@ -2249,6 +2208,26 @@ if and ((min(plot_selected) > 2), (nplot == 1))
             if sum(strcmp(ext,handles.filetype)) > 0
                 data = load(data_name);
                 
+                % sort
+                data = sortrows(data);
+                % unique
+                data=findduplicate(data);
+                % remove empty 
+                data(any(isinf(data),2),:) = [];
+                
+                diffx = diff(data(:,1));
+                if max(diffx) - min(diffx) > eps('single')
+                    hwarn = warndlg('Warning: Interpolation using median sampling rate');
+                    set(gcf,'units','norm') % set location
+                    set(gcf,'position',[0.2,0.6,0.2,0.1])
+                    figure(hwarn);
+                    interpolate_rate = median(diffx);
+                    [data]=interpolate(data,interpolate_rate);
+                end
+                
+                % remove mean of the 2nd column
+                data(:,2) = data(:,2) - mean(data(:,2));
+                %
                 t=data(:,1);
                 dt=t(2)-t(1);
                 nyquist = 1/(2*dt);

@@ -22,7 +22,7 @@ function varargout = leadlagGUI(varargin)
 
 % Edit the above text to modify the response to help leadlagGUI
 
-% Last Modified by GUIDE v2.5 03-Aug-2020 23:39:15
+% Last Modified by GUIDE v2.5 05-Aug-2020 14:35:03
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -59,7 +59,7 @@ handles.unit = varargin{1}.unit;
 handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
 
 handles.hmain = gcf;
-set(handles.hmain,'Name', 'Acycle: Lead/lag')
+set(handles.hmain,'Name', 'Acycle: Lead-lag relationship')
 % GUI settings
 set(0,'Units','normalized') % set units as normalized
 h=get(gcf,'Children');  % get all content
@@ -74,10 +74,13 @@ set(handles.text2,'position',[0.015,0.849,0.24,0.15])
 set(handles.text3,'position',[0.015,0.28,0.24,0.15])
 set(handles.edit1,'position',[0.125,0.547,0.88,0.208])
 set(handles.edit2,'position',[0.125,0.03,0.88,0.208])
-set(handles.text4,'position',[0.05,0.125,0.12,0.1])
-set(handles.text5,'position',[0.35,0.125,0.12,0.1])
-set(handles.edit3,'position',[0.18,0.125,0.12,0.1])
-set(handles.edit4,'position',[0.46,0.125,0.12,0.1])
+set(handles.text4,'position',[0.3,0.125,0.1,0.1])
+set(handles.text5,'position',[0.5,0.125,0.12,0.1])
+set(handles.text6,'position',[0.05,0.125,0.1,0.1])
+set(handles.edit3,'position',[0.4,0.125,0.1,0.1])
+set(handles.edit4,'position',[0.6,0.125,0.12,0.1])
+set(handles.popupmenu1,'position',[0.15,0.125,0.15,0.1])
+set(handles.popupmenu1,'Value',1)
 
 set(handles.pushbutton3,'position',[0.015,0.557,0.1,0.208]) % plot
 set(handles.pushbutton4,'position',[0.015,0.03,0.1,0.208]) % plot
@@ -162,8 +165,9 @@ dat2(any(isinf(dat1),2),:) = [];
 ll = str2double(get(handles.edit3,'string'));
 step = str2double(get(handles.edit4,'string'));
 plotn = 1; % plot
+timedir = get(handles.popupmenu1,'Value'); % 1: small=young; 2: small=old 
 try
-    [llgrid,RMSE] = rmse4leadlag(dat1,dat2,ll,step,plotn);
+    [llgrid,RMSE] = rmse4leadlag(dat1,dat2,ll,step,timedir,plotn);
 catch
     errordlg('Error. Check selected datasets and settings','Acycle: lead/lag')
 end
@@ -314,6 +318,29 @@ end
 % --- Executes during object creation, after setting all properties.
 function pushbutton1_CreateFcn(hObject, eventdata, handles)
 
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in popupmenu1.
+function popupmenu1_Callback(hObject, eventdata, handles)
+% hObject    handle to popupmenu1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu1 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popupmenu1
+
+
+% --- Executes during object creation, after setting all properties.
+function popupmenu1_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popupmenu1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end

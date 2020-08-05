@@ -23,13 +23,13 @@
 
 % Author:	Mingsong Li (Penn State)
 % Date  :   Aug. 3, 2020
-function [llgrid,RMSE] = rmse4leadlag(target,series,ll,step,plotn)
-
+function [llgrid,RMSE] = rmse4leadlag(target,series,ll,step,timedir,plotn)
+if nargin < 6; plotn = 1; end
+if nargin < 5; timedir = 1; end
 % Example:
 %
 % target = load('/Users/mingsongli/Dropbox/Research/202004NewarkMengWang/data/PC1.txt');
 % series = load('/Users/mingsongli/Dropbox/Research/202004NewarkMengWang/data/composite-sue-rsp0.02-16.041-LOWESS-TD-composite-sue-rsp0.02-16.041-LOWESS-Gau-0.132±0.07-agemodel-405_max-DYNOT-median-new.txt');
-% series = load('/Users/mingsongli/Dropbox/Research/202004NewarkMengWang/data/composite-sue-rsp0.02-16.041-LOWESS-TD-composite-sue-rsp0.02-16.041-LOWESS-Gau-0.132±0.07-agemodel-405_max-rho1-median.txt');
 % step = 1;
 % ll = 300;
 % plotn = 1;
@@ -97,11 +97,19 @@ RMSEj = RMSE(RMSE==min(RMSE));
 llgridj = llgrid(RMSE==min(RMSE));
 
 if llgridj > 0
-    leadlagid = 'leads';
+    if timedir == 1
+        leadlagid = 'lags behind';
+    else
+        leadlagid = 'leads';
+    end
 elseif llgridj == 0
     leadlagid = 'is in-phase with';
 else
-    leadlagid = 'lags behind';
+    if timedir == 1
+        leadlagid = 'leads';
+    else
+        leadlagid = 'lags behind';
+    end
 end
 
 if plotn == 1
@@ -111,7 +119,11 @@ if plotn == 1
     hold on
     ylimhere = ylim;
     plot([llgridj llgridj],[ylimhere(1) ylimhere(2)],'r-.')
-    xlabel('lead (+) / lag (-)')
+    if timedir == 1
+        xlabel('lead (-) / lag (+)')
+    else
+        xlabel('lag (-) / lead (+)')
+    end
     ylabel('RMSE')
     title(['Min RMSE @ ', num2str(llgridj),'. Series ',leadlagid,' reference.'])
     

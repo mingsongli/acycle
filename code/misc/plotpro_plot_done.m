@@ -129,3 +129,5 @@ end
 set(gcf,'color','w');
 legend(handles.plot_list)
 hold off
+%% return to the plot pro GUI
+figure(handles.plotproGUIfig)

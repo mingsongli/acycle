@@ -3,23 +3,25 @@
 _______________________________________
 
 Version : Acycle_v2.3_preview
-Date    : June 10, 2020 - Aug 4, 2020
+Date    : June 10, 2020 - Aug 5, 2020
 By      : Mingsong Li
 NOTE    : ask for MatLab RUNTIME 2019a
 
     1. Dynamic filtering of a frequency in the depth domain with user-defined 
        lower boundary, average frequency, and upper boundary.
-       written by Nicolas Thibault and Giovanni Rizzi
-       
-       Modified by Mingsong Li for Acycle
+       Written by Nicolas Thibault and Giovanni Rizzi.       
+       Modified by Mingsong Li for Acycle.
 
-    2. Lead/lag: a new tool to determine the phase lead/lag between a 'reference' 
+    2. Lead/lag relationship: a new tool to determine the phase lead/lag between a 'reference' 
         and a 'series'.
 
     3. Insolation:
         A winter-spring time range is allowed, i.e., 
         the ending day smaller than the starting day.
 
+    4. Amplitude Modulation: Data preprocessing enabled to expand compatibility..
+
+    5. Plot Pro: refinement.
 _______________________________________
 
 Version : Acycle_v2.2
@@ -69,7 +71,7 @@ NOTE    : ask for MatLab RUNTIME 2019a
 
     3. Prewhitening GUI
         refined rho1 of the robust AR1 model
-        Thank Zheng Gong for this reminder.
+        Thank Zheng Gong.
 
     4. Spectral Moments: bug fixed.
         Now the polynomial model of smoothing can produce correct results.
