@@ -3,16 +3,18 @@
 _______________________________________
 
 Version : Acycle_v2.3_preview
-Date    : June 10, 2020 - Aug 5, 2020
+Date    : June 10, 2020 - Aug 6, 2020
 By      : Mingsong Li
 NOTE    : ask for MatLab RUNTIME 2019a
 
-    1. Dynamic filtering of a frequency in the depth domain with user-defined 
-       lower boundary, average frequency, and upper boundary.
+    1. New tool: Dynamic filtering
+       Dynamic filtering of a frequency in the depth domain with 
+       user-defined lower boundary, average frequency, and upper boundary.
        Written by Nicolas Thibault and Giovanni Rizzi.       
        Modified by Mingsong Li for Acycle.
 
-    2. Lead/lag relationship: a new tool to determine the phase lead/lag between a 'reference' 
+    2. New tool: Lead/lag relationship
+        A new tool to determine the phase lead/lag between a 'reference' 
         and a 'series'.
 
     3. Insolation:
@@ -22,6 +24,12 @@ NOTE    : ask for MatLab RUNTIME 2019a
     4. Amplitude Modulation: Data preprocessing enabled to expand compatibility..
 
     5. Plot Pro: refinement.
+
+    6. New tool: Stratigraphic Correlation
+        A visual inspection and correlation of two time series.
+            A 'series' can be correlated to a selected 'reference series'
+            using hand-picked tie points.
+        
 _______________________________________
 
 Version : Acycle_v2.2

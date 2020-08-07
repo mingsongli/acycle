@@ -22,7 +22,7 @@ function varargout = leadlagGUI(varargin)
 
 % Edit the above text to modify the response to help leadlagGUI
 
-% Last Modified by GUIDE v2.5 05-Aug-2020 14:35:03
+% Last Modified by GUIDE v2.5 06-Aug-2020 16:45:49
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -72,19 +72,21 @@ set(handles.hmain,'position',[0.38,0.2,0.6,0.25]) % set position
 set(handles.uipanel1,'position',[0.025,0.286,0.947,0.649]) % Data
 set(handles.text2,'position',[0.015,0.849,0.24,0.15])
 set(handles.text3,'position',[0.015,0.28,0.24,0.15])
-set(handles.edit1,'position',[0.125,0.547,0.88,0.208])
-set(handles.edit2,'position',[0.125,0.03,0.88,0.208])
-set(handles.text4,'position',[0.3,0.125,0.1,0.1])
-set(handles.text5,'position',[0.5,0.125,0.12,0.1])
-set(handles.text6,'position',[0.05,0.125,0.1,0.1])
-set(handles.edit3,'position',[0.4,0.125,0.1,0.1])
-set(handles.edit4,'position',[0.6,0.125,0.12,0.1])
-set(handles.popupmenu1,'position',[0.15,0.125,0.15,0.1])
+set(handles.edit1,'position',[0.125,0.547,0.87,0.208])
+set(handles.edit2,'position',[0.125,0.03,0.87,0.208])
+
+set(handles.text6,'position',[0.015,0.125,0.1,0.1])
+set(handles.popupmenu1,'position',[0.12,0.125,0.17,0.1])
 set(handles.popupmenu1,'Value',1)
+set(handles.text4,'position',[0.3,0.125,0.1,0.1])
+set(handles.edit3,'position',[0.4,0.125,0.08,0.1])
+set(handles.text5,'position',[0.48,0.125,0.1,0.1])
+set(handles.edit4,'position',[0.58,0.125,0.06,0.1])
+set(handles.checkbox1,'position',[0.67,0.125,0.1,0.1])
+set(handles.pushbutton1,'position',[0.8,0.1,0.16,0.168]) % plot
 
 set(handles.pushbutton3,'position',[0.015,0.557,0.1,0.208]) % plot
 set(handles.pushbutton4,'position',[0.015,0.03,0.1,0.208]) % plot
-set(handles.pushbutton1,'position',[0.8,0.1,0.16,0.168]) % plot
 
 % Read list
 GETac_pwd;
@@ -158,9 +160,9 @@ dat2 = sortrows(dat2);
 % unique
 dat1=findduplicate(dat1);
 dat2=findduplicate(dat2);
-% remove empty 
+% remove empty
 dat1(any(isinf(dat1),2),:) = [];
-dat2(any(isinf(dat1),2),:) = [];
+dat2(any(isinf(dat2),2),:) = [];
 %
 ll = str2double(get(handles.edit3,'string'));
 step = str2double(get(handles.edit4,'string'));
@@ -172,18 +174,22 @@ catch
     errordlg('Error. Check selected datasets and settings','Acycle: lead/lag')
 end
 
-CDac_pwd; % cd ac_pwd dir
-[~,name1,~] = fileparts(handles.plot_s{1});
-[~,name2,ext2] = fileparts(handles.plot_s{2});
-name1 = [name2,'-LeadLag-',name1,ext2];
-try
-    dlmwrite(name1, [llgrid',RMSE'], 'delimiter', ',', 'precision', 9);
-catch
+% save data or not
+savedatayn = get(handles.checkbox1,'value');
+if savedatayn == 1
+    CDac_pwd; % cd ac_pwd dir
+    [~,name1,~] = fileparts(handles.plot_s{1});
+    [~,name2,ext2] = fileparts(handles.plot_s{2});
+    name1 = [name2,'-LeadLag-',name1,ext2];
+    try
+        dlmwrite(name1, [llgrid',RMSE'], 'delimiter', ',', 'precision', 9);
+    catch
+    end
+    d = dir; %get files
+    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+    refreshcolor;
+    cd(pre_dirML); % return to matlab view folder
 end
-d = dir; %get files
-set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-refreshcolor;
-cd(pre_dirML); % return to matlab view folder
 
 % --- Executes on button press in pushbutton4.
 function pushbutton4_Callback(hObject, eventdata, handles)
@@ -344,3 +350,12 @@ function popupmenu1_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in checkbox1.
+function checkbox1_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox1

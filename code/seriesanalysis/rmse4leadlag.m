@@ -16,6 +16,7 @@
 %               Positive: series leads target
 %               Negative: series lags target
 %   step    : time step, from 'lead' to 'lag'
+%   timedir : time direction; 1: small=young; 2: small=old
 
 % OUTPUT
 %   leadlag : 
