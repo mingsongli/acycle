@@ -2,58 +2,68 @@
 
 _______________________________________
 
-Version : ACycle_v2.2
+Version : Acycle_v2.3_preview
+Date    : June 10, 2020 - Aug 6, 2020
+By      : Mingsong Li
+NOTE    : ask for MatLab RUNTIME 2019a
+
+    1. New tool: Dynamic filtering
+       Dynamic filtering of a frequency in the depth domain with 
+       user-defined lower boundary, average frequency, and upper boundary.
+       Written by Nicolas Thibault and Giovanni Rizzi.       
+       Modified by Mingsong Li for Acycle.
+
+    2. New tool: Lead/lag relationship
+        A new tool to determine the phase lead/lag between a 'reference' 
+        and a 'series'.
+
+    3. Insolation:
+        A winter-spring time range is allowed, i.e., 
+        the ending day smaller than the starting day.
+
+    4. Amplitude Modulation: Data preprocessing enabled to expand compatibility..
+
+    5. Plot Pro: refinement.
+
+    6. New tool: Stratigraphic Correlation
+        A visual inspection and correlation of two time series.
+            A 'series' can be correlated to a selected 'reference series'
+            using hand-picked tie points.
+        
+_______________________________________
+
+Version : Acycle_v2.2
 Date    : Mar 24, 2020 - June 6, 2020
 By      : Mingsong Li
 NOTE    : ask for MatLab RUNTIME 2019a
 
     1. Power spectral analysis
-        Add power law model
-        Add bending power law model
-        for MTM, periodogram, and Lomb methods
+        For MTM, periodogram, and Lomb methods: Add the power-law model and bending power-law model.
+       
+    2. Add curve fitting method for robust AR1 confidence level estimation.
+        This method is now the default method.
 
-    2. Add curve fitting method for robust AR1 conf. level estimation
-        This method is now the default method
+    3. Allowing more control: bias correction for the robust AR1 estimation,
+        designed for the ultra-high resolution data.
 
-    3. Allowing more control: bias correction for the robust AR1 estimation 
-        designed for the ultra-high resolution data
+    4. Plot Preview: show multiple panels for multi-column data.
 
-    4. Plot Preview: show multiple panels for multi-column data
+    5. Spectral Analysis GUI: show \rho value in the title; allow nw = 1 for MTM.
+
+    6. Add a new tool: Basic Series -> Length-of-day & day-of-year.
+
+    7. "Math - Smooth - Bootstrap": change data saving style.
+
+    8. Build Age Model: save and plot sedimentation rate; plot age model.
+
+    9. Add coherence and phase analysis.
+
+    10. Bootstrap: fill plot.
+
+    11. Plot Preview: add legend.
 _______________________________________
 
-Version : ACycle_v2.1.1 [PREVIEW; NOT OFFICIALLY RELEASED]
-Date    : Feb 24, 2020 - Mar. 14, 2020
-By      : Mingsong Li
-NOTE    : ask for MatLab RUNTIME 2019a
-
-    1. Pre-whitenning GUI: add "\rho" to the text.
-
-    2. Spectral Analysis GUI: show \rho value in the title; allow nw = 1 for MTM
-
-    3. Plot stand. + 2: fit plot content to the order of title 
-
-    4. Add a new tool: Basic Series -> Length-of-day & day-of-year
-
-    5. "Math - Smooth - Bootstrap": change data saving style
-        Thanks Feng Cheng! Read more here:
-        https://github.com/mingsongli/acycle/issues/19
-
-    6. TimeOpt: plot all-in-one; Thank Wei Liu for this suggestion.
-
-    7. TimeOpt: null hypothesis testing for all given test sedimentation rate
-            plotted in the COCO H0-sig.level style.
-            null hypothesis testing for the optimal sedimentation rate is the default option.
-
-    8. Build Age Model: save and plot sedimentation rate; plot age model
-
-    9. NEW: Coherence and phase analysis
-
-    10. Bootstrap: fill plot
-
-    11. Plot Preview: add legend.
-_______________________________________
-
-Version : ACycle_v2.1.0
+Version : Acycle_v2.1.0
 Date    : Sept 17, 2019 - Feb 23, 2020
 By      : Mingsong Li
 NOTE    : ask for MatLab RUNTIME 2019a
@@ -69,7 +79,7 @@ NOTE    : ask for MatLab RUNTIME 2019a
 
     3. Prewhitening GUI
         refined rho1 of the robust AR1 model
-        Thank Zheng Gong for this reminder.
+        Thank Zheng Gong.
 
     4. Spectral Moments: bug fixed.
         Now the polynomial model of smoothing can produce correct results.
@@ -125,7 +135,7 @@ NOTE    : ask for MatLab RUNTIME 2019a
 
 _______________________________________
 
-Version : ACycle_v2.0
+Version : Acycle_v2.0
 Date    : Aug 25, 2019 - Sept 2, 2019
 By      : Mingsong Li
 NOTE    : ask for MatLab RUNTIME 2019a
@@ -166,7 +176,7 @@ NOTE    : ask for MatLab RUNTIME 2019a
     The standalone version of Acycle 2.0 may only work with MatLab runtime 2019a.
 _____________________________________
 
-Version : ACycle_v1.3
+Version : Acycle_v1.3
 Date    : Aug 6, 2019; 11:20 am
 By      : Mingsong Li
 
@@ -199,7 +209,7 @@ By      : Mingsong Li
 
 _____________________________________
 
-Version : ACycle_v1.2.1
+Version : Acycle_v1.2.1
 Date    : May 23, 2019; 11:07 pm
 By      : Mingsong Li
 
@@ -215,7 +225,7 @@ By      : Mingsong Li
 
 _____________________________________
 
-Version : ACycle_v1.2
+Version : Acycle_v1.2
 Date    : May 20, 2019; 7:11 pm
 By      : Mingsong Li
 
@@ -245,7 +255,7 @@ By      : Mingsong Li
 
 _____________________________________
 
-Version : ACycle_v1.1
+Version : Acycle_v1.1
 Date    : April 6, 2019; 6:09 pm
 By      : Mingsong Li
 
@@ -264,7 +274,7 @@ By      : Mingsong Li
     	7. Mini-robot GUI
 _____________________________________
 
-Version : ACycle_v1.0.2
+Version : Acycle_v1.0.2
 Date    : Mar. 12, 2019; 2:04 pm
 By      : Mingsong Li
 
@@ -287,13 +297,13 @@ _____________________________________
 _____________________________________
 
 
-Version : ACycle v1.0
+Version : Acycle v1.0
 Date    : Feb. 26, 2019 - Mar. 8, 2019
 By      : Mingsong Li
 
     1. Wiki: https://github.com/mingsongli/acycle/wiki
 
-    2. Acycle paper was accepted:
+    2. Acycle paper has been accepted:
 
 	Mingsong Li, Linda Hinnov, Lee Kump. 2019. Acycle: Time-series analysis 
     software for paleoclimate projects and education, Computers & Geosciences, 
@@ -304,7 +314,7 @@ _____________________________________
 _____________________________________
 _____________________________________
 
-Version : ACycle_v0.3.3.20190225
+Version : Acycle_v0.3.3.20190225
 Date    : Feb. 25, 2019; 1:15 am Beijing
 By      : Mingsong Li
 
@@ -315,14 +325,14 @@ By      : Mingsong Li
     3. refine the main gui figure showing tooltips (when mouse moveover)
 _____________________________________
 
-Version : ACycle_v0.3.2.20190127
+Version : Acycle_v0.3.2.20190127
 Date    : Jan. 27, 2019; 6:20 am Beijing
 By      : Mingsong Li
 
 	1. Reduce start-up GUI loading time
 _____________________________________
 
-Version : ACycle_v0.3.1.20190117
+Version : Acycle_v0.3.1.20190117
 Date    : Jan. 17, 2019; 9:26 pm EST
 By      : Mingsong Li (Penn State)
 
@@ -336,7 +346,7 @@ By      : Mingsong Li (Penn State)
 _____________________________________
 
 
-Version : ACycle_v0.3.0.20190112
+Version : Acycle_v0.3.0.20190112
 Date    : Jan. 12, 2019; 11:50 pm EST
 By      : Mingsong Li (Penn State)
 
@@ -383,7 +393,7 @@ _____________________________________
 _____________________________________
 _____________________________________
 
-New Stage:  ACycle_v0.2.6 Stand-alone versions
+New Stage:  Acycle_v0.2.6 Stand-alone versions
 
     Today stand-alone versions for both Mac and Windows released!
 
@@ -393,7 +403,7 @@ New Stage:  ACycle_v0.2.6 Stand-alone versions
 _____________________________________
 _____________________________________
 
-Version : ACycle_v0.2.6.20190101
+Version : Acycle_v0.2.6.20190101
 Date    : Jan. 1, 2019; 00:12 am EST
 By      : Mingsong Li (Penn State)
 
@@ -406,7 +416,7 @@ By      : Mingsong Li (Penn State)
     4. Astronomical solutions GUI refined
 _____________________________________
 
-Version : ACycle_v0.2.6.20181229
+Version : Acycle_v0.2.6.20181229
 Date    : Dec. 29, 2018; 11:21 am EST
 By      : Mingsong Li (Penn State)
 
@@ -421,7 +431,7 @@ By      : Mingsong Li (Penn State)
 
 _____________________________________
 
-Version : ACycle_v0.2.6.20181224
+Version : Acycle_v0.2.6.20181224
 Date    : Dec. 24, 2018; 11:21 pm EST
 By      : Mingsong Li (Penn State)
 
@@ -440,7 +450,7 @@ By      : Mingsong Li (Penn State)
 
 _____________________________________
 
-Version : ACycle_v0.2.6.20181222
+Version : Acycle_v0.2.6.20181222
 Date    : Dec. 22, 2018; 11:15 pm EST
 By      : Mingsong Li (Penn State)
 
@@ -458,7 +468,7 @@ _____________________________________
 _____________________________________
 _____________________________________
 
-Version : ACycle_v0.2.5.20181108
+Version : Acycle_v0.2.5.20181108
 Date    : Nov. 8, 2018; 7:19 pm EST
 By      : Mingsong Li (Penn State)
 

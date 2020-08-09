@@ -164,8 +164,8 @@ handles.season1 = 90; % season day starting
 handles.season2 = 180;  % season day ending
 handles.month1 = 1;
 handles.month2 = 2;
-handles.dayi1 = 80;
-handles.dayi2 = 264;
+handles.dayi1 = 80; % starting date
+handles.dayi2 = 264; % ending date (unable)
 handles.lat1 = 65;  % latitude default
 handles.lat2 = 80;  % latitude range from lat1 to lat2
 handles.dlat = 1;  % latitude resolution
@@ -197,8 +197,10 @@ function push_OK_Callback(hObject, eventdata, handles)
 t1 = handles.t1;
 t2 = handles.t2;
 dt = handles.dt;
-dayi1 = handles.dayi1;
-dayi2 = handles.dayi2;
+%dayi1 = handles.dayi1;
+%dayi2 = handles.dayi2;
+dayi1 = str2double(get(handles.edit_dayi1,'String'));
+dayi2 = str2double(get(handles.edit_dayi2,'String'));
 lat1 = handles.lat1;
 lat2 = handles.lat2;
 dlat = handles.dlat;
@@ -234,7 +236,12 @@ elseif unit_t == 3
     unit_t_r = 'yr';
 end
 if type == 1
-    day = min(dayi1,dayi2): max(dayi1,dayi2);
+    if dayi1 < dayi2
+        day = dayi1 : dayi2;
+    else
+        dayi2 = dayi2+365;
+        day = dayi1 : dayi2;
+    end
 else
     day = dayi1;
 end

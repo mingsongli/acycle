@@ -74,7 +74,7 @@ function varargout = AC(varargin)
 
 % Edit the above text to modify the response to help AC
 
-% Last Modified by GUIDE v2.5 17-Mar-2020 14:25:07
+% Last Modified by GUIDE v2.5 06-Aug-2020 22:02:58
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -104,7 +104,7 @@ function AC_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to AC (see VARARGIN)
 set(gcf,'position',[0.5,0.1,0.45,0.8]) % set position
-set(gcf,'Name','Acycle v2.2')
+set(gcf,'Name','Acycle v2.3 preview')
 set(gcf,'DockControls', 'off')
 set(gcf,'Color', 'white')
 set(0,'Units','normalized') % set units as normalized
@@ -1528,47 +1528,6 @@ end
 guidata(hObject, handles);
 
 
-% --------------------------------------------------------------------
-function menu_oversampling_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_interp (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
-nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
-    data_name = char(contents(plot_selected));
-    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
-        if isdir(data_name) == 1
-        else
-        [~,~,ext] = fileparts(data_name);
-        if sum(strcmp(ext,handles.filetype)) > 0
-            GETac_pwd; data_name = fullfile(ac_pwd,data_name);
-            data = load(data_name);
-            time = data(:,1);
-            %dt = median(diff(time));
-            dtmin = min(diff(time));
-            dtmax = max(diff(time));
-            dlg_title = 'Interpolation';
-            prompt = {'Tested sampling rate 1:','Tested sampling rate 2:',...
-                'Number of tested sampling rates','Number of simulation'};
-            num_lines = 1;
-            defaultans = {num2str(0.5*dtmin),num2str(5*dtmax),'100','1000'};
-            options.Resize='on';
-            answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-            
-            if ~isempty(answer)
-                sr1 = str2double(answer{1});
-                sr2 = str2double(answer{2});
-                raten = str2double(answer{3});
-                nsim = str2double(answer{4});
-                [sr_sh_5] = OversamplingTest(data,sr1,sr2,raten,nsim);
-            end
-        end
-        end
-end
-guidata(hObject, handles);
-
 % --- Executes during object creation, after setting all properties.
 function menu_interp_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to axes_refresh (see GCBO)
@@ -2249,6 +2208,26 @@ if and ((min(plot_selected) > 2), (nplot == 1))
             if sum(strcmp(ext,handles.filetype)) > 0
                 data = load(data_name);
                 
+                % sort
+                data = sortrows(data);
+                % unique
+                data=findduplicate(data);
+                % remove empty 
+                data(any(isinf(data),2),:) = [];
+                
+                diffx = diff(data(:,1));
+                if max(diffx) - min(diffx) > eps('single')
+                    hwarn = warndlg('Warning: Interpolation using median sampling rate');
+                    set(gcf,'units','norm') % set location
+                    set(gcf,'position',[0.2,0.6,0.2,0.1])
+                    figure(hwarn);
+                    interpolate_rate = median(diffx);
+                    [data]=interpolate(data,interpolate_rate);
+                end
+                
+                % remove mean of the 2nd column
+                data(:,2) = data(:,2) - mean(data(:,2));
+                %
                 t=data(:,1);
                 dt=t(2)-t(1);
                 nyquist = 1/(2*dt);
@@ -5534,3 +5513,49 @@ function menu_coh_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 guidata(hObject, handles);
 coherenceGUI(handles)
+
+
+% --------------------------------------------------------------------
+function menu_dynfilter_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_dynfilter (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox_acmain,'Value');
+nplot = length(plot_selected);   % length
+if and ((min(plot_selected) > 2), (nplot == 1))
+    data_name = char(contents(plot_selected));
+    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; 
+    filename = fullfile(ac_pwd,data_name);
+        if isdir(filename) == 1
+        else
+            [~,~,ext] = fileparts(filename);
+            if sum(strcmp(ext,handles.filetype)) > 0
+                current_data = load(filename);
+                handles.current_data = current_data;
+                handles.filename = filename;
+                handles.data_name = data_name;
+                handles.ext = ext;
+                guidata(hObject, handles);
+                DynamicFilter(handles);
+            end
+        end
+end
+guidata(hObject, handles);
+
+
+% --------------------------------------------------------------------
+function menu_leadlag_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_leadlag (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+leadlagGUI(handles)
+
+
+% --------------------------------------------------------------------
+function menu_correlation_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_correlation (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+CorrelationGUI(handles)

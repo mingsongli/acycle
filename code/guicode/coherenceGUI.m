@@ -22,7 +22,7 @@ function varargout = coherenceGUI(varargin)
 
 % Edit the above text to modify the response to help coherenceGUI
 
-% Last Modified by GUIDE v2.5 16-Mar-2020 15:43:13
+% Last Modified by GUIDE v2.5 05-Aug-2020 15:23:39
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -87,6 +87,10 @@ set(handles.text4,'position',[0.586,0.724, 0.074,0.05]) % set position
 set(handles.uibuttongroup1,'position',[0.016,0.037, 0.84,0.366]) % set position
 set(handles.text1,'position',[0.012,0.838, 0.089,0.15]) % set position
 set(handles.popupmenu1,'position',[0.111,0.726, 0.21,0.231]) % set position
+set(handles.text15,'position',[0.48,0.51, 0.09,0.05]) % set position
+set(handles.popupmenu2,'position',[0.469,0.45, 0.117,0.05]) % set position
+set(handles.popupmenu2,'Value',1)
+
 set(handles.text11,'position',[0.012,0.573, 0.173,0.15]) % set position
 set(handles.text7,'position',[0.012,0.308, 0.121,0.15]) % set position
 set(handles.text8,'position',[0.012,0.145, 0.152,0.15]) % set position
@@ -104,18 +108,19 @@ set(handles.text12,'position',[0.119,0.295,0.339,0.211]) % set position
 set(handles.text13,'position',[0.119,0.105,0.339,0.211]) % set position
 set(handles.edit8,'position',[0.514,0.305,0.44,0.232]) % set position
 set(handles.edit9,'position',[0.514,0.042,0.44,0.232]) % set position
-set(handles.text14,'position',[0.576,0.915,0.089,0.14]) % set position
+set(handles.text14,'position',[0.576,0.91,0.089,0.14]) % set position
 set(handles.axes1,'position',[0.603,0.15,0.166,0.6]) % set position
 set(handles.axes2,'position',[0.814,0.15,0.166,0.6]) % set position
-set(handles.checkbox1,'position',[0.576,0.675,0.03,0.2]) % set position
+set(handles.checkbox1,'position',[0.576,0.675,0.022,0.2]) % set position
 set(handles.checkbox2,'position',[0.788,0.675,0.03,0.2]) % set position
 axes(handles.axes2);
 polarscatter(45,10,50,'filled','MarkerFaceAlpha',.5)
 axes(handles.axes1);
 plot(rand(20,2))
 
-set(handles.edit7,'string',num2str(0.1))
-handles.cohthreshold = 0.1;
+handles.cohthreshold = 0;
+set(handles.edit7,'string',num2str(handles.cohthreshold))
+
 % Choose default command line output for coherenceGUI
 handles.output = hObject;
 
@@ -265,7 +270,7 @@ if index_selected > 2
         target    = load(fullfile(targetdir,targetname));
         target = datapreproc(target);
         t1 = target(:,1);
-        segs = 8;
+        segs = 2;  % 2 segements
         winoverlap = 0.5; % 50% overlap
         sr_target = median(diff(target(:,1)));
         windowsize = round(abs(t1(end)-t1(1))/segs);
@@ -293,6 +298,20 @@ if index_selected > 2
         seriesname = char(list_content(index_selected(i),1));
         series_num = series_num + 1;
         series(series_num,1) = {seriesname};
+        
+        targetdir = char(get(handles.edit1,'String'));
+        target    = load(fullfile(targetdir,seriesname));
+        target = datapreproc(target,0);
+        t1 = target(:,1);
+        segs = 2;  % 2 segements
+        winoverlap = 0.5; % 50% overlap
+        sr_target = median(diff(target(:,1)));
+        windowsize = round(abs(t1(end)-t1(1))/segs);
+        nooverlap = round(windowsize * winoverlap);
+        set(handles.edit5,'string',num2str(windowsize))
+        set(handles.edit6,'string',num2str(nooverlap))
+        set(handles.edit8,'string',num2str(0))
+        set(handles.edit9,'string',num2str(1/(2*sr_target)))
     end
 end
 set(handles.listbox2,'String',char(series),'Value',1);
@@ -465,7 +484,10 @@ function checkbox1_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox1
-coherence_update;
+try
+    coherence_update;
+catch
+end
 guidata(hObject,handles)
 
 % --- Executes on button press in checkbox2.
@@ -475,7 +497,10 @@ function checkbox2_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox2
-coherence_update;
+try
+    coherence_update;
+catch
+end
 guidata(hObject,handles)
 
 % --- Executes on button press in checkbox3.
@@ -525,3 +550,27 @@ if get(hObject,'Value') == 1
 end
 coherence_update;
 guidata(hObject,handles)
+
+
+% --- Executes on selection change in popupmenu2.
+function popupmenu2_Callback(hObject, eventdata, handles)
+% hObject    handle to popupmenu2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu2 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popupmenu2
+coherence_update;
+guidata(hObject,handles)
+
+% --- Executes during object creation, after setting all properties.
+function popupmenu2_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popupmenu2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
