@@ -272,6 +272,7 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
     
 % --- Executes on button press in pushbutton3.
+% RUN & Save
 function pushbutton3_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton3 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -390,7 +391,8 @@ if strcmp(method,'Multi-taper method')
             if plot_x_period
                 update_spectral_x_period_mtm
             else
-                title([dat_name,'-',num2str(nw),'\pi-MTM-Robust-AR1: \rho = ',num2str(rhoM),'. S0 =',num2str(s0M)])
+                title([dat_name,'-',num2str(nw),'\pi-MTM-Robust-AR1: \rho = ',num2str(rhoM),'. S0 =',num2str(s0M),'; bw = ',num2str(bw)])
+                
                 xlabel(['Frequency (cycles/',num2str(unit),')']) 
                 set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'pi MTM'])
                 set(gca,'XMinorTick','on','YMinorTick','on')
@@ -509,7 +511,7 @@ if strcmp(method,'Multi-taper method')
         end
         legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','Power law')
         ylabel('Power')
-        title([num2str(nw),'\pi MTM & power law'])
+        title([num2str(nw),'\pi MTM & power law','; bw = ',num2str(bw)])
         set(gcf,'Name',[num2str(nw),'\pi MTM & power law: ',dat_name,ext])
         set(gca,'XMinorTick','on','YMinorTick','on')
         
@@ -593,7 +595,7 @@ if strcmp(method,'Multi-taper method')
         end
         legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','BPL')
         ylabel('Power')
-        title([num2str(nw),'\pi MTM & bending power law'])
+        title([num2str(nw),'\pi MTM & bending power law','; bw = ',num2str(bw)])
         set(gcf,'Name',[num2str(nw),'\pi MTM & bending power law: ',dat_name,ext])
         set(gca,'XMinorTick','on','YMinorTick','on')
         
@@ -621,7 +623,7 @@ if strcmp(method,'Multi-taper method')
             xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
             ylabel('Power ')
             legend('Power','bw')
-            title([num2str(nw),'\pi MTM method',' ','; Sampling rate = ',num2str(dt),' ', unit])
+            title([num2str(nw),' \pi MTM method; Sampling rate = ',num2str(dt),' ', unit,'; bw = ',num2str(bw)])
             set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'pi MTM'])
             xlim([0 fmax]);
             set(gca,'XMinorTick','on','YMinorTick','on')
@@ -688,7 +690,8 @@ if strcmp(method,'Multi-taper method')
             xlim([0 fmax]);
             xlabel(['Frequency (cycles/',num2str(unit),')']) 
             ylabel('Power ')
-            title([num2str(nw),'\pi MTM classic AR1: \rho = ',num2str(rho),'; Sampling rate = ',num2str(dt),' ', unit])
+            title([num2str(nw),'\pi MTM classic AR1: \rho = ',num2str(rho),'; Sampling rate = ',num2str(dt),' ', unit,'; bw = ',num2str(bw)])
+            
     step = 5.5;
         waitbar(step / steps)
         delete(hwaitbar)
@@ -802,7 +805,7 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
         xlim([0 fmax]);
     end
     ylabel('Power ')
-    title('Lomb-Scargle spectrum')
+    title(['Lomb-Scargle spectrum','; bw = ',num2str(df)])
     set(gcf,'Name',[dat_name,ext,': Lomb-Scargle spectrum'])
     set(gca,'XMinorTick','on','YMinorTick','on')
     
@@ -882,7 +885,7 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
         end
         legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','Power law')
         ylabel('Power')
-        title('Lomb-Scargle spectrum & power law')
+        title(['Lomb-Scargle spectrum & power law','; bw = ',num2str(df)])
         set(gcf,'Name',['Lomb-Scargle spectrum & power law: ',dat_name,ext])
         set(gca,'XMinorTick','on','YMinorTick','on')
         
@@ -963,7 +966,7 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
         end
         legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','BPL')
         ylabel('Power')
-        title('Lomb-Scargle spectrum & bending power law')
+        title(['Lomb-Scargle spectrum & bending power law','; bw = ',num2str(df)])
         set(gcf,'Name',['Lomb-Scargle spectrum & bending power law: ',dat_name,ext])
         set(gca,'XMinorTick','on','YMinorTick','on')
         
@@ -999,7 +1002,7 @@ elseif  strcmp(method,'Periodogram')
     plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
     xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
     ylabel('Power ')
-    title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit])
+    title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit,'; bw = ',num2str(df)])
     set(gcf,'Name',[dat_name,ext,': periodogram'])
     set(gca,'XMinorTick','on','YMinorTick','on')
     xlim([0 fmax]);
@@ -1095,7 +1098,7 @@ elseif  strcmp(method,'Periodogram')
         %legend('Power','95% global','99% local','95% local','90% local','Power law')
         legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','Power law')
         ylabel('Power')
-        title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit])
+        title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit,'; bw = ',num2str(df)])
         set(gcf,'Name',['Periodogram & power law: ',dat_name,ext])
         set(gca,'XMinorTick','on','YMinorTick','on')
         
@@ -1177,7 +1180,7 @@ elseif  strcmp(method,'Periodogram')
         end
         legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','BPL')
         ylabel('Power')
-        title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit])
+        title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit,'; bw = ',num2str(df)])
         set(gcf,'Name',['Periodogram & bending power law: ',dat_name,ext])
         set(gca,'XMinorTick','on','YMinorTick','on')
         
@@ -1524,7 +1527,7 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
+% RUN
 % --- Executes on button press in pushbutton17.
 function pushbutton17_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton17 (see GCBO)
@@ -1640,7 +1643,7 @@ if strcmp(method,'Multi-taper method')
             else
                 xlim([0 fmax]);
                 xlabel(['Frequency (cycles/',num2str(unit),')']) 
-                title([num2str(nw),'\pi-MTM-Robust-AR(1): \rho = ',num2str(rhoM),'. S0 = ',num2str(s0M)])
+                title([num2str(nw),'\pi-MTM-Robust-AR(1): \rho = ',num2str(rhoM),'. S0 = ',num2str(s0M),'; bw = ',num2str(bw)])                
                 set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'pi MTM'])
                 set(gca,'XMinorTick','on','YMinorTick','on')
                 set(gcf,'Color', 'white')
@@ -1734,7 +1737,7 @@ if strcmp(method,'Multi-taper method')
         %legend('Power','95% global','99% local','95% local','90% local','Power law')
         legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','Power law')
         ylabel('Power')
-        title([num2str(nw),'\pi MTM & power law'])
+        title([num2str(nw),'\pi MTM & power law','; bw = ',num2str(bw)])        
         set(gcf,'Name',[num2str(nw),'\pi MTM & power law: ',dat_name,ext])
         set(gca,'XMinorTick','on','YMinorTick','on')
         
@@ -1807,7 +1810,7 @@ if strcmp(method,'Multi-taper method')
         end
         legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','BPL')
         ylabel('Power')
-        title([num2str(nw),'\pi MTM & bending power law'])
+        title([num2str(nw),'\pi MTM & bending power law','; bw = ',num2str(bw)])
         set(gcf,'Name',[num2str(nw),'\pi MTM & bending power law: ',dat_name,ext])
         set(gca,'XMinorTick','on','YMinorTick','on')
         
@@ -1830,7 +1833,7 @@ if strcmp(method,'Multi-taper method')
         xlabel(['Frequency (cycles/',num2str(unit),')']) 
         ylabel('Power ')
         legend('Power','bw')
-        title([num2str(nw),' \pi MTM method',' ','; Sampling rate = ',num2str(dt),' ', unit])
+        title([num2str(nw),' \pi MTM method; Sampling rate = ',num2str(dt),' ', unit,'; bw = ',num2str(bw)])
         set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'pi MTM'])
         set(gca,'XMinorTick','on','YMinorTick','on')
         xlim([0 fmax]);
@@ -1894,7 +1897,8 @@ if strcmp(method,'Multi-taper method')
         xlim([0 fmax]);
         xlabel(['Frequency (cycles/',num2str(unit),')'])
         ylabel('Power ')
-        title([num2str(nw),'\pi MTM classic AR1: \rho = ',num2str(rho),'; Sampling rate = ',num2str(dt),' ', unit])
+        title([num2str(nw),'\pi MTM classic AR1: \rho = ',num2str(rho),'; Sampling rate = ',num2str(dt),' ', unit,'; bw = ',num2str(bw)])
+        
         legend('Power','AR1','90%','95%','99%','99.9%')
         step = 5.5;
         waitbar(step / steps)
@@ -1977,7 +1981,7 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
     end
     
     ylabel('Power ')
-    title('Lomb-Scargle spectrum')
+    title(['Lomb-Scargle spectrum','; bw = ',num2str(df)])
     set(gcf,'Name',[dat_name,ext,': Lomb-Scargle spectrum'])
     set(gca,'XMinorTick','on','YMinorTick','on')
     
@@ -2047,7 +2051,7 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
         %legend('Power','95% global','99% local','95% local','90% local','Power law')
         legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','Power law')
         ylabel('Power')
-        title('Lomb-Scargle spectrum & power law')
+        title(['Lomb-Scargle spectrum & power law','; bw = ',num2str(df)])
         set(gcf,'Name',['Lomb-Scargle spectrum & power law: ',dat_name,ext])
         set(gca,'XMinorTick','on','YMinorTick','on')
         
@@ -2116,7 +2120,7 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
         end
         legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','BPL')
         ylabel('Power')
-        title('Lomb-Scargle spectrum & bending power law')
+        title(['Lomb-Scargle spectrum & bending power law','; bw = ',num2str(df)])
         set(gcf,'Name',['Lomb-Scargle spectrum & bending power law: ',dat_name,ext])
         set(gca,'XMinorTick','on','YMinorTick','on')
         
@@ -2187,7 +2191,7 @@ elseif  strcmp(method,'Periodogram')
     end
     
     ylabel('Power ')
-    title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit])
+    title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit,'; bw = ',num2str(df)])
     set(gcf,'Name',['Periodogram & AR1: ',dat_name,ext])
     set(gca,'XMinorTick','on','YMinorTick','on')
     
@@ -2257,7 +2261,7 @@ elseif  strcmp(method,'Periodogram')
         %legend('Power','95% global','99% local','95% local','90% local','Power law')
         legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','Power law')
         ylabel('Power')
-        title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit])
+        title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit,'; bw = ',num2str(df)])
         set(gcf,'Name',['Periodogram & power law: ',dat_name,ext])
         set(gca,'XMinorTick','on','YMinorTick','on')
         
@@ -2329,7 +2333,7 @@ elseif  strcmp(method,'Periodogram')
         end
         legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','BPL')
         ylabel('Power')
-        title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit])
+        title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit,'; bw = ',num2str(df)])
         set(gcf,'Name',['Periodogram & bending power law: ',dat_name,ext])
         set(gca,'XMinorTick','on','YMinorTick','on')
         
