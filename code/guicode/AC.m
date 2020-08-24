@@ -4147,10 +4147,28 @@ function menu_folder_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_folder (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox_acmain,'Value');
+nplot = length(plot_selected);   % length
+if and ((min(plot_selected) > 2), (nplot == 1))
+    dat_name = char(contents(plot_selected));
+    dat_name = strrep2(dat_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; data_name = fullfile(ac_pwd,dat_name);
+    if isdir(data_name) == 1
+    else
+        [~,dat_name,ext] = fileparts(data_name);
+    end
+else
+    dat_name = 'newfolder';
+end
+
 prompt = {'Type name of the folder'};
 dlg_title = 'Create a Folder in the working directory';
 num_lines = 1;
-defaultans = {'newfolder'};
+defaultans = {[dat_name,'_new']};
+%defaultans = {'newfolder'};
 options.Resize='on';
 answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
 if ~isempty(answer)
@@ -4624,10 +4642,27 @@ function menu_newtxt_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_newtxt (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox_acmain,'Value');
+nplot = length(plot_selected);   % length
+if and ((min(plot_selected) > 2), (nplot == 1))
+    dat_name = char(contents(plot_selected));
+    dat_name = strrep2(dat_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; data_name = fullfile(ac_pwd,dat_name);
+    if isdir(data_name) == 1
+    else
+        [~,dat_name,ext] = fileparts(data_name);
+    end
+else
+    dat_name = 'untitled';
+end
+
 prompt = {'Name of the new text file'};
 dlg_title = 'New text file';
 num_lines = 1;
-defaultans = {'untitled.txt'};
+defaultans = {[dat_name,'_empty.txt']};
+%defaultans = {'untitled.txt'};
 options.Resize='on';
 answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
 if ~isempty(answer)
