@@ -199,7 +199,7 @@ function pushbutton4_Callback(hObject, eventdata, handles)
 pre_dirML = pwd;
 CDac_pwd; % cd ac_pwd dir
 [file,path] = uigetfile({'*.*',  'All Files (*.*)'},...
-                        'Select a Reference Series');
+                        'Select a Target Series');
 if isequal(file,0)
     disp('User selected Cancel')
 else
