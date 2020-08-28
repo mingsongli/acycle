@@ -101,12 +101,12 @@ ifaze = atan(angle(hx));
 % calculating the INSTANTANEOUS FREQUENCY
 ifreq = diff(ufaze)/(2*pi*dt);
 % plot the results
-%figure;
-%subplot(4,1,1), plot(t,xx),title('Modulated signal & Instantaneous amplitude'); hold on;
-%subplot(4,1,1), plot(t,iamp); hold off;
-%subplot(4,1,2), plot(t,ufaze),title('Unrolled phase')
-%subplot(4,1,3), plot(t,ufazedet),title('Detrended phase')
-%subplot(4,1,4), plot(t(1:(length(t)-1)),ifreq),title('Instantaneous frequency')
+% figure;
+% subplot(4,1,1), plot(t,xx),title('Modulated signal & Instantaneous amplitude'); hold on;
+% subplot(4,1,1), plot(t,iamp); hold off;
+% subplot(4,1,2), plot(t,ufaze),title('Unrolled phase')
+% subplot(4,1,3), plot(t,ufazedet),title('Detrended phase')
+% subplot(4,1,4), plot(t(1:(length(t)-1)),ifreq),title('Instantaneous frequency')
 %%
 
 tanhilb=[t,xx,iamp,ufaze,ufazedet];
