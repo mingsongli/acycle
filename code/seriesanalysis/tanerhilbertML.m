@@ -53,30 +53,31 @@ arg2 = log(arg2);
 twod = 2.*arg1/arg2;
 ncut = fix(npts/2+1);
 %.....Filter for positive frequencies
-for n=1:ncut;
-w = (n-1)*dw;
-arg = (2.*abs(w-wc)/bw)^twod;
-darg=-1.0*arg;
-filter(n) =  ( amp * exp(darg));
+for n=1:ncut
+    w = (n-1)*dw;
+    arg = (2.*abs(w-wc)/bw)^twod;
+    darg=-1.0*arg;
+    filter(n) =  ( amp * exp(darg));
 end
 
 ncut1 = ncut+1;
 %.....Filter for negative frequencies
-for n=ncut1:npts;
-w = (n-npts-1)*dw;
-aw = abs(w);
-arg = (2.*abs(aw-wc)/bw)^twod;
-darg=-1.0*arg;
-filter(n) = (amp * exp(darg));
+for n=ncut1:npts
+    w = (n-npts-1)*dw;
+    aw = abs(w);
+    arg = (2.*abs(aw-wc)/bw)^twod;
+    darg=-1.0*arg;
+    filter(n) = (amp * exp(darg));
 end
-% below for acycle plot
+% below: for acycle plot
 assignin('base','tanerfilterenv',filter)
-% up    for acycle plot
+% up   : for acycle plot
+
 %% Forward FFT data
 xftfor = fft(x,npts);
 %.....Apply the filter over all frequencies
-for n=1:npts;
-xftfor(n) = xftfor(n) * filter(n);
+for n=1:npts
+    xftfor(n) = xftfor(n) * filter(n);
 end
 %.....Inverse FFT
 xftinv = ifft(xftfor,npts);

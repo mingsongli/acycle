@@ -1678,7 +1678,7 @@ for nploti = 1:nplot
                     data = load(data_name);
                 end
 
-                prompt = {'Threshold value'; 'Keep high/low? (1=high; 0=low)'};
+                prompt = {'Threshold value (default = mean)'; 'Keep high/low? (1=high; 0=low)'};
                 dlg_title = 'Clipping:';
                 num_lines = 1;
                 defaultans = {num2str(nanmean(data(:,2))), '1'};
