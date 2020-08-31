@@ -711,12 +711,13 @@ else
         plot(data_filterout(:,1),data_filterout(:,3),'b')
         % plot
         figure;
-        t = data_filterout(:,1);
+        t  = data_filterout(:,1);
         xx = data_filterout(:,2);
         subplot(4,1,1), plot(t,xx),title('Modulated signal & Instantaneous amplitude'); hold on;
         subplot(4,1,1), plot(t,data_filterout(:,3)); hold off;
         xlim([min(data(:,1)),max(data(:,1))])
         set(gca,'XMinorTick','on','YMinorTick','on')
+        
         subplot(4,1,2), plot(t,data_filterout(:,4)),title('Unrolled instantaneous phase')
         xlim([min(data(:,1)),max(data(:,1))])
         set(gca,'XMinorTick','on','YMinorTick','on')
@@ -729,10 +730,11 @@ else
         % option #2 using linear fit: works well for the filtered curve with
         % many (over 4-6) cycles
         sdat = polyfit(t,data_filterout(:,4),1);
-        datalinear = t*sdat(1);
+        sdat(1)
+        datalinear = (t-t(1)) * sdat(1);
         iphasedet = (data_filterout(:,4) - datalinear)*180/pi;
         subplot(4,1,3), plot(t,iphasedet),title('Instantaneous phase')
-        %subplot(4,1,3), plot(t,data_filterout(:,5)*180/pi),title('Detrended phase')
+        subplot(4,1,3), plot(t,data_filterout(:,5)*180/pi),title('Detrended phase')
         xlim([min(data(:,1)),max(data(:,1))])
         ylabel(['phase (',char(176),')'])
         set(gca,'XMinorTick','on','YMinorTick','on')
