@@ -723,21 +723,17 @@ else
         set(gca,'XMinorTick','on','YMinorTick','on')
         
         % remove the linear trend
-        % option #1 using mean frequency
-        % fm = str2double(get(handles.edit1,'string')); % mean freq.
-        % slopi = 2*pi*fm; % slopi
-        % iphasedet = data_filterout(:,4) - t*slopi;
-        % option #2 using linear fit: works well for the filtered curve with
+        % using linear fit: works well for the filtered curve with
         % many (over 4-6) cycles
         sdat = polyfit(t,data_filterout(:,4),1);
-        sdat(1)
         datalinear = (t-t(1)) * sdat(1);
-        iphasedet = (data_filterout(:,4) - datalinear)*180/pi;
+        iphasedet = data_filterout(:,4) - datalinear;
         subplot(4,1,3), plot(t,iphasedet),title('Instantaneous phase')
-        subplot(4,1,3), plot(t,data_filterout(:,5)*180/pi),title('Detrended phase')
+        %subplot(4,1,3), plot(t,data_filterout(:,5)),title('Detrended instantaneous phase')
         xlim([min(data(:,1)),max(data(:,1))])
-        ylabel(['phase (',char(176),')'])
+        ylabel('phase (radians)')
         set(gca,'XMinorTick','on','YMinorTick','on')
+        
         subplot(4,1,4), plot(t(1:(length(t)-1)),handles.ifreq),title('Instantaneous frequency')
         xlim([min(data(:,1)),max(data(:,1))])
         set(gca,'XMinorTick','on','YMinorTick','on')
@@ -750,6 +746,7 @@ else
         end
         
         dlmwrite(handles.add_list_ufazedet, [t,iphasedet], 'delimiter', ',', 'precision', 9);
+        %dlmwrite(handles.add_list_ufazedet, [t,data_filterout(:,5)], 'delimiter', ',', 'precision', 9);
     end
     cd(pre_dirML); % return to matlab view folder
     
