@@ -32,7 +32,6 @@ NOTE    : ask for MatLab RUNTIME 2019a
   
     7. Spectral Analysis
 
-        Set 'DropLastTaper' as 'false' for all MTM calculation
         Set max freq for plot only
         f-test: fix a bug in f-test
             Thanks Paul Olsen for the bug report.
