@@ -44,11 +44,6 @@ end
 % End initialization code - DO NOT EDIT
 
 %% LOG
-
-% M.Li (Peking Univ)
-% 2020-12-10
-% Set 'DropLastTaper' 'false' for MTM calculations
-% pmtm(datax,nw,nzeropad,'DropLastTaper',false);
 %
 
 % --- Executes just before spectrum is made visible.
@@ -370,7 +365,7 @@ if strcmp(method,'Multi-taper method')
             if nw == 1
                 [pxx,w] = pmtm(datax,nw,nzeropad,'DropLastTaper',false);
             else
-                [pxx,w] = pmtm(datax,nw,nzeropad,'DropLastTaper',false);
+                [pxx,w] = pmtm(datax,nw,nzeropad);
             end
             % Nyquist frequency
             fn = 1/(2*dt);
@@ -444,13 +439,13 @@ if strcmp(method,'Multi-taper method')
         if nw == 1
             [po,w]=pmtm(datax,nw,nzeropad,'DropLastTaper',false);
         else
-            [po,w]=pmtm(datax,nw,nzeropad,'DropLastTaper',false);
+            [po,w]=pmtm(datax,nw,nzeropad);
         end
     else 
         if nw == 1
             [po,w]=pmtm(datax,nw,'DropLastTaper',false);
         else
-            [po,w]=pmtm(datax,nw,'DropLastTaper',false);
+            [po,w]=pmtm(datax,nw);
         end
     end
     fd1=w/(2*pi*dt);
@@ -1631,7 +1626,7 @@ if strcmp(method,'Multi-taper method')
             if nw == 1
                 [pxx,w] = pmtm(datax,nw,nzeropad,'DropLastTaper',false);
             else
-                [pxx,w] = pmtm(datax,nw,nzeropad,'DropLastTaper',false);
+                [pxx,w] = pmtm(datax,nw,nzeropad);
             end
             % Nyquist frequency
             fn = 1/(2*dt);
@@ -1690,13 +1685,13 @@ if strcmp(method,'Multi-taper method')
         if nw == 1
             [po,w]=pmtm(datax,nw,nzeropad,'DropLastTaper',false);
         else
-            [po,w]=pmtm(datax,nw,nzeropad,'DropLastTaper',false);
+            [po,w]=pmtm(datax,nw,nzeropad);
         end
     else
         if nw == 1
             [po,w]=pmtm(datax,nw,'DropLastTaper',false);
         else
-            [po,w]=pmtm(datax,nw,'DropLastTaper',false);
+            [po,w]=pmtm(datax,nw);
         end
     end
     fd1=w/(2*pi*dt);
