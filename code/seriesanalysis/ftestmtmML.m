@@ -1,4 +1,4 @@
-function [freq,ftest,fsig,Amp,Faz,Sig,Noi,dof,wt]=ftestmtmML(data,NW,npad,plotn)
+function [freq1,ftest,fsigout,Amp,Faz,Sig,Noi,dof,wt]=ftestmtmML(data,NW,npad,plotn)
 % ftestmtmML.m
 %
 % This script is based on an educational SCILAB script provided by 
@@ -63,197 +63,39 @@ dt = median(diff(t));
 % Apply ftestmtm.m to compute Amp, ftest, etc. 
 % using output dof from mtmdofs.m with same NW and npad
 %
-[freq,ftest,fconf,Amp,Faz,Sig,Noi] = ftestmtm(t,detrend(w),NW,dof,npad);
+[freq1,ftest,fconf,Amp,Faz,Sig,Noi] = ftestmtm(t,detrend(w),NW,dof,npad);
 fnyq = 1/(2*dt);
-fsig = 1-fconf;
+fsigout = 1-fconf;
 if plotn
     figure; 
     subplot(3,1,1)
-    plot(freq, Amp,'color',[0, 0.4470, 0.7410],'LineWidth',1.5)
+    plot(freq1, Amp,'color',[0, 0.4470, 0.7410],'LineWidth',1.5)
     xlim([0, fnyq])
     title(['Amplitude, F-test & significance level : ', num2str(NW), '\pi'])
     ylabel('Amplitude')
     
-    subplot(3,1,3)
-    fsigsh = 0.15;
-    fsig1 = fsig;
-    fsig1(fsig1>fsigsh) = 0;
-    %yyaxis right
-    plot(freq, fsig1,'color','red','LineWidth',1);
-    ylim([0.0, fsigsh])
-    xlim([0, fnyq])
-    line([0 fnyq],[.05 .05],'Color','k','LineWidth',0.35,'LineStyle',':')
-    line([0 fnyq],[.10 .10],'Color','r','LineWidth',0.5,'LineStyle','-.')
-    line([0 fnyq],[.14 .14],'Color','m','LineWidth',0.5,'LineStyle','--')
-    yticks([0.0 0.05 0.10 0.14 0.15])
-    yticklabels({'0.15','0.10', '0.05','0.01','0'})
-    ylabel('F-test significance level')
-    xlabel('Frequency')
-    
     subplot(3,1,2)
-    plot(freq, ftest,'color','k','LineWidth',1);
+    plot(freq1, ftest,'color','k','LineWidth',1);
     xlim([0, fnyq])
     ylabel('F-ratio')
     
+    subplot(3,1,3)
+    fsigsh = 0.15;
+    fsig1 = fsigout;
+    fsig1(fsig1>fsigsh) = fsigsh;
+    %yyaxis right
+    plot(freq1, fsig1,'color','red','LineWidth',1);
+    ylim([0.0, fsigsh])
+    xlim([0, fnyq])
+    line([0 fnyq],[.10 .10],'Color','k','LineWidth',0.5,'LineStyle',':')
+    line([0 fnyq],[.05 .05],'Color','m','LineWidth',0.35,'LineStyle','-.')
+    line([0 fnyq],[.01 .01],'Color','r','LineWidth',0.5,'LineStyle','--')
+    yticks([0.0 0.01 0.05 0.10 0.15])
+    yticklabels({'0','0.01', '0.05', '0.10','0.15'})
+    ylabel('F-test significance level')
+    xlabel('Frequency')
+    set(gca, 'YDir','reverse')
 end
 
 
-function [freq,dof,wt] = mtmdofs(t,y,NW,npad)
-%   Adaptive-weights and degrees of freedom for 
-%   prolate multitapered spectra
-%
-%   INPUTS:
-%	t (column vector) = timescale of y; must be uniformly sampled. 
-%	y (column vector) = real-valued time series  
-%	NW = time-bandwidth product to use (e.g. NW=2 for 2pi multitapers)
-%   npad = zero pad to npad * length of y 
-%
-%   CALLS TO:
-%   dpss.m (discrete prolate spheroidal sequences, MATLAB Signal Toolbox)
-%
-%   OUTPUTS:
-%	freq = vector of frequencies
-%	dof = adaptive weighted dofs (NOTE: input to ftestmtm.m)
-%	wt(n,k) = adaptive weights for each of k eigenspectra
-%
-% 
-%   REFERENCE:
-%   Thomson, D.J., 1982. Spectrum estimation and harmonic analysis. 
-%      Proceedings of the IEEE, 70, 1055-1096.
-%
-dof=[ ]; wt=[ ]; evals=[ ]; bias=[ ]; spw=[ ]; 
-N = length(y);
-sig2=var(y);
-K = 2*NW - 1; % total number of dpss tapers to use
-[h,evals] = dpss(N,NW);	% get the dpss tapers and eigenvalues
-bias = 1.-evals; % compute bias of the dpss tapers
-k = 1;	% index, dpss taper
-f = 1;	% index, frequency
-% get K sets of dpss-tapered Fourier coefficients of y;
-% zero pad to npad x length of y 
-for k = 1:K
-    Yk(:,k) = fft(h(:,k).*y,npad*N);
-end
-% 
-nfft=length(Yk);
-jj=100.;
-tol=0.0003;
-% Equations 5.3 and 5.4 in Thomson (1982)
-for n=1:nfft % end at line 62
-% Analyze current frequency using all K tapers
-for k=1:K 
-spw(k)=real(Yk(n,k)*conj(Yk(n,k)))/sig2;
-end
-as = (spw(1)+spw(2))/2.0;
-iflag=0;
-% Convergence to tol usually in a few steps
-for j=1:jj 
-fn=0.;
-fx=0.;
-for k=1:K 
-a1=sqrt(evals(k))*as/(evals(k)*as + bias(k));
-a1=a1^2;
-fn=fn+a1*spw(k);
-fx=fx+a1;
-end
-ax=fn/fx;
-das=abs(ax-as);
-as=ax;
-end
-iflag=0;
-if das >= tol
-    iflag=1
-end
-% compute adaptive weights for all tapered spectra at nth frequency 
-degs=0.;
-for k=1:K % end at line 60
-wt(n,k)=sqrt(evals(k))*ax/(evals(k)*ax + bias(k));
-degs = degs+(evals(k)*wt(n,k)^2)/(evals(1)*wt(n,1)^2);
-end
-% Equation 5.5 in Thomson (1982)
-dof(n)=2.*degs;
-end
-% create frequency scale; first nnft/2+1 frequencies are 0 and positive
-dt= t(2)-t(1);
-fnyq = 1/(2*dt);
-M = length(dof);
-df=fnyq/(M/2);
-freq =(0:df:(M-1)*df);
-%disp('Real-valued time series spectra valid from f=0 to 1/(2*dt) only')
-% Note: dof=dof(1:(M/2+1)) are the positive frequencies
 
-
-
-
-function [freq,ftest,fsig,Amp,Faz,Sig,Noi] = ftestmtm(t,y,NW,dof,npad)
-%   Adaptive-weighted harmonic F-test, Thomson multitaper method.
-%
-%   INPUTS:
-%	t (column vector) = timescale of y; **must be uniformly sampled. 
-%	y (column vector) = real-valued time series to be tested. 
-%	NW = time-bandwidth product
-%   dof (column vector) = adaptive-weighted dofs (from mtmdofs.m)
-%   >> NOTE: if dof is missing, high-resolution option is used.
-%   npad = zero pad to npad * length of y 
-%
-%   CALLS TO:
-%   dpss.m (discrete prolate spheroidal sequences, MATLAB Signal Toolbox)
-%   fcdf.m (Fisher cumulative distribution function, MATLAB Statistics Toolbox)
-%
-%  The F-ratio statistic ("F-test") is distributed as an F pdf
-%  with 2 and kdof (high-resolution) or dof(f)-2 (adaptive-weighted) DOFs
-%
-%   OUTPUTS:
-%	Freq = vector of frequencies
-%	ftest = vector with F-ratios
-%	fsig = vector of 1-alpha probability for the F-ratios
-%   Amp = vector of harmonic amplitude 
-%   Faz = vector of harmonic phase (in degrees)
-%   Sig = vector of signal (F-ratio nominator)
-%   Noi = vector of noise (F-ratio denominator)
-%  
-%   REFERENCE:
-%   Thomson, D.J., 1982. Spectrum estimation and harmonic analysis. 
-%      Proceedings of the IEEE, 70, 1055-1096.
-% 
-Amp=[ ];Noi=[ ];Sig=[ ];ftest=[ ];fsig=[ ];freq=[ ];Faz=[ ];
-N = length(y);
-if nargin<4, disp('NOTE: using high-resolution option'); end
-K = 2*NW - 1; % total number of dpss tapers 
-h = dpss(N,NW);	% get the dpss tapers 
-k = 1;	% dpss taper index
-f = 1;	% frequency index
-% get K sets of dpss-tapered Fourier coefficients of y;
-% pad to  npad x length of y 
-for k = 1:K
-    Yk(:,k) = fft(h(:,k).*y,npad*N);
-end
-nfft=length(Yk);
-% U0 and Usum are elements from Eq. 13.5 (Thomson, 1982)
-U0 = sum(h(:,1:K),1);
-Usum = sum(U0.^2);
-% kdof is denominator dofs for high resolution estimator
-kdof = 2*K-2;
-% mu is Eq. 13.5 (Thomson, 1982)
-% ftest is Eq. 13.10 (Thomson, 1982)
-for f=1:nfft
-mu = sum(Yk(f,:).*U0)./Usum;
-vimag=imag(mu);
-vreal=real(mu);
-Amp(f)=2*sqrt(vimag^2+vreal^2);
-% sine with no phase shift registers -90 deg. phase
-Faz(f)=360.*atan2(vimag,vreal)/(2*pi);
-ftest(f)=(((K-1)*(abs(mu)).^2*Usum))./(sum((abs(Yk(f,:)-mu*U0)).^2));
-% significance for high resolution option using kdof
-if nargin<4, fsig(f)=fcdf1(ftest(f),2,kdof-2.0); end
-% significance using adaptive-weighted dof vector from mtmdofs.m
-if nargin>3, fsig(f) = fcdf(ftest(f),2,dof(f)-2.0); end
-Sig(f)=(((K-1)*(abs(mu)).^2*Usum));
-Noi(f)=(sum((abs(Yk(f,:)-mu*U0)).^2));
-end
-% create frequency scale; first nfft/2+1  0 + positive frequencies
-dt= t(2)-t(1);
-fnyq = 1/(2*dt);
-M = length(Amp);
-df=fnyq/(M/2);
-freq =0:df:(M-1)*df;

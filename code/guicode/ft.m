@@ -693,14 +693,14 @@ else
     end
     set(gca,'XMinorTick','on','YMinorTick','on')
     if strcmp(filter,'Taner-Hilbert')
+        
         add_list_am = handles.add_list_am;
         ampmod = [data_filterout(:,1),data_filterout(:,3)];
         ifaze = [data_filterout(:,1),handles.ifaze];
         ifreq = [data_filterout(1:end-1,1),handles.ifreq];
         dlmwrite(add_list, data_filterout(:,1:2), 'delimiter', ',', 'precision', 9);
         dlmwrite(add_list_am, ampmod, 'delimiter', ',', 'precision', 9);
-        dlmwrite(handles.add_list_ufaze,[data_filterout(:,1),data_filterout(:,4)], 'delimiter', ',', 'precision', 9);
-        dlmwrite(handles.add_list_ufazedet, [data_filterout(:,1),data_filterout(:,5)], 'delimiter', ',', 'precision', 9);
+        dlmwrite(handles.add_list_ufaze,[data_filterout(:,1),data_filterout(:,4)], 'delimiter', ',', 'precision', 9);        
         dlmwrite(handles.add_list_ifaze, ifaze, 'delimiter', ',', 'precision', 9);
         dlmwrite(handles.add_list_ifreq, ifreq, 'delimiter', ',', 'precision', 9);
         disp(['>>  Save as: ', handles.add_list_am])
@@ -709,6 +709,44 @@ else
         disp(['>>  Save as: ', handles.add_list_ifaze])
         disp(['>>  Save as: ', handles.add_list_ifreq])
         plot(data_filterout(:,1),data_filterout(:,3),'b')
+        % plot
+        figure;
+        t  = data_filterout(:,1);
+        xx = data_filterout(:,2);
+        subplot(4,1,1), plot(t,xx),title('Modulated signal & Instantaneous amplitude'); hold on;
+        subplot(4,1,1), plot(t,data_filterout(:,3)); hold off;
+        xlim([min(data(:,1)),max(data(:,1))])
+        set(gca,'XMinorTick','on','YMinorTick','on')
+        
+        subplot(4,1,2), plot(t,data_filterout(:,4)),title('Unrolled instantaneous phase')
+        xlim([min(data(:,1)),max(data(:,1))])
+        set(gca,'XMinorTick','on','YMinorTick','on')
+        
+        % remove the linear trend
+        % using linear fit: works well for the filtered curve with
+        % many (over 4-6) cycles
+        sdat = polyfit(t,data_filterout(:,4),1);
+        datalinear = (t-t(1)) * sdat(1);
+        iphasedet = data_filterout(:,4) - datalinear;
+        subplot(4,1,3), plot(t,iphasedet),title('Instantaneous phase')
+        %subplot(4,1,3), plot(t,data_filterout(:,5)),title('Detrended instantaneous phase')
+        xlim([min(data(:,1)),max(data(:,1))])
+        ylabel('phase (radians)')
+        set(gca,'XMinorTick','on','YMinorTick','on')
+        
+        subplot(4,1,4), plot(t(1:(length(t)-1)),handles.ifreq),title('Instantaneous frequency')
+        xlim([min(data(:,1)),max(data(:,1))])
+        set(gca,'XMinorTick','on','YMinorTick','on')
+        if handles.unit_type == 0;
+            xlabel(['Unit (',handles.unit,')'])
+        elseif handles.unit_type == 1;
+            xlabel(['Depth (',handles.unit,')'])
+        else
+            xlabel(['Time (',handles.unit,')'])
+        end
+        
+        dlmwrite(handles.add_list_ufazedet, [t,iphasedet], 'delimiter', ',', 'precision', 9);
+        %dlmwrite(handles.add_list_ufazedet, [t,data_filterout(:,5)], 'delimiter', ',', 'precision', 9);
     end
     cd(pre_dirML); % return to matlab view folder
     

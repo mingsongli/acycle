@@ -100,9 +100,11 @@ if and(get(handles.checkbox_ar1_check,'value') == 0, get(handles.checkbox_robust
 end
 
 if handles.check_ftest_value
-    [freq,ftest,fsig,Amp,Faz,Sig,Noi,dof,wt]=ftestmtmML(data,nw,padtimes,0);
+    [freq,ftest,fsigout,Amp,Faz,Sig,Noi,dof,wt]=ftestmtmML(data,nw,padtimes,0);
     pt = 1./freq;
+    
     figure;
+    
     subplot(3,1,1)
     
     plot(pt, Amp,'color',[0, 0.4470, 0.7410],'LineWidth',1.5)
@@ -112,27 +114,31 @@ if handles.check_ftest_value
     if handles.logfreq == 1
         set(gca,'xscale','log')
     end
-    subplot(3,1,3)
-    fsigsh = 0.15;
-    fsig1 = fsig;
-    fsig1(fsig1>fsigsh) = 0;
-    %yyaxis right
-    plot(pt, fsig1,'color','red','LineWidth',1);
-    ylim([0.0, fsigsh])
-    line([pt(1) pt(end)],[.05 .05],'Color','k','LineWidth',0.35,'LineStyle',':')
-    line([pt(1) pt(end)],[.10 .10],'Color','r','LineWidth',0.5,'LineStyle','-.')
-    line([pt(1) pt(end)],[.14 .14],'Color','m','LineWidth',0.5,'LineStyle','--')
-    yticks([0.0 0.05 0.10 0.14 0.15])
-    yticklabels({'0.15','0.10', '0.05','0.01','0'})
-    ylabel('F-test significance level')
-    xlabel('Period')
+    
+    subplot(3,1,2)
+    plot(pt, ftest,'color','k','LineWidth',1);
+    ylabel('F-ratio')
     xlim([1/fmax, pt(3)]);set(gca, 'XDir','reverse')
     if handles.logfreq == 1
         set(gca,'xscale','log')
     end
-    subplot(3,1,2)
-    plot(pt, ftest,'color','k','LineWidth',1);
-    ylabel('F-ratio')
+    
+    subplot(3,1,3)
+    hold on
+    fsigsh = 0.15;
+    fsig1 = fsigout;
+    fsig1(fsig1>fsigsh) = fsigsh;
+    %yyaxis right
+    plot(pt, fsig1,'color','red','LineWidth',1);
+    ylim([0.0, fsigsh])
+    line([pt(2) pt(end)],[.05 .05],'Color','m','LineWidth',0.35,'LineStyle','-.')
+    line([pt(2) pt(end)],[.10 .10],'Color','k','LineWidth',0.5,'LineStyle',':')
+    line([pt(2) pt(end)],[.01 .01],'Color','r','LineWidth',0.5,'LineStyle','--')
+    yticks([0.0 0.01 0.05 0.10 0.15])
+    yticklabels({'0','0.01','0.05','0.10','0.15'})
+    ylabel('F-test significance level')
+    xlabel('Period')
+    set(gca, 'YDir','reverse')
     xlim([1/fmax, pt(3)]);set(gca, 'XDir','reverse')
     if handles.logfreq == 1
         set(gca,'xscale','log')

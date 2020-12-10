@@ -22,7 +22,7 @@ function varargout = spectrum(varargin)
 
 % Edit the above text to modify the response to help spectrum
 
-% Last Modified by GUIDE v2.5 05-Jun-2020 14:14:21
+% Last Modified by GUIDE v2.5 10-Dec-2020 21:31:32
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -43,6 +43,13 @@ else
 end
 % End initialization code - DO NOT EDIT
 
+%% LOG
+
+% M.Li (Peking Univ)
+% 2020-12-10
+% Set 'DropLastTaper' 'false' for MTM calculations
+% pmtm(datax,nw,nzeropad,'DropLastTaper',false);
+%
 
 % --- Executes just before spectrum is made visible.
 function spectrum_OpeningFcn(hObject, eventdata, handles, varargin)
@@ -193,9 +200,12 @@ poc1 = find( pocnorm > 99, 1);
 % suggest a new input max freq.
 if fd1(poc1)/fd1(end) <= 0.85
     handles.ValidNyqFreqR = fd1(poc1);
+    handles.BiasCorr = 1;
     set(handles.edit_fmax_input,'String', num2str(fd1(poc1)))
     set(handles.radiobutton_fmax,'Value',0)
     set(handles.radiobutton_input,'Value',1)
+else
+    handles.BiasCorr = 0;
 end
 %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %
 % Update handles structure
@@ -297,6 +307,7 @@ check_plot_fmax = get(handles.radiobutton_fmax,'Value');
 plot_fmax_input = str2double(get(handles.edit_fmax_input,'String'));
 nw = handles.timebandwidth;
 bw=2*nw*df;
+BiasCorr = handles.BiasCorr;
 
 if handles.pad > 0
     padtimes = str2double(get(handles.edit3,'String'));
@@ -326,7 +337,11 @@ if strcmp(method,'Multi-taper method')
             'AR1 best fit model? 1 = linear; 2 = log power (default)';...
             'Bias correction for ultra-high resolution data'};
         num_lines = 1;
-        defaultans = {num2str(0.2),num2str(2),num2str(0)};
+        if BiasCorr == 0
+            defaultans = {num2str(0.2),num2str(2),num2str(0)};
+        else
+            defaultans = {num2str(0.2),num2str(2),num2str(1)};
+        end
         options.Resize='on';
         answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
 
@@ -349,33 +364,32 @@ if strcmp(method,'Multi-taper method')
             try close(hwarn)
             catch
             end
-            %if biascorr == 1
+            
+            % for plot only
             % Multi-taper method power spectrum
             if nw == 1
                 [pxx,w] = pmtm(datax,nw,nzeropad,'DropLastTaper',false);
             else
-                [pxx,w] = pmtm(datax,nw,nzeropad);
+                [pxx,w] = pmtm(datax,nw,nzeropad,'DropLastTaper',false);
             end
             % Nyquist frequency
             fn = 1/(2*dt);
             % true frequencies
-            f = w/pi*fn;
-            % median-smoothing data numbers
-            smoothn = round(smoothwin * length(pxx));
-            pxxsmooth0 = moveMedian(pxx,smoothn);
-            theored1 = s0M * (1-rhoM^2)./(1-(2.*rhoM.*cos(pi.*f./fmax))+rhoM^2);
-            K = 2*nw -1;
-            nw2 = 2*(K);
-            % Chi-square inversed distribution
-            chi90 = theored1 * chi2inv(0.90,nw2)/nw2;
-            chi95 = theored1 * chi2inv(0.95,nw2)/nw2;
-            chi99 = theored1 * chi2inv(0.99,nw2)/nw2;
+            f0 = w/pi*fn;
+            
+            f1 = redconfAR1(:,1);
+            pxxsmooth0 = redconfAR1(:,3);
+            f = redconfML96(:,1);
+            theored1 = redconfML96(:,3);
+            chi90 = redconfML96(:,4);
+            chi95 = redconfML96(:,5);
+            chi99 = redconfML96(:,6);
             
             figdata = figure; 
             set(gcf,'Color', 'white')
-            semilogy(f,pxx,'k')
+            semilogy(f0,pxx,'k')
             hold on; 
-            semilogy(f,pxxsmooth0,'m-.');
+            semilogy(f1,pxxsmooth0,'m-.');
             semilogy(f,theored1,'k-','LineWidth',2);
             semilogy(f,chi90,'r-');
             semilogy(f,chi95,'r--','LineWidth',2);
@@ -430,13 +444,13 @@ if strcmp(method,'Multi-taper method')
         if nw == 1
             [po,w]=pmtm(datax,nw,nzeropad,'DropLastTaper',false);
         else
-            [po,w]=pmtm(datax,nw,nzeropad);
+            [po,w]=pmtm(datax,nw,nzeropad,'DropLastTaper',false);
         end
     else 
         if nw == 1
             [po,w]=pmtm(datax,nw,'DropLastTaper',false);
         else
-            [po,w]=pmtm(datax,nw);
+            [po,w]=pmtm(datax,nw,'DropLastTaper',false);
         end
     end
     fd1=w/(2*pi*dt);
@@ -719,11 +733,12 @@ if strcmp(method,'Multi-taper method')
         end
     else
     end  
+    
     if handles.check_ftest_value
         if plot_x_period
             update_spectral_x_period_mtm
         else
-            [freq,ftest,fsig,Amp,Faz,Sig,Noi,dof,wt]=ftestmtmML(data,nw,padtimes,1);
+            [freq,ftest,fsigout,Amp,Faz,Sig,Noi,dof,wt]=ftestmtmML(data,nw,padtimes,1);
             set(gcf,'color','white');
             set(gcf,'units','norm') % set location
             set(gcf,'position',[0.0,0.05,0.45,0.45])
@@ -752,11 +767,13 @@ if strcmp(method,'Multi-taper method')
         namefsig = [dat_name,'-',num2str(nw),'piMTM-fsig',ext];
         namefamp = [dat_name,'-',num2str(nw),'piMTM-amp',ext];
         namefrest = [dat_name,'-',num2str(nw),'piMTM-Faz-Sig-Noi-Dof',ext];
+        
         CDac_pwd;
         dataftest = [freq',ftest'];
-        datafsig  = [freq',fsig'];
+        datafsig  = [freq',fsigout'];
         dataamp  = [freq',Amp'];
         datarest  = [freq',Faz',Sig',Noi',dof'];
+        
         [dataftest] = select_interval(dataftest,0,fnyq);
         [datafsig] = select_interval(datafsig,0,fnyq);
         [dataamp] = select_interval(dataamp,0,fnyq);
@@ -1552,6 +1569,9 @@ plot_x_period = get(handles.checkbox8,'Value');
 plot_fmax_input = str2double(get(handles.edit_fmax_input,'String'));
 nw = handles.timebandwidth;
 bw=2*nw*df;
+
+BiasCorr = handles.BiasCorr;
+
 if handles.pad > 0
     padtimes = str2double(get(handles.edit3,'String'));
     nzeropad = nlength*padtimes;
@@ -1579,7 +1599,11 @@ if strcmp(method,'Multi-taper method')
             'AR1 best fit model? 1 = linear; 2 = log power (default)';...
             'Bias correction for ultra-high resolution data'};
         num_lines = 1;
-        defaultans = {num2str(0.2),num2str(2),num2str(0)};
+        if BiasCorr == 0
+            defaultans = {num2str(0.2),num2str(2),num2str(0)};
+        else
+            defaultans = {num2str(0.2),num2str(2),num2str(1)};
+        end
         options.Resize='on';
         answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
 
@@ -1602,31 +1626,31 @@ if strcmp(method,'Multi-taper method')
             catch
             end
             
+            % for plot only
             % Multi-taper method power spectrum
             if nw == 1
                 [pxx,w] = pmtm(datax,nw,nzeropad,'DropLastTaper',false);
             else
-                [pxx,w] = pmtm(datax,nw,nzeropad);
+                [pxx,w] = pmtm(datax,nw,nzeropad,'DropLastTaper',false);
             end
             % Nyquist frequency
             fn = 1/(2*dt);
             % true frequencies
-            f = w/pi*fn;
-            % median-smoothing data numbers
-            smoothn = round(smoothwin * length(pxx));
-            pxxsmooth0 = moveMedian(pxx,smoothn);
-            theored1 = s0M * (1-rhoM^2)./(1-(2.*rhoM.*cos(pi.*f./fmax))+rhoM^2);
-            K = 2*nw -1;
-            nw2 = 2*(K);
-            % Chi-square inversed distribution
-            chi90 = theored1 * chi2inv(0.90,nw2)/nw2;
-            chi95 = theored1 * chi2inv(0.95,nw2)/nw2;
-            chi99 = theored1 * chi2inv(0.99,nw2)/nw2;
+            f0 = w/pi*fn;
+            
+            f1 = redconfAR1(:,1);
+            pxxsmooth0 = redconfAR1(:,3);
+            f = redconfML96(:,1);
+            theored1 = redconfML96(:,3);
+            chi90 = redconfML96(:,4);
+            chi95 = redconfML96(:,5);
+            chi99 = redconfML96(:,6);
+
             figdata = figure; 
             set(gcf,'Color', 'white')
-            semilogy(f,pxx,'k')
+            semilogy(f0,pxx,'k')
             hold on; 
-            semilogy(f,pxxsmooth0,'m-.');
+            semilogy(f1,pxxsmooth0,'m-.');
             semilogy(f,theored1,'k-','LineWidth',2);
             semilogy(f,chi90,'r-');
             semilogy(f,chi95,'r--','LineWidth',2);
@@ -1666,13 +1690,13 @@ if strcmp(method,'Multi-taper method')
         if nw == 1
             [po,w]=pmtm(datax,nw,nzeropad,'DropLastTaper',false);
         else
-            [po,w]=pmtm(datax,nw,nzeropad);
+            [po,w]=pmtm(datax,nw,nzeropad,'DropLastTaper',false);
         end
     else
         if nw == 1
             [po,w]=pmtm(datax,nw,'DropLastTaper',false);
         else
-            [po,w]=pmtm(datax,nw);
+            [po,w]=pmtm(datax,nw,'DropLastTaper',false);
         end
     end
     fd1=w/(2*pi*dt);
@@ -2494,3 +2518,18 @@ else
     handles.checkBPL = 0;
 end
 guidata(hObject, handles);
+
+
+
+% --- Executes during object creation, after setting all properties.
+function pushbutton3_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_nsimulation (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+

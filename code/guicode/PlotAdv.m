@@ -210,6 +210,7 @@ for i = 1: handles.nplot
 end
 set(handles.edit6,'string',plotseries)
 %axis_setting
+set(handles.push_axis,'String','X')
 set(handles.pop_data,'String', handles.plot_list_ext);
 set(handles.pop_linestyle, 'Value', matrix_setting{2});
 set(handles.pop_linesize, 'Value', pop_linesize_ii);
