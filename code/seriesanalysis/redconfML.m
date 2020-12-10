@@ -69,7 +69,7 @@ fn = 1/(2*dt);
 if nw == 1
     [pxx,f] = pmtm(x,nw,nfft,'DropLastTaper',false);
 else
-    [pxx,f] = pmtm(x,nw,nfft,'DropLastTaper',false);
+    [pxx,f] = pmtm(x,nw,nfft);
 end
 
 % true frequencies
