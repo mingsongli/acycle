@@ -4411,7 +4411,6 @@ if check == 1;
         padtype = str2double(answer{9});
         for i = 1:nplot
             
-            figure;
             plot_no = plot_selected(i);
             plot_filter_s = char(contents(plot_no));
             plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
@@ -4447,6 +4446,8 @@ if check == 1;
             disp(f3)
             disp('Wait ... ...')
             [pow]=pdan(data,f3,window,nw,ftmin,fterm,step,pad);
+            %assignin('base','power',pow)
+            figure;
             plot(pow(:,1),pow(:,2),'k','LineWidth',1);
             set(gca,'XMinorTick','on','YMinorTick','on')
             xlabel('Time (kyr)')
@@ -4455,7 +4456,10 @@ if check == 1;
             if savedata == 1
                 name1 = [dat_name,'-win',num2str(window),'-pda',ext];
                 CDac_pwd  % cd ac_pwd dir
-                dlmwrite(name1, pow, 'delimiter', ',', 'precision', 9); 
+                dlmwrite(name1, pow, 'delimiter', ',', 'precision', 9);
+                disp(name1)
+                disp('col #1      col #2   col #3   col #4')
+                disp('depth/time  ratio    target   all')
                 refreshcolor;
                 cd(pre_dirML); % return to matlab view folder
             end
