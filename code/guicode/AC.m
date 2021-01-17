@@ -281,11 +281,11 @@ pause(0.0001);%
 % if isdeployed
 %     copyright;
 % end
-try 
+%try 
     % If the software has not been used for 30 days, checking updates
-    ac_check_opendate;
-catch
-end
+%    ac_check_opendate;
+%catch
+%end
 % bug fixed: window system32 may be the default working folder, but not
 % writable.
 try
@@ -2114,10 +2114,10 @@ for nploti = 1:nplot
                 sst = data(:,2);
                 dt = mean(diff(time));
                 prompt = {['Period range from (',handles.unit,')']; ['Period range to (',handles.unit,')'];...
-                    'Pad (1=yes,0=no)'; 'Discrete scale spacing (default)'};
+                    'Pad (1=yes,0=no)'; 'Discrete scale spacing (default)';'Mother (MORLET, PAUL, or DOG)'};
                 dlg_title = '1D Wavelet transform';
                 num_lines = 1;
-                defaultans = {num2str(2*dt),num2str(timelen), '1', '0.1'};
+                defaultans = {num2str(2*dt),num2str(timelen), '1', '0.1','MORLET'};
                 options.Resize='on';
                 answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
                     if ~isempty(answer)
@@ -2126,8 +2126,9 @@ for nploti = 1:nplot
                         pt2 = str2double(answer{2});
                         pad  = str2double(answer{3});
                         dss  = str2double(answer{4});
+                        mother = answer{5};
                         figwave = figure;
-                        [~,~,~]= waveletML(sst,time,pad,dss,pt1,pt2);
+                        [~,~,~]= waveletML(sst,time,pad,dss,pt1,pt2,mother);
                         name1 = [dat_name,'-wavelet.fig'];
                         
                         CDac_pwd

@@ -6,7 +6,13 @@
 % Modified Oct 1999, changed Global Wavelet Spectrum (GWS) to be sideways,
 %   changed all "log" to "log2", changed logarithmic axis on GWS to
 %   a normal axis.
-function [power,period,lag1]= waveletML(sst,time,pad,dj,pt1,pt2)
+function [power,period,lag1]= waveletML(sst,time,pad,dj,pt1,pt2,mother)
+
+% Mingsong Li, Peking University, Jan 17, 2021
+if nargin < 7
+    mother = 'MORLET';
+end
+
 %load 'sst_nino3.dat'   % input SST time series
 %sst = sst_nino3;
 
@@ -29,13 +35,12 @@ xlim = [min(time),max(time)];
 %dj = 0.25;    % this will do 4 sub-octaves per octave
 s0 = 2*dt;    % this says start at a scale of 6 months
 % 
-%pt = 
+% Mingsong Li, Peking University, Jan 17, 2021
 j1 = round(log2(pt2))/dj;    % this says do 7 powers-of-two with dj sub-octaves each
-j1 = round(pt2/dj);
+%j1 = round(pt2/dj);
+
 %j1 = 10.5/dj;
-%lag1 = 0.72;  % lag-1 autocorrelation for red noise background
 lag1 = rhoAR1ML(sst);
-mother = 'Morlet';
 % set range
 if pt2 > (time(end)-time(1))
     pt2 = time(end)-time(1);
