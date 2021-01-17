@@ -56,7 +56,7 @@ nyquist=1/(2*dt);                   % Nyquist frequency
 xdata=data(:,2);                    % value of time series
 npts=fix(window/dt);               % number of time series used for one calculation
     if step >= nrow/2
-       disp('€˜Error: step is too big');
+       disp('ï¿½ï¿½Error: step is too big');
     end
     if fterm > nyquist
         fterm = nyquist;
@@ -108,8 +108,10 @@ end
     powf = power_all(:,nfrange);
     powfsum = sum(powf,2);
 
-pow(:,2) = powfsum./powallsum;
 pow(:,1) = (linspace(data(1,1)+window/2,data(nrow,1)-window/2,m3))';
+pow(:,2) = powfsum./powallsum;
+pow(:,3) = powfsum;
+pow(:,4) = powallsum;
  end
 
  %% get total number of frequencies from pmtm

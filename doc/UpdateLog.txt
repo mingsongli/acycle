@@ -38,6 +38,9 @@ NOTE    : ask for MatLab RUNTIME 2019a
 
     8. Plot Pro
         Bug fix
+
+    9. Power decomposition analysis
+        Save more data: time, power ratio, target power, total power
         
 _______________________________________
 

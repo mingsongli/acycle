@@ -59,31 +59,14 @@
     <img src="https://github.com/mingsongli/acycleFig/blob/master/github-icon-for-resume-14.jpg" alt="GitHub" title="Download Acycle in GitHub" width="88" height="88">
 </a>
 
-#### Apple's iCloud (BEST for users in Mainland China):
-
-<a href="https://www.icloud.com/iclouddrive/0lS56NrnVTArRB0mQ1rdQemeg#Acycle2.2-MatLab-version">
-    <img src="https://github.com/mingsongli/acycleFig/blob/master/icloud-mail.png" alt="Apple's iCloud" title="Download Acycle in Apple's iCloud" width="110" height="88">
-</a>
-
-Acycle v2.2 Mac Green version: https://www.icloud.com/iclouddrive/0z960AtbnkbrXj83DiLCkpI2A#Acycle2.2-mac-green
-
-Acycle v2.2 Mac Installer:     https://www.icloud.com/iclouddrive/0va13wQtAxivIWKyt9TKeTuwQ#Acycle2.2-mac-Installer
-
-Acycle v2.2 Win Green version: https://www.icloud.com/iclouddrive/0c5ERPmHJISJA_JS0XOXjh-6w#Acycle2.2-win-green.exe
-
-Acycle v2.2 Win Installer:     https://www.icloud.com/iclouddrive/03gggCPE1IgzaLm8kMx0MGULQ#Acycle2.2-win-Installer.exe
-
-Acycle v2.2 MatLab version:    https://www.icloud.com/iclouddrive/0lS56NrnVTArRB0mQ1rdQemeg#Acycle2.2-MatLab-version
-
-
 ---
 ### Contact
-<a href="https://mingsongli.com/">
-    <img src="https://github.com/mingsongli/acycleFig/blob/master/WechatIMG17.jpeg" alt="MingsongLi.com" title="Mingsong Li homepage" width="100" height="100">
+<a href="http://faculty.pku.edu.cn/li/en">
+    <img src="https://github.com/mingsongli/acycleFig/blob/master/WechatIMG17.jpeg" alt="http://faculty.pku.edu.cn/li/en" title="Mingsong Li homepage" width="100" height="100">
 </a>
 <br>
-Mingsong Li, Penn State. June 6, 2020 <br>
-E-mail: <i> mul450 {at} psu.edu;  limingsonglms {at} gmail.com </i> <br><br>
+Mingsong Li, Peking University. Jan 17, 2021 <br>
+E-mail: <i> msli {at} pku.edu.cn;  limingsonglms {at} gmail.com </i> <br><br>
 
 Website: https://mingsongli.com/acycle
 
