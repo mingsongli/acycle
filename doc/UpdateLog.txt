@@ -2,6 +2,22 @@
 
 _______________________________________
 
+Version : Acycle_v2.3
+Date    : Jan 1, 2021 - Jan 18, 2020
+By      : Mingsong Li (Peking University)
+
+    1. Wavelet: add mother wavelet function
+        The choices are 'MORLET' (default), 'PAUL', or 'DOG'.
+        Adjust max period
+
+    2. Power decomposition analysis
+        Save more columns: time, power ratio, target power, and total power
+
+    3. Lead-lag analysis
+        Fix a bug in the choice of reference and target series
+        Excluding NaN values for the mean function
+_______________________________________
+
 Version : Acycle_v2.3_preview
 Date    : June 10, 2020 - Dec 10, 2020
 By      : Mingsong Li
@@ -39,9 +55,6 @@ NOTE    : ask for MatLab RUNTIME 2019a
     8. Plot Pro
         Bug fix
 
-    9. Power decomposition analysis
-        Save more data: time, power ratio, target power, total power
-        
 _______________________________________
 
 Version : Acycle_v2.2

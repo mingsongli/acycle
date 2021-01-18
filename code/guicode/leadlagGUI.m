@@ -222,8 +222,9 @@ end
 xmax = nanmax(dat2(:,1));
 xmin = nanmin(dat2(:,1));
 
-ll = (xmax-xmin)/2;
-step = (xmax-xmin)/200;
+ll = (xmax-xmin)/10;
+%step = (xmax-xmin)/200;
+step = mean(diff(dat2(:,1)),'omitnan')/2;
 
 set(handles.edit3,'String',num2str(ll))
 set(handles.edit4,'String',num2str(step))

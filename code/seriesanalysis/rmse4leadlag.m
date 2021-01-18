@@ -24,6 +24,10 @@
 
 % Author:	Mingsong Li (Penn State)
 % Date  :   Aug. 3, 2020
+
+% Update:   Mingsong Li (Peking University)
+% Date:     Jan 18, 2021
+
 function [llgrid,RMSE] = rmse4leadlag(target,series,ll,step,timedir,plotn)
 if nargin < 6; plotn = 1; end
 if nargin < 5; timedir = 1; end
@@ -62,14 +66,11 @@ end
 series1(:,2) = (series1(:,2) - mean(series1(:,2)))/std(series1(:,2));
 target1(:,2) = (target1(:,2) - mean(target1(:,2)))/std(target1(:,2));
 
-llgrid = 0:step:ll;
-llgrid1 = -1 * llgrid(2:end);
-llgrid = [llgrid1, llgrid];
-llgrid = sort(llgrid);
+llgrid = -ll:step:ll;
 lln = length(llgrid);
 RMSE = NaN(1,lln);
 % iteration
-for i = 1: lln
+for i = 1 : lln
     series2 = series1;
     % Step 2. Shift series
     series2(:,1) = series2(:,1) + llgrid(i);
@@ -85,16 +86,15 @@ for i = 1: lln
         continue
     end
     [series3] = select_interval(series2,sel1,sel2);
-    [target4] = select_interval(target1,sel1,sel2);
+    [target2] = select_interval(target1,sel1,sel2);
     
     % Step 4. Interpolate the series using the first column (time) of the target
-    series2int = interp1(series3(:,1),series3(:,2),target4(:,1));
-    series4  = [target4(:,1),series2int];
-    rmsei = sqrt(mean((series4(:,2) - target4(:,2)).^2));
+    series2int = interp1(series3(:,1),series3(:,2),target2(:,1));
+    
+    rmsei = sqrt(mean((series2int - target2(:,2)).^2,'omitnan'));
     RMSE(i) = rmsei;
 end
 
-RMSEj = RMSE(RMSE==min(RMSE));
 llgridj = llgrid(RMSE==min(RMSE));
 
 if llgridj > 0
@@ -114,7 +114,7 @@ else
 end
 
 if plotn == 1
-    figure;
+    figure;whitebg(gcf);
     set(gcf,'color','white')
     plot(llgrid,RMSE,'k');
     hold on
@@ -128,7 +128,9 @@ if plotn == 1
     ylabel('RMSE')
     title(['Min RMSE @ ', num2str(llgridj),'. Series ',leadlagid,' reference.'])
     
-    figure;set(gcf,'color','white')
+    figure;
+    whitebg(gcf);
+    set(gcf,'color','white')
     subplot(311)
     plot(target(:,1),target(:,2),'b-')
     xlim([min(target(:,1)),max(target(:,1))]);
