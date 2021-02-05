@@ -9,6 +9,8 @@
 ---
 `Acycle is a time-series analysis software for research and education`
 
+### Website: [acycle.org](https://acycle.org)
+
 ### Highlights
 > * A fully implemented graphical user interface (GUI) facilitates operator use
 > * Acycle runs either in the MATLAB environment or as a stand-alone application on Mac and Windows
