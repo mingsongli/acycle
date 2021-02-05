@@ -23,16 +23,8 @@
 
 ### What they say
 
-<a href="https://www.eaps.purdue.edu/people/faculty-pages/ogg.html">
-    <img src="https://www.eaps.purdue.edu/images/people/faculty/ogg1.jpg" alt="James Ogg" title="James Ogg">
-</a>
-
 * **Dr. James G. Ogg** (Purdue University, USA):
     > "His _**Acycle**_ software will become the standard tool for time-scale applications by all international workers."<br>
-
-<a href="https://geos.vt.edu/people/emeritus-faculty/fred-read.html">
-    <img src="https://geos.vt.edu/content/geos_vt_edu/en/people/emeritus-faculty/fred-read/jcr:content/bio-image.transform/xl-medium/image.jpg" alt="JF Read" title="J. Fred Read" width="111" height="111">
-</a>
 
 * **Dr. J. Fred Read** (Virginia Tech, USA):
     > "It is truly an amazing contribution to the geosciences community. As someone who has spent much of the last 50 years trying to understand cyclic carbonates on shallow platforms, and having been involved with my students in some of the early work on stratigraphic modelling of the effects of Milankovitch forcing of carbonate platform stratigraphy, I was blown away by the power of the Acycle software. ... You should all feel very proud of this contribution. It opens up much needed access to these powerful tools for a wide audience in the sedimentary geology and paleoclimate community. Thanks again for all your efforts. A really marvellous job."<br>
@@ -68,7 +60,7 @@
 Mingsong Li, Peking University. Jan 17, 2021 <br>
 E-mail: <i> msli {at} pku.edu.cn;  limingsonglms {at} gmail.com </i> <br><br>
 
-Website: https://mingsongli.com/acycle
+Website: https://acycle.org/
 
 <a href="https://scholar.google.com/citations?user=NYUXDW0AAAAJ&hl=en&inst=4855597776033322861">
     <img src="https://github.com/mingsongli/acycleFig/blob/master/google-scholar-icon-1.jpg" alt="Google Scholar" title="Google Scholar homepage" width="48" height="48">
@@ -203,7 +195,7 @@ _Examples #12 Image profile_
 _Examples #13 Plot Digitizer_
 
 
-[Read More](https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf) and [example](https://github.com/mingsongli/acycle/wiki/Examples#example-3-carnian-cyclostratigraphy)
+[Read More](https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf) and [example](https://acycle.org/examples/)
 
 ---
 ## Wiki: Table of Content
@@ -282,9 +274,6 @@ _Examples #13 Plot Digitizer_
 ---
 ## What they say
 
-<a href="https://geos.vt.edu/people/emeritus-faculty/fred-read.html">
-    <img src="https://geos.vt.edu/content/geos_vt_edu/en/people/emeritus-faculty/fred-read/jcr:content/bio-image.transform/xl-medium/image.jpg" alt="JF Read" title="J. Fred Read" width="111" height="111">
-</a>
 
 * **Dr. [J. Fred Read](https://geos.vt.edu/people/emeritus-faculty/fred-read.html)** (Virginia Tech, USA)
 
@@ -295,20 +284,10 @@ _Examples #13 Plot Digitizer_
     > You should all feel very proud of this contribution.  It opens up much needed access to these powerful tools for a wide audience in the sedimentary geology and paleoclimate community.  Thanks again for all your efforts. **A really marvellous job.**
 
 
-
-<a href="https://www.eaps.purdue.edu/people/faculty-pages/ogg.html">
-    <img src="https://www.eaps.purdue.edu/images/people/faculty/ogg1.jpg" alt="James Ogg" title="James Ogg">
-</a>
-
 * **Dr. [James Ogg](https://www.eaps.purdue.edu/people/faculty-pages/ogg.html)** (Purdue University, USA):
 
     > "Mingsong Li's _**Acycle**_ software enables us to quickly analyze the potential of new outcrops and boreholes, and then to determine the sedimentation rates and elapsed time. **His _**Acycle**_ software will become the standard tool for time-scale applications by all international workers."**
 
-
-
-<a href="https://eesc.columbia.edu/faculty/paul-e-olsen">
-    <img src="https://eesc.columbia.edu/sites/default/files/styles/profile_thumb_100x150/public/bio/olsen_p.jpg?itok=X8DlX5ax" alt="Paul Olsen" title="Paul Olsen">
-</a>
 
 * **Dr. [Paul E. Olsen](https://eesc.columbia.edu/faculty/paul-e-olsen)** (Columbia University, USA):
 
@@ -333,10 +312,6 @@ _Examples #13 Plot Digitizer_
 
 * **Dr. Nicolas R. Thibault** (University of Copenhagen, Denmark):
     > "I’ve been playing a lot with the excellent _**Acycle**_ package for Matlab that Mingsong developed. Congratulations, this is a very nice interface that simplifies a lot our work and makes it truly faster to analyse a time-series."
-
-<a href="https://www.uu.nl/staff/FJHilgen">
-    <img src="https://www.knaw.nl/en/members/members/15429/@@images/bigImage" alt="Frits Hilgen" title="Frits Hilgen">
-</a>
 
 * **Dr. Frits Hilgen** (Utrecht University, Netherlands):
     > "I used it this academic year for the first time in my MSc course on Astronomical climate forcing 
@@ -371,7 +346,7 @@ also my students were very enthusiastic about _**Acycle**_ and I now use it now 
 
 ---
 ## Read more
-- **Wiki**: https://github.com/mingsongli/acycle/wiki <br>
+- **Official website**: https://acycle.org <br>
 - or here: https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf
 - or here:  _Acycle_ "**Help**" menu - "**Manual**",
 - or here:
