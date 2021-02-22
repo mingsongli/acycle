@@ -4857,10 +4857,8 @@ if check == 1;
             c1 = str2double(answer{1});
             c2 = str2double(answer{2});
             c0 = c2;
-            if or(c1> c0, c2> c0)
-                errordlg('Error: column is too large')
-            elseif or(c1<1, c2<1)
-                errordlg('Error: column is no less than 1')
+            if or(c1<1, c2<1)
+                errordlg('Error: Input column number is no less than 1')
             else
                 try
                     data = load(plot_filter_s);
@@ -4876,18 +4874,21 @@ if check == 1;
                 [~, ncol] = size(data);
 
                 data = data(~any(isnan(data),2),:);
-
-                data_new(:,1) = data(:,c1);
-                data_new(:,2) = data(:,c2);
-                CDac_pwd  % cd ac_pwd dir
-                % save data
-                name1 = [dat_name,'-c',num2str(c1),'-c',num2str(c2),ext];  % New name
-                dlmwrite(name1, data_new, 'delimiter', ',', 'precision', 9);
-                disp(['Extract data from columns ',num2str(c1),' & ',num2str(c2),' : ',dat_name,ext])
-                d = dir; %get files
-                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-                refreshcolor;
-                cd(pre_dirML); % return to matlab view folder
+                try
+                    data_new(:,1) = data(:,c1);
+                    data_new(:,2) = data(:,c2);
+                    CDac_pwd  % cd ac_pwd dir
+                    % save data
+                    name1 = [dat_name,'-c',num2str(c1),'-c',num2str(c2),ext];  % New name
+                    dlmwrite(name1, data_new, 'delimiter', ',', 'precision', 9);
+                    disp(['Extract data from columns ',num2str(c1),' & ',num2str(c2),' : ',dat_name,ext])
+                    d = dir; %get files
+                    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+                    refreshcolor;
+                    cd(pre_dirML); % return to matlab view folder
+                catch
+                    errordlg('Error! Input column number may be too large')
+                end
             end
         end
     end
