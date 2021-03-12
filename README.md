@@ -6,6 +6,7 @@
 [![](https://img.shields.io/badge/license-GPL-brightgreen.svg)](https://www.gnu.org/licenses/)
 [![](https://img.shields.io/badge/platform-Mac_Win-green.svg)]()
 ![](https://img.shields.io/badge/language-MatLab-red.svg)
+[![View acycle on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://www.mathworks.com/matlabcentral/fileexchange/88703-acycle)
 ---
 `Acycle is a time-series analysis software for research and education`
 
@@ -91,14 +92,14 @@ Website: https://acycle.org/
 
 ---
 ### Abstract
-* _Acycle_ is a comprehensive, but "user-friendly" software package for analysis of time-series designed for (but not limted to) climate research and education.
+* _Acycle_ is a comprehensive, but "user-friendly" software package for analysis of time-series designed for (but not limited to) climate research and education.
 * _Acycle_ runs either in the MATLAB environment or as a stand-alone application on Mac and Windows.
 * It is an open-source package and is available free of charge.
     * _Acycle_ provides data preparation tools, curve fitting, detrending procedures with multiple options available to track or remove secular trends, and integrates various power spectral analysis approaches for detection and tracking of periodic signals.
 
-    * _Acycle_ also provides a toolbox that evaluates astronomical signals in climate series, and estimates the most likely sedimentation rate by maximizing the correlation coefficient between power spectra of an astronomical solution and a paleoclimate series.
+    * _Acycle_ also provides a toolbox that evaluates astronomical signals in climate series and estimates the most likely sedimentation rate by maximizing the correlation coefficient between power spectra of an astronomical solution and a paleoclimate series.
 
-    * Many of the functions are specific to paleoclimatology and cyclostratigraphy, and are not found in standard, statistical packages.
+    * Many of the functions are specific to paleoclimatology and cyclostratigraphy and are not found in standard, statistical packages.
 
 ![gui](https://github.com/mingsongli/acycleFig/blob/master/acycle1.2-GUI.png)
 

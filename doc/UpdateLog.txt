@@ -16,6 +16,13 @@ By      : Mingsong Li (Peking University)
     3. Lead-lag analysis
         Fix a bug in the choice of reference and target series
         Excluding NaN values for the mean function
+
+    4. Extract Data
+        Bug fixed
+
+    5. Robust AR(1)
+        include the median-smoothed power spectrum
+        
 _______________________________________
 
 Version : Acycle_v2.3_preview
