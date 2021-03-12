@@ -113,7 +113,7 @@ try
     disp('>>  MTM rho and S0 estimation: curve fitting method')
     % % % % % % % % % % % % % % % % % %
 catch
-    % Alternatively, I use a naive grid search method.
+    % Alternatively, acycle will use a naive grid search method.
     [rhoM, s0M] = minirhos0(s0,fn,ft,pxxsmooth,linlog);
     disp('>>  MTM rho and S0 estimation: grid search method')
 end

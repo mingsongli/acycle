@@ -1287,8 +1287,8 @@ if strcmp(method,'Multi-taper method')
             
             name1 = [dat_name,'-',num2str(nw),'piMTM-RobustAR1',ext];
             data1 = redconfML96;
-            name2 = [dat_name,'-',num2str(nw),'piMTM-ClassicAR1',ext];
-            data2 = redconfAR1;
+            name2 = [dat_name,'-',num2str(nw),'piMTM-RobustAR1-Med-smooth',ext];
+            data2 = [f1,pxxsmooth0];
             
             CDac_pwd;
             dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
