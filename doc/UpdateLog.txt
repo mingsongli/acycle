@@ -2,8 +2,8 @@
 
 _______________________________________
 
-Version : Acycle_v2.3
-Date    : Jan 1, 2021 - Jan 18, 2020
+Version : Acycle_v2.3_preview
+Date    : Jan 1, 2021 - Mar 15, 2021
 By      : Mingsong Li (Peking University)
 
     1. Wavelet: add mother wavelet function

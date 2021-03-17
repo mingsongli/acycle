@@ -228,7 +228,7 @@ handles.unit = 'unit'; % default file name
 handles.unit_type = 0;
 handles.t1 = 55;
 handles.f1 = 0.0;
-handles.f2 = 0.06;
+handles.f2 = 0.08;
 handles.sr1 = 1;
 handles.sr2 = 30;
 handles.srstep = .1;
@@ -4391,13 +4391,13 @@ if check == 1;
         'Time-bandwidth product, nw:',...
         'Lower cutoff frequency (>= 0)',...
         'Upper cutoff frequency (<= nyquist)',...
-        'Step of calculations:',...
+        'Step of calculations (kyr):',...
         'Zero-padding number:',...
-        'Save Results (1 = Yes; 0 = No):',...
-        'Padding Depth: 0=No, 1=zero, 2=mirror; 3=mean; 4=random'};
+        'Save results (1 = Yes; 0 = No):',...
+        'Padding depth: 0=No, 1=zero, 2=mirror; 3=mean; 4=random'};
     dlg_title = 'Power Decomposition analysis';
     num_lines = 1;
-    defaultans = {'1/45 1/25','500','2',num2str(handles.f1),num2str(handles.f2),'1','5000','0','0'};
+    defaultans = {'1/45 1/25','500','2',num2str(handles.f1),num2str(handles.f2),'1','5000','1','1'};
     options.Resize='on';
     answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
     if ~isempty(answer)
