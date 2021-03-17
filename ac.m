@@ -33,14 +33,13 @@ function ac
 % Program Author:
 %
 %   Mingsong Li, PhD
-%   Department of Geosciences
-%   Pennsylvania State University
-%   410 Deike Bldg, 
-%   University Park, PA 16801, USA
-%   Contact:  mul450@psu.edu; limingsonglms@gmail.com
-%   Website:  https://github.com/mingsongli/acycle
-%             https://github.com/mingsongli/acycle/wiki
-%             http://mingsongli.com
+%   3417 Yifu No. 2 Bldg, 
+%   School of Earth and Space Sciences, Peking University
+%   No. 5 Yiheyuan Road, Haidian, Beijing 100871, China
+%   Contact:  msli@pku.edu.edu; limingsonglms@gmail.com
+%   Website:  http://acycle.org
+%             https://github.com/mingsongli/acycle
+%             
 % 
 %   Linda A. Hinnov
 %   Department of Atmospheric, Oceanic and Earth Sciences
@@ -50,7 +49,7 @@ function ac
 %   Email: lhinnov@gmu.edu
 %   Website: http://mason.gmu.edu/~lhinnov/
 %
-% Copyright (C) 2017-2020
+% Copyright (C) 2017-2021
 %
 % This program is a free software; you can redistribute it and/or modify it
 % under the terms of the GNU GENERAL PUBLIC LICENSE as published by the 
