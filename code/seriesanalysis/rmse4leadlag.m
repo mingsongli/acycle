@@ -114,7 +114,7 @@ else
 end
 
 if plotn == 1
-    figure;whitebg(gcf);
+    figure;
     set(gcf,'color','white')
     plot(llgrid,RMSE,'k');
     hold on
@@ -126,10 +126,9 @@ if plotn == 1
         xlabel('lag (-) / lead (+)')
     end
     ylabel('RMSE')
-    title(['Min RMSE @ ', num2str(llgridj),'. Series ',leadlagid,' reference.'])
+    title(['Min RMSE @ ', num2str(llgridj),'. Target ',leadlagid,' reference.'])
     
     figure;
-    whitebg(gcf);
     set(gcf,'color','white')
     subplot(311)
     plot(target(:,1),target(:,2),'b-')
@@ -140,10 +139,10 @@ if plotn == 1
     if llgridj ~=0
         hold on
         plot(series(:,1)+llgridj, series(:,2),'r-.')
-        legend({'Raw series';'Adjusted series'});
+        legend({'Raw target';'Adjusted target'});
     end
     xlim([min(target(:,1)),max(target(:,1))]);
-    title('Series')
+    title('Target')
     
     subplot(313)
     plot(target1(:,1),target1(:,2),'b-')

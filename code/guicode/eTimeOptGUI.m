@@ -133,7 +133,6 @@ handles.acfigmain = varargin{1}.acfigmain;
 
 handles.filename = varargin{1}.data_name; % save dataname
 handles.dat_name = varargin{1}.dat_name; % save dataname
-handles.unit = varargin{1}.unit; % save unit
 handles.path_temp = varargin{1}.path_temp; % save path
 handles.listbox_acmain = varargin{1}.listbox_acmain; % save path
 handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;

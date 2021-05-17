@@ -74,7 +74,7 @@ function varargout = AC(varargin)
 
 % Edit the above text to modify the response to help AC
 
-% Last Modified by GUIDE v2.5 06-Aug-2020 22:02:58
+% Last Modified by GUIDE v2.5 27-Apr-2021 19:23:55
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -5600,3 +5600,30 @@ function menu_correlation_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 CorrelationGUI(handles)
+
+
+% --------------------------------------------------------------------
+function menu_CSA_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_CSA (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox_acmain,'Value');
+nplot = length(plot_selected);   % length
+if and ((min(plot_selected) > 2), (nplot == 1))
+    data_name = char(contents(plot_selected));
+    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; data_name = fullfile(ac_pwd,data_name);
+        if isdir(data_name) == 1
+        else
+            [~,~,ext] = fileparts(data_name);
+            if sum(strcmp(ext,handles.filetype)) > 0
+                current_data = load(data_name);
+                handles.current_data = current_data;
+                handles.data_name = data_name;
+                guidata(hObject, handles);
+                circularspecGUI(handles);
+            end
+        end
+end
+guidata(hObject, handles);
