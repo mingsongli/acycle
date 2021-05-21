@@ -9,29 +9,27 @@ dt=mean(diff(time));
 nyquist = 1/(2*dt);
 rayleigh = 1/(dt*npts);
 
-fm = str2double(get(handles.edit1,'string')); % mean freq.
-fb = str2double(get(handles.edit2,'string')); %bandwidth
+flow = str2double(get(handles.edit1,'string'));  % low frequency
+fhigh = str2double(get(handles.edit2,'string')); % high frequency
 
-if fb<=0
+if fhigh<=flow
     % in case fmin >= fmid
-    warndlg('Minimum bandwidth must be >= 0. Set it to 0.2 * freq')
-    fb = 0.2 * fm;
-    f1 = fm - fb;
-    f2 = fm;
-    f3 = fm + fb;
+    fc = (fhigh+flow)/2;
+    fhighdlg = warndlg('fhigh-flow must be > 0.');
+    fhigh = 1.2 * fc;
+    flow = 0.8 *fc;
     
-    flch = [f1 f2 f3];
+    flch = [flow fc fhigh];
     flch = sort(flch);
-    ftext3 = [num2str(flch(1)),' ~ ',num2str(flch(3))];
-    set(handles.edit2,'string',num2str(fb))
+    ftext3 = ['f center: ',num2str(fc)];
+    set(handles.edit2,'string',num2str(fhigh))
     set(handles.text3,'string',ftext3)
 else
-    f1 = fm - fb;
-    f2 = fm;
-    f3 = fm + fb;
-    flch = [f1 f2 f3];
+    fc = (flow+fhigh)/2;
+    flch = [flow fc fhigh];
     flch = sort(flch);
-    ftext3 = [num2str(flch(1)),' ~ ',num2str(flch(3))];
+    ftext3 = ['f center: ',num2str(fc)];
+    %ftext3 = ['f_low-f_high: ',num2str(flch(1)),' ~ ',num2str(flch(3))];
     set(handles.text3,'string',ftext3)
 end
 
@@ -61,22 +59,20 @@ f = 1/dt * (0:(L/2))/L;
 
 if strcmp(filter,'Gaussian')
     set(handles.edit18,'enable','off')
-    fwidth = abs(f2 - f1);
-    gauss_mf = max(P1)*gaussmf(f,[fwidth fm]);
+    % update data and names
+    [gaussbandx,filter1,f1]=gaussfilter(datax,dt,flch(2),flch(1),flch(3));
     % plot
     axes(handles.ft_axes3);
     plot(f,P1)
     hold on
-    plot(f,gauss_mf,'r-')
+    plot(f1,max(P1)*filter1,'r-')
     xlim([x_1, x_2])
     ylim([y_1, y_2])
     hold off
     axes(handles.ft_axes4);
     xlim([x_1, x_2])
-    % update data and names
-    [gaussbandx,filter,f]=gaussfilter(datax,dt,flch(2),flch(1),flch(3));
     data_filterout = [time,gaussbandx];
-    add_list = [handles.dat_name,'-Gau-',num2str(flch(2)),char(177),num2str(abs(flch(2)-flch(3))),'.txt'];
+    add_list = [handles.dat_name,'-Gau-flow-',num2str(flch(1)),'-fhigh-',num2str(flch(3)),'.txt'];
     
 elseif strcmp(filter,'Taner-Hilbert')
     set(handles.edit18,'enable','on')
@@ -98,12 +94,12 @@ elseif strcmp(filter,'Taner-Hilbert')
     xlim([x_1, x_2])
     
     handles.filterdd = tanhilb;
-    add_list = [handles.dat_name,'-Tan-',num2str(flch(2)),char(177),num2str(abs(flch(2)-flch(3))),'-e',num2str(log10(taner_c)),'.txt'];
-    add_list_am = [handles.dat_name,'-Tan-',num2str(flch(2)),char(177),num2str(abs(flch(2)-flch(3))),'-e',num2str(log10(taner_c)),'-AM.txt'];
-    add_list_ufaze = [handles.dat_name,'-Tan-',num2str(flch(2)),char(177),num2str(abs(flch(2)-flch(3))),'-e',num2str(log10(taner_c)),'-ufaze.txt'];
-    add_list_ufazedet = [handles.dat_name,'-Tan-',num2str(flch(2)),char(177),num2str(abs(flch(2)-flch(3))),'-e',num2str(log10(taner_c)),'-ufazedet.txt'];
-    add_list_ifaze = [handles.dat_name,'-Tan-',num2str(flch(2)),char(177),num2str(abs(flch(2)-flch(3))),'-e',num2str(log10(taner_c)),'-ifaze.txt'];
-    add_list_ifreq = [handles.dat_name,'-Tan-',num2str(flch(2)),char(177),num2str(abs(flch(2)-flch(3))),'-e',num2str(log10(taner_c)),'-ifreq.txt'];
+    add_list = [handles.dat_name,'-Tan-flow-',num2str(flch(1)),'-fhigh-',num2str(flch(3)),'-e',num2str(log10(taner_c)),'.txt'];
+    add_list_am = [handles.dat_name,'-Tan-flow-',num2str(flch(1)),'-fhigh-',num2str(flch(3)),'-e',num2str(log10(taner_c)),'-AM.txt'];
+    add_list_ufaze = [handles.dat_name,'-Tan-flow-',num2str(flch(1)),'-fhigh-',num2str(flch(3)),'-e',num2str(log10(taner_c)),'-ufaze.txt'];
+    add_list_ufazedet = [handles.dat_name,'-Tan-flow-',num2str(flch(1)),'-fhigh-',num2str(flch(3)),'-e',num2str(log10(taner_c)),'-ufazedet.txt'];
+    add_list_ifaze = [handles.dat_name,'-Tan-flow-',num2str(flch(1)),'-fhigh-',num2str(flch(3)),'-e',num2str(log10(taner_c)),'-ifaze.txt'];
+    add_list_ifreq = [handles.dat_name,'-Tan-flow-',num2str(flch(1)),'-fhigh-',num2str(flch(3)),'-e',num2str(log10(taner_c)),'-ifreq.txt'];
     data_filterout = tanhilb;
     handles.add_list_am = add_list_am;
     handles.add_list_ufaze = add_list_ufaze;
@@ -121,7 +117,7 @@ elseif strcmp(filter,'Cheby1')
     'DesignMethod','cheby1');
     yb = filtfilt(d,datax);
     data_filterout = [time,yb];
-    add_list = [handles.dat_name,'-Cheby1-',num2str(flch(1)),'-',num2str(flch(3)),'.txt'];
+    add_list = [handles.dat_name,'-Cheby1-flow-',num2str(flch(1)),'-fhigh-',num2str(flch(3)),'.txt'];
     
 elseif strcmp(filter,'Ellip')
     set(handles.edit18,'enable','off')
@@ -133,9 +129,10 @@ elseif strcmp(filter,'Ellip')
     'PassbandRipple',1,...
     'StopbandAttenuation2',20,...
     'DesignMethod','ellip');
+
     yb = filtfilt(d,datax);
     data_filterout = [time,yb];
-    add_list = [handles.dat_name,'-Ellip-',num2str(flch(1)),'-',num2str(flch(3)),'.txt'];
+    add_list = [handles.dat_name,'-Ellip-flow-',num2str(flch(1)),'-fhigh-',num2str(flch(3)),'.txt'];
 
 elseif strcmp(filter,'Butter')
     set(handles.edit18,'enable','off')
@@ -146,7 +143,7 @@ elseif strcmp(filter,'Butter')
     'DesignMethod','butter');
     yb = filtfilt(d,datax);  % filtfilt is okay. but it may not be included in some version of Matlab
     data_filterout = [time,yb];
-    add_list = [handles.dat_name,'-Butter-',num2str(flch(1)),'-',num2str(flch(3)),'.txt'];
+    add_list = [handles.dat_name,'-Butter-flow-',num2str(flch(1)),'-fhigh-',num2str(flch(3)),'.txt'];
     
 else
     set(handles.edit18,'enable','on')
@@ -163,4 +160,7 @@ end
 
 handles.add_list = add_list;
 handles.data_filterout = data_filterout;
+try
+    figure(fhighdlg)
+end
 guidata(hObject, handles);
