@@ -51,8 +51,10 @@ function LODGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to LODGUI (see VARARGIN)
+handles.MonZoom = varargin{1}.MonZoom;
+
 set(gcf,'Name','Acycle: Lenght-of-day & Day-of-year')
-set(gcf,'position',[0.4,0.55,0.313,0.289]) % set position
+set(gcf,'position',[0.4,0.55,0.313,0.289]* handles.MonZoom) % set position
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
 h=get(gcf,'Children');  % get all content

@@ -54,6 +54,7 @@ function linegenerator_OpeningFcn(hObject, eventdata, handles, varargin)
 
 % Choose default command line output for linegenerator
 handles.output = hObject;
+handles.MonZoom = varargin{1}.MonZoom;
 
 handles.acfigmain = varargin{1}.acfigmain;
 handles.listbox_acmain = varargin{1}.listbox_acmain;
@@ -62,7 +63,7 @@ handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
 set(gcf,'Name','Acycle: Signal Noise Generator')
-set(gcf,'position',[0.05,0.1,0.6,0.6])
+set(gcf,'position',[0.05,0.1,0.6,0.6]* handles.MonZoom)
 % set x axis position
 set(handles.text2,'Position',[0.013, 0.933, 0.069, 0.029])  % X axis:
 set(handles.text3,'Position',[0.013, 0.858, 0.05, 0.029])  % From

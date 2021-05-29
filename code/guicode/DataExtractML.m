@@ -53,6 +53,8 @@ function DataExtractML_OpeningFcn(hObject, eventdata, handles, varargin)
 % varargin   command line arguments to DataExtractML (see VARARGIN)
 
 % Choose default command line output for DataExtractML
+handles.MonZoom = varargin{1}.MonZoom;
+
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
 h=get(gcf,'Children');  % get all content
@@ -60,7 +62,7 @@ h=get(gcf,'Children');  % get all content
 
 handles.output = hObject;
 handles.DataExtractMain = gcf;
-set(handles.DataExtractMain,'position',[0.02,0.85,0.5,0.11]) % set position
+set(handles.DataExtractMain,'position',[0.02,0.85,0.5,0.11]* handles.MonZoom) % set position
 set(gcf,'Name','Acycle: Plot Digitizer')
 handles.x00 = 0;
 handles.x01 = 1;

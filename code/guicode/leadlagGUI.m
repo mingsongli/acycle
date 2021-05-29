@@ -57,6 +57,7 @@ handles.output = hObject;
 handles.listbox_acmain = varargin{1}.listbox_acmain; % save path
 handles.unit = varargin{1}.unit;
 handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
+handles.MonZoom = varargin{1}.MonZoom;
 
 handles.hmain = gcf;
 set(handles.hmain,'Name', 'Acycle: Lead-lag relationship')
@@ -68,7 +69,7 @@ set(h1,'FontUnits','points','FontSize',11.5);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
 
-set(handles.hmain,'position',[0.38,0.2,0.6,0.25]) % set position
+set(handles.hmain,'position',[0.38,0.2,0.6,0.25]* handles.MonZoom) % set position
 set(handles.uipanel1,'position',[0.025,0.286,0.947,0.649]) % Data
 set(handles.text2,'position',[0.015,0.849,0.24,0.15])
 set(handles.text3,'position',[0.015,0.28,0.24,0.15])

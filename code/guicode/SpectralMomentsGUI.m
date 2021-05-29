@@ -54,6 +54,7 @@ function SpectralMomentsGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 
 % Choose default command line output for SpectralMomentsGUI
 handles.output = hObject;
+handles.MonZoom = varargin{1}.MonZoom;
 
 %
 set(0,'Units','normalized') % set units as normalized
@@ -97,6 +98,7 @@ set(handles.pushbutton2,'position',[0.819,0.273,0.129,0.25]) % OK
 set(handles.text10,'position',[0.04,0.01,0.94,0.191]) % ref
 
 set(gcf,'Name','Acycle: Spectral Moments')
+set(gcf,'position',[0.5,0.5,0.3,0.28]* handles.MonZoom) % set position
 dat = varargin{1}.current_data;  % data
 diffx = diff(dat(:,1));
 % check data
@@ -129,7 +131,7 @@ handles.spectralmomentsFig = figure;
     set(0,'Units','normalized') % set units as normalized
     set(gcf,'units','norm') % set location
     set(gcf,'color','w');
-    set(handles.spectralmomentsFig,'position',[0.2,0.4,0.2,0.4]) % set position
+    set(handles.spectralmomentsFig,'position',[0.2,0.4,0.2,0.4]* handles.MonZoom) % set position
     plot(datx,daty)
     xlabel(handles.unit);ylabel('Value');title(handles.dat_name, 'Interpreter', 'none')
     xlim([min(datx) max(datx)])

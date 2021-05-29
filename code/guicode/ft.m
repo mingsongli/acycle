@@ -57,11 +57,12 @@ h1=findobj(h,'FontUnits','norm');  % find all font units as points
 set(h1,'FontUnits','points','FontSize',12);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',12);  % set as norm
+handles.MonZoom = varargin{1}.MonZoom;
 
 if ismac
-    set(gcf,'position',[0.4,0.2,0.55,0.4]) % set position
+    set(gcf,'position',[0.4,0.2,0.55,0.4]* handles.MonZoom) % set position
 elseif ispc
-    set(gcf,'position',[0.3,0.2,0.55,0.4]) % set position
+    set(gcf,'position',[0.3,0.2,0.55,0.4]* handles.MonZoom) % set position
     set(h1,'FontUnits','points','FontSize',11);  % set as norm
     set(h2,'FontUnits','points','FontSize',11);  % set as norm
 end

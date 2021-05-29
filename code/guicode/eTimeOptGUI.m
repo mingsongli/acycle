@@ -57,6 +57,8 @@ handles.output = hObject;
 %
 handles.hmain = gcf;
 %
+handles.MonZoom = varargin{1}.MonZoom;
+
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
 h=get(gcf,'Children');  % get all content
@@ -65,7 +67,7 @@ set(h1,'FontUnits','points','FontSize',11.5);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
 
-set(handles.hmain,'position',[0.2,0.3,0.35,0.6]) % set position
+set(handles.hmain,'position',[0.2,0.3,0.35,0.6]* handles.MonZoom) % set position
 
 set(handles.text2,'position',[0.044,0.91,0.1,0.05])
 set(handles.text3,'position',[0.16,0.91,0.6,0.05])

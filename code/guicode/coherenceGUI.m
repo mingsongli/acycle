@@ -57,6 +57,8 @@ handles.acfigmain = varargin{1}.acfigmain;
 handles.listbox_acmain = varargin{1}.listbox_acmain;
 handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
 handles.unit = varargin{1}.unit;
+handles.MonZoom = varargin{1}.MonZoom;
+
 %
 % Choose default command line output for agescale
 handles.output = hObject;
@@ -70,7 +72,7 @@ set(h1,'FontUnits','points','FontSize',11.5);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
 
-set(gcf,'position',[0.03,0.03,0.7,0.4]) % set position
+set(gcf,'position',[0.03,0.03,0.7,0.4]* handles.MonZoom) % set position
 set(handles.pushbutton4,'position',[0.496,0.776,0.06,0.06]) % set position
 set(handles.pushbutton7,'position',[0.496,0.653,0.06,0.06]) % set position
 set(handles.pushbutton8,'position',[0.86,0.05,0.12,0.15]) % set position

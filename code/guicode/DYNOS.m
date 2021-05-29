@@ -55,6 +55,8 @@ function DYNOS_OpeningFcn(hObject, eventdata, handles, varargin)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to DYNOS (see VARARGIN)
+handles.MonZoom = varargin{1}.MonZoom;
+
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
 h=get(gcf,'Children');  % get all content
@@ -71,7 +73,7 @@ set(h2,'FontUnits','points','FontSize',fontsize);  % set as norm
 set(gcf,'Name','Acycle: Sedimentary Noise Model - DYNOT')
 
 % Choose default command line output for DYNOS
-set(gcf,'position',[0.05,0.05,0.85,0.85]) % set position
+set(gcf,'position',[0.05,0.05,0.85,0.85] * handles.MonZoom) % set position
 % uipanels
 set(handles.uipanel6,'position', [0.015,0.9,0.124,0.076])
 set(handles.uipanel7,'position', [0.14,0.9,0.167,0.076])
