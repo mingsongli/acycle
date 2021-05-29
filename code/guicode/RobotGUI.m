@@ -9,6 +9,7 @@ unit_type = varargin{1}.unit_type;
 listbox_acmain = varargin{1}.listbox_acmain;
 edit_acfigmain_dir= varargin{1}.edit_acfigmain_dir;
 MonZoom = varargin{1}.MonZoom;
+handles.sortdata = varargin{1}.sortdata;
 %%
 x = data(:,1);
 y = data(:,2);

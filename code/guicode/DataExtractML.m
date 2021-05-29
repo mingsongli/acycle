@@ -54,6 +54,7 @@ function DataExtractML_OpeningFcn(hObject, eventdata, handles, varargin)
 
 % Choose default command line output for DataExtractML
 handles.MonZoom = varargin{1}.MonZoom;
+handles.sortdata = varargin{1}.sortdata;
 
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location

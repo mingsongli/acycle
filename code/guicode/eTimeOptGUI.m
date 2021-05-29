@@ -58,6 +58,7 @@ handles.output = hObject;
 handles.hmain = gcf;
 %
 handles.MonZoom = varargin{1}.MonZoom;
+handles.sortdata = varargin{1}.sortdata;
 
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
@@ -130,6 +131,7 @@ set(gcf,'Name','Acycle: eTimeOpt')
 dat = varargin{1}.current_data;  % data
 handles.unit = varargin{1}.unit; % unit
 handles.unit_type = varargin{1}.unit_type; % unit type
+
 handles.slash_v = varargin{1}.slash_v;
 handles.acfigmain = varargin{1}.acfigmain;
 
@@ -166,38 +168,42 @@ if handles.step <= dt
 end
 % check unit, set to cm
 if handles.unit_type == 0
-    hwarn = warndlg('Is the Unit m? If not, set unit in Acycle and restart eTimeOpt');
+    hwarn = warndlg('Unit is assumed to be m. If not, choose correct unit and restart eTimeOpt');
     dat(:,1) = dat(:,1)*100;
     dt = dt * 100;
-    dtr = dt*100;
+    dtr = dtr * 100;
 elseif handles.unit_type == 2
     hwarn = warndlg('Unit type is Time! Make sure the unit is m');
 else
     if strcmp(handles.unit,'m')
         dat(:,1) = dat(:,1)*100;
-        dtr = dt*100;dt = dt * 100;
+        dtr = dt * 100;
+        dt = dt * 100;
         %msgbox('Unit is m, now changes to cm','Unit transform')
     elseif strcmp(handles.unit,'dm')
         dat(:,1) = dat(:,1)*10;
-        dtr = dt*10;dt = dt * 10;
+        dtr = dt*10;
+        dt = dt * 10;
         msgbox('Unit is dm, now changes to cm','Unit transform')
     elseif strcmp(handles.unit,'mm')
         dat(:,1) = dat(:,1)/10;
-        dtr = dt/10;dt = dt / 10;
+        dtr = dt/10;
+        dt = dt / 10;
         msgbox('Unit is mm, now changes to cm','Unit transform')
     elseif strcmp(handles.unit,'km')
         dat(:,1) = dat(:,1)* 1000 * 100;
-        dtr = dt*100*1000;dt = dt * 100*1000;
+        dtr = dt*100*1000;
+        dt = dt * 100*1000;
         msgbox('Unit is km, now changes to cm','Unit transform')
     elseif strcmp(handles.unit,'ft')
         dat(:,1) = dat(:,1)* 30.48;
-        dtr = dt * 30.48; dt = dt * 30.48;
+        dtr = dt * 30.48; 
+        dt = dt * 30.48;
         msgbox('Unit is ft, now changes to cm','Unit transform')
     end
 end
 %
 set(handles.text3,'String',handles.dat_name)
-
 set(handles.radiobutton1,'Value',1)
 set(handles.radiobutton2,'Value',0)
 set(handles.radiobutton3,'Value',1)
@@ -346,6 +352,7 @@ end
 % check unit
 if handles.unit_type == 0
     y_grid = y_grid/100;
+    window = window/100;  % use real window size
 elseif handles.unit_type == 2
     
 else
@@ -433,18 +440,18 @@ end
 colorbar('southoutside')
 
 dat_name = handles.dat_name;
-acfig_name = [dat_name,'-',num2str(window),handles.unit,'win-',num2str(sedmin),'-',num2str(sedmax),'SAR-eTimeOpt.AC.fig'];
+acfig_name = [dat_name,'-',num2str(window),handles.unit,'-win-',num2str(sedmin),'-',num2str(sedmax),'SAR-eTimeOpt.AC.fig'];
 % Log name
-eTimeOpt_name = [dat_name,'-',num2str(window),handles.unit,'win-',num2str(sedmin),'-',num2str(sedmax),'SAR-eTimeOpt.fig'];
-savefile_name = [dat_name,'-',num2str(window),handles.unit,'win-',num2str(sedmin),'-',num2str(sedmax),'SAR-eTimeOpt.txt'];
+eTimeOpt_name = [dat_name,'-',num2str(window),handles.unit,'-win-',num2str(sedmin),'-',num2str(sedmax),'SAR-eTimeOpt.fig'];
+savefile_name = [dat_name,'-',num2str(window),handles.unit,'-win-',num2str(sedmin),'-',num2str(sedmax),'SAR-eTimeOpt.txt'];
 
 CDac_pwd;
 
 if exist([pwd,handles.slash_v,acfig_name]) || exist([pwd,handles.slash_v,eTimeOpt_name])|| exist([pwd,handles.slash_v,savefile_name])
     for i = 1:100
-        acfig_name = [dat_name,'-',num2str(window),handles.unit,'win-',num2str(sedmin),'-',num2str(sedmax),'SAR-eTimeOpt-',num2str(i),'.AC.fig'];
-        eTimeOpt_name   = [dat_name,'-',num2str(window),handles.unit,'win-',num2str(sedmin),'-',num2str(sedmax),'SAR-eTimeOpt-',num2str(i),'.fig'];
-        savefile_name = [dat_name,'-',num2str(window),handles.unit,'win-',num2str(sedmin),'-',num2str(sedmax),'SAR-eTimeOpt-',num2str(i),'.txt'];
+        acfig_name = [dat_name,'-',num2str(window),handles.unit,'-win-',num2str(sedmin),'-',num2str(sedmax),'SAR-eTimeOpt-',num2str(i),'.AC.fig'];
+        eTimeOpt_name   = [dat_name,'-',num2str(window),handles.unit,'-win-',num2str(sedmin),'-',num2str(sedmax),'SAR-eTimeOpt-',num2str(i),'.fig'];
+        savefile_name = [dat_name,'-',num2str(window),handles.unit,'-win-',num2str(sedmin),'-',num2str(sedmax),'SAR-eTimeOpt-',num2str(i),'.txt'];
 
         if exist([pwd,handles.slash_v,acfig_name]) || exist([pwd,handles.slash_v,eTimeOpt_name])|| exist([pwd,handles.slash_v,savefile_name])
         else

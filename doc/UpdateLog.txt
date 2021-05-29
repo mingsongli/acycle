@@ -22,6 +22,22 @@ By      : Mingsong Li (Peking University)
 
     5. Robust AR(1)
         include the median-smoothed power spectrum
+
+    6. Circular Spectral Analysis
+        New function added
+
+    7. eCOCO/COCO
+        Adjust sliding step for eCOCO
+        Adjust the number of orbit parameters (if less than 7 orbits are used) 
+
+    8. Adjust the size of all GUI for different monitors
+
+    9. Evofft
+        Save x grid, y grid, and fft matrix
+
+    10. Sort listbox
+
+    11. Remove the top two dots in the listbox
         
 _______________________________________
 

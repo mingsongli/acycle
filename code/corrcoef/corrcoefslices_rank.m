@@ -249,7 +249,10 @@ if nsim > 0
     %% confidence interval estimation for correlation coefficient
     
     corr_h0 = corry_per;  % percentile of the value
-    corr_h0(:,2) = (7-corrCI(:,end));   % number of orbits involved
+    
+    orbitn = length(orbit7);
+
+    corr_h0(:,2) = (orbitn-corrCI(:,end));   % number of orbits involved
     if plotn == 1
         
         figure;
@@ -284,10 +287,8 @@ if nsim > 0
         xlabel(ax3,'Sedimentation rate (cm/kyr)')
         ylabel(ax3,'#')
         title(ax3,'Number of contributing astronomical parameters')
-        ylim(ax3,[0 7.5])
+        ylim(ax3,[0 orbitn+0.5])
         set(ax1,'XMinorTick','on')
-        %yticks(ax3,[1 2 3 4 5 6 7])
-        %legend('# orbits')
     end
 else
     corr_h0 = zeros(mpts,1);

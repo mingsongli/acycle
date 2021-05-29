@@ -58,6 +58,8 @@ handles.output = hObject;
 handles.hmain = gcf;
 %
 handles.MonZoom = varargin{1}.MonZoom;
+handles.sortdata = varargin{1}.sortdata;
+
 %
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
@@ -208,7 +210,8 @@ end
 % plot
 plotn = 1;
 if plotn
-    figure;set(gcf,'Color', 'white')
+    figure;
+    set(gcf,'Color', 'white')
     subplot(2,1,1)
     xlabel(['Period (',handles.unit,')'])
     ylabel('Power')

@@ -52,6 +52,7 @@ function DynamicFilter_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to DynamicFilter (see VARARGIN)
 handles.MonZoom = varargin{1}.MonZoom;
+handles.sortdata = varargin{1}.sortdata;
 
 set(gcf,'Name','Acycle: Dynamic Filtering | Frequency Stabilization')
 set(0,'Units','normalized') % set units as normalized
