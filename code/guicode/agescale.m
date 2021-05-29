@@ -57,6 +57,7 @@ handles.listbox_acmain = varargin{1}.listbox_acmain;
 handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
 handles.unit = varargin{1}.unit;
 handles.MonZoom = varargin{1}.MonZoom;
+handles.sortdata = varargin{1}.sortdata;
 
 %
 % Choose default command line output for agescale

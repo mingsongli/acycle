@@ -63,6 +63,7 @@ set(h2,'FontUnits','points','FontSize',12);  % set as norm
 
 handles.MonZoom = varargin{1}.MonZoom;
 set(gcf,'position',[0.45,0.3,0.25,0.5]* handles.MonZoom) % set position
+handles.sortdata = varargin{1}.sortdata;
 
 set(handles.uipanel6,'position',[0.025,0.254,0.95,0.666])
 set(handles.text21,'position',[0.021,0.852,0.26,0.07])
@@ -625,7 +626,7 @@ if prewhitenok == 1
     handles.prewhiten_rlowess = 'rLOWESS';
     handles.prewhiten_loess = 'LOESS';
     handles.prewhiten_rloess = 'rLOESS';
-    handles.prewhiten_sgolay = 'Savitzky-Golay';
+    %handles.prewhiten_sgolay = 'Savitzky-Golay';
     
     set(handles.prewhiten_pushbutton,'Enable','on')
 end
@@ -846,6 +847,7 @@ end
 ylabel('Value')
 title('Raw data & trend')
 fig = gcf;
+set(gcf,'Color', 'white')
 set(gcf,'Units','normalized','position',[0.09,0.3,0.35,0.4]) % set position
 hold on;
 prewhiten_list = 1;

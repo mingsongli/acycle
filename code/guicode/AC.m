@@ -27,17 +27,17 @@ function varargout = AC(varargin)
 %
 % Program Author:
 %           Mingsong Li, PhD
-%           Department of Geosciences
-%           Pennsylvania State University
-%           410 Deike Bldg, 
-%           University Park, PA 16801, USA
+%           School of Earth and Space Sciences
+%           Peking University
+%           Beijing 100871, China
+
 %
-% Email:    mul450@psu.edu; limingsonglms@gmail.com
+% Email:    : msli@pku.edu.cn ; limingsonglms@gmail.com
 % Website:  https://github.com/mingsongli/acycle
-%           https://github.com/mingsongli/acycle/wiki
+%           https://acycle.org
 %           http://mingsongli.com
 %
-% Copyright (C) 2017-2020
+% Copyright (C) 2017-2021
 %
 % This program is a free software; you can redistribute it and/or modify it
 % under the terms of the GNU GENERAL PUBLIC LICENSE as published by the 
@@ -74,7 +74,7 @@ function varargout = AC(varargin)
 
 % Edit the above text to modify the response to help AC
 
-% Last Modified by GUIDE v2.5 27-Apr-2021 19:23:55
+% Last Modified by GUIDE v2.5 29-May-2021 23:52:31
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -108,8 +108,10 @@ function AC_OpeningFcn(hObject, eventdata, handles, varargin)
 set(0,'Units','centimeters')
 MonitorPos = get(0,'MonitorPositions');
 handles.MonitorPos = MonitorPos;
-if MonitorPos(1,4) < 35
-     handles.MonZoom = 1.2;
+if MonitorPos(1,4) < 30
+     handles.MonZoom = 1.25;
+elseif  MonitorPos(1,4) < 38 % Macbook pro 16 retina
+    handles.MonZoom = 1.1;   
 elseif  MonitorPos(1,4) < 45 % Macbook pro 16 retina
     handles.MonZoom = 1;   
 elseif  MonitorPos(1,4) < 55
@@ -124,10 +126,9 @@ else
     handles.MonitorZoom = 0.4;
 end
 
-
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'position',[0.5,0.1,0.45,0.8] * handles.MonZoom) % set position
-set(gcf,'Name','Acycle v2.3 preview')
+set(gcf,'Name','Acycle v2.3')
 set(gcf,'DockControls', 'off')
 set(gcf,'Color', 'white')
 set(gcf,'units','norm') % set location
@@ -201,7 +202,8 @@ if ispc
     set(h_push_openfolder,'BackgroundColor','white') % 
 end
 
-set(handles.popupmenu1,'position', [0.75,0.945,0.24,0.04],'tooltip','<html>Select unit<br>for dataset')
+set(handles.popupmenu1,'position', [0.83,0.91,0.15,0.06],'tooltip','<html>Select unit<br>for dataset')
+set(handles.popupmenu2,'position', [0.67,0.91,0.15,0.06],'tooltip','<html>Sort<br>dataset')
 set(handles.edit_acfigmain_dir,'position', [0.081,0.9,0.91,0.04],'tooltip','Working directory')
 set(handles.listbox_acmain,'position', [0.02,0.008,0.96,0.884])
 
@@ -241,7 +243,8 @@ else
     fprintf(fileID,'%s',pwd);
     fclose(fileID);
 end
-
+handles.sortdata = 'date descend';
+set(handles.popupmenu2,'value',4)
 refreshcolor;
 cd(path_root) %back to root path
 
@@ -341,7 +344,6 @@ if strcmp(EventData.Modifier,'control')
     nplot = length(plot_selected);   % length
     CDac_pwd;
     handles.nplot = nplot;
-    if  min(plot_selected) > 2
         handles.data_name = {};
         handles.file = {};
         for i = 1 : nplot
@@ -349,7 +351,6 @@ if strcmp(EventData.Modifier,'control')
            handles.data_name{i} = strrep2(filename, '<HTML><FONT color="blue">', '</FONT></HTML>');
            handles.file{i} = [ac_pwd,handles.slash_v,handles.data_name{i}];
         end
-    end
     handles.copycut = 'copy';
     cd(pre_dirML);
     guidata(hObject, handles);
@@ -363,7 +364,6 @@ if strcmp(EventData.Modifier,'control')
     nplot = length(plot_selected);   % length
     CDac_pwd;
     handles.nplot = nplot;
-    if  min(plot_selected) > 2
         handles.data_name = {};
         handles.file = {};
         for i = 1 : nplot
@@ -371,7 +371,6 @@ if strcmp(EventData.Modifier,'control')
            handles.data_name{i} = strrep2(filename, '<HTML><FONT color="blue">', '</FONT></HTML>');
            handles.file{i} = [ac_pwd,handles.slash_v,handles.data_name{i}];
         end
-    end
     handles.copycut = 'cut';
     cd(pre_dirML);
     guidata(hObject, handles);
@@ -449,7 +448,11 @@ guidata(hObject,handles)
 function push_folder_clbk(hObject, handles)
 GETac_pwd;
 if ismac
-    system(['open ',ac_pwd]);
+    try
+        system(['open ',ac_pwd]);
+    catch
+        disp('  error: space between folder name')
+    end
 elseif ispc
     winopen(ac_pwd);
 end
@@ -464,7 +467,6 @@ nplot = length(plot_selected);   % length
 % check
 for i = 1:nplot
     plot_no = plot_selected(i);
-    if plot_no > 2
         plot_filter_s = char(contents(plot_no));
         plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
         GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
@@ -496,9 +498,6 @@ for i = 1:nplot
                 end
             end
         end
-    else
-        return
-    end
 end
 
 if check == 1
@@ -556,18 +555,15 @@ check = 0;
 
 for i = 1:nplot
     plot_no = plot_selected(i);
-    if plot_no > 2
-        plot_filter_s = char(contents(plot_no));
-        plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
-        GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
-        if isdir(plot_filter_s)
-        else
-            [~,dat_name,ext] = fileparts(plot_filter_s);
-            if sum(strcmp(ext,handles.filetype)) > 0
-                check = 1; % selection can be executed 
-            end
-        end
+    plot_filter_s = char(contents(plot_no));
+    plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
+    if isdir(plot_filter_s)
     else
+        [~,dat_name,ext] = fileparts(plot_filter_s);
+        if sum(strcmp(ext,handles.filetype)) > 0
+            check = 1; % selection can be executed 
+        end
     end
 end
 
@@ -949,48 +945,44 @@ nplot = length(plot_selected);   % length
 % check
 for i = 1:nplot
     plot_no = plot_selected(i);
-    if plot_no > 2
-        plot_filter_s = char(contents(plot_no));
-        plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
-        if isdir(plot_filter_s)
-            return
-        else
-            [~,dat_name,ext] = fileparts(plot_filter_s);
-            check = 0;
-            if sum(strcmp(ext,handles.filetype)) > 0
-                check = 1; % selection can be executed 
-            elseif strcmp(ext,'.fig')
-                plot_filter_s = char(contents(plot_selected(1)));
-                try openfig(plot_filter_s);
+    plot_filter_s = char(contents(plot_no));
+    plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    if isdir(plot_filter_s)
+        return
+    else
+        [~,dat_name,ext] = fileparts(plot_filter_s);
+        check = 0;
+        if sum(strcmp(ext,handles.filetype)) > 0
+            check = 1; % selection can be executed 
+        elseif strcmp(ext,'.fig')
+            plot_filter_s = char(contents(plot_selected(1)));
+            try openfig(plot_filter_s);
+            catch
+            end
+        elseif strcmp(ext,{'.pdf','.ai','.ps'})
+            plot_filter_s = char(contents(plot_selected(1)));
+            open(plot_filter_s);
+        elseif sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
+            try 
+                hwarn = warndlg('Wait, large image? can be very slow ...');
+
+                im_name = imread(plot_filter_s);
+                hFig1 = figure;
+                lastwarn('') % Clear last warning message
+                imshow(im_name);
+                set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
+                [warnMsg, warnId] = lastwarn;
+                if ~isempty(warnMsg)
+                    close(hFig1)
+                    imscrollpanel_ac(plot_filter_s);
+                end
+                try close(hwarn)
                 catch
                 end
-            elseif strcmp(ext,{'.pdf','.ai','.ps'})
-                plot_filter_s = char(contents(plot_selected(1)));
-                open(plot_filter_s);
-            elseif sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
-                try 
-                    hwarn = warndlg('Wait, large image? can be very slow ...');
-                    
-                    im_name = imread(plot_filter_s);
-                    hFig1 = figure;
-                    lastwarn('') % Clear last warning message
-                    imshow(im_name);
-                    set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
-                    [warnMsg, warnId] = lastwarn;
-                    if ~isempty(warnMsg)
-                        close(hFig1)
-                        imscrollpanel_ac(plot_filter_s);
-                    end
-                    try close(hwarn)
-                    catch
-                    end
-                catch
-                    warndlg('Image color space not supported. Convert to RGB or Grayscale')
-                end
+            catch
+                warndlg('Image color space not supported. Convert to RGB or Grayscale')
             end
         end
-    else
-        return
     end
 end
 plotsucess = 0;
@@ -1222,27 +1214,23 @@ nplot = length(plot_selected);   % length
 % check
 for i = 1:nplot
     plot_no = plot_selected(i);
-    if plot_no > 2
-        plot_filter_s1 = char(contents(plot_no));
-        plot_filter_s = strrep2(plot_filter_s1, '<HTML><FONT color="blue">', '</FONT></HTML>');
-        GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
-        if isdir(plot_filter_s)
-            return
-        else
-            [~,~,ext] = fileparts(plot_filter_s);
-            check = 0;
-            if sum(strcmp(ext,handles.filetype)) > 0
-                check = 1; % selection can be executed 
-            elseif strcmp(ext,'.fig')
-                plot_filter_s = char(contents(plot_selected(1)));
-                openfig(plot_filter_s);
-            elseif strcmp(ext,{'.pdf','.ai','.ps'})
-                plot_filter_s = char(contents(plot_selected(1)));
-                open(plot_filter_s);
-            end
-        end
-    else
+    plot_filter_s1 = char(contents(plot_no));
+    plot_filter_s = strrep2(plot_filter_s1, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
+    if isdir(plot_filter_s)
         return
+    else
+        [~,~,ext] = fileparts(plot_filter_s);
+        check = 0;
+        if sum(strcmp(ext,handles.filetype)) > 0
+            check = 1; % selection can be executed 
+        elseif strcmp(ext,'.fig')
+            plot_filter_s = char(contents(plot_selected(1)));
+            openfig(plot_filter_s);
+        elseif strcmp(ext,{'.pdf','.ai','.ps'})
+            plot_filter_s = char(contents(plot_selected(1)));
+            open(plot_filter_s);
+        end
     end
 end
 
@@ -1464,88 +1452,86 @@ function menu_selectinterval_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if min(plot_selected) > 2
-    for i = 1:nplot
-        data_name = char(contents(plot_selected(i)));
-        data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
-        if isdir(data_name) == 1
-        else
-            [~,dat_name,ext] = fileparts(data_name);
-        if sum(strcmp(ext,handles.filetype)) > 0
-            GETac_pwd; data_name = fullfile(ac_pwd,data_name);
-            data = load(data_name);
-            time = data(:,1);
-            value = data(:,2);
-            npts = length(time);
+for i = 1:nplot
+    data_name = char(contents(plot_selected(i)));
+    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    if isdir(data_name) == 1
+    else
+        [~,dat_name,ext] = fileparts(data_name);
+    if sum(strcmp(ext,handles.filetype)) > 0
+        GETac_pwd; data_name = fullfile(ac_pwd,data_name);
+        data = load(data_name);
+        time = data(:,1);
+        value = data(:,2);
+        npts = length(time);
 
-            prompt = {'Enter the START of interval:','Enter the END of interval:','Apply to ALL? (1 = yes)'};
-            dlg_title = 'Input Select interval';
-            num_lines = 1;
-            defaultans = {num2str(time(1)),num2str(time(npts)),'0'};
-            options.Resize='on';
-            answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-            if ~isempty(answer)
-                xmin_cut = str2double(answer{1});
-                xmax_cut = str2double(answer{2});
-                ApplyAll = str2double(answer{3});
-                
-                if ApplyAll == 1
-                    for ii = 1:nplot
-                        data_name = char(contents(plot_selected(ii)));
-                        data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
-                        if isdir(data_name) == 1
-                        else
-                            [~,dat_name,ext] = fileparts(data_name);
-                            disp(['>>  Processing ',data_name])
-                            if sum(strcmp(ext,handles.filetype)) > 0
-                                GETac_pwd; data_name = fullfile(ac_pwd,data_name);
-                                data = load(data_name);
-                                time = data(:,1);
-                                if or (max(time) < xmin_cut, min(time) > xmax_cut)
-                                    errordlg(['No overlap between selected interval and ',dat_name],'Error')
-                                    disp('      Error, no overlap')
-                                    continue
-                                end
-                                if and (min(time) > xmin_cut, max(time) < xmax_cut)
-                                    disp('      Selected interval too large, skipped')
-                                    continue
-                                end
-                                [current_data] = select_interval(data,xmin_cut,xmax_cut); 
-                                name1 = [dat_name,'_',num2str(xmin_cut),'_',num2str(xmax_cut),ext];  % New name
-                                CDac_pwd; % cd ac_pwd dir
-                                dlmwrite(name1, current_data, 'delimiter', ',', 'precision', 9);
+        prompt = {'Enter the START of interval:','Enter the END of interval:','Apply to ALL? (1 = yes)'};
+        dlg_title = 'Input Select interval';
+        num_lines = 1;
+        defaultans = {num2str(time(1)),num2str(time(npts)),'0'};
+        options.Resize='on';
+        answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+        if ~isempty(answer)
+            xmin_cut = str2double(answer{1});
+            xmax_cut = str2double(answer{2});
+            ApplyAll = str2double(answer{3});
+
+            if ApplyAll == 1
+                for ii = 1:nplot
+                    data_name = char(contents(plot_selected(ii)));
+                    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+                    if isdir(data_name) == 1
+                    else
+                        [~,dat_name,ext] = fileparts(data_name);
+                        disp(['>>  Processing ',data_name])
+                        if sum(strcmp(ext,handles.filetype)) > 0
+                            GETac_pwd; data_name = fullfile(ac_pwd,data_name);
+                            data = load(data_name);
+                            time = data(:,1);
+                            if or (max(time) < xmin_cut, min(time) > xmax_cut)
+                                errordlg(['No overlap between selected interval and ',dat_name],'Error')
+                                disp('      Error, no overlap')
+                                continue
                             end
+                            if and (min(time) > xmin_cut, max(time) < xmax_cut)
+                                disp('      Selected interval too large, skipped')
+                                continue
+                            end
+                            [current_data] = select_interval(data,xmin_cut,xmax_cut); 
+                            name1 = [dat_name,'_',num2str(xmin_cut),'_',num2str(xmax_cut),ext];  % New name
+                            CDac_pwd; % cd ac_pwd dir
+                            dlmwrite(name1, current_data, 'delimiter', ',', 'precision', 9);
                         end
                     end
-                    d = dir; %get files
-                    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-                    refreshcolor;
-                    cd(pre_dirML); % return to matlab view folder
-                    return
-                else
-                    
-                    if or (max(time) < xmin_cut, min(time) > xmax_cut)
-                        errordlg(['No overlap between selected interval and ',dat_name],'Error')
-                        disp('      Error, no overlap')
-                        return
-                    end
-                    if and (min(time) > xmin_cut, max(time) < xmax_cut)
-                        disp('Selected interval too large, skipped')
-                        return
-                    end
-                    [current_data] = select_interval(data,xmin_cut,xmax_cut); 
-                    name1 = [dat_name,'_',num2str(xmin_cut),'_',num2str(xmax_cut),ext];  % New name
-
-                    CDac_pwd; % cd ac_pwd dir
-                    dlmwrite(name1, current_data, 'delimiter', ',', 'precision', 9);
-                    d = dir; %get files
-                    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-                    refreshcolor;
-                    cd(pre_dirML); % return to matlab view folder
                 end
+                d = dir; %get files
+                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+                refreshcolor;
+                cd(pre_dirML); % return to matlab view folder
+                return
+            else
+
+                if or (max(time) < xmin_cut, min(time) > xmax_cut)
+                    errordlg(['No overlap between selected interval and ',dat_name],'Error')
+                    disp('      Error, no overlap')
+                    return
+                end
+                if and (min(time) > xmin_cut, max(time) < xmax_cut)
+                    disp('Selected interval too large, skipped')
+                    return
+                end
+                [current_data] = select_interval(data,xmin_cut,xmax_cut); 
+                name1 = [dat_name,'_',num2str(xmin_cut),'_',num2str(xmax_cut),ext];  % New name
+
+                CDac_pwd; % cd ac_pwd dir
+                dlmwrite(name1, current_data, 'delimiter', ',', 'precision', 9);
+                d = dir; %get files
+                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+                refreshcolor;
+                cd(pre_dirML); % return to matlab view folder
             end
         end
-        end
+    end
     end
 end
 guidata(hObject, handles);
@@ -1568,7 +1554,6 @@ nplot = length(plot_selected);   % length
 disp(['Select ',num2str(nplot),' data'])
     
 for nploti = 1:nplot
-    if plot_selected > 2
     data_name_all = (contents(plot_selected));
     data_name = char(data_name_all{nploti});
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
@@ -1619,7 +1604,6 @@ for nploti = 1:nplot
                 cd(pre_dirML); % return to matlab view folder
             end
         end
-        end
     end
 end
 guidata(hObject, handles);
@@ -1633,7 +1617,7 @@ function menu_norm_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
@@ -1668,83 +1652,81 @@ plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
 disp(['Select ',num2str(nplot),' data'])
 for nploti = 1:nplot
-    if plot_selected > 2
-        data_name_all = (contents(plot_selected));
-        data_name = char(data_name_all{nploti});
-        data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
-        disp(['>>  Processing clipping:', data_name]);
-        GETac_pwd; 
-        data_name = fullfile(ac_pwd,data_name);
-    
-        if isdir(data_name) == 1
-        else
-            [~,dat_name,ext] = fileparts(data_name);
-            if sum(strcmp(ext,handles.filetype)) > 0
-                try
-                    fid = fopen(data_name);
-                    data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
-                    fclose(fid);
-                    if iscell(data_ft)
-                        try
-                            data = cell2mat(data_ft);
-                        catch
-                            fid = fopen(data_name,'at');
-                            fprintf(fid,'%d\n',[]);
-                            fclose(fid);
-                            fid = fopen(data_name);
-                            data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
-                            fclose(fid);
-                            data = cell2mat(data_ft);
-                        end
+    data_name_all = (contents(plot_selected));
+    data_name = char(data_name_all{nploti});
+    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    disp(['>>  Processing clipping:', data_name]);
+    GETac_pwd; 
+    data_name = fullfile(ac_pwd,data_name);
+
+    if isdir(data_name) == 1
+    else
+        [~,dat_name,ext] = fileparts(data_name);
+        if sum(strcmp(ext,handles.filetype)) > 0
+            try
+                fid = fopen(data_name);
+                data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
+                fclose(fid);
+                if iscell(data_ft)
+                    try
+                        data = cell2mat(data_ft);
+                    catch
+                        fid = fopen(data_name,'at');
+                        fprintf(fid,'%d\n',[]);
+                        fclose(fid);
+                        fid = fopen(data_name);
+                        data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
+                        fclose(fid);
+                        data = cell2mat(data_ft);
                     end
-                catch
-                    data = load(data_name);
                 end
+            catch
+                data = load(data_name);
+            end
 
-                prompt = {'Threshold value (default = mean)'; 'Keep high/low? (1=high; 0=low)'};
-                dlg_title = 'Clipping:';
-                num_lines = 1;
-                defaultans = {num2str(nanmean(data(:,2))), '1'};
-                options.Resize='on';
-                answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-                    if ~isempty(answer)
+            prompt = {'Threshold value (default = mean)'; 'Keep high/low? (1=high; 0=low)'};
+            dlg_title = 'Clipping:';
+            num_lines = 1;
+            defaultans = {num2str(nanmean(data(:,2))), '1'};
+            options.Resize='on';
+            answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+                if ~isempty(answer)
 
-                        clip_value = str2double(answer{1});
-                        clip_high  = str2double(answer{2});
+                    clip_value = str2double(answer{1});
+                    clip_high  = str2double(answer{2});
 
-                        time = data(:,1);
-                        y = data(:,2);
-                        n = length(time);
-                        if clip_high == 1
-                            for i = 1:n
-                                if y(i) > clip_value
-                                    y(i) = y(i) - clip_value;
-                                else
-                                    y(i) = 0;
-                                end
+                    time = data(:,1);
+                    y = data(:,2);
+                    n = length(time);
+                    if clip_high == 1
+                        for i = 1:n
+                            if y(i) > clip_value
+                                y(i) = y(i) - clip_value;
+                            else
+                                y(i) = 0;
                             end
-                            name1 = [dat_name,'-clip',num2str(clip_value),'+',ext];
-                        else
-                            for i = 1:n
-                                if y(i) > clip_value
-                                    y(i) = 0;
-                                else
-                                    y(i) = y(i) - clip_value;
-                                end
-                            end
-                            name1 = [dat_name,'-clip<',num2str(clip_value),'-',ext];
                         end
-
-                            data1 = [time,y];
-                            CDac_pwd
-                            dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
-                            d = dir; %get files
-                            set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-                            refreshcolor;
-                            cd(pre_dirML); % return to matlab view folder
+                        name1 = [dat_name,'-clip',num2str(clip_value),'+',ext];
                     else
-                        errordlg('Error, input must be a positive integer')
+                        for i = 1:n
+                            if y(i) > clip_value
+                                y(i) = 0;
+                            else
+                                y(i) = y(i) - clip_value;
+                            end
+                        end
+                        name1 = [dat_name,'-clip<',num2str(clip_value),'-',ext];
                     end
+
+                        data1 = [time,y];
+                        CDac_pwd
+                        dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
+                        d = dir; %get files
+                        set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+                        refreshcolor;
+                        cd(pre_dirML); % return to matlab view folder
+                else
+                    errordlg('Error, input must be a positive integer')
                 end
         end
     end
@@ -1759,7 +1741,7 @@ function menu_log10_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
@@ -1793,7 +1775,7 @@ function menu_smooth_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
@@ -1857,7 +1839,7 @@ function menu_bootstrap_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
@@ -1935,9 +1917,7 @@ contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of lis
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
 disp(['Select ',num2str(nplot),' data'])
-%if and ((min(plot_selected) > 2), (nplot == 1))
 for nploti = 1:nplot
-if plot_selected > 2
     data_name_all = (contents(plot_selected));
     data_name = char(data_name_all{nploti});
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
@@ -1979,7 +1959,7 @@ if plot_selected > 2
                 % check
                 int_gt_0 = @(n) (rem(n,1) == 0) & (n > 0);
                 math_derivative = int_gt_0(derivative_n);
-                
+
                 if math_derivative == 1
                     data = data(~any(isnan(data),2),:); % remove NaN values
                     data = sortrows(data);
@@ -2006,7 +1986,6 @@ if plot_selected > 2
         end
         end
 end
-end
 guidata(hObject, handles);
 
 % --- Executes during object creation, after setting all properties.
@@ -2023,7 +2002,7 @@ function menu_period_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
@@ -2056,7 +2035,7 @@ function menu_power_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
@@ -2097,83 +2076,80 @@ contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of lis
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
 disp(['Select ',num2str(nplot),' data'])
-%if and ((min(plot_selected) > 2), (nplot == 1))
 for nploti = 1:nplot
-    if plot_selected > 2
-        data_name_all = (contents(plot_selected));
-        data_name = char(data_name_all{nploti});
-        data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
-        disp(['>>  Processing clipping:', data_name]);
-        GETac_pwd; 
-        data_name = fullfile(ac_pwd,data_name);
-    
-        if isdir(data_name) == 1
-        else
-            [~,dat_name,ext] = fileparts(data_name);
-            if sum(strcmp(ext,handles.filetype)) > 0
-                try
-                    fid = fopen(data_name);
-                    data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
-                    fclose(fid);
-                    if iscell(data_ft)
-                        try
-                            data = cell2mat(data_ft);
-                        catch
-                            fid = fopen(data_name,'at');
-                            fprintf(fid,'%d\n',[]);
-                            fclose(fid);
-                            fid = fopen(data_name);
-                            data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
-                            fclose(fid);
-                            data = cell2mat(data_ft);
-                        end
-                    end
-                catch
-                    data = load(data_name);
-                end
-                
-                time = data(:,1);
-                timelen = 0.5 * (time(end)-time(1));
-                sst = data(:,2);
-                dt = mean(diff(time));
-                prompt = {['Period range from (',handles.unit,')']; ['Period range to (',handles.unit,')'];...
-                    'Pad (1=yes,0=no)'; 'Discrete scale spacing (default)';'Mother (MORLET, PAUL, or DOG)'};
-                dlg_title = '1D Wavelet transform';
-                num_lines = 1;
-                defaultans = {num2str(2*dt),num2str(timelen), '1', '0.1','MORLET'};
-                options.Resize='on';
-                answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-                    if ~isempty(answer)
-                        figwarnwave = warndlg('Wavelet may take a few minutes ...','Warning: Slow Process!');
-                        pt1 = str2double(answer{1});
-                        pt2 = str2double(answer{2});
-                        pad  = str2double(answer{3});
-                        dss  = str2double(answer{4});
-                        mother = answer{5};
-                        figwave = figure;
-                        [~,~,~]= waveletML(sst,time,pad,dss,pt1,pt2,mother);
-                        name1 = [dat_name,'-wavelet.fig'];
-                        
-                        CDac_pwd
-                        try savefig(figwave,name1)
-                            disp(['>>  Save as: ',name1, '. Folder: '])
-                            disp(pwd)
-                        catch
-                            disp('>>  Wavelet figure unsaved ...')
-                        end
-                        try close(figwarnwave)
-                        catch
-                        end
-                        
-                        d = dir; %get files
-                        set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-                        refreshcolor;
-                        cd(pre_dirML); % return to matlab view folder
-                    else
-                        
+    data_name_all = (contents(plot_selected));
+    data_name = char(data_name_all{nploti});
+    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    disp(['>>  Processing clipping:', data_name]);
+    GETac_pwd; 
+    data_name = fullfile(ac_pwd,data_name);
+
+    if isdir(data_name) == 1
+    else
+        [~,dat_name,ext] = fileparts(data_name);
+        if sum(strcmp(ext,handles.filetype)) > 0
+            try
+                fid = fopen(data_name);
+                data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
+                fclose(fid);
+                if iscell(data_ft)
+                    try
+                        data = cell2mat(data_ft);
+                    catch
+                        fid = fopen(data_name,'at');
+                        fprintf(fid,'%d\n',[]);
+                        fclose(fid);
+                        fid = fopen(data_name);
+                        data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
+                        fclose(fid);
+                        data = cell2mat(data_ft);
                     end
                 end
-        end
+            catch
+                data = load(data_name);
+            end
+
+            time = data(:,1);
+            timelen = 0.5 * (time(end)-time(1));
+            sst = data(:,2);
+            dt = mean(diff(time));
+            prompt = {['Period range from (',handles.unit,')']; ['Period range to (',handles.unit,')'];...
+                'Pad (1=yes,0=no)'; 'Discrete scale spacing (default)';'Mother (MORLET, PAUL, or DOG)'};
+            dlg_title = '1D Wavelet transform';
+            num_lines = 1;
+            defaultans = {num2str(2*dt),num2str(timelen), '1', '0.1','MORLET'};
+            options.Resize='on';
+            answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+                if ~isempty(answer)
+                    figwarnwave = warndlg('Wavelet may take a few minutes ...','Warning: Slow Process!');
+                    pt1 = str2double(answer{1});
+                    pt2 = str2double(answer{2});
+                    pad  = str2double(answer{3});
+                    dss  = str2double(answer{4});
+                    mother = answer{5};
+                    figwave = figure;
+                    [~,~,~]= waveletML(sst,time,pad,dss,pt1,pt2,mother);
+                    name1 = [dat_name,'-wavelet.fig'];
+
+                    CDac_pwd
+                    try savefig(figwave,name1)
+                        disp(['>>  Save as: ',name1, '. Folder: '])
+                        disp(pwd)
+                    catch
+                        disp('>>  Wavelet figure unsaved ...')
+                    end
+                    try close(figwarnwave)
+                    catch
+                    end
+
+                    d = dir; %get files
+                    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+                    refreshcolor;
+                    cd(pre_dirML); % return to matlab view folder
+                else
+
+                end
+            end
     end
 end
 guidata(hObject, handles);
@@ -2192,7 +2168,7 @@ function menu_filter_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
@@ -2221,7 +2197,7 @@ contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of lis
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
 
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     data_name = char(contents(plot_selected));
     dat_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,dat_name);
@@ -2297,7 +2273,7 @@ function menu_dynos_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
@@ -2326,7 +2302,7 @@ function menu_ecoco_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
@@ -2413,22 +2389,18 @@ nplot = length(plot_selected);   % length
 % check
 for i = 1:nplot
     plot_no = plot_selected(i);
-    if plot_no > 2
-        plot_filter_s = char(contents(plot_no));
-        plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
-        GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
-        if isdir(plot_filter_s)
-            return
-        else
-            [~,~,ext] = fileparts(plot_filter_s);
-            if sum(strcmp(ext,handles.filetype)) > 0
-                check = 1; % selection can be executed 
-            else
-                return
-            end
-        end
-    else
+    plot_filter_s = char(contents(plot_no));
+    plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
+    if isdir(plot_filter_s)
         return
+    else
+        [~,~,ext] = fileparts(plot_filter_s);
+        if sum(strcmp(ext,handles.filetype)) > 0
+            check = 1; % selection can be executed 
+        else
+            return
+        end
     end
 end
 
@@ -2479,22 +2451,18 @@ nplot = length(plot_selected);   % length
 % check
 for i = 1:nplot
     plot_no = plot_selected(i);
-    if plot_no > 2
-        plot_filter_s = char(contents(plot_no));
-        plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
-        GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
-        if isdir(plot_filter_s)
-            return
-        else
-            [~,~,ext] = fileparts(plot_filter_s);
-            if sum(strcmp(ext,handles.filetype)) > 0
-                check = 1; % selection can be executed 
-            else
-                return
-            end
-        end
-    else
+    plot_filter_s = char(contents(plot_no));
+    plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
+    if isdir(plot_filter_s)
         return
+    else
+        [~,~,ext] = fileparts(plot_filter_s);
+        if sum(strcmp(ext,handles.filetype)) > 0
+            check = 1; % selection can be executed 
+        else
+            return
+        end
     end
 end
 
@@ -2547,28 +2515,26 @@ plot_selected = handles.index_selected;  % read selection in listbox 1
 nplot = length(plot_selected);   % length
 % check
 if nplot == 1
-    if plot_selected > 2
-        CDac_pwd;
-        plot_filter_s = char(contents(plot_selected));
-        plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
-        prompt = {'Enter new file name:'};
-        dlg_title = 'Rename                           ';
-        num_lines = 1;
-        defaultans = {plot_filter_s};
-        options.Resize='on';
-        answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-        newname = char(answer);
-        if ~isempty(newname)
-            try
-                movefile(plot_filter_s,newname)
-            catch
-                disp('Error: Cannot copy or move a file or directory onto itself.')
-            end
-            d = dir; %get files
-            set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-            refreshcolor;
-            cd(pre_dirML);
+    CDac_pwd;
+    plot_filter_s = char(contents(plot_selected));
+    plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    prompt = {'Enter new file name:'};
+    dlg_title = 'Rename                           ';
+    num_lines = 1;
+    defaultans = {plot_filter_s};
+    options.Resize='on';
+    answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+    newname = char(answer);
+    if ~isempty(newname)
+        try
+            movefile(plot_filter_s,newname)
+        catch
+            disp('Error: Cannot copy or move a file or directory onto itself.')
         end
+        d = dir; %get files
+        set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+        refreshcolor;
+        cd(pre_dirML);
     end
 end
 
@@ -2632,7 +2598,7 @@ function menu_depeaks_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
@@ -2698,7 +2664,7 @@ function menu_prewhiten_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
@@ -2726,7 +2692,7 @@ function menu_agebuild_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
@@ -2838,7 +2804,7 @@ function menu_function_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
@@ -2890,7 +2856,7 @@ function menu_maxmin_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
@@ -2948,7 +2914,7 @@ function menu_cpt_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
@@ -3029,7 +2995,7 @@ function menu_imshow_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
@@ -3071,7 +3037,7 @@ function menu_rgb2gray_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
@@ -3114,7 +3080,7 @@ function menu_improfile_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
@@ -3240,14 +3206,12 @@ plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
 CDac_pwd;
 handles.nplot = nplot;
-if  min(plot_selected) > 2
-    handles.data_name = {};
-    handles.file = {};
-    for i = 1 : nplot
-       filename = char(contents(plot_selected(i)));
-       handles.data_name{i} = strrep2(filename, '<HTML><FONT color="blue">', '</FONT></HTML>');
-       handles.file{i} = [ac_pwd,handles.slash_v,handles.data_name{i}];
-    end
+handles.data_name = {};
+handles.file = {};
+for i = 1 : nplot
+   filename = char(contents(plot_selected(i)));
+   handles.data_name{i} = strrep2(filename, '<HTML><FONT color="blue">', '</FONT></HTML>');
+   handles.file{i} = [ac_pwd,handles.slash_v,handles.data_name{i}];
 end
 handles.copycut = 'cut';
 cd(pre_dirML);
@@ -3272,14 +3236,12 @@ plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
 CDac_pwd;
 handles.nplot = nplot;
-if  min(plot_selected) > 2
-    handles.data_name = {};
-    handles.file = {};
-    for i = 1 : nplot
-       filename = char(contents(plot_selected(i)));
-       handles.data_name{i} = strrep2(filename, '<HTML><FONT color="blue">', '</FONT></HTML>');
-       handles.file{i} = [ac_pwd,handles.slash_v,handles.data_name{i}];
-    end
+handles.data_name = {};
+handles.file = {};
+for i = 1 : nplot
+   filename = char(contents(plot_selected(i)));
+   handles.data_name{i} = strrep2(filename, '<HTML><FONT color="blue">', '</FONT></HTML>');
+   handles.file{i} = [ac_pwd,handles.slash_v,handles.data_name{i}];
 end
 handles.copycut = 'copy';
 cd(pre_dirML);
@@ -3331,7 +3293,7 @@ for i = 1:nplot
             if exist(new_name_w_dir)
                 [~,dat_name,ext] = fileparts(new_name);
                 for i = 1:100
-                    new_name = [dat_name,'_copy',num2str(i),ext];
+                    new_name = [dat_name,'_',num2str(i),ext];
                     if exist([ac_pwd,handles.slash_v,new_name])
                     else
                         break
@@ -3377,37 +3339,33 @@ if deletefile == 1
     nplot = length(selected);   % length
     CDac_pwd; % cd working dir
     % handles.listnumber = handles.listnumber - nplot;
-    if selected > 2
         
-        for i = 1:nplot
-            plot_no = selected(i);
-            plot_filter_selection = char(list_content(plot_no));
-            
-            if plot_no > 2
-                file_type = exist(plot_filter_selection);
-                    if file_type == 0
-                        plot_filter_selection = strrep2(plot_filter_selection, '<HTML><FONT color="blue">', '</FONT></HTML>');
-                    end
-                if isdir(plot_filter_selection)
-                    choice = questdlg('DELETE selected folder and files within it', ...
-                        'Warning', 'Yes','No','No');
-                    % Handle response
-                    switch choice
-                        case 'No'
-                        case 'Yes'
-                            status = rmdir(plot_filter_selection,'s');
-                    end
-                else
-                    recycle on;
-                    delete(plot_filter_selection);
-                end
+    for i = 1:nplot
+        plot_no = selected(i);
+        plot_filter_selection = char(list_content(plot_no));
+
+        file_type = exist(plot_filter_selection);
+            if file_type == 0
+                plot_filter_selection = strrep2(plot_filter_selection, '<HTML><FONT color="blue">', '</FONT></HTML>');
             end
+        if isdir(plot_filter_selection)
+            choice = questdlg('DELETE selected folder and files within it', ...
+                'Warning', 'Yes','No','No');
+            % Handle response
+            switch choice
+                case 'No'
+                case 'Yes'
+                    status = rmdir(plot_filter_selection,'s');
+            end
+        else
+            recycle on;
+            delete(plot_filter_selection);
         end
-        d = dir; %get files
-        set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-        refreshcolor;
-        cd(pre_dirML);
     end
+    d = dir; %get files
+    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+    refreshcolor;
+    cd(pre_dirML);
     guidata(hObject,handles)
 end
 
@@ -3424,24 +3382,20 @@ nplot = length(plot_selected);   % length
 check = 0;
 for i = 1:nplot
     plot_no = plot_selected(i);
-    if plot_no > 2
-        plot_filter_s = char(contents(plot_no));
-        plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
-        GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
-        if isdir(plot_filter_s)
-            return
-        else
-            [~,~,ext] = fileparts(plot_filter_s);
-            if sum(strcmp(ext,handles.filetype)) > 0
-                if nplot >1
-                check = 1; % selection can be executed 
-                end
-            else
-                return
-            end
-        end
-    else
+    plot_filter_s = char(contents(plot_no));
+    plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
+    if isdir(plot_filter_s)
         return
+    else
+        [~,~,ext] = fileparts(plot_filter_s);
+        if sum(strcmp(ext,handles.filetype)) > 0
+            if nplot >1
+                check = 1; % selection can be executed 
+            end
+        else
+            return
+        end
     end
 end
 
@@ -3449,15 +3403,12 @@ if check == 1;
     plot_filter_s2 = char(contents(plot_selected(1)));
     GETac_pwd; plot_filter_s2 = fullfile(ac_pwd,plot_filter_s2);
     dat_new = load(plot_filter_s2);
-    if i > 1
-        for i = 2:nplot
-            plot_no = plot_selected(i);
-            plot_filter_s = char(contents(plot_no));
-            data_filterout = load(fullfile(ac_pwd,plot_filter_s));
-            dat_new = [dat_new; data_filterout];
-            dat_merge = sortrows(dat_new);
-        end
-    else
+    for i = 1:nplot
+        plot_no = plot_selected(i);
+        plot_filter_s = char(contents(plot_no));
+        data_filterout = load(fullfile(ac_pwd,plot_filter_s));
+        dat_new = [dat_new; data_filterout];
+        dat_merge = sortrows(dat_new);
     end
     dat_merge = findduplicate(dat_merge);
     CDac_pwd
@@ -3482,24 +3433,20 @@ nplot = length(plot_selected);   % length
 check = 0;
 for i = 1:nplot
     plot_no = plot_selected(i);
-    if plot_no > 2
-        plot_filter_s = char(contents(plot_no));
-        plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
-        GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
-        if isdir(plot_filter_s)
-            return
-        else
-            [~,~,ext] = fileparts(plot_filter_s);
-            if sum(strcmp(ext,handles.filetype)) > 0
-                if nplot == 2
-                check = 1; % selection can be executed 
-                end
-            else
-                return
-            end
-        end
-    else
+    plot_filter_s = char(contents(plot_no));
+    plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
+    if isdir(plot_filter_s)
         return
+    else
+        [~,~,ext] = fileparts(plot_filter_s);
+        if sum(strcmp(ext,handles.filetype)) > 0
+            if nplot == 2
+                check = 1; % selection can be executed 
+            end
+        else
+            return
+        end
     end
 end
 
@@ -3509,15 +3456,12 @@ if check == 1
     dat_new = load(plot_filter_s2);
     dat_new1 = dat_new;
     dat_new2 = dat_new;
-    if i > 1
-        for i = 2:nplot
-            plot_no = plot_selected(i);
-            plot_filter_s = char(contents(plot_no));
-            data_filterout = load(fullfile(ac_pwd,plot_filter_s));
-            dat_new1 = [dat_new(:,1),  dat_new1(:,2).* data_filterout(:,2)];
-            dat_new2 = [data_filterout(:,1),  dat_new2(:,2).* data_filterout(:,2)];
-        end
-    else
+    for i = 1:nplot
+        plot_no = plot_selected(i);
+        plot_filter_s = char(contents(plot_no));
+        data_filterout = load(fullfile(ac_pwd,plot_filter_s));
+        dat_new1 = [dat_new(:,1),  dat_new1(:,2).* data_filterout(:,2)];
+        dat_new2 = [data_filterout(:,1),  dat_new2(:,2).* data_filterout(:,2)];
     end
     CDac_pwd
     dlmwrite('multipliedseries1.txt', dat_new1, 'delimiter', ',', 'precision', 9);
@@ -3545,7 +3489,6 @@ plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
 disp(['Select ',num2str(nplot),' data'])
 for nploti = 1:nplot
-if plot_selected > 2
     prompt = {'Sort data in ascending order?','Unique values in data?','Remove empty row?','Apply to ALL'};
         dlg_title = 'Sort, Unique & Remove empty (1 = yes)';
         num_lines = 1;
@@ -3733,7 +3676,6 @@ if plot_selected > 2
             end
         end
 end
-end
 guidata(hObject, handles);
 
 
@@ -3745,7 +3687,7 @@ function menu_sr2age_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
@@ -3790,21 +3732,17 @@ nplot = length(plot_selected);   % length
 % check
 for i = 1:nplot
     plot_no = plot_selected(i);
-    if plot_no > 2
-        plot_filter_s = char(contents(plot_no));
-        plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
-        GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
-        if isdir(plot_filter_s)
-            return
-        else
-            [~,~,ext] = fileparts(plot_filter_s);
-            check = 0;
-            if sum(strcmp(ext,handles.filetype)) > 0
-                check = 1; % selection can be executed 
-            end
-        end
-    else
+    plot_filter_s = char(contents(plot_no));
+    plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
+    if isdir(plot_filter_s)
         return
+    else
+        [~,~,ext] = fileparts(plot_filter_s);
+        check = 0;
+        if sum(strcmp(ext,handles.filetype)) > 0
+            check = 1; % selection can be executed 
+        end
     end
 end
 
@@ -3862,40 +3800,36 @@ nplot = length(plot_selected);   % length
 % check
 for i = 1:nplot
     plot_no = plot_selected(i);
-    if plot_no > 2
-        plot_filter_s = char(contents(plot_no));
-        plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
-        GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
-        if isdir(plot_filter_s)
-            return
-        else
-            [~,~,ext] = fileparts(plot_filter_s);
-            check = 0;
-            if sum(strcmp(ext,handles.filetype)) > 0
-                check = 1; % selection can be executed 
-            elseif sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
-                try 
-                    hwarn = warndlg('Wait, large image? can be very slow ...');
-                    im_name = imread(plot_filter_s);
-                    hFig1 = figure;
-                    lastwarn('') % Clear last warning message
-                    imshow(im_name);
-                    set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
-                    [warnMsg, warnId] = lastwarn;
-                    if ~isempty(warnMsg)
-                        close(hFig1)
-                        imscrollpanel_ac(plot_filter_s);
-                    end
-                    try close(hwarn)
-                    catch
-                    end
-                catch
-                    warndlg('Image color space not supported. Convert to RGB or Grayscale')
+    plot_filter_s = char(contents(plot_no));
+    plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
+    if isdir(plot_filter_s)
+        return
+    else
+        [~,~,ext] = fileparts(plot_filter_s);
+        check = 0;
+        if sum(strcmp(ext,handles.filetype)) > 0
+            check = 1; % selection can be executed 
+        elseif sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
+            try 
+                hwarn = warndlg('Wait, large image? can be very slow ...');
+                im_name = imread(plot_filter_s);
+                hFig1 = figure;
+                lastwarn('') % Clear last warning message
+                imshow(im_name);
+                set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
+                [warnMsg, warnId] = lastwarn;
+                if ~isempty(warnMsg)
+                    close(hFig1)
+                    imscrollpanel_ac(plot_filter_s);
                 end
+                try close(hwarn)
+                catch
+                end
+            catch
+                warndlg('Image color space not supported. Convert to RGB or Grayscale')
             end
         end
-    else
-        return
     end
 end
 if check == 1
@@ -3936,7 +3870,7 @@ if nsim_yes < 2
 if nplot > 1
     warndlg('Select 1 data only','Error');
 end
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
@@ -4176,7 +4110,7 @@ function menu_folder_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     dat_name = char(contents(plot_selected));
     dat_name = strrep2(dat_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,dat_name);
@@ -4229,21 +4163,17 @@ nplot = length(plot_selected);   % length
 % check
 for i = 1:nplot
     plot_no = plot_selected(i);
-    if plot_no > 2
-        plot_filter_s = char(contents(plot_no));
-        plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
-        GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
-        if isdir(plot_filter_s)
-            return
-        else
-            [~,dat_name,ext] = fileparts(plot_filter_s);
-            check = 0;
-            if sum(strcmp(ext,handles.filetype)) > 0
-                check = 1; % selection can be executed 
-            end
-        end
-    else
+    plot_filter_s = char(contents(plot_no));
+    plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
+    if isdir(plot_filter_s)
         return
+    else
+        [~,dat_name,ext] = fileparts(plot_filter_s);
+        check = 0;
+        if sum(strcmp(ext,handles.filetype)) > 0
+            check = 1; % selection can be executed 
+        end
     end
 end
 
@@ -4328,21 +4258,17 @@ nplot = length(plot_selected);   % length
 % check
 for i = 1:nplot
     plot_no = plot_selected(i);
-    if plot_no > 2
-        plot_filter_s = char(contents(plot_no));
-        plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
-        GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
-        if isdir(plot_filter_s)
-            return
-        else
-            [~,dat_name,ext] = fileparts(plot_filter_s);
-            check = 0;
-            if sum(strcmp(ext,handles.filetype)) > 0
-                check = 1; % selection can be executed 
-            end
-        end
-    else
+    plot_filter_s = char(contents(plot_no));
+    plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
+    if isdir(plot_filter_s)
         return
+    else
+        [~,dat_name,ext] = fileparts(plot_filter_s);
+        check = 0;
+        if sum(strcmp(ext,handles.filetype)) > 0
+            check = 1; % selection can be executed 
+        end
     end
 end
 
@@ -4388,23 +4314,19 @@ nplot = length(plot_selected);   % length
 % check
 for i = 1:nplot
     plot_no = plot_selected(i);
-    if plot_no > 2
-        plot_filter_s = char(contents(plot_no));
-        plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
-        GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
-        if isdir(plot_filter_s)
-            return
-        else
-            [~,~,ext] = fileparts(plot_filter_s);
-            check = 0;
-            if sum(strcmp(ext,handles.filetype)) > 0
-                check = 1; % selection can be executed 
-            else
-                errordlg('Error: Selected file must be a supported type (*.txt,*.csv).');
-            end
-        end
-    else
+    plot_filter_s = char(contents(plot_no));
+    plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
+    if isdir(plot_filter_s)
         return
+    else
+        [~,~,ext] = fileparts(plot_filter_s);
+        check = 0;
+        if sum(strcmp(ext,handles.filetype)) > 0
+            check = 1; % selection can be executed 
+        else
+            errordlg('Error: Selected file must be a supported type (*.txt,*.csv).');
+        end
     end
 end
 
@@ -4504,7 +4426,7 @@ function menu_desection_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
@@ -4571,7 +4493,7 @@ function menu_gap_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
@@ -4674,7 +4596,7 @@ function menu_newtxt_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     dat_name = char(contents(plot_selected));
     dat_name = strrep2(dat_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,dat_name);
@@ -4794,29 +4716,25 @@ nplot = length(plot_selected);   % length
 % check
 for i = 1:nplot
     plot_no = plot_selected(i);
-    if plot_no > 2
-        plot_filter_s = char(contents(plot_no));
-        plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
-        GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
-        if isdir(plot_filter_s)
-            return
-        else
-            [~,~,ext] = fileparts(plot_filter_s);
-            check = 0;
-            if sum(strcmp(ext,handles.filetype)) > 0
-                check = 1; % selection can be executed 
-            elseif sum(strcmp(ext,{'.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.TIF'})) > 0
-                try 
-                    im_name = imread(plot_filter_s);
-                    figure;
-                    imshow(im_name)
-                    set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
-                catch
-                end
+    plot_filter_s = char(contents(plot_no));
+    plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
+    if isdir(plot_filter_s)
+        return
+    else
+        [~,~,ext] = fileparts(plot_filter_s);
+        check = 0;
+        if sum(strcmp(ext,handles.filetype)) > 0
+            check = 1; % selection can be executed 
+        elseif sum(strcmp(ext,{'.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.TIF'})) > 0
+            try 
+                im_name = imread(plot_filter_s);
+                figure;
+                imshow(im_name)
+                set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
+            catch
             end
         end
-    else
-        return
     end
 end
 
@@ -4841,24 +4759,20 @@ plot_selected = handles.index_selected;  % read selection in listbox 1
 nplot = length(plot_selected);   % length
 % check
 for i = 1:nplot
-    plot_no = plot_selected(i);
-    if plot_no > 2
-        plot_filter_s = char(contents(plot_no));
-        plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
-        GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
-        if isdir(plot_filter_s)
-            return
-        else
-            [~,~,ext] = fileparts(plot_filter_s);
-            check = 0;
-            if sum(strcmp(ext,handles.filetype)) > 0
-                check = 1; % selection can be executed 
-            else
-                errordlg('Error: unsupported file type')
-            end
-        end
-    else
+plot_no = plot_selected(i);
+    plot_filter_s = char(contents(plot_no));
+    plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
+    if isdir(plot_filter_s)
         return
+    else
+        [~,~,ext] = fileparts(plot_filter_s);
+        check = 0;
+        if sum(strcmp(ext,handles.filetype)) > 0
+            check = 1; % selection can be executed 
+        else
+            errordlg('Error: unsupported file type')
+        end
     end
 end
 
@@ -4931,21 +4845,17 @@ nplot = length(plot_selected);   % length
 % check
 for i = 1:nplot
     plot_no = plot_selected(i);
-    if plot_no > 2
-        plot_filter_s = char(contents(plot_no));
-        plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
-        GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
-        if isdir(plot_filter_s)
-            return
-        else
-            [~,~,ext] = fileparts(plot_filter_s);
-            check = 0;
-            if sum(strcmp(ext,handles.filetype)) > 0
-                check = 1; % selection can be executed 
-            end
-        end
-    else
+    plot_filter_s = char(contents(plot_no));
+    plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
+    if isdir(plot_filter_s)
         return
+    else
+        [~,~,ext] = fileparts(plot_filter_s);
+        check = 0;
+        if sum(strcmp(ext,handles.filetype)) > 0
+            check = 1; % selection can be executed 
+        end
     end
 end
 
@@ -5048,7 +4958,7 @@ function menu_whiten_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
@@ -5081,7 +4991,7 @@ function menu_timeOpt_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
@@ -5112,7 +5022,7 @@ function menu_movmedian_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
@@ -5410,7 +5320,7 @@ function menu_digitizer_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
@@ -5462,7 +5372,7 @@ function menu_eTimeOpt_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
@@ -5494,7 +5404,7 @@ function linegenerator_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
@@ -5532,7 +5442,7 @@ function menu_specmoments_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
@@ -5587,7 +5497,7 @@ function menu_dynfilter_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; 
@@ -5633,7 +5543,7 @@ function menu_CSA_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if and ((min(plot_selected) > 2), (nplot == 1))
+if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
@@ -5650,3 +5560,32 @@ if and ((min(plot_selected) > 2), (nplot == 1))
         end
 end
 guidata(hObject, handles);
+
+
+% --- Executes on selection change in popupmenu2.
+function popupmenu2_Callback(hObject, eventdata, handles)
+% hObject    handle to popupmenu2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu2 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popupmenu2
+str1 = get(handles.popupmenu2,'string');
+val1 = get(handles.popupmenu2,'value');
+handles.sortdata = str1{val1};
+CDac_pwd; % cd working dir
+refreshcolor;
+cd(pre_dirML);
+guidata(hObject, handles);
+
+% --- Executes during object creation, after setting all properties.
+function popupmenu2_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popupmenu2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

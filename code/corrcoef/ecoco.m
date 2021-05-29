@@ -40,6 +40,7 @@ function [prt_sr,out_depth,out_ecc,out_ep,out_eci,out_ecoco,out_ecocorb,out_norb
 %
 % By Mingsong Li, June 2017
 %   updated by Mingsong Li, Dec 25, 2017
+%   updated by Mingsong Li, May 29, 2021
 %
 %%
 %f_nyq_target = target(length(target(:,1)),1);  % to estimate sr0 (turnpoint sed.rate)
@@ -100,12 +101,12 @@ steps = 50;
 nmc_n = ceil(m3/steps);
 waitbarstep = 0;
 waitbar(waitbarstep / steps)
-
+orbitn = length(orbit7);
  for i = 1:m3
      [corrCI,~,~] = corrcoefslices_rank([timex(:,i),x(:,i)],target,orbit7,dt,pad,sr1,sr2,srstep,adjust,red,0,0,slices);
      out_ecc(:,i) = corrCI(:,2);  % evolutionary ecorrcoef value
      out_ep(:,i) = corrCI(:,3);  % evolutionary ecorrcoef p-value
-     norbit1 = 7 - corrCI(:,end);
+     norbit1 = orbitn - corrCI(:,end);
      out_norbit(:,i) = norbit1;
      for j = 1:nofsr
          percent_value = findperct(corrCI(j,2),corry(j,:));
@@ -114,7 +115,7 @@ waitbar(waitbarstep / steps)
          end
          out_eci(j,i) = percent_value;
          out_ecoco(j,i) = (- log10(out_eci(j,i))) * out_ecc(j,i);
-         out_ecocorb(j,i) = out_norbit(j,i) / 7 * out_ecoco(j,i);
+         out_ecocorb(j,i) = out_norbit(j,i) / orbitn * out_ecoco(j,i);
      end
      
      if rem(i,nmc_n) == 0

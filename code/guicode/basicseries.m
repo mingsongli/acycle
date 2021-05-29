@@ -55,6 +55,7 @@ handles.acfigmain = varargin{1}.acfigmain;
 handles.listbox_acmain = varargin{1}.listbox_acmain;
 handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
 handles.MonZoom = varargin{1}.MonZoom;
+handles.sortdata = varargin{1}.sortdata;
 
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
@@ -411,6 +412,7 @@ title(name, 'Interpreter', 'none')
 % refresh AC main window
 figure(handles.acfigmain);
 CDac_pwd; % cd working dir
+figure(handles.acfigmain);
 refreshcolor;
 cd(pre_dirML); % return view dir
 figure(figdata); % return plot

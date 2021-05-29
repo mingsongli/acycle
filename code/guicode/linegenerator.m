@@ -55,6 +55,7 @@ function linegenerator_OpeningFcn(hObject, eventdata, handles, varargin)
 % Choose default command line output for linegenerator
 handles.output = hObject;
 handles.MonZoom = varargin{1}.MonZoom;
+handles.sortdata = varargin{1}.sortdata;
 
 handles.acfigmain = varargin{1}.acfigmain;
 handles.listbox_acmain = varargin{1}.listbox_acmain;

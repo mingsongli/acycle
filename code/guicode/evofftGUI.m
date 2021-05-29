@@ -22,7 +22,7 @@ function varargout = evofftGUI(varargin)
 
 % Edit the above text to modify the response to help evofftGUI
 
-% Last Modified by GUIDE v2.5 21-May-2019 11:37:51
+% Last Modified by GUIDE v2.5 29-May-2021 22:36:49
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -59,6 +59,7 @@ set(h1,'FontUnits','points','FontSize',11.5);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
 handles.MonZoom = varargin{1}.MonZoom;
+handles.sortdata = varargin{1}.sortdata;
 
 if ismac
     set(gcf,'position',[0.45,0.4,0.4,0.35]* handles.MonZoom) % set position
@@ -84,12 +85,12 @@ set(handles.checkbox8,'Value',1)
 set(handles.popupmenu4,'position',[0.46,0.03,0.18,0.11])
 
 set(handles.uipanel6,'position',[0.029,0.05,0.251,0.28])
-set(handles.uipanel10,'position',[0.637,0.1,0.251,0.42])
+set(handles.uipanel10,'position',[0.637,0.08,0.251,0.42])
 set(handles.popupmenu3,'position',[0.02,0.5,0.95,0.36])
 set(handles.text8,'position',[0.0637,0.22,0.371,0.173])
 set(handles.edit9,'position',[0.412,0.2,0.4,0.25])
-
-set(handles.evofft_ok_pushbutton,'position',[0.888,0.169,0.11,0.283])
+set(handles.checkbox9,'position',[0.888,0.4,0.11,0.08])
+set(handles.evofft_ok_pushbutton,'position',[0.888,0.08,0.11,0.22])
 set(handles.text6,'position',[0.138,0.714,0.316,0.238])
 set(handles.edit7,'position',[0.651,0.698,0.309,0.27])
 set(handles.evofft_Nyquist_radiobutton,'position',[0.111,0.381,0.687,0.365])
@@ -114,8 +115,11 @@ data_s = varargin{1}.current_data;
 handles.unit = varargin{1}.unit;
 handles.unit_type = varargin{1}.unit_type;
 handles.current_data = data_s;
-handles.filename = varargin{1}.data_name;
+handles.data_name = varargin{1}.data_name;
 handles.path_temp = varargin{1}.path_temp;
+handles.listbox_acmain = varargin{1}.listbox_acmain; % save path
+handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
+[dat_dir,handles.filename,exten] = fileparts(handles.data_name);
 
 handles.plot_2d = 1;
 handles.plot_log = 0;
@@ -164,16 +168,16 @@ set(handles.checkbox5, 'Value',0);
 set(handles.checkbox6, 'Value',1);
 set(handles.popupmenu3, 'Value',1);
 set(handles.edit9, 'String', '');
-
+set(handles.checkbox9, 'Value',0);
 
 diffx = diff(data_s(:,1));
-if max(diffx) - min(diffx) > eps('single')
+if max(diffx) - min(diffx) > 10*eps('single')
     hwarn = warndlg('Not equally spaced data. Interpolated using mean sampling rate!');
     interpolate_rate = mean(diffx);
     handles.current_data = interpolate(data_s,interpolate_rate);
     %set(0,'Units','normalized') % set units as normalized
     set(gcf,'units','norm') % set location
-    set(gcf,'position',[0.15,0.6,0.25,0.1])
+    set(gcf,'position',[0.15,0.6,0.15,0.08]* handles.MonZoom)
     figure(hwarn);
 end
 % Update handles structure
@@ -921,7 +925,7 @@ end
        if handles.rotate == 0
             view(10,70);
         else
-            for i = 1: 370; 
+            for i = 1: 370
                 view(i,70); 
                 pause(0.05); 
             end
@@ -929,6 +933,20 @@ end
     end
 handles.evofftfig = evofftfig;
 %
+if get(handles.checkbox9,'value')
+    CDac_pwd
+    filename = handles.filename;
+    name1 = [filename,'-evofft-s','.txt'];
+    name2 = [filename,'-evofft-freq','.txt'];
+    name3 = [filename,'-evofft-time','.txt'];
+    dlmwrite(name1, s, 'delimiter', ',', 'precision', 9); 
+    dlmwrite(name2, x_grid', 'delimiter', ',', 'precision', 9); 
+    dlmwrite(name3, y_grid', 'delimiter', ',', 'precision', 9); 
+    d = dir; %get files
+    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+    refreshcolor;
+    cd(pre_dirML); % return to matlab view folder
+end
 guidata(hObject, handles);
 
 % --------------------------------------------------------------------
@@ -1283,3 +1301,12 @@ function popupmenu4_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in checkbox9.
+function checkbox9_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox9 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox9

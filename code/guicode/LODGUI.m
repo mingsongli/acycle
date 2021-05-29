@@ -52,6 +52,7 @@ function LODGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to LODGUI (see VARARGIN)
 handles.MonZoom = varargin{1}.MonZoom;
+handles.sortdata = varargin{1}.sortdata;
 
 set(gcf,'Name','Acycle: Lenght-of-day & Day-of-year')
 set(gcf,'position',[0.4,0.55,0.313,0.289]* handles.MonZoom) % set position
@@ -130,22 +131,22 @@ function pushbutton1_Callback(hObject, eventdata, handles)
 single0 = get(handles.radiobutton1,'Value');
 single1 = get(handles.radiobutton2,'Value');
 if single0 == 1
-    T = str2double(get(handles.edit1,'string'));
-    if T >=4500 || T<=-4500
-        if T >=4500
+    T1 = str2double(get(handles.edit1,'string'));
+    if T1 >=4500 || T1<=-4500
+        if T1 >=4500
             errordlg('Given age is too large')
         else
             errordlg('Given age is too small')
         end
     else
         
-        [lod, doy] = lodla04(T/-1000);
+        [lod, doy] = lodla04(T1/-1000);
         
-        name1 = ['LOD_',num2str(T),'Ma.txt'];
-        name2 = ['LOD_DOY_',num2str(T),'Ma.txt'];
+        name1 = ['LOD_',num2str(T1),'Ma.txt'];
+        name2 = ['LOD_DOY_',num2str(T1),'Ma.txt'];
         CDac_pwd
-        dlmwrite(name1, [T,lod], 'delimiter', ',', 'precision', 9);
-        dlmwrite(name2, [T,doy], 'delimiter', ',', 'precision', 9);
+        dlmwrite(name1, [T1,lod], 'delimiter', ',', 'precision', 9);
+        dlmwrite(name2, [T1,doy], 'delimiter', ',', 'precision', 9);
         d = dir; %get files
         set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
         refreshcolor;
@@ -155,10 +156,10 @@ if single0 == 1
         set(gcf,'Name','Acycle: Lenght-of-day & Day-of-year | plot')
         set(gcf,'color','w');
         subplot(2,1,1)
-        plot(T,lod,'-ko')
+        plot(T1,lod,'-ko')
         ylabel('length of day (hour)')
         subplot(2,1,2)
-        plot(T,doy,'-ko')
+        plot(T1,doy,'-ko')
         xlabel('Age (Ma)')
         ylabel('stellar day of year')
     end
@@ -166,16 +167,16 @@ elseif single1 == 1
     age1 = str2double(get(handles.edit1,'string'));
     age2 = str2double(get(handles.edit2,'string'));
     step = str2double(get(handles.edit3,'string'));
-    T = age1:step:age2;
-    T = T';
-    if isempty(T) == 0
-        [lod, doy] = lodla04(T/-1000);
+    T1 = age1:step:age2;
+    T1 = T1';
+    if isempty(T1) == 0
+        [lod, doy] = lodla04(T1/-1000);
         
         name1 = ['LOD_',num2str(age1),'_',num2str(step),'_',num2str(age2),'Ma.txt'];
         name2 = ['LOD_DOY_',num2str(age1),'_',num2str(step),'_',num2str(age2),'Ma.txt'];
         CDac_pwd
-        dlmwrite(name1, [T,lod], 'delimiter', ',', 'precision', 9);
-        dlmwrite(name2, [T,doy], 'delimiter', ',', 'precision', 9);
+        dlmwrite(name1, [T1,lod], 'delimiter', ',', 'precision', 9);
+        dlmwrite(name2, [T1,doy], 'delimiter', ',', 'precision', 9);
         d = dir; %get files
         set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
         refreshcolor;
@@ -185,10 +186,10 @@ elseif single1 == 1
         set(gcf,'Name','Acycle: Lenght-of-day & Day-of-year | plot')
         set(gcf,'color','w');
         subplot(2,1,1)
-        plot(T,lod,'-ko')
+        plot(T1,lod,'-ko')
         ylabel('length of day (hours)')
         subplot(2,1,2)
-        plot(T,doy,'-ko')
+        plot(T1,doy,'-ko')
         xlabel('Age (Ma)')
         ylabel('stellar day of year')
     else

@@ -124,6 +124,7 @@ plot_s = varargin{1}.plot_s;
 handles.plot_s = plot_s;
 handles.nplot = varargin{1}.nplot;
 handles.unit = varargin{1}.unit;
+handles.sortdata = varargin{1}.sortdata;
 set(handles.edit4,'string',handles.unit)
 set(handles.edit5,'string','value')
 

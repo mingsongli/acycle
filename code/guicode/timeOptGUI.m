@@ -58,6 +58,7 @@ handles.output = hObject;
 handles.hmain = gcf;
 %
 handles.MonZoom = varargin{1}.MonZoom;
+handles.sortdata = varargin{1}.sortdata;
 
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
@@ -130,9 +131,24 @@ handles.path_temp = varargin{1}.path_temp; % save path
 handles.listbox_acmain = varargin{1}.listbox_acmain; % save path
 handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
 
+datx = dat(:,1);  % unit should be cm
+daty = dat(:,2);
+diffx = diff(datx);
+npts = length(datx);
+% check data
+if sum(diffx <= 0) > 0
+    disp('>>  Waning: data has to be in ascending order, no duplicated number allowed')
+    dat = sortrows(dat);
+end
+% check data
+if abs((max(diffx)-min(diffx))/2) > 10*eps('single')
+    hwarn1 = warndlg('Data may not be evenly spaced!');
+end
+%
+
 % check unit
 if handles.unit_type == 0
-    hwarn = warndlg('Unit is assumed to be m. If not, choose correct unit');
+    hwarn = warndlg('Unit is assumed to be m. If not, choose correct unit and restart TimeOpt');
     dat(:,1) = dat(:,1)*100;
 elseif handles.unit_type == 2
     hwarn = warndlg('Unit type is Time! Make sure the unit should be m');
@@ -173,20 +189,7 @@ set(handles.checkbox3,'Value',0)
 set(handles.checkbox4,'Value',0)
 set(handles.edit10,'Enable','off')
 %
-datx = dat(:,1);  % unit should be cm
-daty = dat(:,2);
-diffx = diff(datx);
-npts = length(datx);
-% check data
-if sum(diffx <= 0) > 0
-    disp('>>  Waning: data has to be in ascending order, no duplicated number allowed')
-    dat = sortrows(dat);
-end
-% check data
-if abs((max(diffx)-min(diffx))/2) > eps('single');
-    hwarn1 = warndlg('Data may not be evenly spaced!');
-end
-%
+
 handles.dat = dat; % save data
 % set default sedmin, sedmax
 handles.sedmin = 0;

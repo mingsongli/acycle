@@ -58,6 +58,7 @@ handles.output = hObject;
 %
 handles.hmain = gcf;
 handles.MonZoom = varargin{1}.MonZoom;
+handles.sortdata = varargin{1}.sortdata;
 
 %
 set(0,'Units','normalized') % set units as normalized
@@ -271,7 +272,7 @@ set(handles.uibuttongroup6,'Visible','off') % sliding window invisible for COCO
 set(handles.edit9,'String',num2str(handles.window)) % window size
 %set(handles.edit10,'String',num2str(handles.step)) % step size
 set(handles.text16,'String',handles.unit)
-set(handles.edit10,'String',num2str(dt/100)) % step
+set(handles.edit10,'String',num2str(handles.step)) % step
 set(handles.text17,'String',handles.unit)
 set(handles.text19,'String','cm/kyr')
 
@@ -1430,8 +1431,9 @@ param3 = ['Data: Remove red noise model: ',num2str(redmodel),'. Correlation meth
 param5 = ['Tested sedimentation rate step is ', num2str(srstep),' cm/kyr from ',num2str(sr1),' to ',num2str(sr2),' cm/kyr'];
 param6 = ['Target age is ',num2str(t1),' ka. Zero padding is ',num2str(pad), '. Freq. is ',num2str(f1),'-',num2str(f2),' cycles/kyr'];
 param7 = ['Astronomical solution: ', solutionmodel];
-param8 = ['Seven astronomical cycles are: ',num2str(orbit7(1)),', ',num2str(orbit7(2)),', ',num2str(orbit7(3)),', ',...
-    num2str(orbit7(4)),', ',num2str(orbit7(5)),', ',num2str(orbit7(6)),', ',num2str(orbit7(7))];
+%param8 = ['Astronomical cycles are: ',num2str(orbit7(1)),', ',num2str(orbit7(2)),', ',num2str(orbit7(3)),', ',...
+%    num2str(orbit7(4)),', ',num2str(orbit7(5)),', ',num2str(orbit7(6)),', ',num2str(orbit7(7))];
+param8 = ['Astronomical cycles are: ',num2str(orbit7)];
 
 if handles.ecocoS == 0
     param4 = ['Zero padding for the data is ',num2str(pad)];
