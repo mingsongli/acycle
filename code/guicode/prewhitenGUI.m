@@ -55,6 +55,7 @@ function prewhitenGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % Choose default command line output for prewhitenGUI
 handles.output = hObject;
 handles.hmain = gcf;
+handles.MonZoom = varargin{1}.MonZoom;
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
 h=get(gcf,'Children');  % get all content
@@ -63,7 +64,7 @@ set(h1,'FontUnits','points','FontSize',11.5);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
 
-set(handles.hmain,'position',[0.15,0.75,0.15,0.15]) % set position
+set(handles.hmain,'position',[0.15,0.75,0.15,0.15] * handles.MonZoom) % set position
 set(handles.uibuttongroup1,'position',[0.08,0.08,0.82,0.82]) % Power spectrum
 
 set(handles.radiobutton1,'position',[0.02,0.721,0.65,0.207]) % COCO

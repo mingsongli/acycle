@@ -57,11 +57,12 @@ h1=findobj(h,'FontUnits','norm');  % find all font units as points
 set(h1,'FontUnits','points','FontSize',12);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',12);  % set as norm
+handles.MonZoom = varargin{1}.MonZoom;
 
 if ismac
-    set(gcf,'position',[0.4,0.2,0.55,0.4]) % set position
+    set(gcf,'position',[0.4,0.2,0.55,0.4]* handles.MonZoom) % set position
 elseif ispc
-    set(gcf,'position',[0.3,0.2,0.55,0.4]) % set position
+    set(gcf,'position',[0.3,0.2,0.55,0.4]* handles.MonZoom) % set position
     set(h1,'FontUnits','points','FontSize',11);  % set as norm
     set(h2,'FontUnits','points','FontSize',11);  % set as norm
 end
@@ -160,23 +161,18 @@ fd1index = find(P1 == max(P1), 1, 'first');
 fq_deft = f(fd1index);   % find f with max power
 handles.fd1index = fd1index;
 handles.filt_fmid = fq_deft;
-handles.filt_fmin = fq_deft * 0.8;
+handles.filt_flow = fq_deft * 0.8; % 40%
+handles.filt_fhigh = fq_deft * 1.2; % 40%
 handles.taner_c = 10^12;
-set(handles.edit1, 'String', num2str(fq_deft)); % f center
-set(handles.edit2, 'String', num2str((0.2*fq_deft))); % f band
-% plot cutoff frequencies in axes of power spectrum
-axes(handles.ft_axes3);
-hold on      
-gauss_mf = max(P1)*gaussmf(f,[0.2*fq_deft fq_deft]);
-plot(f,gauss_mf,'r-')
-hold off
+set(handles.edit1, 'String', num2str(handles.filt_flow)); % f low
+set(handles.edit2, 'String', num2str(handles.filt_fhigh)); % f high
 handles.add_list = '';
 handles.filter = 'Gaussian';
 update_filter_axes
 guidata(hObject,handles)
 
 diffx = diff(data_s(:,1));
-if max(diffx) - min(diffx) > eps('single')
+if max(diffx) - min(diffx) > 10 * eps('single')
     hwarn = warndlg('Warning: the data may not be evenly spaced.');
     %set(0,'Units','normalized') % set units as normalized
     set(gcf,'units','norm') % set location
@@ -692,6 +688,7 @@ else
         xlabel(['Time (',handles.unit,')'])
     end
     set(gca,'XMinorTick','on','YMinorTick','on')
+    
     if strcmp(filter,'Taner-Hilbert')
         
         add_list_am = handles.add_list_am;

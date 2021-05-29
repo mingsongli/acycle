@@ -57,6 +57,8 @@ handles.output = hObject;
 
 %
 handles.hmain = gcf;
+handles.MonZoom = varargin{1}.MonZoom;
+
 %
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
@@ -66,7 +68,7 @@ set(h1,'FontUnits','points','FontSize',11.5);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
 
-set(handles.hmain,'position',[0.38,0.2,0.4,0.75]) % set position
+set(handles.hmain,'position',[0.38,0.2,0.4,0.75] * handles.MonZoom) % set position
 set(handles.uibuttongroup7,'position',[0.04,0.915,0.45,0.08]) % Power spectrum
 set(handles.radiobutton1,'position',[0.083,0.138,0.388,0.793]) % COCO
 set(handles.radiobutton2,'position',[0.508,0.138,0.388,0.793]) % eCOCO

@@ -53,6 +53,8 @@ function spectrum_OpeningFcn(hObject, eventdata, handles, varargin)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to spectrum (see VARARGIN)
+handles.MonZoom = varargin{1}.MonZoom;
+
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
 h=get(gcf,'Children');  % get all content
@@ -61,9 +63,9 @@ set(h1,'FontUnits','points','FontSize',11.5);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
 if ismac
-    set(gcf,'position',[0.45,0.5,0.3,0.33]) % set position
+    set(gcf,'position',[0.45,0.5,0.3,0.33]* handles.MonZoom) % set position
 elseif ispc
-    set(gcf,'position',[0.45,0.5,0.3,0.33]) % set position
+    set(gcf,'position',[0.45,0.5,0.3,0.33]* handles.MonZoom) % set position
 end
 set(handles.text7,'position', [0.05,0.875,0.235,0.06])
 set(handles.popupmenu2,'position', [0.3,0.823,0.62,0.12])

@@ -22,7 +22,7 @@ function varargout = CorrelationGUI(varargin)
 
 % Edit the above text to modify the response to help CorrelationGUI
 
-% Last Modified by GUIDE v2.5 07-Aug-2020 18:42:25
+% Last Modified by GUIDE v2.5 29-May-2021 19:14:04
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -58,6 +58,7 @@ handles.output = hObject;
 handles.listbox_acmain = varargin{1}.listbox_acmain; % save path
 handles.unit = varargin{1}.unit;
 handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
+handles.MonZoom = varargin{1}.MonZoom;
 
 handles.hmain = gcf;
 set(handles.hmain,'Name', 'Acycle: Stratigraphic Correlation')
@@ -69,7 +70,7 @@ set(h1,'FontUnits','points','FontSize',11.5);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
 
-set(handles.hmain,'position',[0.4,0.01,0.6,0.3]) % set position
+set(handles.hmain,'position',[0.4,0.01,0.6,0.3]* handles.MonZoom) % set position
 set(handles.uipanel1,'position',[0.025,0.476,0.955,0.475]) % Data
 set(handles.text2,'position',[0.015,0.849,0.24,0.15])
 set(handles.text3,'position',[0.015,0.28,0.24,0.15])
@@ -938,4 +939,3 @@ function edit6_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-

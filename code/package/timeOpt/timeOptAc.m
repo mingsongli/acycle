@@ -325,7 +325,6 @@ if genplot == 2
     line([sedrate(loci(1)) sedrate(loci(1))],[min(xx(:,4)) max(xx(:,4))],'Color','red','LineStyle','--')
     xlabel('Sedimentation rate (cm/kyr)')
     ylabel('r^2')
-    %ylabel('r^2_o_p_t')
     xlim([sedmin,sedmax])
     title('Optimal fit: r^2_o_p_t')
     %
@@ -339,14 +338,14 @@ if genplot == 2
     xlim([min(datay(:,1)), max(datay(:,1))])
     
     subplot(3,2,3)
-    yyaxis left
+    yyaxis right
     plot(sedrate,xx(:,2),'ro','LineWidth',2);
     line([sedrate(locj(1)) sedrate(locj(1))],[min(xx(:,2)) max(xx(:,2))],'Color','red','LineStyle','--')
     xlabel('Sedimentation rate (cm/kyr)')
     ylabel('r^2')
     %ylabel('r^2_p_o_w_e_r')
     xlim([sedmin,sedmax])
-    yyaxis right
+    yyaxis left
     plot(sedrate,xx(:,3),'-','color',[0,0,0]+.5,'LineWidth',2);
     line([sedrate(locm(1)) sedrate(locm(1))],[min(xx(:,3)) max(xx(:,3))],'Color','red','LineStyle','--')
     %ylabel('r^2_e_n_v_e_l_o_p_e')
@@ -513,7 +512,11 @@ if nsim > 1
         xcl  = ones(1,4);
         hwarndlg = warndlg('Monte Carlo simulation. Please Wait ...');
         xsim = timeOptSimAc(dat,sedrate(loci(1)),nsim,fit,cormethod,targetE,targetP,fc,fl,fh,roll);
-
+        assignin('base','xsim',xsim)
+%   sxim: a 3 columns matrix of nsim simulations:
+%       1st: r^2_envelope at the corresponding sed. rate
+%       2nd: r^2_power at the corresponding sed. rate
+%       3rd: r^2_opt at the corresponding sed. rate
         xcl(1) = sedrate(loci(1));
         xs1 = xsim(:,1);
         xcl(2) = length(xs1(xs1>r2env(loci(1))))/nsim;
@@ -531,8 +534,10 @@ if nsim > 1
         set(gcf,'Units','normalized','Position',[0.0, 0.05, 0.33, 0.4])
         set(gcf,'Name','Acycle: TimeOpt Null Hypothesis Testing')
         set(gcf,'color','w');
+        xi=[];f=[];
         subplot(3,1,1)
-        [f,xi] = ksdensity(xsim(:,1));
+        %[f,xi] = ksdensity(xsim(:,1));
+        [f,xi] = ksdensity(xs1);
         X1 = [maxr2env,maxr2env];
         X2 = [maxr2pwr,maxr2pwr];
         Y = [0, 1.1*max(f)];
@@ -549,6 +554,7 @@ if nsim > 1
             num2str(sedrate(loci(1)),'%.3f'),' cm/kyr. # simulations = ',num2str(nsim)])
 
         subplot(3,1,2)
+        xi=[];f=[];
         [f,xi] = ksdensity(xsim(:,2));
         Y = [0, 1.1*max(f)];
         plot(xi,f,'color',[0,0,0]+.5,'LineWidth',2);
@@ -560,6 +566,7 @@ if nsim > 1
         ylim(Y)
 
         subplot(3,1,3)
+        xi=[];f=[];
         [f,xi] = ksdensity(xsim(:,3));
         plot(xi,f,'k-','LineWidth',3);
         hold on

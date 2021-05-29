@@ -61,9 +61,10 @@ set(h1,'FontUnits','points','FontSize',12);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',12);  % set as norm
 
-set(gcf,'position',[0.45,0.3,0.25,0.5]) % set position
+handles.MonZoom = varargin{1}.MonZoom;
+set(gcf,'position',[0.45,0.3,0.25,0.5]* handles.MonZoom) % set position
 
-set(handles.uipanel6,'position',[0.05,0.254,0.9,0.666])
+set(handles.uipanel6,'position',[0.025,0.254,0.95,0.666])
 set(handles.text21,'position',[0.021,0.852,0.26,0.07])
 set(handles.edit10,'position',[0.284,0.852,0.24,0.1])
 set(handles.text20,'position',[0.538,0.873,0.13,0.07])
@@ -76,6 +77,7 @@ set(handles.prewhiten_lowess_checkbox,'position',[0.043,0.61,0.4,0.1])
 set(handles.prewhiten_rlowess_checkbox,'position',[0.043,0.51,0.4,0.1])
 set(handles.prewhiten_loess_checkbox,'position',[0.043,0.41,0.4,0.1])
 set(handles.prewhiten_rloess_checkbox,'position',[0.043,0.31,0.4,0.1])
+set(handles.checkbox34,'position',[0.043,0.21,0.4,0.1])
 set(handles.prewhiten_all_checkbox,'position',[0.043,0.11,0.38,0.1])
 set(handles.prewhiten_clear_pushbutton,'position',[0.375,0.11,0.285,0.1])
 set(handles.prewhiten_pushbutton,'position',[0.673,0.11,0.235,0.1])
@@ -87,7 +89,7 @@ set(handles.checkbox13,'position',[0.057,0.071,0.2,0.212])
 set(handles.edit23,'position',[0.28,0.071,0.214,0.208])
 set(handles.text25,'position',[0.5,0.123,0.321,0.123])
 
-set(handles.uipanel7,'position',[0.05,0.03,0.9,0.213])
+set(handles.uipanel7,'position',[0.025,0.03,0.95,0.213])
 set(handles.prewhiten_select_popupmenu,'position',[0.043,0.2,0.9,0.5])
 set(handles.prewhiten_select_popupmenu,'String','Raw','Value',1);
 handles.smooth_win = 0.35;  % windows for smooth 
@@ -115,6 +117,7 @@ set(handles.prewhiten_lowess_checkbox,'Value', 0);
 set(handles.prewhiten_rlowess_checkbox,'Value', 0);
 set(handles.prewhiten_loess_checkbox,'Value', 0);
 set(handles.prewhiten_rloess_checkbox,'Value', 0);
+set(handles.checkbox34,'Value', 0);
 set(handles.prewhiten_mean_checkbox,'Value', 0);
 set(handles.prewhiten_linear_checkbox,'Value', 0);
 set(handles.prewhiten_all_checkbox,'Value', 0);
@@ -130,6 +133,7 @@ handles.prewhiten_lowess = 'notlowess';
 handles.prewhiten_rlowess = 'notrlowess';
 handles.prewhiten_loess = 'notloess';
 handles.prewhiten_rloess = 'notloess';
+handles.prewhiten_sgolay = 'notsgolay';
 handles.prewhiten_polynomial2 = 'not2nd';
 handles.prewhiten_polynomialmore = 'notmore';
 disp('>> load GUI')
@@ -149,103 +153,6 @@ function varargout = prewhiten_OutputFcn(hObject, eventdata, handles)
 
 % Get default command line output from handles structure
 varargout{1} = handles.output;
-
-
-% --- Executes on selection change in prewhiten_select_popupmenu.
-function prewhiten_select_popupmenu_Callback(hObject, eventdata, handles)
-% hObject    handle to prewhiten_select_popupmenu (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns prewhiten_select_popupmenu contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from prewhiten_select_popupmenu
-handles.prewhiten_popupmenu_selection = 'Raw';
-
-str = get(hObject, 'String');
-val = get(hObject,'Value');
-
-% Set current data to the selected data set.
-current_data1 = handles.prewhiten_data1(:,1);
-
-switch str{val};
-%case 'No_prewhiten (black)' % User selects.
-case 'Raw' % User selects.
-   prewhiten_s = 'No_prewhiten';
-   current_data2 = handles.prewhiten_data1(:,2);
-   trend = zeros(length(current_data2),1);
-   nametype = 0;
-case 'LOWESS  (Green)' % User selects.
-   prewhiten_s = 'LOWESS';
-   current_data2 = handles.prewhiten_data2(:,1);
-   trend = handles.prewhiten_data2(:,2);
-   nametype = 1;
-case 'rLOWESS (Blue)' % User selects.
-   prewhiten_s = 'rLOWESS';
-   current_data2 = handles.prewhiten_data2(:,3);
-   trend = handles.prewhiten_data2(:,4);
-   nametype = 1;
-case 'LOESS      (Red)' % User selects.
-   prewhiten_s = 'LOESS';
-   current_data2 = handles.prewhiten_data2(:,5);
-   trend = handles.prewhiten_data2(:,6);
-   nametype = 1;
-case 'rLOESS     (Magenta)' % User selects.
-   prewhiten_s = 'rLOESS';
-   current_data2 = handles.prewhiten_data2(:,7);
-   trend = handles.prewhiten_data2(:,8);
-   nametype = 1;
-case 'Mean (Thick black)' % User selects.
-   prewhiten_s = 'Mean';
-   current_data2 = handles.prewhiten_data1(:,5);
-   trend = handles.prewhiten_data1(:,6);
-   nametype = 2; % see below
-case 'Linear (Yellow)' % User selects.
-   prewhiten_s = 'Linear';
-   current_data2 = handles.prewhiten_data1(:,3);
-   trend = handles.prewhiten_data1(:,4);
-   nametype = 3;
-case '2nd order (dashed red)' % User selects.
-   prewhiten_s = '2nd';
-   current_data2 = handles.prewhiten_data2(:,9);
-   trend = handles.prewhiten_data2(:,10);
-   nametype = 3;
-case '3+ order (Dashed blue)' % User selects.
-   prewhiten_s = '3+order';
-   current_data2 = handles.prewhiten_data2(:,11);
-   trend = handles.prewhiten_data2(:,12);
-   nametype = 3;
-end
-
-handles.prewhiten_popupmenu_selection = prewhiten_s;
-new_data = [current_data1,current_data2];
-handles.new_data = new_data;
-current_trend = [current_data1,trend];
-win = handles.prewhiten_win;
-
-data_name = handles.data_name;
-[~,dat_name,ext] = fileparts(data_name);
-if nametype == 1
-    handles.name1 = [dat_name,'-',num2str(win),'-',prewhiten_s,ext];
-    name2 = [dat_name,'-',num2str(win),'-',prewhiten_s,'trend',ext];
-elseif nametype == 2
-    handles.name1 = [dat_name,'-demean',ext];
-    name2 = [dat_name,'-mean',ext];
-elseif nametype == 3
-    handles.name1 = [dat_name,'-',prewhiten_s,ext];
-    name2 = [dat_name,'-',prewhiten_s,'trend',ext];
-end
-if nametype > 0
-% refresh AC main window
-    figure(handles.acfigmain);
-    CDac_pwd; % cd ac_pwd dir
-    dlmwrite(handles.name1, new_data, 'delimiter', ',', 'precision', 9);
-    dlmwrite(name2, current_trend, 'delimiter', ',', 'precision', 9);
-    refreshcolor;
-    disp('>>  AC main window: see trend and detrended data')
-    cd(pre_dirML); % return to matlab view folder
-    %figure(figdata); % return plot
-end
-guidata(hObject,handles)
 
 
 % --- Executes during object creation, after setting all properties.
@@ -332,6 +239,94 @@ else
 end
 
 guidata(hObject, handles);
+
+
+
+% --- Executes on button press in prewhiten_rloess_checkbox.
+function checkbox34_Callback(hObject, eventdata, handles)
+% hObject    handle to prewhiten_rloess_checkbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of prewhiten_rloess_checkbox
+handles.prewhiten_sgolay = get(handles.checkbox34,'string');
+
+prewhitenok = get(handles.checkbox34,'Value');
+if prewhitenok == 1
+    set(handles.checkbox34,'Enable','on')
+else
+    handles.prewhiten_sgolay = 'notsgolay';
+end
+
+guidata(hObject, handles);
+
+
+
+% --- Executes on button press in prewhiten_mean_checkbox.
+function prewhiten_mean_checkbox_Callback(hObject, eventdata, handles)
+% hObject    handle to prewhiten_linear_checkbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles.prewhiten_mean = get(hObject,'string');
+prewhitenok = get(hObject,'Value');
+if prewhitenok == 1
+    set(handles.prewhiten_pushbutton,'Enable','on')
+else
+    handles.prewhiten_mean = 'notmean';
+end
+
+guidata(hObject, handles);
+
+
+% --- Executes on button press in prewhiten_linear_checkbox.
+function prewhiten_linear_checkbox_Callback(hObject, eventdata, handles)
+% hObject    handle to prewhiten_linear_checkbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles.prewhiten_linear = get(hObject,'string');
+prewhitenok = get(hObject,'Value');
+if prewhitenok == 1
+    set(handles.prewhiten_pushbutton,'Enable','on')
+else
+    handles.prewhiten_linear = 'notlinear';
+end
+
+guidata(hObject, handles);
+
+
+% --- Executes on button press in checkbox11.
+function checkbox11_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox11 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox11
+handles.prewhiten_polynomial2 = get(hObject,'string');
+prewhitenok = get(hObject,'Value');
+if prewhitenok == 1
+    set(handles.prewhiten_linear_checkbox,'Enable','on')
+else
+    handles.prewhiten_polynomial2 = 'not2nd';
+end
+
+guidata(hObject, handles);
+
+% --- Executes on button press in checkbox13.
+function checkbox13_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox13 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox13
+handles.prewhiten_polynomialmore = get(handles.edit23,'string');
+prewhitenok = get(hObject,'Value');
+if prewhitenok == 1
+    set(handles.prewhiten_pushbutton,'Enable','on')
+else
+    handles.prewhiten_polynomialmore = 'notmore';
+end
+guidata(hObject, handles);
+
 
 
 function edit10_Callback(hObject, eventdata, handles)
@@ -466,36 +461,6 @@ function edit10_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-% --- Executes on button press in prewhiten_mean_checkbox.
-function prewhiten_mean_checkbox_Callback(hObject, eventdata, handles)
-% hObject    handle to prewhiten_linear_checkbox (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-handles.prewhiten_mean = get(hObject,'string');
-prewhitenok = get(hObject,'Value');
-if prewhitenok == 1
-    set(handles.prewhiten_pushbutton,'Enable','on')
-else
-    handles.prewhiten_mean = 'notmean';
-end
-
-guidata(hObject, handles);
-
-% --- Executes on button press in prewhiten_linear_checkbox.
-function prewhiten_linear_checkbox_Callback(hObject, eventdata, handles)
-% hObject    handle to prewhiten_linear_checkbox (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-handles.prewhiten_linear = get(hObject,'string');
-prewhitenok = get(hObject,'Value');
-if prewhitenok == 1
-    set(handles.prewhiten_pushbutton,'Enable','on')
-else
-    handles.prewhiten_linear = 'notlinear';
-end
-
-guidata(hObject, handles);
 
 
 function edit11_Callback(hObject, eventdata, handles)
@@ -647,6 +612,7 @@ if prewhitenok == 1
     set(handles.prewhiten_rlowess_checkbox,'Value',1)
     set(handles.prewhiten_linear_checkbox,'Value',1)
     set(handles.prewhiten_loess_checkbox,'Value',1)
+    set(handles.checkbox34,'Value',1)
     set(handles.prewhiten_rloess_checkbox,'Value',1)
     set(handles.checkbox11,'Value',1)
     set(handles.checkbox13,'Value',1)
@@ -659,6 +625,7 @@ if prewhitenok == 1
     handles.prewhiten_rlowess = 'rLOWESS';
     handles.prewhiten_loess = 'LOESS';
     handles.prewhiten_rloess = 'rLOESS';
+    handles.prewhiten_sgolay = 'Savitzky-Golay';
     
     set(handles.prewhiten_pushbutton,'Enable','on')
 end
@@ -676,6 +643,7 @@ handles.prewhiten_lowess = 'notlowess';
 handles.prewhiten_rlowess = 'notrlowess';
 handles.prewhiten_loess = 'notloess';
 handles.prewhiten_rloess = 'notloess';
+handles.prewhiten_sgolay = 'notsgolay';
 handles.prewhiten_polynomial2 = 'not2nd';
 handles.prewhiten_polynomialmore = 'notmore';
 
@@ -823,40 +791,6 @@ if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColo
 end
 
 
-% --- Executes on button press in checkbox11.
-function checkbox11_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox11 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox11
-handles.prewhiten_polynomial2 = get(hObject,'string');
-prewhitenok = get(hObject,'Value');
-if prewhitenok == 1
-    set(handles.prewhiten_linear_checkbox,'Enable','on')
-else
-    handles.prewhiten_polynomial2 = 'not2nd';
-end
-
-guidata(hObject, handles);
-
-% --- Executes on button press in checkbox13.
-function checkbox13_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox13 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox13
-handles.prewhiten_polynomialmore = get(handles.edit23,'string');
-prewhitenok = get(hObject,'Value');
-if prewhitenok == 1
-    set(handles.prewhiten_pushbutton,'Enable','on')
-else
-    handles.prewhiten_polynomialmore = 'notmore';
-end
-guidata(hObject, handles);
-
-
 function edit23_Callback(hObject, eventdata, handles)
 % hObject    handle to edit23 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -985,6 +919,15 @@ if strcmp(handles.prewhiten_rloess,'rLOESS')
     title(['Raw data & ',num2str(win),'-',unit,' trend'])
 end
 
+% Mingsong Li, Peking Univ, May 20, 2021
+if strcmp(handles.prewhiten_sgolay,'Savitzky-Golay')
+    datasgolay=smooth(datax,datay, smooth_win,'sgolay');
+    plot(datax,datasgolay,'--',[0.8500, 0.3250, 0.0980],'Linewidth',2)
+    prewhiten_list = prewhiten_list + 1;
+    prewhiten(prewhiten_list,1) = {'SGolay     (Brown)'};
+    title(['Raw data & ',num2str(win),'-',unit,' trend'])
+end
+
 hold off
 
 legendlist = [];
@@ -1025,6 +968,10 @@ if exist('datarloess')
 else
     datarloess = (zeros(npts,1));
 end
+if exist('datasgolay')
+else
+    datasgolay = (zeros(npts,1));
+end
 
 fig.Color = [.95 .95 .95];
 set(handles.prewhiten_select_popupmenu,'String',prewhiten,'Value',1);
@@ -1039,3 +986,102 @@ handles.prewhiten_data2 = [(datay-datalowess),datalowess,(datay-datarlowess),dat
     (datay-data2nd),data2nd,(datay-datamore),datamore];
 %set(handles.pushbutton14,'Enable','on')
 guidata(hObject, handles);
+
+
+
+
+% --- Executes on selection change in prewhiten_select_popupmenu.
+function prewhiten_select_popupmenu_Callback(hObject, eventdata, handles)
+% hObject    handle to prewhiten_select_popupmenu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns prewhiten_select_popupmenu contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from prewhiten_select_popupmenu
+handles.prewhiten_popupmenu_selection = 'Raw';
+
+str = get(hObject, 'String');
+val = get(hObject,'Value');
+
+% Set current data to the selected data set.
+current_data1 = handles.prewhiten_data1(:,1);
+
+switch str{val};
+%case 'No_prewhiten (black)' % User selects.
+case 'Raw' % User selects.
+   prewhiten_s = 'No_prewhiten';
+   current_data2 = handles.prewhiten_data1(:,2);
+   trend = zeros(length(current_data2),1);
+   nametype = 0;
+case 'LOWESS  (Green)' % User selects.
+   prewhiten_s = 'LOWESS';
+   current_data2 = handles.prewhiten_data2(:,1);
+   trend = handles.prewhiten_data2(:,2);
+   nametype = 1;
+case 'rLOWESS (Blue)' % User selects.
+   prewhiten_s = 'rLOWESS';
+   current_data2 = handles.prewhiten_data2(:,3);
+   trend = handles.prewhiten_data2(:,4);
+   nametype = 1;
+case 'LOESS      (Red)' % User selects.
+   prewhiten_s = 'LOESS';
+   current_data2 = handles.prewhiten_data2(:,5);
+   trend = handles.prewhiten_data2(:,6);
+   nametype = 1;
+case 'rLOESS     (Magenta)' % User selects.
+   prewhiten_s = 'rLOESS';
+   current_data2 = handles.prewhiten_data2(:,7);
+   trend = handles.prewhiten_data2(:,8);
+   nametype = 1;
+case 'Mean (Thick black)' % User selects.
+   prewhiten_s = 'Mean';
+   current_data2 = handles.prewhiten_data1(:,5);
+   trend = handles.prewhiten_data1(:,6);
+   nametype = 2; % see below
+case 'Linear (Yellow)' % User selects.
+   prewhiten_s = 'Linear';
+   current_data2 = handles.prewhiten_data1(:,3);
+   trend = handles.prewhiten_data1(:,4);
+   nametype = 3;
+case '2nd order (dashed red)' % User selects.
+   prewhiten_s = '2nd';
+   current_data2 = handles.prewhiten_data2(:,9);
+   trend = handles.prewhiten_data2(:,10);
+   nametype = 3;
+case '3+ order (Dashed blue)' % User selects.
+   prewhiten_s = '3+order';
+   current_data2 = handles.prewhiten_data2(:,11);
+   trend = handles.prewhiten_data2(:,12);
+   nametype = 3;
+end
+
+handles.prewhiten_popupmenu_selection = prewhiten_s;
+new_data = [current_data1,current_data2];
+handles.new_data = new_data;
+current_trend = [current_data1,trend];
+win = handles.prewhiten_win;
+
+data_name = handles.data_name;
+[~,dat_name,ext] = fileparts(data_name);
+if nametype == 1
+    handles.name1 = [dat_name,'-',num2str(win),'-',prewhiten_s,ext];
+    name2 = [dat_name,'-',num2str(win),'-',prewhiten_s,'trend',ext];
+elseif nametype == 2
+    handles.name1 = [dat_name,'-demean',ext];
+    name2 = [dat_name,'-mean',ext];
+elseif nametype == 3
+    handles.name1 = [dat_name,'-',prewhiten_s,ext];
+    name2 = [dat_name,'-',prewhiten_s,'trend',ext];
+end
+if nametype > 0
+% refresh AC main window
+    figure(handles.acfigmain);
+    CDac_pwd; % cd ac_pwd dir
+    dlmwrite(handles.name1, new_data, 'delimiter', ',', 'precision', 9);
+    dlmwrite(name2, current_trend, 'delimiter', ',', 'precision', 9);
+    refreshcolor;
+    disp('>>  AC main window: see trend and detrended data')
+    cd(pre_dirML); % return to matlab view folder
+    %figure(figdata); % return plot
+end
+guidata(hObject,handles)

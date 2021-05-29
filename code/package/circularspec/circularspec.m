@@ -1,11 +1,12 @@
-function [P,R,t0] = circularspec(data,pt,p1,p2,plotn)
+function [P,R,t0] = circularspec(data,p1,p2,pn,linlog,plotn)
 % circular power spectral analysis
 % 
 % INPUT
 %   data:  Nx1 1-column data
 %   p1  : test period - start
 %   p2  : test period - end
-%   pt  : test period - step
+%   pn  : test steps
+%   linlog: linear or log steps; 1 = log; 2 = linear
 %   plotn: plot figure or not - 1 = yes; 0 = no
 %
 % OUTPUT
@@ -16,30 +17,45 @@ function [P,R,t0] = circularspec(data,pt,p1,p2,plotn)
 % Examples
 %
 % p1 = 0.1;
-% pt = 0.2;
 % p2 = 60;
+% pn = 100;
+% linlog = 2;
+% plotn = 1;
 % data = load('extinction.mat');
 % data = data.data;
-%
+% [P,R,t0] = circularspec(data,p1,p2,pn,linlog,plotn)
+
 % Mingsong Li, Penn State
 % Oct. 17, 2020
 % limingsonglms@gmail.com
+% Updated May 29, 2021
+% Mingsong Li, Peking University; msli@pku.edu.cn
 
 if nargin < 1
     errormsg('Too few input arguments');
 else
     data = sort(data);
     ddf = diff(data);
-    if nargin > 5; warnmsg('Too many input arguments');end
-    if nargin < 5; plotn = 1; end
-    if nargin < 4; p2 = max(ddf); end
-    if nargin < 3; p1 = min(ddf); end
-    if nargin < 2; pt = (p2-p1)/100; end
+    if nargin > 6; warnmsg('Too many input arguments');end
+    if nargin < 6; plotn = 1; end
+    if nargin < 5; linlog = 2; end
+    if nargin < 4; pn = 100; end
+    if nargin < 3; p2 = max(ddf)-min(ddf); end
+    if nargin < 2; p1 = min(ddf); end
 end
 
 % start
 c1 = 2*pi*data;
-P = p1:pt:p2;
+if linlog == 2
+    P = linspace(p1,p2,pn);
+else
+    sedinc = (log10(p2) - log10(p1))/(pn-1);
+    P = zeros(1,pn);
+    for ii = 1: pn
+        P(ii) = 10^(  log10(p1)  +  (ii-1) * sedinc ) ;
+    end
+end
+
 c2 = c1./P;
 % angles
 ai = sin(c2);

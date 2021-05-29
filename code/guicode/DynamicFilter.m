@@ -51,6 +51,8 @@ function DynamicFilter_OpeningFcn(hObject, eventdata, handles, varargin)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to DynamicFilter (see VARARGIN)
+handles.MonZoom = varargin{1}.MonZoom;
+
 set(gcf,'Name','Acycle: Dynamic Filtering | Frequency Stabilization')
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
@@ -59,7 +61,7 @@ h1=findobj(h,'FontUnits','norm');  % find all font units as points
 set(h1,'FontUnits','points','FontSize',11.5);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
-set(gcf,'position',[0.63,0.4,0.35,0.22]) % set position
+set(gcf,'position',[0.63,0.4,0.35,0.22]* handles.MonZoom) % set position
 
 set(handles.uibuttongroup1,'position',[0.05,0.35,0.38,0.55])
 set(handles.uipanel1,'position',[0.45,0.35,0.25,0.55])
@@ -105,7 +107,7 @@ xmin = min(data_s(:,1));
 xmax = max(data_s(:,1));
 mean1 = median(diff(data_s(:,1)));
 handles.mean = mean1;
-handles.step = 2*mean1;
+handles.step = 4*mean1;
 handles.nyquist = 1/(2*handles.mean);     % prepare nyquist
 handles.window = 0.2*(xmax-xmin);
 

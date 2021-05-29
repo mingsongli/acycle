@@ -8,6 +8,7 @@ unit = varargin{1}.unit;
 unit_type = varargin{1}.unit_type;
 listbox_acmain = varargin{1}.listbox_acmain;
 edit_acfigmain_dir= varargin{1}.edit_acfigmain_dir;
+MonZoom = varargin{1}.MonZoom;
 %%
 x = data(:,1);
 y = data(:,2);
@@ -24,7 +25,7 @@ wavep2 = nanmax(x) - nanmin(x);  % default wavelet period 2
 h_robot = figure('MenuBar','none','Name','Mini-Robot','NumberTitle','off');
 set(h_robot,'units','norm') % set location
 set(0,'Units','normalized') % set units as normalized
-set(h_robot,'position',[0.4,0.2,0.3,0.6],'Color','white') % set position
+set(h_robot,'position',[0.4,0.2,0.3,0.6] * MonZoom,'Color','white') % set position
 
 % data preparation
 panel_prep = uipanel(h_robot,'Title','Prepare Data','FontSize',12,...

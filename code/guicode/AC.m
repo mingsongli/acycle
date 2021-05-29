@@ -103,11 +103,33 @@ function AC_OpeningFcn(hObject, eventdata, handles, varargin)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to AC (see VARARGIN)
-set(gcf,'position',[0.5,0.1,0.45,0.8]) % set position
+
+% Monitor Size
+set(0,'Units','centimeters')
+MonitorPos = get(0,'MonitorPositions');
+handles.MonitorPos = MonitorPos;
+if MonitorPos(1,4) < 35
+     handles.MonZoom = 1.2;
+elseif  MonitorPos(1,4) < 45 % Macbook pro 16 retina
+    handles.MonZoom = 1;   
+elseif  MonitorPos(1,4) < 55
+    handles.MonZoom = .9;
+elseif  MonitorPos(1,4) < 65
+    handles.MonZoom = 0.75;
+elseif  MonitorPos(1,4) < 75  % 32 inch 4k
+    handles.MonZoom = 0.65;
+elseif  MonitorPos(1,4) < 90
+    handles.MonZoom = 0.5;
+else
+    handles.MonitorZoom = 0.4;
+end
+
+
+set(0,'Units','normalized') % set units as normalized
+set(gcf,'position',[0.5,0.1,0.45,0.8] * handles.MonZoom) % set position
 set(gcf,'Name','Acycle v2.3 preview')
 set(gcf,'DockControls', 'off')
 set(gcf,'Color', 'white')
-set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
 
 %% push_up
@@ -1431,7 +1453,8 @@ function menu_contact_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_contact (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-copyright
+guidata(hObject, handles);
+copyright(handles)
 
 % --------------------------------------------------------------------
 function menu_selectinterval_Callback(hObject, eventdata, handles)

@@ -91,7 +91,7 @@ elseif fit == 2
     targetTot = targetE;
 end
 
-xx = zeros(nsim,3);
+xx = nan(nsim,3);
 
 for i = 1:nsim
     x1 = dat(:,1)/sedrate1;

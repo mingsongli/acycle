@@ -56,6 +56,8 @@ handles.acfigmain = varargin{1}.acfigmain;
 handles.listbox_acmain = varargin{1}.listbox_acmain;
 handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
 %
+handles.MonZoom = varargin{1}.MonZoom;
+
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
 h=get(gcf,'Children');  % get all content
@@ -64,7 +66,7 @@ set(h1,'FontUnits','points','FontSize',12);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',12);  % set as norm
 set(gcf,'Name','Acycle: Insolation')
-set(gcf,'position',[0.4,0.1,0.35,0.65])
+set(gcf,'position',[0.4,0.1,0.35,0.65]* handles.MonZoom)
 %type
 set(handles.uibuttongroup1,'position',[0.03,0.852,0.386,0.107])
 set(handles.radiobutton1,'position',[0.089,0.244,0.384,0.561])
