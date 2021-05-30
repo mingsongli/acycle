@@ -14,16 +14,16 @@
 % sedimentary noise model, power decomposition analysis, evolutionary fast
 % Fourier transform, wavelet transform, Bayesian change point, (e)TimeOpt,
 % Spectral Moments or other approaches, please also cite original 
-% publications, as detailed in Acycle Wiki and the Users Guide at
-%   https://github.com/mingsongli/acycle/wiki
+% publications, as detailed in Acycle website and the Users Guide at
+%   https://acycle.org
 %   https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf
 %**************************************************************************
 % Program Manager:
-%   Mingsong Li (Pennsylvania State University)
-%   Email: mul450@psu.edu; limingsonglms@gmail.com; http://mingsongli.com
+%   Mingsong Li (Peking University)
+%   Email: msli@pku.edu.cn; limingsonglms@gmail.com; http://mingsongli.com
 %
 % Program Author:
-%   Mingsong Li (Pennsylvania State University)
+%   Mingsong Li (Peking University)
 %   Linda A. Hinnov (George Mason University)
 %
 % Contributors:
@@ -43,7 +43,7 @@
 %   Qiyan Zhang, Yang (Wendy) Zhang, Christian Zeeden
 
 %**************************************************************************
-% Copyright (C) 2017-2020
+% Copyright (C) 2017-2021
 % This program is a free software; you can redistribute it and/or modify it
 % under the terms of the GNU GENERAL PUBLIC LICENSE as published by the 
 % Free Software Foundation < https://www.gnu.org/licenses/ >.

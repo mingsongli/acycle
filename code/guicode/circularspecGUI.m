@@ -101,6 +101,8 @@ set(handles.text8,'position',[0.015,0.376,0.2,0.35])
 set(handles.edit5,'position',[0.22,0.376,0.2,0.4])
 set(handles.radiobutton3,'position',[0.5,0.58,0.45,0.4])
 set(handles.radiobutton4,'position',[0.5,0.1,0.45,0.4])
+set(handles.radiobutton3,'value',0)
+set(handles.radiobutton4,'value',1)
 set(handles.checkbox1,'position',[0.66,0.155,0.15,0.14])
 set(handles.checkbox2,'position',[0.66,0.055,0.15,0.14])
 set(handles.pushbutton1,'position',[0.83,0.055,0.12,0.23])
@@ -109,8 +111,9 @@ set(handles.pushbutton1,'position',[0.83,0.055,0.12,0.23])
 [~, ncol] = size(dat);
 if ncol == 1
 else
-    msgbox('More than 2 columns detected. 2nd column data was used','Info')
-    dat = dat(:,2); % 
+    msgbox('More than 2 columns detected. The first column data was used','Info')
+    dat = dat(:,1); % 
+    handles.dat = dat;
 end
 
 datx = dat(:,1);
@@ -125,7 +128,7 @@ handles.linLog = 2;
 
 sr = linspace(handles.sedmin,handles.sedmax,handles.numsed);
 sedinfo = ['test periods of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
-    ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
+    ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' ', handles.unit];
 set(handles.text7,'String',sedinfo)
 set(handles.edit1,'string',num2str(handles.sedmin))
 set(handles.edit2,'string',num2str(handles.sedmax))
@@ -162,15 +165,8 @@ else
     clmodel = 1;
 end
 
-data = handles.dat;
-
-[~, ncol] = size(data);
-if ncol == 1
-else
-    data = data(:,2); % 
-end
 % User defined parameters
-
+data = handles.dat;
 %%
 % start
 RR = zeros(mcn,pn);
@@ -379,8 +375,10 @@ else
         sr(ii) = 10^(  log10(handles.sedmin)  +  (ii-1) * sedinc ) ;
     end
 end
-sedinfo = ['test sed. rates of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
-    ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
+
+sedinfo = ['test periods of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+    ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' ', handles.unit];
+
 set(handles.text7,'String',sedinfo)
 guidata(hObject, handles);
 
@@ -406,8 +404,9 @@ else
     handles.linLog = 2;
     sr = linspace(handles.sedmin,handles.sedmax,handles.numsed);
 end
-sedinfo = ['test sed. rates of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
-    ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
+sedinfo = ['test periods of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+    ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' ', handles.unit];
+
 set(handles.text7,'String',sedinfo)
 guidata(hObject, handles);
 
@@ -426,6 +425,8 @@ if handles.sedmin < handles.sedmax
         msgbox(['Minimum is beyond the detection limit ', num2str(sedmin)],'Warning')
     end
     sr = linspace(handles.sedmin,handles.sedmax,handles.numsed);
+    
+    
     sedinfo = ['test periods of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
         ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' ',handles.unit];
     set(handles.text7,'String',sedinfo)
@@ -463,8 +464,8 @@ if handles.sedmax > handles.sedmin
     end
     % display
     sr = linspace(handles.sedmin,handles.sedmax,handles.numsed);
-    sedinfo = ['test sed. rates of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
-        ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
+    sedinfo = ['test periods of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+    ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' ', handles.unit];
     set(handles.text7,'String',sedinfo)
 else
     msgbox(['Maximum is smaller than minimum'],'Warning')
@@ -501,15 +502,15 @@ if handles.numsed > 0
     sr = linspace(handles.sedmin,handles.sedmax,handles.numsed);
     
     if handles.numsed > 3
-        sedinfo = ['test sed. rates of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
-        ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
+        sedinfo = ['test periods of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+    ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' ', handles.unit];
         set(handles.text7,'String',sedinfo)
     elseif handles.numsed == 3
-        sedinfo = ['test sed. rates of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
-            ', ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
+        sedinfo = ['test periods of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+    ', ..., ',num2str(sr(end),'% 3.3f'),' ', handles.unit];
         set(handles.text7,'String',sedinfo)
     elseif handles.numsed == 2
-        sedinfo = ['test sed. rates of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),' cm/kyr'];
+        sedinfo = ['test periods of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),' ', handles.unit];
         set(handles.text7,'String',sedinfo)
     else
         msgbox('Number should be no less than 2','Warning')

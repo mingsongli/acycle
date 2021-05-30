@@ -109,7 +109,7 @@ set(0,'Units','centimeters')
 MonitorPos = get(0,'MonitorPositions');
 handles.MonitorPos = MonitorPos;
 if MonitorPos(1,4) < 30
-     handles.MonZoom = 1.25;
+     handles.MonZoom = 1.2;
 elseif  MonitorPos(1,4) < 38 % Macbook pro 16 retina
     handles.MonZoom = 1.1;   
 elseif  MonitorPos(1,4) < 45 % Macbook pro 16 retina
@@ -202,9 +202,9 @@ if ispc
     set(h_push_openfolder,'BackgroundColor','white') % 
 end
 
-set(handles.popupmenu1,'position', [0.83,0.91,0.15,0.06],'tooltip','<html>Select unit<br>for dataset')
-set(handles.popupmenu2,'position', [0.67,0.91,0.15,0.06],'tooltip','<html>Sort<br>dataset')
-set(handles.edit_acfigmain_dir,'position', [0.081,0.9,0.91,0.04],'tooltip','Working directory')
+set(handles.popupmenu1,'position', [0.83,0.92,0.15,0.06],'tooltip','<html>Select unit<br>for dataset')
+set(handles.popupmenu2,'position', [0.67,0.92,0.15,0.06],'tooltip','<html>Sort<br>dataset')
+set(handles.edit_acfigmain_dir,'position', [0.081,0.9,0.9,0.04],'tooltip','Working directory')
 set(handles.listbox_acmain,'position', [0.02,0.008,0.96,0.884])
 
 if ismac
@@ -3516,6 +3516,8 @@ for nploti = 1:nplot
                         [~,dat_name,ext] = fileparts(data_name);
                         if sum(strcmp(ext,handles.filetype)) > 0
                             try
+                                data = load(data_name);
+                            catch
                                 fid = fopen(data_name);
                                 data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
                                 fclose(fid);
@@ -3538,8 +3540,6 @@ for nploti = 1:nplot
                                         end
                                     end
                                 end
-                            catch
-                                data = load(data_name);
                             end
                             if data_error ==1
                             else
@@ -3597,6 +3597,8 @@ for nploti = 1:nplot
                     [~,dat_name,ext] = fileparts(data_name);
                     if sum(strcmp(ext,handles.filetype)) > 0
                         try
+                            data = load(data_name);
+                        catch
                             fid = fopen(data_name);
                             data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
                             fclose(fid);
@@ -3629,8 +3631,6 @@ for nploti = 1:nplot
                                     end
                                 end
                             end
-                        catch
-                            data = load(data_name);
                         end
                         if data_error == 1
                         else
