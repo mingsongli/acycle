@@ -42,4 +42,4 @@ for i = 1:numel(d)
         listboxStr{i} = sd(i).name;
     end
 end
-set(handles.listbox_acmain,'String',listboxStr,'Value',1) %set string
+set(handles.listbox_acmain,'String',listboxStr,'Value',[]) %set string
