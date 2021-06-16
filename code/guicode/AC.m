@@ -128,7 +128,7 @@ end
 
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'position',[0.5,0.1,0.45,0.8] * handles.MonZoom) % set position
-set(gcf,'Name','Acycle v2.3')
+set(gcf,'Name','Acycle v2.3.1')
 set(gcf,'DockControls', 'off')
 set(gcf,'Color', 'white')
 set(gcf,'units','norm') % set location
@@ -206,6 +206,8 @@ set(handles.popupmenu1,'position', [0.83,0.92,0.15,0.06],'tooltip','<html>Select
 set(handles.popupmenu2,'position', [0.67,0.92,0.15,0.06],'tooltip','<html>Sort<br>dataset')
 set(handles.edit_acfigmain_dir,'position', [0.081,0.9,0.9,0.04],'tooltip','Working directory')
 set(handles.listbox_acmain,'position', [0.02,0.008,0.96,0.884])
+
+set(handles.listbox_acmain,'value', [])
 
 if ismac
     handles.slash_v = '/';
