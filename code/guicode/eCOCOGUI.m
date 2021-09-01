@@ -340,7 +340,8 @@ set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
 set(gcf,'color','w');
 set(handles.ecocofigspectrum,'position',[0.2,0.4,0.2,0.4]) % set position
-dt = (median(diff(datx)));
+dt = (median(diff(datx)))
+pad = handles.pad
 [p1,f] = periodogram(daty,[],handles.pad,1/dt);  % power of dat
 % remove AR1 noise
 if red == 0
@@ -417,6 +418,7 @@ if get(hObject,'Value')
         handles.pad = 10000;
     else
         handles.pad = fix(handles.npts/5000) * 5000 + 5000;
+        disp(fix(handles.npts/5000) * 5000 + 5000)
     end
     set(handles.edit12,'String',num2str(handles.pad))
     set(handles.checkbox1,'Visible','off')
