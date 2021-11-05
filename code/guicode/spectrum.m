@@ -160,8 +160,8 @@ if max(Dt) - min(Dt) > 10 * eps('single')
     handles.method ='Lomb-Scargle spectrum';
     set(handles.popupmenu2, 'Value', 2);
     set(handles.popupmenu_tapers,'Enable','off')
-    set(handles.checkbox_robust,'Enable','off')
-    set(handles.checkbox_robust,'Value',0)
+    set(handles.checkbox_robust,'Enable','on')
+    set(handles.checkbox_robust,'Value',1)
     set(handles.checkbox_ar1_check,'Value',0)
     set(handles.checkbox_ar1_check,'String','White noise')
     set(handles.check_ftest,'Visible', 'off')
@@ -719,54 +719,111 @@ if strcmp(method,'Multi-taper method')
     end
     
 elseif strcmp(method,'Lomb-Scargle spectrum')
-    pfa = [50 10 1 0.01]/100;
-    pd = 1 - pfa;
-    timex = timex + abs(min(timex));
-    %[po,fd1,pth] = plomb(datax,timex,fmax,'normalized','Pd',pd);
-    [po,fd1,pth] = plomb(datax,timex,fmax,'Pd',pd);
-    if plot_x_period
-        pt1 = 1./fd1;
-    end
-    figdata = figure;
-    set(gcf,'Color', 'white')
-    if plot_x_period
-        if handles.checkbox_ar1_v == 1
-            plot(pt1,po,pt1,pth*ones(size(pt1')),'LineWidth',1); 
-            text(10*(1/fmax)*[1 1 1 1],pth-.5,[repmat('P_{fa} = ',[4 1]) num2str(pfa')])
-        else
-            plot(pt1,po,'k-','LineWidth',1); 
+    
+    if get(handles.checkbox_ar1_check,'value') == 1
+        pfa = [50 10 1 0.01]/100;
+        pd = 1 - pfa;
+        timex = timex + abs(min(timex));
+        %[po,fd1,pth] = plomb(datax,timex,fmax,'normalized','Pd',pd);
+        [po,fd1,pth] = plomb(datax,timex,fmax,'Pd',pd);
+        if plot_x_period
+            pt1 = 1./fd1;
         end
-        xlabel(['Period (',num2str(unit),')']) 
-        xlim([1/fmax, pt1(3)]);
-        set(gca, 'XDir','reverse')
-    else
-        if handles.checkbox_ar1_v == 1
-            plot(fd1,po,fd1,pth*ones(size(fd1')),'LineWidth',1); 
-            text(0.3*fmax*[1 1 1 1],pth-.5,[repmat('P_{fa} = ',[4 1]) num2str(pfa')])
+        figdata = figure;
+        set(gcf,'Color', 'white')
+        if plot_x_period
+            if handles.checkbox_ar1_v == 1
+                plot(pt1,po,pt1,pth*ones(size(pt1')),'LineWidth',1); 
+                text(10*(1/fmax)*[1 1 1 1],pth-.5,[repmat('P_{fa} = ',[4 1]) num2str(pfa')])
+            else
+                plot(pt1,po,'k-','LineWidth',1); 
+            end
+            xlabel(['Period (',num2str(unit),')']) 
+            xlim([1/fmax, pt1(3)]);
+            set(gca, 'XDir','reverse')
         else
-            plot(fd1,po,'k-','LineWidth',1); 
+            if handles.checkbox_ar1_v == 1
+                plot(fd1,po,fd1,pth*ones(size(fd1')),'LineWidth',1); 
+                text(0.3*fmax*[1 1 1 1],pth-.5,[repmat('P_{fa} = ',[4 1]) num2str(pfa')])
+            else
+                plot(fd1,po,'k-','LineWidth',1); 
+            end
+
+            xlabel(['Frequency (cycles/',num2str(unit),')']) 
+            xlim([0 fmax]);
         end
 
-        xlabel(['Frequency (cycles/',num2str(unit),')']) 
-        xlim([0 fmax]);
+        ylabel('Power ')
+        title(['Lomb-Scargle spectrum','; bw = ',num2str(df)])
+        set(gcf,'Name',[dat_name,ext,': Lomb-Scargle spectrum'])
+        set(gca,'XMinorTick','on','YMinorTick','on')
+
+        if handles.linlogY == 1
+            set(gca, 'YScale', 'log')
+        else
+            set(gca, 'YScale', 'linear')
+        end
+        if handles.logfreq == 1
+            set(gca,'xscale','log')
+        end
     end
     
-    ylabel('Power ')
-    title(['Lomb-Scargle spectrum','; bw = ',num2str(df)])
-    set(gcf,'Name',[dat_name,ext,': Lomb-Scargle spectrum'])
-    set(gca,'XMinorTick','on','YMinorTick','on')
-    
-    if handles.linlogY == 1
-        set(gca, 'YScale', 'log')
-    else
-        set(gca, 'YScale', 'linear')
+    % robust AR1
+    if get(handles.checkbox_robust,'value') == 1
+        plotn =  1; % show result
+        dlg_title = 'Robust AR(1)';
+        prompt = {'Median smoothing window: default 0.2=20%'};
+        num_lines = 1;
+        defaultans = {num2str(0.2)};
+        options.Resize='on';
+        answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+
+        if ~isempty(answer)
+            smoothwin = str2double(answer{1});
+            if plot_x_period
+                [po,fd1, pth] = plomb_robustar1(datax,timex,fmax,smoothwin,0);   
+                figure; 
+                set(gcf,'Color', 'white')
+                hold on; 
+                semilogy(fd1,pth(5,:),'b-.');
+                semilogy(fd1,pth(4,:),'r--','LineWidth',2);
+                semilogy(fd1,pth(3,:),'r-');
+                semilogy(fd1,pth(2,:),'k-','LineWidth',2);
+                semilogy(fd1,pth(1,:),'m-.');
+                semilogy(fd1,po,'k')
+                xlim([0,fmax])
+                xlabel(['Period (',num2str(unit),')']) 
+                ylabel('Power')
+                smthwin = [num2str(smoothwin*100),'%', ' median-smoothed'];
+                legend( 'Robust AR(1) 99%', 'Robust AR(1) 95%','Robust AR(1) 90%',...
+                    'Robust AR(1) median',smthwin,'Power')
+                set(gca,'XMinorTick','on','YMinorTick','on')
+            else
+                [po,fd1, pth] = plomb_robustar1(datax,timex,fmax,smoothwin,plotn);   
+            end
+            title(['Lomb-Scargle spectrum','; bw = ',num2str(df)])
+            set(gcf,'Name',[dat_name,ext,': Lomb-Scargle spectrum'])
+            if handles.linlogY == 1
+                set(gca, 'YScale', 'log')
+            else
+                set(gca, 'YScale', 'linear')
+            end
+            if handles.logfreq == 1
+                set(gca,'xscale','log')
+                
+            end
+        end
     end
-    if handles.logfreq == 1
-        set(gca,'xscale','log')
-    end
-    
     % power law
     if handles.checkPL == 1
+        
+        pfa = [50 10 1 0.01]/100;
+        pd = 1 - pfa;
+        timex = timex + abs(min(timex));
+        %[po,fd1,pth] = plomb(datax,timex,fmax,'normalized','Pd',pd);
+        [po,fd1,pth] = plomb(datax,timex,fmax,'Pd',pd);
+        
+        
         N = length(datax);
         % With no padding or smoothing applied
         % Number of independent Fourier frequencies
@@ -838,6 +895,12 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
     
     % bending power law
     if handles.checkBPL == 1
+        pfa = [50 10 1 0.01]/100;
+        pd = 1 - pfa;
+        timex = timex + abs(min(timex));
+        %[po,fd1,pth] = plomb(datax,timex,fmax,'normalized','Pd',pd);
+        [po,fd1,pth] = plomb(datax,timex,fmax,'Pd',pd);
+        
         N = length(datax);
         % With no padding or smoothing applied
         % Number of independent Fourier frequencies
@@ -1659,52 +1722,130 @@ if strcmp(method,'Multi-taper method')
     
 elseif strcmp(method,'Lomb-Scargle spectrum')
     
-    pfa = [50 10 1 0.01]/100;
-    pd = 1 - pfa;
-    timex = timex + abs(min(timex));
-    %[po,fd1,pth] = plomb(datax,timex,fmax,'normalized','Pd',pd);
-    [po,fd1,pth] = plomb(datax,timex,fmax,'Pd',pd);
-    if plot_x_period
-        pt1 = 1./fd1;
-    end
-    figdata = figure;
-    set(gcf,'Color', 'white')
-    if plot_x_period
-        if handles.checkbox_ar1_v == 1
-            plot(pt1,po,pt1,pth*ones(size(pt1')),'LineWidth',1); 
-            text(10*(1/fmax)*[1 1 1 1],pth-.5,[repmat('P_{fa} = ',[4 1]) num2str(pfa')])
-        else
-            plot(pt1,po,'LineWidth',1); 
+    if get(handles.checkbox_ar1_check,'value') == 1
+        pfa = [50 10 1 0.01]/100;
+        pd = 1 - pfa;
+        timex = timex + abs(min(timex));
+        %[po,fd1,pth] = plomb(datax,timex,fmax,'normalized','Pd',pd);
+        [po,fd1,pth] = plomb(datax,timex,fmax,'Pd',pd);
+        if plot_x_period
+            pt1 = 1./fd1;
         end
-        xlabel(['Period (',num2str(unit),')']) 
-        xlim([1/fmax, pt1(3)]);
-        set(gca, 'XDir','reverse')
-    else
-        if handles.checkbox_ar1_v == 1
-            plot(fd1,po,fd1,pth*ones(size(fd1')),'LineWidth',1); 
-            text(0.3*fmax*[1 1 1 1],pth-.5,[repmat('P_{fa} = ',[4 1]) num2str(pfa')])
+        figdata = figure;
+        set(gcf,'Color', 'white')
+        if plot_x_period
+            if handles.checkbox_ar1_v == 1
+                plot(pt1,po,pt1,pth*ones(size(pt1')),'LineWidth',1); 
+                text(10*(1/fmax)*[1 1 1 1],pth-.5,[repmat('P_{fa} = ',[4 1]) num2str(pfa')])
+            else
+                plot(pt1,po,'LineWidth',1); 
+            end
+            xlabel(['Period (',num2str(unit),')']) 
+            xlim([1/fmax, pt1(3)]);
+            set(gca, 'XDir','reverse')
         else
-            plot(fd1,po,'LineWidth',1); 
+            if handles.checkbox_ar1_v == 1
+                plot(fd1,po,fd1,pth*ones(size(fd1')),'LineWidth',1); 
+                text(0.3*fmax*[1 1 1 1],pth-.5,[repmat('P_{fa} = ',[4 1]) num2str(pfa')])
+            else
+                plot(fd1,po,'LineWidth',1); 
+            end
+            xlabel(['Frequency (cycles/',num2str(unit),')']) 
+            xlim([0 fmax]);
         end
-        xlabel(['Frequency (cycles/',num2str(unit),')']) 
-        xlim([0 fmax]);
-    end
-    ylabel('Power ')
-    title(['Lomb-Scargle spectrum','; bw = ',num2str(df)])
-    set(gcf,'Name',[dat_name,ext,': Lomb-Scargle spectrum'])
-    set(gca,'XMinorTick','on','YMinorTick','on')
+        ylabel('Power ')
+        title(['Lomb-Scargle spectrum','; bw = ',num2str(df)])
+        set(gcf,'Name',[dat_name,ext,': Lomb-Scargle spectrum'])
+        set(gca,'XMinorTick','on','YMinorTick','on')
+
+        if handles.linlogY == 1
+            set(gca, 'YScale', 'log')
+        else
+            set(gca, 'YScale', 'linear')
+        end
+        if handles.logfreq == 1
+            set(gca,'xscale','log')
+        end
+        
+        
+        filename_LS = [dat_name,'-Lomb-Scargle.txt'];
+        CDac_pwd; % cd ac_pwd dir
+        dlmwrite(filename_LS, [fd1,po,(pth*ones(size(fd1')))'], 'delimiter', ',', 'precision', 9);
+        cd(pre_dirML); % return to matlab view folder
+        disp('Refresh the Main Window:')
+        disp(filename_LS)
     
-    if handles.linlogY == 1
-        set(gca, 'YScale', 'log')
-    else
-        set(gca, 'YScale', 'linear')
     end
-    if handles.logfreq == 1
-        set(gca,'xscale','log')
+    
+    % robust AR1
+    if get(handles.checkbox_robust,'value') == 1
+        plotn =  1; % show result
+        dlg_title = 'Robust AR(1)';
+        prompt = {'Median smoothing window: default 0.2=20%'};
+        num_lines = 1;
+        defaultans = {num2str(0.2)};
+        options.Resize='on';
+        answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+
+        if ~isempty(answer)
+            smoothwin = str2double(answer{1});
+            if plot_x_period
+                timex = timex + abs(min(timex));
+                [po,fd1, pth] = plomb_robustar1(datax,timex,fmax,smoothwin,0);   
+                figure; 
+                set(gcf,'Color', 'white')
+                hold on; 
+                semilogy(fd1,pth(5,:),'b-.');
+                semilogy(fd1,pth(4,:),'r--','LineWidth',2);
+                semilogy(fd1,pth(3,:),'r-');
+                semilogy(fd1,pth(2,:),'k-','LineWidth',2);
+                semilogy(fd1,pth(1,:),'m-.');
+                semilogy(fd1,po,'k')
+                xlim([0,fmax])
+                xlabel(['Period (',num2str(unit),')'])
+                ylabel('Power')
+                smthwin = [num2str(smoothwin*100),'%', ' median-smoothed'];
+                legend( 'Robust AR(1) 99%', 'Robust AR(1) 95%','Robust AR(1) 90%',...
+                    'Robust AR(1) median',smthwin,'Power')
+                set(gca,'XMinorTick','on','YMinorTick','on')
+            else
+                [po,fd1, pth] = plomb_robustar1(datax,timex,fmax,smoothwin,plotn);  
+            end
+            title(['Lomb-Scargle spectrum','; bw = ',num2str(df)])
+            set(gcf,'Name',[dat_name,ext,': Lomb-Scargle spectrum'])
+            set(gca,'XMinorTick','on','YMinorTick','on')
+            if handles.linlogY == 1
+                set(gca, 'YScale', 'log')
+            else
+                set(gca, 'YScale', 'linear')
+            end
+            if handles.logfreq == 1
+                set(gca,'xscale','log')
+            end
+            
+            name1 = [dat_name,'-Lomb-robustAR1',ext];
+            data1 = [fd1,po,pth'];
+            CDac_pwd;
+            dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
+            disp('>>  Refresh main window to see red noise estimation data files: ')
+            disp(name1)
+            cd(pre_dirML);
+        
+        end
+        
+        
+        
     end
     
     % power law
     if handles.checkPL == 1
+        pfa = [50 10 1 0.01]/100;
+        pd = 1 - pfa;
+        timex = timex + abs(min(timex));
+        %[po,fd1,pth] = plomb(datax,timex,fmax,'normalized','Pd',pd);
+        [po,fd1,pth] = plomb(datax,timex,fmax,'Pd',pd);
+        
+        
         N = length(datax);
         % With no padding or smoothing applied
         % Number of independent Fourier frequencies
@@ -1786,6 +1927,12 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
     
     % bending power law
     if handles.checkBPL == 1
+        pfa = [50 10 1 0.01]/100;
+        pd = 1 - pfa;
+        timex = timex + abs(min(timex));
+        %[po,fd1,pth] = plomb(datax,timex,fmax,'normalized','Pd',pd);
+        [po,fd1,pth] = plomb(datax,timex,fmax,'Pd',pd);
+        
         N = length(datax);
         % With no padding or smoothing applied
         % Number of independent Fourier frequencies
@@ -1865,12 +2012,6 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
         end
     end
     
-    filename_LS = [dat_name,'-Lomb-Scargle.txt'];
-    CDac_pwd; % cd ac_pwd dir
-    dlmwrite(filename_LS, [fd1,po,(pth*ones(size(fd1')))'], 'delimiter', ',', 'precision', 9);
-    cd(pre_dirML); % return to matlab view folder
-    disp('Refresh the Main Window:')
-    disp(filename_LS)
     
 elseif  strcmp(method,'Periodogram')
     %if max(diffx) - min(diffx) > 10 * eps('single')
@@ -2389,7 +2530,7 @@ elseif strcmp(method,'Periodogram')
     set(handles.check_ftest,'Visible','off')
 elseif strcmp(method,'Lomb-Scargle spectrum')
     set(handles.popupmenu_tapers,'Enable','off')
-    set(handles.checkbox_robust,'Enable','off')
+    set(handles.checkbox_robust,'Enable','on')
     set(handles.checkbox_robust,'Value',1)
     set(handles.checkbox_ar1_check,'Value',0)
     set(handles.checkbox_ar1_check,'String','White noise')
