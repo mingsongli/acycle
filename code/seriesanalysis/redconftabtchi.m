@@ -30,15 +30,15 @@ Art=mean(theored);
 theored(1)=theoredun;
 theored=theored*(meanp/Art);
 
+% gammaincinv
 % The degrees of freedom for MTM is equal to 2*number of tapers;
 % since DropLastTaper=true, then number of tapers=2*nw-1
 % By Linda Hinnov , June, 2017
 nw2=2*(2*nw-1);
-
-facchi90 = 2*gammaincinv(0.90,nw)/(nw2);
-facchi95 = 2*gammaincinv(0.95,nw)/(nw2);
-facchi99 = 2*gammaincinv(0.99,nw)/(nw2);
-facchi999 = 2*gammaincinv(0.999,nw)/(nw2);
+facchi90 = 2 * gammaincinv(0.90,nw)/(nw2);
+facchi95 = 2 * gammaincinv(0.95,nw)/(nw2);
+facchi99 = 2 * gammaincinv(0.99,nw)/(nw2);
+facchi999 = 2 * gammaincinv(0.999,nw)/(nw2);
 tabtchi90 = theored*facchi90;
 tabtchi95 = theored*facchi95;
 tabtchi99 = theored*facchi99;

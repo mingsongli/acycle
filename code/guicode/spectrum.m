@@ -322,10 +322,10 @@ end
 
 if strcmp(method,'Multi-taper method')
     if max(diffx) - min(diffx) > 10 * eps('single')
-        figwarn = warndlg({'Data may be interpolated to an uniform sampling interval';...
-            '';'    Or select : Lomb-Scargle spectrum'});
-        set(figwarn,'units','norm') % set location
-        set(figwarn,'position',[0.5,0.8,0.225,0.09]) % set position
+        %figwarn = warndlg({'Data may be interpolated to an uniform sampling interval';...
+        %    '';'    Or select : Lomb-Scargle spectrum'});
+        %set(figwarn,'units','norm') % set location
+        %set(figwarn,'position',[0.5,0.8,0.225,0.09]) % set position
     end
     
     if handles.checkbox_robustAR1_v == 1
@@ -651,7 +651,8 @@ if strcmp(method,'Multi-taper method')
         waitbar(step / steps)
         step = 2.5;
         waitbar(step / steps)
-        [fd,po,theored,tabtchi90,tabtchi95,tabtchi99,tabtchi999]=redconftabtchi(datax,nw,dt,nzeropad,2);
+        %[fd,po,theored,tabtchi90,tabtchi95,tabtchi99,tabtchi999]=redconftabtchi(datax,nw,dt,nzeropad,2);
+        [fd,po,theored,tabtchi90,tabtchi95,tabtchi99,tabtchi999]=redconfchi2(datax,nw,dt,nzeropad,2);
         rho = rhoAR1(datax);
         step = 4.5;
         waitbar(step / steps)
@@ -906,10 +907,10 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
     
 elseif  strcmp(method,'Periodogram')
     
-    if max(diffx) - min(diffx) > 10 * eps('single')
-        figwarn = warndlg({'Data may be interpolated to an uniform sampling interval';...
-            '';'    Or select : Lomb-Scargle spectrum'});
-    end
+    %if max(diffx) - min(diffx) > 10 * eps('single')
+    %    figwarn = warndlg({'Data may be interpolated to an uniform sampling interval';...
+    %        '';'    Or select : Lomb-Scargle spectrum'});
+    %end
     if padtimes > 1
         [po,fd1] = periodogram(datax,[],nzeropad,1/dt);
     else 
@@ -1192,10 +1193,10 @@ plot_x_period = get(handles.checkbox8,'value');
 
 if strcmp(method,'Multi-taper method')
     if max(diffx) - min(diffx) > 10 * eps('single')
-        figwarn = warndlg({'Data may be interpolated to an uniform sampling interval';...
-            '';'    Or select : Lomb-Scargle spectrum'});
-        set(figwarn,'units','norm') % set location
-        set(figwarn,'position',[0.5,0.8,0.225,0.09]) % set position
+        %figwarn = warndlg({'Data may be interpolated to an uniform sampling interval';...
+        %    '';'    Or select : Lomb-Scargle spectrum'});
+        %set(figwarn,'units','norm') % set location
+        %set(figwarn,'position',[0.5,0.8,0.225,0.09]) % set position
     end
     if handles.checkbox_robustAR1_v == 1
         dlg_title = 'Robust AR(1) Estimation';
@@ -1552,7 +1553,8 @@ if strcmp(method,'Multi-taper method')
     %     if strcmp(handles.checkbox_ar1_check,'tabtchi')
             step = 2.5;
             waitbar(step / steps)
-            [fd,po,theored,tabtchi90,tabtchi95,tabtchi99,tabtchi999]=redconftabtchi(datax,nw,dt,nzeropad,2);
+            %[fd,po,theored,tabtchi90,tabtchi95,tabtchi99,tabtchi999]=redconftabtchi(datax,nw,dt,nzeropad,2);
+            [fd,po,theored,tabtchi90,tabtchi95,tabtchi99,tabtchi999]=redconfchi2(datax,nw,dt,nzeropad,2);
             rho = rhoAR1(datax);
     step = 4.5;
         waitbar(step / steps)
@@ -1871,10 +1873,10 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
     disp(filename_LS)
     
 elseif  strcmp(method,'Periodogram')
-    if max(diffx) - min(diffx) > 10 * eps('single')
-        figwarn = warndlg({'Data may be interpolated to an uniform sampling interval';...
-            '';'    Or select : Lomb-Scargle spectrum'});
-    end
+    %if max(diffx) - min(diffx) > 10 * eps('single')
+    %    figwarn = warndlg({'Data may be interpolated to an uniform sampling interval';...
+    %        '';'    Or select : Lomb-Scargle spectrum'});
+    %end
     if padtimes > 1
         [po,fd1] = periodogram(datax,[],nzeropad,1/dt);
     else 

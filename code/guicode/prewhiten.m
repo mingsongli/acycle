@@ -347,6 +347,7 @@ set(handles.edit11, 'String', num2str(prewhitenwinpercent));
 set(handles.slider4, 'Value', handles.smooth_win);
 
 try figure(handles.detrendfig)
+    set(gcf,'Color', 'white')
     current_data = handles.current_data;
     smooth_win = handles.smooth_win;
     unit = handles.unit;
@@ -479,6 +480,7 @@ set(handles.edit10, 'String', num2str(handles.prewhiten_win));
 set(handles.slider4, 'Value', handles.smooth_win);
 
 try figure(handles.detrendfig)
+    set(gcf,'Color', 'white')
     current_data = handles.current_data;
     smooth_win = handles.smooth_win;
     unit = handles.unit;
@@ -676,6 +678,7 @@ set(handles.edit10,'String',num2str(handles.prewhiten_win))
 set(handles.edit11,'String',num2str(win_ratio*100))
 
 try figure(handles.detrendfig)
+    set(gcf,'Color', 'white')
     current_data = handles.current_data;
     smooth_win = handles.smooth_win;
     unit = handles.unit;
@@ -835,6 +838,7 @@ if npts > 2000
 end
 
 handles.detrendfig = figure;
+set(gcf,'Color', 'white')
 plot(datax,datay,'-k');
 axis([min(datax) max(datax) min(datay) max(datay)])
 if handles.unit_type == 1
@@ -846,8 +850,8 @@ elseif handles.unit_type == 0
 end
 ylabel('Value')
 title('Raw data & trend')
-fig = gcf;
-set(gcf,'Color', 'white')
+%fig = gcf;
+%set(gcf,'Color', 'white')
 set(gcf,'Units','normalized','position',[0.09,0.3,0.35,0.4]) % set position
 hold on;
 prewhiten_list = 1;
@@ -975,7 +979,7 @@ else
     datasgolay = (zeros(npts,1));
 end
 
-fig.Color = [.95 .95 .95];
+%fig.Color = [.95 .95 .95];
 set(handles.prewhiten_select_popupmenu,'String',prewhiten,'Value',1);
 set(gca,'XMinorTick','on','YMinorTick','on')
 
