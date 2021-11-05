@@ -74,7 +74,7 @@ function varargout = AC(varargin)
 
 % Edit the above text to modify the response to help AC
 
-% Last Modified by GUIDE v2.5 29-May-2021 23:52:31
+% Last Modified by GUIDE v2.5 31-Oct-2021 16:18:30
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -1768,70 +1768,6 @@ if nplot == 1
         end
 end
 guidata(hObject, handles);
-
-% --------------------------------------------------------------------
-function menu_smooth_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_smooth (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
-nplot = length(plot_selected);   % length
-if nplot == 1
-    data_name = char(contents(plot_selected));
-    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
-    GETac_pwd; data_name = fullfile(ac_pwd,data_name);
-        if isdir(data_name) == 1
-        else
-            [~,dat_name,ext] = fileparts(data_name);
-        if sum(strcmp(ext,handles.filetype)) > 0
-
-            try
-                fid = fopen(data_name);
-                data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
-                fclose(fid);
-                if iscell(data_ft)
-                    data = cell2mat(data_ft);
-                end
-            catch
-                data = load(data_name);
-            end 
-
-            time = data(:,1);
-            value = data(:,2);
-            npts = length(time);
-            dlg_title = 'Smooth';
-            prompt = {'Number of points (3, 5, 7, ...):'};
-            num_lines = 1;
-            defaultans = {'3'};
-            options.Resize='on';
-            answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-            if ~isempty(answer)
-                smooth_v = str2double(answer{1});
-                %data(:,2) = movemean(data(:,2),smooth_v,'omitnan');
-                data(:,2) = movemean(data(:,2),smooth_v);
-                name1 = [dat_name,'_',num2str(smooth_v),'ptsm',ext];  % New name
-                CDac_pwd
-                dlmwrite(name1, data, 'delimiter', ',', 'precision', 9); 
-                d = dir; %get files
-                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-                refreshcolor;
-                cd(pre_dirML); % return to matlab view folder
-                figure;
-                plot(time,value,'k')
-                hold on;
-                plot(time,data(:,2),'r','LineWidth',2.5)
-                title([dat_name,ext], 'Interpreter', 'none')
-                xlabel(handles.unit)
-                ylabel('Value')
-                legend('Raw',[num2str(smooth_v),'points-smoothed'])
-                hold off;
-            end
-        end
-        end
-end
-guidata(hObject, handles);
-
 
 % --------------------------------------------------------------------
 function menu_bootstrap_Callback(hObject, eventdata, handles)
@@ -5017,6 +4953,70 @@ guidata(hObject, handles);
 
 
 % --------------------------------------------------------------------
+function menu_smooth_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_smooth (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox_acmain,'Value');
+nplot = length(plot_selected);   % length
+if nplot == 1
+    data_name = char(contents(plot_selected));
+    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; data_name = fullfile(ac_pwd,data_name);
+        if isdir(data_name) == 1
+        else
+            [~,dat_name,ext] = fileparts(data_name);
+        if sum(strcmp(ext,handles.filetype)) > 0
+
+            try
+                fid = fopen(data_name);
+                data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
+                fclose(fid);
+                if iscell(data_ft)
+                    data = cell2mat(data_ft);
+                end
+            catch
+                data = load(data_name);
+            end 
+
+            time = data(:,1);
+            value = data(:,2);
+            npts = length(time);
+            dlg_title = 'Moving Mean';
+            prompt = {'Number of data points (3, 5, 7, ...):'};
+            num_lines = 1;
+            defaultans = {'3'};
+            options.Resize='on';
+            answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+            if ~isempty(answer)
+                smooth_v = str2double(answer{1});
+                %data(:,2) = movemean(data(:,2),smooth_v,'omitnan');
+                data(:,2) = movemean(data(:,2),smooth_v);
+                name1 = [dat_name,'_',num2str(smooth_v),'ptsm',ext];  % New name
+                CDac_pwd
+                dlmwrite(name1, data, 'delimiter', ',', 'precision', 9); 
+                d = dir; %get files
+                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+                refreshcolor;
+                cd(pre_dirML); % return to matlab view folder
+                figure;
+                plot(time,value,'k')
+                hold on;
+                plot(time,data(:,2),'r','LineWidth',2.5)
+                title([dat_name,ext], 'Interpreter', 'none')
+                xlabel(handles.unit)
+                ylabel('Value')
+                legend('Raw',[num2str(smooth_v),'points-smoothed'])
+                hold off;
+            end
+        end
+        end
+end
+guidata(hObject, handles);
+
+
+% --------------------------------------------------------------------
 function menu_movmedian_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_movmedian (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -5047,18 +5047,16 @@ if nplot == 1
             value = data(:,2);
             npts = length(time);
             dlg_title = 'Moving Median';
-            prompt = {'Moving median window: (0.2 = 20%)'};
+            prompt = {'Window (number of data points, 3, 5, 7, etc.):'};
             num_lines = 1;
-            defaultans = {'0.2'};
+            defaultans = {'3'};
             options.Resize='on';
             answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
             if ~isempty(answer)
                 smooth_v = str2double(answer{1});
-                % median-smoothing data numbers
-                smoothn = round(smooth_v * npts);
                 % median-smoothing
-                try data(:,2) = moveMedian(data(:,2),smoothn);
-                    name1 = [dat_name,'_',num2str(smooth_v*100),'%-median',ext];  % New name
+                try data(:,2) = moveMedian(data(:,2),smooth_v);
+                    name1 = [dat_name,'_',num2str(smooth_v),'pts-median',ext];  % New name
                     CDac_pwd
                     dlmwrite(name1, data, 'delimiter', ',', 'precision', 9); 
                     d = dir; %get files
@@ -5072,7 +5070,74 @@ if nplot == 1
                     title([dat_name,ext], 'Interpreter', 'none')
                     xlabel(handles.unit)
                     ylabel('Value')
-                    legend('Raw',[num2str(smooth_v*100),'%-median smoothed'])
+                    legend('Raw',[num2str(smooth_v),'pts-median smoothed'])
+                    hold off;
+                catch
+                    msgbox('Data error, empty value?','Error')
+                end
+            end
+        end
+        end
+end
+guidata(hObject, handles);
+
+
+% --------------------------------------------------------------------
+function menu_movGauss_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_movGauss (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox_acmain,'Value');
+nplot = length(plot_selected);   % length
+if nplot == 1
+    data_name = char(contents(plot_selected));
+    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; data_name = fullfile(ac_pwd,data_name);
+        if isdir(data_name) == 1
+        else
+            [~,dat_name,ext] = fileparts(data_name);
+        if sum(strcmp(ext,handles.filetype)) > 0
+        try
+            fid = fopen(data_name);
+            data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
+            fclose(fid);
+            if iscell(data_ft)
+                data = cell2mat(data_ft);
+            end
+        catch
+            data = load(data_name);
+        end 
+
+            time = data(:,1);
+            value = data(:,2);
+            npts = length(time);
+            dlg_title = 'Gaussian-weighted moving average filter';
+            prompt = {'Window (number of data points, 4, 11, etc.):'};
+            num_lines = 1;
+            defaultans = {'4'};
+            options.Resize='on';
+            answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+            if ~isempty(answer)
+                window = round(str2double(answer{1}));
+                % median-smoothing data numbers
+                % median-smoothing
+                try data(:,2) = smoothdata(data(:,2),'gaussian',window); 
+                    name1 = [dat_name,'_',num2str(window),'pts-Gauss',ext];  % New name
+                    CDac_pwd
+                    dlmwrite(name1, data, 'delimiter', ',', 'precision', 9); 
+                    d = dir; %get files
+                    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+                    refreshcolor;
+                    cd(pre_dirML); % return to matlab view folder
+                    mvmedianfig = figure;
+                    plot(time,value,'k')
+                    hold on;
+                    plot(time,data(:,2),'r','LineWidth',2.5)
+                    title([dat_name,ext], 'Interpreter', 'none')
+                    xlabel(handles.unit)
+                    ylabel('Value')
+                    legend('Raw',[num2str(window),' pts-Gauss smoothed'])
                     hold off;
                 catch
                     msgbox('Data error, empty value?','Error')
@@ -5591,3 +5656,4 @@ function popupmenu2_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+

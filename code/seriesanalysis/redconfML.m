@@ -1,4 +1,4 @@
-function [rhoM, s0M,redconfAR1,redconfML96]=redconfML(x,dt,nw,nfft,linlog,smoothwin,fmax,plot)
+function [rhoM, s0M,redconfAR1,redconfML96]=redconfML(x,dt,nw,nfft,linlog,smoothwin,fmax,plotn)
 %
 % Robust Estimation of Background Noise and Signal Detection
 %INPUT
@@ -42,7 +42,7 @@ function [rhoM, s0M,redconfAR1,redconfML96]=redconfML(x,dt,nw,nfft,linlog,smooth
 %
 %
 if nargin < 8
-    plot = 1;
+    plotn = 1;
     if nargin < 7
         fmax = 1/(2*dt);
     if nargin < 6
@@ -131,7 +131,7 @@ chi95 = theored1 * chi2inv(0.95,nw2)/nw2;
 chi99 = theored1 * chi2inv(0.99,nw2)/nw2;
 chi999 = theored1 * chi2inv(0.999,nw2)/nw2;
 
-if plot == 1
+if plotn == 1
     figure; 
     semilogy(ft0,pxx0,'k')
     hold on; 
