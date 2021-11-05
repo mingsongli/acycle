@@ -51,7 +51,8 @@ if get(handles.checkbox_ar1_check,'value')
     %figdata = figure;
     clf;
     set(gcf,'Color', 'white')
-    [fd,po,theored,tabtchi90,tabtchi95,tabtchi99,tabtchi999]=redconftabtchi(datax,nw,dt,nzeropad,2);
+    %[fd,po,theored,tabtchi90,tabtchi95,tabtchi99,tabtchi999]=redconftabtchi(datax,nw,dt,nzeropad,2);
+    [fd,po,theored,tabtchi90,tabtchi95,tabtchi99,tabtchi999]=redconfchi2(datax,nw,dt,nzeropad,2);
     pt = 1./fd;
     plot(pt,po,'k-','LineWidth',1);
     hold on; 

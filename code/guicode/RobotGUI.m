@@ -651,7 +651,8 @@ set(runbt,'CData',imread('menu_robot.jpg'))
                 disp('>>')
                 disp('>>  ==========    Step 4: Power spctra & noise   ==========')
                 disp('>>')
-                [f,p,theored,tabtchi90,tabtchi95,tabtchi99,tabtchi999]=redconftabtchi(dat(:,2),2,dt);
+                %[f,p,theored,tabtchi90,tabtchi95,tabtchi99,tabtchi999]=redconftabtchi(dat(:,2),2,dt);
+                [f,p,theored,tabtchi90,tabtchi95,tabtchi99,tabtchi999]=redconfchi2(dat(:,2),2,dt);
                 figure; semilogy(f,p,'k')
                 set(gcf,'Units','normalized','position',[0.66,0.5,0.33,0.4])
                 hold on; 
