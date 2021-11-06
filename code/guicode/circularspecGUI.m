@@ -166,10 +166,10 @@ if get(handles.radiobutton3,'Value') == 1
     disp(' Random distance model')
     if get(handles.noise_white,'Value') == 1
         disp('    white noise model')
-        clmodel = 2;
+        clmodel = 2;   % two models (monte carlo and theoretic)
     else
         disp('    red noise model')
-        clmodel = 3;
+        clmodel = 3;  % 1 model; theoretic
         dlg_title = 'Robust AR(1)';
         prompt = {'Median smoothing window: default 0.2=20%'};
         num_lines = 1;
@@ -186,7 +186,7 @@ if get(handles.radiobutton3,'Value') == 1
     end
 else
     clmodel = 1;
-    disp(' Fixed distance model')
+    disp(' Fixed distance model')  % 1 model; monte carlo
 end
 
 % User defined parameters
@@ -206,7 +206,7 @@ if clmodel < 3
             RR(i,:) = Ri;
         end
     elseif clmodel == 2
-        a = rand(length(data),mcn)*max(data);
+        a = rand(length(data),mcn)*(max(data)-min(data)) + min(data);
         for i = 1:mcn    
             [~,Ri,~] = circularspec(a(:,i),p1,p2,pn,handles.linLog,plotn);
             RR(i,:) = Ri;
@@ -220,7 +220,7 @@ if clmodel < 3
     % real power spectrum
     [P,R,t0] = circularspec(data,p1,p2,pn,handles.linLog,0);
 
-    % confidence levels
+    % confidence levels using Monte Carlo
     cl = zeros(1,pn);
     for j = 1: length(cl)
         percj = [RR(:,j);R(j)];
@@ -235,7 +235,6 @@ if clmodel < 3
         nw2 = 2*(K);
         chi90 = theowhite * chi2inv(0.90,nw2)/nw2;
         chi95 = theowhite * chi2inv(0.95,nw2)/nw2;
-        %chi98 = theored1 * chi2inv(0.98,nw2)/nw2;
         chi99 = theowhite * chi2inv(0.99,nw2)/nw2;
         chi999 = theowhite * chi2inv(0.999,nw2)/nw2;
 
@@ -243,6 +242,7 @@ if clmodel < 3
         chi2normnw2 = chi2norm' * nw2;
         pll = chi2cdf(chi2normnw2,nw2);
     end
+    
 elseif clmodel == 3
     % red noise
     %number of data points
@@ -295,6 +295,7 @@ end
 plotn = 1;
 if plotn
     if clmodel < 3
+        % fixed OR random with monte carlo
         figure;
         set(gcf,'Color', 'white')
         subplot(2,1,1)
@@ -307,7 +308,11 @@ if plotn
         plot(P,Y(1,:),'k-','LineWidth',1)
         plot(P,R,'LineWidth',1,'color',[0.9290, 0.6940, 0.1250])
         hold off
-        title('CSA with Confidence Levels (Monte Carlo)')
+        if clmodel == 1
+            title('CSA with Confidence Levels (Monte Carlo, fixed distance)')
+        elseif clmodel == 2
+            title('CSA with Confidence Levels (Monte Carlo, random distance)')
+        end
         xlim([p1,p2])
         legend('99%','95%','90%','50%','power')
         if flipx; set(gca, 'XDir','reverse'); end
@@ -324,6 +329,37 @@ if plotn
         xlim([p1,p2])
         if flipx; set(gca, 'XDir','reverse'); end
         
+        % random with theoretic
+        if clmodel == 2
+            figure;
+            set(gcf,'Color', 'white')
+            subplot(2,1,1)
+            hold on;
+            plot(P,chi99,'g-','LineWidth',1)
+            plot(P,chi95,'r-','LineWidth',3)
+            plot(P,chi90,'b-','LineWidth',1)
+            plot(P,theowhite,'k-','LineWidth',1)
+            plot(P,R,'LineWidth',1,'color',[0.9290, 0.6940, 0.1250]);
+            title('CSA with Confidence Levels (white, chi2, random distance)')
+            xlabel(['Period (',handles.unit,')'])
+            ylabel('Power')
+            xlim([p1,p2])
+            legend('99%','95%','90%','50%','power')
+            if flipx; set(gca, 'XDir','reverse'); end
+
+            subplot(2,1,2)
+            hold on
+            plot(P,ones(1,pn)*95,'r-','LineWidth',3)
+            plot(P,ones(1,pn)*99,'g-','LineWidth',1)
+            plot(P,pll*100,'LineWidth',1,'color',[0.9290, 0.6940, 0.1250])
+            hold off
+            ylim([90,100])
+            xlabel(['Period (',handles.unit,')'])
+            ylabel('Confidence level (%)')
+            xlim([p1,p2])
+            if flipx; set(gca, 'XDir','reverse'); end
+        end
+    
     elseif clmodel == 3
         
         figure; 
@@ -340,6 +376,7 @@ if plotn
         xlim([p1,p2])
         xlabel(['Period (',handles.unit,')'])
         ylabel('Power')
+        title('CSA with Confidence Levels (red, chi2, random distance)')
         smthwin = [num2str(smoothwin*100),'%', ' median-smoothed'];
         legend('Robust AR(1) 99.9%', 'Robust AR(1) 99%', 'Robust AR(1) 95%','Robust AR(1) 90%',...
             'Robust AR(1) median',smthwin,'Power')
@@ -364,35 +401,6 @@ if plotn
         if flipx; set(gca, 'XDir','reverse'); end
     end
     
-    if clmodel == 2
-        figure;
-        set(gcf,'Color', 'white')
-        subplot(2,1,1)
-        hold on;
-        plot(P,chi99,'g-','LineWidth',1)
-        plot(P,chi95,'r-','LineWidth',3)
-        plot(P,chi90,'b-','LineWidth',1)
-        plot(P,theowhite,'k-','LineWidth',1)
-        plot(P,R,'LineWidth',1,'color',[0.9290, 0.6940, 0.1250]);
-        title('CSA with Confidence Levels (white noise)')
-        xlabel(['Period (',handles.unit,')'])
-        ylabel('Power')
-        xlim([p1,p2])
-        legend('99%','95%','90%','50%','power')
-        if flipx; set(gca, 'XDir','reverse'); end
-        
-        subplot(2,1,2)
-        hold on
-        plot(P,ones(1,pn)*95,'r-','LineWidth',3)
-        plot(P,ones(1,pn)*99,'g-','LineWidth',1)
-        plot(P,pll*100,'LineWidth',1,'color',[0.9290, 0.6940, 0.1250])
-        hold off
-        ylim([90,100])
-        xlabel(['Period (',handles.unit,')'])
-        ylabel('Confidence level (%)')
-        xlim([p1,p2])
-        if flipx; set(gca, 'XDir','reverse'); end
-    end
 end
 
 if savedata ==1
