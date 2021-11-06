@@ -669,7 +669,7 @@ elseif strcmp(method,'Lomb-Scargle periodogram')
     [s,x_grid,y_grid]=evoplomb(data,window,step,fmin,handles.nyquist,norm);
 elseif strcmp(method,'Multi-taper method')
     [s,x_grid,y_grid] = evopmtm(data,window,step,fmin,handles.nyquist,norm);
-elseif strcmp(method,'Fast Fourier transform')
+elseif strcmp(method,'Fast Fourier transform (MatLab)')
     fmin = str2double(get(handles.edit7,'String'));
     [s,x_grid,y_grid]=evofftML(data,window,step,fmin,handles.nyquist,norm);
 elseif strcmp(method,'Fast Fourier transform (LAH)')
