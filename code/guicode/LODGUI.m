@@ -306,10 +306,18 @@ if model == 1
             ylabel('Climatic Precession Periods (kyr)','LineWidth',1)
             xlim([age1, age2])
             
+            
+            % reorder
+            CalMiR = [...
+                calmi(:,3),calmi(:,4),calmi(:,1),calmi(:,2),calmi(:,7),calmi(:,8)...
+                360.0*3.6./calmi(:,5),360.0*3.6./calmi(:,6),...
+                calmi(:,9:end)];
             name1 = ['CalMi_',num2str(age1),'_',num2str(age2),'-Ma-step_',num2str(step),'.txt'];
             CDac_pwd
-            disp('age, daymin, daymax, amin, amax, kmin, kmax, obmin, obmax, o1min, o1max, p1min, p1max, p2min, p2max, p3min, p3max, p4min, p4max')
-            dlmwrite(name1, [T1,calmi], 'delimiter', ',', 'precision', 9);
+            disp(['>> data saved: ', name1])
+            disp('  col #1, #2, #3, ... , #19')
+            disp('  age, amin, amax, daymin, daymax, obmin, obmax, kmin, kmax, o1min, o1max, p1min, p1max, p2min, p2max, p3min, p3max, p4min, p4max')
+            dlmwrite(name1, [T1,CalMiR], 'delimiter', ',', 'precision', 9);
             d = dir; %get files
             set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
             refreshcolor;
