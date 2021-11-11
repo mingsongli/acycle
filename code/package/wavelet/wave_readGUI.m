@@ -94,8 +94,6 @@ if handles.wavehastorerun
     if plot_save 
         
         name1 = [dat_name,'-wavelet.fig'];
-        name2 = [dat_name,'-wavelet-time.txt'];
-        name3 = [dat_name,'-wavelet-period.txt'];
         name4 = [dat_name,'-wavelet-power.txt'];
         name5 = [dat_name,'-wavelet-siglev95.txt'];
         CDac_pwd
@@ -103,23 +101,24 @@ if handles.wavehastorerun
             disp(['>>  Save as: ',name1, '. Folder: '])
             disp(pwd)
         catch
-            disp('>>  Wavelet figure unsaved ...')
+            disp('>>  Error. Wavelet figure unsaved. Save manually if needed ...')
         end
         try close(figwarnwave)
         catch
         end
-        dlmwrite(name2, datax, 'delimiter', ',', 'precision', 9);
-        dlmwrite(name3, period, 'delimiter', ',', 'precision', 9);
-        dlmwrite(name4, power, 'delimiter', ',', 'precision', 9);
-        dlmwrite(name5, sig95, 'delimiter', ',', 'precision', 9);
+        power_mat = [nan,period;datax,power'];
+        sig_mat   = [nan,period;datax,sig95'];
+        dlmwrite(name4, power_mat, 'delimiter', ',', 'precision', 9);
+        dlmwrite(name5, sig_mat, 'delimiter', ',', 'precision', 9);
         d = dir; %get files
         set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
         refreshcolor;
         cd(pre_dirML); % return to matlab view folder
         
     end
+    
 else
-    disp('  Parameters NOT changed. Use wavelet analysis for plots')
+    disp('  Wavelet: Parameters unchanged. Use existing analysis for plots')
     % read memory to save time because wavelet analysis can be time
     % consuming
     datax = handles.datax;

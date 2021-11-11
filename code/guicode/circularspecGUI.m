@@ -241,6 +241,8 @@ if clmodel < 3
         chi2norm = R./theowhite';
         chi2normnw2 = chi2norm' * nw2;
         pll = chi2cdf(chi2normnw2,nw2);
+        
+        Y1 = [theowhite',chi90',chi95',chi99',chi999'];
     end
     
 elseif clmodel == 3
@@ -409,10 +411,14 @@ if savedata ==1
         if clmodel == 1
             name1 = [handles.filename,'-CSA-fixed','.txt'];
         elseif clmodel == 2
-            name1 = [handles.filename,'-CSA-random','.txt'];
+            name1 = [handles.filename,'-CSA-random-theoreticwhite','.txt'];
+            name2 = [handles.filename,'-CSA-random-MonteCarlo','.txt'];
         end
         CDac_pwd
         dlmwrite(name1, xx, 'delimiter', ',', 'precision', 9); 
+        if clmodel == 2
+            dlmwrite(name2, Y1, 'delimiter', ',', 'precision', 9); 
+        end
         d = dir; %get files
         set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
         refreshcolor;
