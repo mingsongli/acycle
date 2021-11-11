@@ -191,7 +191,6 @@ guidata(hObject, handles);
 
 if max(Dti) - min(Dti) > 10 * eps('single')
     f = warndlg('Interpolation needed?','Warning');
-    figure(f);
 end
 
 % UIWAIT makes waveletGUI wait for user response (see UIRESUME)
@@ -308,6 +307,7 @@ if handles.lengthdata == 1
 else
     % coherence
 end
+guidata(hObject, handles);
 
 % --- Executes on button press in checkbox3.
 function checkbox3_Callback(hObject, eventdata, handles)
@@ -326,6 +326,7 @@ if handles.lengthdata == 1
 else
     % coherence
 end
+guidata(hObject, handles);
 
 % --- Executes on button press in checkbox4.
 function checkbox4_Callback(hObject, eventdata, handles)
@@ -344,6 +345,7 @@ if handles.lengthdata == 1
 else
     % coherence
 end
+guidata(hObject, handles);
 
 % --- Executes on button press in checkbox5.
 function checkbox5_Callback(hObject, eventdata, handles)
@@ -362,6 +364,7 @@ if handles.lengthdata == 1
 else
     % coherence
 end
+guidata(hObject, handles);
 
 % --- Executes on button press in checkbox6.
 function checkbox6_Callback(hObject, eventdata, handles)
@@ -380,6 +383,7 @@ if handles.lengthdata == 1
 else
     % coherence
 end
+guidata(hObject, handles);
 
 % --- Executes on button press in radiobutton3.
 function radiobutton3_Callback(hObject, eventdata, handles)
@@ -403,6 +407,7 @@ if handles.lengthdata == 1
 else
     % coherence
 end
+guidata(hObject, handles);
 
 % --- Executes on button press in radiobutton4.
 function radiobutton4_Callback(hObject, eventdata, handles)
@@ -426,6 +431,7 @@ if handles.lengthdata == 1
 else
     % coherence
 end
+guidata(hObject, handles);
 
 % --- Executes on selection change in popupmenu3.
 function popupmenu3_Callback(hObject, eventdata, handles)
@@ -445,6 +451,7 @@ if handles.lengthdata == 1
 else
     % coherence
 end
+guidata(hObject, handles);
 
 % --- Executes during object creation, after setting all properties.
 function popupmenu3_CreateFcn(hObject, eventdata, handles)
@@ -477,6 +484,7 @@ if handles.lengthdata == 1
 else
     % coherence
 end
+guidata(hObject, handles);
 
 % --- Executes during object creation, after setting all properties.
 function edit6_CreateFcn(hObject, eventdata, handles)
@@ -543,6 +551,7 @@ if handles.lengthdata == 1
 else
     % coherence
 end
+guidata(hObject, handles);
 
 % --- Executes during object creation, after setting all properties.
 function popupmenu2_CreateFcn(hObject, eventdata, handles)
@@ -576,6 +585,7 @@ if handles.lengthdata == 1
 else
     % coherence
 end
+guidata(hObject, handles);
 
 % --- Executes during object creation, after setting all properties.
 function edit3_CreateFcn(hObject, eventdata, handles)
@@ -609,6 +619,7 @@ if handles.lengthdata == 1
 else
     % coherence
 end
+guidata(hObject, handles);
 
 % --- Executes during object creation, after setting all properties.
 function edit4_CreateFcn(hObject, eventdata, handles)
@@ -642,6 +653,7 @@ if handles.lengthdata == 1
 else
     % coherence
 end
+guidata(hObject, handles);
 
 % --- Executes during object creation, after setting all properties.
 function edit5_CreateFcn(hObject, eventdata, handles)
@@ -674,6 +686,7 @@ if handles.lengthdata == 1
 else
     % coherence
 end
+guidata(hObject, handles);
 
 % --- Executes on button press in checkbox8.
 function checkbox8_Callback(hObject, eventdata, handles)
@@ -692,6 +705,7 @@ if handles.lengthdata == 1
 else
     % coherence
 end
+guidata(hObject, handles);
 
 % --- Executes on button press in checkbox9.
 function checkbox9_Callback(hObject, eventdata, handles)
@@ -710,6 +724,7 @@ if handles.lengthdata == 1
 else
     % coherence
 end
+guidata(hObject, handles);
 
 
 function edit7_Callback(hObject, eventdata, handles)
@@ -730,6 +745,7 @@ if handles.lengthdata == 1
 else
     % coherence
 end
+guidata(hObject, handles);
 
 % --- Executes during object creation, after setting all properties.
 function edit7_CreateFcn(hObject, eventdata, handles)
@@ -761,6 +777,7 @@ if handles.lengthdata == 1
 else
     % coherence
 end
+guidata(hObject, handles);
 
 % --- Executes on button press in checkbox11.
 function checkbox11_Callback(hObject, eventdata, handles)
@@ -801,6 +818,7 @@ if handles.lengthdata == 1
 else
     % coherence
 end
+guidata(hObject, handles);
 
 
 % --- Executes on button press in radiobutton2.
@@ -820,3 +838,4 @@ if handles.lengthdata == 1
 else
     % coherence
 end
+guidata(hObject, handles);
