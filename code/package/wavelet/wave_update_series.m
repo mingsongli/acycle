@@ -1,5 +1,12 @@
 % wavelet update panel A: time series
 
+% Designed for Acycle: wavelet analysis
+%
+% By Mingsong Li
+%   Peking University
+%   msli@pku.edu.cn
+%   acycle.org
+%   Nov 11, 2021
 
 %--- Plot time series
 
@@ -19,3 +26,5 @@ if plot_flipx
 else
     set(gca,'Xdir','normal')
 end
+set(gca,'XMinorTick','on','YMinorTick','on')
+set(gca,'TickDir','out');

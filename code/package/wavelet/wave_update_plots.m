@@ -1,6 +1,14 @@
 % wavelet update plots
 
 
+% Designed for Acycle: wavelet analysis
+%
+% By Mingsong Li
+%   Peking University
+%   msli@pku.edu.cn
+%   acycle.org
+%   Nov 11, 2021
+
 if and(plot_spectrum == 1,plot_series ==1)
     try figure(handles.figwave)
         

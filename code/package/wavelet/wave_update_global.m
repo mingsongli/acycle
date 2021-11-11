@@ -1,5 +1,14 @@
 % wavelet update panel C: global spectrum
 
+
+% Designed for Acycle: wavelet analysis
+%
+% By Mingsong Li
+%   Peking University
+%   msli@pku.edu.cn
+%   acycle.org
+%   Nov 11, 2021
+
 %--- Plot global wavelet spectrum
 hold on
 if plot_linelog
@@ -25,3 +34,5 @@ if plot_flipy
 else
     set(gca,'Ydir','normal')
 end
+set(gca,'XMinorTick','on','YMinorTick','on')
+set(gca,'TickDir','out');

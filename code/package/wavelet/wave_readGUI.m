@@ -1,5 +1,12 @@
 % wavelet read gui settings
 
+% Designed for Acycle: wavelet analysis
+%
+% By Mingsong Li
+%   Peking University
+%   msli@pku.edu.cn
+%   acycle.org
+%   Nov 11, 2021
 
 % read data and settings
 dat_name = handles.filename1;

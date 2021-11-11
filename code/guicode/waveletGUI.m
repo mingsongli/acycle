@@ -62,9 +62,9 @@ set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
 handles.MonZoom = varargin{1}.MonZoom;
 handles.sortdata = varargin{1}.sortdata;
 if ismac
-    set(gcf,'position',[0.45,0.4,0.4,0.35]* handles.MonZoom) % set position
+    set(gcf,'position',[0.45,0.2,0.4,0.35]* handles.MonZoom) % set position
 elseif ispc
-    set(gcf,'position',[0.45,0.4,0.4,0.35]* handles.MonZoom) % set position
+    set(gcf,'position',[0.45,0.2,0.4,0.35]* handles.MonZoom) % set position
 end
 set(gcf,'Name','Acycle: Wavelet')
 
@@ -98,18 +98,20 @@ set(handles.uipanel2,'position',[0.02,0.02,0.78,0.36])
 set(handles.checkbox2,'position',[0.02,0.75,0.25,0.2])
 set(handles.checkbox3,'position',[0.02,0.5,0.25,0.2])
 set(handles.checkbox8,'position',[0.02,0.25,0.25,0.2])
+set(handles.checkbox10,'position',[0.02,0.02,0.25,0.2])
 set(handles.checkbox4,'position',[0.3,0.75,0.25,0.2])
 set(handles.checkbox5,'position',[0.3,0.5,0.25,0.2])
 set(handles.checkbox6,'position',[0.3,0.25,0.25,0.2])
 set(handles.checkbox9,'position',[0.3,0.05,0.25,0.2])
-set(handles.radiobutton3,'position',[0.02,0.02,0.1,0.2])
-set(handles.radiobutton4,'position',[0.14,0.02,0.1,0.2])
 
-set(handles.checkbox10,'position',[0.58,0.75,0.25,0.2])
-set(handles.text9,'position',[0.58,0.45,0.12,0.15])
-set(handles.popupmenu3,'position',[0.71,0.45,0.26,0.2])
-set(handles.text10,'position',[0.58,0.15,0.12,0.15])
-set(handles.edit6,'position',[0.71,0.15,0.15,0.15])
+
+set(handles.text9,'position',[0.58,0.75,0.12,0.15])
+set(handles.popupmenu3,'position',[0.71,0.73,0.26,0.2])
+set(handles.text10,'position',[0.58,0.55,0.12,0.15])
+set(handles.edit6,'position',[0.73,0.55,0.15,0.15])
+
+set(handles.radiobutton3,'position',[0.65,0.15,0.1,0.2])
+set(handles.radiobutton4,'position',[0.75,0.15,0.1,0.2])
 
 set(handles.uipanel3,'position',[0.82,0.02,0.14,0.36])
 set(handles.checkbox7,'position',[0.03,0.6,0.95,0.2])
@@ -150,7 +152,9 @@ end
 
 time = data(:,1);
 timelen = 0.5 * (time(end)-time(1));
-dt = mean(diff(time));
+Dti = diff(time);
+dt = mean(Dti);
+
 
 set(handles.edit3,'string',num2str(2*dt))
 set(handles.edit4,'string',num2str(timelen))
@@ -163,7 +167,7 @@ set(handles.checkbox4,'value',0)
 set(handles.checkbox5,'value',1)
 set(handles.checkbox6,'value',0)
 set(handles.checkbox7,'value',0)
-set(handles.checkbox9,'value',0)
+set(handles.checkbox9,'value',1)
 set(handles.checkbox10,'value',1)
 % value
 set(handles.radiobutton1,'value',0)
@@ -184,6 +188,11 @@ handles.output = hObject;
 
 % Update handles structure
 guidata(hObject, handles);
+
+if max(Dti) - min(Dti) > 10 * eps('single')
+    f = warndlg('Interpolation needed?','Warning');
+    figure(f);
+end
 
 % UIWAIT makes waveletGUI wait for user response (see UIRESUME)
 % uiwait(handles.figure1);

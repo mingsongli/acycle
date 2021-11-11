@@ -1,4 +1,12 @@
 % wavelet update panel B: wavelet spectrum
+%
+% Designed for Acycle: wavelet analysis
+%
+% By Mingsong Li
+%   Peking University
+%   msli@pku.edu.cn
+%   acycle.org
+%   Nov 11, 2021
 
 if plot_linelog
     if plot_2d == 1
@@ -30,10 +38,7 @@ else
             surf(datax,log2(period),power)
         end
     end
-    set(gca,'YLim',log2([pt1,pt2]), ...
-    'YDir','reverse', ...
-    'YTick',log2(Yticks(:)), ...
-    'YTickLabel',Yticks)
+    
 end
 shading interp
 if isempty(plot_colorgrid)
@@ -117,3 +122,13 @@ if plot_flipy
 else
     set(gca,'Ydir','normal')
 end
+if plot_linelog
+else
+    set(gca,'YLim',log2([pt1,pt2]), ...
+    'YDir','reverse', ...
+    'YTick',log2(Yticks(:)), ...
+    'YTickLabel',Yticks)
+end
+
+set(gca,'XMinorTick','on','YMinorTick','on')
+set(gca,'TickDir','out');
