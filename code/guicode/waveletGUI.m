@@ -184,7 +184,7 @@ set(handles.checkbox4,'value',0)
 set(handles.checkbox5,'value',1)
 set(handles.checkbox6,'value',0)
 set(handles.checkbox7,'value',0)
-set(handles.checkbox10,'value',1)
+set(handles.checkbox10,'value',0)
 % value
 set(handles.radiobutton1,'value',0)
 set(handles.radiobutton2,'value',1)

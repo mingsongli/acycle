@@ -26,7 +26,7 @@ if plot_series ==1
         if ploti == 1
             if plot_swap == 0
                 %--- Plot time series 1
-                ax1 = subplot('position',[0.1 0.75 0.8 0.2]);
+                ax1 = subplot('position',[0.1 0.8 0.8 0.15]);
                 plot(datax,dat1y,'k')
                 ax1.XAxis.Visible = 'off'; % remove x-axis
             else
@@ -47,7 +47,7 @@ if plot_series ==1
         elseif ploti == 2
             if plot_swap == 0
                 %--- Plot time series 2
-                ax2 = subplot('position',[0.1 0.5 0.8 0.2]);
+                ax2 = subplot('position',[0.1 0.6 0.8 0.15]);
                 plot(datax,dat2y,'k')
                 ax2.XAxis.Visible = 'off'; % remove x-axis
                 
@@ -79,7 +79,7 @@ if plot_series ==1
     
     %--- Contour plot wavelet power spectrum
     if plot_swap == 0
-        subplot('position',[0.1 0.08 0.8 0.4])
+        subplot('position',[0.1 0.1 0.8 0.45])
     else
         subplot('position',[0.45 0.1 0.5 0.8])
     end
