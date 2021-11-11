@@ -70,12 +70,7 @@ ac_dir_str = which('ac.m');
 % Test valid directory
 pwd_init = pwd;
 
-% splash screen
-s = SplashScreen( 'Splashscreen', 'acycle_logo.jpg', ...
-                'ProgressBar', 'on', ...
-                'ProgressPosition', 1, ...
-                'ProgressRatio', 0.05 );
-s.addText( 160, 460, 'Loading ...', 'FontSize', 50, 'Color', 'white' )
+
 
 if ~isdeployed
     
@@ -92,18 +87,35 @@ if ~isdeployed
         errordlg('Directory may NOT contain non-English or non-numeric characters',...
             'Path Error')
     end
-    
-    % logo
-    pause(0.25)
+    try
+        % splash screen
+        s = SplashScreen( 'Splashscreen', 'acycle_logo.jpg', ...
+                        'ProgressBar', 'on', ...
+                        'ProgressPosition', 1, ...
+                        'ProgressRatio', 0.05 );
+        s.addText( 160, 460, 'Loading ...', 'FontSize', 50, 'Color', 'white' )
+        % logo
+        pause(0.25)
+    catch
+        
+    end
 else
-    % standalone version
-    s.addText( 140, 488, 'may take 10-60 seconds', 'FontSize', 20, 'Color', 'white' )
-    pause(1)
-    set(s,'ProgressRatio', 0.3)
-    pause(1)
-    set(s,'ProgressRatio', 0.5)
-    pause(3)
-    
+    try
+        % standalone version
+        % splash screen
+        s = SplashScreen( 'Splashscreen', 'acycle_logo.jpg', ...
+                        'ProgressBar', 'on', ...
+                        'ProgressPosition', 1, ...
+                        'ProgressRatio', 0.05 );
+        s.addText( 160, 460, 'Loading ...', 'FontSize', 50, 'Color', 'white' )
+        s.addText( 140, 488, 'may take 10-60 seconds', 'FontSize', 20, 'Color', 'white' )
+        pause(1)
+        set(s,'ProgressRatio', 0.3)
+        pause(1)
+        set(s,'ProgressRatio', 0.5)
+        pause(1)
+    catch
+    end
 end
 
 

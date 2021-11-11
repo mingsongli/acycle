@@ -22,7 +22,7 @@ function varargout = eCOCOGUI(varargin)
 
 % Edit the above text to modify the response to help eCOCOGUI
 
-% Last Modified by GUIDE v2.5 30-May-2021 14:35:15
+% Last Modified by GUIDE v2.5 06-Nov-2021 23:13:40
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -340,7 +340,8 @@ set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
 set(gcf,'color','w');
 set(handles.ecocofigspectrum,'position',[0.2,0.4,0.2,0.4]) % set position
-dt = (median(diff(datx)));
+dt = (median(diff(datx)))
+pad = handles.pad
 [p1,f] = periodogram(daty,[],handles.pad,1/dt);  % power of dat
 % remove AR1 noise
 if red == 0
@@ -417,6 +418,7 @@ if get(hObject,'Value')
         handles.pad = 10000;
     else
         handles.pad = fix(handles.npts/5000) * 5000 + 5000;
+        disp(fix(handles.npts/5000) * 5000 + 5000)
     end
     set(handles.edit12,'String',num2str(handles.pad))
     set(handles.checkbox1,'Visible','off')
@@ -1011,6 +1013,18 @@ orbit7 = [num2str(o7(1),'% .1f'),' ',num2str(o7(2),'% .1f'),' ',...
     num2str(o7(3),'% .1f'),' ',num2str(o7(4),'% .1f'),' ',...
     num2str(o7(5),'% .1f'),' ',num2str(o7(6),'% .1f'),' ',num2str(o7(7),'% .1f')];
 set(handles.text21,'String',orbit7)
+
+[daymin, daymax,amin, amax, kmin, kmax, obmin,obmax, o1min, o1max, p1min, p1max,...
+    p2min, p2max, p3min, p3max, p4min, p4max] = MilankovitchCal(age);
+age_obl = 0.5 * (o1min + o1max);
+age_p2 = 0.5 * (p1min + p1max); 
+age_p1 = 0.5 * (p2min + p2max); 
+age_p3 = 0.5 * (p3min + p3max);
+o7waltham = [405 125 95 age_obl age_p2 age_p1 age_p3];
+orbit7waltham = [num2str(o7waltham(1),'% .1f'),' ',num2str(o7waltham(2),'% .1f'),' ',...
+    num2str(o7waltham(3),'% .1f'),' ',num2str(o7waltham(4),'% .1f'),' ',...
+    num2str(o7waltham(5),'% .1f'),' ',num2str(o7waltham(6),'% .1f'),' ',num2str(o7waltham(7),'% .1f')];
+set(handles.edit11,'String',orbit7waltham)
 
 if get(handles.radiobutton7,'Value')
     handles.orbit7  = o7;    
@@ -1809,5 +1823,7 @@ function pushbutton4_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton4 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-url = 'https://davidwaltham.com/wp-content/uploads/2014/01/Milankovitch.html';
-web(url,'-browser')
+%url = 'https://davidwaltham.com/wp-content/uploads/2014/01/Milankovitch.html';
+%web(url,'-browser')
+guidata(hObject, handles);
+LODGUI(handles);

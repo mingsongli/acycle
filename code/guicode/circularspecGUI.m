@@ -68,7 +68,7 @@ h1=findobj(h,'FontUnits','norm');  % find all font units as points
 set(h1,'FontUnits','points','FontSize',11.5);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
-set(handles.hmain,'position',[0.2,0.3,0.35,0.2] * handles.MonZoom) % set position
+set(handles.hmain,'position',[0.2,0.3,0.45,0.28] * handles.MonZoom) % set position
 set(gcf,'Name','Acycle: Circular spectral analysis')
 dat =varargin{1}.current_data;  % data
 handles.dat = dat;
@@ -98,15 +98,18 @@ set(handles.text7,'position',[0.18,0.05,0.76,0.34])
 
 set(handles.uipanel2,'position',[0.05,0.05,0.6,0.3])
 set(handles.text8,'position',[0.015,0.376,0.2,0.35])
-set(handles.edit5,'position',[0.22,0.376,0.2,0.4])
-set(handles.radiobutton3,'position',[0.5,0.58,0.45,0.4])
-set(handles.radiobutton4,'position',[0.5,0.1,0.45,0.4])
+set(handles.edit5,'position',[0.22,0.376,0.16,0.4])
+set(handles.radiobutton3,'position',[0.4,0.58,0.25,0.4])
+set(handles.radiobutton4,'position',[0.4,0.1,0.25,0.4])
 set(handles.radiobutton3,'value',0)
 set(handles.radiobutton4,'value',1)
+set(handles.uibuttongroup1,'position',[0.68,0.02,0.3,0.96])
+set(handles.uibuttongroup1,'visible','off')
+set(handles.noise_white,'position',[0.15,0.5,0.82,0.45])
+set(handles.noise_red,'position',[0.15,0.05,0.82,0.45])
 set(handles.checkbox1,'position',[0.66,0.155,0.15,0.14])
 set(handles.checkbox2,'position',[0.66,0.055,0.15,0.14])
 set(handles.pushbutton1,'position',[0.83,0.055,0.12,0.23])
-
 
 [~, ncol] = size(dat);
 if ncol == 1
@@ -160,9 +163,30 @@ savedata = get(handles.checkbox1,'value');
 flipx = get(handles.checkbox2,'value');
 
 if get(handles.radiobutton3,'Value') == 1
-    clmodel = 2;
+    disp(' Random distance model')
+    if get(handles.noise_white,'Value') == 1
+        disp('    white noise model')
+        clmodel = 2;   % two models (monte carlo and theoretic)
+    else
+        disp('    red noise model')
+        clmodel = 3;  % 1 model; theoretic
+        dlg_title = 'Robust AR(1)';
+        prompt = {'Median smoothing window: default 0.2=20%'};
+        num_lines = 1;
+        defaultans = {num2str(0.2)};
+        options.Resize='on';
+        answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+
+        if ~isempty(answer)
+            smoothwin = str2double(answer{1});
+            nw = 2; % number
+            rho = 0.5; % prior
+            linlog = handles.linLog; % 1 = log; 2 = linear
+        end
+    end
 else
     clmodel = 1;
+    disp(' Fixed distance model')  % 1 model; monte carlo
 end
 
 % User defined parameters
@@ -171,83 +195,275 @@ data = handles.dat;
 % start
 RR = zeros(mcn,pn);
 plotn = 0;  % no plot for the Monte Carlo simulations
-
-% Monte Carlo
-if clmodel == 1
-    for i = 1:mcn
-        t2 = diff(data);
-        tn3 = randperm(length(t2));
-        tn4= [0;cumsum(t2(tn3))];
-        [~,Ri,~] = circularspec(tn4,p1,p2,pn,handles.linLog,plotn);
-        RR(i,:) = Ri;
+if clmodel < 3
+    % Monte Carlo
+    if clmodel == 1
+        for i = 1:mcn
+            t2 = diff(data);
+            tn3 = randperm(length(t2));
+            tn4= [0;cumsum(t2(tn3))];
+            [~,Ri,~] = circularspec(tn4,p1,p2,pn,handles.linLog,plotn);
+            RR(i,:) = Ri;
+        end
+    elseif clmodel == 2
+        a = rand(length(data),mcn)*(max(data)-min(data)) + min(data);
+        for i = 1:mcn    
+            [~,Ri,~] = circularspec(a(:,i),p1,p2,pn,handles.linLog,plotn);
+            RR(i,:) = Ri;
+        end
     end
-elseif clmodel == 2
-    a = rand(length(data),mcn)*max(data);
-    for i = 1:mcn    
-        [~,Ri,~] = circularspec(a(:,i),p1,p2,pn,handles.linLog,plotn);
-        RR(i,:) = Ri;
+
+    % percentile
+    prt = [50,90,95,99];
+    Y = prctile(RR,prt,1);
+
+    % real power spectrum
+    [P,R,t0] = circularspec(data,p1,p2,pn,handles.linLog,0);
+
+    % confidence levels using Monte Carlo
+    cl = zeros(1,pn);
+    for j = 1: length(cl)
+        percj = [RR(:,j);R(j)];
+        cl(j) = length(percj(percj<R(j)))/(1+mcn);
     end
+
+    if clmodel == 2
+        % theory white noise
+        theowhite = ones(1,pn)*mean(Y(1,:));
+        nw = 2;
+        K = 2*nw -1;
+        nw2 = 2*(K);
+        chi90 = theowhite * chi2inv(0.90,nw2)/nw2;
+        chi95 = theowhite * chi2inv(0.95,nw2)/nw2;
+        chi99 = theowhite * chi2inv(0.99,nw2)/nw2;
+        chi999 = theowhite * chi2inv(0.999,nw2)/nw2;
+
+        chi2norm = R./theowhite';
+        chi2normnw2 = chi2norm' * nw2;
+        pll = chi2cdf(chi2normnw2,nw2);
+        
+        Y1 = [theowhite',chi90',chi95',chi99',chi999'];
+    end
+    
+elseif clmodel == 3
+    % red noise
+    %number of data points
+    datan = length(data);
+    datan1 = datan -1;
+
+    % test Period
+    if linlog == 2
+        P = linspace(p1,p2,pn);
+    else
+        sedinc = (log10(p2) - log10(p1))/(pn-1);
+        P = zeros(1,pn);
+        for ii = 1: pn
+            P(ii) = 10^(  log10(p1)  +  (ii-1) * sedinc ) ;
+        end
+    end
+
+    % real power spectrum
+    [P,R,t0] = circularspec(data(:,1),p1,p2,pn,linlog,0);
+
+    s0 = mean(R);
+    duration = max(data(:,1)) - min(data(:,1));
+    fmax = 1/(2 * duration/datan);
+
+    ft = 1./P;
+    ft = ft';
+    pxxsmooth = moveMedian(R,round(smoothwin*length(R)));
+
+    cospara = cos(pi.*ft./fmax);
+    funrobust = @(v,f)v(1) * (1-v(2)^2)./(1-(2.*v(2).*cospara)+v(2)^2);
+    v1 = [s0,rho];
+    x = lsqcurvefit(funrobust,v1,ft,pxxsmooth);
+    rhoM = x(2);
+    s0M = x(1);
+    disp('>>    MTM rho and S0 estimation: curve fitting method')
+
+    % median-smoothing reshape significance level
+    theored1 = s0M * (1-rhoM^2)./(1-(2.*rhoM.*cos(pi.*ft./fmax))+rhoM^2);
+
+    K = 2*nw -1;
+    nw2 = 2*(K);
+    % Chi-square inversed distribution
+    chi90 = theored1 * chi2inv(0.90,nw2)/nw2;
+    chi95 = theored1 * chi2inv(0.95,nw2)/nw2;
+    chi99 = theored1 * chi2inv(0.99,nw2)/nw2;
+    chi999 = theored1 * chi2inv(0.999,nw2)/nw2;
+    
 end
-
-% percentile
-prt = [50,90,95,99,99.5];
-Y = prctile(RR,prt,1);
-
-% real power spectrum
-[P,R,t0] = circularspec(data,p1,p2,pn,handles.linLog,0);
-
-% confidence levels
-cl = zeros(1,pn);
-for j = 1: length(cl)
-    percj = [RR(:,j);R(j)];
-    cl(j) = length(percj(percj<R(j)))/(1+mcn);
-end
-
 % plot
 plotn = 1;
 if plotn
-    figure;
-    set(gcf,'Color', 'white')
-    subplot(2,1,1)
-    xlabel(['Period (',handles.unit,')'])
-    ylabel('Power')
-    hold on;
-    plot(P,Y(5,:),'c-','LineWidth',1)
-    plot(P,Y(4,:),'g-','LineWidth',1)
-    plot(P,Y(3,:),'r-','LineWidth',3)
-    plot(P,Y(2,:),'b-','LineWidth',1)
-    plot(P,Y(1,:),'k-','LineWidth',1)
-    plot(P,R,'LineWidth',1,'color',[0.9290, 0.6940, 0.1250])
-    hold off
-    xlim([p1,p2])
-    legend('99.9%','99%','95%','90%','50%','power')
-    if flipx; set(gca, 'XDir','reverse'); end
+    if clmodel < 3
+        % fixed OR random with monte carlo
+        figure;
+        set(gcf,'Color', 'white')
+        subplot(2,1,1)
+        xlabel(['Period (',handles.unit,')'])
+        ylabel('Power')
+        hold on;
+        plot(P,Y(4,:),'g-','LineWidth',1)
+        plot(P,Y(3,:),'r-','LineWidth',3)
+        plot(P,Y(2,:),'b-','LineWidth',1)
+        plot(P,Y(1,:),'k-','LineWidth',1)
+        plot(P,R,'LineWidth',1,'color',[0.9290, 0.6940, 0.1250])
+        hold off
+        if clmodel == 1
+            title('CSA with Confidence Levels (Monte Carlo, fixed distance)')
+        elseif clmodel == 2
+            title('CSA with Confidence Levels (Monte Carlo, random distance)')
+        end
+        xlim([p1,p2])
+        legend('99%','95%','90%','50%','power')
+        if flipx; set(gca, 'XDir','reverse'); end
+
+        subplot(2,1,2)
+        hold on
+        plot(P,ones(1,pn)*95,'r-','LineWidth',3)
+        plot(P,ones(1,pn)*99,'g-','LineWidth',1)
+        plot(P,cl*100,'LineWidth',1,'color',[0.9290, 0.6940, 0.1250])
+        hold off
+        ylim([90,100])
+        xlabel(['Period (',handles.unit,')'])
+        ylabel('Confidence level (%)')
+        xlim([p1,p2])
+        if flipx; set(gca, 'XDir','reverse'); end
+        
+        % random with theoretic
+        if clmodel == 2
+            figure;
+            set(gcf,'Color', 'white')
+            subplot(2,1,1)
+            hold on;
+            plot(P,chi99,'g-','LineWidth',1)
+            plot(P,chi95,'r-','LineWidth',3)
+            plot(P,chi90,'b-','LineWidth',1)
+            plot(P,theowhite,'k-','LineWidth',1)
+            plot(P,R,'LineWidth',1,'color',[0.9290, 0.6940, 0.1250]);
+            title('CSA with Confidence Levels (white, chi2, random distance)')
+            xlabel(['Period (',handles.unit,')'])
+            ylabel('Power')
+            xlim([p1,p2])
+            legend('99%','95%','90%','50%','power')
+            if flipx; set(gca, 'XDir','reverse'); end
+
+            subplot(2,1,2)
+            hold on
+            plot(P,ones(1,pn)*95,'r-','LineWidth',3)
+            plot(P,ones(1,pn)*99,'g-','LineWidth',1)
+            plot(P,pll*100,'LineWidth',1,'color',[0.9290, 0.6940, 0.1250])
+            hold off
+            ylim([90,100])
+            xlabel(['Period (',handles.unit,')'])
+            ylabel('Confidence level (%)')
+            xlim([p1,p2])
+            if flipx; set(gca, 'XDir','reverse'); end
+        end
     
-    subplot(2,1,2)
-    hold on
-    plot(P,ones(1,pn)*95,'r-','LineWidth',3)
-    plot(P,ones(1,pn)*99,'g-','LineWidth',1)
-    plot(P,ones(1,pn)*99.9,'c-','LineWidth',1)
-    plot(P,cl*100,'LineWidth',1,'color',[0.9290, 0.6940, 0.1250])
-    hold off
-    ylim([90,100])
-    xlabel(['Period (',handles.unit,')'])
-    ylabel('Confidence level (%)')
-    xlim([p1,p2])
-    if flipx; set(gca, 'XDir','reverse'); end
+    elseif clmodel == 3
+        
+        figure; 
+        set(gcf,'Color', 'white')
+        subplot(2,1,1)
+        hold on; 
+        semilogy(P,chi999,'g--','LineWidth',1);
+        semilogy(P,chi99,'b-.');
+        semilogy(P,chi95,'r--','LineWidth',2);
+        semilogy(P,chi90,'r-');
+        semilogy(P,theored1,'k-','LineWidth',2);
+        semilogy(P,pxxsmooth,'m-.');
+        semilogy(P,R,'k')
+        xlim([p1,p2])
+        xlabel(['Period (',handles.unit,')'])
+        ylabel('Power')
+        title('CSA with Confidence Levels (red, chi2, random distance)')
+        smthwin = [num2str(smoothwin*100),'%', ' median-smoothed'];
+        legend('Robust AR(1) 99.9%', 'Robust AR(1) 99%', 'Robust AR(1) 95%','Robust AR(1) 90%',...
+            'Robust AR(1) median',smthwin,'Power')
+        if flipx; set(gca, 'XDir','reverse'); end
+        
+        subplot(2,1,2)
+        hold on
+        chi2norm = R./theored1';
+        chi2normnw2 = chi2norm' * nw2;
+        pl = chi2cdf(chi2normnw2,nw2);
+        
+        plot(P,ones(1,pn)*90,'r-.','LineWidth',1)
+        plot(P,ones(1,pn)*95,'r--','LineWidth',3)
+        plot(P,ones(1,pn)*99,'b-.','LineWidth',1)
+        plot(P,ones(1,pn)*99.9,'g--','LineWidth',1)
+        plot(P,pl*100,'LineWidth',1,'color',[0.9290, 0.6940, 0.1250])
+        xlim([p1,p2])
+        hold off
+        ylim([80,100])
+        xlabel(['Period (',handles.unit,')'])
+        ylabel('confidence level (%)')
+        if flipx; set(gca, 'XDir','reverse'); end
+    end
+    
 end
+
 if savedata ==1
-    xx = [P',R',Y',cl'];
-    name1 = [handles.filename,'-CSA','.txt'];
-    CDac_pwd
-    dlmwrite(name1, xx, 'delimiter', ',', 'precision', 9); 
-    d = dir; %get files
-    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-    refreshcolor;
-    cd(pre_dirML); % return to matlab view folder
-    disp(['>> saved data: ',name1])
-    disp(' Col  #1      #2    #3   #4   #5   #6    #7    #8')
-    disp('    period, power, 50%, 90%, 95%, 99%, 99.5%, Conf.Level')
+    if clmodel < 3
+        xx = [P',R',Y',cl'];
+        if clmodel == 1
+            name1 = [handles.filename,'-CSA-fixed','.txt'];
+        elseif clmodel == 2
+            name1 = [handles.filename,'-CSA-random-theoreticwhite','.txt'];
+            name2 = [handles.filename,'-CSA-random-MonteCarlo','.txt'];
+        end
+        CDac_pwd
+        dlmwrite(name1, xx, 'delimiter', ',', 'precision', 9); 
+        if clmodel == 2
+            dlmwrite(name2, Y1, 'delimiter', ',', 'precision', 9); 
+        end
+        d = dir; %get files
+        set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+        refreshcolor;
+        cd(pre_dirML); % return to matlab view folder
+        disp(['>> saved data: ',name1])
+        %disp(' Col  #1      #2    #3   #4   #5   #6    #7    #8')
+        %disp('    period, power, 50%, 90%, 95%, 99%, 99.5%, Conf.Level')
+        disp(' Col  #1      #2    #3   #4   #5   #6    #7')
+        disp('    period, power, 50%, 90%, 95%, 99% Conf.Level')
+    elseif clmodel == 3        
+        Y = [pxxsmooth';theored1';chi90';chi95';chi99';chi999'];
+        xx = [P',R',Y',pl(:,1)];
+        %xx = [P',R',Y'];
+        name1 = [handles.filename,'-CSA-random-robustAR1','.txt'];
+        CDac_pwd
+        dlmwrite(name1, xx, 'delimiter', ',', 'precision', 9); 
+        d = dir; %get files
+        set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+        refreshcolor;
+        cd(pre_dirML); % return to matlab view folder
+        disp(['>> saved data: ',name1])
+        %disp(' Col  #1      #2    #3   #4   #5   #6    #7    #8')
+        %disp('    period, power, 50%, 90%, 95%, 99%, 99.5%, Conf.Level')
+        disp(' Col  #1      #2    #3   #4   #5   #6    #7')
+        disp('    period, power, 50%, 90%, 95%, 99% Conf.Level')
+    end
+    
+    if clmodel == 2
+        
+        Y = [theowhite;chi90;chi95;chi99;chi999];
+        xx = [P',R',Y',pll(:,1)];
+        name1 = [handles.filename,'-CSA-random-white','.txt'];
+        CDac_pwd
+        dlmwrite(name1, xx, 'delimiter', ',', 'precision', 9); 
+        d = dir; %get files
+        set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+        refreshcolor;
+        cd(pre_dirML); % return to matlab view folder
+        disp(['>> saved data: ',name1])
+        %disp(' Col  #1      #2    #3   #4   #5   #6    #7    #8')
+        %disp('    period, power, 50%, 90%, 95%, 99%, 99.5%, Conf.Level')
+        disp(' Col  #1      #2    #3   #4   #5   #6    #7')
+        disp('    period, power, 50%, 90%, 95%, 99% Conf.Level')
+    end
+    
 end
 
 % --- Outputs from this function are returned to the command line.
@@ -336,8 +552,10 @@ function radiobutton3_Callback(hObject, eventdata, handles)
 val = get(handles.radiobutton3,'Value');
 if val == 1
     set(handles.radiobutton4, 'Value', 0);
+    set(handles.uibuttongroup1, 'visible', 'on');
 else
     set(handles.radiobutton4, 'Value', 1);
+    set(handles.uibuttongroup1, 'visible', 'off');
 end
 
 % --- Executes on button press in radiobutton4.
@@ -350,8 +568,10 @@ function radiobutton4_Callback(hObject, eventdata, handles)
 val = get(handles.radiobutton4,'Value');
 if val == 1
     set(handles.radiobutton3, 'Value', 0);
+    set(handles.uibuttongroup1, 'visible', 'off');
 else
     set(handles.radiobutton3, 'Value', 1);
+    set(handles.uibuttongroup1, 'visible', 'on');
 end
 
 % --- Executes on button press in radiobutton1.
