@@ -66,7 +66,6 @@ if ismac
 elseif ispc
     set(gcf,'position',[0.45,0.2,0.4,0.35]* handles.MonZoom) % set position
 end
-set(gcf,'Name','Acycle: Wavelet')
 
 set(handles.text2,'position',[0.02,0.85,0.1,0.06])
 set(handles.edit1,'position',[0.13,0.85,0.65,0.06])
@@ -104,7 +103,6 @@ set(handles.checkbox5,'position',[0.3,0.5,0.25,0.2])
 set(handles.checkbox6,'position',[0.3,0.25,0.25,0.2])
 set(handles.checkbox9,'position',[0.3,0.05,0.25,0.2])
 
-
 set(handles.text9,'position',[0.58,0.75,0.12,0.15])
 set(handles.popupmenu3,'position',[0.71,0.73,0.26,0.2])
 set(handles.text10,'position',[0.58,0.55,0.12,0.15])
@@ -131,23 +129,44 @@ handles.listbox_acmain = varargin{1}.listbox_acmain; % save path
 handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
 handles.lengthdata = lengthdata;
 handles.wavehastorerun = 1;
+handles.switchdata = 0;
 
 if lengthdata == 1
+    % wavelet
+    set(gcf,'Name','Acycle: Wavelet')
     [dat_dir,handles.filename1,exten] = fileparts(data_name);
     
     set(handles.text3,'enable','off')
     set(handles.edit2,'enable','off')
     set(handles.pushbutton1,'visible','off')
     set(handles.edit1,'string',[handles.filename1,exten])
+    set(handles.text6,'string','Discrete scale spacing')
+    set(handles.edit5,'string','0.1')
+    set(handles.popupmenu1, 'Value', 1);
+    set(handles.popupmenu2,'enable','on')
+    set(handles.edit7,'enable','on')
+    set(handles.checkbox1,'Value',0,'enable','on')
+    set(handles.checkbox3,'Value',0,'enable','on','string','plot spectrum')
+    set(handles.checkbox9,'Value',1,'enable','on')
 else
-    [dat_dir,handles.filename1,exten] = fileparts(data_name(1,:));
-    [dat_dir,handles.filename2,exten] = fileparts(data_name(2,:));
+    % wcoherence
+    set(gcf,'Name','Acycle: Wavelet coherence and cross-spectrum')
+    [handles.dat_dir,handles.filename1,handles.exten] = fileparts(data_name(1,:));
+    [handles.dat_dir,handles.filename2,handles.exten] = fileparts(data_name(2,:));
     set(handles.text3,'enable','on')
     set(handles.edit2,'enable','on')
     set(handles.pushbutton1,'visible','on')
-    set(handles.edit1,'string',[handles.filename1,exten])
-    set(handles.edit2,'string',[handles.filename2,exten])
-    set(handles.popupmenu1,'value',3)
+    set(handles.edit1,'string',[handles.filename1,handles.exten])
+    set(handles.edit2,'string',[handles.filename2,handles.exten])
+    set(handles.popupmenu1, 'Value', 3);
+    set(handles.popupmenu2,'enable','off')
+    set(handles.edit7,'enable','off')
+    set(handles.text6,'string','Phase threshold')
+    set(handles.edit5,'string','0.7')
+    set(handles.checkbox1,'Value',0,'enable','off')
+    %set(handles.checkbox3,'Value',0,'enable','off','string','cross-spectrum')
+    set(handles.checkbox3,'Value',0,'enable','on','string','cross-spectrum')
+    set(handles.checkbox9,'Value',0,'enable','off')
 end
 
 time = data(:,1);
@@ -155,19 +174,16 @@ timelen = 0.5 * (time(end)-time(1));
 Dti = diff(time);
 dt = mean(Dti);
 
-
 set(handles.edit3,'string',num2str(2*dt))
 set(handles.edit4,'string',num2str(timelen))
-set(handles.popupmenu1,'value',1)
+set(handles.popupmenu1,'value',1,'enable','off')
 set(handles.popupmenu2,'value',1)
 set(handles.checkbox2,'value',1)
-set(handles.checkbox3,'value',0)
 set(handles.checkbox8,'value',1)
 set(handles.checkbox4,'value',0)
 set(handles.checkbox5,'value',1)
 set(handles.checkbox6,'value',0)
 set(handles.checkbox7,'value',0)
-set(handles.checkbox9,'value',1)
 set(handles.checkbox10,'value',1)
 % value
 set(handles.radiobutton1,'value',0)
@@ -178,7 +194,6 @@ set(handles.radiobutton4,'value',0)
 set(handles.checkbox8,'value',1)
 
 set(handles.checkbox1,'value',0)
-set(handles.edit5,'string','0.1')
 set(handles.edit6,'string','')
 set(handles.edit7,'string','6')
 set(handles.popupmenu3,'value',1)
@@ -197,6 +212,46 @@ end
 % uiwait(handles.figure1);
 
 
+% --- Executes on button press in pushbutton1.
+function pushbutton1_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% switch data
+handles.wavehastorerun = 1;
+
+if handles.switchdata == 0
+    data_name = handles.data_name;
+    [handles.dat_dir,handles.filename1,handles.exten] = fileparts(data_name(2,:));
+    [handles.dat_dir,handles.filename2,handles.exten] = fileparts(data_name(1,:));
+    set(handles.edit1,'string',[handles.filename1,handles.exten])
+    set(handles.edit2,'string',[handles.filename2,handles.exten])
+    
+    handles.data_name = [data_name(2,:);data_name(1,:)];
+    
+    handles.switchdata = 1;
+    
+elseif handles.switchdata == 1
+    
+    data_name = handles.data_name;
+    [handles.dat_dir,handles.filename1,handles.exten] = fileparts(data_name(2,:));
+    [handles.dat_dir,handles.filename2,handles.exten] = fileparts(data_name(1,:));
+    set(handles.edit1,'string',[handles.filename1,handles.exten])
+    set(handles.edit2,'string',[handles.filename2,handles.exten])
+    
+    handles.data_name = [data_name(2,:);data_name(1,:)];
+    
+    handles.switchdata = 0;
+end
+
+% coherence
+wavecoh_readGUI
+% update plot
+wavecoh_update_plots
+
+% Update handles structure
+guidata(hObject, handles);
+
 % --- Executes on button press in pushbutton2.
 function pushbutton2_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton2 (see GCBO)
@@ -212,6 +267,9 @@ if handles.lengthdata == 1
     
 else
     % coherence
+    wavecoh_readGUI
+    % update plot
+    wavecoh_update_plots
 end
 
 handles.wavehastorerun = 0;
@@ -274,12 +332,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on button press in pushbutton1.
-function pushbutton1_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
 
 % --- Executes on button press in checkbox7.
 function checkbox7_Callback(hObject, eventdata, handles)
@@ -288,7 +340,21 @@ function checkbox7_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox7
-
+handles.wavehastorerun = 1;
+if handles.lengthdata == 1
+    
+    % read gui settings
+    wave_readGUI
+    % update all panels
+    wave_update_plots
+    
+else
+    % coherence
+    wavecoh_readGUI
+    % update plot
+    wavecoh_update_plots
+end
+guidata(hObject, handles);
 
 % --- Executes on button press in checkbox2.
 function checkbox2_Callback(hObject, eventdata, handles)
@@ -306,6 +372,9 @@ if handles.lengthdata == 1
     
 else
     % coherence
+    wavecoh_readGUI
+    % update plot
+    wavecoh_update_plots
 end
 guidata(hObject, handles);
 
@@ -325,6 +394,9 @@ if handles.lengthdata == 1
     
 else
     % coherence
+    wavecoh_readGUI
+    % update plot
+    wavecoh_update_plots
 end
 guidata(hObject, handles);
 
@@ -344,6 +416,9 @@ if handles.lengthdata == 1
     
 else
     % coherence
+    wavecoh_readGUI
+    % update plot
+    wavecoh_update_plots
 end
 guidata(hObject, handles);
 
@@ -363,6 +438,9 @@ if handles.lengthdata == 1
     
 else
     % coherence
+    wavecoh_readGUI
+    % update plot
+    wavecoh_update_plots
 end
 guidata(hObject, handles);
 
@@ -382,6 +460,9 @@ if handles.lengthdata == 1
     
 else
     % coherence
+    wavecoh_readGUI
+    % update plot
+    wavecoh_update_plots
 end
 guidata(hObject, handles);
 
@@ -406,6 +487,9 @@ if handles.lengthdata == 1
     
 else
     % coherence
+    wavecoh_readGUI
+    % update plot
+    wavecoh_update_plots
 end
 guidata(hObject, handles);
 
@@ -430,6 +514,9 @@ if handles.lengthdata == 1
     
 else
     % coherence
+    wavecoh_readGUI
+    % update plot
+    wavecoh_update_plots
 end
 guidata(hObject, handles);
 
@@ -450,6 +537,9 @@ if handles.lengthdata == 1
     
 else
     % coherence
+    wavecoh_readGUI
+    % update plot
+    wavecoh_update_plots
 end
 guidata(hObject, handles);
 
@@ -483,6 +573,9 @@ if handles.lengthdata == 1
     
 else
     % coherence
+    wavecoh_readGUI
+    % update plot
+    wavecoh_update_plots
 end
 guidata(hObject, handles);
 
@@ -550,6 +643,9 @@ if handles.lengthdata == 1
     
 else
     % coherence
+    wavecoh_readGUI
+    % update plot
+    wavecoh_update_plots
 end
 guidata(hObject, handles);
 
@@ -584,6 +680,9 @@ if handles.lengthdata == 1
     
 else
     % coherence
+    wavecoh_readGUI
+    % update plot
+    wavecoh_update_plots
 end
 guidata(hObject, handles);
 
@@ -618,6 +717,9 @@ if handles.lengthdata == 1
     
 else
     % coherence
+    wavecoh_readGUI
+    % update plot
+    wavecoh_update_plots
 end
 guidata(hObject, handles);
 
@@ -652,6 +754,9 @@ if handles.lengthdata == 1
     
 else
     % coherence
+    wavecoh_readGUI
+    % update plot
+    wavecoh_update_plots
 end
 guidata(hObject, handles);
 
@@ -685,6 +790,9 @@ if handles.lengthdata == 1
     
 else
     % coherence
+    wavecoh_readGUI
+    % update plot
+    wavecoh_update_plots
 end
 guidata(hObject, handles);
 
@@ -704,6 +812,9 @@ if handles.lengthdata == 1
     
 else
     % coherence
+    wavecoh_readGUI
+    % update plot
+    wavecoh_update_plots
 end
 guidata(hObject, handles);
 
@@ -723,6 +834,9 @@ if handles.lengthdata == 1
     
 else
     % coherence
+    wavecoh_readGUI
+    % update plot
+    wavecoh_update_plots
 end
 guidata(hObject, handles);
 
@@ -744,6 +858,9 @@ if handles.lengthdata == 1
     
 else
     % coherence
+    wavecoh_readGUI
+    % update plot
+    wavecoh_update_plots
 end
 guidata(hObject, handles);
 
@@ -776,6 +893,9 @@ if handles.lengthdata == 1
     
 else
     % coherence
+    wavecoh_readGUI
+    % update plot
+    wavecoh_update_plots
 end
 guidata(hObject, handles);
 
@@ -786,6 +906,7 @@ function checkbox11_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox11
+handles.wavehastorerun = 1;
 
 if handles.lengthdata == 1
     
@@ -796,6 +917,9 @@ if handles.lengthdata == 1
     
 else
     % coherence
+    wavecoh_readGUI
+    % update plot
+    wavecoh_update_plots
 end
 
 handles.wavehastorerun = 0;
@@ -817,6 +941,9 @@ if handles.lengthdata == 1
     
 else
     % coherence
+    wavecoh_readGUI
+    % update plot
+    wavecoh_update_plots
 end
 guidata(hObject, handles);
 
@@ -837,5 +964,8 @@ if handles.lengthdata == 1
     
 else
     % coherence
+    wavecoh_readGUI
+    % update plot
+    wavecoh_update_plots
 end
 guidata(hObject, handles);

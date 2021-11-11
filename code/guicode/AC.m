@@ -5569,7 +5569,7 @@ function menu_waveletGUI_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-if nplot <= 1
+if nplot <= 2
     data_name = char(contents(plot_selected));
     if nplot == 1
         data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
