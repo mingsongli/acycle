@@ -3,14 +3,14 @@
 _______________________________________
 
 Version : Acycle_v2.4.0
-Date    : Nov 4, 2021 - 
+Date    : Nov 4, 2021 - Nov. 12. 2021
 By      : Mingsong Li (Peking University)
 
     1. Circular spectral analysis: CL using Monte Carlo with fixed / random distance, and red noise model
     2. Lomb-Scargle spectrum test against red noise using Robust AR(1) model
     3. Add moving Gauss smoothing
-    4. Debug CLs using classic AR1 for MTM
-    5. Spectral analysis: show CL as a function of frequency
+    4. Debug Conf. Levels using classic AR1 for MTM
+    5. Spectral analysis: show Conf. Level as a function of frequency
     6. Milankovitch Calculator (Waltham, 2015)
     7. Wavelet (NEW GUI)
     8. Wavelet coherence and cross-spectrum (NEW)
