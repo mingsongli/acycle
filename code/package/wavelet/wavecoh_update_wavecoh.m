@@ -1,8 +1,6 @@
 
 power = wcoh;
 period = 1./period;  % convert freq to period
-%period = seconds(period);
-%coi = seconds(coi);
 if plot_linelog
     if plot_2d == 1
         if plot_log2pow
@@ -19,7 +17,6 @@ if plot_linelog
     end
     set(gca,'YLim',[pt1,pt2])
 else
-
     if plot_2d == 1
         if plot_log2pow
             pcolor(datax,log2(period),log2(power))
@@ -74,19 +71,19 @@ if plot_coi
             plot(datax,1./coi,'k')
         elseif plot_2d == 0
             if plot_log2pow
-                plot3(datax,1./coi,max(log2(power)),'k')
+                plot3(datax,1./coi,max(log2(power)),'w--','LineWidth',2)
             else
-                plot3(datax,1./coi,max(power),'k')
+                plot3(datax,1./coi,max(power),'w--','LineWidth',2)
             end
         end
     else   % log y axis
         if plot_2d == 1
-            plot(datax,log2(1./coi),'k')
+            plot(datax,log2(1./coi),'w--','LineWidth',2)
         elseif plot_2d == 0
             if plot_log2pow
-                plot3(datax,log2(1./coi),max(log2(power)),'k')
+                plot3(datax,log2(1./coi),max(log2(power)),'w--','LineWidth',2)
             else
-                plot3(datax,log2(1./coi),max(power),'k')
+                plot3(datax,log2(1./coi),max(power),'w--','LineWidth',2)
             end
         end
     end
@@ -99,21 +96,17 @@ else
     set(gca,'Xdir','normal')
 end
 if plot_flipy
-    set(gca,'Ydir','reverse')
+    figure(handles.figwave)
 else
-    set(gca,'Ydir','normal')
+    figure(handles.figwave)
+    set(gca,'Ydir','reverse')
 end
 if plot_linelog
-    %set(gca,'YLim',[fs1,fs2])
     set(gca,'YLim',[pt1,pt2])
 else
     set(gca,'YLim',log2([pt1,pt2]), ...
-    'YDir','reverse', ...
     'YTick',log2(Yticks(:)), ...
     'YTickLabel',Yticks)
-
-    %set(gca,'YLim',log2([pt1,pt2]), ...
-    %'YDir','reverse')
 end
 
 set(gca,'XMinorTick','on','YMinorTick','on')
@@ -126,16 +119,29 @@ if plot_swap == 1
     end
 end
 
-
 if plot_spectrum
+    
+    figure(handles.figwave)
+    if plot_series == 1
+        if plot_swap == 0
+            subplot('position',[0.1 0.1 0.8 0.45])
+        else
+            subplot('position',[0.45 0.1 0.5 0.8])
+        end
+    elseif plot_series == 0
+        if plot_swap == 0
+            subplot('position',[0.1 0.1 0.8 0.8])
+        else
+            subplot('position',[0.1 0.1 0.8 0.8])
+        end
+    end
+    
     dt = mean(diff(datax));
-    fs = 1/(2*dt);
-    figure;
-    %wcoherence(dat1y,dat2y,fs,'PhaseDisplayThreshold',dss);
     wcoherence(dat1y,dat2y,seconds(dt),'PhaseDisplayThreshold',dss);
+    colorbar('off')
     set(gca,'XMinorTick','on','YMinorTick','on')
     set(gca,'TickDir','out');
-
+    set(gcf, 'color','white')
     if plot_flipx
         set(gca,'Xdir','reverse')
     else
@@ -146,15 +152,30 @@ if plot_spectrum
     else
         set(gca,'Ydir','reverse')
     end
-
+    set(gca,'YLim',log2([pt1,pt2]))
+    
+    % force to use the same axis
+    xtick = xticklabels;
+    for i = 1:length(xtick)
+        Xticks_raw(i,1) = str2double(xtick{i});
+        Xticks(i,1) = str2double(xtick{i}) + datax(1); 
+    end
+    set(gca,'XTick',Xticks_raw, ...
+    'XTickLabel',Xticks)
+    
+    Yticks_wcs = floor(log2(pt1)):ceil(log2(pt2));
+    set(gca,'YTick',Yticks_wcs, ...
+    'YTickLabel',2.^Yticks_wcs)
+    
     if handles.unit_type == 0
-        xlabel(['Unit (',handles.unit,') (start = 0)'])
+       xlabel(['Unit (',handles.unit,')'])
     elseif handles.unit_type == 1
-        xlabel(['Depth (',handles.unit,') (start = 0)'])
+       xlabel(['Depth (',handles.unit,')'])
     else
-        xlabel(['Time (',handles.unit,') (start = 0)'])
+       xlabel(['Time (',handles.unit,')'])
     end
     ylabel(['Period (',handles.unit,')'])
+    
 end
 if plot_swap == 1
     view([90 -90])

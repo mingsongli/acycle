@@ -201,13 +201,47 @@ set(handles.checkbox11,'value',0)
 % Choose default command line output for waveletGUI
 handles.output = hObject;
 
+
+if lengthdata == 1
+    if max(Dti) - min(Dti) > 10 * eps('single')
+        f = warndlg('Interpolation needed?','Warning');
+    end
+else
+    data_name = handles.data_name;
+    %data = handles.current_data;
+    s2 = data_name(1,:);
+    s2(s2 == ' ') = [];
+    dat1 = load(s2);
+    s2 = data_name(2,:);
+    s2(s2 == ' ') = [];
+    dat2 = load(s2);
+    
+    Dti1 = diff(dat1(:,1));
+    Dti2 = diff(dat2(:,1));
+    
+    if max(Dti1) - min(Dti1) > 10 * eps('single')
+        if max(Dti2) - min(Dti2) > 10 * eps('single')
+            f = warndlg('Series 1 AND 2: Interpolation needed?','Warning');
+        else
+            f = warndlg('Series 1: Interpolation needed?','Warning');
+        end
+    else
+        if max(Dti2) - min(Dti2) > 10 * eps('single')
+            f = warndlg('Series 2: Interpolation needed?','Warning');
+        else
+            if length(Dti1) == length(Dti2)
+                if dat1(1,1) - dat2(1,1) > 100 * eps('single')
+                    f3 = warndlg('Starting point of the series must be the same. Try <Interpolate Series>','Warning');
+                end
+            else
+                f2 = warndlg('Series length must be equal','Warning');
+            end
+        end
+    end
+   
+end
 % Update handles structure
 guidata(hObject, handles);
-
-if max(Dti) - min(Dti) > 10 * eps('single')
-    f = warndlg('Interpolation needed?','Warning');
-end
-
 % UIWAIT makes waveletGUI wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
@@ -393,10 +427,26 @@ if handles.lengthdata == 1
     wave_update_plots
     
 else
-    % coherence
-    wavecoh_readGUI
-    % update plot
-    wavecoh_update_plots
+    handles.wavehastorerun = 1;
+    if get(hObject,'Value')
+        set(handles.radiobutton1,'enable','off','value',0)
+        set(handles.radiobutton2,'enable','off','value',1)
+        set(handles.checkbox8,'enable','off')
+        set(handles.checkbox8,'value',1)
+        % coherence
+        wavecoh_readGUI
+        % update plot
+        wavecoh_update_plots
+    else
+        set(handles.checkbox2,'value',0)
+        set(handles.radiobutton1,'enable','on','value',0)
+        set(handles.radiobutton2,'enable','on','value',1)
+        set(handles.checkbox8,'enable','on')
+        % coherence
+        wavecoh_readGUI
+        % update plot
+        wavecoh_update_plots
+    end
 end
 guidata(hObject, handles);
 
@@ -932,6 +982,7 @@ function radiobutton1_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of radiobutton1
+
 if handles.lengthdata == 1
     
     % read gui settings
@@ -955,6 +1006,7 @@ function radiobutton2_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of radiobutton2
+
 if handles.lengthdata == 1
     
     % read gui settings
