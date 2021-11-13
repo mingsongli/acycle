@@ -79,9 +79,9 @@ if plot_series ==1
     
     %--- Contour plot wavelet power spectrum
     if plot_swap == 0
-        subplot('position',[0.1 0.1 0.8 0.45])
+        sub3 = subplot('position',[0.1 0.1 0.8 0.45]);
     else
-        subplot('position',[0.45 0.1 0.5 0.8])
+        sub3 = subplot('position',[0.45 0.1 0.5 0.8]);
     end
     wavecoh_update_wavecoh
 
@@ -97,9 +97,11 @@ elseif plot_series == 0
     end
     %--- Contour plot wavelet power spectrum
     if plot_swap == 0
-        subplot('position',[0.1 0.1 0.8 0.8])
+        sub3 = subplot('position',[0.1 0.1 0.8 0.8]);
     else
-        subplot('position',[0.1 0.1 0.8 0.8])
+        sub3 = subplot('position',[0.1 0.1 0.8 0.8]);
     end
         wavecoh_update_wavecoh
+        figure(handles.figwave)
+        title('Wavelet Coherence')
 end

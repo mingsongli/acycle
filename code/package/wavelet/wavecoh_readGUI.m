@@ -71,8 +71,7 @@ if handles.wavehastorerun
         dat2y = (dat2y - mean(dat2y))/sqrt(variance2);
     end
     dt = mean(diff(datax));
-    fs = 1/(2*dt);
-    %figure;wcoherence(dat2y,dat1y,fs,'PhaseDisplayThreshold',dss);
+    fs = 1/dt;
     [wcoh,wcs,period,coi] = wcoherence(dat1y,dat2y,fs,'PhaseDisplayThreshold',dss);
     % save output into memory
     handles.datax = datax;
