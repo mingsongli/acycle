@@ -10,9 +10,8 @@
 %   Nov 11, 2021
 if plot_series ==1
     try figure(handles.figwave)
-        
+       % clf
     catch
-        
         handles.figwave = figure;
         set(gcf,'Name','Acycle: Wavelet coherence and cross-spectrum plot')
         set(gcf,'units','norm') % set location
@@ -30,9 +29,9 @@ if plot_series ==1
                 plot(datax,dat1y,'k')
                 ax1.XAxis.Visible = 'off'; % remove x-axis
             else
-                ax1 = subplot('position',[0.05 0.1 0.15 0.8]);
+                ax1 = subplot('position',[0.07 0.1 0.15 0.8]);
                 plot(datax,dat1y,'k')
-                view([90 -90])
+                view([-90 90])
                 %ax1.XAxis.Visible = 'off'; % remove x-axis
                 
                 if handles.unit_type == 0
@@ -60,9 +59,10 @@ if plot_series ==1
                 end
             else
                 ax2 = subplot('position',[0.25 0.1 0.15 0.8]);
-                ax2.XAxis.Visible = 'off'; % remove x-axis
                 plot(datax,dat2y,'k')
-                view([90 -90])
+                %ax2.XAxis.Visible = 'off'; % remove x-axis
+                set(ax2,'XTickLabel',[])
+                view([-90 90])
             end
             ylabel('Value of series #2')
             
@@ -84,11 +84,12 @@ if plot_series ==1
         sub3 = subplot('position',[0.45 0.1 0.5 0.8]);
     end
     wavecoh_update_wavecoh
+    figure(handles.waveletGUIfig)
 
 %%
 elseif plot_series == 0
     try figure(handles.figwave)
-        
+    %    clf
     catch
         handles.figwave = figure;
         set(gcf,'Name','Acycle: wavelet plot')
@@ -102,6 +103,5 @@ elseif plot_series == 0
         sub3 = subplot('position',[0.1 0.1 0.8 0.8]);
     end
         wavecoh_update_wavecoh
-        figure(handles.figwave)
-        title('Wavelet Coherence')
+        figure(handles.waveletGUIfig)
 end

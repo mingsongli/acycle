@@ -24,7 +24,7 @@ if plot_linelog
     end
     set(gca,'YLim',[pt1,pt2])
 else
-    Yticks = 2.^(fix(log2(min(period))):fix(log2(max(period))));
+    
     if plot_2d == 1
         if plot_log2pow
             pcolor(datax,log2(period),log2(power))
@@ -117,18 +117,21 @@ if plot_flipx
 else
     set(gca,'Xdir','normal')
 end
-if plot_flipy
-    set(gca,'Ydir','reverse')
-else
-    set(gca,'Ydir','normal')
-end
+
 if plot_linelog
+    set(gca,'YLim',[pt1,pt2])
 else
     set(gca,'YLim',log2([pt1,pt2]), ...
-    'YDir','reverse', ...
-    'YTick',log2(Yticks(:)), ...
-    'YTickLabel',Yticks)
+        'YDir','normal', ...
+        'YTick',log2(Yticks(:)), ...
+        'YTickLabel',Yticks)
 end
 
-set(gca,'XMinorTick','on','YMinorTick','on')
+if plot_flipy
+   set(gca,'Ydir','reverse')
+else
+   set(gca,'Ydir','normal')
+end
+
+set(gca,'XMinorTick','on')
 set(gca,'TickDir','out');

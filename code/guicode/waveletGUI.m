@@ -22,7 +22,7 @@ function varargout = waveletGUI(varargin)
 
 % Edit the above text to modify the response to help waveletGUI
 
-% Last Modified by GUIDE v2.5 11-Nov-2021 01:51:05
+% Last Modified by GUIDE v2.5 14-Nov-2021 23:27:17
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -52,6 +52,7 @@ function waveletGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to waveletGUI (see VARARGIN)
 
+handles.waveletGUIfig = gcf;
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
 h=get(gcf,'Children');  % get all content
@@ -94,22 +95,27 @@ set(handles.text11,'position',[0.06,0.15,0.2,0.15])
 set(handles.edit7,'position',[0.28,0.1,0.1,0.2])
 
 set(handles.uipanel2,'position',[0.02,0.02,0.78,0.36])
-set(handles.checkbox2,'position',[0.02,0.75,0.25,0.2])
-set(handles.checkbox3,'position',[0.02,0.5,0.25,0.2])
-set(handles.checkbox8,'position',[0.02,0.25,0.25,0.2])
-set(handles.checkbox10,'position',[0.02,0.02,0.25,0.2])
-set(handles.checkbox4,'position',[0.3,0.75,0.25,0.2])
-set(handles.checkbox5,'position',[0.3,0.5,0.25,0.2])
-set(handles.checkbox6,'position',[0.3,0.25,0.25,0.2])
-set(handles.checkbox9,'position',[0.3,0.05,0.25,0.2])
+set(handles.checkbox2,'position',[0.02,0.75,0.2,0.2])
+set(handles.checkbox3,'position',[0.02,0.5,0.2,0.2])
+set(handles.checkbox8,'position',[0.02,0.25,0.2,0.2])
+set(handles.checkbox10,'position',[0.02,0.02,0.2,0.2])
 
-set(handles.text9,'position',[0.58,0.75,0.12,0.15])
-set(handles.popupmenu3,'position',[0.71,0.73,0.26,0.2])
-set(handles.text10,'position',[0.58,0.55,0.12,0.15])
-set(handles.edit6,'position',[0.73,0.55,0.15,0.15])
+set(handles.checkbox4,'position',[0.25,0.75,0.2,0.2])
+set(handles.checkbox5,'position',[0.25,0.5,0.2,0.2])
+set(handles.checkbox6,'position',[0.25,0.25,0.2,0.2])
+set(handles.checkbox9,'position',[0.25,0.05,0.2,0.2])
 
-set(handles.radiobutton3,'position',[0.65,0.15,0.1,0.2])
-set(handles.radiobutton4,'position',[0.75,0.15,0.1,0.2])
+set(handles.text9,'position',[0.5,0.75,0.1,0.15])
+set(handles.popupmenu3,'position',[0.62,0.73,0.2,0.2])
+set(handles.text10,'position',[0.5,0.55,0.1,0.15])
+set(handles.edit6,'position',[0.62,0.55,0.2,0.15])
+
+set(handles.text12,'position',[0.5,0.35,0.1,0.15])
+set(handles.edit8,'position',[0.62,0.35,0.32,0.15])
+set(handles.pushbutton3,'position',[0.955,0.35,0.035,0.15])
+
+set(handles.radiobutton3,'position',[0.65,0.1,0.1,0.2])
+set(handles.radiobutton4,'position',[0.75,0.1,0.1,0.2])
 
 set(handles.uipanel3,'position',[0.82,0.02,0.14,0.36])
 set(handles.checkbox7,'position',[0.03,0.6,0.95,0.2])
@@ -145,7 +151,7 @@ if lengthdata == 1
     set(handles.popupmenu1, 'Value', 1);
     set(handles.popupmenu2,'enable','on')
     set(handles.edit7,'enable','on')
-    set(handles.checkbox1,'Value',0,'enable','on')
+    set(handles.checkbox1,'Value',1,'enable','on')
     set(handles.checkbox3,'Value',0,'enable','on','string','plot spectrum')
     set(handles.checkbox9,'Value',1,'enable','on')
 else
@@ -169,42 +175,19 @@ else
     set(handles.checkbox9,'Value',0,'enable','off')
 end
 
+
 time = data(:,1);
-timelen = 0.5 * (time(end)-time(1));
+timelen = (time(end)-time(1));
 Dti = diff(time);
 dt = mean(Dti);
-
-set(handles.edit3,'string',num2str(2*dt))
-set(handles.edit4,'string',num2str(timelen))
-set(handles.popupmenu1,'value',1,'enable','off')
-set(handles.popupmenu2,'value',1)
-set(handles.checkbox2,'value',1)
-set(handles.checkbox8,'value',1)
-set(handles.checkbox4,'value',0)
-set(handles.checkbox5,'value',1)
-set(handles.checkbox6,'value',0)
-set(handles.checkbox7,'value',0)
-set(handles.checkbox10,'value',0)
-% value
-set(handles.radiobutton1,'value',0)
-set(handles.radiobutton2,'value',1)
-
-set(handles.radiobutton3,'value',1)
-set(handles.radiobutton4,'value',0)
-set(handles.checkbox8,'value',1)
-
-set(handles.checkbox1,'value',0)
-set(handles.edit6,'string','')
-set(handles.edit7,'string','6')
-set(handles.popupmenu3,'value',1)
-set(handles.checkbox11,'value',0)
-% Choose default command line output for waveletGUI
-handles.output = hObject;
 
 
 if lengthdata == 1
     if max(Dti) - min(Dti) > 10 * eps('single')
-        f = warndlg('Interpolation needed?','Warning');
+        f = warndlg('Interpolation needed. Mean sampling rate was used.','Warning');
+        
+        [data]=interpolate(data,dt);
+        handles.current_data = data;
     end
 else
     data_name = handles.data_name;
@@ -240,11 +223,43 @@ else
     end
    
 end
+
+% ticks
+Yticks_default = 2.^(fix(log2(2*dt)):fix(log2(timelen)));
+Yticks = mat2str(Yticks_default);
+Yticks(1)= [];
+Yticks(length(Yticks))=[];
+set(handles.edit3,'string',num2str(  2^floor(log2(2*dt)) ))
+set(handles.edit4,'string',num2str( 2^fix(log2(timelen)) ))
+set(handles.popupmenu1,'value',1,'enable','off')
+set(handles.popupmenu2,'value',1)
+set(handles.checkbox2,'value',1)
+set(handles.checkbox8,'value',1)
+set(handles.checkbox4,'value',0)
+set(handles.checkbox5,'value',1)
+set(handles.checkbox6,'value',0)
+set(handles.checkbox7,'value',0)
+set(handles.checkbox10,'value',0)
+set(handles.edit8,'string',Yticks)
+% value
+set(handles.radiobutton1,'value',0)
+set(handles.radiobutton2,'value',1)
+
+set(handles.radiobutton3,'value',1)
+set(handles.radiobutton4,'value',0)
+set(handles.checkbox8,'value',1)
+
+set(handles.edit6,'string','')
+set(handles.edit7,'string','6')
+set(handles.popupmenu3,'value',1)
+set(handles.checkbox11,'value',0)
+% Choose default command line output for waveletGUI
+handles.output = hObject;
+
 % Update handles structure
 guidata(hObject, handles);
 % UIWAIT makes waveletGUI wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
-
 
 % --- Executes on button press in pushbutton1.
 function pushbutton1_Callback(hObject, eventdata, handles)
@@ -432,20 +447,27 @@ else
         set(handles.radiobutton1,'enable','off','value',0)
         set(handles.radiobutton2,'enable','off','value',1)
         set(handles.checkbox8,'enable','off')
+        set(handles.edit5,'enable','on')
         set(handles.checkbox8,'value',1)
         % coherence
         wavecoh_readGUI
         % update plot
         wavecoh_update_plots
     else
-        set(handles.checkbox2,'value',0)
+        %
         set(handles.radiobutton1,'enable','on','value',0)
         set(handles.radiobutton2,'enable','on','value',1)
         set(handles.checkbox8,'enable','on')
+        set(handles.edit5,'enable','off')
+        try figure(handles.figwave)
+            clf
+        end
+        %set(handles.checkbox2,'value',0)
         % coherence
         wavecoh_readGUI
         % update plot
         wavecoh_update_plots
+        
     end
 end
 guidata(hObject, handles);
@@ -1021,3 +1043,47 @@ else
     wavecoh_update_plots
 end
 guidata(hObject, handles);
+
+
+function edit8_Callback(hObject, eventdata, handles)
+% hObject    handle to edit8 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit8 as text
+%        str2double(get(hObject,'String')) returns contents of edit8 as a double
+
+if handles.lengthdata == 1
+    
+    % read gui settings
+    wave_readGUI
+    % update all panels
+    wave_update_plots
+    
+else
+    % coherence
+    wavecoh_readGUI
+    % update plot
+    wavecoh_update_plots
+end
+guidata(hObject, handles);
+
+% --- Executes during object creation, after setting all properties.
+function edit8_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit8 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in pushbutton3.
+function pushbutton3_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+msgbox({'User defined tick labels, space delimited values, e.g.,';'10 20 41 100 405 1200 2400'},'Help: format')

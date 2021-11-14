@@ -10,8 +10,13 @@
 
 %--- Plot time series
 
-plot(datax,datay,'k')
+plot(datax,datay,'k');
 set(gca,'XLim',xlim(:))
+
+if plot_swap == 0
+    ax1.XAxis.Visible = 'off'; % remove x-axis
+end
+
 if handles.unit_type == 0
     xlabel(['Unit (',handles.unit,')'])
 elseif handles.unit_type == 1

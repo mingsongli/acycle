@@ -3,7 +3,7 @@
 _______________________________________
 
 Version : Acycle_v2.4.0
-Date    : Nov 4, 2021 - Nov. 12. 2021
+Date    : Nov 4, 2021 - Nov 15, 2021
 By      : Mingsong Li (Peking University)
 
     1. Circular spectral analysis: CL using Monte Carlo with fixed / random distance, and red noise model
