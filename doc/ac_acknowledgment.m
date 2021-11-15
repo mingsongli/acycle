@@ -41,8 +41,8 @@
 %   Dorothée Husson, Arsenio Muñoz Jiménez, Ilja Kocken, Lee R. Kump, 
 %   Dongyang Liu, Kunyuan Ma, Mathieu Martinez, James Ogg, Paul Olsen, 
 %   Jeffrey Park, J. Fred Read, Chen Shen, Victor A. Piedrahita Velez, 
-%   Chuanyue Wang, Meng Wang, Xu Yao, Qiyan Zhang, Yang (Wendy) Zhang, 
-%   Christian Zeeden
+%   Chuanyue Wang, Meng Wang, Xu Yao, Qiyan Zhang, Haotian Zhang, 
+%   Yang (Wendy) Zhang, Christian Zeeden
 
 %**************************************************************************
 % Copyright (C) 2017-2021
