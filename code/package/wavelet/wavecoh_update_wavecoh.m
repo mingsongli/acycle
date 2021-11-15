@@ -60,6 +60,23 @@ if plot_spectrum
     ylabel(['Period (',handles.unit,')'])
     title('cross spectrum')
     
+    if isempty(plot_colorgrid)
+        try
+            colormap(plot_colormap)
+        catch
+            colormap(parula)
+        end
+    else
+        try
+            colormap([plot_colormap,'(',num2str(plot_colorgrid),')'])
+        catch
+            try colormap(['parula(',num2str(plot_colorgrid),')'])
+            catch
+                colormap(parula)
+            end
+        end
+    end
+    
 else
     
     power = wcoh;
