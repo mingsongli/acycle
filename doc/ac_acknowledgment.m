@@ -20,7 +20,8 @@
 %**************************************************************************
 % Program Manager:
 %   Mingsong Li (Peking University)
-%   Email: msli@pku.edu.cn; limingsonglms@gmail.com; http://mingsongli.com
+%   Email: msli@pku.edu.cn; limingsonglms@gmail.com; 
+%   acycle.org; mingsongli.com
 %
 % Program Author:
 %   Mingsong Li (Peking University)
@@ -35,12 +36,13 @@
 %   Christopher Torrence, Gilbert Compo (Wavelet)
 %
 % Acknowledgment:
-%   Feng Cheng, Anne-Christine Da Silva, Hewei Duan, Zheng Gong, Yanan Fang, 
-%   Marco Franceschi, Daniel R. Franco, Frits Hilgen, Xiaoni Hu, Dorothée Husson, 
-%   Arsenio Muñoz Jiménez, Ilja Kocken, Lee R. Kump, Dongyang Liu, Kunyuan Ma, 
-%   Mathieu Martinez, James Ogg, Paul Olsen, Jeffrey Park, J. Fred Read,
-%   Chen Shen, Victor A. Piedrahita Velez, Chuanyue Wang, Meng Wang, Xu Yao, 
-%   Qiyan Zhang, Yang (Wendy) Zhang, Christian Zeeden
+%   Feng Cheng, Anne-Christine Da Silva, Hewei Duan, Zheng Gong, Zhengtang Guo, 
+%   Yanan Fang, Marco Franceschi, Daniel R. Franco, Frits Hilgen, Xiaoni Hu, 
+%   Dorothée Husson, Arsenio Muñoz Jiménez, Ilja Kocken, Lee R. Kump, 
+%   Dongyang Liu, Kunyuan Ma, Mathieu Martinez, James Ogg, Paul Olsen, 
+%   Jeffrey Park, J. Fred Read, Chen Shen, Victor A. Piedrahita Velez, 
+%   Chuanyue Wang, Meng Wang, Xu Yao, Qiyan Zhang, Yang (Wendy) Zhang, 
+%   Christian Zeeden
 
 %**************************************************************************
 % Copyright (C) 2017-2021

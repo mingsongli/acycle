@@ -51,6 +51,15 @@ else
     plot_colorgrid = [];
     set(handles.edit6,'string','')
 end
+
+try
+    Yticks = strread(get(handles.edit8,'String'));
+    Yticks = sort(Yticks);
+catch
+    Yticks = [];
+    msgbox({'User defined tick labels, space delimited values, e.g.,';'10 20 41 100 405 1200 2400'},'Help: format')
+end
+
 if get(handles.radiobutton3,'value')
     plot_2d = 1;  % 2d
 else
@@ -96,7 +105,6 @@ if handles.wavehastorerun
     handles.global_signif = global_signif;
     
     handles.wavehastorerun = 0;
-    
     
     if plot_save 
         
