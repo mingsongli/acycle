@@ -21,7 +21,8 @@ end
 % remove duplicated elements
 
 B = {A{2}};
-for k =3:266
+As = size(A);
+for k =3:As(1)
     C = A{k};
     if ~any(strcmp(B,C))
         B{end+1,1} = C;

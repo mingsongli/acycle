@@ -22,7 +22,7 @@ function varargout = waveletGUI(varargin)
 
 % Edit the above text to modify the response to help waveletGUI
 
-% Last Modified by GUIDE v2.5 14-Nov-2021 23:27:17
+% Last Modified by GUIDE v2.5 17-Nov-2021 00:05:51
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -231,6 +231,7 @@ Yticks(1)= [];
 Yticks(length(Yticks))=[];
 set(handles.edit3,'string',num2str(  2^floor(log2(2*dt)) ))
 set(handles.edit4,'string',num2str( 2^fix(log2(timelen)) ))
+%set(handles.edit4,'string',num2str( 3/8 * abs(data(1,1)-data(end,1)) ))
 set(handles.popupmenu1,'value',1,'enable','off')
 set(handles.popupmenu2,'value',1)
 set(handles.checkbox2,'value',1)
@@ -1087,3 +1088,10 @@ function pushbutton3_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 msgbox({'User defined tick labels, space delimited values, e.g.,';'10 20 41 100 405 1200 2400'},'Help: format')
+
+
+% --- Executes when figure1 is resized.
+function figure1_SizeChangedFcn(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)

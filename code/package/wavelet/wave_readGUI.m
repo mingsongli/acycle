@@ -110,7 +110,7 @@ if handles.wavehastorerun
         
         name1 = [dat_name,'-wavelet.fig'];
         name4 = [dat_name,'-wavelet-power.txt'];
-        name5 = [dat_name,'-wavelet-siglev95.txt'];
+        name5 = [dat_name,'-wavelet-siglev.txt'];
         CDac_pwd
         try savefig(handles.figwave,name1)
             disp(['>>  Save as: ',name1, '. Folder: '])
