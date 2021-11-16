@@ -1422,9 +1422,9 @@ function menu_manuals_Callback(hObject, eventdata, handles)
 
 %filename = which('AC_Users_Guide.pdf');
 %openpdf(filename);
-url2 = 'https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf';
+url2 = 'https://github.com/mingsongli/acycle/blob/master/doc/Acycle_Users_Guide.pdf';
 web(url2,'-browser')
-url = 'https://github.com/mingsongli/acycle/wiki';
+url = 'https://acycle.org/manual/';
 web(url,'-browser')
 
 
@@ -1433,9 +1433,10 @@ function menu_findupdates_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_findupdates (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-url = 'https://mingsongli.com/acycle';
-web(url,'-browser')
+
 url = 'https://github.com/mingsongli/acycle';
+web(url,'-browser')
+url = 'https://acycle.org/downloads/';
 web(url,'-browser')
 
 % --------------------------------------------------------------------
@@ -1443,6 +1444,7 @@ function menu_contact_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_contact (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
 guidata(hObject, handles);
 copyright(handles)
 
@@ -3987,8 +3989,8 @@ function menu_email_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_email (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-email
-
+url = 'mingsongli.com';
+web(url,'-browser')
 
 % --------------------------------------------------------------------
 function menu_samplerate_Callback(hObject, eventdata, handles)
