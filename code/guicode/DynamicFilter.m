@@ -54,7 +54,7 @@ function DynamicFilter_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.MonZoom = varargin{1}.MonZoom;
 handles.sortdata = varargin{1}.sortdata;
 
-set(gcf,'Name','Acycle: Dynamic Filtering | Frequency Stabilization')
+
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
 h=get(gcf,'Children');  % get all content
@@ -104,6 +104,65 @@ handles.path_temp = varargin{1}.path_temp;
 handles.ext = varargin{1}.ext;
 handles.slash_v = varargin{1}.slash_v;
 
+
+
+% language
+lang_choice = varargin{1}.lang_choice;
+lang_id = varargin{1}.lang_id;
+lang_var = varargin{1}.lang_var;
+if lang_choice>0
+    %
+    [~, locb] = ismember('dd30',lang_id);
+    set(gcf,'Name',lang_var{locb})
+    %
+    [~, locb1] = ismember('dd31',lang_id);
+    set(handles.uibuttongroup1,'title',lang_var{locb1})
+    [~, locb1] = ismember('dd32',lang_id);
+    set(handles.text3,'string',lang_var{locb1})
+    [~, locb1] = ismember('dd33',lang_id);
+    set(handles.radiobutton2,'string',lang_var{locb1})
+    [~, locb1] = ismember('dd34',lang_id);
+    set(handles.radiobutton1,'string',lang_var{locb1})
+    %
+    [~, locb1] = ismember('main32',lang_id);
+    set(handles.uipanel1,'title',lang_var{locb1})
+    [~, locb1] = ismember('main33',lang_id);
+    set(handles.pushbutton1,'string',lang_var{locb1})
+    set(handles.pushbutton2,'string',lang_var{locb1})
+    [~, locb1] = ismember('main07',lang_id);
+    set(handles.uipanel2,'title',lang_var{locb1})
+    
+    [~, locb1] = ismember('menu03',lang_id);
+    set(handles.uipanel3,'title',lang_var{locb1})
+    [~, locb1] = ismember('dd35',lang_id);
+    set(handles.checkbox1,'string',lang_var{locb1})
+    [~, locb1] = ismember('dd36',lang_id);
+    set(handles.checkbox2,'string',lang_var{locb1})
+    [~, locb1] = ismember('main00',lang_id);
+    set(handles.pushbutton4,'string',lang_var{locb1})
+    
+    [~, locb1] = ismember('dd37',lang_id);
+    dd37 = lang_var{locb1};
+    
+    [~, locb1] = ismember('dd38',lang_id);
+    dd38 = lang_var{locb1};
+    [~, locb1] = ismember('dd39',lang_id);
+    dd39 = lang_var{locb1};
+    [~, locb1] = ismember('dd40',lang_id);
+    dd40 = lang_var{locb1};
+    [~, locb1] = ismember('dd41',lang_id);
+    dd41 = lang_var{locb1};
+    set(handles.popupmenu1,'string',{dd38,dd39,dd40,dd41})
+else
+    set(gcf,'Name','Acycle: Dynamic Filtering | Frequency Stabilization')
+end
+
+% language
+handles.lang_choice = lang_choice;
+handles.lang_id = lang_id;
+handles.lang_var = lang_var;
+
+
 xmin = min(data_s(:,1));
 xmax = max(data_s(:,1));
 mean1 = median(diff(data_s(:,1)));
@@ -139,7 +198,11 @@ handles.output = hObject;
 
 diffx = diff(data_s(:,1));
 if max(diffx) - min(diffx) > 2*eps('single')
-    hwarn = warndlg('Not equally spaced data. Interpolated using mean sampling rate!');
+    if lang_choice==0
+        hwarn = warndlg('Not uniformly spaced data. Interpolated using mean sampling rate!');
+    else
+        hwarn = warndlg(dd37);
+    end
     interpolate_rate = mean(diffx);
     handles.current_data = interpolate(data_s,interpolate_rate);
     %set(0,'Units','normalized') % set units as normalized
@@ -195,21 +258,7 @@ function popupmenu1_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns popupmenu1 contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupmenu1
-contents = cellstr(get(hObject,'String'));
-val = contents{get(hObject,'Value')};
-if strcmp(val,'zero')
-    %disp('zero')
-    handles.padtype = 1;
-elseif strcmp(val,'mirror')
-    %disp('mirror')
-    handles.padtype = 2;
-elseif strcmp(val,'mean')
-    %disp('mean')
-    handles.padtype = 3;
-elseif strcmp(val,'random')
-    %disp('random')
-    handles.padtype = 4;
-end
+handles.padtype = get(hObject,'Value');
 guidata(hObject, handles);
 
 % --- Executes during object creation, after setting all properties.
@@ -229,6 +278,20 @@ function pushbutton4_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton4 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('main23',lang_id);
+    main23 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main24',lang_id);
+    main24 = handles.lang_var{locb1};
+    [~, locb] = ismember('main02',lang_id);
+    main02 = handles.lang_var{locb};
+    [~, locb] = ismember('dd42',lang_id);
+    dd42 = handles.lang_var{locb};
+end
+
+
 figft = gcf;
 data =  handles.current_data;
 window = handles.window;
@@ -247,16 +310,26 @@ padding = handles.padtype;
 % plot data
 figdata = figure;
 plot(data(:,1),data(:,2),'k-')
-xlabel(['Depth (',unit,')'])
-ylabel('Value')
-title('Data')
-set(gca,'TickDir','out')
 xlim([min(data(:,1)),max(data(:,1))])
-set(figdata,'units','norm') % set location
-set(figdata,'position',[0.05,0.02,0.9,0.3]) % set position
-set(figdata,'Name','Acycle: Data') % set position
-
-[xdata_filtered,time,freqboundlow,freqboundhigh]=dynamic_filter(data,window,step,fmin,fmax,unit,norm,padding);
+if handles.lang_choice == 0
+    xlabel(['Depth (',unit,')'])
+    ylabel('Value')
+    title('Data')
+    set(gca,'TickDir','out')
+    set(figdata,'units','norm') % set location
+    set(figdata,'position',[0.05,0.02,0.9,0.3]) % set position
+    set(figdata,'Name','Acycle: Data') % set position
+else
+    xlabel([main23,' (',unit,')'])
+    ylabel(main24)
+    title(main02)
+    set(gca,'TickDir','out')
+    set(figdata,'units','norm') % set location
+    set(figdata,'position',[0.05,0.02,0.9,0.3]) % set position
+    set(figdata,'Name',['Acycle: ',main02]) % set position
+end
+%[xdata_filtered,time,freqboundlow,freqboundhigh]=dynamic_filter(data,window,step,fmin,fmax,unit,norm,padding);
+[xdata_filtered,time,freqboundlow,freqboundhigh]=dynamic_filter_lang(data,window,step,fmin,fmax,unit,norm,padding); % with language option
 % save figure handles
 figdynfilter = gcf;
 
@@ -289,7 +362,11 @@ savefig(dynfilfigname1) % save ac.fig
 figure(figdata);
 hold on;
 plot(time, xdata_filtered,'r-')
-title('Data & dynamic filtered output')
+if handles.lang_choice == 0
+    title('Data & dynamic filtered output')
+else
+    title(dd42)
+end
 hold off;
 
 % open and write log into log_name file
@@ -330,8 +407,21 @@ function pushbutton2_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton2 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-evofft_tips_win = 'Tips: window  < total data length; window ~= 2x aimed cycle. i.e. 20 m for a 10-m cycles';
-warndlg(evofft_tips_win,'Tips: window length')
+
+
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('dd43',lang_id);
+    dd43 = handles.lang_var{locb1};
+    [~, locb1] = ismember('dd44',lang_id);
+    dd44 = handles.lang_var{locb1};
+end
+if handles.lang_choice == 0
+    evofft_tips_win = 'Tips: window  < total data length; window ~= 2x aimed cycle. i.e. 20 m for a 10-m cycles';
+    warndlg(evofft_tips_win,'Tips: window length')
+else
+    warndlg(dd43,dd44)
+end
 
 function edit5_Callback(hObject, eventdata, handles)
 % hObject    handle to edit5 (see GCBO)
@@ -370,8 +460,22 @@ function pushbutton1_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-evofft_tips_step = 'Tips: Step  >= mean sample rate';
-warndlg(evofft_tips_step,'Tips: Step length')
+
+
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('dd45',lang_id);
+    dd45 = handles.lang_var{locb1};
+    [~, locb1] = ismember('dd46',lang_id);
+    dd46 = handles.lang_var{locb1};
+end
+if handles.lang_choice == 0
+    evofft_tips_step = 'Tips: Step  >= mean sample rate';
+    warndlg(evofft_tips_step,'Tips: Step length')
+else
+    warndlg(dd45,dd46)
+end
+
 
 
 function edit3_Callback(hObject, eventdata, handles)
@@ -381,13 +485,33 @@ function edit3_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit3 as text
 %        str2double(get(hObject,'String')) returns contents of edit3 as a double
+
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('dd47',lang_id);
+    dd47 = handles.lang_var{locb1};
+    [~, locb1] = ismember('dd48',lang_id);
+    dd48 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main29',lang_id);
+    main29 = handles.lang_var{locb1};
+end
+
 val = str2double(get(hObject,'String'));
 if val < handles.mean
-    warndlg('Step must be no smaller than the mean sampling rate','Warning')
+    if handles.lang_choice == 0
+        warndlg('Step must be no smaller than the mean sampling rate','Warning')
+    else
+        warndlg(dd47,main29)
+    end
     set(handles.edit3,'string',num2str(handles.mean))
 end
 if val > 0.5 * handles.lenthx
-    warndlg('Step is too large','Warning')
+    if handles.lang_choice == 0
+        warndlg('Step is too large','Warning')
+    else
+        warndlg(dd48,main29)
+    end
+    
     set(handles.edit3,'string',num2str(handles.mean * 5))
 end
 % --- Executes during object creation, after setting all properties.
@@ -434,13 +558,36 @@ function edit1_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit1 as text
 %        str2double(get(hObject,'String')) returns contents of edit1 as a double
+
+
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('dd49',lang_id);
+    dd49 = handles.lang_var{locb1};
+    [~, locb1] = ismember('dd50',lang_id);
+    dd50 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main29',lang_id);
+    main29 = handles.lang_var{locb1};
+end
+
+
 val = str2double(get(hObject,'String'));
 if val <= str2double(get(handles.edit2,'String'))
-    warndlg('Maximum Freq. must be larger than freq. min','Warning')
+    
+    if handles.lang_choice == 0
+        warndlg('Maximum Freq. must be larger than freq. min','Warning')
+    else
+        warndlg(dd49,main29)
+    end
     set(handles.edit1,'string',num2str(handles.nyquist * 0.5))
 end
 if val > handles.nyquist
-    warndlg('Maximum Freq. must be no larger than the Nyquist frequency','Warning')
+    
+    if handles.lang_choice == 0
+        warndlg('Maximum Freq. must be no larger than the Nyquist frequency','Warning')
+    else
+        warndlg(dd50,main29)
+    end
     set(handles.edit1,'string',num2str(handles.nyquist))
 end
 set(handles.radiobutton1,'value',1)
@@ -467,13 +614,34 @@ function edit2_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit2 as text
 %        str2double(get(hObject,'String')) returns contents of edit2 as a double
+
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('dd51',lang_id);
+    dd51 = handles.lang_var{locb1};
+    [~, locb1] = ismember('dd52',lang_id);
+    dd52 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main29',lang_id);
+    main29 = handles.lang_var{locb1};
+end
+
 val = str2double(get(hObject,'String'));
 if val >= handles.nyquist
-    warndlg('Freq. min must be smaller than the Nyquist frequency','Warning')
+    
+    if handles.lang_choice == 0
+        warndlg('Freq. min must be smaller than the Nyquist frequency','Warning')
+    else
+        warndlg(dd51,main29)
+    end
     set(handles.edit2,'string','0')
 end
 if val < 0
-    warndlg('Freq. min must be no less than 0','Warning')
+    
+    if handles.lang_choice == 0
+        warndlg('Freq. min must be no less than 0','Warning')
+    else
+        warndlg(dd52,main29)
+    end
     set(handles.edit2,'string','0')
 end
 

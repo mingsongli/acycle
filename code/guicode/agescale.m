@@ -59,10 +59,40 @@ handles.unit = varargin{1}.unit;
 handles.MonZoom = varargin{1}.MonZoom;
 handles.sortdata = varargin{1}.sortdata;
 
-%
 % Choose default command line output for agescale
 handles.output = hObject;
-set(gcf,'Name','Acycle: Age Scale')
+
+% language
+lang_choice = varargin{1}.lang_choice;
+if lang_choice>0
+    lang_id = varargin{1}.lang_id;
+    lang_var = varargin{1}.lang_var;
+    [~, locb] = ismember('a00',lang_id);
+    set(gcf,'Name',lang_var{locb})
+    [~, locb] = ismember('main27',lang_id);
+    set(handles.text3,'string',lang_var{locb})
+    [~, locb] = ismember('a02',lang_id);
+    set(handles.text4,'string',lang_var{locb})
+    [~, locb] = ismember('a03',lang_id);
+    set(handles.pushbutton11,'string',lang_var{locb})
+    [~, locb] = ismember('a04',lang_id);
+    set(handles.pushbutton12,'string',lang_var{locb})
+    [~, locb] = ismember('a05',lang_id);
+    set(handles.pushbutton13,'string',lang_var{locb})
+    [~, locb] = ismember('a06',lang_id);
+    set(handles.pushbutton8,'string',lang_var{locb})
+    
+else
+    set(gcf,'Name','Acycle: Age Scale')
+end
+
+% language
+handles.lang_choice = lang_choice;
+handles.lang_id = lang_id;
+handles.lang_var = lang_var;
+%
+
+
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
 h=get(gcf,'Children');  % get all content

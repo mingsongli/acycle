@@ -62,7 +62,7 @@ handles.MonZoom = varargin{1}.MonZoom;
 handles.sortdata = varargin{1}.sortdata;
 
 handles.hmain = gcf;
-set(handles.hmain,'Name', 'Acycle: Stratigraphic Correlation')
+
 % GUI settings
 set(0,'Units','normalized') % set units as normalized
 h=get(gcf,'Children');  % get all content
@@ -73,6 +73,59 @@ set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
 
 set(handles.hmain,'position',[0.4,0.01,0.6,0.3]* handles.MonZoom) % set position
 set(handles.uipanel1,'position',[0.025,0.476,0.955,0.475]) % Data
+
+% language
+lang_choice = varargin{1}.lang_choice;
+lang_id = varargin{1}.lang_id;
+lang_var = varargin{1}.lang_var;
+if lang_choice>0
+    %
+    [~, locb] = ismember('c70',lang_id);
+    set(handles.hmain,'Name',lang_var{locb})
+    %
+    [~, locb1] = ismember('c71',lang_id);
+    set(handles.uipanel1,'title',lang_var{locb1})
+    [~, locb1] = ismember('main11',lang_id);
+    set(handles.text2,'string',lang_var{locb1})
+    [~, locb1] = ismember('main18',lang_id);
+    set(handles.pushbutton3,'string',lang_var{locb1})
+    set(handles.pushbutton4,'string',lang_var{locb1})
+    [~, locb1] = ismember('main13',lang_id);
+    set(handles.text3,'string',lang_var{locb1})
+    %
+    [~, locb1] = ismember('c72',lang_id);
+    set(handles.uipanel2,'title',lang_var{locb1})
+    [~, locb1] = ismember('c73',lang_id);
+    set(handles.text6,'string',lang_var{locb1})
+    [~, locb1] = ismember('c74',lang_id);
+    set(handles.text9,'string',lang_var{locb1})
+    [~, locb1] = ismember('main05',lang_id);
+    set(handles.text4,'string',lang_var{locb1})
+    set(handles.text7,'string',lang_var{locb1})
+    [~, locb1] = ismember('main06',lang_id);
+    set(handles.text5,'string',lang_var{locb1})
+    set(handles.text8,'string',lang_var{locb1})
+    [~, locb1] = ismember('main01',lang_id);
+    set(handles.checkbox1,'string',lang_var{locb1})
+    [~, locb1] = ismember('main19',lang_id);
+    set(handles.pushbutton5,'string',lang_var{locb1})
+    [~, locb1] = ismember('main20',lang_id);
+    set(handles.pushbutton2,'string',lang_var{locb1})
+    [~, locb1] = ismember('main00',lang_id);
+    set(handles.pushbutton1,'string',lang_var{locb1})
+    [~, locb1] = ismember('c90',lang_id);
+    set(handles.pushbutton2,'enable','off','string',lang_var{locb1}) % plot
+else
+    set(handles.hmain,'Name', 'Acycle: Stratigraphic Correlation')
+    set(handles.pushbutton1,'string','OK')
+    set(handles.pushbutton2,'enable','off','string','Clear All') % plot
+end
+
+% language
+handles.lang_choice = lang_choice;
+handles.lang_id = lang_id;
+handles.lang_var = lang_var;
+
 set(handles.text2,'position',[0.015,0.849,0.24,0.15])
 set(handles.text3,'position',[0.015,0.28,0.24,0.15])
 set(handles.edit1,'position',[0.125,0.547,0.87,0.208])
@@ -84,12 +137,11 @@ set(handles.pushbutton2,'position',[0.015,0.03,0.1,0.208]) % plot
 set(handles.pushbutton5,'position',[0.9,0.076,0.08,0.168]) % plot
 set(handles.pushbutton5,'enable','off') % plot
 
-set(handles.pushbutton1,'string','OK')
 handles.corrmodel = 'ok';
 set(handles.checkbox1,'position',[0.8,0.3,0.1,0.1])
 set(handles.checkbox1,'value',1)
 set(handles.pushbutton2,'position',[0.8,0.076,0.08,0.168]) % plot
-set(handles.pushbutton2,'enable','off','string','Clear All') % plot
+
 set(handles.pushbutton1,'position',[0.9,0.276,0.08,0.168]) % undo
 
 % setting panel
@@ -138,11 +190,58 @@ function pushbutton1_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('c70',lang_id);
+    c70 = handles.lang_var{locb1};
+    [~, locb1] = ismember('c75',lang_id);
+    c75 = handles.lang_var{locb1};
+    [~, locb] = ismember('c76',lang_id);
+    c76 = handles.lang_var{locb};
+    [~, locb] = ismember('c77',lang_id);
+    c77 = handles.lang_var{locb};
+    [~, locb] = ismember('c78',lang_id);
+    c78 = handles.lang_var{locb};
+    [~, locb] = ismember('c79',lang_id);
+    c79 = handles.lang_var{locb};
+    [~, locb] = ismember('c80',lang_id);
+    c80 = handles.lang_var{locb};
+    [~, locb] = ismember('c81',lang_id);
+    c81 = handles.lang_var{locb};
+    [~, locb] = ismember('c82',lang_id);
+    c82 = handles.lang_var{locb};
+    [~, locb] = ismember('c83',lang_id);
+    c83 = handles.lang_var{locb};
+    [~, locb] = ismember('c84',lang_id);
+    c84 = handles.lang_var{locb};
+    [~, locb] = ismember('c85',lang_id);
+    c85 = handles.lang_var{locb};
+    
+    [~, locb] = ismember('main21',lang_id);
+    main21 = handles.lang_var{locb};
+    [~, locb] = ismember('main24',lang_id);
+    main24 = handles.lang_var{locb};
+    [~, locb] = ismember('main11',lang_id);
+    main11 = handles.lang_var{locb};
+    [~, locb] = ismember('main23',lang_id);
+    main23 = handles.lang_var{locb};
+    [~, locb] = ismember('main25',lang_id);
+    main25 = handles.lang_var{locb};
+    [~, locb] = ismember('main26',lang_id);
+    main26 = handles.lang_var{locb};
+    [~, locb] = ismember('main27',lang_id);
+    main27 = handles.lang_var{locb};
+    
+end
 try
     rawref = handles.referencedata;
     rawser = handles.seriesdata;
 catch
-    warndlg('reference/series data not ready')
+    if handles.lang_choice == 0
+        warndlg('reference/series data not ready')
+    else
+        warndlg(c75)
+    end
     return
 end
 refxmin = str2double(get(handles.edit3,'String'));
@@ -174,15 +273,26 @@ catch
     set(CorrFig,'units','norm') % set units as normalized
     set(CorrFig,'position',[0.01,0.3,0.9,0.65]) % set position
     set(CorrFig,'Color','white')
-    set(CorrFig,'Name','Acycle: Stratigraphic Correlation')
+    if handles.lang_choice == 0
+        set(CorrFig,'Name','Acycle: Stratigraphic Correlation')
+    else
+        set(CorrFig,'Name',c70)
+    end
     subplot(3,1,1)
     plot(rawref(:,1),rawref(:,2),'-','color',[128 128 128]/255)
     xlim([refxmin, refxmax])
-    xlabel('Time')
-    ylabel('Value')
-    msg1 = '\fontsize{14}\color{blue}Select a tie point in the \color{red}reference \color{blue}plot; right click to stop';
-    title(msg1)
-    legend('Reference')
+    if handles.lang_choice == 0
+        xlabel('Time')
+        ylabel('Value')
+        msg1 = '\fontsize{14}\color{blue}Select a tie point in the \color{red}reference \color{blue}plot; right click to stop';
+        title(msg1)
+        legend('Reference')
+    else
+        xlabel(main21)
+        ylabel(main24)
+        title(c76)
+        legend(main11)
+    end
 
     xl = xlim;
     yl = ylim;
@@ -192,18 +302,30 @@ catch
     subplot(3,1,2)
     plot(rawser(:,1),rawser(:,2),'b-')
     xlim([serxmin, serxmax])
-    xlabel('Depth')
-    ylabel('Value')
-    title('\fontsize{14}\color{blue}Series')
+    if handles.lang_choice == 0
+        xlabel('Depth')
+        ylabel('Value')
+        title('\fontsize{14}\color{blue}Series')
+    else
+        xlabel(main23)
+        ylabel(main24)
+        title(c79)
+    end
     xl2 = xlim;
     yl2 = ylim;
     tieshiftx2 = (xl2(2)-xl2(1));
     tieshifty2 = (yl2(2)-yl2(1));
 
     subplot(3,1,3)
-    xlabel('Time')
-    ylabel('Standardized Value')
-    title('Reference vs. Tuned Series')
+    if handles.lang_choice == 0
+        xlabel('Time')
+        ylabel('Standardized Value')
+        title('Reference vs. Tuned Series')
+    else
+        xlabel(main21)
+        ylabel(main25)
+        title(c80)
+    end
     handles.CorrFig = gcf;
 end
 % update
@@ -220,11 +342,19 @@ while con == 1
     figure(handles.CorrFig)
     
     subplot(3,1,2)
-    title('\fontsize{14}\color{blue}Series')
+    if handles.lang_choice == 0
+        title('\fontsize{14}\color{blue}Series')
+    else
+        title(c79)
+    end
     subplot(3,1,1)
-    msg1 = '\fontsize{14}\color{blue}Select a tie point in the \color{red}reference \color{blue}plot; right click to stop';
-    title(msg1)
     
+    if handles.lang_choice == 0
+        msg1 = '\fontsize{14}\color{blue}Select a tie point in the \color{red}reference \color{blue}plot; right click to stop';
+        title(msg1)
+    else
+        title(c76)
+    end
     %legend('Reference')
     [x1, y1, con] = myginput(1,'crosshair');
     if con == 1
@@ -241,12 +371,20 @@ while con == 1
         plot(tiepoints1(:,1),tiepoints1(:,2),'*','color',[128 0 0]/255)
         text(tiepoints1(:,1)+shiftv*tieshiftx,tiepoints1(:,2)+shiftv*tieshifty,num2str(tiepoints1(:,3)))
         hold off
-        xlabel('Time')
-        ylabel('Value')
-        title('\fontsize{14}\color{blue}Reference')
-        subplot(3,1,2)
-        msg2 = '\fontsize{14}\color{blue}Select a tie point in the \color{red}series \color{blue}plot; right click to stop';
-        title(msg2)
+        if handles.lang_choice == 0
+            xlabel('Time')
+            ylabel('Value')
+            title('\fontsize{14}\color{blue}Reference')
+            subplot(3,1,2)
+            msg2 = '\fontsize{14}\color{blue}Select a tie point in the \color{red}series \color{blue}plot; right click to stop';
+            title(msg2)
+        else
+            xlabel(main21)
+            ylabel(main24)
+            title(c78)
+            subplot(3,1,2)
+            title(c77)
+        end
         [x2, y2, con] = myginput(1,'crosshair');
         if con == 1
             % record the pair
@@ -256,7 +394,11 @@ while con == 1
             tiepoints2(idi,2) = y2;
             tiepoints2(idi,3) = idi;
             % show results
-            disp(['Tie Point ',num2str(idi),' completed: series @ ',num2str(x2),' -> ref. @ ',num2str(x1),'.'])
+            if handles.lang_choice == 0
+                disp(['Tie Point ',num2str(idi),' completed: series @ ',num2str(x2),' -> ref. @ ',num2str(x1),'.'])
+            else
+                disp([c81,num2str(idi),c82,num2str(x2),c83,num2str(x1),'.'])
+            end
             subplot(3,1,2)
             plot(rawser(:,1),rawser(:,2),'b-')
             xlim([serxmin, serxmax])
@@ -264,9 +406,15 @@ while con == 1
             plot(tiepoints2(:,1),tiepoints2(:,2),'r*')
             text(tiepoints2(:,1)+shiftv*tieshiftx2,tiepoints2(:,2)+shiftv*tieshifty2,num2str(tiepoints2(:,3)))
             hold off
-            xlabel('Depth')
-            ylabel('Value')
-            title('\fontsize{14}\color{blue}Series')
+            if handles.lang_choice == 0
+                xlabel('Depth')
+                ylabel('Value')
+                title('\fontsize{14}\color{blue}Series')
+            else
+                xlabel(main23)
+                ylabel(main24)
+                title(c79)
+            end
             
             % tuning
             agemodel = [tiepoints2(:,1),tiepoints1(:,1),tiepoints2(:,3)]; % [series reference]
@@ -303,25 +451,43 @@ while con == 1
             
             xlim([min(refxmin,min(time1)), max(refxmax,max(time1))])
             hold off
-            xlabel('Time')
-            ylabel('Standardized Value')
-            title('Reference vs. Tuned Series')
+            if handles.lang_choice == 0
+                xlabel('Time')
+                ylabel('Standardized Value')
+                title('Reference vs. Tuned Series')
+            else
+                xlabel(main21)
+                ylabel(main25)
+                title(c80)
+            end
             % Sed Rate
             try figure(handles.CorrSR)
                 stairs(sedrate(:,1),sedrate(:,2));
                 xlim([serxmin, serxmax])
-                xlabel('Depth')
-                ylabel('Sedimentation Rate')
+                if handles.lang_choice == 0
+                    xlabel('Depth')
+                    ylabel('Sedimentation Rate')
+                else
+                    xlabel(main23)
+                    ylabel(main26)
+                end
             catch
                 CorrSR = figure;
                 set(CorrSR,'units','norm') % set units as normalized
                 set(CorrSR,'position',[0.01,0.03,0.9,0.22]) % set position
                 set(CorrSR,'Color','white')
-                set(CorrSR,'Name','Acycle: Stratigraphic Correlation | Sedimentation Rate')
+                
                 stairs(sedrate(:,1),sedrate(:,2));
+                if handles.lang_choice == 0
+                    set(CorrSR,'Name','Acycle: Stratigraphic Correlation | Sedimentation Rate')
+                    xlabel('Depth')
+                    ylabel('Sedimentation Rate')
+                else
+                    set(CorrSR,'Name',c84)
+                    xlabel(main23)
+                    ylabel(main26)
+                end
                 xlim([serxmin, serxmax])
-                xlabel('Depth')
-                ylabel('Sedimentation Rate')
                 handles.CorrSR = gcf;
             end
             % age model
@@ -333,24 +499,40 @@ while con == 1
                 %text(agemodel(:,1),agemodel(:,2),num2str(agemodel(:,3)))
                 text(agemodel(:,1)+shiftv*tieshiftx2,agemodel(:,2)-2*shiftv*tieshiftx,num2str(agemodel(:,3)))
                 hold off
-                xlabel('Depth')
-                ylabel('Time')
-                title('Age Model')
+                if handles.lang_choice == 0
+                    xlabel('Depth')
+                    ylabel('Time')
+                    title('Age Model')
+                else
+                    xlabel(main23)
+                    ylabel(main21)
+                    title(main27)
+                end
             catch
                 CorrAgeMod = figure;
                 set(CorrAgeMod,'units','norm') % set units as normalized
                 set(CorrAgeMod,'position',[0.55,0.5,0.45,0.45]) % set position
                 set(CorrAgeMod,'Color','white')
-                set(CorrAgeMod,'Name','Acycle: Age Model')
+                if handles.lang_choice == 0
+                    set(CorrAgeMod,'Name','Acycle: Age Model')
+                else
+                    set(CorrAgeMod,'Name',c85)
+                end
                 plot(agemodel(:,1),agemodel(:,2),'ro-')
                 hold on
                 text(agemodel(:,1)+shiftv*tieshiftx2,agemodel(:,2)-2*shiftv*tieshiftx,num2str(agemodel(:,3)))
                 hold off
                 xlim([xl2(1), xl2(2)])
                 ylim([xl(1), xl(2)])
-                xlabel('Depth')
-                ylabel('Time')
-                title('Age Model')
+                if handles.lang_choice == 0
+                    xlabel('Depth')
+                    ylabel('Time')
+                    title('Age Model')
+                else
+                    xlabel(main23)
+                    ylabel(main21)
+                    title(main27)
+                end
                 handles.CorrAgeMod = gcf;
                 try figure(handles.CorrSR)
                 catch
@@ -372,9 +554,15 @@ while con == 1
             plot(tiepoints1(:,1),tiepoints1(:,2),'*','color',[128 0 0]/255)
             text(tiepoints1(:,1)+shiftv*tieshiftx,tiepoints1(:,2)+shiftv*tieshifty,num2str(tiepoints1(:,3)))
             hold off
-            xlabel('Time')
-            ylabel('Value')
-            title('\fontsize{14}\color{blue}Reference')
+            if handles.lang_choice == 0
+                xlabel('Time')
+                ylabel('Value')
+                title('\fontsize{14}\color{blue}Reference')
+            else
+                xlabel(main21)
+                ylabel(main24)
+                title(c78)
+            end
         end
     end
 end
@@ -414,6 +602,35 @@ function pushbutton5_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton5 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+% language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('c75',lang_id);
+    c75 = handles.lang_var{locb1};
+    [~, locb] = ismember('c76',lang_id);
+    c76 = handles.lang_var{locb};
+    [~, locb] = ismember('c79',lang_id);
+    c79 = handles.lang_var{locb};
+    [~, locb] = ismember('c80',lang_id);
+    c80 = handles.lang_var{locb};
+    [~, locb] = ismember('c91',lang_id);
+    c91 = handles.lang_var{locb};
+    
+    [~, locb] = ismember('main21',lang_id);
+    main21 = handles.lang_var{locb};
+    [~, locb] = ismember('main24',lang_id);
+    main24 = handles.lang_var{locb};
+    [~, locb] = ismember('main23',lang_id);
+    main23 = handles.lang_var{locb};
+    [~, locb] = ismember('main25',lang_id);
+    main25 = handles.lang_var{locb};
+    [~, locb] = ismember('main26',lang_id);
+    main26 = handles.lang_var{locb};
+    [~, locb] = ismember('main27',lang_id);
+    main27 = handles.lang_var{locb};
+end
+
 idi = handles.idi;
 if idi > 1
     
@@ -426,14 +643,21 @@ if idi > 1
     
     handles.tiepoints1 = tiepoints1;
     handles.tiepoints2 = tiepoints2;
-    
-    set(handles.pushbutton1,'String','Continue')
+    if handles.lang_choice == 0
+        set(handles.pushbutton1,'String','Continue')
+    else
+        set(handles.pushbutton1,'String',c91)
+    end
     
     try
         rawref = handles.referencedata;
         rawser = handles.seriesdata;
     catch
-        warndlg('reference/series data not ready')
+        if handles.lang_choice == 0
+            warndlg('reference/series data not ready')
+        else
+            warndlg(c75)
+        end
         return
     end
     refxmin = str2double(get(handles.edit3,'String'));
@@ -461,10 +685,16 @@ if idi > 1
         plot(tiepoints1(:,1),tiepoints1(:,2),'*','color',[128 0 0]/255)
         text(tiepoints1(:,1)+shiftv*tieshiftx,tiepoints1(:,2)+shiftv*tieshifty,num2str(tiepoints1(:,3)))
         hold off
-        msg1 = '\fontsize{14}\color{blue}Select a tie point in the \color{red}reference \color{blue}plot; right click to stop';
-        title(msg1)
-        xlabel('Time')
-        ylabel('Value')
+        if handles.lang_choice == 0
+            msg1 = '\fontsize{14}\color{blue}Select a tie point in the \color{red}reference \color{blue}plot; right click to stop';
+            title(msg1)
+            xlabel('Time')
+            ylabel('Value')
+        else
+            title(c76)
+            xlabel(main21)
+            ylabel(main24)
+        end
         
         subplot(3,1,2)
         xl2 = xlim;
@@ -477,9 +707,15 @@ if idi > 1
         plot(tiepoints2(:,1),tiepoints2(:,2),'r*')
         text(tiepoints2(:,1)+shiftv*tieshiftx2,tiepoints2(:,2)+shiftv*tieshifty2,num2str(tiepoints2(:,3)))
         hold off
-        xlabel('Depth')
-        ylabel('Value')
-        title('\fontsize{14}\color{blue}Series')
+        if handles.lang_choice == 0
+            xlabel('Depth')
+            ylabel('Value')
+            title('\fontsize{14}\color{blue}Series')
+        else
+            xlabel(main23)
+            ylabel(main24)
+            title(c79)
+        end
         
         % tuning
         agemodel = [tiepoints2(:,1),tiepoints1(:,1),tiepoints2(:,3)]; % [series reference]
@@ -513,15 +749,26 @@ if idi > 1
         plot(tie2t,(tiepoints2sort(:,2)-mean(rawser(:,2)))/std(rawser(:,2)),'r*')
         xlim([min(refxmin,min(time1)), max(refxmax,max(time1))])
         hold off
-        xlabel('Time')
-        ylabel('Standardized Value')
-        title('Reference vs. Tuned Series')
+        if handles.lang_choice == 0
+            xlabel('Time')
+            ylabel('Standardized Value')
+            title('Reference vs. Tuned Series')
+        else
+            xlabel(main21)
+            ylabel(main25)
+            title(c80)
+        end
         % Sed Rate
         try figure(handles.CorrSR)
             stairs(sedrate(:,1),sedrate(:,2));
             xlim([serxmin, serxmax])
-            xlabel('Depth')
-            ylabel('Sedimentation Rate')
+            if handles.lang_choice == 0
+                xlabel('Depth')
+                ylabel('Sedimentation Rate')
+            else
+                xlabel(main23)
+                ylabel(main26)
+            end
         catch
         end
         % age model
@@ -533,9 +780,15 @@ if idi > 1
             %text(agemodel(:,1),agemodel(:,2),num2str(agemodel(:,3)))
             text(agemodel(:,1)+shiftv*tieshiftx2,agemodel(:,2)-2*shiftv*tieshiftx,num2str(agemodel(:,3)))
             hold off
-            xlabel('Depth')
-            ylabel('Time')
-            title('Age Model')
+            if handles.lang_choice == 0
+                xlabel('Depth')
+                ylabel('Time')
+                title('Age Model')
+            else
+                xlabel(main23)
+                ylabel(main21)
+                title(main27)
+            end
         catch
         end
         
@@ -567,12 +820,43 @@ function pushbutton3_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+% language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb] = ismember('c86',lang_id);
+    c86 = handles.lang_var{locb};
+    [~, locb] = ismember('c87',lang_id);
+    c87 = handles.lang_var{locb};
+    [~, locb] = ismember('c92',lang_id);
+    c92 = handles.lang_var{locb};
+    
+    [~, locb] = ismember('main24',lang_id);
+    main24 = handles.lang_var{locb};
+    [~, locb] = ismember('main11',lang_id);
+    main11 = handles.lang_var{locb};
+    [~, locb] = ismember('main12',lang_id);
+    main12 = handles.lang_var{locb};
+    [~, locb] = ismember('main28',lang_id);
+    main28 = handles.lang_var{locb};
+    
+end
+
 pre_dirML = pwd;
 CDac_pwd; % cd ac_pwd dir
-[file,path] = uigetfile({'*.*',  'All Files (*.*)'},...
+if handles.lang_choice == 0
+    [file,path] = uigetfile({'*.*',  'All Files (*.*)'},...
                         'Select a Reference Series');
+else
+    [file,path] = uigetfile({'*.*',  c92},...
+                        c86);
+end
 if isequal(file,0)
-    disp('User selected Cancel')
+    if handles.lang_choice == 0
+        disp('User selected Cancel')
+    else
+        disp(c87)
+    end
 else
     set(handles.edit1,'string',fullfile(path,file))
 end
@@ -615,9 +899,15 @@ try figure(handles.RawDataFig)
     subplot(2,1,1)
     plot(dat2(:,1),dat2(:,2),'r-')
     xlim([xmin,xmax])
-    xlabel('Depth/Time')
-    ylabel('Value')
-    title('Reference')
+    if handles.lang_choice == 0
+        xlabel('Depth/Time')
+        ylabel('Value')
+        title('Reference')
+    else
+        xlabel(main28)
+        ylabel(main24)
+        title(main11)
+    end
     subplot(2,1,2)
     try
         dat1 = handles.seriesdata;
@@ -625,9 +915,15 @@ try figure(handles.RawDataFig)
         xlim([min(dat1(:,1)),max(dat1(:,1))])
     catch
     end
-    xlabel('Depth/Time')
-    ylabel('Value')
-    title('Series')
+    if handles.lang_choice == 0
+        xlabel('Depth/Time')
+        ylabel('Value')
+        title('Series')
+    else
+        xlabel(main28)
+        ylabel(main24)
+        title(main12)
+    end
 catch
     handles.RawDataFig = figure;
     set(0,'Units','normalized') % set units as normalized
@@ -636,9 +932,15 @@ catch
     subplot(2,1,1)
     plot(dat2(:,1),dat2(:,2),'r-')
     xlim([xmin,xmax])
-    xlabel('Depth/Time')
-    ylabel('Value')
-    title('Reference')
+    if handles.lang_choice == 0
+        xlabel('Depth/Time')
+        ylabel('Value')
+        title('Reference')
+    else
+        xlabel(main28)
+        ylabel(main24)
+        title(main11)
+    end
     subplot(2,1,2)
     try
         dat1 = handles.seriesdata;
@@ -646,91 +948,20 @@ catch
         xlim([min(dat1(:,1)),max(dat1(:,1))])
     catch
     end
-    xlabel('Depth/Time')
-    ylabel('Value')
-    title('Series')
+    if handles.lang_choice == 0
+        xlabel('Depth/Time')
+        ylabel('Value')
+        title('Series')
+    else
+        xlabel(main28)
+        ylabel(main24)
+        title(main12)
+    end
 end
 % Update handles structure
 guidata(hObject, handles);
 
 
-function edit3_Callback(hObject, eventdata, handles)
-% hObject    handle to edit3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit3 as text
-%        str2double(get(hObject,'String')) returns contents of edit3 as a double
-xmin = str2double(get(handles.edit3,'String'));
-xmax = str2double(get(handles.edit4,'String'));
-if xmin < handles.refxmin
-    warndlg('Value is too small')
-    set(handles.edit3,'String',num2str(handles.refxmin))
-else
-    try figure(handles.RawDataFig)
-        subplot(2,1,1)
-        xlim([xmin,xmax])
-        figure(handles.hmain)
-    catch
-    end
-end
-
-
-% --- Executes during object creation, after setting all properties.
-function edit3_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit4_Callback(hObject, eventdata, handles)
-% hObject    handle to edit4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit4 as text
-%        str2double(get(hObject,'String')) returns contents of edit4 as a double
-xmin = str2double(get(handles.edit3,'String'));
-xmax = str2double(get(handles.edit4,'String'));
-if xmax > handles.refxmax
-    warndlg('Value is too large')
-    set(handles.edit4,'String',num2str(handles.refxmax))
-else
-    try figure(handles.RawDataFig)
-        subplot(2,1,1)
-        xlim([xmin,xmax])
-        figure(handles.hmain)
-    catch
-    end
-end
-
-% --- Executes during object creation, after setting all properties.
-function edit4_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in checkbox1.
-function checkbox1_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox1
 
 
 % --- Executes on button press in pushbutton2.
@@ -738,12 +969,43 @@ function pushbutton4_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton2 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+% language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb] = ismember('c86',lang_id);
+    c86 = handles.lang_var{locb};
+    [~, locb] = ismember('c87',lang_id);
+    c87 = handles.lang_var{locb};
+    [~, locb] = ismember('c92',lang_id);
+    c92 = handles.lang_var{locb};
+    
+    [~, locb] = ismember('main24',lang_id);
+    main24 = handles.lang_var{locb};
+    [~, locb] = ismember('main11',lang_id);
+    main11 = handles.lang_var{locb};
+    [~, locb] = ismember('main12',lang_id);
+    main12 = handles.lang_var{locb};
+    [~, locb] = ismember('main28',lang_id);
+    main28 = handles.lang_var{locb};
+    
+end
+
 pre_dirML = pwd;
 CDac_pwd; % cd ac_pwd dir
-[file,path] = uigetfile({'*.*',  'All Files (*.*)'},...
+if handles.lang_choice == 0
+    [file,path] = uigetfile({'*.*',  'All Files (*.*)'},...
                         'Select a Reference Series');
+else
+    [file,path] = uigetfile({'*.*',  c92},...
+                        c86);
+end
 if isequal(file,0)
-    disp('User selected Cancel')
+    if handles.lang_choice == 0
+        disp('User selected Cancel')
+    else
+        disp(c87)
+    end
 else
     set(handles.edit2,'string',fullfile(path,file))
 end
@@ -790,15 +1052,28 @@ try figure(handles.RawDataFig)
         xlim([min(dat1(:,1)),max(dat1(:,1))])
     catch
     end
-    xlabel('Depth/Time')
-    ylabel('Value')
-    title('Reference')
+    if handles.lang_choice == 0
+        xlabel('Depth/Time')
+        ylabel('Value')
+        title('Reference')
+    else
+        xlabel(main28)
+        ylabel(main24)
+        title(main11)
+    end
+
     subplot(2,1,2)
     plot(dat2(:,1),dat2(:,2),'b-')
     xlim([xmin,xmax])
-    xlabel('Depth/Time')
-    ylabel('Value')
-    title('Series')
+    if handles.lang_choice == 0
+        xlabel('Depth/Time')
+        ylabel('Value')
+        title('Series')
+    else
+        xlabel(main28)
+        ylabel(main24)
+        title(main12)
+    end
 catch
     handles.RawDataFig = figure;
     set(0,'Units','normalized') % set units as normalized
@@ -811,20 +1086,229 @@ catch
         xlim([min(dat1(:,1)),max(dat1(:,1))])
     catch
     end
-    xlabel('Depth/Time')
-    ylabel('Value')
-    title('Reference')
+    if handles.lang_choice == 0
+        xlabel('Depth/Time')
+        ylabel('Value')
+        title('Reference')
+    else
+        xlabel(main28)
+        ylabel(main24)
+        title(main11)
+    end
     subplot(2,1,2)
     plot(dat2(:,1),dat2(:,2),'b-')
     xlim([xmin,xmax])
-    xlabel('Depth/Time')
-    ylabel('Value')
-    title('Series')
+    if handles.lang_choice == 0
+        xlabel('Depth/Time')
+        ylabel('Value')
+        title('Series')
+    else
+        xlabel(main28)
+        ylabel(main24)
+        title(main12)
+    end
 end
 
 % Update handles structure
 guidata(hObject, handles);
 
+
+
+
+function edit3_Callback(hObject, eventdata, handles)
+% hObject    handle to edit3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit3 as text
+%        str2double(get(hObject,'String')) returns contents of edit3 as a double
+
+% language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb] = ismember('c88',lang_id);
+    c88 = handles.lang_var{locb};
+end
+
+xmin = str2double(get(handles.edit3,'String'));
+xmax = str2double(get(handles.edit4,'String'));
+if xmin < handles.refxmin
+    if handles.lang_choice == 0
+        warndlg('Value is too small')
+    else
+        warndlg(c88)
+    end
+    set(handles.edit3,'String',num2str(handles.refxmin))
+else
+    try figure(handles.RawDataFig)
+        subplot(2,1,1)
+        xlim([xmin,xmax])
+        figure(handles.hmain)
+    catch
+    end
+end
+
+
+% --- Executes during object creation, after setting all properties.
+function edit3_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit4_Callback(hObject, eventdata, handles)
+% hObject    handle to edit4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit4 as text
+%        str2double(get(hObject,'String')) returns contents of edit4 as a double
+
+% language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb] = ismember('c89',lang_id);
+    c89 = handles.lang_var{locb};
+end
+
+xmin = str2double(get(handles.edit3,'String'));
+xmax = str2double(get(handles.edit4,'String'));
+if xmax > handles.refxmax
+    if handles.lang_choice == 0
+        warndlg('Value is too large')
+    else
+        warndlg(c89)
+    end
+    set(handles.edit4,'String',num2str(handles.refxmax))
+else
+    try figure(handles.RawDataFig)
+        subplot(2,1,1)
+        xlim([xmin,xmax])
+        figure(handles.hmain)
+    catch
+    end
+end
+
+% --- Executes during object creation, after setting all properties.
+function edit4_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit5_Callback(hObject, eventdata, handles)
+% hObject    handle to edit5 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit5 as text
+%        str2double(get(hObject,'String')) returns contents of edit5 as a double
+
+% language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb] = ismember('c88',lang_id);
+    c88 = handles.lang_var{locb};
+end
+
+xmin = str2double(get(handles.edit5,'String'));
+xmax = str2double(get(handles.edit6,'String'));
+if xmin < handles.serxmin
+    if handles.lang_choice == 0
+        warndlg('Value is too small')
+    else
+        warndlg(c88)
+    end
+    set(handles.edit5,'String',num2str(handles.serxmin))
+else
+    try figure(handles.RawDataFig)
+        subplot(2,1,2)
+        xlim([xmin,xmax])
+        figure(handles.hmain)
+    catch
+    end
+end
+
+% --- Executes during object creation, after setting all properties.
+function edit5_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit5 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit6_Callback(hObject, eventdata, handles)
+% hObject    handle to edit6 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit6 as text
+%        str2double(get(hObject,'String')) returns contents of edit6 as a double
+
+% language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb] = ismember('c89',lang_id);
+    c89 = handles.lang_var{locb};
+end
+
+xmin = str2double(get(handles.edit5,'String'));
+xmax = str2double(get(handles.edit6,'String'));
+if xmax > handles.serxmax
+    if handles.lang_choice == 0
+        warndlg('Value is too large')
+    else
+        warndlg(c89)
+    end
+    set(handles.edit6,'String',num2str(handles.serxmax))
+else
+    try figure(handles.RawDataFig)
+        subplot(2,1,2)
+        xlim([xmin,xmax])
+        figure(handles.hmain)
+    catch
+    end
+end
+
+% --- Executes during object creation, after setting all properties.
+function edit6_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit6 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+% --- Executes on button press in checkbox1.
+function checkbox1_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox1
 
 
 function edit1_Callback(hObject, eventdata, handles)
@@ -871,72 +1355,3 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
-
-function edit5_Callback(hObject, eventdata, handles)
-% hObject    handle to edit5 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit5 as text
-%        str2double(get(hObject,'String')) returns contents of edit5 as a double
-xmin = str2double(get(handles.edit5,'String'));
-xmax = str2double(get(handles.edit6,'String'));
-if xmin < handles.serxmin
-    warndlg('Value is too small')
-    set(handles.edit5,'String',num2str(handles.serxmin))
-else
-    try figure(handles.RawDataFig)
-        subplot(2,1,2)
-        xlim([xmin,xmax])
-        figure(handles.hmain)
-    catch
-    end
-end
-
-% --- Executes during object creation, after setting all properties.
-function edit5_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit5 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit6_Callback(hObject, eventdata, handles)
-% hObject    handle to edit6 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit6 as text
-%        str2double(get(hObject,'String')) returns contents of edit6 as a double
-xmin = str2double(get(handles.edit5,'String'));
-xmax = str2double(get(handles.edit6,'String'));
-if xmax > handles.serxmax
-    warndlg('Value is too large')
-    set(handles.edit6,'String',num2str(handles.serxmax))
-else
-    try figure(handles.RawDataFig)
-        subplot(2,1,2)
-        xlim([xmin,xmax])
-        figure(handles.hmain)
-    catch
-    end
-end
-
-% --- Executes during object creation, after setting all properties.
-function edit6_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit6 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end

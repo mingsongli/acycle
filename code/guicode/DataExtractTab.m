@@ -54,6 +54,7 @@ function DataExtractTab_OpeningFcn(hObject, eventdata, handles, varargin)
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
 set(handles.uitable1,'position',[0.011,0.012,0.97,0.984])
+set(gcf,'Name','Acycle: Plot Digitizer')
 
 % Choose default command line output for DataExtractTab
 handles.output = hObject;

@@ -1,0 +1,605 @@
+﻿% ID,en,cn,
+main00,OK,OK,common
+main01,Save data,保存数据,common
+main02,Data,数据,common
+main03,Linear,线性,common
+main04,Log,对数,common
+main05,Minimum,最小值,common
+main06,Maximum,最大值,common
+main07,Sliding Window,滑动窗口,common
+main08,Monte Carlo #,蒙特卡洛数,common
+main09,Flip X-axis,翻转x轴,common
+main10,Flip Y-axis,翻转y轴,common
+main11,Reference,参考序列,common
+main12,Series,序列,common
+main13,Target,目标序列,common
+main14,Frequency,频率,common
+main15,Period,周期,common
+main16,From,开始,common
+main17,To,结束,common
+main18,Open,打开,common
+main19,Undo,撤销,common
+main20,Clear,清除,common
+main21,Time,时间,common
+main22,Age,年龄,common
+main23,Depth,深度,common
+main24,Value,值,common
+main25,Standardized Value,标准化值,common
+main26,Sedimentation Rate,沉积速率,common
+main27,Age Model,年龄模型,common
+main28,Depth/Time,深度/时间,common
+main29,Warning,警告,common
+main30,Yes,是,common
+main31,No,否,common
+main32,Step,步长,common
+main33,Tips,贴士,common
+main34,Unit,单位,common
+main35,Error,错误,common
+main36,Continue,继续,common
+main37,Cancel,取消,common
+main38,Select,选择,common
+main39,Monte Carlo,蒙特卡洛,common
+main40,Median,中值,common
+main41,Window,窗口,common
+main42,Variance,方差,common
+main43,,,common
+main44,,,common
+main45,,,common
+,,,
+menu01,File,文件,menu
+menu02,Edit,编辑,menu
+menu03,Plot,投图,menu
+menu04,Basic Series,基本序列,menu
+menu05,Math,数学,menu
+menu06,Timeseries,时间序列,menu
+menu07,Help,帮助,menu
+menu08,<html>Up<br>one level,<html>向上,menu
+menu09,<html>Open<br>working folder,<html>打开<br>工作文件夹,menu
+menu10,<html>Plot Pro,<html>专业投图,menu
+menu11,<html>Refresh<br>list box,<html>刷新<br>主窗口,menu
+menu12,<html>Mini-robot,<html>迷你机器人,menu
+menu13,<html>Change<br>directory,<html>切换<br>文件夹,menu
+menu14,<html>Select unit<br>for dataset,<html>选择数据<br>首列单位,menu
+menu15,<html>Sort<br>dataset,<html>列表排序,menu
+menu16,Working directory,工作文件夹,menu
+menu17,Change working folder. ,切换工作文件夹。,menu
+menu18,Current working folder may be not writable!,当前文件夹无写入权限。,menu
+menu19,Folder,文件夹,File
+menu20,New Folder,新建文件夹,File
+menu21,New Text File,新建空白文档,File
+menu22,Save *.AC.fig,保存 *.AC.fig文件,File
+menu23,Open *.fig File,载入 *.AC.fig文件,File
+menu24,Open Working Directory,打开工作文件夹,File
+menu25,Extract Data,提取数据列,File
+menu26,,,
+menu27,,,
+menu28,,,
+menu29,,,
+menu30,Refresh,刷新,Edit
+menu31,Rename,重命名,Edit
+menu32,Cut,剪切,Edit
+menu33,Copy,复制,Edit
+menu34,Paste,粘贴,Edit
+menu35,Delete,删除,Edit
+menu36,,,
+menu37,,,
+menu38,,,
+menu39,,,
+menu40,Plot,投图,Plot
+menu41,Plot Pro,投图 pro,Plot
+menu42,Plot Standardized,投图 标准化,Plot
+menu43,Plot Standardized + 2,投图 标准化+2,Plot
+menu44,Plot Swap Axis,投图 置换坐标轴,Plot
+menu45,Stairs,阶梯图,Plot
+menu46,Sampling Rate,采样率,Plot
+menu47,Data Distribution,数值分布,Plot
+menu48,,,
+menu49,,,
+menu50,Insolation,日照量,Basic Series
+menu51,Astronomical Solution,天文解决方案,Basic Series
+menu52,Milankovitch Calculator,米兰科维奇计算器,Basic Series
+menu53,Signal/Noise Generator,信噪生成器,Basic Series
+menu54,LR04 Stack,LR04,Basic Series
+menu55,Examples,实例,Basic Series
+menu56,Mauna Loa CO2 monthly mean,Mauna Loa站逐月平均CO2,Basic Series
+menu57,Insolation 0-2Ma 65N Jun22,6月22日北纬65°日照量0-2Ma,Basic Series
+menu58,La2004 0-2Ma ETP,La20040-2Ma ETP,Basic Series
+menu59,Red Noise rho=0.7 2000 points,红噪音rho=0.7，2000点,Basic Series
+menu60,PETM Svalbard logFe,斯瓦尔巴德PETM logFe,Basic Series
+menu61,Late Triassic Newark Depth Rank,纽瓦克晚三叠深度序列,Basic Series
+menu62,Late Triassic Wayao gamma ray,瓦窑晚三叠自然伽马序列,Basic Series
+menu63,Middle Triassic Guandao2 gamma ray,关岛2中三叠自然伽马序列,Basic Series
+menu64,Image from Mars’ HiRISE camera,火星HiRISE照片,Basic Series
+menu65,Image for Plot Digitizer,图形数字化的图片范例,Basic Series
+menu66,Extinction episodes,大灭绝年龄,Basic Series
+menu67,,,
+menu68,,,
+menu69,,,
+menu70,Sort/Unique/Delete-empty,排序/去重/删空值,Math
+menu71,Interpolation,重采样,Math
+menu72,Interpolation Series,序列重采样,Math
+menu73,Select Parts,选择部分,Math
+menu74,Merge Series,合并序列,Math
+menu75,Multiply Series,序列相乘,Math
+menu76,Add Gaps,增加间隔,Math
+menu77,Remove Parts,去除部分,Math
+menu78,Remove Peaks,去除峰值,Math
+menu79,Clipping,剪裁,Math
+menu80,Changepoint,拐点,Math
+menu81,Standardize,标准化,Math
+menu82,Principal Component,主成分分析,Math
+menu83,Log-transform,log变换,Math
+menu84,Derivative,导数,Math
+menu85,Simple Function,简单函数变换,Math
+menu86,Utilities,工具箱,Math
+menu87,Find Max/Min,寻极值,Math
+menu88,Image,图像工具,Math
+menu89,Show Image,显示图像,Math
+menu90,RGB to Grayscale,RGB转灰度,Math
+menu91,Image Profile,图像序列,Math
+menu92,Plot Digitizer,图形数字化,Math
+menu93,,,
+menu94,,,
+menu95,,,
+menu96,,,
+menu97,,,
+menu98,,,
+menu99,,,
+menu100,Detrending | Curve Fitting,去趋势|曲线拟合,Timeseries
+menu101,Smoothing,平滑,Timeseries
+menu102,Bootstrap,自抽样,Timeseries
+menu103,Moving Average,滑动平均,Timeseries
+menu104,Moving Gaussian,高斯平滑,Timeseries
+menu105,Moving Median,中值平滑,Timeseries
+menu106,Pre-whitening,预白化,Timeseries
+menu107,Spectral Analysis,能谱分析,Timeseries
+menu108,Evolutionary Spectral Analysis,演化能谱分析,Timeseries
+menu109,Wavelet,小波分析,Timeseries
+menu110,Circular Spectral Analysis,圆周能谱分析,Timeseries
+menu111,Coherence & Phase,相干性与相位,Timeseries
+menu112,Lead/Lag Relationship,滞后性分析,Timeseries
+menu113,Filtering,滤波,Timeseries
+menu114,Dynamic Filtering,动态滤波,Timeseries
+menu115,Amplitude Modulation,振幅调制,Timeseries
+menu116,Build Age Model,建立年代模型,Timeseries
+menu117,Sedimentary Rate to Age Model,沉积速率转年龄模型,Timeseries
+menu118,Age Scale | Tuning,调谐,Timeseries
+menu119,Stratigraphic Correlation,地层序列手动对比,Timeseries
+menu120,Power Decomposition Analysis,能量分解分析,Timeseries
+menu121,Sedimentary noise model,沉积噪音模型,Timeseries
+menu122,Dynamic noise after orbital tuning (DYNOT),DYNOT模型,Timeseries
+menu123,Lag-1 autocorrelation coefficient (ρ1),ρ1模型,Timeseries
+menu124,Correlation Coefficient (COCO/eCOCO),相关系数法(COCO/eCOCO),Timeseries
+menu125,TimeOpt,TimeOpt,Timeseries
+menu126,eTimeOpt,eTimeOpt,Timeseries
+menu127,Spectral Moments,Spectral Moments,Timeseries
+menu128,,,
+menu129,,,
+menu130,,,
+menu131,,,
+menu132,,,
+menu133,,,
+menu134,,,
+menu135,,,
+menu136,,,
+menu137,,,
+menu138,,,
+menu139,,,
+menu140,What’s New,更新记录,Help
+menu141,Manuals,用户手册,Help
+menu142,Find Updates,发现新版,Help
+menu143,Copyright,版权声明,Help
+menu144,Contact,联系我们,Help
+menu145,,,
+menu146,,,
+menu147,,,
+menu148,,,
+menu149,,,
+a00,Acycle: Age Scale,Acycle: 调谐,AC
+a01,,,
+a02,Series,待调谐序列,Age Scale
+a03,Show Age Model,展示年龄模型,Age Scale
+a04,Tuning Preview Time,预览 (时间),Age Scale
+a05,Tuning Preview Depth,预览 (深度),Age Scale
+a06,Tuning,调谐,Age Scale
+a07,,,
+a20,Cover existed file ,覆盖已有文件,
+a21,No data copied,没有复制任何数据,
+a22,  error: space between folder name,错误：文件名中可能包含空格,
+a23,"Wait, large image? can be very slow ...",稍等，图像很大？可能很慢,
+a24,>>  Change working folder to ,>> 切换工作文件夹至 ,
+a25,>>  Read data: ,>> 读取数据：,
+a26,Check selected data: ,请检查数据：,
+a27,Data Error!,数据出错,
+a28,No selected data,没有选择任何数据,
+a29,Please first select at leaset one *.txt data file.,请先选择至少一个 *.txt 文件,
+a30,FORMAT:,格式：,
+a31,<No header>,<没有header>,
+a32,1st column: depth or time,第一列：时间或者深度,
+a33,2nd column: value,第二列：值,
+a34,See Terminal/Command Window for details,参见终端(mac)或命令行窗口(win)提示,
+a35,Error: address not exist,错误：地址不存在,
+a36,Cannot find the data.,无法找到这个数据,
+a37,Folder Name may contain NO language other than ENGLISH,文件名尽量不要使用非英语语言,
+a38,Acycle: Plot Preview,Acycle: 投图预览,
+a39,#,第,
+a40,column,列,
+a41,,,
+a42,,,
+a43,,,
+a44,,,
+a45,Enter the START of interval:,输入选择段的起点：,Select Parts
+a46,Enter the END of interval:,输入选择段的终点：,Select Parts
+a47,Apply to ALL? (1 = yes),应用到全部吗？（是，输入 1 ）,Select Parts
+a48,Input Select interval,输入选择段,Select Parts
+a49,>>  Processing ,>>  处理中,Select Parts
+a50,No overlap between selected interval and ,呀！输入的起始点和原数据没有交集,Select Parts
+a51,"      Error, no overlap",      错误，没有交集,Select Parts
+a52,"      Selected interval too large, skipped",      选择段太大，已跳过,Select Parts
+a53,,,
+a54,,,
+a55,,,
+a56,,,
+a57,,,
+a58,,,
+a59,,,
+a60,Select,选择,Interpolation
+a61,New sample rate (default = median):,新采样率（默认=中值）：,Interpolation
+a62,datasets,个数据文件,
+a63,>>  Processing clipping:,>>  裁剪处理中:,Clipping
+a64,Threshold value (default = mean),裁剪临界值（默认=均值）：,Clipping
+a65,Keep high/low? (1=high; 0=low),保留高/低于临界值（1=高于；0=低于）,Clipping
+a66,"Error, input must be a positive integer",错误，输入值必须为0或者正整数,Clipping
+a67,Clipped data (0 = set to 0; 1 = delete; 2 = threshold),如何处理被裁剪的数据（0=设为0；1=删除点；2=使用临界值）,Clipping
+a68,,,
+a69,,,
+a70,Window (unit),窗口大小（单位）,Smoothing
+a71,"Method: ""loess/lowess/rloess/rlowess""","方法选择: ""loess/lowess/rloess/rlowess""",Smoothing
+a72,Number of bootstrap sampling,自抽样次数,Smoothing
+a73,Slow process. Wait ...,进度缓慢，稍后,Smoothing
+a74,Smoothing,平滑,Smoothing
+a75,">>  Save [time, mean-2std, mean-std, mean, mean+std, mean+2std] as :",">>  保存数据的表头 [时间, 均值-2S.D., 均值-S.D., 均值, 均值+S.D., 均值+2S.D.] :",Smoothing
+a76,"'>>  Save [time, percentiles] as :",">>  保存数据的表头为 [时间, 分位数]",Smoothing
+a77,>>        Percentiles are ,>>        其中分位数为：,Smoothing
+a78,,,
+a79,,,
+a80,>>  Processing derivative:,>>  求导处理中:,Derivative
+a81,"Derivative (1=1st, 2=2nd ...)","导数 (1=一阶, 2=二阶 ...)",Derivative
+a82,Approximate Derivatives:,近似导数：,Derivative
+a83,,,
+a84,,,
+a85,Error: select the data file not a folder,错误：请选择正确的数据文件,Amplitude Modulation
+a86,Warning: Interpolation using median sampling rate,警告：已使用中值采样率进行重采样,Amplitude Modulation
+a87,See main window for amplitude modulation,振幅调制计算结果已保存在主窗口,Amplitude Modulation
+a88,,,
+a89,,,
+a90,Start Age in ka (>= 0):,起始年龄 ka (>= 0):,LR04 Stack
+a91,End Age in ka (<= 5320):,终止年龄 ka (<= 5320):,LR04 Stack
+a92,LR04 stack: Plio-Pleistocene d18O_ben),LR04 堆栈: 底栖有孔虫氧同位素,LR04 Stack
+a93,Time (ka),年龄 (千年),LR04 Stack
+a94,Global Benthic \delta^{18}O,全球底栖有孔虫 \delta^{18}O,LR04 Stack
+a95,LR04 Stack: ,LR04 堆栈 ：,LR04 Stack
+a96,,,
+a97,,,
+a98,,,
+a99,,,
+a100,Enter new file name:,输入新文件名：,Rename
+a101,Rename                           ,重命名,Rename
+a102,Error: Cannot copy or move a file or directory onto itself.,错误：不能粘贴在原文件夹下,Rename
+a103,,,
+a104,,,
+a105,Files (*.txt;*.csv),文件 (*.txt;*.csv),
+a106,"Import data (*.csv,*.txt)","导入数据 (*.csv,*.txt)",
+a107,Tips: open 2 colume data,贴士：打开2列数据,
+a108,Tips: Close,贴士：关闭,
+a109,Name of ACYCLE figure:,Acycle图形文件文件名：,
+a110,Filename,文件名,
+a111,,,
+a112,,,
+a113,Enter Mininum value:,输入极小值：,
+a114,Enter Maximum value:,输入极大值：,
+a115,Input MIN and MAX value,输入临界值,
+a116,,,
+a117,,,
+a118,Enter period (kyr):,输入滤波对应的周期（kyr),Build Age Model
+a119,Use 1 = peak; 0 = trough:,读取 1=峰值；0=低谷,Build Age Model
+a120,Input period,输入周期,Build Age Model
+a121,Acycle: Build Age Model | Age Model,Acycle: 建立年龄模型 | 年龄模型,Build Age Model
+a122, kyr cycle: , kyr 周期：,Build Age Model
+a123,Acycle: Build Age Model | Sedimentation Rate,Acycle: 建立年龄模型 | 沉积速率,Build Age Model
+a124,,,
+a125,a for the 1st column: x(i) = a * x(i) + b,第1列数据变换，参数 a；公式: x(i) = a * x(i) + b,Simple function
+a126,b for the 1st column: x(i) = a * x(i) + b,第1列数据变换，参数 b；公式: x(i) = a * x(i) + b,Simple function
+a127,c for the 2nd column: y(i) = c * y(i) + d,第2列数据变换，参数 c；公式: y(i) = c * y(i) + d,Simple function
+a128,d for the 2nd column: y(i) = c * y(i) + d,第2列数据变换，参数 d；公式: y(i) = c * y(i) + d,Simple function
+a129,Input parameters,参数输入,Simple function
+a130,Find Max/Min value and indice,查找极值,Find Max/Min
+a131,"Max or Min (1 = max, else = min)",选择极大值（1）或极小值（默认）,Find Max/Min
+a132,Tested column,目标列,Find Max/Min
+a133,,,
+a134,,,
+a135,Ruggieri (2013) Bayesian Changepoint,"贝叶斯拐点 (Ruggieri, 2013) 参数设置",Changepoint
+a136,"k_max, max no. of change points allowed","k_max, 允许拐点的最大数量",Changepoint
+a137,"d_min, min distance between consecutive change points","d_min, 相邻拐点的最小距离",Changepoint
+a138,"k_0, variance scaling hyperparameter","k_0, 方差缩放超参数",Changepoint
+a139,"v_0,  pseudo data point","v_0,  假数据点",Changepoint
+a140,"sig_0, pseudo data variance (maybe halved)","sig_0, 假数据的方差 (可能需要减半)",Changepoint
+a141,"n, number of sampled solutions","n, 取样方案的数目",Changepoint
+a142,"Save data? (1 = yes, 0 = no)","保存结果? (1 = 是, 0 = 否)",Changepoint
+a143,"Large dataset, wait...",大数据，请稍后,Changepoint
+a144, Bayesian change points output saved. R_2 is ,贝叶斯拐点结果已保存。R2值为 ,Changepoint
+a145,,,
+a146,This is not a RGB image,这不是一个RGB图像,AC: image
+a147,": Press ""SHIFT""or""ALT"" & select cursors now",：按住SHIFT或ALT键且点击图片选择光标点,AC: image
+a148,"Steps: 1) click the ""Data Tips"" tool; 2) select two cursors; 3) press ""Enter"" in the COMMAND window","步骤：1）选择“Data Tips""选点工具；2）选择2个光标点；3）在命令窗口输入回车键",AC: image
+a149,,,AC: image
+a150,">>  Press ""Enter""",>> 按下回车键,AC: image
+a151,"More than 2 cursors selected, only first 2 used!",选择了多于2个光标点，只使用前2个点,AC: image
+a152,This is not a grayscale image!,这不是一张灰度图片,AC: image
+a153,"Looks like a cymk image, right?",看起来这是一张CYMK图像，是吗？,AC: image
+a154,>>  save profile data as   ,>>  保存图像数据序列为,AC: image
+a155,>>  save control points as ,>>  保存控制点为,AC: image
+a156,Grayscale,灰度,AC: image
+a157,,,
+a158,Cover existed file ,覆盖已有文件,
+a159,No data copied,没有复制任何数据,
+a160,You are going to DELETE the selected file(s),你要删除选择的文件吗？,
+a161,DELETE selected folder and files within it,删除文件夹及其内部的全部文件,
+a162,,,
+a163,Sort data in ascending order?,按首列升序排序？(1=是；0=否),
+a164,Unique values in data?,数据去重值？,
+a165,Remove empty row?,数据去空行？,
+a166,Apply to ALL,应用到全部数据？,
+a167,"Sort, Unique & Remove empty (1 = yes)",排序、去重、去空行,
+a168,Check data file: ,检查文件：,
+a169,Data Error!,数据出错,
+a170,      Error! Skipped. Check the data file:,      错误。检查文件：,
+a171,,,
+a172,,,
+a173,,,
+a174,,,
+a175,,,
+a176,,,
+a177,,,
+a178,,,
+a179,,,
+a180,Single run or Monte Carlo Simulation,单次运行还是多次蒙特卡洛模拟,
+a181,Single,单次运行,
+a182,Select 1 data only,只能选择1个数据文件,
+a183,Sampling rate (Default = 95% percentile),设定采样率（默认=95%分位数）,
+a184,Evolutionary RHO in AR(1),演化AR(1)的RHO,
+a185,RHO in AR(1),AR(1)的RHO,
+a186,>>  Save rho1    : ,>>  保存 rho1    : ,
+a187,Monte Carlo simulations,蒙特卡洛模拟,
+a188,Window ranges from,窗口范围从,
+a189,Window ranges to,窗口范围至,
+a190,Sample rate from,采样率从,
+a191,Sample rate to,采样率至,
+a192,Plot: interpolation,投图：重采样,
+a193,Plot: shift grids (Default = 15; no shift = 1),投图：随机投放网格划分（默认=15个；不随机=1）,
+a194,Monte Carlo Simulation of eRHO in AR(1),演化AR(1)的RHO蒙特卡洛模拟,
+a195,Noise estimation - rho1: Monte Carlo processing ...,噪音rho1模型: 蒙特卡洛模拟中,
+a196,Simulation step = ,模拟进度：,
+a197,>>  Save rho1 median    : ,>>  保存 rho1的均值    : ,
+a198,>>  Save rho1 percentile: ,>>  保存 rho1的分位数: ,
+a199,"Number simulations is too few, try 1000",蒙特卡洛模拟次数太小，试试1000,
+a200,,,
+a201,Type name of the folder,输入文件夹名称,
+a202,newfolder,新建文件夹,
+a203,_new,_新,
+a204,,,
+a205,Sampling rate (original domain),采样率（原始）,
+a206,: kernel fit of sampling rates,: 采样率分布的kernel拟合,
+a207,Sampling rate: distribution,采样率：分布,
+a208,Sampling rate (,采样率 (,
+a209,Number,#,
+a210,Data Distribution,数据分布,
+a211,: kernel fit of the data,: 数据值分布的kernel拟合,
+a212,,,
+a213,,,
+a214,,,
+a215,,,
+a216,,,
+a217,,,
+a218,,,
+a219,,,
+a220,,,
+a221,,,
+a222,,,
+a223,,,
+a224,,,
+a225,,,
+a226,,,
+a227,,,
+a228,,,
+a229,,,
+a230,,,
+,,,
+b00,Acycle: Astronomical Solutions,Acycle: 天文解决方案,Astronomical Solutions
+b01,Astronomical solutions,天文解决方案,Astronomical Solutions
+b02,Astronomical parameters,天文参数,Astronomical Solutions
+b03,Time Interval,选择时间间隔,Astronomical Solutions
+b04,From t1,从t1开始,Astronomical Solutions
+b05,To t2,到t2结束,Astronomical Solutions
+b06,,,Astronomical Solutions
+b07,ETP weight,ETP权重,Astronomical Solutions
+b08,Eccentricity,偏心率,Astronomical Solutions
+b09,Obliquity,斜率,Astronomical Solutions
+b10,Precession,岁差,Astronomical Solutions
+b11,,,
+c00,Acycle: Circular spectral analysis,Acycle: 圆周能谱分析,Circular spectral analysis
+c01,Data:,数据:,Circular spectral analysis
+c02,Test period,设置检测周期,Circular spectral analysis
+c03,,,Circular spectral analysis
+c04,,,Circular spectral analysis
+c05,,,Circular spectral analysis
+c06,,,Circular spectral analysis
+c07,Number of steps,总步数,Circular spectral analysis
+c08,More than 1 column detected. The first column data was used,数据不止1列数据。仅分析第一列数据,Circular spectral analysis
+c09,Info,提示,Circular spectral analysis
+c10,test periods of ,检测的周期为：,Circular spectral analysis
+c11,,,Circular spectral analysis
+c12,,,Circular spectral analysis
+c13,Random distance,随机距离,Circular spectral analysis
+c14,Fixed distance,固定距离,Circular spectral analysis
+c15,Noise Model,噪音模型,Circular spectral analysis
+c16,White,白噪,Circular spectral analysis
+c17,Red,红噪,Circular spectral analysis
+c18,,,
+c19,,,
+c20,Median smoothing window: default 0.2=20%,滑动中值窗口：默认0.2=20%,
+c21,,,
+c30,Acycle: Coherence & Phase Analysis,Acycle: 相干性&相位,Coherence & Phase Analysis
+c31,,,Coherence & Phase Analysis
+c32,Series,目标序列,Coherence & Phase Analysis
+c33,Depth/Time,深度/时间,Coherence & Phase Analysis
+c34,Small=Young,小值=年轻,Coherence & Phase Analysis
+c35,Small=Old,小值=老,Coherence & Phase Analysis
+c36,Parameters,参数,Coherence & Phase Analysis
+c37,Method,方法,Coherence & Phase Analysis
+c38,Coherence threshold,相干性临界值,Coherence & Phase Analysis
+c39,Window size,窗口大小,Coherence & Phase Analysis
+c40,Number of overlap,重叠数量,Coherence & Phase Analysis
+c41,Plot X range,X坐标范围,Coherence & Phase Analysis
+c42,,,
+c43,,,
+c44,,,
+c45,,,
+c46,Plot Style,投图样式,
+c47,,,
+c48,Coherence Plot,相干性投图,
+c49,,,
+c50,,,
+c51,,,
+c60,Acycle: Copyright,Acycle: 版权声明,Copyright
+c61,"Acycle v2.4 (Nov 15, 2021)",Acycle 2.4 (2021年11月18日),Copyright
+c62,Mingsong Li (Peking University) & Linda A. Hinnov (George Mason),李明松（北京大学）、Linda A. Hinnov （乔治梅森大学）,Copyright
+c63,Website: acycle.org,网址：Acycle.org,Copyright
+c64,              github.com/mingsongli/acycle,              github.com/mingsongli/acycle,Copyright
+c65,,,
+c66,,,
+c67,,,
+c68,,,
+c69,,,
+c70,Acycle: Stratigraphic Correlation,Acycle: 地层序列手动对比,Stratigraphic Correlation
+c71,Select Reference and Target,选择参考与目标序列,Stratigraphic Correlation
+c72,Set limits,设置区间,Stratigraphic Correlation
+c73,Reference : X limit,参考序列：x轴范围,Stratigraphic Correlation
+c74,Series : X limit,目标序列：x轴范围,Stratigraphic Correlation
+c75,reference/series data not ready,参考/目标序列数据没有准备好,Stratigraphic Correlation
+c76,\fontsize{14}\color{blue}Select a tie point in the \color{red}reference \color{blue}plot; right click to stop,\fontsize{14}\color{blue}在 \color{red}参考序列 \color{blue} 图上单击选择一个锚点；右键点击结束,Stratigraphic Correlation
+c77,\fontsize{14}\color{blue}Select a tie point in the \color{red}series \color{blue}plot; right click to stop,\fontsize{14}\color{blue}在 \color{red}目标序列 \color{blue}图上单击选择一个锚点；右键点击结束,Stratigraphic Correlation
+c78,\fontsize{14}\color{blue}Reference,\fontsize{14}\color{blue}参考序列,Stratigraphic Correlation
+c79,\fontsize{14}\color{blue}Series,\fontsize{14}\color{blue}目标序列,Stratigraphic Correlation
+c80,Reference vs. Tuned Series,参考序列 vs. 调谐后目标序列,Stratigraphic Correlation
+c81,Tie Point ,锚点,Stratigraphic Correlation
+c82, completed: series @ , 完成：目标序列 @ ,Stratigraphic Correlation
+c83, -> ref. @ , -> 参考序列 @ ,Stratigraphic Correlation
+c84,Acycle: Stratigraphic Correlation | Sedimentation Rate,Acycle: 地层对比 | 沉积速率,Stratigraphic Correlation
+c85,Acycle: Age Model,Acycle: 年龄模型,Stratigraphic Correlation
+c86,Select a Reference Series,选择一个参考序列,Stratigraphic Correlation
+c87,User selected Cancel,取消了选择,Stratigraphic Correlation
+c88,Value is too small,值太小,Stratigraphic Correlation
+c89,Value is too large,值太大,Stratigraphic Correlation
+c90,Clear All,全部清除,Stratigraphic Correlation
+c91,Continue,继续,Stratigraphic Correlation
+c92,All Files (*.*),全部文件 (*.*),Stratigraphic Correlation
+c93,,,
+c94,,,
+l00,Acycle: Language,Acycle: 语言选择,Language
+l01,Select language,更改语言 (Language),Language
+,,,
+dd00,Acycle: Plot Digitizer,Acycle: 图形数字化,Plot Digitizer
+dd01,"Wait, large image can be very slow",稍等，大图片加载速度较慢,Plot Digitizer
+dd02,Input the values in EditBoxs. Click Calibrate axis to set axis!,在编辑框中输入数值，点击 校正坐标轴 按钮设置坐标轴控制点,Plot Digitizer
+dd03,You are going to Clear all points,你真要清除全部数据点吗？,Plot Digitizer
+dd04,Calibrate axis,校正坐标轴,Plot Digitizer
+dd05,Locate the X-Axis Start point !!!,请定位X轴起点,Plot Digitizer
+dd06,Locate the X-Axis End point !!!,请定位X轴终点,Plot Digitizer
+dd07,Locate the Y-Axis Start point !!!,请定位Y轴起点,Plot Digitizer
+dd08,Locate the Y-Axis End point !!!,请定位Y轴终点,Plot Digitizer
+dd09,"Now Digitize the point, press RightButton to stop",现在开始数字化吧，点击右键停止数字化,Plot Digitizer
+dd10,Recalibrate axis,重新校正坐标轴,Plot Digitizer
+dd11,,,Plot Digitizer
+dd12,>>  data info: i = ,    数据信息: i = ,Plot Digitizer
+dd13,Preparing image. Wait,图像准备中，请稍后,Plot Digitizer
+dd14,X axis,X轴,Plot Digitizer
+dd15,Y axis,Y轴,Plot Digitizer
+dd16,Start Point,起点,Plot Digitizer
+dd17,End Point,终点,Plot Digitizer
+dd18,Data Extract,提取数据,Plot Digitizer
+dd19,Digitize,数字化,Plot Digitizer
+dd20,Grid Line,网格线,Plot Digitizer
+dd21,Auto-digitize,自动数字化,Plot Digitizer
+dd22,Acycle: Original figure,Acycle: 原始图像,Plot Digitizer
+dd23,Acycle: Plot Digitizer | data,Acycle: 图形数字化 | 数据点,Plot Digitizer
+dd24,Image color space not supported. Convert to RGB or Grayscale,不支持该图像的色彩空间。请转换为GRB或者灰度格式。,Plot Digitizer
+dd25,,,
+dd26,,,
+dd27,,,
+dd28,,,
+dd29,,,
+dd30,Acycle: Dynamic Filtering | Frequency Stabilization,Acycle: 动态滤波 | 频率稳定器,Dynamic Filtering
+dd31,Plot: Maximum Frequency,投图：频率设置,Dynamic Filtering
+dd32,Freq. min.,最小值,Dynamic Filtering
+dd33,Use Nyquist,使用Dyquist,Dynamic Filtering
+dd34,Use Input,自定义,Dynamic Filtering
+dd35,Normalize each window,归一化每个窗口,Dynamic Filtering
+dd36,Padding X,X补植,Dynamic Filtering
+dd37,Not uniformly spaced data. Interpolated using mean sampling rate!,非等间距采样，已使用平均采样率重采样,Dynamic Filtering
+dd38,zero,零,Dynamic Filtering
+dd39,mirror,镜像,Dynamic Filtering
+dd40,mean,均值,Dynamic Filtering
+dd41,random,随机,Dynamic Filtering
+dd42,Data & dynamic filtered output,数据与动态滤波结果,Dynamic Filtering
+dd43,Tips: window  < total data length; window ~= 2x aimed cycle. i.e. 20 m for a 10-m cycles,贴士：窗口大小需小于数据总长；约2倍的目标周期似为合适。例如对具有10 m目标周期的数据，窗口设置为20m,Dynamic Filtering
+dd44,Tips: window length,贴士：窗口长度,Dynamic Filtering
+dd45,Tips: Step  >= mean sample rate,贴士：步长需大于等于平均采样率,Dynamic Filtering
+dd46,Tips: Step length,贴士：步长,Dynamic Filtering
+dd47,Step must be no smaller than the mean sampling rate,步长必须不小于平均采样率,Dynamic Filtering
+dd48,Step is too large,步长太大,Dynamic Filtering
+dd49,Maximum Freq. must be larger than freq. min,最大频率必须大于最小频率,Dynamic Filtering
+dd50,Maximum Freq. must be no larger than the Nyquist frequency,最大频率必须不大于Nyquist频率,Dynamic Filtering
+dd51,Freq. min must be smaller than the Nyquist frequency,最小频率必须小于Nyquist频率,Dynamic Filtering
+dd52,Freq. min must be no less than 0,最小频率必须不小于0,Dynamic Filtering
+dd53,Window = %d %s,窗口 = %d %s,Dynamic Filtering
+dd54,Frequency (cycles/,频率 (周期/,Dynamic Filtering
+dd55,'\fontsize{16}\color{blue}Select \color{red}lower \color{blue}frequency boundary; right click to stop',\fontsize{16}\color{blue}左键连续单击选择频率的 \color{red}下边界 \color{blue}; 右键点击结束,Dynamic Filtering
+dd56,'\fontsize{16}\color{blue}Select \color{red}higher \color{blue}frequency boundary; right click to stop',\fontsize{16}\color{blue}左键连续单击选择频率的 \color{red}上边界 \color{blue}; 右键点击结束,Dynamic Filtering
+dd57,Please wait ...,请稍等 ……,Dynamic Filtering
+dd58,,,
+dd59,,,
+dd70,,,
+dd71,,,
+dd72,,,
+dd73,,,
+dd74,,,
+dd75,,,
+dd76,,,
+dd77,,,
+dd78,,,
+dd79,,,
+dd80,,,
+dd81,,,
+dd82,,,
+dd83,,,
+dd84,,,
+dd85,,,
+dd86,,,
+dd87,,,
+dd88,,,
+dd89,,,
+dd90,,,
+dd91,,,
+dd92,,,
+dd93,,,
+dd94,,,
+dd95,,,
+dd96,,,
+dd97,,,
+dd98,,,
+dd99,,,
+dd100,,,
+dd101,,,
+dd102,,,
+dd103,,,

@@ -74,7 +74,7 @@ function varargout = AC(varargin)
 
 % Edit the above text to modify the response to help AC
 
-% Last Modified by GUIDE v2.5 07-Nov-2021 10:37:13
+% Last Modified by GUIDE v2.5 18-Nov-2021 01:24:23
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -133,13 +133,245 @@ set(gcf,'DockControls', 'off')
 set(gcf,'Color', 'white')
 set(gcf,'units','norm') % set location
 
+%% language
+
+lang_choice = load('ac_lang.txt');
+langdict = readtable('langdict.csv');
+lang_id = langdict.x_ID;
+if lang_choice == 0
+    % English
+    lang_var = langdict.en;
+elseif lang_choice == 1
+    % Chinese
+    lang_var = langdict.cn;
+end
+if lang_choice > 0
+    % menu
+    [~, locb] = ismember('menu01',lang_id);
+    set(handles.menu_file,'text',lang_var{locb})
+    [~, locb] = ismember('menu02',lang_id);
+    set(handles.menu_edit,'text',lang_var{locb})
+    [~, locb] = ismember('menu03',lang_id);
+    set(handles.menu_plotall,'text',lang_var{locb})
+    [~, locb] = ismember('menu04',lang_id);
+    set(handles.menu_basic,'text',lang_var{locb})
+    [~, locb] = ismember('menu05',lang_id);
+    set(handles.menu_math,'text',lang_var{locb})
+    [~, locb] = ismember('menu06',lang_id);
+    set(handles.menuac,'text',lang_var{locb})
+    [~, locb] = ismember('menu07',lang_id);
+    set(handles.menu_help,'text',lang_var{locb})
+    % File
+    [~, locb] = ismember('menu20',lang_id);
+    set(handles.menu_folder,'text',lang_var{locb})
+    [~, locb] = ismember('menu21',lang_id);
+    set(handles.menu_newtxt,'text',lang_var{locb})
+    [~, locb] = ismember('menu22',lang_id);
+    set(handles.menu_savefig,'text',lang_var{locb})
+    [~, locb] = ismember('menu23',lang_id);
+    set(handles.menu_open,'text',lang_var{locb})
+    [~, locb] = ismember('menu24',lang_id);
+    set(handles.menu_opendir,'text',lang_var{locb})
+    [~, locb] = ismember('menu25',lang_id);
+    set(handles.menu_extract,'text',lang_var{locb})
+    % Edit
+    [~, locb] = ismember('menu30',lang_id);
+    set(handles.menu_refreshlist,'text',lang_var{locb})
+    [~, locb] = ismember('menu31',lang_id);
+    set(handles.menu_rename,'text',lang_var{locb})
+    [~, locb] = ismember('menu32',lang_id);
+    set(handles.menu_cut,'text',lang_var{locb})
+    [~, locb] = ismember('menu33',lang_id);
+    set(handles.menu_copy,'text',lang_var{locb})
+    [~, locb] = ismember('menu34',lang_id);
+    set(handles.menu_paste,'text',lang_var{locb})
+    [~, locb] = ismember('menu35',lang_id);
+    set(handles.menu_delete,'text',lang_var{locb})
+    % Plot
+    [~, locb] = ismember('menu40',lang_id);
+    set(handles.menu_plot,'text',lang_var{locb})
+    [~, locb] = ismember('menu41',lang_id);
+    set(handles.menu_plotplus,'text',lang_var{locb})
+    [~, locb] = ismember('menu42',lang_id);
+    set(handles.menu_plotn,'text',lang_var{locb})
+    [~, locb] = ismember('menu43',lang_id);
+    set(handles.menu_plotn2,'text',lang_var{locb})
+    [~, locb] = ismember('menu44',lang_id);
+    set(handles.menu_SwapPlot,'text',lang_var{locb})
+    [~, locb] = ismember('menu45',lang_id);
+    set(handles.munu_plot_stairs,'text',lang_var{locb})
+    [~, locb] = ismember('menu46',lang_id);
+    set(handles.menu_samplerate,'text',lang_var{locb})
+    [~, locb] = ismember('menu47',lang_id);
+    set(handles.menu_datadistri,'text',lang_var{locb})
+    % Basic Series
+    [~, locb] = ismember('menu50',lang_id);
+    set(handles.menu_insol,'text',lang_var{locb})
+    [~, locb] = ismember('menu51',lang_id);
+    set(handles.menu_laskar,'text',lang_var{locb})
+    [~, locb] = ismember('menu52',lang_id);
+    set(handles.menu_LOD,'text',lang_var{locb})
+    [~, locb] = ismember('menu53',lang_id);
+    set(handles.linegenerator,'text',lang_var{locb})
+    [~, locb] = ismember('menu54',lang_id);
+    set(handles.menu_LR04,'text',lang_var{locb})
+    [~, locb] = ismember('menu55',lang_id);
+    set(handles.menu_examples,'text',lang_var{locb})
+    [~, locb] = ismember('menu56',lang_id);
+    set(handles.menu_example_hawaiiCO2,'text',lang_var{locb})
+    [~, locb] = ismember('menu57',lang_id);
+    set(handles.menu_example_inso2Ma,'text',lang_var{locb})
+    [~, locb] = ismember('menu58',lang_id);
+    set(handles.menu_example_la04etp,'text',lang_var{locb})
+    [~, locb] = ismember('menu59',lang_id);
+    set(handles.menu_example_redp7,'text',lang_var{locb})
+    [~, locb] = ismember('menu60',lang_id);
+    set(handles.menu_example_PETM,'text',lang_var{locb})
+    [~, locb] = ismember('menu61',lang_id);
+    set(handles.menu_example_Newark,'text',lang_var{locb})
+    [~, locb] = ismember('menu62',lang_id);
+    set(handles.menu_example_wayao,'text',lang_var{locb})
+    [~, locb] = ismember('menu63',lang_id);
+    set(handles.menu_example_GD2GR,'text',lang_var{locb})
+    [~, locb] = ismember('menu64',lang_id);
+    set(handles.menu_example_marsimage,'text',lang_var{locb})
+    [~, locb] = ismember('menu65',lang_id);
+    set(handles.menu_example_plotdigitizer,'text',lang_var{locb})
+    [~, locb] = ismember('menu66',lang_id);
+    set(handles.menu_extinction_CSA,'text',lang_var{locb})
+    % Math
+    [~, locb] = ismember('menu70',lang_id);
+    set(handles.menu_sort,'text',lang_var{locb})
+    [~, locb] = ismember('menu71',lang_id);
+    set(handles.menu_interp,'text',lang_var{locb})
+    [~, locb] = ismember('menu72',lang_id);
+    set(handles.menu_interpseries,'text',lang_var{locb})
+    [~, locb] = ismember('menu73',lang_id);
+    set(handles.menu_selectinterval,'text',lang_var{locb})
+    [~, locb] = ismember('menu74',lang_id);
+    set(handles.menu_add,'text',lang_var{locb})
+    [~, locb] = ismember('menu75',lang_id);
+    set(handles.menu_multiply,'text',lang_var{locb})
+    [~, locb] = ismember('menu76',lang_id);
+    set(handles.menu_gap,'text',lang_var{locb})
+    [~, locb] = ismember('menu77',lang_id);
+    set(handles.menu_desection,'text',lang_var{locb})
+    [~, locb] = ismember('menu78',lang_id);
+    set(handles.menu_depeaks,'text',lang_var{locb})
+    [~, locb] = ismember('menu79',lang_id);
+    set(handles.menu_clip,'text',lang_var{locb})
+    [~, locb] = ismember('menu80',lang_id);
+    set(handles.menu_cpt,'text',lang_var{locb})
+    [~, locb] = ismember('menu81',lang_id);
+    set(handles.menu_norm,'text',lang_var{locb})
+    [~, locb] = ismember('menu82',lang_id);
+    set(handles.menu_pca,'text',lang_var{locb})
+    [~, locb] = ismember('menu83',lang_id);
+    set(handles.menu_log10,'text',lang_var{locb})
+    [~, locb] = ismember('menu84',lang_id);
+    set(handles.menu_derivative,'text',lang_var{locb})
+    [~, locb] = ismember('menu85',lang_id);
+    set(handles.menu_function,'text',lang_var{locb})
+    [~, locb] = ismember('menu86',lang_id);
+    set(handles.menu_utilities,'text',lang_var{locb})
+    [~, locb] = ismember('menu87',lang_id);
+    set(handles.menu_maxmin,'text',lang_var{locb})
+    [~, locb] = ismember('menu88',lang_id);
+    set(handles.menu_image,'text',lang_var{locb})
+    [~, locb] = ismember('menu89',lang_id);
+    set(handles.menu_imshow,'text',lang_var{locb})
+    [~, locb] = ismember('menu90',lang_id);
+    set(handles.menu_rgb2gray,'text',lang_var{locb})
+    [~, locb] = ismember('menu91',lang_id);
+    set(handles.menu_improfile,'text',lang_var{locb})
+    [~, locb] = ismember('menu92',lang_id);
+    set(handles.menu_digitizer,'text',lang_var{locb})
+    % Time series
+    [~, locb] = ismember('menu100',lang_id);
+    set(handles.menu_prewhiten,'text',lang_var{locb})
+    [~, locb] = ismember('menu101',lang_id);
+    set(handles.menu_smooth1,'text',lang_var{locb})
+    [~, locb] = ismember('menu102',lang_id);
+    set(handles.menu_bootstrap,'text',lang_var{locb})
+    [~, locb] = ismember('menu103',lang_id);
+    set(handles.menu_smooth,'text',lang_var{locb})
+    [~, locb] = ismember('menu104',lang_id);
+    set(handles.menu_movGauss,'text',lang_var{locb})
+    [~, locb] = ismember('menu105',lang_id);
+    set(handles.menu_movmedian,'text',lang_var{locb})
+    [~, locb] = ismember('menu106',lang_id);
+    set(handles.menu_whiten,'text',lang_var{locb})
+    [~, locb] = ismember('menu107',lang_id);
+    set(handles.menu_power,'text',lang_var{locb})
+    [~, locb] = ismember('menu108',lang_id);
+    set(handles.menu_period,'text',lang_var{locb})
+    [~, locb] = ismember('menu109',lang_id);
+    set(handles.menu_waveletGUI,'text',lang_var{locb})
+    [~, locb] = ismember('menu110',lang_id);
+    set(handles.menu_CSA,'text',lang_var{locb})
+    [~, locb] = ismember('menu111',lang_id);
+    set(handles.menu_coh,'text',lang_var{locb})
+    [~, locb] = ismember('menu112',lang_id);
+    set(handles.menu_leadlag,'text',lang_var{locb})
+    [~, locb] = ismember('menu113',lang_id);
+    set(handles.menu_filter,'text',lang_var{locb})
+    [~, locb] = ismember('menu114',lang_id);
+    set(handles.menu_dynfilter,'text',lang_var{locb})
+    [~, locb] = ismember('menu115',lang_id);
+    set(handles.menu_AM,'text',lang_var{locb})
+    [~, locb] = ismember('menu116',lang_id);
+    set(handles.menu_agebuild,'text',lang_var{locb})
+    [~, locb] = ismember('menu117',lang_id);
+    set(handles.menu_sr2age,'text',lang_var{locb})
+    [~, locb] = ismember('menu118',lang_id);
+    set(handles.menu_age,'text',lang_var{locb})
+    [~, locb] = ismember('menu119',lang_id);
+    set(handles.menu_correlation,'text',lang_var{locb})
+    [~, locb] = ismember('menu120',lang_id);
+    set(handles.menu_pda,'text',lang_var{locb})
+    [~, locb] = ismember('menu121',lang_id);
+    set(handles.menu_sednoise,'text',lang_var{locb})
+    [~, locb] = ismember('menu122',lang_id);
+    set(handles.menu_dynos,'text',lang_var{locb})
+    [~, locb] = ismember('menu123',lang_id);
+    set(handles.menu_rho,'text',lang_var{locb})
+    [~, locb] = ismember('menu124',lang_id);
+    set(handles.menu_ecoco,'text',lang_var{locb})
+    [~, locb] = ismember('menu125',lang_id);
+    set(handles.menu_timeOpt,'text',lang_var{locb})
+    [~, locb] = ismember('menu126',lang_id);
+    set(handles.menu_eTimeOpt,'text',lang_var{locb})
+    [~, locb] = ismember('menu127',lang_id);
+    set(handles.menu_specmoments,'text',lang_var{locb})
+    %
+    [~, locb] = ismember('menu140',lang_id);
+    set(handles.menu_read,'text',lang_var{locb})
+    [~, locb] = ismember('menu141',lang_id);
+    set(handles.menu_manuals,'text',lang_var{locb})
+    [~, locb] = ismember('menu142',lang_id);
+    set(handles.menu_findupdates,'text',lang_var{locb})
+    [~, locb] = ismember('l01',lang_id);
+    set(handles.menu_lang,'text',lang_var{locb})
+    [~, locb] = ismember('menu143',lang_id);
+    set(handles.menu_contact,'text',lang_var{locb})
+    [~, locb] = ismember('menu144',lang_id);
+    set(handles.menu_email,'text',lang_var{locb})
+end
 %% push_up
 h_push_up = uicontrol('Style','pushbutton','Tag','push_up');%,'BackgroundColor','white','ForegroundColor','white');  % set style, Tag
 %jEdit = findjobj(h_push_up);   % find java
 %jEdit.Border = [];  % hide border
 set(h_push_up,'Units','normalized') % set units as normalized
 set(h_push_up,'Position', [0.02,0.945,0.06,0.05]) % set position
-tooltip = '<html>Up<br>one level';  % tooltip
+
+
+[lia, locb] = ismember('menu08',lang_id);
+if lia
+    tooltip = lang_var{locb};
+else
+    tooltip = '<html>Up<br>one level';  % tooltip
+end
+
 set(h_push_up,'tooltip',tooltip,'CData',imread('menu_up.jpg'))  % set tooltip and button image
 set(h_push_up,'Callback',@push_up_clbk)  % set callback function
 
@@ -149,7 +381,14 @@ h_push_folder = uicontrol('Style','pushbutton','Tag','push_folder');%,'Backgroun
 % jEdit.Border = [];  % hide border
 set(h_push_folder,'Units','normalized') % set units as normalized
 set(h_push_folder,'Position', [0.106,0.945,0.065,0.05]) % set position
-tooltip = '<html>Open<br>working folder';  % tooltip
+
+[lia, locb] = ismember('menu09',lang_id);
+if lia
+    tooltip = lang_var{locb};
+else
+    tooltip = '<html>Open<br>working folder';  % tooltip
+end
+
 set(h_push_folder,'tooltip',tooltip,'CData',imread('menu_folder.jpg'))  % set tooltip and button image
 set(h_push_folder,'Callback',@push_folder_clbk)  % set callback function
 
@@ -159,7 +398,14 @@ h_push_plot = uicontrol('Style','pushbutton','Tag','push_plot');%,'BackgroundCol
 % jEdit.Border = [];  % hide border
 set(h_push_plot,'Units','normalized') % set units as normalized
 set(h_push_plot,'Position', [0.2,0.945,0.06,0.05]) % set position
-tooltip = '<html>Plot Pro';  % tooltip
+
+[lia, locb] = ismember('menu10',lang_id);
+if lia
+    tooltip = lang_var{locb};
+else
+    tooltip = '<html>Plot Pro';  % tooltip
+end
+
 set(h_push_plot,'tooltip',tooltip,'CData',imread('menu_plot.jpg'))  % set tooltip and button image
 set(h_push_plot,'Callback',@push_plot_clbk)  % set callback function
 
@@ -169,7 +415,15 @@ h_push_refresh = uicontrol('Style','pushbutton','Tag','push_refresh');%,'Backgro
 % jEdit.Border = [];  % hide border
 set(h_push_refresh,'Units','normalized') % set units as normalized
 set(h_push_refresh,'Position', [0.28,0.945,0.06,0.05]) % set position
-tooltip = '<html>Refresh<br>list box';  % tooltip
+
+[lia, locb] = ismember('menu11',lang_id);
+if lia
+    tooltip = lang_var{locb};
+else
+    tooltip = '<html>Refresh<br>list box';  % tooltip
+end
+
+
 set(h_push_refresh,'tooltip',tooltip,'CData',imread('menu_refresh.jpg'))  % set tooltip and button image
 set(h_push_refresh,'Callback',@push_refresh_clbk)  % set callback function
 
@@ -179,7 +433,15 @@ h_push_robot = uicontrol('Style','pushbutton','Tag','push_robot');%,'BackgroundC
 % jEdit.Border = [];  % hide border
 set(h_push_robot,'Units','normalized') % set units as normalized
 set(h_push_robot,'Position', [0.36,0.945,0.06,0.05]) % set position
-tooltip = '<html>Mini-robot';  % tooltip
+
+[lia, locb] = ismember('menu12',lang_id);
+if lia
+    tooltip = lang_var{locb};
+else
+    tooltip = '<html>Mini-robot';  % tooltip
+end
+
+
 set(h_push_robot,'tooltip',tooltip,'CData',imread('menu_robot.jpg'))  % set tooltip and button image
 set(h_push_robot,'Callback',@push_robot_clbk)  % set callback function
 
@@ -189,7 +451,14 @@ h_push_openfolder = uicontrol('Style','pushbutton','Tag','push_openfolder');%,'B
 % jEdit.Border = [];  % hide border
 set(h_push_openfolder,'Units','normalized') % set units as normalized
 set(h_push_openfolder,'Position', [0.02,0.9,0.06,0.04]) % set position
-tooltip = '<html>Change<br>directory';  % tooltip
+
+[lia, locb] = ismember('menu13',lang_id);
+if lia
+    tooltip = lang_var{locb};
+else
+    tooltip = '<html>Change<br>directory';  % tooltip
+end
+
 set(h_push_openfolder,'tooltip',tooltip,'CData',imread('menu_open.jpg'))  % set tooltip and button image
 set(h_push_openfolder,'Callback',@push_openfolder_clbk)  % set callback function
 %%
@@ -202,9 +471,29 @@ if ispc
     set(h_push_openfolder,'BackgroundColor','white') % 
 end
 
-set(handles.popupmenu1,'position', [0.83,0.92,0.15,0.06],'tooltip','<html>Select unit<br>for dataset')
-set(handles.popupmenu2,'position', [0.67,0.92,0.15,0.06],'tooltip','<html>Sort<br>dataset')
-set(handles.edit_acfigmain_dir,'position', [0.081,0.9,0.9,0.04],'tooltip','Working directory')
+[lia, locb] = ismember('menu14',lang_id);
+if lia
+    tooltip = lang_var{locb};
+else
+    tooltip = '<html>Select unit<br>for dataset';  % tooltip
+end
+set(handles.popupmenu1,'position', [0.83,0.92,0.15,0.06],'tooltip',tooltip)
+
+[lia, locb] = ismember('menu15',lang_id);
+if lia
+    tooltip = lang_var{locb};
+else
+    tooltip = '<html>Sort<br>dataset';  % tooltip
+end
+set(handles.popupmenu2,'position', [0.67,0.92,0.15,0.06],'tooltip',tooltip)
+
+[lia, locb] = ismember('menu16',lang_id);
+if lia
+    tooltip = lang_var{locb};
+else
+    tooltip = 'Working directory';  % tooltip
+end
+set(handles.edit_acfigmain_dir,'position', [0.081,0.9,0.9,0.04],'tooltip',tooltip)
 set(handles.listbox_acmain,'position', [0.02,0.008,0.96,0.884])
 
 set(handles.listbox_acmain,'value', [])
@@ -285,6 +574,11 @@ handles.math_derivative = 1;
 assignin('base','unit',handles.unit)
 assignin('base','unit_type',handles.unit_type)
 
+% language
+handles.lang_choice = lang_choice;
+handles.lang_id = lang_id;
+handles.lang_var = lang_var;
+
 % Update handles structure
 guidata(hObject, handles);
 
@@ -322,7 +616,20 @@ try
     fclose(fileID);
     delete(tempname1)
 catch
-    msgbox(['Change working folder. ','Current working folder may be not writable!'],'Folder');
+    
+    [lia1, locb1] = ismember('menu17',lang_id);
+    [~, locb2] = ismember('menu18',lang_id);
+    [~, locb3] = ismember('menu19',lang_id);
+    if lia1
+        tooltip1 = lang_var{locb1};
+        tooltip2 = lang_var{locb2};
+        tooltip3 = lang_var{locb3};
+    else
+        tooltip1 = 'Change working folder. ';  % tooltip
+        tooltip2 = 'Current working folder may be not writable!';
+        tooltip3 = 'Folder';
+    end
+    msgbox([tooltip1,tooltip2],tooltip3);
 end
 
 % --- Outputs from this function are returned to the command line.
@@ -337,7 +644,20 @@ varargout{1} = handles.output;
 
 % Mar 17, 2020
 function KeyPress(hObject, EventData, handles)
+
 handles = guidata(hObject);
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('a20',lang_id);
+    a20 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main29',lang_id);
+    main29 = handles.lang_var{locb1};
+    [~, locb] = ismember('a21',lang_id);
+    a21 = handles.lang_var{locb};
+end
+
+
 if strcmp(EventData.Modifier,'control') 
     if strcmp(EventData.Key,'c')
     %disp('ctrl + c')
@@ -392,9 +712,15 @@ if strcmp(EventData.Modifier,'control')
             new_name = handles.data_name{i};
             new_name_w_dir = [ac_pwd,handles.slash_v,new_name];
             if exist(new_name_w_dir)
-                answer = questdlg(['Cover existed file ',new_name,'?'],...
-                    'Warning',...
-                    'Yes','No','No');
+                if handles.lang_choice == 0
+                    answer = questdlg(['Cover existed file ',new_name,'?'],...
+                        'Warning',...
+                        'Yes','No','No');
+                else
+                    answer = questdlg([a20,new_name,'?'],...
+                        main29,'Yes','No','No');
+                    
+                end
                 % Handle response
                 switch answer
                     case 'Yes'
@@ -423,7 +749,11 @@ if strcmp(EventData.Modifier,'control')
                 file_list = handles.file;
                 copyfile(file_list{i}, new_file)
             catch
-                disp('No data copied')
+                if handles.lang_choice == 0
+                    disp('No data copied')
+                else
+                    disp(a21)
+                end
             end
         end
     end
@@ -448,12 +778,25 @@ guidata(hObject,handles)
 
 
 function push_folder_clbk(hObject, handles)
+
+handles = guidata(hObject);
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('a22',lang_id);
+    a22 = handles.lang_var{locb1};
+end
+
 GETac_pwd;
 if ismac
     try
         system(['open ',ac_pwd]);
     catch
-        disp('  error: space between folder name')
+        if handles.lang_choice == 0
+            disp('  error: space between folder name')
+        else
+            disp(a22)
+        end
     end
 elseif ispc
     winopen(ac_pwd);
@@ -462,6 +805,17 @@ end
 
 function push_plot_clbk(hObject, handles)
 handles = guidata(hObject);
+
+
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('dd01',lang_id);
+    dd01 = handles.lang_var{locb1};
+    [~, locb1] = ismember('dd24',lang_id);
+    dd24 = handles.lang_var{locb1};
+end
+
 
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
@@ -481,7 +835,11 @@ for i = 1:nplot
                 check = 1; % selection can be executed 
             elseif sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
                 try 
-                    hwarn = warndlg('Wait, large image? can be very slow ...');
+                    if handles.lang_choice == 0
+                        hwarn = warndlg('Wait, large image? can be very slow ...');
+                    else
+                        hwarn = warndlg(dd01);
+                    end
 
                     im_name = imread(plot_filter_s);
                     hFig1 = figure;
@@ -496,7 +854,11 @@ for i = 1:nplot
                     catch
                     end
                 catch
-                    warndlg('Image color space not supported. Convert to RGB or Grayscale')
+                    if handles.lang_choice == 0
+                        warndlg('Image color space not supported. Convert to RGB or Grayscale')
+                    else
+                        warndlg(dd24)
+                    end
                 end
             end
         end
@@ -522,13 +884,30 @@ cd(pre_dirML); % return view dir
 % --- Executes on button press in push_openfolder.
 function push_openfolder_clbk(hObject, eventdata, handles)
 handles = guidata(hObject);
+
+
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('a24',lang_id);
+    a24 = handles.lang_var{locb1};
+    [~, locb1] = ismember('dd24',lang_id);
+    dd24 = handles.lang_var{locb1};
+end
+
+
+
 pre_dirML = pwd;
 GETac_pwd;
 selpath = uigetdir(ac_pwd);
 if selpath == 0
 else
     if isdir(selpath)
-        disp(['>>  Change working folder to ',selpath])
+        if handles.lang_choice == 0
+            disp(['>>  Change working folder to ',selpath])
+        else
+            disp([a24,selpath])
+        end
         cd(selpath)
         refreshcolor;
         cd(pre_dirML); % return view dir
@@ -542,6 +921,30 @@ function push_robot_clbk(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = guidata(hObject);
+
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('a25',lang_id);
+    a25 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a26',lang_id);
+    a26 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a27',lang_id);
+    a27 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a28',lang_id);
+    a28 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a29',lang_id);
+    a29 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a30',lang_id);
+    a30 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a31',lang_id);
+    a31 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a32',lang_id);
+    a32 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a33',lang_id);
+    a33 = handles.lang_var{locb1};
+end
+
 unit = handles.unit;
 unit_type = handles.unit_type;
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
@@ -590,12 +993,20 @@ if check == 1
                     fclose(fid);
                     fid = fopen(plot_filter_s);
                     data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
-                    disp(['>>  Read data: ', dat_name, '. Okay!'])
+                    if handles.lang_choice == 0
+                        disp(['>>  Read data: ', dat_name])
+                    else
+                        disp([a25, dat_name])
+                    end
                     fclose(fid);
                     try
                         data_filterout = cell2mat(data_ft);
                     catch
-                        warndlg(['Check selected data: ',dat_name],'Data Error!')
+                        if handles.lang_choice == 0
+                            warndlg(['Check selected data: ',dat_name],'Data Error!')
+                        else
+                            warndlg([a26,dat_name],a27)
+                        end
                     end
                 end
             end
@@ -607,10 +1018,17 @@ if check == 1
         
     end
 else
-    warndlg({'No selected data';'';...
-        'Please first select at leaset one *.txt data file.';...
-        '';'FORMAT:';'';'<No header>';'';...
-        '1st column: depth or time';'';'2nd column: value';''})
+    if handles.lang_choice == 0
+        warndlg({'No selected data';'';...
+            'Please first select at leaset one *.txt data file.';...
+            '';'FORMAT:';'';'<No header>';'';...
+            '1st column: depth or time';'';'2nd column: value';''})
+    else
+        warndlg({a28;'';...
+            a29;...
+            '';a30;'';a31;'';...
+            a32;'';a33;''})
+    end
 end
 
 
@@ -622,6 +1040,20 @@ function listbox_acmain_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns listbox_acmain contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from listbox_acmain
+
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('a23',lang_id);
+    a23 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a24',lang_id);
+    a24 = handles.lang_var{locb1};
+    [~, locb1] = ismember('dd24',lang_id);
+    dd24 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a34',lang_id);
+    a34 = handles.lang_var{locb1};
+end
+
 
 persistent chk
 if isempty(chk)
@@ -649,7 +1081,11 @@ if handles.doubleclick
         cd(filename)
         refreshcolor;
         cd(pre_dirML);
-        disp(['>>  Change directory to < ', filename1, ' >'])
+        if handles.lang_choice == 0
+            disp(['>>  Change directory to < ', filename1, ' >'])
+        else
+            disp([a24,' < ', filename1, ' >'])
+        end
     catch
         [~,dat_name,ext] = fileparts(filename);
         filetype = handles.filetype;
@@ -707,7 +1143,11 @@ if handles.doubleclick
                 end
             elseif ismember(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})
                 try
-                    hwarn = warndlg('Wait, large image? can be very slow ...');
+                    if handles.lang_choice == 0
+                        hwarn = warndlg('Wait, large image? can be very slow ...');
+                    else
+                        hwarn = warndlg(a23);
+                    end
                     im_name = imread(filename);
                     hFig1 = figure;
                     lastwarn('') % Clear last warning message
@@ -722,7 +1162,11 @@ if handles.doubleclick
                     catch
                     end
                 catch
-                    warndlg('Image color space not supported. Convert to RGB or Grayscale')
+                    if handles.lang_choice == 0
+                        warndlg('Image color space not supported. Convert to RGB or Grayscale')
+                    else
+                        warndlg(dd24)
+                    end
                 end
             elseif ismember(ext,{'.pdf'})
                 openpdf(filename)
@@ -769,7 +1213,11 @@ if handles.doubleclick
                     try
                         nlen = length(data1(:,1));
                         if nlen> 15
-                            msgbox('See Terminal/Command Window for details')
+                            if handles.lang_choice == 0
+                                msgbox('See Terminal/Command Window for details')
+                            else
+                                msgbox(a34)
+                            end
                             disp(['>>  ',dat_name,ext])
                             disp(['>>  Total rows: ', num2str(nlen)])
                             disp('>>  First 10 and last 5 rows:')
@@ -777,7 +1225,11 @@ if handles.doubleclick
                             disp('                  ... ...')
                             disp(data1(end-4:end,:))
                         else
-                            msgbox('See Terminal/Command Window for details')
+                            if handles.lang_choice == 0
+                                msgbox('See Terminal/Command Window for details')
+                            else
+                                msgbox(a34)
+                            end
                             disp('>> Data:')
                             disp(data1)
                         end
@@ -799,7 +1251,11 @@ if handles.doubleclick
                     system(['open ',filename]);
                 catch
                     try 
-                        hwarn = warndlg('Wait, large image? can be very slow ...');
+                        if handles.lang_choice == 0
+                            hwarn = warndlg('Wait, large image? can be very slow ...');
+                        else
+                            hwarn = warndlg(a23);
+                        end
                         im_name = imread(filename);
                         hFig1 = figure;
                         lastwarn('') % Clear last warning message
@@ -815,7 +1271,11 @@ if handles.doubleclick
                         catch
                         end
                     catch
-                        warndlg('Image color space not supported. Convert to RGB or Grayscale')
+                        if handles.lang_choice == 0
+                            warndlg('Image color space not supported. Convert to RGB or Grayscale')
+                        else
+                            warndlg(dd24)
+                        end
                     end
                 end
             elseif ismember(ext,{'.pdf','.ai','.ps'})
@@ -873,12 +1333,25 @@ function edit_acfigmain_dir_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit_acfigmain_dir as text
 %        str2double(get(hObject,'String')) returns contents of edit_acfigmain_dir as a double
+
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('a35',lang_id);
+    a35 = handles.lang_var{locb1};
+end
+
+
 address = get(hObject,'String');
 CDac_pwd;
 if isdir(address);
     cd(address)
 else
-    errordlg('Error: address not exist')
+    if handles.lang_choice == 0
+        errordlg('Error: address not exist')
+    else
+        errordlg(a35)
+    end
 end
 d = dir; %get files
 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
@@ -944,6 +1417,40 @@ function menu_plot_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = handles.index_selected;  % read selection in listbox 1
 nplot = length(plot_selected);   % length
+
+
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('a23',lang_id);
+    a23 = handles.lang_var{locb1};
+    
+    [~, locb1] = ismember('dd24',lang_id);
+    dd24 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a26',lang_id);
+    a26 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a27',lang_id);
+    a27 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a36',lang_id);
+    a36 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a37',lang_id);
+    a37 = handles.lang_var{locb1};
+    
+    [~, locb1] = ismember('a38',lang_id);
+    a38 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a39',lang_id);
+    a39 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a40',lang_id);
+    a40 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main34',lang_id);
+    main34 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main23',lang_id);
+    main23 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main21',lang_id);
+    main21 = handles.lang_var{locb1};
+end
+
+
 % check
 for i = 1:nplot
     plot_no = plot_selected(i);
@@ -966,8 +1473,11 @@ for i = 1:nplot
             open(plot_filter_s);
         elseif sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
             try 
-                hwarn = warndlg('Wait, large image? can be very slow ...');
-
+                if handles.lang_choice == 0
+                    hwarn = warndlg('Wait, large image? can be very slow ...');
+                else
+                    hwarn = warndlg(a23);
+                end
                 im_name = imread(plot_filter_s);
                 hFig1 = figure;
                 lastwarn('') % Clear last warning message
@@ -982,7 +1492,12 @@ for i = 1:nplot
                 catch
                 end
             catch
-                warndlg('Image color space not supported. Convert to RGB or Grayscale')
+                if handles.lang_choice == 0
+                    warndlg('Image color space not supported. Convert to RGB or Grayscale')
+                else
+                    hwarn = warndlg(dd24);
+                end
+                
             end
         end
     end
@@ -1017,12 +1532,20 @@ if check == 1
                         try
                             data_filterout = cell2mat(data_ft);
                         catch
-                            warndlg(['Check data: ',dat_name],'Data Error!')
+                            if handles.lang_choice == 0
+                                warndlg(['Check data: ',dat_name],'Data Error!')
+                            else
+                                warndlg([a26,dat_name],a27)
+                            end
                         end
                     end
                 end
             catch
-                warndlg({'Cannot find the data.'; 'Folder Name may contain NO language other than ENGLISH'})
+                if handles.lang_choice == 0
+                    warndlg({'Cannot find the data.'; 'Folder Name may contain NO language other than ENGLISH'})
+                else
+                    warndlg({a36; a37})
+                end
                 try
                     close(figf);
                 catch
@@ -1045,7 +1568,17 @@ if check == 1
             assignin('base','currentdataR',datar);
             %
         catch
-            errordlg([plot_filter_s1,' : data error. Check data'],'Data Error')
+            if handles.lang_choice == 0
+                errordlg([plot_filter_s1,' : data error. Check data'],'Data Error')
+            else
+                errordlg([plot_filter_s1,' : data error. Check data'],'Data Error')
+            end
+            if handles.lang_choice == 0
+                errordlg([plot_filter_s1,' : data error. Check data'],'Data Error')
+            else
+                errordlg([a26,plot_filter_s1],a27)
+                warndlg([a26,dat_name],a27)
+            end
             if plotsucess > 0
             else
                 close(figf)
@@ -1054,19 +1587,32 @@ if check == 1
         end
     end
     set(gca,'XMinorTick','on','YMinorTick','on')
-    if handles.unit_type == 0;
-        xlabel(['Unit (',handles.unit,')'])
-    elseif handles.unit_type == 1;
-        xlabel(['Depth (',handles.unit,')'])
+    if handles.lang_choice == 0
+        if handles.unit_type == 0;
+            xlabel(['Unit (',handles.unit,')'])
+        elseif handles.unit_type == 1;
+            xlabel(['Depth (',handles.unit,')'])
+        else
+            xlabel(['Time (',handles.unit,')'])
+        end
     else
-        xlabel(['Time (',handles.unit,')'])
+        if handles.unit_type == 0;
+            xlabel([main34,' (',handles.unit,')'])
+        elseif handles.unit_type == 1;
+            xlabel([main23,' (',handles.unit,')'])
+        else
+            xlabel([main21, ' (',handles.unit,')'])
+        end
     end
     %title(plot_filter_s1, 'Interpreter', 'none')
     legend(handles.plot_list, 'Interpreter', 'none')
     hold off
     set(gcf,'color','w');
-    set(gcf,'Name','Acycle: Plot Preview','NumberTitle','off');
-    
+    if handles.lang_choice == 0
+        set(gcf,'Name','Acycle: Plot Preview','NumberTitle','off');
+    else
+        set(gcf,'Name',a38,'NumberTitle','off');
+    end
     % multiple column data
     if plotsucess > 0
         try
@@ -1079,7 +1625,11 @@ if check == 1
                     subplot(colnend,1,colni-1)
                     plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
                     set(gca,'XMinorTick','on','YMinorTick','on')
-                    title(['Column #', num2str(colni)], 'Interpreter', 'none')
+                    if handles.unit_type == 0
+                        title(['Column #', num2str(colni)], 'Interpreter', 'none')
+                    else
+                        title([a39, num2str(colni),a40], 'Interpreter', 'none')
+                    end
                     set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
                     if handles.unit_type == 0
                         xlabel(['Unit (',handles.unit,')'])
@@ -1096,15 +1646,29 @@ if check == 1
                     subplot(colnhf,2,colni-1)
                     plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
                     set(gca,'XMinorTick','on','YMinorTick','on')
-                    title(['Column #', num2str(colni)], 'Interpreter', 'none')
-                    set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
-
                     if handles.unit_type == 0
-                        xlabel(['Unit (',handles.unit,')'])
-                    elseif handles.unit_type == 1
-                        xlabel(['Depth (',handles.unit,')'])
+                        title(['Column #', num2str(colni)], 'Interpreter', 'none')
                     else
-                        xlabel(['Time (',handles.unit,')'])
+                        title([a39, num2str(colni),a40], 'Interpreter', 'none')
+                    end
+                    set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
+                    
+                    if handles.lang_choice == 0
+                        if handles.unit_type == 0
+                            xlabel(['Unit (',handles.unit,')'])
+                        elseif handles.unit_type == 1;
+                            xlabel(['Depth (',handles.unit,')'])
+                        else
+                            xlabel(['Time (',handles.unit,')'])
+                        end
+                    else
+                        if handles.unit_type == 0
+                            xlabel([main34,' (',handles.unit,')'])
+                        elseif handles.unit_type == 1
+                            xlabel([main23,' (',handles.unit,')'])
+                        else
+                            xlabel([main21, ' (',handles.unit,')'])
+                        end
                     end
                 end
             elseif coln < 19
@@ -1114,15 +1678,29 @@ if check == 1
                     subplot(colnhf,3,colni-1)
                     plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
                     set(gca,'XMinorTick','on','YMinorTick','on')
-                    title(['Column #', num2str(colni)], 'Interpreter', 'none')
+                    if handles.unit_type == 0
+                        title(['Column #', num2str(colni)], 'Interpreter', 'none')
+                    else
+                        title([a39, num2str(colni),a40], 'Interpreter', 'none')
+                    end
                     set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
 
-                    if handles.unit_type == 0
-                        xlabel(['Unit (',handles.unit,')'])
-                    elseif handles.unit_type == 1
-                        xlabel(['Depth (',handles.unit,')'])
+                    if handles.lang_choice == 0
+                        if handles.unit_type == 0
+                            xlabel(['Unit (',handles.unit,')'])
+                        elseif handles.unit_type == 1;
+                            xlabel(['Depth (',handles.unit,')'])
+                        else
+                            xlabel(['Time (',handles.unit,')'])
+                        end
                     else
-                        xlabel(['Time (',handles.unit,')'])
+                        if handles.unit_type == 0
+                            xlabel([main34,' (',handles.unit,')'])
+                        elseif handles.unit_type == 1
+                            xlabel([main23,' (',handles.unit,')'])
+                        else
+                            xlabel([main21, ' (',handles.unit,')'])
+                        end
                     end
                 end
             elseif coln < 25
@@ -1132,15 +1710,29 @@ if check == 1
                     subplot(colnhf,4,colni-1)
                     plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
                     set(gca,'XMinorTick','on','YMinorTick','on')
-                    title(['Column #', num2str(colni)], 'Interpreter', 'none')
+                    if handles.unit_type == 0
+                        title(['Column #', num2str(colni)], 'Interpreter', 'none')
+                    else
+                        title([a39, num2str(colni),a40], 'Interpreter', 'none')
+                    end
                     set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
 
-                    if handles.unit_type == 0
-                        xlabel(['Unit (',handles.unit,')'])
-                    elseif handles.unit_type == 1
-                        xlabel(['Depth (',handles.unit,')'])
+                    if handles.lang_choice == 0
+                        if handles.unit_type == 0
+                            xlabel(['Unit (',handles.unit,')'])
+                        elseif handles.unit_type == 1;
+                            xlabel(['Depth (',handles.unit,')'])
+                        else
+                            xlabel(['Time (',handles.unit,')'])
+                        end
                     else
-                        xlabel(['Time (',handles.unit,')'])
+                        if handles.unit_type == 0
+                            xlabel([main34,' (',handles.unit,')'])
+                        elseif handles.unit_type == 1
+                            xlabel([main23,' (',handles.unit,')'])
+                        else
+                            xlabel([main21, ' (',handles.unit,')'])
+                        end
                     end
                 end
             else
@@ -1151,14 +1743,28 @@ if check == 1
                     plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
                     set(gca,'XMinorTick','on','YMinorTick','on')
                     set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
-                    title(['Column #', num2str(colni)], 'Interpreter', 'none')
-
                     if handles.unit_type == 0
-                        xlabel(['Unit (',handles.unit,')'])
-                    elseif handles.unit_type == 1
-                        xlabel(['Depth (',handles.unit,')'])
+                        title(['Column #', num2str(colni)], 'Interpreter', 'none')
                     else
-                        xlabel(['Time (',handles.unit,')'])
+                        title([a39, num2str(colni),a40], 'Interpreter', 'none')
+                    end
+
+                    if handles.lang_choice == 0
+                        if handles.unit_type == 0
+                            xlabel(['Unit (',handles.unit,')'])
+                        elseif handles.unit_type == 1
+                            xlabel(['Depth (',handles.unit,')'])
+                        else
+                            xlabel(['Time (',handles.unit,')'])
+                        end
+                    else
+                        if handles.unit_type == 0
+                            xlabel([main34,' (',handles.unit,')'])
+                        elseif handles.unit_type == 1
+                            xlabel([main23,' (',handles.unit,')'])
+                        else
+                            xlabel([main21, ' (',handles.unit,')'])
+                        end
                     end
                 end
                 if coln<50
@@ -1167,15 +1773,29 @@ if check == 1
                         subplot(colnhf,4,colni-25)
                         plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
                         set(gca,'XMinorTick','on','YMinorTick','on')
-                        title(['Column #', num2str(colni)], 'Interpreter', 'none')
+                        if handles.unit_type == 0
+                            title(['Column #', num2str(colni)], 'Interpreter', 'none')
+                        else
+                            title([a39, num2str(colni),a40], 'Interpreter', 'none')
+                        end
                         set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
 
-                        if handles.unit_type == 0
-                            xlabel(['Unit (',handles.unit,')'])
-                        elseif handles.unit_type == 1
-                            xlabel(['Depth (',handles.unit,')'])
+                        if handles.lang_choice == 0
+                            if handles.unit_type == 0
+                                xlabel(['Unit (',handles.unit,')'])
+                            elseif handles.unit_type == 1
+                                xlabel(['Depth (',handles.unit,')'])
+                            else
+                                xlabel(['Time (',handles.unit,')'])
+                            end
                         else
-                            xlabel(['Time (',handles.unit,')'])
+                            if handles.unit_type == 0
+                                xlabel([main34,' (',handles.unit,')'])
+                            elseif handles.unit_type == 1
+                                xlabel([main23,' (',handles.unit,')'])
+                            else
+                                xlabel([main21, ' (',handles.unit,')'])
+                            end
                         end
                     end
                 else
@@ -1184,14 +1804,28 @@ if check == 1
                         subplot(6,4,colni-25)
                         plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
                         set(gca,'XMinorTick','on','YMinorTick','on')
-                        title(['Column #', num2str(colni)], 'Interpreter', 'none')
-                        set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
                         if handles.unit_type == 0
-                            xlabel(['Unit (',handles.unit,')'])
-                        elseif handles.unit_type == 1
-                            xlabel(['Depth (',handles.unit,')'])
+                            title(['Column #', num2str(colni)], 'Interpreter', 'none')
                         else
-                            xlabel(['Time (',handles.unit,')'])
+                            title([a39, num2str(colni),a40], 'Interpreter', 'none')
+                        end
+                        set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
+                        if handles.lang_choice == 0
+                            if handles.unit_type == 0
+                                xlabel(['Unit (',handles.unit,')'])
+                            elseif handles.unit_type == 1
+                                xlabel(['Depth (',handles.unit,')'])
+                            else
+                                xlabel(['Time (',handles.unit,')'])
+                            end
+                        else
+                            if handles.unit_type == 0
+                                xlabel([main34,' (',handles.unit,')'])
+                            elseif handles.unit_type == 1
+                                xlabel([main23,' (',handles.unit,')'])
+                            else
+                                xlabel([main21, ' (',handles.unit,')'])
+                            end
                         end
                     end
                 end
@@ -1213,6 +1847,20 @@ function menu_SwapPlot_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = handles.index_selected;  % read selection in listbox 1
 nplot = length(plot_selected);   % length
+
+
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('main34',lang_id);
+    main34 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main23',lang_id);
+    main23 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main21',lang_id);
+    main21 = handles.lang_var{locb1};
+end
+
+
 % check
 for i = 1:nplot
     plot_no = plot_selected(i);
@@ -1267,13 +1915,26 @@ if check == 1;
             data_filterout = data_filterout(~any(isnan(data_filterout),2),:);
             plot(data_filterout(:,2),data_filterout(:,1),'LineWidth',1);
     end
-    if handles.unit_type == 0;
-        ylabel(['Unit (',handles.unit,')'])
-    elseif handles.unit_type == 1;
-        ylabel(['Depth (',handles.unit,')'])
+    
+    
+    if handles.lang_choice == 0
+        if handles.unit_type == 0
+            ylabel(['Unit (',handles.unit,')'])
+        elseif handles.unit_type == 1
+            ylabel(['Depth (',handles.unit,')'])
+        else
+            ylabel(['Time (',handles.unit,')'])
+        end
     else
-        ylabel(['Time (',handles.unit,')'])
+        if handles.unit_type == 0
+            ylabel([main34,' (',handles.unit,')'])
+        elseif handles.unit_type == 1
+            ylabel([main23,' (',handles.unit,')'])
+        else
+            ylabel([main21, ' (',handles.unit,')'])
+        end
     end
+    
     title(plot_filter_s1, 'Interpreter', 'none')
     set(gca,'XMinorTick','on','YMinorTick','on')
     hold off
@@ -1456,6 +2117,31 @@ function menu_selectinterval_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
+
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('a45',lang_id);
+    a45 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a46',lang_id);
+    a46 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a47',lang_id);
+    a47 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a48',lang_id);
+    a48 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a49',lang_id);
+    a49 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a50',lang_id);
+    a50 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a51',lang_id);
+    a51 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a52',lang_id);
+    a52 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main35',lang_id);
+    main35 = handles.lang_var{locb1};
+end
+
+
 for i = 1:nplot
     data_name = char(contents(plot_selected(i)));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
@@ -1468,9 +2154,13 @@ for i = 1:nplot
         time = data(:,1);
         value = data(:,2);
         npts = length(time);
-
-        prompt = {'Enter the START of interval:','Enter the END of interval:','Apply to ALL? (1 = yes)'};
-        dlg_title = 'Input Select interval';
+        if handles.lang_choice == 0
+            prompt = {'Enter the START of interval:','Enter the END of interval:','Apply to ALL? (1 = yes)'};
+            dlg_title = 'Input Select interval';
+        else
+            prompt = {a45,a46,a47};
+            dlg_title = a48;
+        end
         num_lines = 1;
         defaultans = {num2str(time(1)),num2str(time(npts)),'0'};
         options.Resize='on';
@@ -1487,18 +2177,31 @@ for i = 1:nplot
                     if isdir(data_name) == 1
                     else
                         [~,dat_name,ext] = fileparts(data_name);
-                        disp(['>>  Processing ',data_name])
+                        if handles.lang_choice == 0
+                            disp(['>>  Processing ',data_name])
+                        else
+                            disp([a49,data_name])
+                        end
                         if sum(strcmp(ext,handles.filetype)) > 0
                             GETac_pwd; data_name = fullfile(ac_pwd,data_name);
                             data = load(data_name);
                             time = data(:,1);
                             if or (max(time) < xmin_cut, min(time) > xmax_cut)
-                                errordlg(['No overlap between selected interval and ',dat_name],'Error')
-                                disp('      Error, no overlap')
+                                if handles.lang_choice == 0
+                                    errordlg(['No overlap between selected interval and ',dat_name],'Error')
+                                    disp('      Error, no overlap')
+                                else
+                                    errordlg([a50,dat_name],main35)
+                                    disp(a51)
+                                end
                                 continue
                             end
                             if and (min(time) > xmin_cut, max(time) < xmax_cut)
-                                disp('      Selected interval too large, skipped')
+                                if handles.lang_choice == 0
+                                    disp('      Selected interval too large, skipped')
+                                else
+                                    disp(a52)
+                                end
                                 continue
                             end
                             [current_data] = select_interval(data,xmin_cut,xmax_cut); 
@@ -1516,12 +2219,21 @@ for i = 1:nplot
             else
 
                 if or (max(time) < xmin_cut, min(time) > xmax_cut)
-                    errordlg(['No overlap between selected interval and ',dat_name],'Error')
-                    disp('      Error, no overlap')
+                    if handles.lang_choice == 0
+                        errordlg(['No overlap between selected interval and ',dat_name],'Error')
+                        disp('      Error, no overlap')
+                    else
+                        errordlg([a50,dat_name],main35)
+                        disp(a51)
+                    end
                     return
                 end
                 if and (min(time) > xmin_cut, max(time) < xmax_cut)
-                    disp('Selected interval too large, skipped')
+                    if handles.lang_choice == 0
+                        disp('      Selected interval too large, skipped')
+                    else
+                        disp(a52)
+                    end
                     return
                 end
                 [current_data] = select_interval(data,xmin_cut,xmax_cut); 
@@ -1555,8 +2267,25 @@ function menu_interp_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-disp(['Select ',num2str(nplot),' data'])
-    
+
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('a60',lang_id);
+    a60 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a61',lang_id);
+    a61 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a62',lang_id);
+    a62 = handles.lang_var{locb1};
+    [~, locb1] = ismember('menu71',lang_id);
+    menu71 = handles.lang_var{locb1};
+end
+
+if handles.lang_choice == 0
+    disp(['Select ',num2str(nplot),' data'])
+else
+    disp([a60,' ',num2str(nplot),a62])
+end
 for nploti = 1:nplot
     data_name_all = (contents(plot_selected));
     data_name = char(data_name_all{nploti});
@@ -1589,8 +2318,13 @@ for nploti = 1:nplot
         end 
             time = data(:,1);
             srmedian = median(diff(time));
-            dlg_title = 'Interpolation';
-            prompt = {'New sample rate (default = median):'};
+            if handles.lang_choice == 0
+                dlg_title = 'Interpolation';
+                prompt = {'New sample rate (default = median):'};
+            else
+                dlg_title = menu71;
+                prompt = {a61};
+            end
             num_lines = 1;
             defaultans = {num2str(srmedian)};
             options.Resize='on';
@@ -1654,12 +2388,42 @@ function menu_clip_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-disp(['Select ',num2str(nplot),' data'])
+
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('a60',lang_id);
+    a60 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a62',lang_id);
+    a62 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a63',lang_id);
+    a63 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a64',lang_id);
+    a64 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a65',lang_id);
+    a65 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a66',lang_id);
+    a66 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a67',lang_id);
+    a67 = handles.lang_var{locb1};
+    [~, locb1] = ismember('menu79',lang_id);
+    menu79 = handles.lang_var{locb1};
+end
+
+if handles.lang_choice == 0
+    disp(['Select ',num2str(nplot),' data'])
+else
+    disp([a60,' ',num2str(nplot),a62])
+end
 for nploti = 1:nplot
     data_name_all = (contents(plot_selected));
     data_name = char(data_name_all{nploti});
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
-    disp(['>>  Processing clipping:', data_name]);
+    if handles.lang_choice == 0
+        disp(['>>  Processing clipping:', data_name]);
+    else
+        disp([a63, data_name]);
+    end
     GETac_pwd; 
     data_name = fullfile(ac_pwd,data_name);
 
@@ -1687,50 +2451,74 @@ for nploti = 1:nplot
             catch
                 data = load(data_name);
             end
-
-            prompt = {'Threshold value (default = mean)'; 'Keep high/low? (1=high; 0=low)'};
-            dlg_title = 'Clipping:';
+            if handles.lang_choice == 0
+                prompt = {'Threshold value (default = mean)'; 'Keep high/low? (1=high; 0=low)';'Clipped data (0 = set to 0; 1 = delete; 2 = threshold)'};
+                dlg_title = 'Clipping:';
+            else
+                prompt = {a64; a65; a67};
+                dlg_title = menu79;
+            end
             num_lines = 1;
-            defaultans = {num2str(nanmean(data(:,2))), '1'};
+            defaultans = {num2str(nanmean(data(:,2))), '1','0'};
             options.Resize='on';
             answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
                 if ~isempty(answer)
 
                     clip_value = str2double(answer{1});
                     clip_high  = str2double(answer{2});
+                    clip_set  = str2double(answer{3});
 
                     time = data(:,1);
                     y = data(:,2);
-                    n = length(time);
+                    
                     if clip_high == 1
-                        for i = 1:n
-                            if y(i) > clip_value
-                                y(i) = y(i) - clip_value;
+                        if clip_set == 0
+                            y(y<clip_value) = clip_value;
+                            y = y - clip_value;
+                            name1 = [dat_name,'-clip<',num2str(clip_value),'-0',ext];
+                        elseif clip_set ==1
+                            time(y<clip_value) = [];
+                            y(y<clip_value) = [];
+                            name1 = [dat_name,'-clip<',num2str(clip_value),'-D',ext];
+                        elseif clip_set ==2
+                            y(y<clip_value) = clip_value;
+                            name1 = [dat_name,'-clip<',num2str(clip_value),'-threshold',ext];
+                        else
+                            if handles.lang_choice == 0
+                                errordlg('Error, input must be either 1, 2 or 0')
                             else
-                                y(i) = 0;
+                                errordlg(a66)
                             end
                         end
-                        name1 = [dat_name,'-clip',num2str(clip_value),'+',ext];
+                        
                     else
-                        for i = 1:n
-                            if y(i) > clip_value
-                                y(i) = 0;
+                        if clip_set == 0
+                            y(y>clip_value) = clip_value;
+                            y = y - clip_value;
+                            name1 = [dat_name,'-clip>',num2str(clip_value),'-0',ext];
+                        elseif clip_set ==1
+                            time(y>clip_value) = [];
+                            y(y>clip_value) = [];
+                            name1 = [dat_name,'-clip>',num2str(clip_value),'-D',ext];
+                        elseif clip_set ==2
+                            y(y>clip_value) = clip_value;
+                            name1 = [dat_name,'-clip>',num2str(clip_value),'-threshold',ext];
+                        else
+                            if handles.lang_choice == 0
+                                errordlg('Error, input must be either 1, 2 or 0')
                             else
-                                y(i) = y(i) - clip_value;
+                                errordlg(a66)
                             end
                         end
-                        name1 = [dat_name,'-clip<',num2str(clip_value),'-',ext];
                     end
 
-                        data1 = [time,y];
-                        CDac_pwd
-                        dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
-                        d = dir; %get files
-                        set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-                        refreshcolor;
-                        cd(pre_dirML); % return to matlab view folder
-                else
-                    errordlg('Error, input must be a positive integer')
+                    data1 = [time,y];
+                    CDac_pwd
+                    dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
+                    d = dir; %get files
+                    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+                    refreshcolor;
+                    cd(pre_dirML); % return to matlab view folder
                 end
         end
     end
@@ -1779,7 +2567,32 @@ function menu_bootstrap_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
+
 if nplot == 1
+    
+    %language
+    lang_id = handles.lang_id;
+    if handles.lang_choice > 0
+        [~, locb1] = ismember('menu102',lang_id);
+        menu102 = handles.lang_var{locb1};
+        [~, locb1] = ismember('a70',lang_id);
+        a70 = handles.lang_var{locb1};
+        [~, locb1] = ismember('a71',lang_id);
+        a71 = handles.lang_var{locb1};
+        [~, locb1] = ismember('a72',lang_id);
+        a72 = handles.lang_var{locb1};
+        [~, locb1] = ismember('a73',lang_id);
+        a73 = handles.lang_var{locb1};
+        [~, locb1] = ismember('a74',lang_id);
+        a74 = handles.lang_var{locb1};
+        [~, locb1] = ismember('a75',lang_id);
+        a75 = handles.lang_var{locb1};
+        [~, locb1] = ismember('a76',lang_id);
+        a76 = handles.lang_var{locb1};
+        [~, locb1] = ismember('a77',lang_id);
+        a77 = handles.lang_var{locb1};
+    end
+    
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
@@ -1802,9 +2615,14 @@ if nplot == 1
             time = data(:,1);
             value = data(:,2);
             span_d = (time(end)-time(1))* 0.1;
-            dlg_title = 'Bootstrap';
-            prompt = {'Window (unit)','Method: "loess/lowess/rloess/rlowess"',...
-                'Number of bootstrap'};
+            if handles.lang_choice == 0
+                dlg_title = 'Bootstrap';
+                prompt = {'Window (unit)','Method: "loess/lowess/rloess/rlowess"',...
+                    'Number of bootstrap sampling'};
+            else
+                dlg_title = menu102;
+                prompt = {a70,a71,a72};
+            end
             num_lines = 1;
             defaultans = {num2str(span_d),'loess','1000'};
             options.Resize='on';
@@ -1815,7 +2633,11 @@ if nplot == 1
                 bootn = str2double(answer{3});
                 
                 span = span_v/(time(end)-time(1));
-                hwarn1 = warndlg('Slow process. Wait ...','Smoothing');
+                if handles.lang_choice == 0
+                    hwarn1 = warndlg('Slow process. Wait ...','Smoothing');
+                else
+                    hwarn1 = warndlg(a73,a74);
+                end
                 [meanboot,bootstd,bootprt] = smoothciML(time,value,method,span,bootn);
                 try close(hwarn1)
                 catch
@@ -1828,10 +2650,15 @@ if nplot == 1
                 data1 = [time,bootprt];
                 name = [dat_name,'_',num2str(span_v),'_',method,'_',num2str(bootn),'_bootstp_meanstd',ext];  % New name
                 name1 = [dat_name,'_',num2str(span_v),'_',method,'_',num2str(bootn),'_bootstp_percentile',ext];
-                
-                disp(['>>  Save [time, mean-2std, mean-std, mean, mean+std, mean+2std] as :',name])
-                disp(['>>  Save [time, percentiles] as :',name1])
-                disp('>>        Percentiles are ')
+                if handles.lang_choice == 0
+                    disp(['>>  Save [time, mean-2std, mean-std, mean, mean+std, mean+2std] as :',name])
+                    disp(['>>  Save [time, percentiles] as :',name1])
+                    disp('>>        Percentiles are ')
+                else
+                    disp([a75,name])
+                    disp([a76,name1])
+                    disp(a77)
+                end
                 disp('>>        [0.5,2.5,5,25,50,75,95,97.5,99.5]')
                 CDac_pwd
                 dlmwrite(name, data, 'delimiter', ',', 'precision', 9); 
@@ -1856,12 +2683,38 @@ function menu_derivative_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-disp(['Select ',num2str(nplot),' data'])
+
+
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('a60',lang_id);
+    a60 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a62',lang_id);
+    a62 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a80',lang_id);
+    a80 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a81',lang_id);
+    a81 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a82',lang_id);
+    a82 = handles.lang_var{locb1};
+end
+
+if handles.lang_choice == 0
+    disp(['Select ',num2str(nplot),' data'])
+else
+    disp([a60,' ',num2str(nplot),a62])
+end
+
 for nploti = 1:nplot
     data_name_all = (contents(plot_selected));
     data_name = char(data_name_all{nploti});
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
-    disp(['>>  Processing derivative:', data_name]);
+    if handles.lang_choice == 0
+        disp(['>>  Processing derivative:', data_name]);
+    else
+        disp([a80, data_name]);
+    end
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
         if isdir(data_name) == 1
         else
@@ -1887,9 +2740,13 @@ for nploti = 1:nplot
             catch
                 data = load(data_name);
             end
-
-            prompt = {'Derivative (1=1st, 2=2nd ...)'};
-            dlg_title = 'Approximate Derivatives:';
+            if handles.lang_choice == 0
+                prompt = {'Derivative (1=1st, 2=2nd ...)'};
+                dlg_title = 'Approximate Derivatives:';
+            else
+                prompt = {a81};
+                dlg_title = a82;
+            end
             num_lines = 1;
             defaultans = {num2str(handles.math_derivative)};
             options.Resize='on';
@@ -1919,8 +2776,6 @@ for nploti = 1:nplot
                     set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                     refreshcolor;
                     cd(pre_dirML); % return to matlab view folder
-                else
-                    errordlg('Error, input must be a positive integer')
                 end
             end
         end
@@ -2037,12 +2892,27 @@ contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of lis
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
 
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('a85',lang_id);
+    a85 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a86',lang_id);
+    a86 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a87',lang_id);
+    a87 = handles.lang_var{locb1};
+end
+
 if nplot == 1
     data_name = char(contents(plot_selected));
     dat_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,dat_name);
         if isdir(data_name) == 1
-            disp('>>  Error: select the data file not a folder')
+            if handles.lang_choice == 0
+                warndlg('Error: select the data file not a folder')
+            else
+                warndlg(a85)
+            end
         else
             [~,~,ext] = fileparts(data_name);
             if sum(strcmp(ext,handles.filetype)) > 0
@@ -2057,9 +2927,13 @@ if nplot == 1
                 
                 diffx = diff(data(:,1));
                 if max(diffx) - min(diffx) > eps('single')
-                    hwarn = warndlg('Warning: Interpolation using median sampling rate');
+                    if handles.lang_choice == 0
+                        hwarn = warndlg('Warning: Interpolation using median sampling rate');
+                    else
+                        hwarn = warndlg(a86);
+                    end
                     set(gcf,'units','norm') % set location
-                    set(gcf,'position',[0.2,0.6,0.2,0.1])
+                    %set(gcf,'position',[0.2,0.6,0.2,0.1])
                     figure(hwarn);
                     interpolate_rate = median(diffx);
                     [data]=interpolate(data,interpolate_rate);
@@ -2084,7 +2958,11 @@ if nplot == 1
                 CDac_pwd
                 dlmwrite(name1, data_am, 'delimiter', ',', 'precision', 9);
                 dlmwrite(name2, [tanhilb(:,1), tanhilb(:,2)], 'delimiter', ',', 'precision', 9);
-                disp('>>  See main window for amplitude modulation')
+                if handles.lang_choice == 0
+                    msgbox('See main window for amplitude modulation')
+                else
+                    msgbox(a87)
+                end
                 d = dir; %get files
                 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                 refreshcolor;
@@ -2189,9 +3067,31 @@ function menu_LR04_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_LR04 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-prompt = {'Start Age in k.a. (>= 0):',...
-                'End Age in k.a. (<= 5320):'};
-dlg_title = 'LR04 stack: Plio-Pleistocene d18O_ben)';
+
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('a90',lang_id);
+    a90 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a91',lang_id);
+    a91 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a92',lang_id);
+    a92 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a93',lang_id);
+    a93 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a94',lang_id);
+    a94 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a95',lang_id);
+    a95 = handles.lang_var{locb1};
+end
+if handles.lang_choice == 0
+    prompt = {'Start Age in ka (>= 0):',...
+                    'End Age in ka (<= 5320):'};
+    dlg_title = 'LR04 stack: Plio-Pleistocene d18O_ben)';
+else
+    prompt = {a90,a91};
+    dlg_title = a92;
+end
 num_lines = 1;
 defaultans = {'0','5320'};
 options.Resize='on';
@@ -2203,9 +3103,15 @@ if ~isempty(answer)
     LR04stack_s = select_interval(LR04stack,t1,t2);
     figure;
     plot(LR04stack_s(:,1),LR04stack_s(:,2),'LineWidth',1);
-    xlabel('Time (kyr)')
-    ylabel('Global Benthic \delta^{18}O')
-    title(['LR04 Stack: ',num2str(t1),'_',num2str(t2),' ka'])
+    if handles.lang_choice == 0
+        xlabel('Time (ka)')
+        ylabel('Global Benthic \delta^{18}O')
+        title(['LR04 Stack: ',num2str(t1),'_',num2str(t2),' ka'], 'Interpreter', 'none')
+    else
+        xlabel(a93)
+        ylabel(a94)
+        title([a95,num2str(t1),'_',num2str(t2),' ka'], 'Interpreter', 'none')
+    end
     set(gca,'XMinorTick','on','YMinorTick','on')
     filename = ['LR04_Stack_',num2str(t1),'_',num2str(t2),'ka.txt'];
     % cd ac_pwd dir
@@ -2226,6 +3132,19 @@ function menu_plotn_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = handles.index_selected;  % read selection in listbox 1
 nplot = length(plot_selected);   % length
+
+
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('main21',lang_id);
+    main21 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main23',lang_id);
+    main23 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main34',lang_id);
+    main34 = handles.lang_var{locb1};
+end
+
 % check
 for i = 1:nplot
     plot_no = plot_selected(i);
@@ -2270,12 +3189,22 @@ if check == 1;
     set(gca,'XMinorTick','on','YMinorTick','on')
     hold off
     title(contents(plot_selected), 'Interpreter', 'none')
-    if handles.unit_type == 0;
-        xlabel(['Unit (',handles.unit,')'])
-    elseif handles.unit_type == 1;
-        xlabel(['Depth (',handles.unit,')'])
+    if handles.lang_choice == 0
+        if handles.unit_type == 0;
+            xlabel(['Unit (',handles.unit,')'])
+        elseif handles.unit_type == 1;
+            xlabel(['Depth (',handles.unit,')'])
+        else
+            xlabel(['Time (',handles.unit,')'])
+        end
     else
-        xlabel(['Time (',handles.unit,')'])
+        if handles.unit_type == 0;
+            xlabel([main34,' (',handles.unit,')'])
+        elseif handles.unit_type == 1;
+            xlabel([main23,' (',handles.unit,')'])
+        else
+            xlabel([main21,' (',handles.unit,')'])
+        end
     end
 end
 guidata(hObject,handles)
@@ -2288,6 +3217,17 @@ function menu_plotn2_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = handles.index_selected;  % read selection in listbox 1
 nplot = length(plot_selected);   % length
+
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('main21',lang_id);
+    main21 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main23',lang_id);
+    main23 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main34',lang_id);
+    main34 = handles.lang_var{locb1};
+end
 % check
 for i = 1:nplot
     plot_no = plot_selected(i);
@@ -2334,12 +3274,22 @@ if check == 1
     hold off
     title(contents(plot_selected), 'Interpreter', 'none')
     xlim([min(xlimit(:,1)) max(xlimit(:,2))])
-    if handles.unit_type == 0
-        xlabel(['Unit (',handles.unit,')'])
-    elseif handles.unit_type == 1
-        xlabel(['Depth (',handles.unit,')'])
+    if handles.lang_choice == 0
+        if handles.unit_type == 0;
+            xlabel(['Unit (',handles.unit,')'])
+        elseif handles.unit_type == 1;
+            xlabel(['Depth (',handles.unit,')'])
+        else
+            xlabel(['Time (',handles.unit,')'])
+        end
     else
-        xlabel(['Time (',handles.unit,')'])
+        if handles.unit_type == 0;
+            xlabel([main34,' (',handles.unit,')'])
+        elseif handles.unit_type == 1;
+            xlabel([main23,' (',handles.unit,')'])
+        else
+            xlabel([main21,' (',handles.unit,')'])
+        end
     end
 
 end
@@ -2353,13 +3303,30 @@ function menu_rename_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = handles.index_selected;  % read selection in listbox 1
 nplot = length(plot_selected);   % length
+
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('a100',lang_id);
+    a100 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a101',lang_id);
+    a101 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a102',lang_id);
+    a102 = handles.lang_var{locb1};
+end
+
 % check
 if nplot == 1
     CDac_pwd;
     plot_filter_s = char(contents(plot_selected));
     plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
-    prompt = {'Enter new file name:'};
-    dlg_title = 'Rename                           ';
+    if handles.lang_choice == 0
+        prompt = {'Enter new file name:'};
+        dlg_title = 'Rename                           ';
+    else
+        prompt = {a100};
+        dlg_title = a101;
+    end
     num_lines = 1;
     defaultans = {plot_filter_s};
     options.Resize='on';
@@ -2369,7 +3336,11 @@ if nplot == 1
         try
             movefile(plot_filter_s,newname)
         catch
-            disp('Error: Cannot copy or move a file or directory onto itself.')
+            if handles.lang_choice == 0
+                msgbox('Error: Cannot copy or move a file or directory onto itself.')
+            else
+                msgbox(a102)
+            end
         end
         d = dir; %get files
         set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
@@ -2390,11 +3361,34 @@ function menu_import_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_import (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-[filename, pathname] = uigetfile({'*.txt;*.csv','Files (*.txt;*.csv)'},...
-    'Import data (*.csv,*.txt)');
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('a105',lang_id);
+    a105 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a106',lang_id);
+    a106 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a107',lang_id);
+    a107 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a108',lang_id);
+    a108 = handles.lang_var{locb1};
+end
+if handles.lang_choice == 0
+    [filename, pathname] = uigetfile({'*.txt;*.csv','Files (*.txt;*.csv)'},...
+        'Import data (*.csv,*.txt)');
+else
+    [filename, pathname] = uigetfile({'*.txt;*.csv',a105},...
+        a106);
+end
 if filename == 0
-    open_data = 'Tips: open 2 colume data';
-    h = helpdlg(open_data,'Tips: Close');
+    if handles.lang_choice == 0
+        open_data = 'Tips: open 2 colume data';
+        h = helpdlg(open_data,'Tips: Close');
+    else
+        open_data = a107;
+        h = helpdlg(open_data,a108);
+    end
+    
     uiwait(h); 
 else
     aaa = [pathname,filename];
@@ -2415,19 +3409,30 @@ function menu_savefig_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_savefig (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-prompt = {'Name of ACYCLE figure:'};
-        dlg_title = 'Filename';
-        num_lines = 1;
-        defaultans = {'.AC.fig'};
-        options.Resize='on';
-        answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-        newname = char(answer);
-        if ~isempty(newname)
-            CDac_pwd % cd ac_pwd dir
-            savefig(newname)
-            refreshcolor;
-            cd(pre_dirML); % return to matlab view folder
-        end
+if handles.lang_choice > 0
+    [~, locb1] = ismember('a109',lang_id);
+    a109 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a110',lang_id);
+    a110 = handles.lang_var{locb1};
+end
+if handles.lang_choice == 0
+    prompt = {'Name of ACYCLE figure:'};
+    dlg_title = 'Filename';
+else
+    prompt = {a109};
+    dlg_title = a110;
+end
+num_lines = 1;
+defaultans = {'.AC.fig'};
+options.Resize='on';
+answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+newname = char(answer);
+if ~isempty(newname)
+    CDac_pwd % cd ac_pwd dir
+    savefig(newname)
+    refreshcolor;
+    cd(pre_dirML); % return to matlab view folder
+end
 
 
 % --------------------------------------------------------------------
@@ -2438,6 +3443,18 @@ function menu_depeaks_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
+
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('a113',lang_id);
+    a113 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a114',lang_id);
+    a114 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a115',lang_id);
+    a115 = handles.lang_var{locb1};
+end
+
 if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
@@ -2451,9 +3468,13 @@ if nplot == 1
             time = data(:,1);
             value = data(:,2);
             npts = length(time);
-
-            prompt = {'Enter Mininum value:','Enter Maximum value:'};
-            dlg_title = 'Input MIN and MAX value';
+            if handles.lang_choice == 0
+                prompt = {'Enter Mininum value:','Enter Maximum value:'};
+                dlg_title = 'Input MIN and MAX value';
+            else
+                prompt = {a113,a114};
+                dlg_title = a115;
+            end
             num_lines = 1;
             defaultans = {num2str(min(value)),num2str(max(value))};
             options.Resize='on';
@@ -2532,6 +3553,33 @@ function menu_agebuild_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
+
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('a118',lang_id);
+    a118 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a119',lang_id);
+    a119 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a120',lang_id);
+    a120 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a121',lang_id);
+    a121 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a122',lang_id);
+    a122 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a123',lang_id);
+    a123 = handles.lang_var{locb1};
+    
+    [~, locb1] = ismember('main21',lang_id);
+    main21 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main23',lang_id);
+    main23 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main26',lang_id);
+    main26 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main27',lang_id);
+    main27 = handles.lang_var{locb1};
+end
+
 if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
@@ -2542,9 +3590,13 @@ if nplot == 1
         if sum(strcmp(ext,handles.filetype)) > 0
 
             data = load(data_name);
-
-            prompt = {'Enter period (kyr):','Use 1 = peak; 0 = trough:'};
-            dlg_title = 'Input period';
+            if handles.lang_choice == 0
+                prompt = {'Enter period (kyr):','Use 1 = peak; 0 = trough:'};
+                dlg_title = 'Input period';
+            else
+                prompt = {a118,a119};
+                dlg_title = a120;
+            end
             num_lines = 1;
             defaultans = {'41','1'};
             options.Resize='on';
@@ -2607,27 +3659,42 @@ if nplot == 1
                 figure;
                 set(gcf,'units','norm') % set location
                 set(gcf,'position',[0.01,0.55,0.45,0.4]) % set position
-                set(gcf,'Name','Acycle: Build Age Model | Age Model','NumberTitle','off')
                 set(gcf,'color','w');
                 plot(agemodelfull(:,1), agemodelfull(:,2),'k','LineWidth',1)
-                xlabel(['Depth (',handles.unit,')'])
-                ylabel('Time (kyr)')
-                title(['Age Model: ', num2str(period), ' kyr cycle: ', plot_filter_s])
+                if handles.lang_choice == 0
+                    set(gcf,'Name','Acycle: Build Age Model | Age Model','NumberTitle','off')
+                    xlabel(['Depth (',handles.unit,')'])
+                    ylabel('Time (kyr)')
+                    title(['Age Model: ', num2str(period), ' kyr cycle: ', plot_filter_s])
+                else
+                    set(gcf,'Name',a121,'NumberTitle','off')
+                    xlabel([main23,' (',handles.unit,')'])
+                    ylabel([main21,' (kyr)'])
+                    title([main27,': ', num2str(period), a122, plot_filter_s])
+                end
+                
                 set(gca,'XMinorTick','on','YMinorTick','on')
                 xlim([agemodelfull(1,1), agemodelfull(end,1)])
                 ylim([agemodelfull(1,2), agemodelfull(end,2)])
                 
                 figure;
                 set(gcf,'color','w');
-                set(gcf,'Name','Acycle: Build Age Model | Sedimentation Rate')
                 set(gcf,'units','norm') % set location
                 set(gcf,'position',[0.01,0.05,0.45,0.4]) % set position
                 stairs(sedrate(:,1), sedrate(:,2),'k','LineWidth',1)
-                xlabel(['Depth (',handles.unit,')'])
-                ylabel(['Sedimentation rate (',handles.unit,'/kyr)'])
+                if handles.lang_choice == 0
+                    set(gcf,'Name','Acycle: Build Age Model | Sedimentation Rate')
+                    xlabel(['Depth (',handles.unit,')'])
+                    ylabel(['Sedimentation rate (',handles.unit,'/kyr)'])
+                    title(['Sedimentation rate: ', num2str(period), ' kyr cycle: ', plot_filter_s])
+                else
+                    set(gcf,'Name',a123)
+                    xlabel([main23,' (',handles.unit,')'])
+                    ylabel([main26,' (',handles.unit,'/kyr)'])
+                    title([main26,': ', num2str(period), a122, plot_filter_s])
+                end
                 xlim([sedrate(1,1), sedrate(end,1)])
                 ylim([0, max(sedrate(:,2)) * 2])
-                title(['Sedimentation rate: ', num2str(period), ' kyr cycle: ', plot_filter_s])
                 set(gca,'XMinorTick','on','YMinorTick','on')
             end
         end
@@ -2641,6 +3708,21 @@ function menu_function_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_function (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('a125',lang_id);
+    a125 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a126',lang_id);
+    a126 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a127',lang_id);
+    a127 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a128',lang_id);
+    a128 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a129',lang_id);
+    a129 = handles.lang_var{locb1};
+end
+
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
@@ -2654,12 +3736,16 @@ if nplot == 1
         if sum(strcmp(ext,handles.filetype)) > 0
             
             data = load(data_name);
-
-            prompt = {'a for the 1st column: x(i) = a * x(i) + b',...
-                'b for the 1st column: x(i) = a * x(i) + b',...
-                'c for the 2nd column: y(i) = c * y(i) + d',...
-                'd for the 2nd column: y(i) = c * y(i) + d'};
-            dlg_title = 'Input parameters';
+            if handles.lang_choice == 0
+                prompt = {'a for the 1st column: x(i) = a * x(i) + b',...
+                    'b for the 1st column: x(i) = a * x(i) + b',...
+                    'c for the 2nd column: y(i) = c * y(i) + d',...
+                    'd for the 2nd column: y(i) = c * y(i) + d'};
+                dlg_title = 'Input parameters';
+            else
+                prompt = {a125,a126,a127,a128};
+                dlg_title = a129;
+            end
             num_lines = 1;
             defaultans = {'1','0','1','0'};
             options.Resize='on';
@@ -2696,6 +3782,21 @@ function menu_maxmin_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('dd16',lang_id);
+    dd16 = handles.lang_var{locb1};
+    [~, locb1] = ismember('dd17',lang_id);
+    dd17 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a130',lang_id);
+    a130 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a131',lang_id);
+    a131 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a132',lang_id);
+    a132 = handles.lang_var{locb1};
+end
+
 if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
@@ -2717,8 +3818,13 @@ if nplot == 1
         end 
         
             x = data(:,1);
-            dlg_title = 'Find Max/Min value and indice';
-            prompt = {'Interval start','Interval end','Max or Min (1 = max, else = min)','Tested column'};
+            if handles.lang_choice
+                dlg_title = 'Find Max/Min value and indice';
+                prompt = {'Interval start','Interval end','Max or Min (1 = max, else = min)','Tested column'};
+            else
+                dlg_title = a130;
+                prompt = {dd16,dd17,a131,a132};
+            end
             num_lines = 1;
             defaultans = {num2str(min(x)),num2str(max(x)),'1','2'};
             options.Resize='on';
@@ -2749,6 +3855,31 @@ function menu_cpt_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('a135',lang_id);
+    a135 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a136',lang_id);
+    a136 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a137',lang_id);
+    a137 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a138',lang_id);
+    a138 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a139',lang_id);
+    a139 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a140',lang_id);
+    a140 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a141',lang_id);
+    a141 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a142',lang_id);
+    a142 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a143',lang_id);
+    a143 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a144',lang_id);
+    a144 = handles.lang_var{locb1};
+end
+
 % Function of Bayesian changepoint technique
 
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
@@ -2775,15 +3906,27 @@ if nplot == 1
         end 
         
             x = data(:,1);
-            dlg_title = 'Ruggieri (2013) Bayesian Changepoint';
-            prompt = {...
-                'k_max, max no. of change points allowed',...
-                'd_min, min distance between consecutive change points',...
-                'k_0, variance scaling hyperparameter',...
-                'v_0,  pseudo data point',...
-                'sig_0, pseudo data variance (maybe halved)',...
-                'n, number of sampled solutions',...
-                'Save data? (1 = yes, 0 = no)'};
+            if handles.lang_choice == 0
+                dlg_title = 'Ruggieri (2013) Bayesian Changepoint';
+                prompt = {...
+                    'k_max, max no. of change points allowed',...
+                    'd_min, min distance between consecutive change points',...
+                    'k_0, variance scaling hyperparameter',...
+                    'v_0,  pseudo data point',...
+                    'sig_0, pseudo data variance (maybe halved)',...
+                    'n, number of sampled solutions',...
+                    'Save data? (1 = yes, 0 = no)'};
+            else
+                dlg_title = a135;
+                prompt = {...
+                    a136,...
+                    a137,...
+                    a138,...
+                    a139,...
+                    a140,...
+                    a141,...
+                    a142};
+            end
             num_lines = 1;
             sig_0 = var(data(:,2));
             k_0 = ceil( abs(x(end)-x(1))/44 ); % default value, 1/sub-interval*25%
@@ -2792,7 +3935,11 @@ if nplot == 1
             answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
             if ~isempty(answer)
                 if length(x)> 500
-                    warndlg('Large dataset, wait...')
+                    if handles.lang_choice == 0
+                        warndlg('Large dataset, wait...')
+                    else
+                        warndlg(a143)
+                    end
                 end
                 k_max = str2double(answer{1}); % default is 10
                 d_min = str2double(answer{2}); % at least twice as many data points as free parameters
@@ -2814,7 +3961,11 @@ if nplot == 1
                     CDac_pwd
                     dlmwrite([dat_name,'-BayesRegModel',ext], mod, 'delimiter', ',', 'precision', 9);
                     dlmwrite([dat_name,'-BayesChangepoint',ext], cpt, 'delimiter', ',', 'precision', 9);
-                    disp(['>> ',dat_name,ext,' Bayesian change points output saved. R_2 is ',num2str(R_2)])
+                    if handles.lang_choice == 0
+                        disp(['>> ',dat_name,ext,' Bayesian change points output saved. R_2 is ',num2str(R_2)])
+                    else
+                        disp(['>> ',dat_name,ext,a144,num2str(R_2)])
+                    end
                     
                     d = dir; %get files
                     set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
@@ -2835,6 +3986,17 @@ function menu_imshow_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
+
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('dd01',lang_id);
+    dd01 = handles.lang_var{locb1};
+    [~, locb1] = ismember('dd24',lang_id);
+    dd24 = handles.lang_var{locb1};
+end
+
+
 if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
@@ -2846,7 +4008,11 @@ if nplot == 1
             if sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
                 try
                     % GRB and Grayscale supported here
-                    hwarn = warndlg('Wait, large image? can be very slow ...');
+                    if handles.lang_choice == 0
+                        hwarn = warndlg('Wait, large image? can be very slow ...');
+                    else
+                        hwarn = warndlg(dd01);
+                    end
                     im_name = imread(data_name);
                     hFig1 = figure;
                     lastwarn('') % Clear last warning message
@@ -2861,13 +4027,16 @@ if nplot == 1
                     catch
                     end
                 catch
-                    warndlg('Image color space not supported. Convert to RGB or Grayscale')
+                    if handles.lang_choice == 0
+                        warndlg('Image color space not supported. Convert to RGB or Grayscale')
+                    else
+                        warndlg(dd24)
+                    end
                 end
             end
         end
 end
 guidata(hObject, handles);
-
 
 % --------------------------------------------------------------------
 function menu_rgb2gray_Callback(hObject, eventdata, handles)
@@ -2877,6 +4046,16 @@ function menu_rgb2gray_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
+
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('a146',lang_id);
+    a146 = handles.lang_var{locb1};
+    [~, locb1] = ismember('dd24',lang_id);
+    dd24 = handles.lang_var{locb1};
+end
+
 if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
@@ -2901,10 +4080,18 @@ if nplot == 1
                         refreshcolor;
                         cd(pre_dirML); % return to matlab view folder
                     catch
-                        warndlg('This is not a RGB image')
+                        if handles.lang_choice == 0
+                            warndlg('This is not a RGB image')
+                        else
+                            warndlg(a146)
+                        end
                     end
                 catch
-                    warndlg('Image color space not supported. Convert to RGB or Grayscale')
+                    if handles.lang_choice == 0
+                        warndlg('Image color space not supported. Convert to RGB or Grayscale')
+                    else
+                        warndlg(dd24)
+                    end
                 end
             end
         end
@@ -2920,6 +4107,42 @@ function menu_improfile_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
+
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('a147',lang_id);
+    a147 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a148',lang_id);
+    a148 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a149',lang_id);
+    a149 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a150',lang_id);
+    a150 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a151',lang_id);
+    a151 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a152',lang_id);
+    a152 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a153',lang_id);
+    a153 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a154',lang_id);
+    a154 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a155',lang_id);
+    a155 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a156',lang_id);
+    a156 = handles.lang_var{locb1};
+    [~, locb1] = ismember('dd24',lang_id);
+    dd24 = handles.lang_var{locb1};
+    [~, locb1] = ismember('dd01',lang_id);
+    dd01 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main24',lang_id);
+    main24 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main36',lang_id);
+    main36 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main37',lang_id);
+    main37 = handles.lang_var{locb1};
+end
+
 if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
@@ -2929,14 +4152,17 @@ if nplot == 1
             [~,dat_name,ext] = fileparts(data_name);
             if sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
                 try
-                    hwarn = warndlg('Wait, large image? can be very slow ...');
+                    if handles.lang_choice == 0
+                        hwarn = warndlg('Wait, large image? can be very slow ...');
+                    else
+                        hwarn = warndlg(dd01);
+                    end
                     I = imread(data_name);
                     figI = figure;
                     lastwarn('') % Clear last warning message
                     imshow(I);
-
+                        
                     [warnMsg, warnId] = lastwarn;
-                    
                     if ~isempty(warnMsg)
                         close(figI)
                         imscrollpanel_ac(data_name);
@@ -2945,19 +4171,35 @@ if nplot == 1
                     try close(hwarn)
                     catch
                     end
-                    
-                    set(gcf,'Name',[dat_name,ext,': Press "SHIFT"or"ALT" & select cursors now'],'NumberTitle','off')
+                    if handles.lang_choice == 0
+                        set(gcf,'Name',[dat_name,ext,': Press "SHIFT"or"ALT" & select cursors now'],'NumberTitle','off')
 
-                    choice = questdlg('Steps: 1) click the "DataCursor" tool; 2) select two cursors; 3) press "Enter" in the COMMAND window', ...
-                        'Press "SHIFT"or"ALT" key & select 2 cursors', 'Continue','Cancel','Continue');
+                        choice = questdlg('Steps: 1) click the "Data Tips" tool; 2) select two cursors; 3) press "Enter" in the COMMAND window', ...
+                            'Press "SHIFT"or"ALT" key & select 2 cursors', 'Continue','Cancel','Continue');
+                    else
+                        set(gcf,'Name',[dat_name,ext,a147],'NumberTitle','off')
 
+                        choice = questdlg(a148, a149, main36,main37,main36);
+                    end
+                    if handles.lang_choice == 0
+                        case1 = 'Continue';
+                        case2 = 'Cancel';
+                    else
+                        case1 = main36;
+                        case2 = main37;
+                    end
                     switch choice
-                        case 'Continue'
+                        %case 'Continue'
+                        case case1
                             figure(figI)
                             
                             dcm_obj = datacursormode(figI);
                             set(dcm_obj,'DisplayStyle','datatip','SnapToDataVertex','off','Enable','on')
-                            Sure = input('>>  Press "Enter"');
+                            if handles.lang_choice == 0
+                                Sure = input('>>  Press "Enter"');
+                            else
+                                Sure = input(a150);
+                            end
                             c_info = getCursorInfo(dcm_obj);
                             m = length(c_info);
                             CursorInfo_value = zeros(m,2);
@@ -2970,7 +4212,11 @@ if nplot == 1
                             hold on; plot( CursorInfo_value(:,1), CursorInfo_value(:,2), 'g-','LineWidth',3)
 
                             if m > 2
-                                warndlg('More than 2 cursors selected, only first 2 used!')
+                                if handles.lang_choice == 0
+                                    warndlg('More than 2 cursors selected, only first 2 used!')
+                                else
+                                    warndlg(a151)
+                                end
                             end
 
                             if m >= 2
@@ -2981,10 +4227,18 @@ if nplot == 1
 
                                 try data = [cz,c];
                                 catch
-                                    warndlg('This is not a grayscale image!')
+                                    if handles.lang_choice == 0
+                                        warndlg('This is not a grayscale image!')
+                                    else
+                                        warndlg(a152)
+                                    end
                                     try c = reshape(c,[],3);
                                     catch
-                                        warndlg('Looks like a cymk image, right?')
+                                        if handles.lang_choice == 0
+                                            warndlg('Looks like a cymk image, right?')
+                                        else
+                                            warndlg(a153)
+                                        end
                                         c = reshape(c,[],4);
                                     end
                                     data = [cz,c];
@@ -2996,9 +4250,14 @@ if nplot == 1
                                 CDac_pwd
                                 dlmwrite(name , data, 'delimiter', ',', 'precision', 9);
                                 dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
-                                disp(['>>  save profile data as   ',name1])
-                                disp(['>>  save control points as ',name1])
-                                d = dir; %get files
+                                if handles.lang_choice == 0
+                                    disp(['>>  save profile data as   ',name1])
+                                    disp(['>>  save control points as ',name1])
+                                else
+                                    disp([a154,name1])
+                                    disp([a155,name1])
+                                end                                    
+                                    d = dir; %get files
                                 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                                 refreshcolor;
                                 cd(pre_dirML); % return to matlab view folder
@@ -3008,18 +4267,32 @@ if nplot == 1
                                 xlabel('Pixels'); 
                                 set(gca,'XMinorTick','on','YMinorTick','on')
                                 if m == 2
-                                    ylabel('Grayscale')
+                                    if handles.lang_choice == 0
+                                        ylabel('Grayscale')
+                                    else
+                                        ylabel(a156)
+                                    end
                                 else
-                                    ylabel('Value')
+                                    if handles.lang_choice == 0
+                                        ylabel('Value')
+                                    else
+                                        ylabel(main24)
+                                    end
                                 end
                             end
-                        case 'Cancel'
+                        %case 'Cancel'
+                        case case2
+                            
                             try close(figI)
                             catch
                             end
                     end
                 catch
-                    warndlg('Image color space not supported. Convert to RGB or Grayscale')
+                    if handles.lang_choice == 0
+                        warndlg('Image color space not supported. Convert to RGB or Grayscale')
+                    else
+                        warndlg(dd24)
+                    end
                 end
                     
             end
@@ -3108,19 +4381,48 @@ nplot = handles.nplot; % number of selected files
 if nplot == 0
     return
 end
+
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('a158',lang_id);
+    a158 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a159',lang_id);
+    a159 = handles.lang_var{locb1};
+    
+    [~, locb1] = ismember('main30',lang_id);
+    main30 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main31',lang_id);
+    main31 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main29',lang_id);
+    main29 = handles.lang_var{locb1};
+    
+    case1 = main30;
+    case2 = main31;
+else
+    case1 = 'Yes';
+    case2 = 'No';
+end
+
+disp('debug 1')
 for i = 1:nplot
     if strcmp(copycut,'cut')
+        % cut
         new_name = handles.data_name{i};
         new_name_w_dir = [ac_pwd,handles.slash_v,new_name];
         if exist(new_name_w_dir)
-            answer = questdlg(['Cover existed file ',new_name,'?'],...
-                'Warning',...
-                'Yes','No','No');
+            if handles.lang_choice == 0
+                answer = questdlg(['Cover existed file ',new_name,'?'],...
+                    'Warning',...
+                    'Yes','No','No');
+            else
+                answer = questdlg([a158,new_name,'?'],main29,main30,main31,main31);
+            end
             % Handle response
             switch answer
-                case 'Yes'
+                case case1
                     movefile(handles.file{i}, ac_pwd)
-                case 'No'
+                case case2
             end
         else
             movefile(handles.file{i}, ac_pwd)
@@ -3143,9 +4445,16 @@ for i = 1:nplot
             new_file = [ac_pwd,handles.slash_v,new_name];
             file_list = handles.file;
             copyfile(file_list{i}, new_file)
+            disp(file_list)
         catch
-            disp('No data copied')
+            if handles.lang_choice == 0
+                disp('No data copied')
+            else
+                disp(a159)
+            end
         end
+    else
+        disp(' failed')
     end
 end
 d = dir; %get files
@@ -3163,13 +4472,39 @@ function menu_delete_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 deletefile = 0;
 
-choice = questdlg('You are going to DELETE the selected file(s)', ...
-	'Warning', 'Yes','No','No');
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('a160',lang_id);
+    a160 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a161',lang_id);
+    a161 = handles.lang_var{locb1};
+    
+    [~, locb1] = ismember('main30',lang_id);
+    main30 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main31',lang_id);
+    main31 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main29',lang_id);
+    main29 = handles.lang_var{locb1};
+    
+    case1 = main30;
+    case2 = main31;
+else
+    case1 = 'Yes';
+    case2 = 'No';
+end
+if handles.lang_choice == 0 
+    choice = questdlg('You are going to DELETE the selected file(s)', ...
+        'Warning', 'Yes','No','No');
+else
+    choice = questdlg(a160, ...
+        main29, main30,main31,main31);
+end
 % Handle response
 switch choice
-    case 'No'
+    case case2
         deletefile = 0;
-    case 'Yes'
+    case case1
         deletefile = 1;
 end
 
@@ -3189,12 +4524,17 @@ if deletefile == 1
                 plot_filter_selection = strrep2(plot_filter_selection, '<HTML><FONT color="blue">', '</FONT></HTML>');
             end
         if isdir(plot_filter_selection)
-            choice = questdlg('DELETE selected folder and files within it', ...
-                'Warning', 'Yes','No','No');
+            if handles.lang_choice == 0 
+                choice = questdlg('DELETE selected folder and files within it', ...
+                    'Warning', 'Yes','No','No');
+            else
+                choice = questdlg(a161, ...
+                    main29, main30,main31,main31);
+            end
             % Handle response
             switch choice
-                case 'No'
-                case 'Yes'
+                case case2
+                case case1
                     status = rmdir(plot_filter_selection,'s');
             end
         else
@@ -3327,110 +4667,70 @@ function menu_sort_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-disp(['Select ',num2str(nplot),' data'])
-for nploti = 1:nplot
-    prompt = {'Sort data in ascending order?','Unique values in data?','Remove empty row?','Apply to ALL'};
-        dlg_title = 'Sort, Unique & Remove empty (1 = yes)';
-        num_lines = 1;
-        defaultans = {num2str(handles.math_sort),num2str(handles.math_unique),num2str(handles.math_deleteempty),'0'};
-        options.Resize='on';
-        answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-        if ~isempty(answer)
-            datasort = str2double(answer{1});
-            dataunique = str2double(answer{2});
-            dataempty = str2double(answer{3});
-            dataApply2ALL = str2double(answer{4});
-            
-            if dataApply2ALL == 1
-                for nploti = 1:nplot
-                % Apply settings to all data
-                    data_name_all = (contents(plot_selected));
-                    data_name = char(data_name_all{nploti});
-                    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
-                    GETac_pwd; 
-                    data_name = fullfile(ac_pwd,data_name);
-                    disp(['>>  Processing ', data_name]);
-                    data_error = 0;
-                    if isdir(data_name) == 1
-                    else
-                        [~,dat_name,ext] = fileparts(data_name);
-                        if sum(strcmp(ext,handles.filetype)) > 0
-                            try
-                                data = load(data_name);
-                            catch
-                                fid = fopen(data_name);
-                                data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
-                                fclose(fid);
-                                if iscell(data_ft)
-                                    try
-                                        data = cell2mat(data_ft);
-                                    catch
-                                        fid = fopen(data_name,'at');
-                                        fprintf(fid,'%d\n',[]);
-                                        fclose(fid);
-                                        fid = fopen(data_name);
-                                        data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
-                                        fclose(fid);
-                                        try
-                                            data = cell2mat(data_ft);
-                                        catch
-                                            warndlg(['Check data file: ', dat_name],'Data Error!')
-                                            disp(['      Error! Skipped. Check the data file:', dat_name]);
-                                            data_error = 1;
-                                        end
-                                    end
-                                end
-                            end
-                            if data_error ==1
-                            else
-                                data = data(~any(isnan(data),2),:); % remove NaN values
-                                if datasort == 1
-                                    data = sortrows(data);
-                                    name1 = [dat_name,'-so'];
-                                end
-                                if dataunique == 1
-                                    data=findduplicate(data);
-                                    name1 = [dat_name,'-u'];  % New name
-                                end
-                                if (datasort + dataunique) == 2
-                                    name1 = [dat_name,'-su'];  % New name
-                                end
-                                if dataempty == 1
-                                    data(any(isinf(data),2),:) = [];
-                                    if (datasort + dataunique) > 0
-                                        name1 = [name1,'e'];  % New name
-                                    else
-                                        name1 = [dat_name,'-e'];  % New name
-                                    end
-                                end
-                                if (datasort + dataunique + dataempty) > 0
-                                    name2 = [name1,ext];
-                                else
-                                    name2 = [dat_name,ext];
-                                end
-                                % remember settings
-                                handles.math_sort = datasort;
-                                handles.math_unique = dataunique;
-                                handles.math_deleteempty = dataempty;
 
-                                CDac_pwd
-                                dlmwrite(name2, data, 'delimiter', ',', 'precision', 9);
-                            end
-                        end
-                    end
-                end
-                d = dir; %get files
-                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-                refreshcolor;
-                cd(pre_dirML); % return to matlab view folder
-                return
-            else
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('main38',lang_id);
+    main38 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a49',lang_id);
+    a49 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a62',lang_id);
+    a62 = handles.lang_var{locb1};
+    
+    [~, locb1] = ismember('a163',lang_id);
+    a163 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a164',lang_id);
+    a164 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a165',lang_id);
+    a165 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a166',lang_id);
+    a166 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a167',lang_id);
+    a167 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a168',lang_id);
+    a168 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a169',lang_id);
+    a169 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a170',lang_id);
+    a170 = handles.lang_var{locb1};
+end
+if handles.lang_choice == 0
+    disp(['Select ',num2str(nplot),' data'])
+else
+    disp([main38,' ',num2str(nplot),a62])
+end
+for nploti = 1:nplot
+    if handles.lang_choice == 0
+        prompt = {'Sort data in ascending order?','Unique values in data?','Remove empty row?','Apply to ALL'};
+        dlg_title = 'Sort, Unique & Remove empty (1 = yes)';
+    else
+        prompt = {a163,a164,a165,a166};
+        dlg_title = a167;
+    end
+    num_lines = 1;
+    defaultans = {num2str(handles.math_sort),num2str(handles.math_unique),num2str(handles.math_deleteempty),'0'};
+    options.Resize='on';
+    answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+    if ~isempty(answer)
+        datasort = str2double(answer{1});
+        dataunique = str2double(answer{2});
+        dataempty = str2double(answer{3});
+        dataApply2ALL = str2double(answer{4});
+
+        if dataApply2ALL == 1
+            for nploti = 1:nplot
+            % Apply settings to all data
                 data_name_all = (contents(plot_selected));
                 data_name = char(data_name_all{nploti});
                 data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
-                GETac_pwd;
+                GETac_pwd; 
                 data_name = fullfile(ac_pwd,data_name);
-                disp(['>>  Processing ', data_name]);
+                if handles.lang_choice == 0
+                    disp(['>>  Processing ', data_name]);
+                else
+                    disp([a49, data_name]);
+                end
                 data_error = 0;
                 if isdir(data_name) == 1
                 else
@@ -3455,24 +4755,19 @@ for nploti = 1:nplot
                                     try
                                         data = cell2mat(data_ft);
                                     catch
-                                        % length of 2 columns are not equal
-                                        lengthmin = min(length(data_ft{1,1}), length(data_ft{1,2}));
-                                        data_ft1 = data_ft{1,1};
-                                        data_ft2 = data_ft{1,2};
-                                        data_ft_new{1,1} = data_ft1(1:lengthmin);
-                                        data_ft_new{1,2} = data_ft2(1:lengthmin);
-                                        try 
-                                            data = cell2mat(data_ft_new);
-                                        catch
+                                        if handles.lang_choice == 0
                                             warndlg(['Check data file: ', dat_name],'Data Error!')
-                                            disp(['      Error! Check the data file:', dat_name]);
-                                            data_error = 1;
+                                            disp(['      Error! Skipped. Check the data file:', dat_name]);
+                                        else
+                                            warndlg([a168, dat_name],a169)
+                                            disp([a170, dat_name]);
                                         end
+                                        data_error = 1;
                                     end
                                 end
                             end
                         end
-                        if data_error == 1
+                        if data_error ==1
                         else
                             data = data(~any(isnan(data),2),:); % remove NaN values
                             if datasort == 1
@@ -3506,15 +4801,115 @@ for nploti = 1:nplot
 
                             CDac_pwd
                             dlmwrite(name2, data, 'delimiter', ',', 'precision', 9);
-                            d = dir; %get files
-                            set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-                            refreshcolor;
-                            cd(pre_dirML); % return to matlab view folder
                         end
                     end
                 end
             end
+            d = dir; %get files
+            set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+            refreshcolor;
+            cd(pre_dirML); % return to matlab view folder
+            return
+        else
+            data_name_all = (contents(plot_selected));
+            data_name = char(data_name_all{nploti});
+            data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+            GETac_pwd;
+            data_name = fullfile(ac_pwd,data_name);
+            if handles.lang_choice == 0
+                disp(['>>  Processing ', data_name]);
+            else
+                disp([a49, data_name]);
+            end
+            data_error = 0;
+            if isdir(data_name) == 1
+            else
+                [~,dat_name,ext] = fileparts(data_name);
+                if sum(strcmp(ext,handles.filetype)) > 0
+                    try
+                        data = load(data_name);
+                    catch
+                        fid = fopen(data_name);
+                        data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
+                        fclose(fid);
+                        if iscell(data_ft)
+                            try
+                                data = cell2mat(data_ft);
+                            catch
+                                fid = fopen(data_name,'at');
+                                fprintf(fid,'%d\n',[]);
+                                fclose(fid);
+                                fid = fopen(data_name);
+                                data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
+                                fclose(fid);
+                                try
+                                    data = cell2mat(data_ft);
+                                catch
+                                    % length of 2 columns are not equal
+                                    lengthmin = min(length(data_ft{1,1}), length(data_ft{1,2}));
+                                    data_ft1 = data_ft{1,1};
+                                    data_ft2 = data_ft{1,2};
+                                    data_ft_new{1,1} = data_ft1(1:lengthmin);
+                                    data_ft_new{1,2} = data_ft2(1:lengthmin);
+                                    try 
+                                        data = cell2mat(data_ft_new);
+                                    catch
+                                        if handles.lang_choice == 0
+                                            warndlg(['Check data file: ', dat_name],'Data Error!')
+                                            disp(['      Error! Skipped. Check the data file:', dat_name]);
+                                        else
+                                            warndlg([a168, dat_name],a169)
+                                            disp([a170, dat_name]);
+                                        end
+                                        data_error = 1;
+                                    end
+                                end
+                            end
+                        end
+                    end
+                    if data_error == 1
+                    else
+                        data = data(~any(isnan(data),2),:); % remove NaN values
+                        if datasort == 1
+                            data = sortrows(data);
+                            name1 = [dat_name,'-so'];
+                        end
+                        if dataunique == 1
+                            data=findduplicate(data);
+                            name1 = [dat_name,'-u'];  % New name
+                        end
+                        if (datasort + dataunique) == 2
+                            name1 = [dat_name,'-su'];  % New name
+                        end
+                        if dataempty == 1
+                            data(any(isinf(data),2),:) = [];
+                            if (datasort + dataunique) > 0
+                                name1 = [name1,'e'];  % New name
+                            else
+                                name1 = [dat_name,'-e'];  % New name
+                            end
+                        end
+                        if (datasort + dataunique + dataempty) > 0
+                            name2 = [name1,ext];
+                        else
+                            name2 = [dat_name,ext];
+                        end
+                        % remember settings
+                        handles.math_sort = datasort;
+                        handles.math_unique = dataunique;
+                        handles.math_deleteempty = dataempty;
+
+                        CDac_pwd
+                        dlmwrite(name2, data, 'delimiter', ',', 'precision', 9);
+                        d = dir; %get files
+                        set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+                        refreshcolor;
+                        cd(pre_dirML); % return to matlab view folder
+                    end
+                end
+            end
         end
+    end
 end
 guidata(hObject, handles);
 
@@ -3569,6 +4964,19 @@ function munu_plot_stairs_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
+
+
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('main21',lang_id);
+    main21 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main23',lang_id);
+    main23 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main34',lang_id);
+    main34 = handles.lang_var{locb1};
+end
+
 % check
 for i = 1:nplot
     plot_no = plot_selected(i);
@@ -3609,13 +5017,25 @@ if check == 1
             stairs(data(:,1),data(:,2),'LineWidth',1,'Color','k');
         end
         set(gca,'XMinorTick','on','YMinorTick','on')
-        if handles.unit_type == 0;
-            xlabel(['Unit (',handles.unit,')'])
-        elseif handles.unit_type == 1;
-            xlabel(['Depth (',handles.unit,')'])
+        
+        if handles.lang_choice == 0
+            if handles.unit_type == 0;
+                xlabel(['Unit (',handles.unit,')'])
+            elseif handles.unit_type == 1;
+                xlabel(['Depth (',handles.unit,')'])
+            else
+                xlabel(['Time (',handles.unit,')'])
+            end
         else
-            xlabel(['Time (',handles.unit,')'])
+            if handles.unit_type == 0;
+                xlabel([main34,' (',handles.unit,')'])
+            elseif handles.unit_type == 1;
+                xlabel([main23,' (',handles.unit,')'])
+            else
+                xlabel([main21,' (',handles.unit,')'])
+            end
         end
+
         title(plot_filter_s, 'Interpreter', 'none')
 end
 guidata(hObject, handles);
@@ -3637,6 +5057,15 @@ contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of lis
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
 
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('dd01',lang_id);
+    dd01 = handles.lang_var{locb1};
+    [~, locb1] = ismember('dd24',lang_id);
+    dd24 = handles.lang_var{locb1};
+end
+
 % check
 for i = 1:nplot
     plot_no = plot_selected(i);
@@ -3652,7 +5081,13 @@ for i = 1:nplot
             check = 1; % selection can be executed 
         elseif sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
             try 
-                hwarn = warndlg('Wait, large image? can be very slow ...');
+
+                % GRB and Grayscale supported here
+                if handles.lang_choice == 0
+                    hwarn = warndlg('Wait, large image? can be very slow ...');
+                else
+                    hwarn = warndlg(dd01);
+                end
                 im_name = imread(plot_filter_s);
                 hFig1 = figure;
                 lastwarn('') % Clear last warning message
@@ -3667,7 +5102,11 @@ for i = 1:nplot
                 catch
                 end
             catch
-                warndlg('Image color space not supported. Convert to RGB or Grayscale')
+                if handles.lang_choice == 0
+                    warndlg('Image color space not supported. Convert to RGB or Grayscale')
+                else
+                    warndlg(dd24)
+                end
             end
         end
     end
@@ -3691,16 +5130,93 @@ function menu_rho_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 nsim_yes = 0;
 
-choice = questdlg('Single run or Monte Carlo Simulation', ...
-	'Select', 'Single','Monte Carlo','Cancel','Single');
+
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('main38',lang_id);
+    main38 = handles.lang_var{locb1};  % Monte Carlo
+    [~, locb1] = ismember('main39',lang_id);
+    main39 = handles.lang_var{locb1};  % Monte Carlo
+    [~, locb1] = ismember('main37',lang_id);
+    main37 = handles.lang_var{locb1};  % Cancel
+    [~, locb1] = ismember('a180',lang_id);
+    a180 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a181',lang_id);
+    a181 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a182',lang_id);
+    a182 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a183',lang_id);
+    a183 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a184',lang_id);
+    a184 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a185',lang_id);
+    a185 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a186',lang_id);
+    a186 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a187',lang_id);
+    a187 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a188',lang_id);
+    a188 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a189',lang_id);
+    a189 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a190',lang_id);
+    a190 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a191',lang_id);
+    a191 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a192',lang_id);
+    a192 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a193',lang_id);
+    a193 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a194',lang_id);
+    a194 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a195',lang_id);
+    a195 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a196',lang_id);
+    a196 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a197',lang_id);
+    a197 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a198',lang_id);
+    a198 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a199',lang_id);
+    a199 = handles.lang_var{locb1};
+    
+    [~, locb1] = ismember('main21',lang_id);
+    main21 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main23',lang_id);
+    main23 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main34',lang_id);
+    main34 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main35',lang_id);
+    main35 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main40',lang_id);
+    main40 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main41',lang_id);
+    main41 = handles.lang_var{locb1};
+    [~, locb1] = ismember('menu46',lang_id);
+    menu46 = handles.lang_var{locb1};
+    
+end
+
+if handles.lang_choice == 0
+    choice = questdlg('Single run or Monte Carlo Simulation', ...
+        'Select', 'Single','Monte Carlo','Cancel','Single');
+    case1= 'Single';
+    case2= 'Monte Carlo';
+    case3= 'Cancel';
+else
+    choice = questdlg(a180,main38, a181,main39,main37,a181);
+    case1= a181;
+    case2= main39;
+    case3= main37;
+end
 % Handle response
 switch choice
-    case 'Single'
+    case case1
         nsim_yes = 0;
-    case 'Monte Carlo'
-        %disp([choice ' coming right up.'])
+    case case2
         nsim_yes = 1;
-    case 'Cancel'
+    case case3
         nsim_yes = 2;
 end
 if nsim_yes < 2
@@ -3708,7 +5224,11 @@ if nsim_yes < 2
     plot_selected = get(handles.listbox_acmain,'Value');
     nplot = length(plot_selected);   % length
 if nplot > 1
-    warndlg('Select 1 data only','Error');
+    if handles.lang_choice == 0
+        warndlg('Select 1 data only','Error');
+    else
+        warndlg(a182,main35);
+    end
 end
 if nplot == 1
     data_name = char(contents(plot_selected));
@@ -3722,10 +5242,7 @@ if nplot == 1
                 samplerate = diff(data(:,1));
                 ndata = length(data(:,1));
                 datalength = data(length(data(:,1)),1)-data(1,1);
-                %samp1 = min(samplerate);  % old version
-                %samp2 = max(samplerate);  % old version
                 samp95 = prctile(samplerate,95);  % new version; 1-2 * sample 95% percentile
-                %sampmedian = median(samplerate);
 
                 if nsim_yes == 0
                     
@@ -3734,10 +5251,14 @@ if nplot == 1
                     else
                         window1 = .3 * datalength;
                     end
-                    
-                    prompt = {'Window',...
-                    'Sample rate (Default = 95% percentile)'};
-                    dlg_title = 'Evolutionary RHO in AR(1)';
+                    if handles.lang_choice == 0
+                        prompt = {'Window',...
+                        'Sampling rate (Default = 95% percentile)'};
+                        dlg_title = 'Evolutionary RHO in AR(1)';
+                    else
+                        prompt = {main41,a183};
+                        dlg_title = a184;
+                    end
                     num_lines = 1;
                     defaultans = {num2str(window1),num2str(samp95)};
                     options.Resize='on';
@@ -3749,6 +5270,8 @@ if nplot == 1
                         [rhox] = erhoAR1(data_even,window);
 
                         figure; plot(rhox(:,1),rhox(:,2),'LineWidth',1)
+                            
+                        if handles.lang_choice == 0
                             if handles.unit_type == 0;
                                 xlabel(['Unit (',handles.unit,')'])
                             elseif handles.unit_type == 1;
@@ -3756,10 +5279,21 @@ if nplot == 1
                             else
                                 xlabel(['Time (',handles.unit,')'])
                             end
+                            ylabel('RHO in AR(1)')
+                            title(['Window',' = ',num2str(window),'. ','Sampling rate',' = ',num2str(interpolate_rate)])
+                        else
+                            if handles.unit_type == 0;
+                                xlabel([main34,' (',handles.unit,')'])
+                            elseif handles.unit_type == 1;
+                                xlabel([main23,' (',handles.unit,')'])
+                            else
+                                xlabel([main21,' (',handles.unit,')'])
+                            end
+                            ylabel(a185)
+                            title([main41,' = ',num2str(window),'. ',menu46,' = ',num2str(interpolate_rate)])
+                        end
+        
                         set(gca,'XMinorTick','on','YMinorTick','on')
-                        ylabel('RHO in AR(1)')
-                        title(['Window = ',num2str(window),'. Sample rate = ',num2str(interpolate_rate)])
-
                         name1 = [dat_name,'-rho1.txt'];
                         CDac_pwd
                         if exist([pwd,handles.slash_v,name1])
@@ -3772,166 +5306,212 @@ if nplot == 1
                             end
                         end
                         dlmwrite(name1, rhox, 'delimiter', ',', 'precision', 9); 
-                        disp(['>>  Save rho1    : ',name1])   
+                        if handles.lang_choice == 0
+                            disp(['>>  Save rho1    : ',name1])   
+                        else
+                            disp([a186,name1])   
+                        end
                         cd(pre_dirML); % return to matlab view folder
                     end
                 else
-                    prompt = {'Monte Carlo simulations',...
-                    'Window ranges from',...
-                    'Window ranges to',...
-                    'Sample rate from',...
-                    'Sample rate to',...
-                    'Plot: interpolation',...
-                    'Plot: shift grids (Default = 15; no shift = 1)'};
-                dlg_title = 'Monte Carlo Simulation of eRHO in AR(1)';
-                num_lines = 1;
-                if ndata > 1000;
-                    interpn = 1000;
-                else
-                    interpn = ndata;
-                end
-                
-                if .3 * datalength > 400
-                    window1 = 400;
-                    window2 = 500;
-                else
-                    window1 = .3 * datalength;
-                    window2 = .4 * datalength;
-                end
-                
-                defaultans = {'1000',num2str(window1),num2str(window2),...
-                    num2str(samp95),num2str(2*samp95),num2str(interpn),'15'};
-                options.Resize='on';
-                answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-                if ~isempty(answer)
-                    nsim = str2double(answer{1});
-                    window1 = str2double(answer{2});
-                    window2 = str2double(answer{3});
-                    samprate1 = str2double(answer{4});
-                    samprate2 = str2double(answer{5});
-                    nout = str2double(answer{6});
-                    shiftwin = str2double(answer{7});
-
-                    % Waitbar
-                    hwaitbar = waitbar(0,'Noise estimation - rho1: Monte Carlo processing ...',...    
-                       'WindowStyle','modal');
-                    hwaitbar_find = findobj(hwaitbar,'Type','Patch');
-                    set(hwaitbar_find,'EdgeColor',[0 0.9 0],'FaceColor',[0 0.9 0]) % changes the color to blue
-                    steps = 100;
-                    % step estimation for waitbar
-                    nmc_n = round(nsim/steps);
-                    waitbarstep = 1;
-                    waitbar(waitbarstep / steps)
-                    %
-                  if nsim >= 50
-                    samplez = samprate1+(samprate2-samprate1)*rand(1,nsim);
-                    window_sim = window1 + (window2-window1) * rand(1,nsim);
-                    y_grid = linspace(data(1,1),data(length(data(:,1)),1),nout);
-                    y_grid = y_grid';
-                    powy = zeros(nout,nsim);
-                    if shiftwin > 1
-                        for i=1:nsim
-                            window = window_sim(i);
-                            interpolate_rate= samplez(i);
-                            [data_even] = interpolate(data,interpolate_rate);
-                            [rhox] = erhoAR1(data_even,window);
-                            y_grid_rand = -1*window/2 + window * rand(1);
-                            % interpolation
-                            powy(:,i)=interp1((rhox(:,1)+y_grid_rand),rhox(:,2),y_grid);
-                            disp(['Simulation step = ',num2str(i),' / ',num2str(nsim)]);
-                            
-                            if rem(i,nmc_n) == 0
-                                waitbarstep = waitbarstep+1; 
-                                if waitbarstep > steps; waitbarstep = steps; end
-                                pause(0.001);%
-                                waitbar(waitbarstep / steps)
-                            end
-                        end
-                    elseif shiftwin == 1
-                        for i=1:nsim
-                            window = window_sim(i);
-                            interpolate_rate= samplez(i);
-                            [data_even] = interpolate(data,interpolate_rate);
-                            [rhox] = erhoAR1(data_even,window);
-                            % interpolation
-                            powy(:,i)=interp1(rhox(:,1),rhox(:,2),y_grid);
-                            disp(['Simulation step = ',num2str(i),' / ',num2str(nsim)]);
-                            if rem(i,nmc_n) == 0
-                                waitbarstep = waitbarstep+1; 
-                                if waitbarstep > steps; waitbarstep = steps; end
-                                pause(0.001);%
-                                waitbar(waitbarstep / steps)
-                            end
-                        end
-                    end  
-                    
-                    if ishandle(hwaitbar); 
-                        close(hwaitbar);
-                    end
-                    
-                    percent =[2.5,5,10,15.865,25,50,75,84.135,90,95,97.5];
-                    npercent  = length(percent);
-                    npercent2 = (length(percent)-1)/2;
-                    powyp = prctile(powy, percent,2);
-
-                    for i = 1: npercent
-                        powyadjustp1=powyp(:,i);
-                        powyad_p_nan(:,i) = powyadjustp1(~isnan(powyadjustp1));
-                    end
-                    y_grid_nan = y_grid(~isnan(powyp(:,1)));
-
-                    figure;hold all
-                    colorcode = [221/255,234/255,224/255; ...
-                    201/255,227/255,209/255; ...
-                    176/255,219/255,188/255;...
-                    126/255,201/255,146/255;...
-                    67/255,180/255,100/255];
-                    for i = 1:npercent2
-                        fill([y_grid_nan; (fliplr(y_grid_nan'))'],[powyad_p_nan(:,npercent+1-i);...
-                        (fliplr(powyad_p_nan(:,i)'))'],colorcode(i,:),'LineStyle','none');
-                    end
-                    plot(y_grid,powyp(:,npercent2+1),'Color',[0,120/255,0],'LineWidth',1.5,'LineStyle','--')
-                    hold off
-                    if handles.unit_type == 0;
-                        xlabel(['Unit (',handles.unit,')'])
-                    elseif handles.unit_type == 1;
-                        xlabel(['Depth (',handles.unit,')'])
+                    if handles.lang_choice == 0
+                        prompt = {'Monte Carlo simulations',...
+                        'Window ranges from',...
+                        'Window ranges to',...
+                        'Sampling rate from',...
+                        'Sampling rate to',...
+                        'Plot: interpolation',...
+                        'Plot: shift grids (Default = 15; no shift = 1)'};
+                        dlg_title = 'Monte Carlo Simulation of eRHO in AR(1)';
                     else
-                        xlabel(['Time (',handles.unit,')'])
+                        prompt = {a187,a188,a189,a190,a191,a192,a193};
+                        dlg_title = a194;
                     end
-                    set(gca,'XMinorTick','on','YMinorTick','on')
-                    ylabel('RHO in AR(1)')
-                    legend('2.5% - 97.5%', '5% - 95%', '10% - 90%','15.87% - 84.14%', '25% - 75%', 'Median')
-                    title(['Window: ',num2str(window1),'_',num2str(window2),...
-                        '. Sample rate: ',num2str(samprate1),'_',num2str(samprate2)])
+                    num_lines = 1;
+                    if ndata > 1000
+                        interpn = 1000;
+                    else
+                        interpn = ndata;
+                    end
 
-                    name1 = [dat_name,'-rho1-median.txt'];
-                    data1 = [y_grid_nan,powyad_p_nan(:,npercent2+1)];
-                    name2 = [dat_name,'-rho1-percentile.txt'];
-                    data2 = [y_grid_nan,powyad_p_nan];
-                    CDac_pwd
-                    if exist([pwd,handles.slash_v,name1]) || exist([pwd,handles.slash_v,name2])
-                        for i = 1:100
-                            name1 = [dat_name,'-rho1-median-',num2str(i),'.txt'];
-                            name1 = [dat_name,'-rho1-percentile-',num2str(i),'.txt'];
-                            if exist([pwd,handles.slash_v,name1]) || exist([pwd,handles.slash_v,name2])
+                    if .3 * datalength > 400
+                        window1 = 400;
+                        window2 = 500;
+                    else
+                        window1 = .3 * datalength;
+                        window2 = .4 * datalength;
+                    end
+
+                    defaultans = {'1000',num2str(window1),num2str(window2),...
+                        num2str(samp95),num2str(2*samp95),num2str(interpn),'15'};
+                    options.Resize='on';
+                    answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+                    if ~isempty(answer)
+                        nsim = str2double(answer{1});
+                        window1 = str2double(answer{2});
+                        window2 = str2double(answer{3});
+                        samprate1 = str2double(answer{4});
+                        samprate2 = str2double(answer{5});
+                        nout = str2double(answer{6});
+                        shiftwin = str2double(answer{7});
+
+                        % Waitbar
+                        if handles.lang_choice == 0
+                            hwaitbar = waitbar(0,'Noise estimation - rho1: Monte Carlo processing ...',...    
+                               'WindowStyle','modal');
+                        else
+                            hwaitbar = waitbar(0,a195,'WindowStyle','modal');
+                        end
+                        hwaitbar_find = findobj(hwaitbar,'Type','Patch');
+                        set(hwaitbar_find,'EdgeColor',[0 0.9 0],'FaceColor',[0 0.9 0]) % changes the color to blue
+                        steps = 100;
+                        % step estimation for waitbar
+                        nmc_n = round(nsim/steps);
+                        waitbarstep = 1;
+                        waitbar(waitbarstep / steps)
+                        %
+                      if nsim >= 50
+                        samplez = samprate1+(samprate2-samprate1)*rand(1,nsim);
+                        window_sim = window1 + (window2-window1) * rand(1,nsim);
+                        y_grid = linspace(data(1,1),data(length(data(:,1)),1),nout);
+                        y_grid = y_grid';
+                        powy = zeros(nout,nsim);
+                        if shiftwin > 1
+                            for i=1:nsim
+                                window = window_sim(i);
+                                interpolate_rate= samplez(i);
+                                [data_even] = interpolate(data,interpolate_rate);
+                                [rhox] = erhoAR1(data_even,window);
+                                y_grid_rand = -1*window/2 + window * rand(1);
+                                % interpolation
+                                powy(:,i)=interp1((rhox(:,1)+y_grid_rand),rhox(:,2),y_grid);
+                                if handles.lang_choice == 0
+                                    disp(['Simulation step = ',num2str(i),' / ',num2str(nsim)]);
+                                else
+                                    disp([a196,num2str(i),' / ',num2str(nsim)]);
+                                end
+
+                                if rem(i,nmc_n) == 0
+                                    waitbarstep = waitbarstep+1; 
+                                    if waitbarstep > steps; waitbarstep = steps; end
+                                    pause(0.001);%
+                                    waitbar(waitbarstep / steps)
+                                end
+                            end
+                        elseif shiftwin == 1
+                            for i=1:nsim
+                                window = window_sim(i);
+                                interpolate_rate= samplez(i);
+                                [data_even] = interpolate(data,interpolate_rate);
+                                [rhox] = erhoAR1(data_even,window);
+                                % interpolation
+                                powy(:,i)=interp1(rhox(:,1),rhox(:,2),y_grid);
+                                if handles.lang_choice == 0
+                                    disp(['Simulation step = ',num2str(i),' / ',num2str(nsim)]);
+                                else
+                                    disp([a196,num2str(i),' / ',num2str(nsim)]);
+                                end
+                                if rem(i,nmc_n) == 0
+                                    waitbarstep = waitbarstep+1; 
+                                    if waitbarstep > steps; waitbarstep = steps; end
+                                    pause(0.001);%
+                                    waitbar(waitbarstep / steps)
+                                end
+                            end
+                        end  
+
+                        if ishandle(hwaitbar); 
+                            close(hwaitbar);
+                        end
+
+                        percent =[2.5,5,10,15.865,25,50,75,84.135,90,95,97.5];
+                        npercent  = length(percent);
+                        npercent2 = (length(percent)-1)/2;
+                        powyp = prctile(powy, percent,2);
+
+                        for i = 1: npercent
+                            powyadjustp1=powyp(:,i);
+                            powyad_p_nan(:,i) = powyadjustp1(~isnan(powyadjustp1));
+                        end
+                        y_grid_nan = y_grid(~isnan(powyp(:,1)));
+
+                        figure;hold all
+                        colorcode = [221/255,234/255,224/255; ...
+                        201/255,227/255,209/255; ...
+                        176/255,219/255,188/255;...
+                        126/255,201/255,146/255;...
+                        67/255,180/255,100/255];
+                        for i = 1:npercent2
+                            fill([y_grid_nan; (fliplr(y_grid_nan'))'],[powyad_p_nan(:,npercent+1-i);...
+                            (fliplr(powyad_p_nan(:,i)'))'],colorcode(i,:),'LineStyle','none');
+                        end
+                        plot(y_grid,powyp(:,npercent2+1),'Color',[0,120/255,0],'LineWidth',1.5,'LineStyle','--')
+                        hold off
+                        
+                        set(gca,'XMinorTick','on','YMinorTick','on')
+                         
+                        if handles.lang_choice == 0
+                            if handles.unit_type == 0;
+                                xlabel(['Unit (',handles.unit,')'])
+                            elseif handles.unit_type == 1;
+                                xlabel(['Depth (',handles.unit,')'])
                             else
-                                 break
+                                xlabel(['Time (',handles.unit,')'])
+                            end
+                            ylabel('RHO in AR(1)')
+                            legend('2.5% - 97.5%', '5% - 95%', '10% - 90%','15.87% - 84.14%', '25% - 75%', 'Median')
+                            title(['Window',': ',num2str(window1),'_',num2str(window2),...
+                                '. ','Sampling Rate',': ',num2str(samprate1),'_',num2str(samprate2)], 'Interpreter', 'none')
+                        else
+                            if handles.unit_type == 0;
+                                xlabel([main34,' (',handles.unit,')'])
+                            elseif handles.unit_type == 1;
+                                xlabel([main23,' (',handles.unit,')'])
+                            else
+                                xlabel([main21,' (',handles.unit,')'])
+                            end
+                            ylabel(a185)
+                            legend('2.5% - 97.5%', '5% - 95%', '10% - 90%','15.87% - 84.14%', '25% - 75%', main40)
+                            title([main41,': ',num2str(window1),'_',num2str(window2),...
+                                '. ',menu46,': ',num2str(samprate1),'_',num2str(samprate2)], 'Interpreter', 'none')
+                        end
+                        
+                        
+                        name1 = [dat_name,'-rho1-median.txt'];
+                        data1 = [y_grid_nan,powyad_p_nan(:,npercent2+1)];
+                        name2 = [dat_name,'-rho1-percentile.txt'];
+                        data2 = [y_grid_nan,powyad_p_nan];
+                        CDac_pwd
+                        if exist([pwd,handles.slash_v,name1]) || exist([pwd,handles.slash_v,name2])
+                            for i = 1:100
+                                name1 = [dat_name,'-rho1-median-',num2str(i),'.txt'];
+                                name1 = [dat_name,'-rho1-percentile-',num2str(i),'.txt'];
+                                if exist([pwd,handles.slash_v,name1]) || exist([pwd,handles.slash_v,name2])
+                                else
+                                     break
+                                end
                             end
                         end
+                        dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9); 
+                        dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9); 
+                        if handles.lang_choice == 0
+                            disp(['>>  Save rho1 median    : ',name1])   
+                            disp(['>>  Save rho1 percentile: ',name2])  
+                        else
+                            disp([a197,name1])   
+                            disp([a198,name2])  
+                        end
+                        d = dir; %get files
+                        set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+                        refreshcolor;
+                        cd(pre_dirML);
+                      else
+                          if handles.lang_choice == 0
+                              errordlg('Number simulations is too few, try 1000','Error');
+                          else
+                              errordlg(a199,main35);
+                          end
                     end
-                    dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9); 
-                    dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9); 
-                    disp(['>>  Save rho1 median    : ',name1])   
-                    disp(['>>  Save rho1 percentile: ',name2])  
-                    
-                    d = dir; %get files
-                    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-                    refreshcolor;
-                    cd(pre_dirML);
-                else
-                    errordlg('Number simulations is too few, try 1000','Error');
-                end
                 end
                 end
             end
@@ -3946,6 +5526,16 @@ function menu_folder_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('a201',lang_id);
+    a201 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a202',lang_id);
+    a202 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a203',lang_id);
+    a203 = handles.lang_var{locb1};
+end
 
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
@@ -3961,11 +5551,19 @@ if nplot == 1
 else
     dat_name = 'newfolder';
 end
-
-prompt = {'Type name of the folder'};
-dlg_title = 'Create a Folder in the working directory';
+if handles.lang_choice == 0
+    prompt = {'Type name of the folder'};
+    dlg_title = 'Type name of the folder';
+else
+    prompt = {a201};
+    dlg_title = a201;
+end
 num_lines = 1;
-defaultans = {[dat_name,'_new']};
+if handles.lang_choice == 0
+    defaultans = {[dat_name,'_new']};
+else
+    defaultans = {[dat_name,a203]};
+end
 %defaultans = {'newfolder'};
 options.Resize='on';
 answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
@@ -3997,6 +5595,43 @@ function menu_samplerate_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_samplerate (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    
+    [~, locb1] = ismember('main21',lang_id);
+    main21 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main23',lang_id);
+    main23 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main34',lang_id);
+    main34 = handles.lang_var{locb1};
+    
+    [~, locb1] = ismember('a205',lang_id);
+    a205 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a206',lang_id);
+    a206 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a207',lang_id);
+    a207 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a208',lang_id);
+    a208 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a209',lang_id);
+    a209 = handles.lang_var{locb1};
+    
+    [~, locb1] = ismember('menu46',lang_id);
+    menu46 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main06',lang_id);
+    main06 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main05',lang_id);
+    main05 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main40',lang_id);
+    main40 = handles.lang_var{locb1};
+    [~, locb1] = ismember('dd40',lang_id);
+    dd40 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main42',lang_id);
+    main42 = handles.lang_var{locb1};
+end
+
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = handles.index_selected;  % read selection in listbox 1
 nplot = length(plot_selected);   % length
@@ -4046,19 +5681,36 @@ if check == 1;
             set(0,'Units','normalized') % set units as normalized
             set(gcf,'units','norm') % set location
             set(gcf,'position',[0.1,0.4,0.45,0.45]) % set position
-            set(gcf,'Name', 'Sampling rate (original domain)','NumberTitle','off')
-            if handles.unit_type == 0;
-                xlabel(['Unit (',handles.unit,')'])
-                ylabel('Unit')
-            elseif handles.unit_type == 1;
-                xlabel(['Depth (',handles.unit,')'])
-                ylabel(handles.unit)
+            
+            if handles.lang_choice == 0
+                set(gcf,'Name', 'Sampling rate (original domain)','NumberTitle','off')
+                if handles.unit_type == 0;
+                    xlabel(['Unit (',handles.unit,')'])
+                    ylabel('Unit')
+                elseif handles.unit_type == 1;
+                    xlabel(['Depth (',handles.unit,')'])
+                    ylabel(handles.unit)
+                else
+                    xlabel(['Time (',handles.unit,')'])
+                    ylabel(handles.unit)
+                end
+                title([[dat_name,ext],': ','sampling rate'], 'Interpreter', 'none')
             else
-                xlabel(['Time (',handles.unit,')'])
-                ylabel(handles.unit)
+                set(gcf,'Name', a205,'NumberTitle','off')
+                if handles.unit_type == 0;
+                    xlabel([main34,' (',handles.unit,')'])
+                    ylabel(main34)
+                elseif handles.unit_type == 1;
+                    xlabel([main23,' (',handles.unit,')'])
+                    ylabel(handles.unit)
+                else
+                    xlabel([main21,' (',handles.unit,')'])
+                    ylabel(handles.unit)
+                end
+                title([[dat_name,ext],': ',lower(menu46)], 'Interpreter', 'none')
             end
             
-            title([[dat_name,ext],': sampling rate'], 'Interpreter', 'none')
+            
             xlim([min(datasamp(:,1)),max(datasamp(:,1))])
             ylim([0.9*min(dt) max(dt)*1.1])
             
@@ -4068,19 +5720,37 @@ if check == 1;
             set(0,'Units','normalized') % set units as normalized
             set(gcf,'units','norm') % set location
             set(gcf,'position',[0.55,0.4,0.45,0.45]) % set position
-            title([[dat_name,ext],': kernel fit of sampling rates'], 'Interpreter', 'none')
-            set(gcf,'Name', 'Sampling rate: distribution','NumberTitle','off')
-            if handles.unit_type == 0;
-                xlabel(['Sampling rate (',handles.unit,')'])
-            elseif handles.unit_type == 1;
-                xlabel(['Sampling rate (',handles.unit,')'])
+            
+            if handles.lang_choice == 0
+            
+                title([[dat_name,ext],': kernel fit of sampling rates'], 'Interpreter', 'none')
+                set(gcf,'Name', 'Sampling rate: distribution','NumberTitle','off')
+                if handles.unit_type == 0;
+                    xlabel(['Sampling rate (',handles.unit,')'])
+                elseif handles.unit_type == 1;
+                    xlabel(['Sampling rate (',handles.unit,')'])
+                else
+                    xlabel(['Sampling rate (',handles.unit,')'])
+                end
+                ylabel('Number')
+                note = ['max: ',num2str(max(dt)),'; mean: ',num2str(mean(dt)),...
+                    '; median: ',num2str(median(dt)),'; min: ',num2str(min(dt)),...
+                    '; variance: ',num2str(var(dt))];
             else
-                xlabel(['Sampling rate (',handles.unit,')'])
+                title([[dat_name,ext],a206], 'Interpreter', 'none')
+                set(gcf,'Name', a207,'NumberTitle','off')
+                if handles.unit_type == 0;
+                    xlabel([a208,handles.unit,')'])
+                elseif handles.unit_type == 1;
+                    xlabel([a208,handles.unit,')'])
+                else
+                    xlabel([a208,handles.unit,')'])
+                end
+                ylabel(a209)
+                note = [main06,':',num2str(max(dt)),',','mean',': ',num2str(mean(dt)),...
+                    ',',lower(main40),': ',num2str(median(dt)),',',main05,': ',num2str(min(dt)),...
+                    ',',lower(main42),': ',num2str(var(dt))];
             end
-            ylabel('Number')
-            note = ['max: ',num2str(max(dt)),'; mean: ',num2str(mean(dt)),...
-                '; median: ',num2str(median(dt)),'; min: ',num2str(min(dt)),...
-                '; variance: ',num2str(var(dt))];
             legend(note)
             %text(mean(dt),len_t/10,note);
     end
@@ -4092,6 +5762,32 @@ function menu_datadistri_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_datadistri (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    
+    [~, locb1] = ismember('a210',lang_id);
+    a210 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a211',lang_id);
+    a211 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main02',lang_id);
+    main02 = handles.lang_var{locb1};
+    
+    [~, locb1] = ismember('menu46',lang_id);
+    menu46 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main06',lang_id);
+    main06 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main05',lang_id);
+    main05 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main40',lang_id);
+    main40 = handles.lang_var{locb1};
+    [~, locb1] = ismember('dd40',lang_id);
+    dd40 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main42',lang_id);
+    main42 = handles.lang_var{locb1};
+end
+
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = handles.index_selected;  % read selection in listbox 1
 nplot = length(plot_selected);   % length
@@ -4130,19 +5826,30 @@ if check == 1;
 
             datax = data_filterout(:,2);
             figure;
+            set(gcf,'Color', 'white')
             histfit(datax,[],'kernel')
-            set(gcf,'Name', 'Data Distribution','NumberTitle','off')
-            title([[dat_name,ext],': kernel fit of the data'], 'Interpreter', 'none')
-            xlabel('Data')
-            note = ['max: ',num2str(max(datax)),'; mean: ',num2str(mean(datax)),...
-                '; median: ',num2str(median(datax)),'; min: ',num2str(min(datax)),...
-                '; variance: ',num2str(var(datax))];
+            if handles.lang_choice == 0
+                set(gcf,'Name', 'Data Distribution','NumberTitle','off')
+                title([[dat_name,ext],': kernel fit of the data'], 'Interpreter', 'none')
+                xlabel('Data')
+                note = ['max: ',num2str(max(datax)),'; mean: ',num2str(mean(datax)),...
+                    '; median: ',num2str(median(datax)),'; min: ',num2str(min(datax)),...
+                    '; variance: ',num2str(var(datax))];
+            else
+                set(gcf,'Name', a210,'NumberTitle','off')
+                title([[dat_name,ext],a211], 'Interpreter', 'none')
+                xlabel(main02)
+                note = [main06,':',num2str(max(datax)),',','mean',': ',num2str(mean(datax)),...
+                    ',',lower(main40),': ',num2str(median(datax)),',',main05,': ',num2str(min(datax)),...
+                    ',',lower(main42),': ',num2str(var(datax))];
+            end
             legend(note)
+            ylabel('#')
     end
 end
 guidata(hObject,handles)
 
-
+            
 % --------------------------------------------------------------------
 function menu_pda_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_pda (see GCBO)
@@ -5108,6 +6815,20 @@ cd(pre_dirML); % return to matlab view folder
 
 
 % --------------------------------------------------------------------
+function menu_extinction_CSA_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_extinction_CSA (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+data_name = which('Example-CSA-extinction.txt');
+
+CDac_pwd
+copyfile(data_name,pwd);
+d = dir; %get files
+set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+refreshcolor;
+cd(pre_dirML); % return to matlab view folder
+
+% --------------------------------------------------------------------
 function menu_example_inso2Ma_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_example_inso2Ma (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -5303,7 +7024,15 @@ if nplot == 1
                     guidata(hObject, handles);
                     DataExtractML(handles);
                 catch
-                    warndlg('Image color space not supported. Convert to RGB or Grayscale')
+                    if handles.lang_choice == 0
+                        warndlg('Image color space not supported. Convert to RGB or Grayscale')
+                    else
+                        % language
+                        lang_var = handles.lang_var;
+                        [~, locb1] = ismember('dd24',handles.lang_id);
+                        dd24 = lang_var{locb1};
+                        warndlg(dd24)
+                    end
                 end
             end
         end
@@ -5613,3 +7342,14 @@ if nplot <= 2
     end
 end
 guidata(hObject, handles);
+
+
+
+% --------------------------------------------------------------------
+function menu_lang_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_lang (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+guidata(hObject, handles);
+languageGUI(handles)

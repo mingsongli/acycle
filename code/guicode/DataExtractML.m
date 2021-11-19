@@ -64,7 +64,7 @@ h=get(gcf,'Children');  % get all content
 handles.output = hObject;
 handles.DataExtractMain = gcf;
 set(handles.DataExtractMain,'position',[0.02,0.85,0.5,0.11]* handles.MonZoom) % set position
-set(gcf,'Name','Acycle: Plot Digitizer')
+
 handles.x00 = 0;
 handles.x01 = 1;
 handles.x02 = 2; % 1 = linear; 0 = log
@@ -88,8 +88,83 @@ handles.acfigmain = varargin{1}.acfigmain;
 handles.listbox_acmain = varargin{1}.listbox_acmain;
 handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
 
-hwarn = warndlg('Wait, large image can be very slow');
+% language
+lang_choice = varargin{1}.lang_choice;
+lang_id = varargin{1}.lang_id;
+lang_var = varargin{1}.lang_var;
+
+if lang_choice>0
+    %
+    [~, locb] = ismember('dd00',lang_id);
+    set(gcf,'Name',lang_var{locb})
+    %
+    [~, locb1] = ismember('dd01',lang_id);
+    dd01 = lang_var{locb1};
+    [~, locb1] = ismember('dd02',lang_id);
+    dd02 = lang_var{locb1};
+    [~, locb1] = ismember('dd04',lang_id);
+    dd04 = lang_var{locb1};
+    [~, locb1] = ismember('dd22',lang_id);
+    dd22 = lang_var{locb1};
+    [~, locb1] = ismember('dd14',lang_id);
+    set(handles.uipanel3,'title',lang_var{locb1})
+    [~, locb1] = ismember('dd15',lang_id);
+    set(handles.uipanel2,'title',lang_var{locb1})
+    [~, locb1] = ismember('dd16',lang_id);
+    set(handles.text8,'string',lang_var{locb1})
+    set(handles.text6,'string',lang_var{locb1})
+    [~, locb1] = ismember('dd17',lang_id);
+    set(handles.text9,'string',lang_var{locb1})
+    set(handles.text7,'string',lang_var{locb1})
+    [~, locb1] = ismember('dd18',lang_id);
+    set(handles.text5,'string',lang_var{locb1})
+    [~, locb1] = ismember('dd19',lang_id);
+    set(handles.PushDigitize,'string',lang_var{locb1})
+    [~, locb1] = ismember('dd20',lang_id);
+    set(handles.push_grid,'string',lang_var{locb1})
+    [~, locb1] = ismember('dd21',lang_id);
+    set(handles.push_auto,'string',lang_var{locb1})
+    [~, locb1] = ismember('main03',lang_id);
+    set(handles.radiobutton1,'string',lang_var{locb1})
+    set(handles.radiobutton3,'string',lang_var{locb1})
+    [~, locb1] = ismember('main04',lang_id);
+    set(handles.radiobutton2,'string',lang_var{locb1})
+    set(handles.radiobutton4,'string',lang_var{locb1})
+    %
+    set(handles.push_calibrate,'string',dd04)
+    [~, locb1] = ismember('dd19',lang_id);
+    set(handles.PushDigitize,'string',lang_var{locb1})
+    [~, locb1] = ismember('dd21',lang_id);
+    set(handles.push_auto,'string',lang_var{locb1})
+    [~, locb1] = ismember('main19',lang_id);
+    set(handles.push_undo,'string',lang_var{locb1})
+    [~, locb1] = ismember('dd20',lang_id);
+    set(handles.push_grid,'string',lang_var{locb1})
+    [~, locb1] = ismember('main01',lang_id);
+    set(handles.pushsave,'string',lang_var{locb1})
+    
+else
+    set(gcf,'Name','Acycle: Plot Digitizer')
+end
+
+% language
+handles.lang_choice = lang_choice;
+handles.lang_id = lang_id;
+handles.lang_var = lang_var;
+
+
+if lang_choice==0
+    hwarn = warndlg('Wait, large image can be very slow');
+else
+    hwarn = warndlg(dd01);
+end
 handles.DataExtractFig = figure;
+if lang_choice==0
+    set(gcf,'Name','Acycle: Original figure')
+else
+    set(gcf,'Name',dd22)
+end
+
 lastwarn('') % Clear last warning message
 imshow(handles.figname);
 [warnMsg, warnId] = lastwarn;
@@ -109,16 +184,16 @@ set(handles.text5,'position',[0.018,0.03,0.687,0.129])
 set(handles.uipanel2,'position',[0.354,0.208,0.344,0.723])
 set(handles.text6,'position',[0.028,0.692,0.274,0.2])
 set(handles.text7,'position',[0.028,0.197,0.274,0.2])
-set(handles.edit3,'position',[0.306,0.615,0.282,0.338])
-set(handles.edit4,'position',[0.306,0.108,0.282,0.338])
+set(handles.edit3,'position',[0.306,0.615,0.282,0.338],'string','0')
+set(handles.edit4,'position',[0.306,0.108,0.282,0.338],'string','1')
 set(handles.radiobutton3,'position',[0.597,0.646,0.306,0.354])
 set(handles.radiobutton4,'position',[0.597,0.138,0.359,0.354])
 
 set(handles.uipanel3,'position',[0.007,0.208,0.344,0.723])
 set(handles.text8,'position',[0.028,0.692,0.274,0.2])
 set(handles.text9,'position',[0.028,0.197,0.274,0.2])
-set(handles.edit1,'position',[0.306,0.615,0.282,0.338])
-set(handles.edit2,'position',[0.306,0.108,0.282,0.338])
+set(handles.edit1,'position',[0.306,0.615,0.282,0.338],'string','0')
+set(handles.edit2,'position',[0.306,0.108,0.282,0.338],'string','1')
 set(handles.radiobutton1,'position',[0.597,0.646,0.306,0.354])
 set(handles.radiobutton2,'position',[0.597,0.138,0.359,0.354])
 
@@ -128,8 +203,11 @@ set(handles.push_auto,'position',[0.713,0.069,0.117,0.208])
 set(handles.push_undo,'position',[0.843,0.683,0.096,0.208])
 set(handles.push_grid,'position',[0.843,0.376,0.096,0.208])
 set(handles.pushsave,'position',[0.843,0.069,0.096,0.208])
-
-set(handles.text5, 'string', 'Input the values in EditBoxs. Click Calibrate axis to set axis!');
+if lang_choice==0
+    set(handles.text5, 'string', 'Input the values in EditBoxs. Click Calibrate axis to set axis!');
+else
+    set(handles.text5, 'string', dd02);
+end
 handles.warnMsg = warnMsg;
 guidata(hObject, handles);
 
@@ -153,13 +231,47 @@ function push_calibrate_Callback(hObject, eventdata, handles)
 % hObject    handle to push_calibrate (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+% language
+lang_choice = handles.lang_choice;
+lang_id = handles.lang_id;
+lang_var = handles.lang_var;
+if lang_choice>0
+    %
+    [~, locb1] = ismember('dd02',lang_id);
+    dd02 = lang_var{locb1};
+    [~, locb1] = ismember('dd03',lang_id);
+    dd03 = lang_var{locb1};
+    [~, locb1] = ismember('dd04',lang_id);
+    dd04 = lang_var{locb1};
+    [~, locb1] = ismember('dd05',lang_id);
+    dd05 = lang_var{locb1};
+    [~, locb1] = ismember('dd06',lang_id);
+    dd06 = lang_var{locb1};
+    [~, locb1] = ismember('dd07',lang_id);
+    dd07 = lang_var{locb1};
+    [~, locb1] = ismember('dd08',lang_id);
+    dd08 = lang_var{locb1};
+    [~, locb1] = ismember('dd09',lang_id);
+    dd09 = lang_var{locb1};
+    [~, locb1] = ismember('dd10',lang_id);
+    dd10 = lang_var{locb1};
+    
+    [~, locb1] = ismember('main29',lang_id);
+    main29 = lang_var{locb1};
+    
+end
+
 if handles.recalibrate == 1
-    choice = questdlg('You are going to Clear all points', ...
-	'Warning', 'Yes','No','No');
+    if lang_choice == 0
+        choice = questdlg('You are going to Clear all points', ...
+        'Warning', 'Yes','No','No');
+    else
+        choice = questdlg(dd03, main29, 'Yes','No','No');
+    end
     % Handle response
     switch choice
         case 'No'
-            recalibratePoint = 0;
             return
         case 'Yes'
             recalibratePoint = 1;
@@ -178,8 +290,13 @@ if handles.recalibrate == 1
         end
         set(gcf,'units','norm') % set location
         set(gcf,'position',[0.0,0.0,0.8,0.75]) % set position
-        set(handles.text5, 'string', 'Input the values in EditBoxs. Click Calibrate axis to set axis!');
-        set(handles.push_calibrate, 'string', 'Calibrate axis');
+        if lang_choice == 0
+            set(handles.text5, 'string', 'Input the values in EditBoxs. Click Calibrate axis to set axis!');
+            set(handles.push_calibrate, 'string', 'Calibrate axis');
+        else
+            set(handles.text5, 'string', dd02);
+            set(handles.push_calibrate, 'string', dd04);
+        end
         handles.recalibrate = 0;
         handles.tableData = cell(0);
         handles.i = 1;
@@ -190,7 +307,11 @@ if handles.recalibrate == 1
     end
 end
     % #1
-    set(handles.text5, 'string', 'Locate the X-Axis Start point !!!');
+    if lang_choice == 0
+        set(handles.text5, 'string', 'Locate the X-Axis Start point !!!');
+    else
+        set(handles.text5, 'string', dd05);
+    end
     figure(handles.DataExtractFig);
     try
         set(handles.DataExtractFig,'WindowButtonMotionFcn', @mouseMove);
@@ -202,7 +323,12 @@ end
     line(x00, y00, 'marker', '.', 'color', 'r', 'markersize', 20);
     % #2
     figure(handles.DataExtractMain);
-    set(handles.text5, 'string', 'Locate the X-Axis End point !!!');
+    if lang_choice == 0
+        set(handles.text5, 'string', 'Locate the X-Axis End point !!!');
+    else
+        set(handles.text5, 'string', dd06);
+    end
+    
     figure(handles.DataExtractFig);
     currPt = ginput(1);
     x01 = currPt(1, 1);
@@ -211,7 +337,12 @@ end
     line([x00, x01], [y00, y01], 'color', 'r');
     % #3
     figure(handles.DataExtractMain);
-    set(handles.text5, 'string', 'Locate the Y-Axis Start point !!!');
+    if lang_choice == 0
+        set(handles.text5, 'string', 'Locate the Y-Axis Start point !!!');
+    else
+        set(handles.text5, 'string', dd07);
+    end
+    
     figure(handles.DataExtractFig);
     currPt = ginput(1);
     x02 = currPt(1, 1);
@@ -219,15 +350,23 @@ end
     line(x02, y02, 'marker', '.', 'color', 'r', 'markersize', 20);
     % #4
     figure(handles.DataExtractMain);
-    set(handles.text5, 'string', 'Locate the Y-Axis End point !!!');
+    if lang_choice == 0
+        set(handles.text5, 'string', 'Locate the Y-Axis End point !!!');
+    else
+        set(handles.text5, 'string', dd08);
+    end
+    
     figure(handles.DataExtractFig);
     currPt = ginput(1);
     x03 = currPt(1, 1);
     y03 = currPt(1, 2);
     line(x03, y03, 'marker', '.', 'color', 'r', 'markersize', 20);
     line([x02, x03], [y02, y03], 'color', 'r');
-
-    set(handles.text5, 'string', 'Now Digitize the point, press RightButton to stop');
+    if lang_choice == 0
+        set(handles.text5, 'string', 'Now Digitize the point, press RightButton to stop');
+    else
+        set(handles.text5, 'string', dd09);
+    end
 
     handles.x00 = x00;
     handles.x01 = x01;
@@ -239,7 +378,11 @@ end
     handles.y03 = y03;
 %end
 if handles.recalibrate == 0
-    set(handles.push_calibrate, 'string', 'Recalibrate axis');
+    if lang_choice == 0
+        set(handles.push_calibrate, 'string', 'Recalibrate axis');
+    else
+        set(handles.push_calibrate, 'string', dd10);
+    end
     handles.recalibrate = 1;
 end
 guidata(hObject, handles);
@@ -250,6 +393,15 @@ function PushDigitize_Callback(hObject, eventdata, handles)
 % hObject    handle to PushDigitize (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+% language
+lang_choice = handles.lang_choice;
+lang_id = handles.lang_id;
+lang_var = handles.lang_var;
+if lang_choice>0
+    [~, locb1] = ismember('dd12',lang_id);
+    dd12 = lang_var{locb1};
+end
 
 x00 = handles.x00;
 x01 = handles.x01;
@@ -298,8 +450,12 @@ while con == 1
         tableDatai{i, 2} = x;
         tableDatai{i, 3} = y;
         set(gui1data.uitable1, 'data', tableData);
-        disp(['>>  data info: i = ',num2str(i), ', x = ', num2str(x), ', y = ',num2str(y)])
-        %plot(tableData{:, 2},tableData{:, 3},'r-');
+        if lang_choice==0
+            disp(['>>  data info: i = ',num2str(i), ', x = ', num2str(x), ', y = ',num2str(y)])
+        else
+            disp([dd12,num2str(i), ', x = ', num2str(x), ', y = ',num2str(y)])
+        end
+            %plot(tableData{:, 2},tableData{:, 3},'r-');
         i = i + 1;
         set(gcf,'Pointer','arrow');
     end
@@ -315,6 +471,16 @@ function push_undo_Callback(hObject, eventdata, handles)
 % hObject    handle to push_undo (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+% language
+lang_choice = handles.lang_choice;
+lang_id = handles.lang_id;
+lang_var = handles.lang_var;
+if lang_choice>0
+    [~, locb1] = ismember('dd09',lang_id);
+    dd09 = lang_var{locb1};
+end
+
 i = handles.i;
 if i > 1
     %i
@@ -325,12 +491,9 @@ if i > 1
     tableDatai = handles.tableDatai;
     tableDatai = tableDatai(1:i-1,:);
     
-    try figure(handles.DataExtractFig)
-        clf('reset')
+    try close(handles.DataExtractFig)
+
     catch
-        %handles.DataExtractFig = figure;
-        %imshow(handles.figname);
-        %clf('reset')
     end
     if ~isempty(handles.warnMsg)
         imscrollpanel_acDig(handles.figname);
@@ -338,6 +501,7 @@ if i > 1
     else
         handles.DataExtractFig = figure;
         imshow(handles.figname);
+        hold on
     end
     set(gcf,'units','norm') % set location
     set(gcf,'position',[0.0,0.0,0.8,0.75]) % set position
@@ -356,8 +520,11 @@ if i > 1
     line(x02, y02, 'marker', '.', 'color', 'r', 'markersize', 20);
     line(x03, y03, 'marker', '.', 'color', 'r', 'markersize', 20);
     line([x02, x03], [y02, y03], 'color', 'r');
-    set(handles.text5, 'string', 'Now Digitize the point, press RightButton to stop');
-    
+    if lang_choice>0
+        set(handles.text5, 'string', 'Now Digitize the point, press RightButton to stop');
+    else
+        set(handles.text5, 'string', dd09);
+    end
     hguiTable = findobj('Tag','DataExtractTable1');
     gui1data  = guidata(hguiTable(1));
 
@@ -574,6 +741,16 @@ function push_auto_Callback(hObject, eventdata, handles)
 % hObject    handle to push_auto (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+% language
+lang_choice = handles.lang_choice;
+lang_id = handles.lang_id;
+lang_var = handles.lang_var;
+if lang_choice>0
+    [~, locb1] = ismember('dd13',lang_id);
+    dd13 = lang_var{locb1};
+end
+
 I = imread(handles.figname);
 shreshn = 255/2; % color grayscale
 srsh = handles.srsh; % pixal
@@ -594,13 +771,14 @@ if ndims(I) == 3
     Ig01(Ig01==0)  = 1; % data
     Ig01(Ig01==255)  = 0; % bg
     Ig01 = double(Ig01);
-    hwarn1 = warndlg('Preparing image. Wait ...');
+    if lang_choice>0
+        hwarn1 = warndlg('Preparing image. Wait ...');
+    else
+        hwarn1 = warndlg(dd13);
+    end
     hwarnfig = gcf;
     [Y] = getPKS(Ig01,2);
     close(hwarnfig)
-    %fig1 = figure; pcolor(Y);set(gca,'Ydir','reverse')
-    %fig2 = figure; 
-    %figure(handles.DataExtractFig)
     shading interp
     % get data
     con = 1;

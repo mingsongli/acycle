@@ -59,7 +59,38 @@ handles.sortdata = varargin{1}.sortdata;
 
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
-set(gcf,'Name','Acycle: Astronomical Solutions')
+
+
+% language
+lang_choice = varargin{1}.lang_choice;
+if lang_choice>0
+    lang_id = varargin{1}.lang_id;
+    lang_var = varargin{1}.lang_var;
+    [~, locb] = ismember('b00',lang_id);
+    set(gcf,'Name',lang_var{locb})
+    [~, locb] = ismember('b01',lang_id);
+    set(handles.text2,'string',lang_var{locb})
+    [~, locb] = ismember('b02',lang_id);
+    set(handles.text3,'string',lang_var{locb})
+    [~, locb] = ismember('b03',lang_id);
+    set(handles.text4,'string',lang_var{locb})
+    [~, locb] = ismember('b04',lang_id);
+    set(handles.text5,'string',lang_var{locb})
+    [~, locb] = ismember('b05',lang_id);
+    set(handles.text6,'string',lang_var{locb})
+    [~, locb] = ismember('main00',lang_id);
+    set(handles.pushbutton1,'string',lang_var{locb})
+    [~, locb] = ismember('b07',lang_id);
+    set(handles.uipanel_ETP,'title',lang_var{locb})
+    [~, locb] = ismember('b08',lang_id);
+    set(handles.text13,'string',lang_var{locb})
+    [~, locb] = ismember('b09',lang_id);
+    set(handles.text14,'string',lang_var{locb})
+    [~, locb] = ismember('b10',lang_id);
+    set(handles.text15,'string',lang_var{locb})
+else
+    set(gcf,'Name','Acycle: Astronomical Solutions')
+end
 
 h=get(gcf,'Children');  % get all content
 h1=findobj(h,'FontUnits','norm');  % find all font units as points

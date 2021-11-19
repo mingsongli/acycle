@@ -64,7 +64,6 @@ handles.sortdata = varargin{1}.sortdata;
 % Choose default command line output for agescale
 handles.output = hObject;
 handles.cohgui = gcf;
-set(gcf,'Name','Acycle: Coherence & Phase Analysis')
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
 h=get(gcf,'Children');  % get all content
@@ -74,6 +73,55 @@ h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
 
 set(gcf,'position',[0.03,0.03,0.7,0.4]* handles.MonZoom) % set position
+
+% language
+lang_choice = varargin{1}.lang_choice;
+if lang_choice>0
+    lang_id = varargin{1}.lang_id;
+    lang_var = varargin{1}.lang_var;
+    [~, locb] = ismember('c30',lang_id);
+    set(gcf,'Name',lang_var{locb})
+    [~, locb] = ismember('main11',lang_id);
+    set(handles.text3,'string',lang_var{locb})
+    [~, locb] = ismember('c32',lang_id);
+    set(handles.text4,'string',lang_var{locb})
+    [~, locb] = ismember('c33',lang_id);
+    set(handles.text15,'string',lang_var{locb})
+    [~, locb1] = ismember('c34',lang_id);
+    [~, locb2] = ismember('c35',lang_id);
+    set(handles.popupmenu2,'string',{lang_var{locb1},lang_var{locb2}})
+    %set(handles.popupmenu2,'string',lang_var{locb})
+    [~, locb] = ismember('c36',lang_id);
+    set(handles.uibuttongroup1,'title',lang_var{locb})
+    [~, locb] = ismember('c37',lang_id);
+    set(handles.text1,'string',lang_var{locb})
+    %
+    [~, locb] = ismember('c38',lang_id);
+    set(handles.text11,'string',lang_var{locb})
+    [~, locb] = ismember('c39',lang_id);
+    set(handles.text7,'string',lang_var{locb})
+    [~, locb] = ismember('c40',lang_id);
+    set(handles.text8,'string',lang_var{locb})
+    [~, locb] = ismember('c41',lang_id);
+    set(handles.uibuttongroup2,'title',lang_var{locb})
+    [~, locb] = ismember('main14',lang_id);
+    set(handles.radiobutton1,'string',lang_var{locb})
+    [~, locb] = ismember('main15',lang_id);
+    set(handles.radiobutton2,'string',lang_var{locb})
+    [~, locb] = ismember('main16',lang_id);
+    set(handles.text12,'string',lang_var{locb})
+    [~, locb] = ismember('main17',lang_id);
+    set(handles.text13,'string',lang_var{locb})
+    [~, locb] = ismember('c46',lang_id);
+    set(handles.text14,'string',lang_var{locb})
+    [~, locb] = ismember('main01',lang_id);
+    set(handles.checkbox3,'string',lang_var{locb})
+    [~, locb] = ismember('c48',lang_id);
+    set(handles.pushbutton8,'string',lang_var{locb})
+else
+    set(gcf,'Name','Acycle: Coherence & Phase Analysis')
+end
+
 set(handles.pushbutton4,'position',[0.496,0.776,0.06,0.06]) % set position
 set(handles.pushbutton7,'position',[0.496,0.653,0.06,0.06]) % set position
 set(handles.pushbutton8,'position',[0.86,0.05,0.12,0.15]) % set position
@@ -91,7 +139,7 @@ set(handles.uibuttongroup1,'position',[0.016,0.037, 0.84,0.366]) % set position
 set(handles.text1,'position',[0.012,0.838, 0.089,0.15]) % set position
 set(handles.popupmenu1,'position',[0.111,0.726, 0.21,0.231]) % set position
 set(handles.text15,'position',[0.48,0.51, 0.09,0.05]) % set position
-set(handles.popupmenu2,'position',[0.469,0.45, 0.117,0.05]) % set position
+set(handles.popupmenu2,'position',[0.47,0.45, 0.11,0.05]) % set position
 set(handles.popupmenu2,'Value',1)
 
 set(handles.text11,'position',[0.012,0.573, 0.173,0.15]) % set position
@@ -111,7 +159,7 @@ set(handles.text12,'position',[0.119,0.295,0.339,0.211]) % set position
 set(handles.text13,'position',[0.119,0.105,0.339,0.211]) % set position
 set(handles.edit8,'position',[0.514,0.305,0.44,0.232]) % set position
 set(handles.edit9,'position',[0.514,0.042,0.44,0.232]) % set position
-set(handles.text14,'position',[0.576,0.91,0.089,0.14]) % set position
+set(handles.text14,'position',[0.576,0.9,0.089,0.12]) % set position
 set(handles.axes1,'position',[0.603,0.15,0.166,0.6]) % set position
 set(handles.axes2,'position',[0.814,0.15,0.166,0.6]) % set position
 set(handles.checkbox1,'position',[0.576,0.675,0.022,0.2]) % set position

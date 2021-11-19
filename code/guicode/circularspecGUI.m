@@ -69,7 +69,7 @@ set(h1,'FontUnits','points','FontSize',11.5);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
 set(handles.hmain,'position',[0.2,0.3,0.45,0.28] * handles.MonZoom) % set position
-set(gcf,'Name','Acycle: Circular spectral analysis')
+
 dat =varargin{1}.current_data;  % data
 handles.dat = dat;
 handles.unit = varargin{1}.unit; % unit
@@ -82,6 +82,57 @@ handles.data_name = varargin{1}.data_name; % save dataname
 handles.path_temp = varargin{1}.path_temp; % save path
 handles.listbox_acmain = varargin{1}.listbox_acmain; % save path
 handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
+
+% language
+lang_choice = varargin{1}.lang_choice;
+if lang_choice>0
+    lang_id = varargin{1}.lang_id;
+    lang_var = varargin{1}.lang_var;
+    [~, locb] = ismember('c00',lang_id);
+    set(gcf,'Name',lang_var{locb})
+    [~, locb] = ismember('main02',lang_id);
+    set(handles.text2,'string',lang_var{locb})
+    [~, locb] = ismember('c02',lang_id);
+    set(handles.uipanel1,'title',lang_var{locb})
+    [~, locb] = ismember('main03',lang_id);
+    set(handles.radiobutton1,'string',lang_var{locb})
+    [~, locb] = ismember('main04',lang_id);
+    set(handles.radiobutton2,'string',lang_var{locb})
+    [~, locb] = ismember('main05',lang_id);
+    set(handles.text4,'string',lang_var{locb})
+    [~, locb] = ismember('main06',lang_id);
+    set(handles.text5,'string',lang_var{locb})
+    [~, locb] = ismember('c07',lang_id);
+    set(handles.text6,'string',lang_var{locb})
+    %
+    [~, locb] = ismember('c08',lang_id);
+    tips1 = lang_var{locb};
+    [~, locb] = ismember('c09',lang_id);
+    tips2 = lang_var{locb};
+    [~, locb] = ismember('c10',lang_id);
+    tips3 = lang_var{locb};
+    [~, locb] = ismember('main07',lang_id);
+    set(handles.uipanel1,'title',lang_var{locb})
+    [~, locb] = ismember('main08',lang_id);
+    set(handles.text8,'string',lang_var{locb})
+    [~, locb] = ismember('c13',lang_id);
+    set(handles.radiobutton3,'string',lang_var{locb})
+    [~, locb] = ismember('c14',lang_id);
+    set(handles.radiobutton4,'string',lang_var{locb})
+    [~, locb] = ismember('c15',lang_id);
+    set(handles.uibuttongroup1,'title',lang_var{locb})
+    [~, locb] = ismember('c16',lang_id);
+    set(handles.noise_white,'string',lang_var{locb})
+    [~, locb] = ismember('c17',lang_id);
+    set(handles.noise_red,'string',lang_var{locb})
+    [~, locb] = ismember('main01',lang_id);
+    set(handles.checkbox1,'string',lang_var{locb})
+    [~, locb] = ismember('main09',lang_id);
+    set(handles.checkbox2,'string',lang_var{locb})
+else
+    set(gcf,'Name','Acycle: Circular spectral analysis')
+end
+
 %
 set(handles.text2,'position',[0.05,0.85,0.1,0.075])
 set(handles.text3,'position',[0.15,0.85,0.8,0.075])
@@ -114,7 +165,11 @@ set(handles.pushbutton1,'position',[0.83,0.055,0.12,0.23])
 [~, ncol] = size(dat);
 if ncol == 1
 else
-    msgbox('More than 2 columns detected. The first column data was used','Info')
+    if lang_choice==0
+        msgbox('More than 1 column detected. The first column data was used','Info')
+    else
+        msgbox(tips1,tips2)
+    end
     dat = dat(:,1); % 
     handles.dat = dat;
 end
@@ -130,8 +185,13 @@ handles.numsed = 100;
 handles.linLog = 2;
 
 sr = linspace(handles.sedmin,handles.sedmax,handles.numsed);
-sedinfo = ['test periods of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
-    ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' ', handles.unit];
+if lang_choice==0
+    sedinfo = ['test periods of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+        ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' ', handles.unit];
+else
+    sedinfo = [tips3,num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+        ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' ', handles.unit];
+end
 set(handles.text7,'String',sedinfo)
 set(handles.edit1,'string',num2str(handles.sedmin))
 set(handles.edit2,'string',num2str(handles.sedmax))
@@ -141,6 +201,11 @@ set(handles.radiobutton2,'value',0)
 
 [dat_dir,handles.filename,exten] = fileparts(handles.data_name);
 set(handles.text3,'string',handles.filename)
+
+% language
+handles.lang_choice = lang_choice;
+handles.lang_id = lang_id;
+handles.lang_var = lang_var;
 % Update handles structure
 guidata(hObject, handles);
 
@@ -168,10 +233,17 @@ if get(handles.radiobutton3,'Value') == 1
         disp('    white noise model')
         clmodel = 2;   % two models (monte carlo and theoretic)
     else
+                
         disp('    red noise model')
         clmodel = 3;  % 1 model; theoretic
         dlg_title = 'Robust AR(1)';
-        prompt = {'Median smoothing window: default 0.2=20%'};
+        if handles.lang_choice==0
+            prompt = {'Median smoothing window: default 0.2=20%'};
+        else
+            [~, locb] = ismember('c20',handles.lang_id);
+            lang_var = handles.lang_var;
+            prompt = {lang_var{locb}};
+        end
         num_lines = 1;
         defaultans = {num2str(0.2)};
         options.Resize='on';
