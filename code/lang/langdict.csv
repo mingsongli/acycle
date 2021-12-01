@@ -1,4 +1,4 @@
-﻿% ID,en,cn,
+% ID,en,cn,
 main00,OK,OK,common
 main01,Save data,保存数据,common
 main02,Data,数据,common
@@ -107,11 +107,11 @@ menu50,Insolation,日照量,Basic Series
 menu51,Astronomical Solution,天文解决方案,Basic Series
 menu52,Milankovitch Calculator,米兰科维奇计算器,Basic Series
 menu53,Signal/Noise Generator,信噪生成器,Basic Series
-menu54,LR04 Stack,LR04,Basic Series
+menu54,LR04 Stack,LR04栈,Basic Series
 menu55,Examples,实例,Basic Series
 menu56,Mauna Loa CO2 monthly mean,Mauna Loa站逐月平均CO2,Basic Series
 menu57,Insolation 0-2Ma 65N Jun22,6月22日北纬65°日照量0-2Ma,Basic Series
-menu58,La2004 0-2Ma ETP,La20040-2Ma ETP,Basic Series
+menu58,La2004 0-2Ma ETP,La2004 0-2Ma ETP,Basic Series
 menu59,Red Noise rho=0.7 2000 points,红噪音rho=0.7，2000点,Basic Series
 menu60,PETM Svalbard logFe,斯瓦尔巴德PETM logFe,Basic Series
 menu61,Late Triassic Newark Depth Rank,纽瓦克晚三叠深度序列,Basic Series
@@ -124,9 +124,9 @@ menu67,,,
 menu68,,,
 menu69,,,
 menu70,Sort/Unique/Delete-empty,排序/去重/删空值,Math
-menu71,Interpolation,重采样,Math
-menu72,Interpolation Series,序列重采样,Math
-menu73,Select Parts,选择部分,Math
+menu71,Interpolation,插值,Math
+menu72,Interpolation Series,序列插值,Math
+menu73,Select Parts,提取部分值,Math
 menu74,Merge Series,合并序列,Math
 menu75,Multiply Series,序列相乘,Math
 menu76,Add Gaps,增加间隔,Math
@@ -136,7 +136,7 @@ menu79,Clipping,剪裁,Math
 menu80,Changepoint,拐点,Math
 menu81,Standardize,标准化,Math
 menu82,Principal Component,主成分分析,Math
-menu83,Log-transform,log变换,Math
+menu83,Log-transform,对数变换,Math
 menu84,Derivative,导数,Math
 menu85,Simple Function,简单函数变换,Math
 menu86,Utilities,工具箱,Math
@@ -158,7 +158,7 @@ menu101,Smoothing,平滑,Timeseries
 menu102,Bootstrap,自抽样,Timeseries
 menu103,Moving Average,滑动平均,Timeseries
 menu104,Moving Gaussian,高斯平滑,Timeseries
-menu105,Moving Median,中值平滑,Timeseries
+menu105,Moving Median,滑动中值,Timeseries
 menu106,Pre-whitening,预白化,Timeseries
 menu107,Spectral Analysis,能谱分析,Timeseries
 menu108,Evolutionary Spectral Analysis,演化能谱分析,Timeseries
@@ -169,9 +169,9 @@ menu112,Lead/Lag Relationship,滞后性分析,Timeseries
 menu113,Filtering,滤波,Timeseries
 menu114,Dynamic Filtering,动态滤波,Timeseries
 menu115,Amplitude Modulation,振幅调制,Timeseries
-menu116,Build Age Model,建立年代模型,Timeseries
+menu116,Build Age Model,建立年龄模型,Timeseries
 menu117,Sedimentary Rate to Age Model,沉积速率转年龄模型,Timeseries
-menu118,Age Scale | Tuning,调谐,Timeseries
+menu118,Age Scale | Tuning,年龄尺度|调谐,Timeseries
 menu119,Stratigraphic Correlation,地层序列手动对比,Timeseries
 menu120,Power Decomposition Analysis,能量分解分析,Timeseries
 menu121,Sedimentary noise model,沉积噪音模型,Timeseries
@@ -194,7 +194,7 @@ menu137,,,
 menu138,,,
 menu139,,,
 menu140,What’s New,更新记录,Help
-menu141,Manuals,用户手册,Help
+menu141,Manuals,用户指南,Help
 menu142,Find Updates,发现新版,Help
 menu143,Copyright,版权声明,Help
 menu144,Contact,联系我们,Help
@@ -286,7 +286,7 @@ a91,End Age in ka (<= 5320):,终止年龄 ka (<= 5320):,LR04 Stack
 a92,LR04 stack: Plio-Pleistocene d18O_ben),LR04 堆栈: 底栖有孔虫氧同位素,LR04 Stack
 a93,Time (ka),年龄 (千年),LR04 Stack
 a94,Global Benthic \delta^{18}O,全球底栖有孔虫 \delta^{18}O,LR04 Stack
-a95,LR04 Stack: ,LR04 堆栈 ：,LR04 Stack
+a95,LR04 Stack:,LR04 堆栈 ：,LR04 Stack
 a96,,,
 a97,,,
 a98,,,
@@ -335,7 +335,7 @@ a140,"sig_0, pseudo data variance (maybe halved)","sig_0, 假数据的方差 (�
 a141,"n, number of sampled solutions","n, 取样方案的数目",Changepoint
 a142,"Save data? (1 = yes, 0 = no)","保存结果? (1 = 是, 0 = 否)",Changepoint
 a143,"Large dataset, wait...",大数据，请稍后,Changepoint
-a144, Bayesian change points output saved. R_2 is ,贝叶斯拐点结果已保存。R2值为 ,Changepoint
+a144,Bayesian change points output saved. R_2 is,贝叶斯拐点结果已保存。R2值为,Changepoint
 a145,,,
 a146,This is not a RGB image,这不是一个RGB图像,AC: image
 a147,": Press ""SHIFT""or""ALT"" & select cursors now",：按住SHIFT或ALT键且点击图片选择光标点,AC: image
@@ -377,7 +377,7 @@ a182,Select 1 data only,只能选择1个数据文件,
 a183,Sampling rate (Default = 95% percentile),设定采样率（默认=95%分位数）,
 a184,Evolutionary RHO in AR(1),演化AR(1)的RHO,
 a185,RHO in AR(1),AR(1)的RHO,
-a186,>>  Save rho1    : ,>>  保存 rho1    : ,
+a186,>>  Save rho1    :,>>  保存 rho1    :,
 a187,Monte Carlo simulations,蒙特卡洛模拟,
 a188,Window ranges from,窗口范围从,
 a189,Window ranges to,窗口范围至,
@@ -388,8 +388,8 @@ a193,Plot: shift grids (Default = 15; no shift = 1),投图：随机投放网格�
 a194,Monte Carlo Simulation of eRHO in AR(1),演化AR(1)的RHO蒙特卡洛模拟,
 a195,Noise estimation - rho1: Monte Carlo processing ...,噪音rho1模型: 蒙特卡洛模拟中,
 a196,Simulation step = ,模拟进度：,
-a197,>>  Save rho1 median    : ,>>  保存 rho1的均值    : ,
-a198,>>  Save rho1 percentile: ,>>  保存 rho1的分位数: ,
+a197,>>  Save rho1 median    :,>>  保存 rho1的均值    :,
+a198,>>  Save rho1 percentile:,>>  保存 rho1的分位数:,
 a199,"Number simulations is too few, try 1000",蒙特卡洛模拟次数太小，试试1000,
 a200,,,
 a201,Type name of the folder,输入文件夹名称,
@@ -714,7 +714,7 @@ ec29,"Unit is dm, now changes to cm",单位是分米，现在切换为厘米,
 ec30,"Unit is mm, now changes to cm",单位是毫米，现在切换为厘米,
 ec31,"Unit is km, now changes to cm",单位是千米，现在切换为厘米,
 ec32,"Unit is ft, now changes to cm",单位是英尺，现在切换为厘米,
-ec33, test sed. rates: ,测试的沉积速率,
+ec33, test sed. rates: ,个测试的沉积速率,
 ec34,Check parameters in BLUE\nclick OK to run eTimeOpt,检查蓝色字体的设置\n点击OK键运行,
 ec35,raw periodogram (& red noise),原始周期图（红噪音）,
 ec36,red noise removed ?,红噪音移除？,

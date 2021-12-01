@@ -142,6 +142,7 @@ set(handles.pushbutton4,'position',[0.82,0.083,0.15,0.229]) %
 
 % language
 lang_choice = varargin{1}.lang_choice;
+handles.lang_choice = lang_choice;
 if lang_choice>0
     lang_id = varargin{1}.lang_id;
     lang_var = varargin{1}.lang_var;
@@ -226,6 +227,8 @@ if lang_choice>0
     set(handles.text17,'string',lang_var{locb})
     [~, locb] = ismember('ec23',lang_id);
     set(handles.pushbutton2,'string',lang_var{locb})
+    [~, locb] = ismember('ec67',lang_id);
+    set(handles.pushbutton3,'string',lang_var{locb})
     %
     [~, locb] = ismember('ec24',lang_id);
     ec24 = lang_var{locb};
@@ -559,12 +562,12 @@ xlim([0 max(f)])
 
 handles.fmaxdata = max(f);
 set(handles.edit4, 'String', num2str(max(f)))
-
-% language
-handles.lang_choice = lang_choice;
-handles.lang_id = lang_id;
-handles.lang_var = lang_var;
-
+if lang_choice>0
+    % language
+    handles.lang_choice = lang_choice;
+    handles.lang_id = lang_id;
+    handles.lang_var = lang_var;
+end
 % Update handles structure
 guidata(hObject, handles);
 
@@ -599,7 +602,16 @@ function radiobutton1_Callback(hObject, eventdata, handles)
 % Hint: get(hObject,'Value') returns toggle state of radiobutton1
 if get(hObject,'Value')
     set(handles.radiobutton2,'Value',0)
-    set(handles.checkbox6,'String','0 padding')
+    
+    if handles.lang_choice==0
+        set(handles.checkbox6,'String','0 padding')
+    else
+        [~, locb1] = ismember('ec08',handles.lang_id);
+        lang_var = handles.lang_var;
+        set(handles.checkbox6,'String',lang_var{locb1})
+    end   
+    
+    
     % adjust padding
     % set zeropadding
     if handles.npts <= 2500
@@ -632,7 +644,14 @@ function radiobutton2_Callback(hObject, eventdata, handles)
 % Hint: get(hObject,'Value') returns toggle state of radiobutton2
 if get(hObject,'Value')
     set(handles.radiobutton1,'Value',0)
-    set(handles.checkbox6,'String','0 padding')
+    
+    if handles.lang_choice==0
+        set(handles.checkbox6,'String','0 padding')
+    else
+        [~, locb1] = ismember('ec08',handles.lang_id);
+        lang_var = handles.lang_var;
+        set(handles.checkbox6,'String',lang_var{locb1})
+    end   
     nptsi = round(handles.window/handles.dt*100);
     % adjust padding
     % set zeropadding
