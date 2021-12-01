@@ -74,7 +74,7 @@ function varargout = AC(varargin)
 
 % Edit the above text to modify the response to help AC
 
-% Last Modified by GUIDE v2.5 07-Nov-2021 10:37:13
+% Last Modified by GUIDE v2.5 02-Dec-2021 01:20:29
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -128,7 +128,7 @@ end
 
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'position',[0.5,0.1,0.45,0.8] * handles.MonZoom) % set position
-set(gcf,'Name','Acycle v2.4')
+set(gcf,'Name','Acycle v2.4.1')
 set(gcf,'DockControls', 'off')
 set(gcf,'Color', 'white')
 set(gcf,'units','norm') % set location
@@ -5609,6 +5609,37 @@ if nplot <= 2
                 guidata(hObject, handles);
                 waveletGUI(handles);
             end
+        end
+    end
+end
+guidata(hObject, handles);
+
+
+% --------------------------------------------------------------------
+function menu_interpolationGUI_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_interpolationGUI (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox_acmain,'Value');
+nplot = length(plot_selected);   % length
+if nplot <= 1
+    data_name = char(contents(plot_selected));
+    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; 
+    data_name = fullfile(ac_pwd,data_name);
+    if isdir(data_name) == 1
+    else
+        [~,dat_name,ext] = fileparts(data_name);
+        if sum(strcmp(ext,handles.filetype)) > 0
+            current_data = load(data_name);
+            handles.current_data = current_data;
+            handles.data_name = data_name;
+            handles.dat_name = dat_name;
+            handles.ext = ext;
+            guidata(hObject, handles);
+            interpolationGUI(handles);
         end
     end
 end
