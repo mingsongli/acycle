@@ -122,7 +122,7 @@ if handles.wavehastorerun
     dof = n - scale;  % the -scale corrects for padding at edges
     global_signif = wave_signif(variance,dt,scale,1,lag1,-1,dof,mother,param);
     
-    if method_sel == 1
+    if method_sel <3
         % Rectification of the bias in the Wavelet power spectrum with the data set
         % (Nino3.dat) given by Torrence and Compo (1998).  This code is modified
         % from wavetest.m, the example script provided by Torrence and Compo
