@@ -5601,14 +5601,13 @@ if nplot <= 2
         data_name = [data_name1;data_name2];
         if or(isdir(data_name1) == 1,  isdir(data_name1) == 1)
         else
-            [~,~,ext] = fileparts(data_name1);
-            if sum(strcmp(ext,handles.filetype)) > 0
-                current_data = load(data_name1);
-                handles.current_data = current_data;
+            %[~,~,ext] = fileparts(data_name1);
+            %if sum(strcmp(ext,handles.filetype)) > 0
+                disp('debug')
                 handles.data_name = data_name;
                 guidata(hObject, handles);
                 waveletGUI(handles);
-            end
+            %end
         end
     end
 end

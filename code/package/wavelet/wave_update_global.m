@@ -10,15 +10,17 @@
 %   Nov 11, 2021
 
 %--- Plot global wavelet spectrum
-hold on
+
 if plot_linelog
     plot(global_ws,period)
-    plot(global_signif,period,'--')
+    hold on
+    %plot(global_signif,period,'--')
     set(gca,'YLim',[pt1,pt2], ...
         'YTickLabel','')
 else
     plot(global_ws,log2(period))
-    plot(global_signif,log2(period),'--')
+    hold on
+    %plot(global_signif,log2(period),'--')
     set(gca,'YLim',log2([pt1,pt2]), ...
         'YDir','reverse', ...
         'YTick',log2(Yticks(:)), ...

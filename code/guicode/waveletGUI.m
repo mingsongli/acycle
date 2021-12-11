@@ -22,7 +22,7 @@ function varargout = waveletGUI(varargin)
 
 % Edit the above text to modify the response to help waveletGUI
 
-% Last Modified by GUIDE v2.5 17-Nov-2021 00:05:51
+% Last Modified by GUIDE v2.5 12-Dec-2021 00:16:20
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -91,24 +91,29 @@ set(handles.text7,'position',[0.06,0.75,0.2,0.15])
 set(handles.popupmenu1,'position',[0.28,0.65,0.68,0.2])
 set(handles.text8,'position',[0.06,0.45,0.2,0.15])
 set(handles.popupmenu2,'position',[0.28,0.35,0.68,0.2])
-set(handles.text11,'position',[0.06,0.15,0.2,0.15])
+set(handles.text11,'position',[0.06,0.12,0.2,0.15])
 set(handles.edit7,'position',[0.28,0.1,0.1,0.2])
+set(handles.text13,'position',[0.4,0.12,0.2,0.15])  % MC for wavelet coherence
+set(handles.edit11,'position',[0.6,0.1,0.1,0.2])
 
 set(handles.uipanel2,'position',[0.02,0.02,0.78,0.36])
 set(handles.checkbox2,'position',[0.02,0.75,0.2,0.2])
 set(handles.checkbox3,'position',[0.02,0.5,0.2,0.2])
+set(handles.edit10,'position',[0.22,0.5,0.05,0.2])
 set(handles.checkbox8,'position',[0.02,0.25,0.2,0.2])
-set(handles.checkbox10,'position',[0.02,0.02,0.2,0.2])
+set(handles.checkbox10,'position',[0.02,0.02,0.12,0.2])
+set(handles.edit9,'position',[0.125,0.02,0.04,0.2])
+set(handles.checkbox12,'position',[0.17,0.02,0.08,0.2],'value',0)
 
-set(handles.checkbox4,'position',[0.25,0.75,0.2,0.2])
-set(handles.checkbox5,'position',[0.25,0.5,0.2,0.2])
-set(handles.checkbox6,'position',[0.25,0.25,0.2,0.2])
-set(handles.checkbox9,'position',[0.25,0.05,0.2,0.2])
+set(handles.checkbox4,'position',[0.3,0.75,0.2,0.2])
+set(handles.checkbox5,'position',[0.3,0.5,0.2,0.2])
+set(handles.checkbox6,'position',[0.3,0.25,0.2,0.2])
+set(handles.checkbox9,'position',[0.3,0.05,0.2,0.2])
 
 set(handles.text9,'position',[0.5,0.75,0.1,0.15])
-set(handles.popupmenu3,'position',[0.62,0.73,0.2,0.2])
+set(handles.popupmenu3,'position',[0.62,0.72,0.2,0.2])
 set(handles.text10,'position',[0.5,0.55,0.1,0.15])
-set(handles.edit6,'position',[0.62,0.55,0.2,0.15])
+set(handles.edit6,'position',[0.62,0.55,0.07,0.15])
 
 set(handles.text12,'position',[0.5,0.35,0.1,0.15])
 set(handles.edit8,'position',[0.62,0.35,0.32,0.15])
@@ -122,14 +127,12 @@ set(handles.checkbox7,'position',[0.03,0.6,0.95,0.2])
 set(handles.pushbutton2,'position',[0.2,0.1,0.6,0.4])
 
 % read selected file
-
-data = varargin{1}.current_data;
 handles.unit = varargin{1}.unit;
 handles.unit_type = varargin{1}.unit_type;
-handles.current_data = data;
 handles.data_name = varargin{1}.data_name;
 data_name = handles.data_name;
 [lengthdata,~] = size(data_name);
+
 handles.path_temp = varargin{1}.path_temp;
 handles.listbox_acmain = varargin{1}.listbox_acmain; % save path
 handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
@@ -137,23 +140,34 @@ handles.lengthdata = lengthdata;
 handles.wavehastorerun = 1;
 handles.switchdata = 0;
 
+set(handles.edit9,'string','2')
+
 if lengthdata == 1
     % wavelet
     set(gcf,'Name','Acycle: Wavelet')
+    
+    data = varargin{1}.current_data;
+    handles.current_data = data;
     [dat_dir,handles.filename1,exten] = fileparts(data_name);
     
     set(handles.text3,'enable','off')
     set(handles.edit2,'enable','off')
     set(handles.pushbutton1,'visible','off')
     set(handles.edit1,'string',[handles.filename1,exten])
-    set(handles.text6,'string','Discrete scale spacing')
     set(handles.edit5,'string','0.1')
     set(handles.popupmenu1, 'Value', 1);
     set(handles.popupmenu2,'enable','on')
     set(handles.edit7,'enable','on')
+    set(handles.edit10,'visible','off')
     set(handles.checkbox1,'Value',1,'enable','on')
     set(handles.checkbox3,'Value',0,'enable','on','string','plot spectrum')
     set(handles.checkbox9,'Value',1,'enable','on')
+    set(handles.checkbox10,'Value',0,'enable','on')
+    method_list = {'Wavelet';'Continous Wavelet Transform';'Wavelet (Torrence & Compo, 1998)'};
+    set(handles.popupmenu1,'Value',1,'enable','on','string',method_list)
+    
+    set(handles.text13,'Visible','off')
+    set(handles.edit11,'Visible','off')
 else
     % wcoherence
     set(gcf,'Name','Acycle: Wavelet coherence and cross-spectrum')
@@ -166,23 +180,29 @@ else
     set(handles.edit2,'string',[handles.filename2,handles.exten])
     set(handles.popupmenu1, 'Value', 3);
     set(handles.popupmenu2,'enable','off')
-    set(handles.edit7,'enable','off')
-    set(handles.text6,'string','Phase threshold')
-    set(handles.edit5,'string','0.7')
-    set(handles.checkbox1,'Value',0,'enable','off')
+    set(handles.edit7,'enable','on')
+    set(handles.edit5,'string','0.1')
+    set(handles.edit10,'visible','on')
+    set(handles.checkbox1,'Value',1,'enable','on')
     %set(handles.checkbox3,'Value',0,'enable','off','string','cross-spectrum')
-    set(handles.checkbox3,'Value',0,'enable','on','string','cross-spectrum')
-    set(handles.checkbox9,'Value',0,'enable','off')
+    set(handles.checkbox3,'Value',0,'enable','on','string','phase, wtc threshold')
+    set(handles.checkbox9,'Value',1,'enable','on')
+    set(handles.checkbox10,'Value',0,'enable','off')
+    set(handles.checkbox12,'Value',0,'enable','off')
+    set(handles.edit9,'enable','off')
+    method_list = {'Wavelet coherence (MatLab)';'Wavelet Coherence (Grinsted2014)'};
+    set(handles.popupmenu1,'Value',2,'enable','on','string',method_list)
+    
+    set(handles.text13,'Visible','on')
+    set(handles.edit11,'Visible','on')
 end
 
 
-time = data(:,1);
-timelen = (time(end)-time(1));
-Dti = diff(time);
-dt = mean(Dti);
-
-
 if lengthdata == 1
+    time = data(:,1);
+    timelen = (time(end)-time(1));
+    Dti = diff(time);
+    dt = mean(Dti);
     if max(Dti) - min(Dti) > 10 * eps('single')
         f = warndlg('Interpolation needed. Mean sampling rate was used.','Warning');
         
@@ -195,33 +215,34 @@ else
     s2 = data_name(1,:);
     s2(s2 == ' ') = [];
     dat1 = load(s2);
+    dat1 = sortrows(dat1);
+
     s2 = data_name(2,:);
     s2(s2 == ' ') = [];
     dat2 = load(s2);
+    dat2 = sortrows(dat2);
+
+    xmin = max( min(dat1(:,1), min(dat2(:,1))));
+    xmax = min( max(dat1(:,1), max(dat2(:,1))));
+    dat1 = select_interval(dat1,xmin,xmax);
     
     Dti1 = diff(dat1(:,1));
-    Dti2 = diff(dat2(:,1));
+    dt = mean(Dti1);
     
     if max(Dti1) - min(Dti1) > 10 * eps('single')
-        if max(Dti2) - min(Dti2) > 10 * eps('single')
-            f = warndlg('Series 1 AND 2: Interpolation needed?','Warning');
-        else
-            f = warndlg('Series 1: Interpolation needed?','Warning');
-        end
-    else
-        if max(Dti2) - min(Dti2) > 10 * eps('single')
-            f = warndlg('Series 2: Interpolation needed?','Warning');
-        else
-            if length(Dti1) == length(Dti2)
-                if dat1(1,1) - dat2(1,1) > 100 * eps('single')
-                    f3 = warndlg('Starting point of the series must be the same. Try <Interpolate Series>','Warning');
-                end
-            else
-                f2 = warndlg('Series length must be equal','Warning');
-            end
-        end
+        f = warndlg('Series 1: Interpolation needed! Done!','Warning');
+        [dat1]=interpolate(dat1,dt);
     end
-   
+    if isequal(dat1(:,1),dat2(:,1))
+        
+    else
+        f2 = warndlg('Time ranges are not equal. Inerpolation series applied.','Warning');
+        dat2int2 = interp1(dat2(:,1),dat2(:,2),dat1(:,1));
+        dat2  = [dat1(:,1),dat2int2];
+    end
+    data = dat1;
+    time = data(:,1);
+    timelen = (time(end)-time(1));
 end
 
 % ticks
@@ -229,15 +250,26 @@ Yticks_default = 2.^(fix(log2(2*dt)):fix(log2(timelen)));
 Yticks = mat2str(Yticks_default);
 Yticks(1)= [];
 Yticks(length(Yticks))=[];
-set(handles.edit3,'string',num2str(  2^floor(log2(2*dt)) ))
-set(handles.edit4,'string',num2str( 2^fix(log2(timelen)) ))
-%set(handles.edit4,'string',num2str( 3/8 * abs(data(1,1)-data(end,1)) ))
-set(handles.popupmenu1,'value',1,'enable','off')
+% init period
+datax = data(:,1);
+datay = data(:,2);
+dt = mean(diff(datax));
+s0 = 2*dt;    %
+pt2 = 2^fix(log2(timelen));
+dss = 0.1;
+j1 = round(log2(pt2))/dss; % end
+pad = 1;
+mother = 'MORLET';
+param = 6;
+
+[~,period,~,coi] = wavelet(datay,dt,pad,dss,s0,j1,mother,param);
+set(handles.edit3,'string',num2str(  min(period) ))
+set(handles.edit4,'string',num2str(  max(coi) ))
 set(handles.popupmenu2,'value',1)
 set(handles.checkbox2,'value',1)
 set(handles.checkbox8,'value',1)
 set(handles.checkbox4,'value',0)
-set(handles.checkbox5,'value',1)
+set(handles.checkbox5,'value',0)
 set(handles.checkbox6,'value',0)
 set(handles.checkbox7,'value',0)
 set(handles.checkbox10,'value',0)
@@ -256,6 +288,19 @@ set(handles.popupmenu3,'value',1)
 set(handles.checkbox11,'value',0)
 % Choose default command line output for waveletGUI
 handles.output = hObject;
+
+if handles.lengthdata == 1
+    % read gui settings
+    wave_readGUI
+    % update all panels
+    wave_update_plots
+    
+else
+    % coherence
+    wavecoh_readGUI
+    % update plot
+    wavecoh_update_plots
+end
 
 % Update handles structure
 guidata(hObject, handles);
@@ -307,7 +352,7 @@ function pushbutton2_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton2 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+handles.wavehastorerun = 1;
 if handles.lengthdata == 1
     
     % read gui settings
@@ -413,6 +458,7 @@ function checkbox2_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox2
+handles.wavehastorerun = 0;
 if handles.lengthdata == 1
     
     % read gui settings
@@ -435,6 +481,7 @@ function checkbox3_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox3
+handles.wavehastorerun = 0;
 if handles.lengthdata == 1
     
     % read gui settings
@@ -443,11 +490,10 @@ if handles.lengthdata == 1
     wave_update_plots
     
 else
-    handles.wavehastorerun = 1;
     if get(hObject,'Value')
         set(handles.radiobutton1,'enable','off','value',0)
         set(handles.radiobutton2,'enable','off','value',1)
-        set(handles.checkbox8,'enable','off')
+        set(handles.checkbox8,'enable','on')
         set(handles.edit5,'enable','on')
         set(handles.checkbox8,'value',1)
         % coherence
@@ -459,7 +505,7 @@ else
         set(handles.radiobutton1,'enable','on','value',0)
         set(handles.radiobutton2,'enable','on','value',1)
         set(handles.checkbox8,'enable','on')
-        set(handles.edit5,'enable','off')
+        set(handles.edit5,'enable','on')
         try figure(handles.figwave)
             clf
         end
@@ -480,6 +526,7 @@ function checkbox4_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox4
+handles.wavehastorerun = 0;
 if handles.lengthdata == 1
     
     % read gui settings
@@ -502,6 +549,7 @@ function checkbox5_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox5
+handles.wavehastorerun = 0;
 if handles.lengthdata == 1
     
     % read gui settings
@@ -524,6 +572,7 @@ function checkbox6_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox6
+handles.wavehastorerun = 0;
 if handles.lengthdata == 1
     
     % read gui settings
@@ -551,6 +600,7 @@ if get(hObject,'Value')
 else
     set(handles.radiobutton4,'value',1)
 end
+handles.wavehastorerun = 0;
 if handles.lengthdata == 1
     
     % read gui settings
@@ -578,6 +628,7 @@ if get(hObject,'Value')
 else
     set(handles.radiobutton3,'value',1)
 end
+handles.wavehastorerun = 0;
 if handles.lengthdata == 1
     
     % read gui settings
@@ -601,6 +652,7 @@ function popupmenu3_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns popupmenu3 contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupmenu3
+handles.wavehastorerun = 0;
 if handles.lengthdata == 1
     
     % read gui settings
@@ -637,6 +689,7 @@ function edit6_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit6 as text
 %        str2double(get(hObject,'String')) returns contents of edit6 as a double
+handles.wavehastorerun = 0;
 if handles.lengthdata == 1
     
     % read gui settings
@@ -673,7 +726,43 @@ function popupmenu1_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns popupmenu1 contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupmenu1
+handles.wavehastorerun = 1;
 
+if handles.lengthdata == 1
+    
+    if get(hObject,'Value') == 2
+        set(handles.edit5,'string',num2str(1/12))
+    else
+        set(handles.edit5,'string',num2str(0.1))
+    end
+
+    % read gui settings
+    wave_readGUI
+    % update all panels
+    wave_update_plots
+    
+else
+    
+    if get(hObject,'Value') == 2
+        set(handles.edit5,'string',num2str(1/12))
+        set(handles.checkbox9,'Value',1,'enable','on')
+        set(handles.text13,'Visible','on')
+        set(handles.edit11,'Visible','on')
+        set(gcf,'Name','Acycle: Wavelet coherence and cross-spectrum')
+    else
+        set(handles.edit5,'string',num2str(0.1))
+        set(handles.checkbox9,'Value',0,'enable','off')
+        set(handles.text13,'Visible','off')
+        set(handles.edit11,'Visible','off')
+        set(gcf,'Name','Acycle: Wavelet coherence')
+    end
+
+    % coherence
+    wavecoh_readGUI
+    % update plot
+    wavecoh_update_plots
+end
+guidata(hObject, handles);
 
 % --- Executes during object creation, after setting all properties.
 function popupmenu1_CreateFcn(hObject, eventdata, handles)
@@ -876,8 +965,9 @@ function checkbox8_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox8
+
+handles.wavehastorerun = 0;
 if handles.lengthdata == 1
-    
     % read gui settings
     wave_readGUI
     % update all panels
@@ -898,6 +988,7 @@ function checkbox9_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox9
+handles.wavehastorerun = 0;
 if handles.lengthdata == 1
     
     % read gui settings
@@ -957,6 +1048,8 @@ function checkbox10_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox10
+handles.wavehastorerun = 0;
+
 if handles.lengthdata == 1
     
     % read gui settings
@@ -1006,6 +1099,7 @@ function radiobutton1_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of radiobutton1
 
+handles.wavehastorerun = 0;
 if handles.lengthdata == 1
     
     % read gui settings
@@ -1030,6 +1124,7 @@ function radiobutton2_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of radiobutton2
 
+handles.wavehastorerun = 0;
 if handles.lengthdata == 1
     
     % read gui settings
@@ -1054,6 +1149,7 @@ function edit8_Callback(hObject, eventdata, handles)
 % Hints: get(hObject,'String') returns contents of edit8 as text
 %        str2double(get(hObject,'String')) returns contents of edit8 as a double
 
+handles.wavehastorerun = 0;
 if handles.lengthdata == 1
     
     % read gui settings
@@ -1095,3 +1191,147 @@ function figure1_SizeChangedFcn(hObject, eventdata, handles)
 % hObject    handle to figure1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+
+function edit9_Callback(hObject, eventdata, handles)
+% hObject    handle to edit9 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit9 as text
+%        str2double(get(hObject,'String')) returns contents of edit9 as a double
+handles.wavehastorerun = 0;
+if str2double(get(hObject,'String')) <= 1
+    set(hObject,'String','2')
+end
+
+if handles.lengthdata == 1
+    
+    % read gui settings
+    wave_readGUI
+    % update all panels
+    wave_update_plots
+    
+else
+    % coherence
+    wavecoh_readGUI
+    % update plot
+    wavecoh_update_plots
+end
+guidata(hObject, handles);
+
+% --- Executes during object creation, after setting all properties.
+function edit9_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit9 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in checkbox12.
+function checkbox12_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox12 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox12
+handles.wavehastorerun = 0;
+
+if handles.lengthdata == 1
+    
+    % read gui settings
+    wave_readGUI
+    % update all panels
+    wave_update_plots
+    
+else
+    % coherence
+    wavecoh_readGUI
+    % update plot
+    wavecoh_update_plots
+end
+guidata(hObject, handles);
+
+
+
+function edit10_Callback(hObject, eventdata, handles)
+% hObject    handle to edit10 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit10 as text
+%        str2double(get(hObject,'String')) returns contents of edit10 as a double
+
+handles.wavehastorerun = 1;
+
+if handles.lengthdata == 1
+    
+    % read gui settings
+    wave_readGUI
+    % update all panels
+    wave_update_plots
+    
+else
+    % coherence
+    wavecoh_readGUI
+    % update plot
+    wavecoh_update_plots
+end
+guidata(hObject, handles);
+
+% --- Executes during object creation, after setting all properties.
+function edit10_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit10 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit11_Callback(hObject, eventdata, handles)
+% hObject    handle to edit11 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit11 as text
+%        str2double(get(hObject,'String')) returns contents of edit11 as a double
+
+handles.wavehastorerun = 1;
+
+if handles.lengthdata == 1
+    
+    % read gui settings
+    wave_readGUI
+    % update all panels
+    wave_update_plots
+    
+else
+    % coherence
+    wavecoh_readGUI
+    % update plot
+    wavecoh_update_plots
+end
+guidata(hObject, handles);
+
+% --- Executes during object creation, after setting all properties.
+function edit11_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit11 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

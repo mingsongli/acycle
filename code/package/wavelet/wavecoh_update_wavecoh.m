@@ -1,4 +1,4 @@
-if plot_spectrum
+if plot_phase
     
     figure(handles.figwave)
     if plot_series == 1
@@ -16,7 +16,7 @@ if plot_spectrum
     end
     
     dt = mean(diff(datax));
-    wcoherence(dat1y,dat2y,seconds(dt),'PhaseDisplayThreshold',dss);
+    wcoherence(dat1y,dat2y,seconds(dt),'PhaseDisplayThreshold',wtcthreshold);
     colorbar('off')
     set(gca,'XMinorTick','on')
     set(gca,'TickDir','out');
@@ -58,7 +58,7 @@ if plot_spectrum
     end
     
     ylabel(['Period (',handles.unit,')'])
-    title('cross spectrum')
+    title('phase')
     
     if isempty(plot_colorgrid)
         try
@@ -154,6 +154,9 @@ else
             end
         else   % log y axis
             if plot_2d == 1
+                %tt=[datax([1 1])-dt*.5;datax;datax([end end])+dt*.5];
+                %hcoi=fill(tt,log2([period([end 1]) coi period([1 end])]),'w');
+                %set(hcoi,'alphadatamapping','direct','facealpha',.4)
                 plot(datax,log2(1./coi),'w--','LineWidth',2)
             elseif plot_2d == 0
                 if plot_log2pow
