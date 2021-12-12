@@ -13,10 +13,11 @@ if plot_series ==1
        % clf
     catch
         handles.figwave = figure;
-        set(gcf,'Name','Acycle: Wavelet coherence and cross-spectrum plot')
+        %set(gcf,'Name','Acycle: Wavelet coherence and cross-spectrum plot')
+        set(gcf,'Name','Acycle: Wavelet coherence plot')
         set(gcf,'units','norm') % set location
         set(gcf, 'color','white')
-
+        set(gcf,'position',[0.1,0.65,0.4,0.4]* handles.MonZoom)
     end
     
     % update panel A: time series  
@@ -83,7 +84,13 @@ if plot_series ==1
     else
         sub3 = subplot('position',[0.45 0.1 0.5 0.8]);
     end
-    wavecoh_update_wavecoh
+    % update wavelet coherence
+    if method_sel == 1
+        wavecoh_update_wavecoh
+    elseif method_sel == 2
+        wavecoh_update_wtc
+        wavecoh_update_xwt
+    end
     figure(handles.waveletGUIfig)
 
 %%
@@ -92,16 +99,24 @@ elseif plot_series == 0
     %    clf
     catch
         handles.figwave = figure;
-        set(gcf,'Name','Acycle: wavelet plot')
+        set(gcf,'Name','Acycle: Wavelet coherence plot')
         set(gcf,'units','norm') % set location
         set(gcf, 'color','white')
+        set(gcf,'position',[0.1,0.65,0.4,0.4]* handles.MonZoom)
     end
+    
     %--- Contour plot wavelet power spectrum
     if plot_swap == 0
         sub3 = subplot('position',[0.1 0.1 0.8 0.8]);
     else
         sub3 = subplot('position',[0.1 0.1 0.8 0.8]);
     end
+    % update wavelet coherence
+    if method_sel == 1
         wavecoh_update_wavecoh
-        figure(handles.waveletGUIfig)
+    elseif method_sel == 2
+        wavecoh_update_wtc
+        wavecoh_update_xwt
+    end
+    figure(handles.waveletGUIfig)
 end

@@ -2,6 +2,20 @@
 
 _______________________________________
 
+Version : Acycle_v2.4.1
+Date    : Dec 1, 2021 - Dec. 12, 2021
+By      : Mingsong Li (Peking University)
+
+    1. Interpolation Pro (New!)
+    2. Wavelet coherence & wavelet
+        Rectified Wavelet Power Spectrum (Liu et al., 2007 doi:10.1175/2007JTECHO511.1)
+        Thank you, Jaume Dinarès-Turell!
+        Bug report: Prof. Zhengtang Guo.
+    3. Wavelet cross spectrum
+        Code by Aslak Grinsted http://www.glaciology.net/wavelet-coherence
+    4. Plot - Convert to sound: hear your data
+_______________________________________
+
 Version : Acycle_v2.4.0
 Date    : Nov 4, 2021 - Nov 15, 2021
 By      : Mingsong Li (Peking University)
@@ -14,7 +28,7 @@ By      : Mingsong Li (Peking University)
     6. Milankovitch Calculator (Waltham, 2015)
     7. Wavelet (NEW GUI)
     8. Wavelet coherence and cross-spectrum (NEW)
-
+    9. User's Guide in Chinese
 _______________________________________
 
 Version : Acycle_v2.3.1
@@ -22,7 +36,6 @@ Date    : Jun 16, 2021 -
 By      : Mingsong Li (Peking University)
 
     1. Listbox: default unselect any data
-
 
 _______________________________________
 
