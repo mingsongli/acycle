@@ -62,7 +62,8 @@ shading interp
 if plot_phase
     hold on
     aWxy=angle(Wxy);
-
+    aWxy(sig95<1) = nan;
+    %aWxy(Rsq<wtcthreshold) = nan;
     phs_dt=round(length(t)/ArrowDensity(1)); 
     tidx=max(floor(phs_dt/2),1):phs_dt:length(t);
 
@@ -84,6 +85,7 @@ end
 if plot_sl
     hold on
     [c,h] = contour(t,log2(period),sig95,[1 1],'k');
+    %[c,h] = contour(t,log2(period),sig95,'k');
     set(h,'linewidth',2)
     hold off
 end
