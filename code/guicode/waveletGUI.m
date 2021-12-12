@@ -162,7 +162,7 @@ if lengthdata == 1
     set(handles.checkbox1,'Value',1,'enable','on')
     set(handles.checkbox3,'Value',0,'enable','on','string','plot spectrum')
     set(handles.checkbox9,'Value',1,'enable','on')
-    set(handles.checkbox10,'Value',0,'enable','on')
+    set(handles.checkbox10,'Value',1,'enable','on')
     method_list = {'Wavelet';'Continous Wavelet Transform';'Wavelet (Torrence & Compo, 1998)'};
     set(handles.popupmenu1,'Value',1,'enable','on','string',method_list)
     
@@ -272,7 +272,6 @@ set(handles.checkbox4,'value',0)
 set(handles.checkbox5,'value',0)
 set(handles.checkbox6,'value',0)
 set(handles.checkbox7,'value',0)
-set(handles.checkbox10,'value',0)
 set(handles.edit8,'string',Yticks)
 % value
 set(handles.radiobutton1,'value',0)

@@ -74,7 +74,7 @@ function varargout = AC(varargin)
 
 % Edit the above text to modify the response to help AC
 
-% Last Modified by GUIDE v2.5 02-Dec-2021 01:20:29
+% Last Modified by GUIDE v2.5 12-Dec-2021 16:43:30
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -5639,6 +5639,58 @@ if nplot <= 1
             handles.ext = ext;
             guidata(hObject, handles);
             interpolationGUI(handles);
+        end
+    end
+end
+guidata(hObject, handles);
+
+
+% --------------------------------------------------------------------
+function menu_sound_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_sound (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox_acmain,'Value');
+nplot = length(plot_selected);   % length
+if nplot == 1
+    data_name = char(contents(plot_selected));
+    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; data_name = fullfile(ac_pwd,data_name);
+    if isdir(data_name) == 1
+    else
+        [~,dat_name,ext] = fileparts(data_name);
+        if sum(strcmp(ext,handles.filetype)) > 0
+
+            data = load(data_name);
+
+            prompt = {'Repeat series: # times',...
+                'Sample rate: 8192 x ?',...
+                'Remove mean (1 = yes; 0 = no)'};
+            dlg_title = 'Sound';
+            num_lines = 1;
+            defaultans = {'5','1','1'};
+            options.Resize='on';
+            answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+            if ~isempty(answer)
+                a = str2double(answer{1});
+                b = str2double(answer{2});
+                c = str2double(answer{3});
+                if c == 1
+                    y = repmat( data(:,2)-mean(data(:,2)), [a,1]);
+                else
+                    y = repmat( data(:,2), [a,1]);
+                end
+                sound(y, b * 8192)
+                
+                name1 = [dat_name,'_rep-',num2str(a),'-rate-',num2str(b*8192),'.wav'];  % New name
+                CDac_pwd
+                audiowrite(name1,y,b*8192)
+                d = dir; %get files
+                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+                refreshcolor;
+                cd(pre_dirML); % return to matlab view folder
+            end
         end
     end
 end

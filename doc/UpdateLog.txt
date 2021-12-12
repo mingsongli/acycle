@@ -3,14 +3,17 @@
 _______________________________________
 
 Version : Acycle_v2.4.1
-Date    : Dec 1, 2021 - 
+Date    : Dec 1, 2021 - Dec. 12, 2021
 By      : Mingsong Li (Peking University)
 
     1. Interpolation Pro (New!)
     2. Wavelet coherence & wavelet
         Rectified Wavelet Power Spectrum (Liu et al., 2007 doi:10.1175/2007JTECHO511.1)
         Thank you, Jaume Dinarès-Turell!
+        Bug report: Prof. Zhengtang Guo.
     3. Wavelet cross spectrum
+        Code by Aslak Grinsted http://www.glaciology.net/wavelet-coherence
+    4. Plot - Convert to sound: hear your data
 _______________________________________
 
 Version : Acycle_v2.4.0

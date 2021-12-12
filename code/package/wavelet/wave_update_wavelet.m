@@ -196,7 +196,12 @@ else
 end
 
 shading interp
-
+% if method_sel == 1
+%     clim=get(gca,'clim'); %center color limits around log2(1)=0
+%     clim=[-1 1]*max(clim(2),3);
+%     set(gca,'clim',clim)
+% end
+    
 if isempty(plot_colorgrid)
     try
         colormap(plot_colormap)
