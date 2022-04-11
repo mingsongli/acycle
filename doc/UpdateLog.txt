@@ -1,5 +1,11 @@
 - - - - - -    What's New   - - - - - -
+_______________________________________
 
+Version : Acycle_v2.4.2
+Date    : Dec 29, 2021
+By      : Mingsong Li (Peking University)
+
+    1. Interpolation Pro: set values within gaps to zero
 _______________________________________
 
 Version : Acycle_v2.4.1

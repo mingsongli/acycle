@@ -36,7 +36,7 @@ for i = 1: nn
         if linlog == 1
             dist = theored - pxxsmooth;
         else
-            dist = log(theored) - log(pxxsmooth);
+            dist = log10(theored) - log10(pxxsmooth);
         end
         disti(i,j) = (sum(dist.^2));
     end

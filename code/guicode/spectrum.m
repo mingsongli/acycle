@@ -331,13 +331,13 @@ if strcmp(method,'Multi-taper method')
     if handles.checkbox_robustAR1_v == 1
         dlg_title = 'Robust AR(1) Estimation';
         prompt = {'Median smoothing window: default 0.2 = 20%';...
-            'AR1 best fit model? 1 = linear; 2 = log power (default)';...
+            'AR1 best fit model? 1 = linear （default）; 2 = log power';...
             'Bias correction for ultra-high resolution data'};
         num_lines = 1;
         if BiasCorr == 0
-            defaultans = {num2str(0.2),num2str(2),num2str(0)};
+            defaultans = {num2str(0.2),num2str(1),num2str(0)};
         else
-            defaultans = {num2str(0.2),num2str(2),num2str(1)};
+            defaultans = {num2str(0.2),num2str(1),num2str(1)};
         end
         options.Resize='on';
         answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
@@ -1264,13 +1264,13 @@ if strcmp(method,'Multi-taper method')
     if handles.checkbox_robustAR1_v == 1
         dlg_title = 'Robust AR(1) Estimation';
         prompt = {'Median smoothing window: default 0.2 = 20%';...
-            'AR1 best fit model? 1 = linear; 2 = log power (default)';...
+            'AR1 best fit model? 1 = linear (default); 2 = log power';...
             'Bias correction for ultra-high resolution data'};
         num_lines = 1;
         if BiasCorr == 0
-            defaultans = {num2str(0.2),num2str(2),num2str(0)};
+            defaultans = {num2str(0.2),num2str(1),num2str(0)};
         else
-            defaultans = {num2str(0.2),num2str(2),num2str(1)};
+            defaultans = {num2str(0.2),num2str(1),num2str(1)};
         end
         options.Resize='on';
         answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
