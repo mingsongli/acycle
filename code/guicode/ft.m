@@ -169,7 +169,9 @@ set(handles.edit1, 'String', num2str(handles.filt_flow)); % f low
 set(handles.edit2, 'String', num2str(handles.filt_fhigh)); % f high
 handles.add_list = '';
 handles.filter = 'Gaussian';
+% update axes 3
 update_filter_axes
+%
 guidata(hObject,handles)
 
 diffx = diff(data_s(:,1));

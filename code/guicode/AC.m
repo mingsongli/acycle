@@ -4681,7 +4681,7 @@ function menu_pca_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = handles.index_selected;  % read selection in listbox 1
-nplot = length(plot_selected);   % length
+nplot = length(plot_selected);   % length  % only work for 1 data file. needs more work if more data is selected
 % check
 for i = 1:nplot
     plot_no = plot_selected(i);
@@ -4738,23 +4738,71 @@ if check == 1;
                     disp(['>>   ',plot_filter_s]);
                 end
             end
+            data_new = [data_pca, data_new];
         end
     end
-    disp('>>  Principal component analysis: Done')
+    disp('>>  ========================================')
+    disp('>>Principal component analysis:')
+    disp('>>  *-PCA-coeff.txt')
+    disp('>>    principal component coefficients')
+    disp('>>  *-PCA-latent-explained-mu.txt')
+    disp('>>    col#1: PC variances; col#2: % of each PC; col#3: mean of each variable')
+    disp('>>  *-tsquared.txt')
+    disp('>>    Hotelling T-squared statistic for each observation')
+    disp('>>  *-PCA.txt')
+    disp('>>    principal component')
+    
+    prompt = {'Is the 1st column time or depth? (yes=1, no=0)'};
+    dlg_title = 'PCA data type inquiry';
+    num_lines = 1;
+    defaultans = {'1'};
+    options.Resize='on';
+    answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+    if ~isempty(answer)
+        depthtime = str2double(answer{1});
+        % if data contains depth/time column, remove it
+        if depthtime == 1
+            data_new2 = data_new(:,2:end);
+        else
+            data_new2 = data_new;
+        end
+    end
+    
     % pca
-    [coeff, pc] = pca(data_new); 
-    [~,dat_name,ext] = fileparts(char(contents(plot_selected(1))));% first file name
+    [coeff, pc, latent, tsquared, explained, mu] = pca(data_new2); 
+    if depthtime == 1
+        pcn = [data_new(:,1),pc];
+        disp('>>    col#1: depth/time; col#2: PC1; col#3: PC2 ...')
+    else
+        pcn = pc;
+        disp('>>    col#1: PC1; col#2: PC2; col#3: PC3 ...')
+    end
+    disp('>>  ========================================')
+    % coeff: principal component coefficients
+    % pc: principal component scores
+    % latent: principal component variances
+    % tsquared: Hotelling's T-squared statistic for each observation in X.
+    % explained: the percentage of the total variance explained by each principal component 
+    % mu, the estimated mean of each variable in X.
+    [~,dat_name,~] = fileparts(char(contents(plot_selected(1))));% first file name
+    ext = '.txt';
     if nplot == 1
         name1 = [dat_name,'-PCA',ext];
         name2 = [dat_name,'-PCA-coeff',ext];
+        name3 = [dat_name,'-PCA-latent-explained-mu',ext];
+        name4 = [dat_name,'-PCA-tsquared',ext];
     else
         name1 = [dat_name,'-w-others-PCA',ext];  % New name
         name2 = [dat_name,'-w-others-PCA-coeff',ext];
+        name3 = [dat_name,'-w-others-PCA-latent-explained-mu',ext];
+        name4 = [dat_name,'-w-others-PCA-tsquared',ext];
     end
-
+    
     CDac_pwd; % cd ac_pwd dir
-    dlmwrite(name1, [data_pca,pc], 'delimiter', ',', 'precision', 9);
+    dlmwrite(name1, pcn, 'delimiter', ',', 'precision', 9);
     dlmwrite(name2, coeff, 'delimiter', ',', 'precision', 9);
+    dlmwrite(name3, [latent,explained,mu'], 'delimiter', ',', 'precision', 9);
+    dlmwrite(name4, [data_new(:,1),tsquared], 'delimiter', ',', 'precision', 9);
     d = dir; %get files
     set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
     refreshcolor;

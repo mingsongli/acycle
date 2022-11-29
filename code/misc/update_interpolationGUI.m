@@ -16,7 +16,7 @@ gapdt = str2double(get(handles.edit6,'string'));
 xq = data(1,1):dt:data(end,1);
 % 1 = linear; 2 = nearest; 3 = next; 4 = previous
 % 5 = pchip; 6 = cubic; 7 = v5cubic; 8 = makima
-% 9 = spline
+% 9 = spline;10= FFT
 if method == 1    
     vq = interp1(data(:,1),data(:,2),xq);
     titlei = '(Default) Linear Interpolation';

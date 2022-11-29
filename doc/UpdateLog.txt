@@ -6,6 +6,7 @@ Date    : Dec 29, 2021
 By      : Mingsong Li (Peking University)
 
     1. Interpolation Pro: set values within gaps to zero
+    2. PCA: allow data with depth/time as the first column
 _______________________________________
 
 Version : Acycle_v2.4.1
