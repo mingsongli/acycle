@@ -1,7 +1,7 @@
 - - - - - -    What's New   - - - - - -
 _______________________________________
 
-Version : Acycle_v2.4.2
+Version : Acycle_v2.5.0
 Date    : Dec 29, 2021 - Nov. 30, 2022
 By      : Mingsong Li (Peking University)
 

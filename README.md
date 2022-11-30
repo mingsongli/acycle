@@ -2,7 +2,7 @@
     <img src="https://github.com/mingsongli/acycleFig/blob/master/default_icon_1024-git.gif" alt="homepage" title="Acycle GitHub homepage">
 </a>
 
-[![](https://img.shields.io/badge/version-v2.4.1-blue.svg)]()
+[![](https://img.shields.io/badge/version-v2.5.0-blue.svg)]()
 [![](https://img.shields.io/badge/license-GPL-brightgreen.svg)](https://www.gnu.org/licenses/)
 [![](https://img.shields.io/badge/platform-Mac_Win-green.svg)]()
 ![](https://img.shields.io/badge/language-MatLab-red.svg)
@@ -60,7 +60,7 @@
     <img src="https://github.com/mingsongli/acycleFig/blob/master/WechatIMG17.jpeg" alt="http://faculty.pku.edu.cn/li/en" title="Mingsong Li homepage" width="100" height="100">
 </a>
 <br>
-Mingsong Li, Peking University. Dec. 12, 2021 <br>
+Mingsong Li, Peking University. Nov. 30, 2022 <br>
 E-mail: <i> msli {at} pku.edu.cn;  limingsonglms {at} gmail.com </i> <br><br>
 
 Website: https://acycle.org/

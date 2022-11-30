@@ -37,7 +37,7 @@ function varargout = AC(varargin)
 %           https://acycle.org
 %           http://mingsongli.com
 %
-% Copyright (C) 2017-2021
+% Copyright (C) 2017-2023
 %
 % This program is a free software; you can redistribute it and/or modify it
 % under the terms of the GNU GENERAL PUBLIC LICENSE as published by the 
@@ -128,7 +128,7 @@ end
 
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'position',[0.5,0.1,0.45,0.8] * handles.MonZoom) % set position
-set(gcf,'Name','Acycle v2.4.1')
+set(gcf,'Name','Acycle v2.5.0')
 set(gcf,'DockControls', 'off')
 set(gcf,'Color', 'white')
 set(gcf,'units','norm') % set location
