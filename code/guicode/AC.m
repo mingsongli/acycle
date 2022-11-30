@@ -37,7 +37,7 @@ function varargout = AC(varargin)
 %           https://acycle.org
 %           http://mingsongli.com
 %
-% Copyright (C) 2017-2021
+% Copyright (C) 2017-2023
 %
 % This program is a free software; you can redistribute it and/or modify it
 % under the terms of the GNU GENERAL PUBLIC LICENSE as published by the 
@@ -74,7 +74,7 @@ function varargout = AC(varargin)
 
 % Edit the above text to modify the response to help AC
 
-% Last Modified by GUIDE v2.5 12-Dec-2021 18:01:28
+% Last Modified by GUIDE v2.5 30-Nov-2022 00:42:49
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -128,7 +128,7 @@ end
 
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'position',[0.5,0.1,0.45,0.8] * handles.MonZoom) % set position
-set(gcf,'Name','Acycle v2.4.1')
+set(gcf,'Name','Acycle v2.5.0')
 set(gcf,'DockControls', 'off')
 set(gcf,'Color', 'white')
 set(gcf,'units','norm') % set location
@@ -496,7 +496,7 @@ for i = 1:nplot
                     catch
                     end
                 catch
-                    warndlg('Image color space not supported. Convert to RGB or Grayscale')
+                    warndlg('Image color space not supported.')
                 end
             end
         end
@@ -722,7 +722,7 @@ if handles.doubleclick
                     catch
                     end
                 catch
-                    warndlg('Image color space not supported. Convert to RGB or Grayscale')
+                    warndlg('Image color space not supported.')
                 end
             elseif ismember(ext,{'.pdf'})
                 openpdf(filename)
@@ -815,7 +815,7 @@ if handles.doubleclick
                         catch
                         end
                     catch
-                        warndlg('Image color space not supported. Convert to RGB or Grayscale')
+                        warndlg('Image color space not supported.')
                     end
                 end
             elseif ismember(ext,{'.pdf','.ai','.ps'})
@@ -965,12 +965,36 @@ for i = 1:nplot
             plot_filter_s = char(contents(plot_selected(1)));
             open(plot_filter_s);
         elseif sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
-            try 
-                hwarn = warndlg('Wait, large image? can be very slow ...');
+            imfinfo1 = imfinfo(plot_filter_s); % image information
+            supportcolor = {'grayscale', 'truecolor'};
 
+            if strcmp(imfinfo1.ColorType,'CIELab')
+                im_name = imread(plot_filter_s);
+
+                aDouble = double(im_name); 
+
+                cielab(:,:,1) = aDouble(:,:,1) ./ (255/100);
+                cielab(:,:,2) = aDouble(:,:,2)-128;
+                cielab(:,:,3) = aDouble(:,:,3)-128;
+                hFig1 = figure;                    
+                subplot(3,1,1)
+                imshow(cielab(:,:,1),[0 100])
+                title('L*')
+                subplot(3,1,2)
+                imshow(cielab(:,:,2),[-128 127])
+                title('a*')
+                subplot(3,1,3)
+                imshow(cielab(:,:,3),[-128 127])
+                title('b*')
+                set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
+
+                hFig2 = figure;
+                imshow(lab2rgb(cielab));
+                set(gcf,'Name',[dat_name,'Lab2RGB',ext],'NumberTitle','off')
+
+            elseif any(strcmp(supportcolor,imfinfo1.ColorType))
                 im_name = imread(plot_filter_s);
                 hFig1 = figure;
-                lastwarn('') % Clear last warning message
                 imshow(im_name);
                 set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
                 [warnMsg, warnId] = lastwarn;
@@ -978,13 +1002,25 @@ for i = 1:nplot
                     close(hFig1)
                     imscrollpanel_ac(plot_filter_s);
                 end
-                try close(hwarn)
+            else
+                try
+                    % GRB and Grayscale supported here
+                    im_name = imread(plot_filter_s);
+                    hFig1 = figure;
+                    lastwarn('') % Clear last warning message
+                    imshow(im_name);
+                    set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
+                    [warnMsg, warnId] = lastwarn;
+                    if ~isempty(warnMsg)
+                        close(hFig1)
+                        imscrollpanel_ac(data_name);
+                    end
                 catch
+                    warndlg('Image color space not supported.')
                 end
-            catch
-                warndlg('Image color space not supported. Convert to RGB or Grayscale')
             end
         end
+        
     end
 end
 plotsucess = 0;
@@ -2844,12 +2880,36 @@ if nplot == 1
         else
             [~,dat_name,ext] = fileparts(data_name);
             if sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
-                try
-                    % GRB and Grayscale supported here
-                    hwarn = warndlg('Wait, large image? can be very slow ...');
+                imfinfo1 = imfinfo(data_name); % image information
+                supportcolor = {'grayscale', 'truecolor'};
+                
+                if strcmp(imfinfo1.ColorType,'CIELab')
+                    im_name = imread(data_name);
+                    
+                    aDouble = double(im_name); 
+                    
+                    cielab(:,:,1) = aDouble(:,:,1) ./ (255/100);
+                    cielab(:,:,2) = aDouble(:,:,2)-128;
+                    cielab(:,:,3) = aDouble(:,:,3)-128;
+                    hFig1 = figure;                    
+                    subplot(3,1,1)
+                    imshow(cielab(:,:,1),[0 100])
+                    title('L*')
+                    subplot(3,1,2)
+                    imshow(cielab(:,:,2),[-128 127])
+                    title('a*')
+                    subplot(3,1,3)
+                    imshow(cielab(:,:,3),[-128 127])
+                    title('b*')
+                    set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
+                    
+                    hFig2 = figure;
+                    imshow(lab2rgb(cielab));
+                    set(gcf,'Name',[dat_name,'Lab2RGB',ext],'NumberTitle','off')
+                    
+                elseif any(strcmp(supportcolor,imfinfo1.ColorType))
                     im_name = imread(data_name);
                     hFig1 = figure;
-                    lastwarn('') % Clear last warning message
                     imshow(im_name);
                     set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
                     [warnMsg, warnId] = lastwarn;
@@ -2857,16 +2917,29 @@ if nplot == 1
                         close(hFig1)
                         imscrollpanel_ac(data_name);
                     end
-                    try close(hwarn)
+                else
+                    try
+                        % GRB and Grayscale supported here
+                        im_name = imread(data_name);
+                        hFig1 = figure;
+                        lastwarn('') % Clear last warning message
+                        imshow(im_name);
+                        set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
+                        [warnMsg, warnId] = lastwarn;
+                        if ~isempty(warnMsg)
+                            close(hFig1)
+                            imscrollpanel_ac(data_name);
+                        end
                     catch
+                        warndlg('Image color space not supported.')
                     end
-                catch
-                    warndlg('Image color space not supported. Convert to RGB or Grayscale')
                 end
+                
             end
         end
 end
 guidata(hObject, handles);
+
 
 
 % --------------------------------------------------------------------
@@ -2888,8 +2961,11 @@ if nplot == 1
             if sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
                 try
                     im_name = imread(data_name);
+                    
+                    imfinfo1 = imfinfo(data_name); % image information
 
-                    try I = rgb2gray(im_name);
+                    if strcmp(imfinfo1.ColorType,'truecolor')
+                        I = rgb2gray(im_name);
                         figure
                         imshow(I)
                         dat_name = [dat_name,'-gray',ext];
@@ -2900,17 +2976,74 @@ if nplot == 1
                         set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                         refreshcolor;
                         cd(pre_dirML); % return to matlab view folder
-                    catch
-                        warndlg('This is not a RGB image')
+
+                    else
+                        warndlg(['This is not a RGB image. Color Type is: ',imfinfo1.ColorType])
                     end
+                
                 catch
-                    warndlg('Image color space not supported. Convert to RGB or Grayscale')
+                    warndlg('Image color space not supported.')
                 end
             end
         end
 end
 guidata(hObject, handles);
 
+
+% --------------------------------------------------------------------
+function menu_rgb2lab_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_rgb2lab (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox_acmain,'Value');
+nplot = length(plot_selected);   % length
+if nplot == 1
+    data_name = char(contents(plot_selected));
+    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; data_name = fullfile(ac_pwd,data_name);
+        if isdir(data_name) == 1
+            
+        else
+            [~,dat_name,ext] = fileparts(data_name);
+            if sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
+                try
+                    im_name = imread(data_name);
+                    
+                    imfinfo1 = imfinfo(data_name); % image information
+
+                    if strcmp(imfinfo1.ColorType,'truecolor')
+                        I = rgb2lab(im_name);
+                        figure
+                        subplot(3,1,1)
+                        imshow(I(:,:,1),[0 100])
+                        title('L*')
+                        subplot(3,1,2)
+                        imshow(I(:,:,2),[-128 127])
+                        title('a*')
+                        subplot(3,1,3)
+                        imshow(I(:,:,3),[-128 127])
+                        title('b*')
+                        dat_name = [dat_name,'-Lab.tif'];
+                        
+                        set(gcf,'Name',dat_name,'NumberTitle','off')
+                        CDac_pwd;
+                        imwrite(I,dat_name,'tif','ColorSpace','CIELab')
+                        d = dir; %get files
+                        set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+                        refreshcolor;
+                        cd(pre_dirML); % return to matlab view folder
+                    else
+                        warndlg(['This is not a RGB image. Color Type is: ',imfinfo1.ColorType])
+                    end
+
+                catch
+                    warndlg('Image color space not supported.')
+                end
+            end
+        end
+end
+guidata(hObject, handles);
 
 % --------------------------------------------------------------------
 function menu_improfile_Callback(hObject, eventdata, handles)
@@ -2931,9 +3064,21 @@ if nplot == 1
                 try
                     hwarn = warndlg('Wait, large image? can be very slow ...');
                     I = imread(data_name);
+                    imfinfo1 = imfinfo(data_name); % image information
                     figI = figure;
                     lastwarn('') % Clear last warning message
-                    imshow(I);
+                    
+                    if strcmp(imfinfo1.ColorType,'CIELab')
+                        aDouble = double(I); 
+                        cielab(:,:,1) = aDouble(:,:,1) ./ (255/100);
+                        cielab(:,:,2) = aDouble(:,:,2)-128;
+                        cielab(:,:,3) = aDouble(:,:,3)-128;
+                        %I = lab2rgb(cielab);
+                        I = cielab(:,:,1);
+                        imshow(I,[0 100]);
+                    else
+                        imshow(I);
+                    end
 
                     [warnMsg, warnId] = lastwarn;
                     
@@ -2945,73 +3090,138 @@ if nplot == 1
                     try close(hwarn)
                     catch
                     end
+                    if strcmp(imfinfo1.ColorType,'CIELab')
+                        set(gcf,'Name',[dat_name,' L*: Press "SHIFT"or"ALT" & select cursors now'],'NumberTitle','off')
+                    else
+                        set(gcf,'Name',[dat_name,': Press "SHIFT"or"ALT" & select cursors now'],'NumberTitle','off')
+                    end
                     
-                    set(gcf,'Name',[dat_name,ext,': Press "SHIFT"or"ALT" & select cursors now'],'NumberTitle','off')
-
-                    choice = questdlg('Steps: 1) click the "DataCursor" tool; 2) select two cursors; 3) press "Enter" in the COMMAND window', ...
-                        'Press "SHIFT"or"ALT" key & select 2 cursors', 'Continue','Cancel','Continue');
+                    choice = questdlg('Steps: 1) click the "DataCursor" tool; 2) select (2) cursors; 3) press "Enter" in the COMMAND window', ...
+                        'Press "SHIFT"or"ALT" key & select cursors', 'Continue','Cancel','Continue');
 
                     switch choice
                         case 'Continue'
                             figure(figI)
-                            
+                            hold on; 
                             dcm_obj = datacursormode(figI);
                             set(dcm_obj,'DisplayStyle','datatip','SnapToDataVertex','off','Enable','on')
                             Sure = input('>>  Press "Enter"');
+                            % get cursor information
                             c_info = getCursorInfo(dcm_obj);
+                            % number of cursors
                             m = length(c_info);
+                            
                             CursorInfo_value = zeros(m,2);
-                            if m == 2
+
+                            if m >= 2
+                                
                                 for i = 1 : m
                                    CursorInfo_value(i,1)=c_info(i).Position(:,1);
                                    CursorInfo_value(i,2)=c_info(i).Position(:,2);
                                 end
-                            end
-                            hold on; plot( CursorInfo_value(:,1), CursorInfo_value(:,2), 'g-','LineWidth',3)
-
-                            if m > 2
-                                warndlg('More than 2 cursors selected, only first 2 used!')
-                            end
-
-                            if m >= 2
-                                [cx,cy,c,xi,yi] = improfile(I,CursorInfo_value(:,1),CursorInfo_value(:,2));
-                                cx = sort(cx - min(cx));
-                                cy = sort(cy - min(cy));
-                                cz = sqrt(cx.^2 + cy.^2);
-
-                                try data = [cz,c];
-                                catch
-                                    warndlg('This is not a grayscale image!')
-                                    try c = reshape(c,[],3);
-                                    catch
-                                        warndlg('Looks like a cymk image, right?')
-                                        c = reshape(c,[],4);
-                                    end
-                                    data = [cz,c];
+                                
+                                if strcmp(imfinfo1.ColorType,'CIELab')
+                                    figure
+                                    imshow(cielab(:,:,1),[0 100]);
+                                    hold on
+                                    plot(CursorInfo_value(:,1), CursorInfo_value(:,2), 'g-','LineWidth',3)
+                                    set(gcf,'Name',[dat_name,': L*'],'NumberTitle','off')
+                                    pause(0.1)
+                                    [cx,cy,c1,xi,yi] = improfile(I,CursorInfo_value(:,1),CursorInfo_value(:,2));
+                                    
+                                    figure;
+                                    imshow(cielab(:,:,2),[-128 127]);
+                                    hold on
+                                    plot(CursorInfo_value(:,1), CursorInfo_value(:,2), 'g-','LineWidth',3)
+                                    hold off
+                                    set(gcf,'Name',[dat_name,': a*'],'NumberTitle','off')
+                                    [~,~,c2,~,~] = improfile(cielab(:,:,2),CursorInfo_value(:,1),CursorInfo_value(:,2));
+                                    pause(0.1)
+                                    
+                                    figure;
+                                    imshow(cielab(:,:,3),[-128 127]);
+                                    hold on
+                                    plot(CursorInfo_value(:,1), CursorInfo_value(:,2), 'g-','LineWidth',3)
+                                    hold off
+                                    set(gcf,'Name',[dat_name,': b*'],'NumberTitle','off')
+                                    [~,~,c3,~,~] = improfile(cielab(:,:,3),CursorInfo_value(:,1),CursorInfo_value(:,2));
+                                    pause(0.1)
+                                else
+                                    % RGB or grayscale
+                                    plot(CursorInfo_value(:,1), CursorInfo_value(:,2), 'g-','LineWidth',3)
+                                    [cx,cy,c,xi,yi] = improfile(I,CursorInfo_value(:,1),CursorInfo_value(:,2));
                                 end
+                                
+                                % pixels
+                                cxd = diff(cx);
+                                cyd = diff(cy);
+                                czd = cxd.*cxd + cyd.*cyd;
+                                z = cumsum(sqrt(czd));
+                                cz = [0;z];
+                                % control pixels
+                                cxd = diff(xi);
+                                cyd = diff(yi);
+                                czd = cxd.*cxd + cyd.*cyd;
+                                zc = cumsum(sqrt(czd));
+                                czp = [0;zc];
+                                czp = [(1:length(xi))',czp];
+
+                                if strcmp(imfinfo1.ColorType,'CIELab')
+                                    data = [cz,c1,c2,c3];
+                                else
+                                    if strcmp(imfinfo1.ColorType,'grayscale')
+                                        data = [cz,c];
+                                    elseif strcmp(imfinfo1.ColorType,'truecolor')
+                                        c = reshape(c,[],3);
+                                        data = [cz,c];
+                                    else
+                                        c = reshape(c,[],4);
+                                        data = [cz,c];
+                                    end
+                                end
+
                                 name = [dat_name,'-profile.txt'];
                                 name1= [dat_name,'-controlpoints.txt'];
+                                name2= [dat_name,'-controlpixels.txt'];
                                 data1 = [xi,yi];
 
                                 CDac_pwd
                                 dlmwrite(name , data, 'delimiter', ',', 'precision', 9);
                                 dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
-                                disp(['>>  save profile data as   ',name1])
+                                dlmwrite(name2, czp, 'delimiter', ',', 'precision', 9);
+                                disp(['>>  save profile data as   ',name])
                                 disp(['>>  save control points as ',name1])
+                                disp(['>>  save control pixels as ',name2])
                                 d = dir; %get files
                                 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                                 refreshcolor;
                                 cd(pre_dirML); % return to matlab view folder
-
-                                figure;plot(cz,c);
+                                
+                                % plot
+                                figure;
+                                plot(data(:,1),data(:,2:end));
+                                hold on
+                                for i = 1:length(zc)
+                                    xline(zc(i),'k--')
+                                end
+                                hold off
                                 title(name, 'Interpreter', 'none'); 
-                                xlabel('Pixels'); 
+                                xlabel('Pixels (lower left -> upper right)');
+                                xlim([0,z(end)])
                                 set(gca,'XMinorTick','on','YMinorTick','on')
-                                if m == 2
+                                if strcmp(imfinfo1.ColorType,'grayscale')
                                     ylabel('Grayscale')
+                                elseif strcmp(imfinfo1.ColorType,'CIELab')
+                                    ylabel('CIELab')
+                                    legend('L*','a*','b*')
+                                elseif strcmp(imfinfo1.ColorType,'truecolor')
+                                    ylabel('RGB')
+                                    legend('Red','Green','Blue')
                                 else
                                     ylabel('Value')
                                 end
+                            else
+                                warndlg('At least two cursors needed!')
                             end
                         case 'Cancel'
                             try close(figI)
@@ -3019,7 +3229,7 @@ if nplot == 1
                             end
                     end
                 catch
-                    warndlg('Image color space not supported. Convert to RGB or Grayscale')
+                    warndlg('Image color space not supported.')
                 end
                     
             end
@@ -3646,16 +3856,41 @@ for i = 1:nplot
     if isdir(plot_filter_s)
         return
     else
-        [~,~,ext] = fileparts(plot_filter_s);
+        [~,dat_name,ext] = fileparts(plot_filter_s);
         check = 0;
         if sum(strcmp(ext,handles.filetype)) > 0
             check = 1; % selection can be executed 
         elseif sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
-            try 
-                hwarn = warndlg('Wait, large image? can be very slow ...');
+            imfinfo1 = imfinfo(plot_filter_s); % image information
+            supportcolor = {'grayscale', 'truecolor'};
+
+            if strcmp(imfinfo1.ColorType,'CIELab')
+                im_name = imread(plot_filter_s);
+
+                aDouble = double(im_name); 
+
+                cielab(:,:,1) = aDouble(:,:,1) ./ (255/100);
+                cielab(:,:,2) = aDouble(:,:,2)-128;
+                cielab(:,:,3) = aDouble(:,:,3)-128;
+                hFig1 = figure;                    
+                subplot(3,1,1)
+                imshow(cielab(:,:,1),[0 100])
+                title('L*')
+                subplot(3,1,2)
+                imshow(cielab(:,:,2),[-128 127])
+                title('a*')
+                subplot(3,1,3)
+                imshow(cielab(:,:,3),[-128 127])
+                title('b*')
+                set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
+
+                hFig2 = figure;
+                imshow(lab2rgb(cielab));
+                set(gcf,'Name',[dat_name,'Lab2RGB',ext],'NumberTitle','off')
+
+            elseif any(strcmp(supportcolor,imfinfo1.ColorType))
                 im_name = imread(plot_filter_s);
                 hFig1 = figure;
-                lastwarn('') % Clear last warning message
                 imshow(im_name);
                 set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
                 [warnMsg, warnId] = lastwarn;
@@ -3663,11 +3898,22 @@ for i = 1:nplot
                     close(hFig1)
                     imscrollpanel_ac(plot_filter_s);
                 end
-                try close(hwarn)
+            else
+                try
+                    % GRB and Grayscale supported here
+                    im_name = imread(plot_filter_s);
+                    hFig1 = figure;
+                    lastwarn('') % Clear last warning message
+                    imshow(im_name);
+                    set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
+                    [warnMsg, warnId] = lastwarn;
+                    if ~isempty(warnMsg)
+                        close(hFig1)
+                        imscrollpanel_ac(data_name);
+                    end
                 catch
+                    warndlg('Image color space not supported.')
                 end
-            catch
-                warndlg('Image color space not supported. Convert to RGB or Grayscale')
             end
         end
     end
@@ -4681,7 +4927,7 @@ function menu_pca_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = handles.index_selected;  % read selection in listbox 1
-nplot = length(plot_selected);   % length
+nplot = length(plot_selected);   % length  % only work for 1 data file. needs more work if more data is selected
 % check
 for i = 1:nplot
     plot_no = plot_selected(i);
@@ -4738,23 +4984,71 @@ if check == 1;
                     disp(['>>   ',plot_filter_s]);
                 end
             end
+            data_new = [data_pca, data_new];
         end
     end
-    disp('>>  Principal component analysis: Done')
+    disp('>>  ========================================')
+    disp('>>Principal component analysis:')
+    disp('>>  *-PCA-coeff.txt')
+    disp('>>    principal component coefficients')
+    disp('>>  *-PCA-latent-explained-mu.txt')
+    disp('>>    col#1: PC variances; col#2: % of each PC; col#3: mean of each variable')
+    disp('>>  *-tsquared.txt')
+    disp('>>    Hotelling T-squared statistic for each observation')
+    disp('>>  *-PCA.txt')
+    disp('>>    principal component')
+    
+    prompt = {'Is the 1st column time or depth? (yes=1, no=0)'};
+    dlg_title = 'PCA data type inquiry';
+    num_lines = 1;
+    defaultans = {'1'};
+    options.Resize='on';
+    answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+    if ~isempty(answer)
+        depthtime = str2double(answer{1});
+        % if data contains depth/time column, remove it
+        if depthtime == 1
+            data_new2 = data_new(:,2:end);
+        else
+            data_new2 = data_new;
+        end
+    end
+    
     % pca
-    [coeff, pc] = pca(data_new); 
-    [~,dat_name,ext] = fileparts(char(contents(plot_selected(1))));% first file name
+    [coeff, pc, latent, tsquared, explained, mu] = pca(data_new2); 
+    if depthtime == 1
+        pcn = [data_new(:,1),pc];
+        disp('>>    col#1: depth/time; col#2: PC1; col#3: PC2 ...')
+    else
+        pcn = pc;
+        disp('>>    col#1: PC1; col#2: PC2; col#3: PC3 ...')
+    end
+    disp('>>  ========================================')
+    % coeff: principal component coefficients
+    % pc: principal component scores
+    % latent: principal component variances
+    % tsquared: Hotelling's T-squared statistic for each observation in X.
+    % explained: the percentage of the total variance explained by each principal component 
+    % mu, the estimated mean of each variable in X.
+    [~,dat_name,~] = fileparts(char(contents(plot_selected(1))));% first file name
+    ext = '.txt';
     if nplot == 1
         name1 = [dat_name,'-PCA',ext];
         name2 = [dat_name,'-PCA-coeff',ext];
+        name3 = [dat_name,'-PCA-latent-explained-mu',ext];
+        name4 = [dat_name,'-PCA-tsquared',ext];
     else
         name1 = [dat_name,'-w-others-PCA',ext];  % New name
         name2 = [dat_name,'-w-others-PCA-coeff',ext];
+        name3 = [dat_name,'-w-others-PCA-latent-explained-mu',ext];
+        name4 = [dat_name,'-w-others-PCA-tsquared',ext];
     end
-
+    
     CDac_pwd; % cd ac_pwd dir
-    dlmwrite(name1, [data_pca,pc], 'delimiter', ',', 'precision', 9);
+    dlmwrite(name1, pcn, 'delimiter', ',', 'precision', 9);
     dlmwrite(name2, coeff, 'delimiter', ',', 'precision', 9);
+    dlmwrite(name3, [latent,explained,mu'], 'delimiter', ',', 'precision', 9);
+    dlmwrite(name4, [data_new(:,1),tsquared], 'delimiter', ',', 'precision', 9);
     d = dir; %get files
     set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
     refreshcolor;
@@ -5303,7 +5597,7 @@ if nplot == 1
                     guidata(hObject, handles);
                     DataExtractML(handles);
                 catch
-                    warndlg('Image color space not supported. Convert to RGB or Grayscale')
+                    warndlg('Image color space not supported.')
                 end
             end
         end
@@ -5332,6 +5626,28 @@ set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
 cd(pre_dirML); % return to matlab view folder
 
+
+
+% --------------------------------------------------------------------
+function menu_example_sphalerite_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_example_sphalerite (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+data_name = which('Example-Sphalerite.jpg');
+[loc,dat_name,ext] = fileparts(data_name);
+if sum(strcmp(ext,{'.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.TIF'})) > 0
+    im_name = imread(data_name);
+    figure;
+    imshow(im_name)
+    set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
+end
+
+CDac_pwd
+copyfile(data_name,pwd)
+d = dir; %get files
+set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+refreshcolor;
+cd(pre_dirML); % return to matlab view folder
 
 % --------------------------------------------------------------------
 function menu_eTimeOpt_Callback(hObject, eventdata, handles)
@@ -5695,3 +6011,6 @@ if nplot == 1
     end
 end
 guidata(hObject, handles);
+
+
+

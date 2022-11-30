@@ -10,10 +10,13 @@ x2 = str2double(get(handles.edit3,'string'));
 y1 = str2double(get(handles.edit4,'string'));
 y2 = str2double(get(handles.edit5,'string'));
 
+gap2zero = get(handles.checkbox3,'value');
+gapdt = str2double(get(handles.edit6,'string'));
+
 xq = data(1,1):dt:data(end,1);
 % 1 = linear; 2 = nearest; 3 = next; 4 = previous
 % 5 = pchip; 6 = cubic; 7 = v5cubic; 8 = makima
-% 9 = spline
+% 9 = spline;10= FFT
 if method == 1    
     vq = interp1(data(:,1),data(:,2),xq);
     titlei = '(Default) Linear Interpolation';
@@ -50,6 +53,25 @@ elseif method == 9
     vq = interp1(data(:,1),data(:,2),xq,'spline');
     titlei = 'Spline Interpolation';
     legendi = 'spline';
+end
+
+% force value=0 for gaps
+if gap2zero == 1
+    dfdt = diff(data(:,1));
+    gapi = 0;
+    gappair = [];
+    for dti = 1 : length(dfdt)
+        if dfdt(dti) > dt * gapdt
+            gapi = gapi + 1;
+            gappair(gapi,1) = data(dti,1);
+            gappair(gapi,2) = data(dti+1,1);
+            vq(and(xq> gappair(gapi,1), xq < gappair(gapi,2))) = 0;
+        end
+    end
+end
+if gap2zero == 1
+    disp('start and end of gaps')
+    disp(gappair)
 end
 
 plot(handles.axes1,data(:,1),data(:,2),'o')

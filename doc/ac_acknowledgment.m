@@ -52,7 +52,7 @@
 %   Xiaoyu Zhang, Yang (Wendy) Zhang, Hanyu Zhu, Christian Zeeden
 
 %**************************************************************************
-% Copyright (C) 2017-2021
+% Copyright (C) 2017-2023
 % This program is a free software; you can redistribute it and/or modify it
 % under the terms of the GNU GENERAL PUBLIC LICENSE as published by the 
 % Free Software Foundation < https://www.gnu.org/licenses/ >.

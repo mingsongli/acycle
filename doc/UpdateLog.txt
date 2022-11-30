@@ -1,5 +1,18 @@
 - - - - - -    What's New   - - - - - -
+_______________________________________
 
+Version : Acycle_v2.5.0
+Date    : Dec 29, 2021 - Nov. 30, 2022
+By      : Mingsong Li (Peking University)
+
+    1. Interpolation Pro: set values within gaps to zero
+    2. PCA: allow data with depth/time as the first column
+    3. Image Show: support color type detection
+    4. Image - Image Profile: allow over two data cursors
+    5. Image - Image Profile: support grayscale, CIE Lab and RGB images
+    6. Image: Add RGB to Lab
+    7. Plot and Plot Pro: support color type detection
+    8. Add a new example: Basic Series - Examples - Image Sphalerite (Example-Sphalerite.jpg)
 _______________________________________
 
 Version : Acycle_v2.4.1
