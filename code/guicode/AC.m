@@ -3121,6 +3121,10 @@ if nplot == 1
                                 end
                                 
                                 if strcmp(imfinfo1.ColorType,'CIELab')
+                                    figure(figI)
+                                    plot(CursorInfo_value(:,1), CursorInfo_value(:,2), 'g-','LineWidth',3)
+                                    hold off
+                                    pause(0.1)
                                     figure
                                     imshow(cielab(:,:,1),[0 100]);
                                     hold on
