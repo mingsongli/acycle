@@ -66,7 +66,7 @@ handles.sortdata = varargin{1}.sortdata;
 if ismac
     set(gcf,'position',[0.35,0.4,0.35,0.25]* handles.MonZoom) % set position
 elseif ispc
-    set(gcf,'position',[0.35,0.4,0.35,0.25]* handles.MonZoom) % set position
+    set(gcf,'position',[0.35,0.4,0.45,0.35]* handles.MonZoom) % set position
 end
 
 set(handles.text2,'position',[0.05,0.82,0.09,0.064])
@@ -163,7 +163,7 @@ set(handles.edit6,'String',num2str(lmin))
 update_recplot
 figure(handles.hrp)
 set(gcf,'units','norm') % set location
-set(gcf,'position',[0.05,0.2,0.35,0.7]* handles.MonZoom)
+set(gcf,'position',[0.05,0.05,0.3,0.6])
 
 % Update handles structure
 guidata(hObject, handles);

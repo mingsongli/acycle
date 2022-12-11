@@ -17,7 +17,18 @@ showseries = get(handles.checkbox1,'Value');
 showdet = get(handles.checkbox2,'Value');
 fliptime = get(handles.checkbox3,'Value');
 ylabeli = get(handles.edit7,'String');
-
+if showdet == 1
+    set(handles.edit3,'Enable','on')
+    set(handles.edit4,'Enable','on')
+    set(handles.edit5,'Enable','on')
+    set(handles.edit6,'Enable','on')
+else
+    
+    set(handles.edit3,'Enable','off')
+    set(handles.edit4,'Enable','off')
+    set(handles.edit5,'Enable','off')
+    set(handles.edit6,'Enable','off')
+end
 try
     threshold = str2double( get(handles.edit2,'String') );
     if threshold > max(S(:))
@@ -92,6 +103,9 @@ if showdet == 1
     end
     %
     % DET
+    if N > 500
+        hwarn = warndlg('Warning: long time series. Please wait. Upate to several minutes','Warning: DET calculation');
+    end
     [DETy,testi] = crp_pdist(x,w,ws,theiler_window, lmin, 0);
     DETx = t(testi) + 1/2 * winN * w/N;
 end
@@ -214,7 +228,7 @@ else
         else
             set (gca, 'xdir', 'normal' )
         end
-
+        
         subplot('position',[0.15 0.05 0.7 0.7]);
         imagesc(t, t, S < threshold);
         axis square; 
@@ -266,7 +280,9 @@ else
         end
     end
 end
-
+try close(hwarn)
+catch
+end
 % save data
 if showdet== 1
     handles.DET = [DETx, DETy];
