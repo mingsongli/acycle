@@ -223,7 +223,7 @@ if handles.sedrate == 0
     
     name1 = [handles.dat_name,'-SpecMoments-depth-uf-bw-win',num2str(window),'.txt'];
     CDac_pwd; % cd ac_pwd dir
-    dlmwrite(name1, [depth,uf,Bw], 'delimiter', ',', 'precision', 9);
+    dlmwrite(name1, [depth,uf,Bw], 'delimiter', ' ', 'precision', 9);
     d = dir; %get files
     set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
     refreshcolor;
@@ -242,8 +242,8 @@ else
     name1 = [handles.dat_name,'-SpecMoments-depth-uf-Bw-Btrend-win',num2str(window),'.txt'];
     name2 = [handles.dat_name,'-SpecMoments-sedrate-win',num2str(window),smoothmodel,'-SR',num2str(srmean),'.txt'];
     CDac_pwd; % cd ac_pwd dir
-    dlmwrite(name1, [depth,uf,Bw,Bwtrend], 'delimiter', ',', 'precision', 9);
-    dlmwrite(name2, [depth,sr], 'delimiter', ',', 'precision', 9);
+    dlmwrite(name1, [depth,uf,Bw,Bwtrend], 'delimiter', ' ', 'precision', 9);
+    dlmwrite(name2, [depth,sr], 'delimiter', ' ', 'precision', 9);
     d = dir; %get files
     set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
     refreshcolor;

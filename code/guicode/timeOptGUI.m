@@ -312,9 +312,9 @@ if handles.savedata == 1
     loci = find(r2opt == maxr2opt);
 
     CDac_pwd
-    dlmwrite(name1, xx, 'delimiter', ',', 'precision', 9); 
-    dlmwrite(name2, datopt, 'delimiter', ',', 'precision', 9);
-    dlmwrite(name3, xcl, 'delimiter', ',', 'precision', 9); 
+    dlmwrite(name1, xx, 'delimiter', ' ', 'precision', 9); 
+    dlmwrite(name2, datopt, 'delimiter', ' ', 'precision', 9);
+    dlmwrite(name3, xcl, 'delimiter', ' ', 'precision', 9); 
 
     [dat_dir,~,~] = fileparts(handles.filename);
     fileID = fopen(fullfile(dat_dir,log_name),'w+');

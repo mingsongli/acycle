@@ -676,7 +676,7 @@ else
     data_filterout = handles.data_filterout;
     filter = handles.filter;
     CDac_pwd;
-    dlmwrite(add_list, data_filterout, 'delimiter', ',', 'precision', 9);
+    dlmwrite(add_list, data_filterout, 'delimiter', ' ', 'precision', 9);
     figdata = figure;
     data = handles.current_data;
     plot(data(:,1),data(:,2),'k');hold on
@@ -698,11 +698,11 @@ else
         ampmod = [data_filterout(:,1),data_filterout(:,3)];
         ifaze = [data_filterout(:,1),handles.ifaze];
         ifreq = [data_filterout(1:end-1,1),handles.ifreq];
-        dlmwrite(add_list, data_filterout(:,1:2), 'delimiter', ',', 'precision', 9);
-        dlmwrite(add_list_am, ampmod, 'delimiter', ',', 'precision', 9);
-        dlmwrite(handles.add_list_ufaze,[data_filterout(:,1),data_filterout(:,4)], 'delimiter', ',', 'precision', 9);        
-        dlmwrite(handles.add_list_ifaze, ifaze, 'delimiter', ',', 'precision', 9);
-        dlmwrite(handles.add_list_ifreq, ifreq, 'delimiter', ',', 'precision', 9);
+        dlmwrite(add_list, data_filterout(:,1:2), 'delimiter', ' ', 'precision', 9);
+        dlmwrite(add_list_am, ampmod, 'delimiter', ' ', 'precision', 9);
+        dlmwrite(handles.add_list_ufaze,[data_filterout(:,1),data_filterout(:,4)], 'delimiter', ' ', 'precision', 9);        
+        dlmwrite(handles.add_list_ifaze, ifaze, 'delimiter', ' ', 'precision', 9);
+        dlmwrite(handles.add_list_ifreq, ifreq, 'delimiter', ' ', 'precision', 9);
         disp(['>>  Save as: ', handles.add_list_am])
         disp(['>>  Save as: ', handles.add_list_ufaze])
         disp(['>>  Save as: ', handles.add_list_ufazedet])
@@ -745,8 +745,8 @@ else
             xlabel(['Time (',handles.unit,')'])
         end
         
-        dlmwrite(handles.add_list_ufazedet, [t,iphasedet], 'delimiter', ',', 'precision', 9);
-        %dlmwrite(handles.add_list_ufazedet, [t,data_filterout(:,5)], 'delimiter', ',', 'precision', 9);
+        dlmwrite(handles.add_list_ufazedet, [t,iphasedet], 'delimiter', ' ', 'precision', 9);
+        %dlmwrite(handles.add_list_ufazedet, [t,data_filterout(:,5)], 'delimiter', ' ', 'precision', 9);
     end
     cd(pre_dirML); % return to matlab view folder
     

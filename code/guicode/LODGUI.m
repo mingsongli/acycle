@@ -317,7 +317,7 @@ if model == 1
             disp(['>> data saved: ', name1])
             disp('  col #1, #2, #3, ... , #19')
             disp('  age, amin, amax, daymin, daymax, obmin, obmax, kmin, kmax, o1min, o1max, p1min, p1max, p2min, p2max, p3min, p3max, p4min, p4max')
-            dlmwrite(name1, [T1,CalMiR], 'delimiter', ',', 'precision', 9);
+            dlmwrite(name1, [T1,CalMiR], 'delimiter', ' ', 'precision', 9);
             d = dir; %get files
             set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
             refreshcolor;
@@ -343,8 +343,8 @@ elseif model == 2
             name1 = ['LOD_',num2str(T1),'Ma.txt'];
             name2 = ['LOD_DOY_',num2str(T1),'Ma.txt'];
             CDac_pwd
-            dlmwrite(name1, [T1,lod], 'delimiter', ',', 'precision', 9);
-            dlmwrite(name2, [T1,doy], 'delimiter', ',', 'precision', 9);
+            dlmwrite(name1, [T1,lod], 'delimiter', ' ', 'precision', 9);
+            dlmwrite(name2, [T1,doy], 'delimiter', ' ', 'precision', 9);
             d = dir; %get files
             set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
             refreshcolor;
@@ -375,8 +375,8 @@ elseif model == 2
             name1 = ['LOD-',num2str(age1),'_',num2str(age2),'_Ma-step_',num2str(step),'.txt'];
             %name2 = ['LOD_DOY_',num2str(age1),'_',num2str(step),'_',num2str(age2),'Ma.txt'];
             CDac_pwd
-            dlmwrite(name1, [T1,lod,doy], 'delimiter', ',', 'precision', 9);
-            %dlmwrite(name2, [T1,doy], 'delimiter', ',', 'precision', 9);
+            dlmwrite(name1, [T1,lod,doy], 'delimiter', ' ', 'precision', 9);
+            %dlmwrite(name2, [T1,doy], 'delimiter', ' ', 'precision', 9);
             d = dir; %get files
             set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
             refreshcolor;

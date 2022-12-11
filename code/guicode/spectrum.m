@@ -1358,8 +1358,8 @@ if strcmp(method,'Multi-taper method')
             data2 = [f1,pxxsmooth0];
             
             CDac_pwd;
-            dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
-            dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9);
+            dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9);
+            dlmwrite(name2, data2, 'delimiter', ' ', 'precision', 9);
             disp('>>  Refresh main window to see red noise estimation data files: ')
             disp(name1)
             disp(name2)
@@ -1417,8 +1417,8 @@ if strcmp(method,'Multi-taper method')
         name2 = [dat_name,'-',num2str(nw),'piMTM-PL-global',ext];
         data2 = [fd1,po,pl,red90global,red95global,red99global];
         CDac_pwd;
-        dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
-        dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9);
+        dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9);
+        dlmwrite(name2, data2, 'delimiter', ' ', 'precision', 9);
         disp('>>  Refresh main window to see red noise estimation data files: ')
         disp(name1)
         disp(name2)
@@ -1501,8 +1501,8 @@ if strcmp(method,'Multi-taper method')
         name2 = [dat_name,'-',num2str(nw),'piMTM-BPL-global',ext];
         data2 = [fd1,po,theored1,red90global,red95global,red99global];
         CDac_pwd;
-        dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
-        dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9);
+        dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9);
+        dlmwrite(name2, data2, 'delimiter', ' ', 'precision', 9);
         disp('>>  Refresh main window to see red noise estimation data files: ')
         disp(name1)
         disp(name2)
@@ -1652,7 +1652,7 @@ if strcmp(method,'Multi-taper method')
         %filename_mtm = [dat_name,'-',num2str(nw),'piMTMspectrum.txt'];
         filename_mtm_cl = [dat_name,'-',num2str(nw),'piMTM-ClassicAR1.txt'];
         CDac_pwd; % cd ac_pwd dir
-        dlmwrite(filename_mtm_cl, [fd,po,theored,tabtchi90,tabtchi95,tabtchi99,tabtchi999], 'delimiter', ',', 'precision', 9);
+        dlmwrite(filename_mtm_cl, [fd,po,theored,tabtchi90,tabtchi95,tabtchi99,tabtchi999], 'delimiter', ' ', 'precision', 9);
         disp('>>  Refresh the Main Window to see output data')
         %disp(filename_mtm)
         disp(filename_mtm_cl)
@@ -1708,10 +1708,10 @@ if strcmp(method,'Multi-taper method')
         [dataftest] = select_interval(dataftest,0,fnyq);
         [datafsig] = select_interval(datafsig,0,fnyq);
         [dataamp] = select_interval(dataamp,0,fnyq);
-        dlmwrite(nameftest, dataftest, 'delimiter', ',', 'precision', 9);
-        dlmwrite(namefsig, datafsig, 'delimiter', ',', 'precision', 9);
-        dlmwrite(namefamp, dataamp, 'delimiter', ',', 'precision', 9);
-        dlmwrite(namefrest, datarest, 'delimiter', ',', 'precision', 9);
+        dlmwrite(nameftest, dataftest, 'delimiter', ' ', 'precision', 9);
+        dlmwrite(namefsig, datafsig, 'delimiter', ' ', 'precision', 9);
+        dlmwrite(namefamp, dataamp, 'delimiter', ' ', 'precision', 9);
+        dlmwrite(namefrest, datarest, 'delimiter', ' ', 'precision', 9);
         %disp('>>  Refresh main window to see red noise estimation data files: ')
         disp(nameftest)
         disp(namefsig)
@@ -1770,7 +1770,7 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
         
         filename_LS = [dat_name,'-Lomb-Scargle.txt'];
         CDac_pwd; % cd ac_pwd dir
-        dlmwrite(filename_LS, [fd1,po,(pth*ones(size(fd1')))'], 'delimiter', ',', 'precision', 9);
+        dlmwrite(filename_LS, [fd1,po,(pth*ones(size(fd1')))'], 'delimiter', ' ', 'precision', 9);
         cd(pre_dirML); % return to matlab view folder
         disp('Refresh the Main Window:')
         disp(filename_LS)
@@ -1826,7 +1826,7 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
             name1 = [dat_name,'-Lomb-robustAR1',ext];
             data1 = [fd1,po,pth'];
             CDac_pwd;
-            dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
+            dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9);
             disp('>>  Refresh main window to see red noise estimation data files: ')
             disp(name1)
             cd(pre_dirML);
@@ -1873,8 +1873,8 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
         name2 = [dat_name,'-Lomb-PL-global',ext];
         data2 = [fd1,po,pl,red90global,red95global,red99global];
         CDac_pwd;
-        dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
-        dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9);
+        dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9);
+        dlmwrite(name2, data2, 'delimiter', ' ', 'precision', 9);
         disp('>>  Refresh main window to see red noise estimation data files: ')
         disp(name1)
         disp(name2)
@@ -1960,8 +1960,8 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
         name2 = [dat_name,'-Lomb-BPL-global',ext];
         data2 = [fd1,po,pl,red90global,red95global,red99global];
         CDac_pwd;
-        dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
-        dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9);
+        dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9);
+        dlmwrite(name2, data2, 'delimiter', ' ', 'precision', 9);
         disp('>>  Refresh main window to see red noise estimation data files: ')
         disp(name1)
         disp(name2)
@@ -2085,8 +2085,8 @@ elseif  strcmp(method,'Periodogram')
         name2 = [dat_name,'-Periodogram-PL-global',ext];
         data2 = [fd1,po,pl,red90global,red95global,red99global];
         CDac_pwd;
-        dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
-        dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9);
+        dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9);
+        dlmwrite(name2, data2, 'delimiter', ' ', 'precision', 9);
         disp('>>  Refresh main window to see red noise estimation data files: ')
         disp(name1)
         disp(name2)
@@ -2168,8 +2168,8 @@ elseif  strcmp(method,'Periodogram')
         name2 = [dat_name,'-Periodogram-BPL-global',ext];
         data2 = [fd1,po,pl,red90global,red95global,red99global];
         CDac_pwd;
-        dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
-        dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9);
+        dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9);
+        dlmwrite(name2, data2, 'delimiter', ' ', 'precision', 9);
         disp('>>  Refresh main window to see red noise estimation data files: ')
         disp(name1)
         disp(name2)
@@ -2224,11 +2224,11 @@ elseif  strcmp(method,'Periodogram')
     
     try filename_Periodogram = [dat_name,'-PeriodogramAR1.txt'];   
         dlmwrite(filename_Periodogram, [fd1,po,theored,tabtchired90,tabtchired95,tabtchired99,tabtchired999], ...
-            'delimiter', ',', 'precision', 9);
+            'delimiter', ' ', 'precision', 9);
     catch
         filename_Periodogram = [dat_name,'-Periodogram.txt'];
         dlmwrite(filename_Periodogram, [fd1,po], ...
-            'delimiter', ',', 'precision', 9);
+            'delimiter', ' ', 'precision', 9);
     end
     cd(pre_dirML); % return to matlab view folder
     disp(filename_Periodogram)

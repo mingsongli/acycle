@@ -596,8 +596,8 @@ if exist([pwd,handles.slash_v,name1]) || exist([pwd,handles.slash_v,name2])
 end
 disp(['>>  Save DYNOT median    : ',name1])
 disp(['>>  Save DYNOT percentile: ',name2])
-dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9); 
-dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9); 
+dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9); 
+dlmwrite(name2, data2, 'delimiter', ' ', 'precision', 9); 
 cd(pre_dirML); % return to matlab view folder
 %
 % refresh AC main window

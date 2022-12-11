@@ -281,7 +281,7 @@ if exist([pwd,handles.slash_v,log_name]) || exist([pwd,handles.slash_v,name1]) |
     end
 end
 
-dlmwrite(name1, [time,xdata_filtered'], 'delimiter', ',', 'precision', 9);
+dlmwrite(name1, [time,xdata_filtered'], 'delimiter', ' ', 'precision', 9);
 
 figure(figdynfilter);
 savefig(dynfilfigname1) % save ac.fig

@@ -1,6 +1,17 @@
 - - - - - -    What's New   - - - - - -
 _______________________________________
 
+
+Version : Acycle_v2.6
+Date    : Dec 11, 2022 -
+By      : Mingsong Li (Peking University)
+
+    1. Recurrence Plot: Timeseries-Recurrence Plot tool!
+    2. Unit: add more options
+    3. Save text data: save SPACE delimited files, rather than COMMA delimited files
+
+_______________________________________
+
 Version : Acycle_v2.5.0
 Date    : Dec 29, 2021 - Nov. 30, 2022
 By      : Mingsong Li (Peking University)

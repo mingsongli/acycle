@@ -298,7 +298,7 @@ name_insol_all = [name_insol,'.txt'];
 if ishandle(figmsgbox); close(figmsgbox); end
 % save data
 CDac_pwd; % cd ac_pwd dir
-dlmwrite(name_insol_all, [t0',Ix'], 'delimiter', ',', 'precision', 9);
+dlmwrite(name_insol_all, [t0',Ix'], 'delimiter', ' ', 'precision', 9);
 % plot data
 figdata = figure; 
 plot(t0',Ix');
@@ -306,7 +306,7 @@ xlim([min(t0),max(t0)]);
 xlabel(['Time (', unit_t_r,')'])
 ylabel('Insolation (W/m^2)')
 title(name_insol)
-%dlmwrite(name_insol_annual, [t0',Insol_a_m'], 'delimiter', ',', 'precision', 9);
+%dlmwrite(name_insol_annual, [t0',Insol_a_m'], 'delimiter', ' ', 'precision', 9);
 if and((type == 1),(handles.latrange == 1))
     InsolLatDayGif(II,t0,lat,day,unit_t_r,name_insol);
 end

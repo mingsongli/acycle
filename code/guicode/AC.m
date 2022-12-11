@@ -74,7 +74,7 @@ function varargout = AC(varargin)
 
 % Edit the above text to modify the response to help AC
 
-% Last Modified by GUIDE v2.5 30-Nov-2022 00:42:49
+% Last Modified by GUIDE v2.5 10-Dec-2022 20:45:48
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -1388,14 +1388,44 @@ case 'ft' % User selects ft.
 case 'km' % User selects km.
    handles.unit = 'km';
    handles.unit_type = 1;
-case 'yr' % User selects year.
-   handles.unit = 'yr';
+case 'second' % User selects year.
+   handles.unit = 'second';
    handles.unit_type = 2;
-case 'kyr' % User selects kilo-year.
-   handles.unit = 'kyr';
+case 'minute' % User selects year.
+   handles.unit = 'minute';
    handles.unit_type = 2;
-case 'myr' % User selects million years.
-   handles.unit = 'myr';
+case 'hour' % User selects year.
+   handles.unit = 'hour';
+   handles.unit_type = 2;
+case 'day' % User selects year.
+   handles.unit = 'day';
+   handles.unit_type = 2;
+case 'month' % User selects year.
+   handles.unit = 'month';
+   handles.unit_type = 2;
+case 'year' % User selects year.
+   handles.unit = 'year';
+   handles.unit_type = 2;
+case 'Kyr' % User selects kilo-year.
+   handles.unit = 'Kyr';
+   handles.unit_type = 2;
+case 'Myr' % User selects million years.
+   handles.unit = 'Myr';
+   handles.unit_type = 2;
+case 'Gyr' % User selects million years.
+   handles.unit = 'Gyr';
+   handles.unit_type = 2;
+case 'a' % User selects million years.
+   handles.unit = 'a';
+   handles.unit_type = 2;
+case 'Ka' % User selects million years.
+   handles.unit = 'Ka';
+   handles.unit_type = 2;
+case 'Ma' % User selects million years.
+   handles.unit = 'Ma';
+   handles.unit_type = 2;
+case 'Ga' % User selects million years.
+   handles.unit = 'Ga';
    handles.unit_type = 2;
 end
 assignin('base','unit',handles.unit)
@@ -1540,7 +1570,7 @@ for i = 1:nplot
                             [current_data] = select_interval(data,xmin_cut,xmax_cut); 
                             name1 = [dat_name,'_',num2str(xmin_cut),'_',num2str(xmax_cut),ext];  % New name
                             CDac_pwd; % cd ac_pwd dir
-                            dlmwrite(name1, current_data, 'delimiter', ',', 'precision', 9);
+                            dlmwrite(name1, current_data, 'delimiter', ' ', 'precision', 9);
                         end
                     end
                 end
@@ -1564,7 +1594,7 @@ for i = 1:nplot
                 name1 = [dat_name,'_',num2str(xmin_cut),'_',num2str(xmax_cut),ext];  % New name
 
                 CDac_pwd; % cd ac_pwd dir
-                dlmwrite(name1, current_data, 'delimiter', ',', 'precision', 9);
+                dlmwrite(name1, current_data, 'delimiter', ' ', 'precision', 9);
                 d = dir; %get files
                 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                 refreshcolor;
@@ -1637,7 +1667,7 @@ for nploti = 1:nplot
                 data_interp = interpolate(data,interpolate_rate);
                 name1 = [dat_name,'-rsp',num2str(interpolate_rate),ext];  % New name
                 CDac_pwd
-                dlmwrite(name1, data_interp, 'delimiter', ',', 'precision', 9); 
+                dlmwrite(name1, data_interp, 'delimiter', ' ', 'precision', 9); 
                 d = dir; %get files
                 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                 refreshcolor;
@@ -1671,7 +1701,7 @@ if nplot == 1
             data1 = [time,value];
             name1 = [dat_name,'-stand',ext];
             CDac_pwd
-            dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9); 
+            dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9); 
             d = dir; %get files
             set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
             refreshcolor;
@@ -1760,7 +1790,7 @@ for nploti = 1:nplot
 
                         data1 = [time,y];
                         CDac_pwd
-                        dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
+                        dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9);
                         d = dir; %get files
                         set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                         refreshcolor;
@@ -1797,7 +1827,7 @@ if nplot == 1
             %csvwrite(name1,data1)
             % cd ac_pwd dir
             CDac_pwd
-            dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9); 
+            dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9); 
             d = dir; %get files
             set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
             refreshcolor;
@@ -1870,8 +1900,8 @@ if nplot == 1
                 disp('>>        Percentiles are ')
                 disp('>>        [0.5,2.5,5,25,50,75,95,97.5,99.5]')
                 CDac_pwd
-                dlmwrite(name, data, 'delimiter', ',', 'precision', 9); 
-                dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9); 
+                dlmwrite(name, data, 'delimiter', ' ', 'precision', 9); 
+                dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9); 
                 d = dir; %get files
                 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                 refreshcolor;
@@ -1950,7 +1980,7 @@ for nploti = 1:nplot
                     handles.math_derivative = derivative_n;
                     name1 = [dat_name,'_',num2str(derivative_n),'derv',ext];
                     CDac_pwd
-                    dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
+                    dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9);
                     d = dir; %get files
                     set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                     refreshcolor;
@@ -2118,8 +2148,8 @@ if nplot == 1
                 name1 = [dat_name,'-AM',ext];
                 name2 = [dat_name,'-AMf',ext];
                 CDac_pwd
-                dlmwrite(name1, data_am, 'delimiter', ',', 'precision', 9);
-                dlmwrite(name2, [tanhilb(:,1), tanhilb(:,2)], 'delimiter', ',', 'precision', 9);
+                dlmwrite(name1, data_am, 'delimiter', ' ', 'precision', 9);
+                dlmwrite(name2, [tanhilb(:,1), tanhilb(:,2)], 'delimiter', ' ', 'precision', 9);
                 disp('>>  See main window for amplitude modulation')
                 d = dir; %get files
                 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
@@ -2246,7 +2276,7 @@ if ~isempty(answer)
     filename = ['LR04_Stack_',num2str(t1),'_',num2str(t2),'ka.txt'];
     % cd ac_pwd dir
     CDac_pwd
-    dlmwrite(filename, LR04stack_s, 'delimiter', ',', 'precision', 9);
+    dlmwrite(filename, LR04stack_s, 'delimiter', ' ', 'precision', 9);
     d = dir; %get files
     set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
     refreshcolor;
@@ -2437,7 +2467,7 @@ else
     data=load(aaa);
     
     CDac_pwd % cd ac_pwd dir
-    dlmwrite(handles.foldname, data, 'delimiter', ',', 'precision', 9); 
+    dlmwrite(handles.foldname, data, 'delimiter', ' ', 'precision', 9); 
     d = dir; %get files
     set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
     refreshcolor;
@@ -2501,7 +2531,7 @@ if nplot == 1
 
                 name1 = [dat_name,'-dpks',num2str(ymin_cut),'_',num2str(ymax_cut),ext];  % New name
                 CDac_pwd
-                dlmwrite(name1, current_data, 'delimiter', ',', 'precision', 9); 
+                dlmwrite(name1, current_data, 'delimiter', ' ', 'precision', 9); 
                 d = dir; %get files
                 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                 refreshcolor;
@@ -2633,8 +2663,8 @@ if nplot == 1
                 name2 = [dat_name,'-sed.rate-',num2str(period),'_',plot_filter_s,ext];
 
                 CDac_pwd
-                dlmwrite(name1, agemodel, 'delimiter', ',', 'precision', 9);
-                dlmwrite(name2, sedrate,  'delimiter', ',', 'precision', 9);
+                dlmwrite(name1, agemodel, 'delimiter', ' ', 'precision', 9);
+                dlmwrite(name2, sedrate,  'delimiter', ' ', 'precision', 9);
                 d = dir; %get files
                 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                 refreshcolor;
@@ -2711,7 +2741,7 @@ if nplot == 1
             if and(and(a == 1, b==0), and(c==1, d==0))
             else
                 CDac_pwd
-                dlmwrite([dat_name,'-new',ext], data, 'delimiter', ',', 'precision', 9);
+                dlmwrite([dat_name,'-new',ext], data, 'delimiter', ' ', 'precision', 9);
                 d = dir; %get files
                 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                 refreshcolor;
@@ -2848,8 +2878,8 @@ if nplot == 1
                 [mod,cpt,R_2] = bayes_cpt(data,k_max,d_min,k_0,v_0,sig_0,num_samp);
                 if savedata == 1
                     CDac_pwd
-                    dlmwrite([dat_name,'-BayesRegModel',ext], mod, 'delimiter', ',', 'precision', 9);
-                    dlmwrite([dat_name,'-BayesChangepoint',ext], cpt, 'delimiter', ',', 'precision', 9);
+                    dlmwrite([dat_name,'-BayesRegModel',ext], mod, 'delimiter', ' ', 'precision', 9);
+                    dlmwrite([dat_name,'-BayesChangepoint',ext], cpt, 'delimiter', ' ', 'precision', 9);
                     disp(['>> ',dat_name,ext,' Bayesian change points output saved. R_2 is ',num2str(R_2)])
                     
                     d = dir; %get files
@@ -3190,9 +3220,9 @@ if nplot == 1
                                 data1 = [xi,yi];
 
                                 CDac_pwd
-                                dlmwrite(name , data, 'delimiter', ',', 'precision', 9);
-                                dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
-                                dlmwrite(name2, czp, 'delimiter', ',', 'precision', 9);
+                                dlmwrite(name , data, 'delimiter', ' ', 'precision', 9);
+                                dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9);
+                                dlmwrite(name2, czp, 'delimiter', ' ', 'precision', 9);
                                 disp(['>>  save profile data as   ',name])
                                 disp(['>>  save control points as ',name1])
                                 disp(['>>  save control pixels as ',name2])
@@ -3466,7 +3496,7 @@ if check == 1;
     end
     dat_merge = findduplicate(dat_merge);
     CDac_pwd
-    dlmwrite('mergedseries.txt', dat_merge, 'delimiter', ',', 'precision', 9);
+    dlmwrite('mergedseries.txt', dat_merge, 'delimiter', ' ', 'precision', 9);
     d = dir; %get files
 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
@@ -3518,8 +3548,8 @@ if check == 1
         dat_new2 = [data_filterout(:,1),  dat_new2(:,2).* data_filterout(:,2)];
     end
     CDac_pwd
-    dlmwrite('multipliedseries1.txt', dat_new1, 'delimiter', ',', 'precision', 9);
-    dlmwrite('multipliedseries2.txt', dat_new2, 'delimiter', ',', 'precision', 9);
+    dlmwrite('multipliedseries1.txt', dat_new1, 'delimiter', ' ', 'precision', 9);
+    dlmwrite('multipliedseries2.txt', dat_new2, 'delimiter', ' ', 'precision', 9);
     d = dir; %get files
 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
@@ -3628,7 +3658,7 @@ for nploti = 1:nplot
                                 handles.math_deleteempty = dataempty;
 
                                 CDac_pwd
-                                dlmwrite(name2, data, 'delimiter', ',', 'precision', 9);
+                                dlmwrite(name2, data, 'delimiter', ' ', 'precision', 9);
                             end
                         end
                     end
@@ -3719,7 +3749,7 @@ for nploti = 1:nplot
                             handles.math_deleteempty = dataempty;
 
                             CDac_pwd
-                            dlmwrite(name2, data, 'delimiter', ',', 'precision', 9);
+                            dlmwrite(name2, data, 'delimiter', ' ', 'precision', 9);
                             d = dir; %get files
                             set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                             refreshcolor;
@@ -3764,7 +3794,7 @@ if nplot == 1
             end
             name1 = [dat_name,'-agemod',ext];  % New name
                 CDac_pwd
-            dlmwrite(name1, agemodel, 'delimiter', ',', 'precision', 9);
+            dlmwrite(name1, agemodel, 'delimiter', ' ', 'precision', 9);
             d = dir; %get files
             set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
             refreshcolor;
@@ -4021,7 +4051,7 @@ if nplot == 1
                                 end
                             end
                         end
-                        dlmwrite(name1, rhox, 'delimiter', ',', 'precision', 9); 
+                        dlmwrite(name1, rhox, 'delimiter', ' ', 'precision', 9); 
                         disp(['>>  Save rho1    : ',name1])   
                         cd(pre_dirML); % return to matlab view folder
                     end
@@ -4170,8 +4200,8 @@ if nplot == 1
                             end
                         end
                     end
-                    dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9); 
-                    dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9); 
+                    dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9); 
+                    dlmwrite(name2, data2, 'delimiter', ' ', 'precision', 9); 
                     disp(['>>  Save rho1 median    : ',name1])   
                     disp(['>>  Save rho1 percentile: ',name2])  
                     
@@ -4492,7 +4522,7 @@ if check == 1;
             if savedata == 1
                 name1 = [dat_name,'-win',num2str(window),'-pda',ext];
                 CDac_pwd  % cd ac_pwd dir
-                dlmwrite(name1, pow, 'delimiter', ',', 'precision', 9);
+                dlmwrite(name1, pow, 'delimiter', ' ', 'precision', 9);
                 disp(name1)
                 disp('col #1      col #2   col #3   col #4')
                 disp('depth/time  ratio    target   all')
@@ -4564,7 +4594,7 @@ if nplot == 1
                             name1 = [dat_name,'-desec',ext];
                             disp(['>> Removed sections are ',answer])
                             CDac_pwd  % cd ac_pwd dir
-                            dlmwrite(name1, data_mer, 'delimiter', ',', 'precision', 9); 
+                            dlmwrite(name1, data_mer, 'delimiter', ' ', 'precision', 9); 
                             refreshcolor;
                             cd(pre_dirML); % return to matlab view folder
                         end
@@ -4630,7 +4660,7 @@ if nplot == 1
                             name1 = [dat_name,'-wgap',ext];
                             disp(['>> Gap location and duration are ',answer])
                             CDac_pwd  % cd ac_pwd dir
-                            dlmwrite(name1, data_mer, 'delimiter', ',', 'precision', 9); 
+                            dlmwrite(name1, data_mer, 'delimiter', ' ', 'precision', 9); 
                             refreshcolor;
                             cd(pre_dirML); % return to matlab view folder
                         end
@@ -4907,7 +4937,7 @@ if check == 1;
                     CDac_pwd  % cd ac_pwd dir
                     % save data
                     name1 = [dat_name,'-c',num2str(c1),'-c',num2str(c2),ext];  % New name
-                    dlmwrite(name1, data_new, 'delimiter', ',', 'precision', 9);
+                    dlmwrite(name1, data_new, 'delimiter', ' ', 'precision', 9);
                     disp(['Extract data from columns ',num2str(c1),' & ',num2str(c2),' : ',dat_name,ext])
                     d = dir; %get files
                     set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
@@ -5049,10 +5079,10 @@ if check == 1;
     end
     
     CDac_pwd; % cd ac_pwd dir
-    dlmwrite(name1, pcn, 'delimiter', ',', 'precision', 9);
-    dlmwrite(name2, coeff, 'delimiter', ',', 'precision', 9);
-    dlmwrite(name3, [latent,explained,mu'], 'delimiter', ',', 'precision', 9);
-    dlmwrite(name4, [data_new(:,1),tsquared], 'delimiter', ',', 'precision', 9);
+    dlmwrite(name1, pcn, 'delimiter', ' ', 'precision', 9);
+    dlmwrite(name2, coeff, 'delimiter', ' ', 'precision', 9);
+    dlmwrite(name3, [latent,explained,mu'], 'delimiter', ' ', 'precision', 9);
+    dlmwrite(name4, [data_new(:,1),tsquared], 'delimiter', ' ', 'precision', 9);
     d = dir; %get files
     set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
     refreshcolor;
@@ -5195,7 +5225,7 @@ if nplot == 1
                 data(:,2) = movemean(data(:,2),smooth_v);
                 name1 = [dat_name,'_',num2str(smooth_v),'ptsm',ext];  % New name
                 CDac_pwd
-                dlmwrite(name1, data, 'delimiter', ',', 'precision', 9); 
+                dlmwrite(name1, data, 'delimiter', ' ', 'precision', 9); 
                 d = dir; %get files
                 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                 refreshcolor;
@@ -5258,7 +5288,7 @@ if nplot == 1
                 try data(:,2) = moveMedian(data(:,2),smooth_v);
                     name1 = [dat_name,'_',num2str(smooth_v),'pts-median',ext];  % New name
                     CDac_pwd
-                    dlmwrite(name1, data, 'delimiter', ',', 'precision', 9); 
+                    dlmwrite(name1, data, 'delimiter', ' ', 'precision', 9); 
                     d = dir; %get files
                     set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                     refreshcolor;
@@ -5325,7 +5355,7 @@ if nplot == 1
                 try data(:,2) = smoothdata(data(:,2),'gaussian',window); 
                     name1 = [dat_name,'_',num2str(window),'pts-Gauss',ext];  % New name
                     CDac_pwd
-                    dlmwrite(name1, data, 'delimiter', ',', 'precision', 9); 
+                    dlmwrite(name1, data, 'delimiter', ' ', 'precision', 9); 
                     d = dir; %get files
                     set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                     refreshcolor;
@@ -6018,3 +6048,30 @@ guidata(hObject, handles);
 
 
 
+
+
+% --------------------------------------------------------------------
+function menu_recplot_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_recplot (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox_acmain,'Value');
+nplot = length(plot_selected);   % length
+if nplot == 1
+    data_name = char(contents(plot_selected));
+    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; data_name = fullfile(ac_pwd,data_name);
+        if isdir(data_name) == 1
+        else
+            [~,~,ext] = fileparts(data_name);
+            if sum(strcmp(ext,handles.filetype)) > 0
+                current_data = load(data_name);
+                handles.current_data = current_data;
+                handles.data_name = data_name;
+                guidata(hObject, handles);
+                RecPlotGUI(handles);
+            end
+        end
+end
+guidata(hObject, handles);

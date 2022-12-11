@@ -349,7 +349,7 @@ set(runbt,'CData',imread('menu_robot.jpg'))
             if isdir(ac_pwd)
                 cd(ac_pwd)
             end
-            dlmwrite([name1,ext], dat, 'delimiter', ',', 'precision', 9);
+            dlmwrite([name1,ext], dat, 'delimiter', ' ', 'precision', 9);
             disp(['>>  Saving data. See main window: ', name1,ext])
             d = dir; %get files
             set(listbox_acmain,'String',{d.name},'Value',1) %set string
@@ -470,7 +470,7 @@ set(runbt,'CData',imread('menu_robot.jpg'))
                     if isdir(ac_pwd)
                         cd(ac_pwd)
                     end
-                    dlmwrite([name1,ext], dati, 'delimiter', ',', 'precision', 9);
+                    dlmwrite([name1,ext], dati, 'delimiter', ' ', 'precision', 9);
                     disp(['>>  Saving data. See main window: ', name1,ext])
                     d = dir; %get files
                     set(listbox_acmain,'String',{d.name},'Value',1) %set string
@@ -556,7 +556,7 @@ set(runbt,'CData',imread('menu_robot.jpg'))
                 if isdir(ac_pwd)
                     cd(ac_pwd)
                 end
-                dlmwrite([name1,ext], dat, 'delimiter', ',', 'precision', 9);
+                dlmwrite([name1,ext], dat, 'delimiter', ' ', 'precision', 9);
                 disp(['>>  Saving data. See main window: ', name1,ext])
                 d = dir; %get files
                 set(listbox_acmain,'String',{d.name},'Value',1) %set string
@@ -616,8 +616,8 @@ set(runbt,'CData',imread('menu_robot.jpg'))
                     if isdir(ac_pwd)
                         cd(ac_pwd)
                     end
-                    dlmwrite(name11, data11, 'delimiter', ',', 'precision', 9);
-                    dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9);
+                    dlmwrite(name11, data11, 'delimiter', ' ', 'precision', 9);
+                    dlmwrite(name2, data2, 'delimiter', ' ', 'precision', 9);
                     disp(['>>  Saving data. See main window: ', name11,ext])
                     disp(['>>  Saving data. See main window: ', name2,ext])
                     d = dir; %get files
@@ -674,7 +674,7 @@ set(runbt,'CData',imread('menu_robot.jpg'))
                     if isdir(ac_pwd)
                         cd(ac_pwd)
                     end
-                    dlmwrite(name11, data11, 'delimiter', ',', 'precision', 9);
+                    dlmwrite(name11, data11, 'delimiter', ' ', 'precision', 9);
                     disp(['>>  Saving data. See main window: ', name11,ext])
                     d = dir; %get files
                     set(listbox_acmain,'String',{d.name},'Value',1) %set string
