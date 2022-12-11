@@ -29,8 +29,8 @@ else
     set(handles.edit5,'Enable','off')
     set(handles.edit6,'Enable','off')
 end
-try
-    threshold = str2double( get(handles.edit2,'String') );
+threshold = str2double( get(handles.edit2,'String') );
+if ~isnan(threshold)
     if threshold > max(S(:))
         threshold = max(S(:));
         set(handles.edit2,'String',num2str(threshold))
@@ -40,8 +40,8 @@ try
         set(handles.edit2,'String',num2str(threshold))
         warning(['Threshold is too small. Must be larger than ', num2str(min(S(:)))])
     end
-catch
-    error('Threshold should be a number')
+    else
+    errordlg('Threshold should be a number')
 end
 
 if showdet == 1
@@ -54,8 +54,8 @@ if showdet == 1
         wsN = median(diff(data_s(:,1)));
     end
     % read window size
-    try
-        w = str2double( get(handles.edit3,'String') );
+    w = str2double( get(handles.edit3,'String') );
+    if ~isnan(w)
         if w > winN
             w = winN;
             set(handles.edit3,'String',num2str(w))
@@ -68,12 +68,13 @@ if showdet == 1
         if ncol > 1
             w = round(N * w/winN);  % force integer
         end
-    catch
-        error(' Window size should be a number ')
+    else
+        errordlg(' Window size should be a number ')
+        return
     end
     % read sliding step
-    try
-        ws = str2double( get(handles.edit4,'String') );
+    ws = str2double( get(handles.edit4,'String') );
+    if ~isnan(ws)
         if ws > w
             ws = w;
             set(handles.edit4,'String',num2str(ws))
@@ -86,20 +87,21 @@ if showdet == 1
         if ncol > 1
             ws = ceil(N * ws/winN);  % force integer
         end
-    catch
-        error(' Sliding step should be a number ')
+    else
+        errordlg(' Sliding step should be a number ')
+        return
     end
     % read theiler window
-    try
-        theiler_window = str2double( get(handles.edit5,'String'));
-    catch
-        error('Theiler window should be a number')
+    theiler_window = str2double( get(handles.edit5,'String'));
+    if isnan(theiler_window)
+        errordlg('Theiler window should be a number')
+        return
     end
     % read lmin
-    try
-        lmin = str2double( get(handles.edit6,'String'));
-    catch
+    lmin = str2double( get(handles.edit6,'String'));
+    if isnan(lmin)
         error('Minimal length of diagonal line structure should be a number')
+        return
     end
     %
     % DET
