@@ -1083,8 +1083,8 @@ if nametype > 0
 % refresh AC main window
     figure(handles.acfigmain);
     CDac_pwd; % cd ac_pwd dir
-    dlmwrite(handles.name1, new_data, 'delimiter', ',', 'precision', 9);
-    dlmwrite(name2, current_trend, 'delimiter', ',', 'precision', 9);
+    dlmwrite(handles.name1, new_data, 'delimiter', ' ', 'precision', 9);
+    dlmwrite(name2, current_trend, 'delimiter', ' ', 'precision', 9);
     refreshcolor;
     disp('>>  AC main window: see trend and detrended data')
     cd(pre_dirML); % return to matlab view folder

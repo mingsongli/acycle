@@ -939,9 +939,9 @@ if get(handles.checkbox9,'value')
     name1 = [filename,'-evofft-s','.txt'];
     name2 = [filename,'-evofft-freq','.txt'];
     name3 = [filename,'-evofft-time','.txt'];
-    dlmwrite(name1, s, 'delimiter', ',', 'precision', 9); 
-    dlmwrite(name2, x_grid', 'delimiter', ',', 'precision', 9); 
-    dlmwrite(name3, y_grid', 'delimiter', ',', 'precision', 9); 
+    dlmwrite(name1, s, 'delimiter', ' ', 'precision', 9); 
+    dlmwrite(name2, x_grid', 'delimiter', ' ', 'precision', 9); 
+    dlmwrite(name3, y_grid', 'delimiter', ' ', 'precision', 9); 
     d = dir; %get files
     set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
     refreshcolor;

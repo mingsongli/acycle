@@ -184,7 +184,7 @@ if savedatayn == 1
     [~,name2,ext2] = fileparts(handles.plot_s{2});
     name1 = [name2,'-LeadLag-',name1,ext2];
     try
-        dlmwrite(name1, [llgrid',RMSE'], 'delimiter', ',', 'precision', 9);
+        dlmwrite(name1, [llgrid',RMSE'], 'delimiter', ' ', 'precision', 9);
     catch
     end
     d = dir; %get files

@@ -329,7 +329,7 @@ for i = 1:nrow
     xmax2 = nanmax(xmax2,max(time));
     xlim([xmin2,xmax2])
     add_list = [dat_name,'-TD-',agemodelname];
-    dlmwrite(add_list, handles.tunedseries, 'delimiter', ',', 'precision', 9);
+    dlmwrite(add_list, handles.tunedseries, 'delimiter', ' ', 'precision', 9);
     d = dir; %get files
     set(handles.listbox1,'String',{d.name},'Value',1) %set string
 end

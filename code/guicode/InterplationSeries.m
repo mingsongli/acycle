@@ -174,7 +174,7 @@ CDac_pwd; % cd ac_pwd dir
 [~,name1,~] = fileparts(handles.plot_s{1});
 [~,name2,ext2] = fileparts(handles.plot_s{2});
 name1 = [name2,'-IntP-',name1,ext2];
-dlmwrite(name1, dat2int, 'delimiter', ',', 'precision', 9);
+dlmwrite(name1, dat2int, 'delimiter', ' ', 'precision', 9);
 d = dir; %get files
 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;

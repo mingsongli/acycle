@@ -400,7 +400,7 @@ end
 name = [handles.solution,'-',parameter,'-',num2str(t1),'-',num2str(t2),'.txt'];
 %csvwrite(name,dat)
 CDac_pwd; % cd ac_pwd dir
-dlmwrite(name, dat, 'delimiter', ',', 'precision', 9);
+dlmwrite(name, dat, 'delimiter', ' ', 'precision', 9);
 cd(pre_dirML); % return to matlab view folder
 % close
 figdata = figure; 

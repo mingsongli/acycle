@@ -273,7 +273,7 @@ if get(handles.radiobutton4,'Value')
 end
 
 CDac_pwd; % cd ac_pwd dir
-dlmwrite(handles.filename, [handles.x,handles.y], 'delimiter', ',', 'precision', 9);
+dlmwrite(handles.filename, [handles.x,handles.y], 'delimiter', ' ', 'precision', 9);
 % refresh AC main window
 figure(handles.acfigmain);
 %CDac_pwd; % cd working dir

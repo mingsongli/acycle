@@ -1771,7 +1771,7 @@ if ~isempty(answer)
     srn_map(:,2) = (sr1+handles.srstep*(srn_best(1,:)-1))';
     srn_map(:,1) = handles.out_depth;
     CDac_pwd
-    dlmwrite(name1, srn_map, 'delimiter', ',', 'precision', 9);
+    dlmwrite(name1, srn_map, 'delimiter', ' ', 'precision', 9);
     disp(['>> Sedimentation rate file: ',name1])
     % Log name
     log_name = [name0,'-log',handles.ext]; 
