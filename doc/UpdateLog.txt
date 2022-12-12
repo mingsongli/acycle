@@ -7,7 +7,7 @@ Date    : Dec 11, 2022 -
 By      : Mingsong Li (Peking University)
 
     1. Recurrence Plot: Timeseries-Recurrence Plot tool!
-    2. Unit: add more options
+    2. Main Window - Unit listbox: add more options
     3. Save text data: save SPACE delimited files, rather than COMMA delimited files
 
 _______________________________________

@@ -22,7 +22,7 @@ function varargout = RecPlotGUI(varargin)
 
 % Edit the above text to modify the response to help RecPlotGUI
 
-% Last Modified by GUIDE v2.5 11-Dec-2022 16:36:31
+% Last Modified by GUIDE v2.5 12-Dec-2022 13:56:35
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -62,6 +62,16 @@ set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
 handles.MonZoom = varargin{1}.MonZoom;
 handles.sortdata = varargin{1}.sortdata;
 
+data_s = varargin{1}.current_data;
+handles.unit = varargin{1}.unit;
+handles.unit_type = varargin{1}.unit_type;
+handles.current_data = data_s;
+handles.data_name = varargin{1}.data_name;
+handles.path_temp = varargin{1}.path_temp;
+handles.listbox_acmain = varargin{1}.listbox_acmain; % save path
+handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
+[dat_dir,handles.filename,exten] = fileparts(handles.data_name);
+
 
 if ismac
     set(gcf,'position',[0.35,0.4,0.35,0.25]* handles.MonZoom) % set position
@@ -77,32 +87,26 @@ set(handles.text3,'position',[0.05,0.6,0.09,0.064])
 set(handles.edit2,'position',[0.145,0.58,0.13,0.1])
 set(handles.checkbox1,'position',[0.105,0.4,0.15,0.15],'Value',1)
 set(handles.checkbox2,'position',[0.105,0.25,0.15,0.15],'Value',0)
-set(handles.checkbox3,'position',[0.105,0.1,0.15,0.15],'Value',0)
+set(handles.checkbox3,'position',[0.105,0.1,0.11,0.15],'Value',0)
+set(handles.checkbox4,'position',[0.22,0.1,0.11,0.15],'Value',0)
 
 set(handles.uipanel1,'position',[0.36,0.1,0.5,0.5])
 set(handles.text4,'position',[0.03,0.7,0.24,0.12])
-set(handles.edit3,'position',[0.27,0.65,0.2,0.18])
+set(handles.edit3,'position',[0.27,0.65,0.1,0.18])
 set(handles.text5,'position',[0.03,0.4,0.24,0.12])
-set(handles.edit4,'position',[0.27,0.35,0.2,0.18])
-set(handles.text6,'position',[0.5,0.7,0.27,0.12])
-set(handles.edit5,'position',[0.77,0.65,0.11,0.18])
-set(handles.text7,'position',[0.5,0.4,0.27,0.12])
-set(handles.edit6,'position',[0.77,0.35,0.11,0.18])
+set(handles.edit4,'position',[0.27,0.35,0.1,0.18])
+set(handles.text6,'position',[0.55,0.7,0.27,0.12])
+set(handles.edit5,'position',[0.83,0.65,0.11,0.18])
+set(handles.text7,'position',[0.55,0.4,0.27,0.12])
+set(handles.edit6,'position',[0.83,0.35,0.11,0.18])
+set(handles.text9,'position',[0.4,0.7,0.13,0.12],'String',handles.unit)
+set(handles.text10,'position',[0.4,0.4,0.13,0.12],'String',handles.unit)
+
 set(handles.pushbutton1,'position',[0.87,0.1,0.12,0.12])
 % Choose default command line output for RecPlotGUI
 handles.output = hObject;
 handles.RecPlotGUI = gcf;
 set(gcf,'Name','Acycle: Recurrence Plot')
-
-data_s = varargin{1}.current_data;
-handles.unit = varargin{1}.unit;
-handles.unit_type = varargin{1}.unit_type;
-handles.current_data = data_s;
-handles.data_name = varargin{1}.data_name;
-handles.path_temp = varargin{1}.path_temp;
-handles.listbox_acmain = varargin{1}.listbox_acmain; % save path
-handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
-[dat_dir,handles.filename,exten] = fileparts(handles.data_name);
 
 % size of data
 [N, ncol] = size(data_s);
@@ -132,10 +136,11 @@ else
     data_s = handles.current_data;
     x = data_s(:,2);
     t = data_s(:,1);
-    w = abs(win_ratio * (max(t) - min(t)));  % 30%
     ws = median(diffx);
-    if w/ws > 500
-        ws = w/300;
+    wmax = abs((max(t) - min(t)));  % 30%
+    w = ws * 30;
+    if w > wmax
+        w = wmax;
     end
 end
 for i = 1:N
@@ -432,3 +437,17 @@ function edit7_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in checkbox4.
+function checkbox4_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox4
+
+update_recplot
+
+% Update handles structure
+guidata(hObject, handles);

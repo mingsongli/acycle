@@ -49,7 +49,7 @@
 %   Victor A. Piedrahita Velez, 
 %   Chuanyue Wang, Meng Wang, Yujing Wu, 
 %   Deke Xu, Xu Yao, Qiyan Zhang, Haotian Zhang, Haoxun Zhang, 
-%   Xiaoyu Zhang, Yang (Wendy) Zhang, Hanyu Zhu, Christian Zeeden
+%   Xiaoyu Zhang, Yang Zhang, Ze Zhang, Hanyu Zhu, Christian Zeeden
 
 %**************************************************************************
 % Copyright (C) 2017-2023
