@@ -16,6 +16,8 @@ end
 showseries = get(handles.checkbox1,'Value');
 showdet = get(handles.checkbox2,'Value');
 fliptime = get(handles.checkbox3,'Value');
+flipseries = get(handles.checkbox4,'Value');
+
 ylabeli = get(handles.edit7,'String');
 if showdet == 1
     set(handles.edit3,'Enable','on')
@@ -105,8 +107,8 @@ if showdet == 1
     end
     %
     % DET
-    if N > 500
-        hwarn = warndlg('Warning: long time series. Please wait. Upate to several minutes','Warning: DET calculation');
+    if N > 300
+        hwarn = warndlg('Warning: long time series. Please wait. Up to several minutes','DET calculation');
     end
     [DETy,testi] = crp_pdist(x,w,ws,theiler_window, lmin, 0);
     DETx = t(testi) + 1/2 * winN * w/N;
@@ -136,7 +138,11 @@ if showseries == 1
         else
             set (gca, 'xdir', 'normal' )
         end
-
+        if flipseries ==1
+            set (gca, 'ydir', 'reverse' )
+        else
+            set (gca, 'ydir', 'normal' )
+        end
         subplot('position',[0.15 0.75 0.7 0.11]);
         plot(DETx,DETy,'k','LineWidth',2)
         xlim([min(t), max(t)])
@@ -188,7 +194,13 @@ if showseries == 1
         else
             set (gca, 'xdir', 'normal' )
         end
-
+        
+        if flipseries ==1
+            set (gca, 'ydir', 'reverse' )
+        else
+            set (gca, 'ydir', 'normal' )
+        end
+        
         subplot('position',[0.15 0.05 0.7 0.7]);
         imagesc(t, t, S < threshold);
         set(gca,'XMinorTick','on','YMinorTick','on')
