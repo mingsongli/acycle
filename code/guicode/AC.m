@@ -466,6 +466,7 @@ handles = guidata(hObject);
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
+check = [];
 % check
 for i = 1:nplot
     plot_no = plot_selected(i);
