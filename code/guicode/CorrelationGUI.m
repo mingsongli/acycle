@@ -578,9 +578,9 @@ if savedatayn == 1
     nameagemodel = [name2,'-TD-',name1,'-AgeMod',ext2];
     try
         cd(seriesdir)
-        dlmwrite(namedata, data1t, 'delimiter', ',', 'precision', 9);
-        dlmwrite(namesr,   sedrate, 'delimiter', ',', 'precision', 9);
-        dlmwrite(nameagemodel,agemodel, 'delimiter', ',', 'precision', 9);
+        dlmwrite(namedata, data1t, 'delimiter', ' ', 'precision', 9);
+        dlmwrite(namesr,   sedrate, 'delimiter', ' ', 'precision', 9);
+        dlmwrite(nameagemodel,agemodel, 'delimiter', ' ', 'precision', 9);
     catch
     end
     d = dir; %get files

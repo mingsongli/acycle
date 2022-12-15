@@ -487,9 +487,9 @@ if savedata ==1
             name2 = [handles.filename,'-CSA-random-MonteCarlo','.txt'];
         end
         CDac_pwd
-        dlmwrite(name1, xx, 'delimiter', ',', 'precision', 9); 
+        dlmwrite(name1, xx, 'delimiter', ' ', 'precision', 9); 
         if clmodel == 2
-            dlmwrite(name2, Y1, 'delimiter', ',', 'precision', 9); 
+            dlmwrite(name2, Y1, 'delimiter', ' ', 'precision', 9); 
         end
         d = dir; %get files
         set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
@@ -506,7 +506,7 @@ if savedata ==1
         %xx = [P',R',Y'];
         name1 = [handles.filename,'-CSA-random-robustAR1','.txt'];
         CDac_pwd
-        dlmwrite(name1, xx, 'delimiter', ',', 'precision', 9); 
+        dlmwrite(name1, xx, 'delimiter', ' ', 'precision', 9); 
         d = dir; %get files
         set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
         refreshcolor;
@@ -524,7 +524,7 @@ if savedata ==1
         xx = [P',R',Y',pll(:,1)];
         name1 = [handles.filename,'-CSA-random-white','.txt'];
         CDac_pwd
-        dlmwrite(name1, xx, 'delimiter', ',', 'precision', 9); 
+        dlmwrite(name1, xx, 'delimiter', ' ', 'precision', 9); 
         d = dir; %get files
         set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
         refreshcolor;

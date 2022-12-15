@@ -515,6 +515,7 @@ set(gcf,'units','norm') % set location
 set(gcf,'color','w');
 set(handles.ecocofigspectrum,'position',[0.2,0.4,0.2,0.4]) % set position
 dt = (median(diff(datx)));
+
 [p1,f] = periodogram(daty,[],handles.pad,1/dt);  % power of dat
 % remove AR1 noise
 if red == 0
@@ -2360,12 +2361,13 @@ if ~isempty(answer)
     srn_map(:,2) = (sr1+handles.srstep*(srn_best(1,:)-1))';
     srn_map(:,1) = handles.out_depth;
     CDac_pwd
-    dlmwrite(name1, srn_map, 'delimiter', ',', 'precision', 9);
+    dlmwrite(name1, srn_map, 'delimiter', ' ', 'precision', 9);
     if handles.lang_choice==0 
         disp(['>> Sedimentation rate file: ',name1])
     else
         disp([ec77,name1])
     end
+
     % Log name
     log_name = [name0,'-log',handles.ext]; 
     if exist([pwd,handles.slash_v,log_name])

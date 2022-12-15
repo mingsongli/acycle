@@ -264,7 +264,7 @@ xlim([min(datp(:,1)) max(datp(:,1))])
 name0 = [handles.dat_name,'-','prewhiten-',num2str(rho1)];
 name1 = [name0,handles.ext];
 CDac_pwd
-dlmwrite(name1, datp, 'delimiter', ',', 'precision', 9);
+dlmwrite(name1, datp, 'delimiter', ' ', 'precision', 9);
 disp(['>> Sedimentation rate file: ',name1])
 d = dir; %get files
 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string

@@ -565,13 +565,13 @@ if exist(name1) || exist(name3)
     end
 end
 
-dlmwrite(name1, tableData(:,2:3), 'delimiter', ',', 'precision', 9);
-dlmwrite(name3, tableData, 'delimiter', ',', 'precision', 9);
+dlmwrite(name1, tableData(:,2:3), 'delimiter', ' ', 'precision', 9);
+dlmwrite(name3, tableData, 'delimiter', ' ', 'precision', 9);
 
 try
     YYYtrue = handles.YYYtrue;
     name2 = 'DataExtract-auto.txt';
-    dlmwrite(name2, YYYtrue, 'delimiter', ',', 'precision', 9);
+    dlmwrite(name2, YYYtrue, 'delimiter', ' ', 'precision', 9);
 catch
 end
 cd(pre_dirML); % return to matlab view folder

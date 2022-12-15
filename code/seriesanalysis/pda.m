@@ -1,7 +1,14 @@
 function [powratio,m]=pda(data,fmin,fmax,window,nw)
-%% pda calculates evolutionary spectral power of a selected narrow frequency band
-%% divided by total spectral power: (selected power) / (total power)
+%% MATLAB FUNCTION PDA
+%
+% PDA (power decomposition analysis) calculates evolutionary spectral power
+% of a selected narrow frequency band
+% divided by total spectral power: (selected power) / (total power)
+%
+% usage: [powratio,m]=pda(data,fmin,fmax,window,nw)
+%
 % INPUT
+%
 % data: evenly spaced 2-column time series; column 1 is time value
 %      in ascending order; column 2 is signal value 
 % fmin:   lower cutoff frequency (> 0) of selected frequency band
@@ -14,16 +21,18 @@ function [powratio,m]=pda(data,fmin,fmax,window,nw)
 %      nfft.m included in this script
 %
 % OUTPUT
+%
 % powratio: 4 columns: time, power ratio, power of selected frequency & total power
 %           (power ratio is power of selected frequency divided by total power)
 % m:        Time of pmtm calculation
 %
-%% Mingsong Li & Linda Hinnov (China Univ Geosci & Johns Hopkins Univ), Nov 12, 2014
-%
+% By Mingsong Li & Linda Hinnov (China Univ Geosci & Johns Hopkins Univ)
+% Nov 12, 2014
+%%
 datasxdif=diff(data(:,1));
 dt=mean(datasxdif);        % sample rate
 nyquist=1/(2*dt);          % Nyquist frequency
-[nrow ncol]=size(data);     % size of data
+[nrow , ~]=size(data);     % size of data
 xdata=data(:,2);           % values of time series
 npts=round(window/dt);    % number of time series used for one calculation
 m=nrow-npts+1;          % number of pmtm calculations, n_row of pmtm matrix results
