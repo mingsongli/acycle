@@ -134,15 +134,10 @@ set(gcf,'units','norm') % set location
 %% language
 
 lang_choice = load('ac_lang.txt');
-langdict = readtable('langdict.csv');
-lang_id = langdict.x_ID;
-if lang_choice == 0
-    % English
-    lang_var = langdict.en;
-elseif lang_choice == 1
-    % Chinese
-    lang_var = langdict.cn;
-end
+langdict = readtable('langdict.xlsx');
+lang_id = langdict.ID;
+lang_var = table2cell(langdict(:, 2 + lang_choice));
+
 if lang_choice > 0
     % menu
     [~, locb] = ismember('menu01',lang_id);
@@ -202,6 +197,8 @@ if lang_choice > 0
     set(handles.menu_samplerate,'text',lang_var{locb})
     [~, locb] = ismember('menu47',lang_id);
     set(handles.menu_datadistri,'text',lang_var{locb})
+    [~, locb] = ismember('menu48',lang_id);
+    set(handles.menu_sound,'text',lang_var{locb})
     % Basic Series
     [~, locb] = ismember('menu50',lang_id);
     set(handles.menu_insol,'text',lang_var{locb})
@@ -236,12 +233,16 @@ if lang_choice > 0
     [~, locb] = ismember('menu65',lang_id);
     set(handles.menu_example_plotdigitizer,'text',lang_var{locb})
     [~, locb] = ismember('menu66',lang_id);
+    set(handles.menu_example_sphalerite,'text',lang_var{locb})
+    [~, locb] = ismember('menu67',lang_id);
     set(handles.menu_extinction_CSA,'text',lang_var{locb})
     % Math
     [~, locb] = ismember('menu70',lang_id);
     set(handles.menu_sort,'text',lang_var{locb})
     [~, locb] = ismember('menu71',lang_id);
     set(handles.menu_interp,'text',lang_var{locb})
+    [~, locb] = ismember('menu93',lang_id);
+    set(handles.menu_interpolationGUI,'text',lang_var{locb})
     [~, locb] = ismember('menu72',lang_id);
     set(handles.menu_interpseries,'text',lang_var{locb})
     [~, locb] = ismember('menu73',lang_id);
@@ -280,6 +281,8 @@ if lang_choice > 0
     set(handles.menu_imshow,'text',lang_var{locb})
     [~, locb] = ismember('menu90',lang_id);
     set(handles.menu_rgb2gray,'text',lang_var{locb})
+    [~, locb] = ismember('menu94',lang_id);
+    set(handles.menu_rgb2lab,'text',lang_var{locb})
     [~, locb] = ismember('menu91',lang_id);
     set(handles.menu_improfile,'text',lang_var{locb})
     [~, locb] = ismember('menu92',lang_id);
@@ -307,6 +310,8 @@ if lang_choice > 0
     set(handles.menu_waveletGUI,'text',lang_var{locb})
     [~, locb] = ismember('menu110',lang_id);
     set(handles.menu_CSA,'text',lang_var{locb})
+    [~, locb] = ismember('menu128',lang_id);
+    set(handles.menu_recplot,'text',lang_var{locb})
     [~, locb] = ismember('menu111',lang_id);
     set(handles.menu_coh,'text',lang_var{locb})
     [~, locb] = ismember('menu112',lang_id);
@@ -354,6 +359,13 @@ if lang_choice > 0
     set(handles.menu_contact,'text',lang_var{locb})
     [~, locb] = ismember('menu144',lang_id);
     set(handles.menu_email,'text',lang_var{locb})
+    
+    % listbox 1
+    for ii = 1:6
+        [~, locb] = ismember(['MainListOrder',num2str(ii)],lang_id);
+        sortorder{ii} = lang_var{locb};
+    end
+    set(handles.popupmenu2,'String',sortorder)
 end
 %% push_up
 h_push_up = uicontrol('Style','pushbutton','Tag','push_up');%,'BackgroundColor','white','ForegroundColor','white');  % set style, Tag
@@ -469,13 +481,7 @@ if ispc
     set(h_push_openfolder,'BackgroundColor','white') % 
 end
 
-[lia, locb] = ismember('menu14',lang_id);
-if lia
-    tooltip = lang_var{locb};
-else
-    tooltip = '<html>Select unit<br>for dataset';  % tooltip
-end
-set(handles.popupmenu1,'position', [0.83,0.92,0.15,0.06],'tooltip',tooltip)
+% sort
 
 [lia, locb] = ismember('menu15',lang_id);
 if lia
@@ -483,8 +489,25 @@ if lia
 else
     tooltip = '<html>Sort<br>dataset';  % tooltip
 end
-set(handles.popupmenu2,'position', [0.67,0.92,0.15,0.06],'tooltip',tooltip)
+set(handles.popupmenu2,'position', [0.6,0.92,0.15,0.06],'tooltip',tooltip)
+% unit
+[lia, locb] = ismember('menu14',lang_id);
+if lia
+    tooltip = lang_var{locb};
+else
+    tooltip = '<html>Select unit<br>for dataset';  % tooltip
+end
+set(handles.popupmenu1,'position', [0.76,0.92,0.13,0.06],'tooltip',tooltip)
+% unit language
+[lia, locb] = ismember('menu26',lang_id);
+if lia
+    tooltip = lang_var{locb};
+else
+    tooltip = '<html>Unit in English';  % tooltip
+end
+set(handles.main_unit_en,'position', [0.89,0.955,0.07,0.025],'tooltip',tooltip,'Value',0)
 
+% working directory
 [lia, locb] = ismember('menu16',lang_id);
 if lia
     tooltip = lang_var{locb};
@@ -533,7 +556,8 @@ else
     fclose(fileID);
 end
 handles.sortdata = 'date descend';
-set(handles.popupmenu2,'value',4)
+handles.val1 = 4;
+set(handles.popupmenu2,'value',handles.val1)
 refreshcolor;
 cd(path_root) %back to root path
 
@@ -576,6 +600,8 @@ assignin('base','unit_type',handles.unit_type)
 handles.lang_choice = lang_choice;
 handles.lang_id = lang_id;
 handles.lang_var = lang_var;
+
+handles.popupmenu1_default = get(handles.popupmenu1,'String');
 
 % Update handles structure
 guidata(hObject, handles);
@@ -2027,69 +2053,19 @@ function popupmenu1_Callback(hObject, eventdata, handles)
 %        contents{get(hObject,'Value')} returns selected item from popupmenu1
 str = get(hObject, 'String');
 val = get(hObject,'Value');
-% Set current data to the selected data set.
-switch str{val}
-case 'unit' % User selects unit.
-   handles.unit = 'unit';
-   handles.unit_type = 0;
-case 'm' % User selects m.
-   handles.unit = 'm';
-   handles.unit_type = 1;
-case 'dm' % User selects dm.
-   handles.unit = 'dm';
-   handles.unit_type = 1;
-case 'cm' % User selects cm.
-    handles.unit = 'cm';
+
+handles.unit = str{val};
+
+if ismember(val, [0, 8, 16])
+    handles.unit_type = 0;
+elseif ismember(val, 2:7)
     handles.unit_type = 1;
-case 'mm' % User selects mm.
-   handles.unit = 'mm';
-   handles.unit_type = 1;
-case 'ft' % User selects ft.
-   handles.unit = 'ft';
-   handles.unit_type = 1;
-case 'km' % User selects km.
-   handles.unit = 'km';
-   handles.unit_type = 1;
-case 'second' % User selects year.
-   handles.unit = 'second';
-   handles.unit_type = 2;
-case 'minute' % User selects year.
-   handles.unit = 'minute';
-   handles.unit_type = 2;
-case 'hour' % User selects year.
-   handles.unit = 'hour';
-   handles.unit_type = 2;
-case 'day' % User selects year.
-   handles.unit = 'day';
-   handles.unit_type = 2;
-case 'month' % User selects year.
-   handles.unit = 'month';
-   handles.unit_type = 2;
-case 'year' % User selects year.
-   handles.unit = 'year';
-   handles.unit_type = 2;
-case 'Kyr' % User selects kilo-year.
-   handles.unit = 'Kyr';
-   handles.unit_type = 2;
-case 'Myr' % User selects million years.
-   handles.unit = 'Myr';
-   handles.unit_type = 2;
-case 'Gyr' % User selects million years.
-   handles.unit = 'Gyr';
-   handles.unit_type = 2;
-case 'a' % User selects million years.
-   handles.unit = 'a';
-   handles.unit_type = 2;
-case 'Ka' % User selects million years.
-   handles.unit = 'Ka';
-   handles.unit_type = 2;
-case 'Ma' % User selects million years.
-   handles.unit = 'Ma';
-   handles.unit_type = 2;
-case 'Ga' % User selects million years.
-   handles.unit = 'Ga';
-   handles.unit_type = 2;
+elseif ismember(val, 9:15)
+    handles.unit_type = 2;
+elseif ismember(val, 17:22)
+    handles.unit_type = 2;
 end
+
 assignin('base','unit',handles.unit)
 guidata(hObject, handles);
 
@@ -8306,6 +8282,7 @@ function popupmenu2_Callback(hObject, eventdata, handles)
 %        contents{get(hObject,'Value')} returns selected item from popupmenu2
 str1 = get(handles.popupmenu2,'string');
 val1 = get(handles.popupmenu2,'value');
+handles.val1 = val1;
 handles.sortdata = str1{val1};
 CDac_pwd; % cd working dir
 refreshcolor;
@@ -8497,4 +8474,26 @@ if nplot == 1
         end
 end
 guidata(hObject, handles);
-%>>>>>>> dev_nolang
+
+
+
+% --- Executes on button press in main_unit_en.
+function main_unit_en_Callback(hObject, eventdata, handles)
+% hObject    handle to main_unit_en (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of main_unit_en
+
+if get(hObject,'Value') > 0
+    % listbox 1
+    lang_id = handles.lang_id;
+    lang_var = handles.lang_var;
+    for ii = 1:22
+        [~, locb] = ismember(['MainUnit',num2str(ii)],lang_id);
+        sortorder{ii} = lang_var{locb};
+    end
+    set(handles.popupmenu1,'String',sortorder)
+else
+    set(handles.popupmenu1,'String',handles.popupmenu1_default)
+end
