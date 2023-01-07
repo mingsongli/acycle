@@ -93,7 +93,6 @@ handles.lang_id = lang_id;
 handles.lang_var = lang_var;
 %
 
-
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
 h=get(gcf,'Children');  % get all content
@@ -348,14 +347,26 @@ for i = 1:nrow
     set(gca,'XMinorTick','on','YMinorTick','on')
     xmin1 = nanmin(xmin1,min(data(:,1)));
     xmax1 = nanmax(xmax1,max(data(:,1)));
-    title('Origin data')
+    if handles.lang_choice==0
+        title('Origin data')
+    else
+        [~, locb1] = ismember('a41',handles.lang_id);
+        lang_var = handles.lang_var;
+        title(lang_var{locb1})
+    end
     xlim([xmin1,xmax1])
     [time,handles.sr] = depthtotime(data(:,1),agemodel);
     handles.tunedseries = [time,data(:,2)];
     subplot(2,1,2)
     plot(time,data(:,2)); hold on;
     set(gca,'XMinorTick','on','YMinorTick','on')
-    title('Tuned data')
+    if handles.lang_choice==0
+        title('Tuned data')
+    else
+        [~, locb1] = ismember('a42',handles.lang_id);
+        lang_var = handles.lang_var;
+        title(lang_var{locb1})
+    end
     xmin2 = nanmin(xmin2,min(time));
     xmax2 = nanmax(xmax2,max(time));
     xlim([xmin2,xmax2])
@@ -399,10 +410,23 @@ axes('Position',[0.2 0.2 0.7 0.7],...
   'FontSize',14)
 line(tiepoints(:,2),tiepoints(:,1),...
   'LineWidth',1)
-xlabel('Age')
-ylabel(['Depth (',handles.unit,')'])
+
+if handles.lang_choice==0
+    xlabel('Age')
+    ylabel(['Depth (',handles.unit,')'])
+    title(['Age Model'])
+else
+    [~, locb1] = ismember('main22',handles.lang_id);
+    lang_var = handles.lang_var;
+    xlabel(lang_var{locb1})
+    [~, locb1] = ismember('main27',handles.lang_id);
+    title(lang_var{locb1})
+    [~, locb1] = ismember('main23',handles.lang_id);
+    ylabel([lang_var{locb1},' (',handles.unit,')'])
+end
+
 set(gca,'XMinorTick','on','YMinorTick','on')
-title(['Age Model'])
+
 cd(pre_dirML); % return view dir
 
 % --- Executes on button press in pushbutton12.
@@ -448,6 +472,7 @@ for i = 1:nrow
     
     %  display in a first diagram with two axes.
     figure1 = figure('Position',[50 50 1000 400], 'Color',[1 1 1]) ;
+    
     ax(1) = axes('Position',[0.1 0.4 0.8 0.4],...
       'Color','None',...
       'XTick',age,...
@@ -456,10 +481,24 @@ for i = 1:nrow
       'FontSize',14);
     line1 = line(t,rec,...
       'LineWidth',1);
-    xlabel(ax(1),'Age')
-    ylabel(ax(1),'Proxy Value')
-    title(ax(1),[dat_name,': Tuned'], 'Interpreter', 'none')
+    
+    
     set(gca,'XMinorTick','on','YMinorTick','on')
+    
+    if handles.lang_choice==0
+        xlabel(ax(1),'Age')
+        ylabel(ax(1),'Proxy Value')
+        title(ax(1),[dat_name,': Tuned'], 'Interpreter', 'none')
+    else
+        [~, locb1] = ismember('main22',handles.lang_id);
+        lang_var = handles.lang_var;
+        xlabel(ax(1),lang_var{locb1})
+        [~, locb1] = ismember('main24',handles.lang_id);
+        ylabel(ax(1),lang_var{locb1})
+        [~, locb1] = ismember('a42',handles.lang_id);
+        title(ax(1),[dat_name,': ',lang_var{locb1}], 'Interpreter', 'none')
+    end
+
     ax(2) = axes('Position',[0.1 0.25 0.8 0.4],...
       'Color','None',...
       'XLim',[t1 t2],...
@@ -470,7 +509,13 @@ for i = 1:nrow
       'YTick',[],...
       'YColor','None',...
       'FontSize',14);
-    xlabel(ax(2),['Depth (',handles.unit,')'])
+    if handles.lang_choice==0
+        xlabel(ax(2),['Depth (',handles.unit,')'])
+    else
+        [~, locb] = ismember('main23',handles.lang_id);
+        lang_var = handles.lang_var;
+        xlabel(ax(2),[lang_var{locb},' (',handles.unit,')'])
+    end
     set(gca,'XMinorTick','on','YMinorTick','on')
     
     % Then we interpolate the  ages to an evenly-spaced depth scale
@@ -503,9 +548,21 @@ for i = 1:nrow
       'FontSize',14);
     line1 = line(t,rec,...
       'LineWidth',1);
-    xlabel(ax(1),'Age')
-    ylabel(ax(1),'Proxy Value')
-    title(ax(1),[dat_name,': Tuned'], 'Interpreter', 'none')
+    
+    if handles.lang_choice==0
+        xlabel(ax(1),'Age')
+        ylabel(ax(1),'Proxy Value')
+        title(ax(1),[dat_name,': Tuned'], 'Interpreter', 'none')
+    else
+        [~, locb1] = ismember('main22',handles.lang_id);
+        lang_var = handles.lang_var;
+        xlabel(ax(1),lang_var{locb1})
+        [~, locb1] = ismember('main24',handles.lang_id);
+        ylabel(ax(1),lang_var{locb1})
+        [~, locb1] = ismember('a42',handles.lang_id);
+        title(ax(1),[dat_name,': ',lang_var{locb1}], 'Interpreter', 'none')
+    end
+    
     set(gca,'XMinorTick','on','YMinorTick','on')
     try
         ax(2) = axes('Position',[0.1 0.25 0.8 0.4],...
@@ -533,7 +590,14 @@ for i = 1:nrow
           'YColor','None',...
           'FontSize',14);
     end
-    xlabel(ax(2),['Depth (',handles.unit,')'])
+    if handles.lang_choice==0
+        xlabel(ax(2),['Depth (',handles.unit,')'])
+    else
+        [~, locb] = ismember('main23',handles.lang_id);
+        lang_var = handles.lang_var;
+        xlabel(ax(2),[lang_var{locb},' (',handles.unit,')'])
+    end
+    
     set(gca,'XMinorTick','on','YMinorTick','on')
 end
 cd(pre_dirML); % return view dir
@@ -592,9 +656,19 @@ for i = 1:nrow
       'FontSize',14);
     line1 = line(data(:,1),rec,...
       'LineWidth',1);
-    xlabel(ax(1),['Depth (',handles.unit,')'])
-    ylabel(ax(1),'Proxy Value')
-    title(ax(1),[dat_name,': Depth'], 'Interpreter', 'none')
+    if handles.lang_choice==0
+        xlabel(ax(1),['Depth (',handles.unit,')'])
+        ylabel(ax(1),'Proxy Value')
+        title(ax(1),[dat_name,': Depth'], 'Interpreter', 'none')
+    else
+        [~, locb1] = ismember('main23',handles.lang_id);
+        lang_var = handles.lang_var;
+        xlabel(ax(1),[lang_var{locb1},' (',handles.unit,')'])
+        title(ax(1),[dat_name,': ',lang_var{locb1}], 'Interpreter', 'none')
+        [~, locb1] = ismember('main24',handles.lang_id);
+        ylabel(ax(1),lang_var{locb1})
+    end
+    
     set(gca,'XMinorTick','on','YMinorTick','on')
     ax(2) = axes('Position',[0.1 0.25 0.8 0.4],...
       'Color','None',...
@@ -606,7 +680,14 @@ for i = 1:nrow
       'YTick',[],...
       'YColor','None',...
       'FontSize',14);
-    xlabel(ax(2),'Age')
+    if handles.lang_choice==0
+        xlabel(ax(2),'Age')
+    else
+        [~, locb] = ismember('main22',handles.lang_id);
+        lang_var = handles.lang_var;
+        xlabel(ax(2),lang_var{locb})
+    end
+    
     set(gca,'XMinorTick','on','YMinorTick','on')
     
     % Then we interpolate the  ages to an evenly-spaced depth scale
@@ -633,9 +714,20 @@ for i = 1:nrow
       'FontSize',14);
     line1 = line(data(:,1),rec,...
       'LineWidth',1);
-    xlabel(ax(1),['Depth (',handles.unit,')'])
-    ylabel(ax(1),'Proxy Value')
-    title(ax(1),[dat_name,': Depth'], 'Interpreter', 'none')
+  
+    if handles.lang_choice==0
+        xlabel(ax(1),['Depth (',handles.unit,')'])
+        ylabel(ax(1),'Proxy Value')
+        title(ax(1),[dat_name,': Depth'], 'Interpreter', 'none')
+    else
+        [~, locb1] = ismember('main23',handles.lang_id);
+        lang_var = handles.lang_var;
+        xlabel(ax(1),[lang_var{locb1},' (',handles.unit,')'])
+        title(ax(1),[dat_name,': ',lang_var{locb1}], 'Interpreter', 'none')
+        [~, locb1] = ismember('main24',handles.lang_id);
+        ylabel(ax(1),lang_var{locb1})
+    end
+    
     set(gca,'XMinorTick','on','YMinorTick','on')
     try
         ax(2) = axes('Position',[0.1 0.25 0.8 0.4],...
@@ -663,7 +755,13 @@ for i = 1:nrow
           'YColor','None',...
           'FontSize',14);
     end
-    xlabel(ax(2),'Age')
+    if handles.lang_choice==0
+        xlabel(ax(2),'Age')
+    else
+        [~, locb] = ismember('main22',handles.lang_id);
+        lang_var = handles.lang_var;
+        xlabel(ax(2),lang_var{locb})
+    end
     set(gca,'XMinorTick','on','YMinorTick','on')
 end
 cd(pre_dirML); % return view dir

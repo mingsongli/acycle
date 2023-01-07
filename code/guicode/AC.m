@@ -189,8 +189,6 @@ if lang_choice > 0
     set(handles.menu_plotn,'text',lang_var{locb})
     [~, locb] = ismember('menu43',lang_id);
     set(handles.menu_plotn2,'text',lang_var{locb})
-    [~, locb] = ismember('menu45',lang_id);
-    set(handles.munu_plot_stairs,'text',lang_var{locb})
     [~, locb] = ismember('menu46',lang_id);
     set(handles.menu_samplerate,'text',lang_var{locb})
     [~, locb] = ismember('menu47',lang_id);
@@ -357,13 +355,16 @@ if lang_choice > 0
     set(handles.menu_contact,'text',lang_var{locb})
     [~, locb] = ismember('menu144',lang_id);
     set(handles.menu_email,'text',lang_var{locb})
-    
+    % unit language
+    set(handles.main_unit_en,'Visible','on','Value',0)
     % listbox 1
     for ii = 1:6
         [~, locb] = ismember(['MainListOrder',num2str(ii)],lang_id);
         sortorder{ii} = lang_var{locb};
     end
     set(handles.popupmenu2,'String',sortorder)
+else
+    set(handles.main_unit_en,'Visible','off','Value',0)
 end
 %% push_up
 h_push_up = uicontrol('Style','pushbutton','Tag','push_up');%,'BackgroundColor','white','ForegroundColor','white');  % set style, Tag
@@ -488,7 +489,13 @@ if lia
 else
     tooltip = '<html>Sort<br>dataset';  % tooltip
 end
-set(handles.popupmenu2,'position', [0.6,0.92,0.15,0.06],'tooltip',tooltip)
+if lang_choice > 0
+    set(handles.popupmenu2,'position', [0.6,0.92,0.15,0.06],'tooltip',tooltip)
+    set(handles.popupmenu1,'position', [0.76,0.92,0.13,0.06],'tooltip',tooltip)
+else
+    set(handles.popupmenu2,'position', [0.6,0.92,0.22,0.06],'tooltip',tooltip)
+    set(handles.popupmenu1,'position', [0.83,0.92,0.13,0.06],'tooltip',tooltip)
+end
 % unit
 [lia, locb] = ismember('menu14',lang_id);
 if lia
@@ -496,7 +503,7 @@ if lia
 else
     tooltip = '<html>Select unit<br>for dataset';  % tooltip
 end
-set(handles.popupmenu1,'position', [0.76,0.92,0.13,0.06],'tooltip',tooltip)
+
 % unit language
 [lia, locb] = ismember('menu26',lang_id);
 if lia
@@ -1685,7 +1692,7 @@ if check == 1
         end
     end
     set(gca,'XMinorTick','on','YMinorTick','on')
-    if handles.lang_choice == 0
+    if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
         if handles.unit_type == 0
             xlabel(['Unit (',handles.unit,')'])
         elseif handles.unit_type == 1
@@ -1751,7 +1758,7 @@ if check == 1
                     end
                     set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
                     
-                    if handles.lang_choice == 0
+                    if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
                         if handles.unit_type == 0
                             xlabel(['Unit (',handles.unit,')'])
                         elseif handles.unit_type == 1
@@ -1783,7 +1790,7 @@ if check == 1
                     end
                     set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
 
-                    if handles.lang_choice == 0
+                    if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
                         if handles.unit_type == 0
                             xlabel(['Unit (',handles.unit,')'])
                         elseif handles.unit_type == 1
@@ -1815,7 +1822,7 @@ if check == 1
                     end
                     set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
 
-                    if handles.lang_choice == 0
+                    if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
                         if handles.unit_type == 0
                             xlabel(['Unit (',handles.unit,')'])
                         elseif handles.unit_type == 1
@@ -1847,7 +1854,7 @@ if check == 1
                         title([a39, num2str(colni),a40], 'Interpreter', 'none')
                     end
 
-                    if handles.lang_choice == 0
+                    if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
                         if handles.unit_type == 0
                             xlabel(['Unit (',handles.unit,')'])
                         elseif handles.unit_type == 1
@@ -1878,7 +1885,7 @@ if check == 1
                         end
                         set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
 
-                        if handles.lang_choice == 0
+                        if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
                             if handles.unit_type == 0
                                 xlabel(['Unit (',handles.unit,')'])
                             elseif handles.unit_type == 1
@@ -1908,7 +1915,7 @@ if check == 1
                             title([a39, num2str(colni),a40], 'Interpreter', 'none')
                         end
                         set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
-                        if handles.lang_choice == 0
+                        if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
                             if handles.unit_type == 0
                                 xlabel(['Unit (',handles.unit,')'])
                             elseif handles.unit_type == 1
@@ -3029,6 +3036,7 @@ function menu_laskar_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_laskar (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
 guidata(hObject, handles);
 basicseries(handles);
 
@@ -3080,7 +3088,7 @@ if ~isempty(answer)
     LR04stack_s = select_interval(LR04stack,t1,t2);
     figure;
     plot(LR04stack_s(:,1),LR04stack_s(:,2),'LineWidth',1);
-    if handles.lang_choice == 0
+    if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
         xlabel('Time (ka)')
         ylabel('Global Benthic \delta^{18}O')
         title(['LR04 Stack: ',num2str(t1),'_',num2str(t2),' ka'], 'Interpreter', 'none')
@@ -3166,7 +3174,7 @@ if check == 1
     set(gca,'XMinorTick','on','YMinorTick','on')
     hold off
     title(contents(plot_selected), 'Interpreter', 'none')
-    if handles.lang_choice == 0
+    if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
         if handles.unit_type == 0
             xlabel(['Unit (',handles.unit,')'])
         elseif handles.unit_type == 1
@@ -3251,7 +3259,7 @@ if check == 1
     hold off
     title(contents(plot_selected), 'Interpreter', 'none')
     xlim([min(xlimit(:,1)) max(xlimit(:,2))])
-    if handles.lang_choice == 0
+    if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
         if handles.unit_type == 0
             xlabel(['Unit (',handles.unit,')'])
         elseif handles.unit_type == 1
@@ -3386,6 +3394,7 @@ function menu_savefig_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_savefig (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+lang_id = handles.lang_id;
 if handles.lang_choice > 0
     [~, locb1] = ismember('a109',lang_id);
     a109 = handles.lang_var{locb1};
@@ -4253,15 +4262,7 @@ if nplot == 1
                     try close(hwarn)
                     catch
                     end
-% %<<<<<<< HEAD
-%                     if handles.lang_choice == 0
-%                         set(gcf,'Name',[dat_name,ext,': Press "SHIFT"or"ALT" & select cursors now'],'NumberTitle','off')
-% 
-%                         choice = questdlg('Steps: 1) click the "Data Tips" tool; 2) select two cursors; 3) press "Enter" in the COMMAND window', ...
-%                             'Press "SHIFT"or"ALT" key & select 2 cursors', 'Continue','Cancel','Continue');
-%                     else
-%                         set(gcf,'Name',[dat_name,ext,a147],'NumberTitle','off')
-% %=======
+
                     if strcmp(imfinfo1.ColorType,'CIELab')
                         set(gcf,'Name',[dat_name,' L*: Press "SHIFT"or"ALT" & select cursors now'],'NumberTitle','off')
                     else
@@ -4270,9 +4271,7 @@ if nplot == 1
                     
                     choice = questdlg('Steps: 1) click the "DataCursor" tool; 2) select (2) cursors; 3) press "Enter" in the COMMAND window', ...
                         'Press "SHIFT"or"ALT" key & select cursors', 'Continue','Cancel','Continue');
-%>>>>>>> dev_nolang
 
-                    %choice = questdlg(a148, a149, main36,main37,main36);
                     end
                     if handles.lang_choice == 0
                         case1 = 'Continue';
@@ -4307,43 +4306,7 @@ if nplot == 1
                                    CursorInfo_value(i,1)=c_info(i).Position(:,1);
                                    CursorInfo_value(i,2)=c_info(i).Position(:,2);
                                 end
-%<<<<<<< HEAD
-%                             end
-%                             hold on; plot( CursorInfo_value(:,1), CursorInfo_value(:,2), 'g-','LineWidth',3)
-% 
-%                             if m > 2
-%                                 if handles.lang_choice == 0
-%                                     warndlg('More than 2 cursors selected, only first 2 used!')
-%                                 else
-%                                     warndlg(a151)
-%                                 end
-%                             end
-% 
-%                             if m >= 2
-%                                 [cx,cy,c,xi,yi] = improfile(I,CursorInfo_value(:,1),CursorInfo_value(:,2));
-%                                 cx = sort(cx - min(cx));
-%                                 cy = sort(cy - min(cy));
-%                                 cz = sqrt(cx.^2 + cy.^2);
-% 
-%                                 try data = [cz,c];
-%                                 catch
-%                                     if handles.lang_choice == 0
-%                                         warndlg('This is not a grayscale image!')
-%                                     else
-%                                         warndlg(a152)
-%                                     end
-%                                     try c = reshape(c,[],3);
-%                                     catch
-%                                         if handles.lang_choice == 0
-%                                             warndlg('Looks like a cymk image, right?')
-%                                         else
-%                                             warndlg(a153)
-%                                         end
-%                                         c = reshape(c,[],4);
-%                                     end
-%                                     data = [cz,c];
-% %=======
-                                
+
                                 if strcmp(imfinfo1.ColorType,'CIELab')
                                     figure(figI)
                                     plot(CursorInfo_value(:,1), CursorInfo_value(:,2), 'g-','LineWidth',3)
@@ -4378,7 +4341,6 @@ if nplot == 1
                                     % RGB or grayscale
                                     plot(CursorInfo_value(:,1), CursorInfo_value(:,2), 'g-','LineWidth',3)
                                     [cx,cy,c,xi,yi] = improfile(I,CursorInfo_value(:,1),CursorInfo_value(:,2));
-%>>>>>>> dev_nolang
                                 end
                                 
                                 % pixels
@@ -4415,7 +4377,6 @@ if nplot == 1
                                 data1 = [xi,yi];
 
                                 CDac_pwd
-%<<<<<<< HEAD
                                 dlmwrite(name , data, 'delimiter', ' ', 'precision', 9);
                                 dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9);
                                 if handles.lang_choice == 0
@@ -4425,16 +4386,10 @@ if nplot == 1
                                     disp([a154,name1])
                                     disp([a155,name1])
                                 end                                    
-                                %    d = dir; %get files
-%=======
-                                %dlmwrite(name , data, 'delimiter', ' ', 'precision', 9);
-                                %dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9);
+
                                 dlmwrite(name2, czp, 'delimiter', ' ', 'precision', 9);
-                                %disp(['>>  save profile data as   ',name])
-                                %disp(['>>  save control points as ',name1])
                                 disp(['>>  save control pixels as ',name2])
                                 d = dir; %get files
-%>>>>>>> dev_nolang
                                 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                                 refreshcolor;
                                 cd(pre_dirML); % return to matlab view folder
@@ -4451,14 +4406,6 @@ if nplot == 1
                                 xlabel('Pixels (lower left -> upper right)');
                                 xlim([0,z(end)])
                                 set(gca,'XMinorTick','on','YMinorTick','on')
-%<<<<<<< HEAD
-%                                 if m == 2
-%                                     if handles.lang_choice == 0
-%                                         ylabel('Grayscale')
-%                                     else
-%                                         ylabel(a156)
-%                                     end
-%=======
                                 if strcmp(imfinfo1.ColorType,'grayscale')
                                     ylabel('Grayscale')
                                 elseif strcmp(imfinfo1.ColorType,'CIELab')
@@ -4467,7 +4414,6 @@ if nplot == 1
                                 elseif strcmp(imfinfo1.ColorType,'truecolor')
                                     ylabel('RGB')
                                     legend('Red','Green','Blue')
-%>>>>>>> dev_nolang
                                 else
                                     if handles.lang_choice == 0
                                         ylabel('Value')
@@ -4485,18 +4431,10 @@ if nplot == 1
                             catch
                             end
                     end
-%                 catch
-%                     if handles.lang_choice == 0
-%                         warndlg('Image color space not supported. Convert to RGB or Grayscale')
-%                     else
-%                         warndlg(dd24)
-%                     end
 
                 end
                     
 end
-        %end
-%end
 guidata(hObject, handles);
 
 
@@ -4921,20 +4859,6 @@ for nploti = 1:nplot
         if dataApply2ALL == 1
             for nploti = 1:nplot
             % Apply settings to all data
-% %=======
-%                                 CDac_pwd
-%                                 dlmwrite(name2, data, 'delimiter', ' ', 'precision', 9);
-%                             end
-%                         end
-%                     end
-%                 end
-%                 d = dir; %get files
-%                 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-%                 refreshcolor;
-%                 cd(pre_dirML); % return to matlab view folder
-%                 return
-%             else
-%>>>>>>> dev_nolang
                 data_name_all = (contents(plot_selected));
                 data_name = char(data_name_all{nploti});
                 data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
@@ -5169,90 +5093,6 @@ if nplot == 1
 end
 guidata(hObject, handles);
 
-
-% --------------------------------------------------------------------
-function munu_plot_stairs_Callback(hObject, eventdata, handles)
-% hObject    handle to munu_plot_stairs (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
-nplot = length(plot_selected);   % length
-
-
-%language
-lang_id = handles.lang_id;
-if handles.lang_choice > 0
-    [~, locb1] = ismember('main21',lang_id);
-    main21 = handles.lang_var{locb1};
-    [~, locb1] = ismember('main23',lang_id);
-    main23 = handles.lang_var{locb1};
-    [~, locb1] = ismember('main34',lang_id);
-    main34 = handles.lang_var{locb1};
-end
-
-% check
-for i = 1:nplot
-    plot_no = plot_selected(i);
-    plot_filter_s = char(contents(plot_no));
-    plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
-    GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
-    if isdir(plot_filter_s)
-        return
-    else
-        [~,~,ext] = fileparts(plot_filter_s);
-        check = 0;
-        if sum(strcmp(ext,handles.filetype)) > 0
-            check = 1; % selection can be executed 
-        end
-    end
-end
-
-if check == 1
-        
-        figure;
-        hold on;
-        for j = 1: nplot
-            plot_no = plot_selected(j);
-            plot_filter_s = char(contents(plot_no));
-            GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
-     try
-        fid = fopen(plot_filter_s);
-        data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
-        fclose(fid);
-        if iscell(data_ft)
-            data = cell2mat(data_ft);
-        end
-    catch
-        data = load(plot_filter_s);
-    end 
-
-            data = data(~any(isnan(data),2),:);
-            stairs(data(:,1),data(:,2),'LineWidth',1,'Color','k');
-        end
-        set(gca,'XMinorTick','on','YMinorTick','on')
-        
-        if handles.lang_choice == 0
-            if handles.unit_type == 0
-                xlabel(['Unit (',handles.unit,')'])
-            elseif handles.unit_type == 1
-                xlabel(['Depth (',handles.unit,')'])
-            else
-                xlabel(['Time (',handles.unit,')'])
-            end
-        else
-            if handles.unit_type == 0
-                xlabel([main34,' (',handles.unit,')'])
-            elseif handles.unit_type == 1
-                xlabel([main23,' (',handles.unit,')'])
-            else
-                xlabel([main21,' (',handles.unit,')'])
-            end
-        end
-
-        title(plot_filter_s, 'Interpreter', 'none')
-end
-guidata(hObject, handles);
 
 
 % --------------------------------------------------------------------
@@ -5513,7 +5353,7 @@ if nsim_yes < 2
 
                             figure; plot(rhox(:,1),rhox(:,2),'LineWidth',1)
 
-                            if handles.lang_choice == 0
+                            if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
                                 if handles.unit_type == 0
                                     xlabel(['Unit (',handles.unit,')'])
                                 elseif handles.unit_type == 1
@@ -5693,7 +5533,7 @@ if nsim_yes < 2
 
                             set(gca,'XMinorTick','on','YMinorTick','on')
 
-                            if handles.lang_choice == 0
+                            if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
                                 if handles.unit_type == 0
                                     xlabel(['Unit (',handles.unit,')'])
                                 elseif handles.unit_type == 1
@@ -5755,21 +5595,6 @@ if nsim_yes < 2
                                   errordlg(a199,main35);
                               end
                           end
-    % %<<<<<<< HEAD
-    % %=======
-    %                     dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9); 
-    %                     dlmwrite(name2, data2, 'delimiter', ' ', 'precision', 9); 
-    %                     disp(['>>  Save rho1 median    : ',name1])   
-    %                     disp(['>>  Save rho1 percentile: ',name2])  
-    %                     
-    %                     d = dir; %get files
-    %                     set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-    %                     refreshcolor;
-    %                     cd(pre_dirML);
-    %                 else
-    %                     errordlg('Number simulations is too few, try 1000','Error');
-    %                 end
-    % %>>>>>>> dev_nolang
                     end
                     end
                 end
@@ -5940,7 +5765,7 @@ if check == 1
             set(gcf,'units','norm') % set location
             set(gcf,'position',[0.1,0.4,0.45,0.45]) % set position
             
-            if handles.lang_choice == 0
+            if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
                 set(gcf,'Name', 'Sampling rate (original domain)','NumberTitle','off')
                 if handles.unit_type == 0
                     xlabel(['Unit (',handles.unit,')'])
@@ -5979,7 +5804,7 @@ if check == 1
             set(gcf,'units','norm') % set location
             set(gcf,'position',[0.55,0.4,0.45,0.45]) % set position
             
-            if handles.lang_choice == 0
+            if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
             
                 title([[dat_name,ext],': kernel fit of sampling rates'], 'Interpreter', 'none')
                 set(gcf,'Name', 'Sampling rate: distribution','NumberTitle','off')
@@ -6082,7 +5907,7 @@ if check == 1
             figure;
             set(gcf,'Color', 'white')
             histfit(datax,[],'kernel')
-            if handles.lang_choice == 0
+            if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
                 set(gcf,'Name', 'Data Distribution','NumberTitle','off')
                 title([[dat_name,ext],': kernel fit of the data'], 'Interpreter', 'none')
                 xlabel('Data')
@@ -6288,7 +6113,7 @@ if check == 1
             figure;
             plot(pow(:,1),pow(:,2),'k','LineWidth',1);
             set(gca,'XMinorTick','on','YMinorTick','on')
-            if handles.lang_choice == 0
+            if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
                 xlabel('Time (kyr)')
                 ylabel('Power ratio')
             else
@@ -6897,18 +6722,13 @@ if check == 1
                     CDac_pwd  % cd ac_pwd dir
                     % save data
                     name1 = [dat_name,'-c',num2str(c1),'-c',num2str(c2),ext];  % New name
-%<<<<<<< HEAD
+
                     dlmwrite(name1, data_new, 'delimiter', ' ', 'precision', 9);
                     if handles.lang_choice == 0
                         disp(['Extract data from columns ',num2str(c1),' & ',num2str(c2),' : ',dat_name,ext])
                     else
                         disp([a264,num2str(c1),' & ',num2str(c2),' : ',dat_name,ext])
                     end
-                    
-% %=======
-%                     dlmwrite(name1, data_new, 'delimiter', ' ', 'precision', 9);
-%                     disp(['Extract data from columns ',num2str(c1),' & ',num2str(c2),' : ',dat_name,ext])
-% %>>>>>>> dev_nolang
                     d = dir; %get files
                     set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                     refreshcolor;
@@ -7458,7 +7278,7 @@ if nplot == 1
                     title([dat_name,ext], 'Interpreter', 'none')
                     xlabel(handles.unit)
                     
-                    if handles.lang_choice == 0
+                    if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
                         ylabel('Value')
                         legend('Raw',[num2str(smooth_v),'pts-median smoothed'])
                     else
@@ -7563,7 +7383,7 @@ if nplot == 1
                     title([dat_name,ext], 'Interpreter', 'none')
                     xlabel(handles.unit)
                     
-                    if handles.lang_choice == 0
+                    if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
                         ylabel('Value')
                         legend('Raw',[num2str(window),' pts-Gauss smoothed'])
                     else
@@ -7613,7 +7433,7 @@ value = data(:,2);
 figure;
 plot(time,value)
 title([dat_name,ext], 'Interpreter', 'none')
-if handles.lang_choice == 0 
+if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
     xlabel('Depth (m)')
 else
     xlabel(a292)
@@ -7649,7 +7469,7 @@ value = data(:,2);
 figure;
 plot(time,value)
 title([dat_name,ext], 'Interpreter', 'none')
-if handles.lang_choice == 0 
+if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
     xlabel('Depth (m)')
     ylabel('Gamma ray (cpm)')
 else
@@ -7701,7 +7521,7 @@ value = data(:,2);
 figure;
 plot(time,value)
 title([dat_name,ext], 'Interpreter', 'none')
-if handles.lang_choice == 0 
+if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
     xlabel('Time (kyr)')
     ylabel('Insolation (W/m^{2})')
 else
@@ -7739,7 +7559,7 @@ value = data(:,2);
 figure;
 plot(time,value)
 title([dat_name,ext], 'Interpreter', 'none')
-if handles.lang_choice == 0 
+if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
     xlabel('Age (ka)')
     ylabel('ETP')
 else
@@ -7776,7 +7596,7 @@ value = data(:,2);
 figure;
 plot(time,value)
 title([dat_name,ext], 'Interpreter', 'none')
-if handles.lang_choice == 0 
+if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
     xlabel('Number (#)')
     ylabel('Value')
 else
@@ -7813,7 +7633,7 @@ value = data(:,2);
 figure;
 plot(time,value)
 title([dat_name,ext], 'Interpreter', 'none')
-if handles.lang_choice == 0 
+if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
     xlabel('Depth (m)')
     ylabel('Gamma ray (cpm)')
 else
@@ -7851,7 +7671,7 @@ value = data(:,2);
 figure;
 plot(time,value)
 title([dat_name,ext], 'Interpreter', 'none')
-if handles.lang_choice == 0 
+if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
     xlabel('Depth (m)')
     ylabel('Depth Rank')
 else
@@ -7918,7 +7738,7 @@ figure;
 plot(time,value)
 title([dat_name,ext], 'Interpreter', 'none')
     
-if handles.lang_choice == 0
+if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
     xlabel('Year')
     ylabel('pCO_2 (ppm)')
 else

@@ -57,6 +57,9 @@ handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
 handles.MonZoom = varargin{1}.MonZoom;
 handles.sortdata = varargin{1}.sortdata;
 handles.val1 = varargin{1}.val1;
+handles.lang_choice = varargin{1}.lang_choice;
+handles.lang_id = varargin{1}.lang_id;
+handles.lang_var = varargin{1}.lang_var;
 
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
@@ -439,7 +442,15 @@ figdata = figure;
 plot(dat(:,1),dat(:,2));
 set(gca,'XMinorTick','on','YMinorTick','on')
 xlim([min(dat(:,1)),max(dat(:,1))]);
-xlabel('Time (kyr)')
+if handles.lang_choice==0
+    xlabel('Time (kyr)')
+else
+    [~, locb1] = ismember('a231',handles.lang_id);
+    lang_var = handles.lang_var;
+    xlabel(lang_var{locb1})
+end
+    
+
 title(name, 'Interpreter', 'none')
 % refresh AC main window
 figure(handles.acfigmain);
