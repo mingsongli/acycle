@@ -12,7 +12,7 @@ function PlotPro2DLineGUI(varargin)
 MonZoom = 1;
 
 %% GUI settings
-h_PlotPro2DLineGUI = figure('MenuBar','none','Name','Acycle: Plot Pro for 2D line plot','NumberTitle','off');
+h_PlotPro2DLineGUI = figure('MenuBar','none','Name','Acycle: Plot Pro','NumberTitle','off');
 handles.h_PlotPro2DLineGUI = h_PlotPro2DLineGUI;
 set(h_PlotPro2DLineGUI,'units','norm') % set location
 set(0,'Units','normalized') % set units as normalized

@@ -148,11 +148,15 @@ end
         if slices > 1
             plot(ax2,f,datap,'LineWidth',.3);
         end
+        fmaxdata = evalin('base','fmaxdata');
+        xlim(ax2,[0, fmaxdata])
         xlabel(ax2,'Frequency (cycle/m)');
         ylabel(ax2,'Power');
         title(ax2,'Data power spectrum');
         legend(ax2,'Power spectrum of data series')
         set(ax2,'XMinorTick','on','YMinorTick','on')
+        
+        
     % save data to workspace
         assignin('base','dataf',dataf)
         assignin('base','datap',datap)

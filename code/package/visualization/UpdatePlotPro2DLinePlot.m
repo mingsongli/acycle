@@ -223,4 +223,5 @@ for j = 1: PlotAdvSetting.panel_nrow(1) * PlotAdvSetting.panel_ncol(1)  % for al
     hold off
     k = k + 1;
 end
+axis tight
 figure(handles.h_PlotPro2DLineGUI); 
