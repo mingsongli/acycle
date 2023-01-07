@@ -51,6 +51,7 @@ function waveletGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to waveletGUI (see VARARGIN)
+handles.val1 = varargin{1}.val1;
 
 handles.waveletGUIfig = gcf;
 set(0,'Units','normalized') % set units as normalized

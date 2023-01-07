@@ -61,12 +61,13 @@ handles.sortdata = varargin{1}.sortdata;
 
 % Choose default command line output for agescale
 handles.output = hObject;
-
+handles.val1 = varargin{1}.val1;
 % language
 lang_choice = varargin{1}.lang_choice;
+lang_id = varargin{1}.lang_id;
+lang_var = varargin{1}.lang_var;
 if lang_choice>0
-    lang_id = varargin{1}.lang_id;
-    lang_var = varargin{1}.lang_var;
+
     [~, locb] = ismember('a00',lang_id);
     set(gcf,'Name',lang_var{locb})
     [~, locb] = ismember('main27',lang_id);

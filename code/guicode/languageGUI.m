@@ -54,6 +54,7 @@ function languageGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.MonZoom = varargin{1}.MonZoom;
 handles.sortdata = varargin{1}.sortdata;
 handles.acfigmain = varargin{1}.acfigmain;
+handles.val1 = varargin{1}.val1;
 
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
@@ -70,9 +71,9 @@ set(handles.pushbutton1,'position',[0.4,0.2,0.2,0.2]) % set position
 
 % language
 lang_choice = varargin{1}.lang_choice;
+lang_id = varargin{1}.lang_id;
+lang_var = varargin{1}.lang_var;
 if lang_choice>0
-    lang_id = varargin{1}.lang_id;
-    lang_var = varargin{1}.lang_var;
     [~, locb] = ismember('l00',lang_id);
     set(gcf,'Name',lang_var{locb})
     [~, locb1] = ismember('l01',lang_id);

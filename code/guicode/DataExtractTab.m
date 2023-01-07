@@ -58,6 +58,7 @@ set(gcf,'Name','Acycle: Plot Digitizer')
 
 % Choose default command line output for DataExtractTab
 handles.output = hObject;
+handles.val1 = varargin{1}.val1;
 
 % Update handles structure
 guidata(hObject, handles);

@@ -60,7 +60,7 @@ handles.data_name = varargin{1}.data_name;
 handles.dat_name = varargin{1}.dat_name; % save dataname
 handles.ext = varargin{1}.ext;
 handles.sortdata = varargin{1}.sortdata;
-
+handles.val1 = varargin{1}.val1;
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
 set(gcf,'Name','Acycle: Interpolation Pro')

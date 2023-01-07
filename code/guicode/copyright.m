@@ -69,9 +69,9 @@ set(handles.edit1,'position',[0.02,0.02,0.96,0.74]) % set position
 
 % language
 lang_choice = varargin{1}.lang_choice;
-if lang_choice>0
     lang_id = varargin{1}.lang_id;
     lang_var = varargin{1}.lang_var;
+if lang_choice>0
     [~, locb] = ismember('c60',lang_id);
     set(gcf,'Name',lang_var{locb})
     [~, locb1] = ismember('c61',lang_id);

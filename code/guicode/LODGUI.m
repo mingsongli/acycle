@@ -53,6 +53,7 @@ function LODGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % varargin   command line arguments to LODGUI (see VARARGIN)
 handles.MonZoom = varargin{1}.MonZoom;
 handles.sortdata = varargin{1}.sortdata;
+handles.val1 = varargin{1}.val1;
 
 set(gcf,'Name','Acycle: Milankovitch Calculator')
 set(gcf,'position',[0.4,0.55,0.313,0.289]* handles.MonZoom) % set position

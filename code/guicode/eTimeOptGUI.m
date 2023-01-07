@@ -59,6 +59,7 @@ handles.hmain = gcf;
 %
 handles.MonZoom = varargin{1}.MonZoom;
 handles.sortdata = varargin{1}.sortdata;
+handles.val1 = varargin{1}.val1;
 
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location

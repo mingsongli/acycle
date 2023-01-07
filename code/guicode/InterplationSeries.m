@@ -59,6 +59,7 @@ handles.unit = varargin{1}.unit;
 handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
 handles.MonZoom = varargin{1}.MonZoom;
 handles.sortdata = varargin{1}.sortdata;
+handles.val1 = varargin{1}.val1;
 
 %
 handles.hmain = gcf;

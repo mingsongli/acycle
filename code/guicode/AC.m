@@ -184,13 +184,11 @@ if lang_choice > 0
     [~, locb] = ismember('menu40',lang_id);
     set(handles.menu_plot,'text',lang_var{locb})
     [~, locb] = ismember('menu41',lang_id);
-    set(handles.menu_plotplus,'text',lang_var{locb})
+    set(handles.menu_plotpro_2d,'text',lang_var{locb})
     [~, locb] = ismember('menu42',lang_id);
     set(handles.menu_plotn,'text',lang_var{locb})
     [~, locb] = ismember('menu43',lang_id);
     set(handles.menu_plotn2,'text',lang_var{locb})
-    [~, locb] = ismember('menu44',lang_id);
-    set(handles.menu_SwapPlot,'text',lang_var{locb})
     [~, locb] = ismember('menu45',lang_id);
     set(handles.munu_plot_stairs,'text',lang_var{locb})
     [~, locb] = ismember('menu46',lang_id);
@@ -417,6 +415,7 @@ else
 end
 
 set(h_push_plot,'tooltip',tooltip,'CData',imread('menu_plot.jpg'))  % set tooltip and button image
+%set(h_push_plot,'Callback',@push_plot_clbk)  % set callback function
 set(h_push_plot,'Callback',@push_plot_clbk)  % set callback function
 
 %% push_refresh
@@ -830,7 +829,6 @@ end
 function push_plot_clbk(hObject, handles)
 handles = guidata(hObject);
 
-
 %language
 lang_id = handles.lang_id;
 if handles.lang_choice > 0
@@ -840,43 +838,75 @@ if handles.lang_choice > 0
     dd24 = handles.lang_var{locb1};
 end
 
-
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
 check = [];
+
 % check
 for i = 1:nplot
     plot_no = plot_selected(i);
-        plot_filter_s = char(contents(plot_no));
-        plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
-        GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
-        if isdir(plot_filter_s)
-            return
-        else
-            [~,~,ext] = fileparts(plot_filter_s);
-            check = 0;
-            if sum(strcmp(ext,handles.filetype)) > 0
-                check = 1; % selection can be executed 
-            elseif sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
-                try 
-                    if handles.lang_choice == 0
-                        hwarn = warndlg('Wait, large image? can be very slow ...');
-                    else
-                        hwarn = warndlg(dd01);
-                    end
+    plot_filter_s = char(contents(plot_no));
+    plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
+    if isdir(plot_filter_s)
+        return
+    else
+        [~,dat_name,ext] = fileparts(plot_filter_s);
+        check = 0;
+        if sum(strcmp(ext,handles.filetype)) > 0
+            check = 1; % selection can be executed 
+        elseif sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
 
+            imfinfo1 = imfinfo(plot_filter_s); % image information
+            supportcolor = {'grayscale', 'truecolor'};
+
+            if strcmp(imfinfo1.ColorType,'CIELab')
+                im_name = imread(plot_filter_s);
+
+                aDouble = double(im_name); 
+
+                cielab(:,:,1) = aDouble(:,:,1) ./ (255/100);
+                cielab(:,:,2) = aDouble(:,:,2)-128;
+                cielab(:,:,3) = aDouble(:,:,3)-128;
+                hFig1 = figure;                    
+                subplot(3,1,1)
+                imshow(cielab(:,:,1),[0 100])
+                title('L*')
+                subplot(3,1,2)
+                imshow(cielab(:,:,2),[-128 127])
+                title('a*')
+                subplot(3,1,3)
+                imshow(cielab(:,:,3),[-128 127])
+                title('b*')
+                set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
+
+                hFig2 = figure;
+                imshow(lab2rgb(cielab));
+                set(gcf,'Name',[dat_name,'Lab2RGB',ext],'NumberTitle','off')
+
+            elseif any(strcmp(supportcolor,imfinfo1.ColorType))
+                im_name = imread(plot_filter_s);
+                hFig1 = figure;
+                imshow(im_name);
+                set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
+                [warnMsg, warnId] = lastwarn;
+                if ~isempty(warnMsg)
+                    close(hFig1)
+                    imscrollpanel_ac(plot_filter_s);
+                end
+            else
+                try
+                    % GRB and Grayscale supported here
                     im_name = imread(plot_filter_s);
                     hFig1 = figure;
                     lastwarn('') % Clear last warning message
                     imshow(im_name);
+                    set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
                     [warnMsg, warnId] = lastwarn;
                     if ~isempty(warnMsg)
                         close(hFig1)
-                        imscrollpanel_ac(plot_filter_s);
-                    end
-                    try close(hwarn)
-                    catch
+                        imscrollpanel_ac(data_name);
                     end
                 catch
                     if handles.lang_choice == 0
@@ -887,17 +917,22 @@ for i = 1:nplot
                 end
             end
         end
+    end
 end
-
 if check == 1
+    GETac_pwd; 
     for i = 1: nplot
         plot_no = plot_selected(i);
         handles.plot_s{i} = fullfile(ac_pwd,char(contents(plot_no)));
     end
+    current_data = load(handles.plot_s{1});
+    handles.current_data = current_data;
+    handles.dat_name = handles.plot_s{1};
     handles.nplot = nplot;
     guidata(hObject, handles);
-    PlotAdv(handles);
+    PlotPro2DLineGUI(handles);
 end
+
 
 % --- Executes on button press in push_refresh.
 function push_refresh_clbk(hObject, handles)
@@ -1899,110 +1934,6 @@ if check == 1
         end
     end
 end
-guidata(hObject,handles)
-
-
-% --------------------------------------------------------------------
-function menu_SwapPlot_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_SwapPlot (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = handles.index_selected;  % read selection in listbox 1
-nplot = length(plot_selected);   % length
-
-
-%language
-lang_id = handles.lang_id;
-if handles.lang_choice > 0
-    [~, locb1] = ismember('main34',lang_id);
-    main34 = handles.lang_var{locb1};
-    [~, locb1] = ismember('main23',lang_id);
-    main23 = handles.lang_var{locb1};
-    [~, locb1] = ismember('main21',lang_id);
-    main21 = handles.lang_var{locb1};
-end
-
-
-% check
-for i = 1:nplot
-    plot_no = plot_selected(i);
-    plot_filter_s1 = char(contents(plot_no));
-    plot_filter_s = strrep2(plot_filter_s1, '<HTML><FONT color="blue">', '</FONT></HTML>');
-    GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
-    if isdir(plot_filter_s)
-        return
-    else
-        [~,~,ext] = fileparts(plot_filter_s);
-        check = 0;
-        if sum(strcmp(ext,handles.filetype)) > 0
-            check = 1; % selection can be executed 
-        elseif strcmp(ext,'.fig')
-            plot_filter_s = char(contents(plot_selected(1)));
-            openfig(plot_filter_s);
-        elseif strcmp(ext,{'.pdf','.ai','.ps'})
-            plot_filter_s = char(contents(plot_selected(1)));
-            open(plot_filter_s);
-        end
-    end
-end
-
-if check == 1
-    figure;
-    hold on;
-    for i = 1:nplot
-        plot_no = plot_selected(i);
-        plot_filter_s = char(contents(plot_no));
-        GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
-    try
-        fid = fopen(plot_filter_s);
-        data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
-        fclose(fid);
-        if iscell(data_ft)
-            try
-                data_filterout = cell2mat(data_ft);
-            catch
-                fid = fopen(plot_filter_s,'at');
-                fprintf(fid,'%d\n',[]);
-                fclose(fid)
-                fid = fopen(plot_filter_s);
-                data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
-                fclose(fid);
-                data_filterout = cell2mat(data_ft);
-            end
-        end
-    catch
-        data_filterout = load(plot_filter_s);
-    end
-            
-            data_filterout = data_filterout(~any(isnan(data_filterout),2),:);
-            plot(data_filterout(:,2),data_filterout(:,1),'LineWidth',1);
-    end
-    
-    
-    if handles.lang_choice == 0
-        if handles.unit_type == 0
-            ylabel(['Unit (',handles.unit,')'])
-        elseif handles.unit_type == 1
-            ylabel(['Depth (',handles.unit,')'])
-        else
-            ylabel(['Time (',handles.unit,')'])
-        end
-    else
-        if handles.unit_type == 0
-            ylabel([main34,' (',handles.unit,')'])
-        elseif handles.unit_type == 1
-            ylabel([main23,' (',handles.unit,')'])
-        else
-            ylabel([main21, ' (',handles.unit,')'])
-        end
-    end
-    
-    title(plot_filter_s1, 'Interpreter', 'none')
-    set(gca,'XMinorTick','on','YMinorTick','on')
-    hold off
-end
-set(gcf,'color','w');
 guidata(hObject,handles)
 
 
@@ -5323,19 +5254,13 @@ if check == 1
 end
 guidata(hObject, handles);
 
-% --- Executes during object creation, after setting all properties.
-function menu_plotplus_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to axes_refresh (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: place code in OpeningFcn to menu_plotplus
 
 % --------------------------------------------------------------------
-function menu_plotplus_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_plotplus (see GCBO)
+function menu_plotpro_2d_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_plotpro_2d (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
@@ -5363,16 +5288,7 @@ for i = 1:nplot
         if sum(strcmp(ext,handles.filetype)) > 0
             check = 1; % selection can be executed 
         elseif sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
-%<<<<<<< HEAD
-%             try 
-% 
-%                 % GRB and Grayscale supported here
-%                 if handles.lang_choice == 0
-%                     hwarn = warndlg('Wait, large image? can be very slow ...');
-%                 else
-%                     hwarn = warndlg(dd01);
-%                 end
-%=======
+
             imfinfo1 = imfinfo(plot_filter_s); % image information
             supportcolor = {'grayscale', 'truecolor'};
 
@@ -5401,7 +5317,6 @@ for i = 1:nplot
                 set(gcf,'Name',[dat_name,'Lab2RGB',ext],'NumberTitle','off')
 
             elseif any(strcmp(supportcolor,imfinfo1.ColorType))
-%>>>>>>> dev_nolang
                 im_name = imread(plot_filter_s);
                 hFig1 = figure;
                 imshow(im_name);
@@ -5441,9 +5356,12 @@ if check == 1
         plot_no = plot_selected(i);
         handles.plot_s{i} = fullfile(ac_pwd,char(contents(plot_no)));
     end
+    current_data = load(handles.plot_s{1});
+    handles.current_data = current_data;
+    handles.dat_name = handles.plot_s{1};
     handles.nplot = nplot;
     guidata(hObject, handles);
-    PlotAdv(handles);
+    PlotPro2DLineGUI(handles);
 end
 
 

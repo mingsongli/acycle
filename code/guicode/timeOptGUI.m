@@ -67,6 +67,7 @@ h1=findobj(h,'FontUnits','norm');  % find all font units as points
 set(h1,'FontUnits','points','FontSize',11.5);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
+handles.val1 = varargin{1}.val1;
 
 set(handles.hmain,'position',[0.2,0.3,0.35,0.6]* handles.MonZoom) % set position
 

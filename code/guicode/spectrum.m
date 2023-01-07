@@ -137,6 +137,8 @@ handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
 %
 data_s = varargin{1}.current_data;
 data_s = sortrows(data_s);
+handles.val1 = varargin{1}.val1;
+
 %
 data_s(:,2) = data_s(:,2) - mean(data_s(:,2));
 handles.current_data = data_s;

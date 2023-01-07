@@ -64,6 +64,7 @@ set(h2,'FontUnits','points','FontSize',12);  % set as norm
 handles.MonZoom = varargin{1}.MonZoom;
 set(gcf,'position',[0.45,0.3,0.25,0.5]* handles.MonZoom) % set position
 handles.sortdata = varargin{1}.sortdata;
+handles.val1 = varargin{1}.val1;
 
 set(handles.uipanel6,'position',[0.025,0.254,0.95,0.666])
 set(handles.text21,'position',[0.021,0.852,0.26,0.07])
@@ -101,6 +102,7 @@ handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
 %
 handles.unit = varargin{1}.unit;
 handles.unit_type = varargin{1}.unit_type;
+handles.val1 = varargin{1}.val1;
 
 handles.current_data = varargin{1}.current_data;
 handles.data_name = varargin{1}.data_name;

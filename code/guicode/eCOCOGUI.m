@@ -59,6 +59,7 @@ handles.output = hObject;
 handles.hmain = gcf;
 handles.MonZoom = varargin{1}.MonZoom;
 handles.sortdata = varargin{1}.sortdata;
+handles.val1 = varargin{1}.val1;
 
 %
 set(0,'Units','normalized') % set units as normalized
@@ -143,9 +144,9 @@ set(handles.pushbutton4,'position',[0.82,0.083,0.15,0.229]) %
 % language
 lang_choice = varargin{1}.lang_choice;
 handles.lang_choice = lang_choice;
+lang_id = varargin{1}.lang_id;
+lang_var = varargin{1}.lang_var;
 if lang_choice>0
-    lang_id = varargin{1}.lang_id;
-    lang_var = varargin{1}.lang_var;
     [~, locb] = ismember('ec00',lang_id);
     set(gcf,'Name',lang_var{locb})  % GUI title
     [~, locb] = ismember('ec02',lang_id);
