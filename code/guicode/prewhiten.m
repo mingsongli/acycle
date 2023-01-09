@@ -51,15 +51,58 @@ function prewhiten_OpeningFcn(hObject, eventdata, handles, varargin)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to prewhiten (see VARARGIN)
+% language
+handles.lang_choice = varargin{1}.lang_choice;
+handles.lang_id = varargin{1}.lang_id;
+handles.lang_var = varargin{1}.lang_var;
+handles.main_unit_selection = varargin{1}.main_unit_selection;
 
+h=get(gcf,'Children');  % get all content
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
-set(gcf,'Name','Acycle: Curve Fitting | Detrending | Smoothing')
-h=get(gcf,'Children');  % get all content
+
 h1=findobj(h,'FontUnits','norm');  % find all font units as points
 set(h1,'FontUnits','points','FontSize',12);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',12);  % set as norm
+
+if handles.lang_choice == 0
+    set(gcf,'Name','Acycle: Curve Fitting | Detrending | Smoothing')
+else
+    [~, locb] = ismember('menu100',handles.lang_id);
+    lang_var = handles.lang_var;
+    set(gcf,'Name',['Acycle: ',lang_var{locb}])
+end
+% language
+lang_id = handles.lang_id;
+lang_var = handles.lang_var;
+if handles.lang_choice > 0
+    [~, locb] = ismember('Fitting01',lang_id);
+    set(handles.uipanel6,'Title',lang_var{locb})
+    [~, locb] = ismember('main41',lang_id);
+    set(handles.text21,'string',lang_var{locb})
+    [~, locb] = ismember('main47',lang_id);
+    set(handles.text20,'string',lang_var{locb})
+    [~, locb] = ismember('Fitting06',lang_id);
+    set(handles.uipanel8,'Title',lang_var{locb})
+    [~, locb] = ismember('Fitting07',lang_id);
+    set(handles.prewhiten_mean_checkbox,'string',lang_var{locb})
+    [~, locb] = ismember('Fitting08',lang_id);
+    set(handles.prewhiten_linear_checkbox,'string',lang_var{locb})
+    [~, locb] = ismember('Fitting09',lang_id);
+    set(handles.checkbox11,'string',lang_var{locb})
+    [~, locb] = ismember('Fitting10',lang_id);
+    set(handles.text25,'string',lang_var{locb})
+    [~, locb] = ismember('Fitting11',lang_id);
+    set(handles.prewhiten_all_checkbox,'string',lang_var{locb})
+    [~, locb] = ismember('Fitting12',lang_id);
+    set(handles.prewhiten_clear_pushbutton,'string',lang_var{locb})
+    [~, locb] = ismember('Fitting13',lang_id);
+    set(handles.uipanel7,'Title',lang_var{locb})
+    [~, locb] = ismember('menu03',lang_id);
+    set(handles.prewhiten_pushbutton,'string',lang_var{locb})
+end
+
 
 handles.MonZoom = varargin{1}.MonZoom;
 set(gcf,'position',[0.45,0.3,0.25,0.5]* handles.MonZoom) % set position
@@ -94,6 +137,7 @@ set(handles.text25,'position',[0.5,0.123,0.321,0.123])
 set(handles.uipanel7,'position',[0.025,0.03,0.95,0.213])
 set(handles.prewhiten_select_popupmenu,'position',[0.043,0.2,0.9,0.5])
 set(handles.prewhiten_select_popupmenu,'String','Raw','Value',1);
+
 handles.smooth_win = 0.35;  % windows for smooth 
 % contact with acycle main window
 handles.acfigmain = varargin{1}.acfigmain;
@@ -139,7 +183,8 @@ handles.prewhiten_rloess = 'notloess';
 handles.prewhiten_sgolay = 'notsgolay';
 handles.prewhiten_polynomial2 = 'not2nd';
 handles.prewhiten_polynomialmore = 'notmore';
-disp('>> load GUI')
+
+
 % Update handles structure
 guidata(hObject, handles);
 

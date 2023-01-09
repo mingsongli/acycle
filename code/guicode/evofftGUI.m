@@ -61,6 +61,14 @@ set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
 handles.MonZoom = varargin{1}.MonZoom;
 handles.sortdata = varargin{1}.sortdata;
 handles.val1 = varargin{1}.val1;
+% language
+lang_choice = varargin{1}.lang_choice;
+handles.lang_choice = lang_choice;
+lang_id = varargin{1}.lang_id;
+lang_var = varargin{1}.lang_var;
+handles.lang_id = lang_id;
+handles.lang_var = lang_var;
+handles.main_unit_selection = varargin{1}.main_unit_selection;
 
 if ismac
     set(gcf,'position',[0.45,0.4,0.4,0.35]* handles.MonZoom) % set position
@@ -111,7 +119,14 @@ set(handles.rotation,'position',[0.06,0.127,0.881,0.365])
 % Choose default command line output for evofftGUI
 handles.output = hObject;
 
-set(gcf,'Name','Acycle: Evolutionary Spectral Analysis')
+
+if handles.lang_choice == 0
+    set(gcf,'Name','Acycle: Evolutionary Spectral Analysis')
+else
+    [~, menu108] = ismember('menu108',lang_id);
+    set(gcf,'Name',['Acycle: ',lang_var{menu108}])
+end
+
 data_s = varargin{1}.current_data;
 handles.unit = varargin{1}.unit;
 handles.unit_type = varargin{1}.unit_type;
@@ -171,9 +186,88 @@ set(handles.popupmenu3, 'Value',1);
 set(handles.edit9, 'String', '');
 set(handles.checkbox9, 'Value',0);
 
+% language
+if handles.lang_choice > 0
+    [~, main49] = ismember('main49',handles.lang_id);
+    set(handles.text5,'String',lang_var{main49})
+    
+    [~, evofft01] = ismember('evofft01',handles.lang_id);
+    set(handles.uipanel1,'Title',lang_var{evofft01})
+    
+    [~, evofft02] = ismember('evofft02',handles.lang_id);
+    set(handles.uipanel2,'Title',lang_var{evofft02})
+    
+    [~, evofft03] = ismember('evofft03',handles.lang_id);
+    set(handles.text6,'String',lang_var{evofft03})
+    
+    [~, evofft04] = ismember('evofft04',handles.lang_id);
+    set(handles.evofft_Nyquist_radiobutton,'String',lang_var{evofft04})
+    
+    [~, spectral14] = ismember('spectral14',handles.lang_id);
+    set(handles.radiobutton2,'String',lang_var{spectral14})
+    
+    [~, main32] = ismember('main32',handles.lang_id);
+    set(handles.uipanel5,'Title',lang_var{main32})
+    
+    [~, main33] = ismember('main33',handles.lang_id);
+    set(handles.pushbutton8,'String',lang_var{main33})
+    set(handles.evofft_tips_win_pushbutton,'String',lang_var{main33})
+    
+    [~, main34] = ismember('main34',handles.lang_id);
+    set(handles.text7,'String',lang_var{main34})
+    
+    [~, main07] = ismember('main07',handles.lang_id);
+    set(handles.uipanel3,'Title',lang_var{main07})
+    
+    [~, evofft05] = ismember('evofft05',handles.lang_id);
+    set(handles.checkbox8,'String',lang_var{evofft05})
+    
+    [~, evofft06] = ismember('evofft06',handles.lang_id);
+    set(handles.checkbox7,'String',lang_var{evofft06})
+    
+    [~, evofft07] = ismember('evofft07',handles.lang_id);
+    set(handles.uipanel6,'Title',lang_var{evofft07})
+    
+    [~, evofft08] = ismember('evofft08',handles.lang_id);
+    set(handles.rotation,'String',lang_var{evofft08})
+    
+    [~, evofft09] = ismember('evofft09',handles.lang_id);
+    set(handles.checkbox2,'String',lang_var{evofft09})
+    
+    [~, main10] = ismember('main10',handles.lang_id);
+    set(handles.checkbox3,'String',lang_var{main10})
+    
+    [~, evofft10] = ismember('evofft10',handles.lang_id);
+    set(handles.checkbox4,'String',lang_var{evofft10})
+    
+    [~, evofft11] = ismember('evofft11',handles.lang_id);
+    set(handles.checkbox5,'String',lang_var{evofft11})
+        
+    [~, main43] = ismember('main43',handles.lang_id);
+    set(handles.checkbox6,'String',['x ',lang_var{main43}])
+    
+    [~, main50] = ismember('main50',handles.lang_id);
+    set(handles.uipanel10,'Title',lang_var{main50})
+    
+    [~, evofft12] = ismember('evofft12',handles.lang_id);
+    set(handles.text8,'String',lang_var{evofft12})
+    
+    [~, main01] = ismember('main01',handles.lang_id);
+    set(handles.checkbox9,'String',lang_var{main01})
+    
+    [~, main00] = ismember('main00',handles.lang_id);
+    set(handles.evofft_ok_pushbutton,'String',lang_var{main00})
+end
+
 diffx = diff(data_s(:,1));
 if max(diffx) - min(diffx) > 10*eps('single')
-    hwarn = warndlg('Not equally spaced data. Interpolated using mean sampling rate!');
+    
+    if handles.lang_choice == 0
+        hwarn = warndlg('Not equally spaced data. Interpolated using mean sampling rate!');
+    else
+        [~, evofft14] = ismember('evofft14',handles.lang_id);
+        hwarn = warndlg(lang_var{evofft14});
+    end
     interpolate_rate = mean(diffx);
     handles.current_data = interpolate(data_s,interpolate_rate);
     %set(0,'Units','normalized') % set units as normalized
@@ -599,16 +693,16 @@ function radiobutton2_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of radiobutton2
-% val = get(handles.radiobutton2,'Value')
-% if val > 0
-%     set(handles.evofft_Nyquist_radiobutton,'Value',0)
-%     set(handles.radiobutton2, 'Value', 1);
-%     handles.evofft_fmax = str2double(get(handles.evofft_fmax_edit, 'String'));
-% else 
-%     set(handles.evofft_Nyquist_radiobutton,'Value',0)
-%     handles.evofft_fmax = handles.nyquist;
-% end
+%Hint: get(hObject,'Value') returns toggle state of radiobutton2
+val = get(handles.radiobutton2,'Value');
+if val > 0
+    set(handles.evofft_Nyquist_radiobutton,'Value',0)
+    set(handles.radiobutton2, 'Value', 1);
+    handles.evofft_fmax = str2double(get(handles.evofft_fmax_edit, 'String'));
+else 
+    set(handles.evofft_Nyquist_radiobutton,'Value',0)
+    handles.evofft_fmax = handles.nyquist;
+end
 
 % --- Executes on button press in evofft_tips_win_pushbutton.
 function evofft_tips_win_pushbutton_Callback(hObject, eventdata, handles)

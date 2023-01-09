@@ -262,7 +262,6 @@ else
 end
 
 %
-
 dat = varargin{1}.current_data;  % data
 %
 diffx = diff(dat(:,1));

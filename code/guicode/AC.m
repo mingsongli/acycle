@@ -106,6 +106,7 @@ function AC_OpeningFcn(hObject, eventdata, handles, varargin)
 set(0,'Units','centimeters')
 MonitorPos = get(0,'MonitorPositions');
 handles.MonitorPos = MonitorPos;
+handles.MonZoom = 1;
 if MonitorPos(1,4) < 30
      handles.MonZoom = 1.2;
 elseif  MonitorPos(1,4) < 38 % Macbook pro 16 retina
@@ -607,6 +608,7 @@ handles.lang_choice = lang_choice;
 handles.lang_id = lang_id;
 handles.lang_var = lang_var;
 
+handles.main_unit_selection = get(handles.main_unit_en,'Value');
 handles.popupmenu1_default = get(handles.popupmenu1,'String');
 
 % Update handles structure
@@ -8184,7 +8186,6 @@ function menu_lang_Callback(hObject, eventdata, handles)
 
 guidata(hObject, handles);
 languageGUI(handles)
-%=======
 
 
 % --------------------------------------------------------------------
@@ -8235,3 +8236,5 @@ if get(hObject,'Value') > 0
 else
     set(handles.popupmenu1,'String',handles.popupmenu1_default)
 end
+handles.main_unit_selection = get(handles.main_unit_en,'Value');
+guidata(hObject, handles);
