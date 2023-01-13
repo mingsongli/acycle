@@ -70,55 +70,6 @@ handles.lang_id = lang_id;
 handles.lang_var = lang_var;
 handles.main_unit_selection = varargin{1}.main_unit_selection;
 
-if ismac
-    set(gcf,'position',[0.45,0.4,0.4,0.35]* handles.MonZoom) % set position
-elseif ispc
-    set(gcf,'position',[0.45,0.4,0.4,0.35]* handles.MonZoom) % set position
-end
-set(handles.text5,'position',[0.018,0.856,0.2,0.06])
-set(handles.popupmenu2,'position',[0.26,0.856,0.68,0.06])
-set(handles.uipanel1,'position',[0.034,0.037,0.906,0.793])
-set(handles.uipanel2,'position',[0.029,0.553,0.454,0.42])
-set(handles.uipanel5,'position',[0.496,0.559,0.239,0.419])
-set(handles.uipanel3,'position',[0.738,0.559,0.257,0.419])
-
-set(handles.checkbox2,'position',[0.293,0.45,0.36,0.1])
-set(handles.checkbox3,'position',[0.293,0.35,0.36,0.1])
-set(handles.checkbox5,'position',[0.293,0.25,0.36,0.1])
-set(handles.checkbox4,'position',[0.293,0.15,0.36,0.1])
-set(handles.checkbox6,'position',[0.293,0.05,0.2,0.1])
-set(handles.checkbox7,'position',[0.029,0.35,0.25,0.08])
-set(handles.checkbox7,'Value',0)
-set(handles.checkbox8,'position',[0.029,0.45,0.25,0.08])
-set(handles.checkbox8,'Value',1)
-set(handles.popupmenu4,'position',[0.46,0.03,0.18,0.11])
-
-set(handles.uipanel6,'position',[0.029,0.05,0.251,0.28])
-set(handles.uipanel10,'position',[0.637,0.08,0.251,0.42])
-set(handles.popupmenu3,'position',[0.02,0.5,0.95,0.36])
-set(handles.text8,'position',[0.0637,0.22,0.371,0.173])
-set(handles.edit9,'position',[0.412,0.2,0.4,0.25])
-set(handles.checkbox9,'position',[0.888,0.4,0.11,0.08])
-set(handles.evofft_ok_pushbutton,'position',[0.888,0.08,0.11,0.22])
-set(handles.text6,'position',[0.138,0.714,0.316,0.238])
-set(handles.edit7,'position',[0.651,0.698,0.309,0.27])
-set(handles.evofft_Nyquist_radiobutton,'position',[0.111,0.381,0.687,0.365])
-set(handles.evofft_nyquist_text,'position',[0.629,0.397,0.281,0.223])
-set(handles.radiobutton2,'position',[0.111,0.1,0.549,0.388])
-set(handles.evofft_fmax_edit,'position',[0.645,0.127,0.309,0.27])
-set(handles.edit_step,'position',[0.103,0.54,0.4,0.38])
-set(handles.pushbutton8,'position',[0.538,0.556,0.41,0.349])
-set(handles.edit8,'position',[0.103,0.143,0.397,0.381])
-set(handles.text7,'position',[0.577,0.206,0.346,0.206])
-set(handles.evofft_win_text,'position',[0.131,0.55,0.738,0.375])
-set(handles.evofft_tips_win_pushbutton,'position',[0.095,0.075,0.774,0.35])
-set(handles.radiobutton_2d,'position',[0.048,0.524,0.56,0.365])
-set(handles.radiobutton_3d,'position',[0.512,0.524,0.476,0.365])
-set(handles.rotation,'position',[0.06,0.127,0.881,0.365])
-
-% Choose default command line output for evofftGUI
-handles.output = hObject;
-
 
 if handles.lang_choice == 0
     set(gcf,'Name','Acycle: Evolutionary Spectral Analysis')
@@ -126,66 +77,6 @@ else
     [~, menu108] = ismember('menu108',lang_id);
     set(gcf,'Name',['Acycle: ',lang_var{menu108}])
 end
-
-data_s = varargin{1}.current_data;
-handles.unit = varargin{1}.unit;
-handles.unit_type = varargin{1}.unit_type;
-handles.current_data = data_s;
-handles.data_name = varargin{1}.data_name;
-handles.path_temp = varargin{1}.path_temp;
-handles.listbox_acmain = varargin{1}.listbox_acmain; % save path
-handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
-[dat_dir,handles.filename,exten] = fileparts(handles.data_name);
-
-handles.plot_2d = 1;
-handles.plot_log = 0;
-handles.freq_log = 0;
-handles.normal = 1;
-handles.flipy = 1;
-handles.color = 'parula'; % default
-handles.colorgrid = [];
-
-xmin = min(data_s(:,1));
-xmax = max(data_s(:,1));
-mean1 = median(diff(data_s(:,1)));
-handles.mean = mean1;
-handles.step = handles.mean;
-handles.nyquist = 1/(2*handles.mean);     % prepare nyquist
-handles.window = 0.2*(xmax-xmin);
-handles.rotate = 0;
-handles.method = 'Fast Fourier transform (LAH)';
-handles.lenthx = xmax-xmin;
-handles.time_0pad = 1;
-handles.padtype = 1;
-% if number of calculations is larger than 500;
-% then, a large step is recommended. This way, the ncal is ~500.
-ncal = (xmax-xmin - handles.window)/mean1;
-if ncal > 500
-    handles.step = abs(xmax - xmin - handles.window)/500;
-end
-%
-set(handles.evofft_nyquist_text, 'String', num2str(handles.nyquist));
-set(handles.evofft_fmax_edit, 'String', num2str(handles.nyquist));
-set(handles.evofft_win_text, 'String', num2str(handles.window));
-set(handles.edit7, 'String', '0');
-set(handles.edit8, 'String', handles.unit);
-set(handles.edit_step, 'String', num2str(handles.step),'Value',1);
-set(handles.evofft_Nyquist_radiobutton, 'Value',0,'Enable','Off');
-set(handles.radiobutton2, 'Value',1,'Enable','Off');
-set(handles.popupmenu2, 'Value',1);
-set(handles.evofft_Nyquist_radiobutton, 'Value',1);
-set(handles.radiobutton_2d, 'Value',1);
-set(handles.radiobutton_3d, 'Value',0);
-set(handles.rotation, 'Value',0);
-set(handles.checkbox2, 'Value',1);
-set(handles.checkbox3, 'Value',1);
-set(handles.checkbox4, 'Value',0);
-set(handles.checkbox5, 'Value',0);
-set(handles.checkbox6, 'Value',1);
-set(handles.popupmenu3, 'Value',1);
-set(handles.edit9, 'String', '');
-set(handles.checkbox9, 'Value',0);
-
 % language
 if handles.lang_choice > 0
     [~, main49] = ismember('main49',handles.lang_id);
@@ -258,6 +149,116 @@ if handles.lang_choice > 0
     [~, main00] = ismember('main00',handles.lang_id);
     set(handles.evofft_ok_pushbutton,'String',lang_var{main00})
 end
+
+
+if ismac
+    set(gcf,'position',[0.45,0.4,0.4,0.35]* handles.MonZoom) % set position
+elseif ispc
+    set(gcf,'position',[0.45,0.4,0.4,0.35]* handles.MonZoom) % set position
+end
+set(handles.text5,'position',[0.018,0.856,0.2,0.06])
+set(handles.popupmenu2,'position',[0.26,0.856,0.68,0.06])
+set(handles.uipanel1,'position',[0.034,0.037,0.906,0.793])
+set(handles.uipanel2,'position',[0.029,0.553,0.454,0.42])
+set(handles.uipanel5,'position',[0.496,0.559,0.239,0.419])
+set(handles.uipanel3,'position',[0.738,0.559,0.257,0.419])
+
+set(handles.checkbox2,'position',[0.293,0.45,0.36,0.1])
+set(handles.checkbox3,'position',[0.293,0.35,0.36,0.1])
+set(handles.checkbox5,'position',[0.293,0.25,0.36,0.1])
+set(handles.checkbox4,'position',[0.293,0.15,0.36,0.1])
+set(handles.checkbox6,'position',[0.293,0.05,0.2,0.1])
+set(handles.checkbox7,'position',[0.029,0.35,0.25,0.08])
+set(handles.checkbox7,'Value',0)
+set(handles.checkbox8,'position',[0.029,0.45,0.25,0.08])
+set(handles.checkbox8,'Value',1)
+set(handles.popupmenu4,'position',[0.46,0.03,0.18,0.11])
+
+set(handles.uipanel6,'position',[0.029,0.05,0.251,0.28])
+set(handles.uipanel10,'position',[0.637,0.08,0.251,0.42])
+set(handles.popupmenu3,'position',[0.02,0.5,0.95,0.36])
+set(handles.text8,'position',[0.0637,0.22,0.371,0.173])
+set(handles.edit9,'position',[0.412,0.2,0.4,0.25])
+set(handles.checkbox9,'position',[0.888,0.4,0.11,0.08])
+set(handles.evofft_ok_pushbutton,'position',[0.888,0.08,0.11,0.22])
+set(handles.text6,'position',[0.138,0.714,0.316,0.238])
+set(handles.edit7,'position',[0.651,0.698,0.309,0.27])
+set(handles.evofft_Nyquist_radiobutton,'position',[0.111,0.381,0.687,0.365])
+set(handles.evofft_nyquist_text,'position',[0.629,0.397,0.281,0.223])
+set(handles.radiobutton2,'position',[0.111,0.1,0.549,0.388])
+set(handles.evofft_fmax_edit,'position',[0.645,0.127,0.309,0.27])
+set(handles.edit_step,'position',[0.103,0.54,0.4,0.38])
+set(handles.pushbutton8,'position',[0.538,0.556,0.41,0.349])
+set(handles.edit8,'position',[0.103,0.143,0.397,0.381])
+set(handles.text7,'position',[0.577,0.206,0.346,0.206])
+set(handles.evofft_win_text,'position',[0.131,0.55,0.738,0.375])
+set(handles.evofft_tips_win_pushbutton,'position',[0.095,0.075,0.774,0.35])
+set(handles.radiobutton_2d,'position',[0.048,0.524,0.56,0.365])
+set(handles.radiobutton_3d,'position',[0.512,0.524,0.476,0.365])
+set(handles.rotation,'position',[0.06,0.127,0.881,0.365])
+
+% Choose default command line output for evofftGUI
+handles.output = hObject;
+
+data_s = varargin{1}.current_data;
+handles.unit = varargin{1}.unit;
+handles.unit_type = varargin{1}.unit_type;
+handles.current_data = data_s;
+handles.data_name = varargin{1}.data_name;
+handles.path_temp = varargin{1}.path_temp;
+handles.listbox_acmain = varargin{1}.listbox_acmain; % save path
+handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
+[dat_dir,handles.filename,exten] = fileparts(handles.data_name);
+
+handles.plot_2d = 1;
+handles.plot_log = 0;
+handles.freq_log = 0;
+handles.normal = 1;
+handles.flipy = 1;
+handles.color = 'parula'; % default
+handles.colorgrid = [];
+
+xmin = min(data_s(:,1));
+xmax = max(data_s(:,1));
+mean1 = median(diff(data_s(:,1)));
+handles.mean = mean1;
+handles.step = handles.mean;
+handles.nyquist = 1/(2*handles.mean);     % prepare nyquist
+handles.window = 0.2*(xmax-xmin);
+handles.rotate = 0;
+handles.method = 'Fast Fourier transform (LAH)';
+handles.lenthx = xmax-xmin;
+handles.time_0pad = 1;
+handles.padtype = 1;
+% if number of calculations is larger than 500;
+% then, a large step is recommended. This way, the ncal is ~500.
+ncal = (xmax-xmin - handles.window)/mean1;
+if ncal > 500
+    handles.step = abs(xmax - xmin - handles.window)/500;
+end
+%
+set(handles.evofft_nyquist_text, 'String', num2str(handles.nyquist));
+set(handles.evofft_fmax_edit, 'String', num2str(handles.nyquist));
+set(handles.evofft_win_text, 'String', num2str(handles.window));
+set(handles.edit7, 'String', '0');
+set(handles.edit8, 'String', handles.unit);
+set(handles.edit_step, 'String', num2str(handles.step),'Value',1);
+set(handles.evofft_Nyquist_radiobutton, 'Value',0,'Enable','Off');
+set(handles.radiobutton2, 'Value',1,'Enable','Off');
+set(handles.popupmenu2, 'Value',1);
+set(handles.evofft_Nyquist_radiobutton, 'Value',1);
+set(handles.radiobutton_2d, 'Value',1);
+set(handles.radiobutton_3d, 'Value',0);
+set(handles.rotation, 'Value',0);
+set(handles.checkbox2, 'Value',1);
+set(handles.checkbox3, 'Value',1);
+set(handles.checkbox4, 'Value',0);
+set(handles.checkbox5, 'Value',0);
+set(handles.checkbox6, 'Value',1);
+set(handles.popupmenu3, 'Value',1);
+set(handles.edit9, 'String', '');
+set(handles.checkbox9, 'Value',0);
+
 
 diffx = diff(data_s(:,1));
 if max(diffx) - min(diffx) > 10*eps('single')

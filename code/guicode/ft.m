@@ -60,7 +60,14 @@ set(h2,'FontUnits','points','FontSize',12);  % set as norm
 handles.MonZoom = varargin{1}.MonZoom;
 handles.sortdata = varargin{1}.sortdata;
 handles.val1 = varargin{1}.val1;
-
+% language
+lang_choice = varargin{1}.lang_choice;
+handles.lang_choice = lang_choice;
+lang_id = varargin{1}.lang_id;
+lang_var = varargin{1}.lang_var;
+handles.lang_id = lang_id;
+handles.lang_var = lang_var;
+handles.main_unit_selection = varargin{1}.main_unit_selection;
 if ismac
     set(gcf,'position',[0.3,0.2,0.65,0.4]* handles.MonZoom) % set position
 elseif ispc
@@ -87,15 +94,15 @@ set(handles.edit2,'position',[0.503,0.574,0.395,0.15])
 set(handles.edit18,'position',[0.59,0.26,0.28,0.1])
 set(handles.edit18,'string','12')
 
-set(handles.text16,'position',[0.074,0.754,0.27,0.094])
-set(handles.text15,'position',[0.074,0.58,0.27,0.094])
-set(handles.text18,'position',[0.074,0.4,0.27,0.094])
-set(handles.text17,'position',[0.074,0.22,0.27,0.094])
+set(handles.text16,'position',[0.074,0.754,0.4,0.094])
+set(handles.text15,'position',[0.074,0.58,0.4,0.094])
+set(handles.text18,'position',[0.074,0.4,0.4,0.094])
+set(handles.text17,'position',[0.074,0.22,0.4,0.094])
 
-set(handles.edit11,'position',[0.369,0.717,0.574,0.159])
-set(handles.edit10,'position',[0.369,0.536,0.574,0.159])
-set(handles.edit13,'position',[0.369,0.362,0.574,0.159])
-set(handles.edit12,'position',[0.369,0.181,0.574,0.159])
+set(handles.edit11,'position',[0.5,0.717,0.426,0.159])
+set(handles.edit10,'position',[0.5,0.536,0.426,0.159])
+set(handles.edit13,'position',[0.5,0.362,0.426,0.159])
+set(handles.edit12,'position',[0.5,0.181,0.426,0.159])
 
 set(handles.radiobutton6,'position',[0.049,0.759,0.634,0.205])
 set(handles.radiobutton7,'position',[0.049,0.562,0.634,0.205])
@@ -106,7 +113,12 @@ set(handles.edit17,'position',[0.626,0.554,0.35,0.159])
 set(handles.popupmenu5,'position',[0.024,0.054,0.976,0.259])
 
 handles.output = hObject;
-set(gcf,'Name','Acycle: Filtering')
+if handles.lang_choice == 0
+    set(gcf,'Name','Acycle: Filtering')
+else
+    [~, menu113] = ismember('menu113',lang_id);
+    set(gcf,'Name',['Acycle: ',lang_var{menu113}])
+end
 % contact with acycle main window
 handles.acfigmain = varargin{1}.acfigmain;
 handles.listbox_acmain = varargin{1}.listbox_acmain;
@@ -157,7 +169,13 @@ axes(handles.ft_axes4);
 plot(fd2,po2);
 xlim([handles.x_1 handles.x_2])
 ylim([handles.y_1 handles.y_3])
-xlabel(['Cycles/' handles.unit])
+% language
+if handles.lang_choice == 0
+    xlabel(['Frequency (cycles/' handles.unit,')'])
+else
+    [~, main14] = ismember('main14',handles.lang_id);
+    xlabel([lang_var{main14},'(1/' handles.unit,')'])
+end
 % Set frequency which has (the 1st) maximum power as default frequencies
 fd1index = find(P1 == max(P1), 1, 'first');
 fq_deft = f(fd1index);   % find f with max power
@@ -172,12 +190,65 @@ handles.add_list = '';
 handles.filter = 'Gaussian';
 % update axes 3
 update_filter_axes
+
+% language
+if handles.lang_choice > 0
+    [~, ft01] = ismember('ft01',handles.lang_id);
+    set(handles.ft_uipanel2,'Title',lang_var{ft01})
+    
+    [~, ft02] = ismember('ft02',handles.lang_id);
+    set(handles.uipanel6,'Title',lang_var{ft02})
+    
+    [~, ft03] = ismember('ft03',handles.lang_id);
+    set(handles.uibuttongroup2,'Title',lang_var{ft03})
+    
+    [~, ft04] = ismember('ft04',handles.lang_id);
+    set(handles.text10,'String',lang_var{ft04})
+    
+    [~, ft05] = ismember('ft05',handles.lang_id);
+    set(handles.text1,'String',lang_var{ft05})
+    
+    [~, ft06] = ismember('ft06',handles.lang_id);
+    set(handles.text2,'String',lang_var{ft06})
+    
+    [~, ft08] = ismember('ft08',handles.lang_id);
+    set(handles.text21,'String',lang_var{ft08})
+    
+    [~, ft09] = ismember('ft09',handles.lang_id);
+    set(handles.text16,'String',lang_var{ft09})
+    
+    [~, ft10] = ismember('ft10',handles.lang_id);
+    set(handles.text15,'String',lang_var{ft10})
+    
+    [~, ft11] = ismember('ft11',handles.lang_id);
+    set(handles.text18,'String',lang_var{ft11})
+    
+    [~, ft12] = ismember('ft12',handles.lang_id);
+    set(handles.text17,'String',lang_var{ft12})
+    
+    [~, ft13] = ismember('ft13',handles.lang_id);
+    set(handles.radiobutton6,'String',lang_var{ft13})
+    
+    [~, ft14] = ismember('ft14',handles.lang_id);
+    set(handles.radiobutton7,'String',lang_var{ft14})
+    
+    [~, ft15] = ismember('ft15',handles.lang_id);
+    set(handles.radiobutton8,'String',lang_var{ft15})
+    
+    [~, main01] = ismember('main01',handles.lang_id);
+    set(handles.pushbutton26,'String',lang_var{main01})
+end
 %
 guidata(hObject,handles)
 
 diffx = diff(data_s(:,1));
 if max(diffx) - min(diffx) > 10 * eps('single')
-    hwarn = warndlg('Warning: the data may not be evenly spaced.');
+    if handles.lang_choice == 0
+        hwarn = warndlg('Warning: the data may not be evenly spaced.');
+    else
+        [~, ec25] = ismember('ec25',handles.lang_id);
+        hwarn = warndlg(lang_var{ec25});
+    end
     %set(0,'Units','normalized') % set units as normalized
     set(gcf,'units','norm') % set location
     set(gcf,'position',[0.2,0.6,0.2,0.1])
@@ -670,8 +741,15 @@ function pushbutton26_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 %a = handles.add_list
 add_list = handles.add_list;
+lang_var = handles.lang_var;
+
 if isempty(add_list)
-    errordlg('Select filtering method')
+    if handles.lang_choice == 0
+        errordlg('Select filtering method')
+    else
+        [~, ft16] = ismember('ft16',handles.lang_id);
+        errordlg(lang_var{ft16})
+    end
 else
     figft = gcf;
     data_filterout = handles.data_filterout;
@@ -684,13 +762,29 @@ else
     plot(data_filterout(:,1),data_filterout(:,2),'r')
     xlim([min(data(:,1)),max(data(:,1))])
     title(add_list, 'Interpreter', 'none')
-    if handles.unit_type == 0;
-        xlabel(['Unit (',handles.unit,')'])
-    elseif handles.unit_type == 1;
-        xlabel(['Depth (',handles.unit,')'])
+    
+    if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+        if handles.unit_type == 0
+            xlabel(['Unit (',handles.unit,')'])
+        elseif handles.unit_type == 1
+            xlabel(['Depth (',handles.unit,')'])
+        else
+            xlabel(['Time (',handles.unit,')'])
+        end
     else
-        xlabel(['Time (',handles.unit,')'])
+        [~, main34] = ismember('main34',handles.lang_id); % unit
+        [~, main23] = ismember('main23',handles.lang_id);
+        [~, main21] = ismember('main21',handles.lang_id);
+        
+        if handles.unit_type == 0
+            xlabel([lang_var{main34},' (',handles.unit,')'])
+        elseif handles.unit_type == 1
+            xlabel([lang_var{main23},' (',handles.unit,')'])
+        else
+            xlabel([lang_var{main21},' (',handles.unit,')'])
+        end
     end
+    
     set(gca,'XMinorTick','on','YMinorTick','on')
     
     if strcmp(filter,'Taner-Hilbert')
@@ -704,22 +798,46 @@ else
         dlmwrite(handles.add_list_ufaze,[data_filterout(:,1),data_filterout(:,4)], 'delimiter', ' ', 'precision', 9);        
         dlmwrite(handles.add_list_ifaze, ifaze, 'delimiter', ' ', 'precision', 9);
         dlmwrite(handles.add_list_ifreq, ifreq, 'delimiter', ' ', 'precision', 9);
-        disp(['>>  Save as: ', handles.add_list_am])
-        disp(['>>  Save as: ', handles.add_list_ufaze])
-        disp(['>>  Save as: ', handles.add_list_ufazedet])
-        disp(['>>  Save as: ', handles.add_list_ifaze])
-        disp(['>>  Save as: ', handles.add_list_ifreq])
+        if handles.lang_choice == 0
+            disp(['>>  Save as: ', handles.add_list_am])
+            disp(['>>  Save as: ', handles.add_list_ufaze])
+            disp(['>>  Save as: ', handles.add_list_ufazedet])
+            disp(['>>  Save as: ', handles.add_list_ifaze])
+            disp(['>>  Save as: ', handles.add_list_ifreq])
+        else
+            
+            [~, main01] = ismember('main01',handles.lang_id);  % save data
+            disp(['>>  ',lang_var{main01},': ', handles.add_list_am])
+            disp(['>>  ',lang_var{main01},': ', handles.add_list_ufaze])
+            disp(['>>  ',lang_var{main01},': ', handles.add_list_ufazedet])
+            disp(['>>  ',lang_var{main01},': ', handles.add_list_ifaze])
+            disp(['>>  ',lang_var{main01},': ', handles.add_list_ifreq])
+        end
         plot(data_filterout(:,1),data_filterout(:,3),'b')
         % plot
         figure;
         t  = data_filterout(:,1);
         xx = data_filterout(:,2);
-        subplot(4,1,1), plot(t,xx),title('Modulated signal & Instantaneous amplitude'); hold on;
+        subplot(4,1,1), plot(t,xx),
+        if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+            title('Modulated signal & Instantaneous amplitude'); 
+        else
+            [~, ft17] = ismember('ft17',handles.lang_id);
+            title(lang_var{ft17});
+        end
+        hold on;
         subplot(4,1,1), plot(t,data_filterout(:,3)); hold off;
         xlim([min(data(:,1)),max(data(:,1))])
         set(gca,'XMinorTick','on','YMinorTick','on')
         
-        subplot(4,1,2), plot(t,data_filterout(:,4)),title('Unrolled instantaneous phase')
+        subplot(4,1,2), plot(t,data_filterout(:,4)),
+        
+        if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+            title('Unrolled instantaneous phase')
+        else
+            [~, ft18] = ismember('ft18',handles.lang_id);
+            title(lang_var{ft18})
+        end
         xlim([min(data(:,1)),max(data(:,1))])
         set(gca,'XMinorTick','on','YMinorTick','on')
         
@@ -729,29 +847,63 @@ else
         sdat = polyfit(t,data_filterout(:,4),1);
         datalinear = (t-t(1)) * sdat(1);
         iphasedet = data_filterout(:,4) - datalinear;
-        subplot(4,1,3), plot(t,iphasedet),title('Instantaneous phase')
+        subplot(4,1,3), plot(t,iphasedet),
+        if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+            title('Instantaneous phase')
+            ylabel('phase (radians)')
+        else
+            [~, ft19] = ismember('ft19',handles.lang_id);
+            [~, ft20] = ismember('ft20',handles.lang_id);
+            title(lang_var{ft19})
+            ylabel(lang_var{ft20})
+        end
         %subplot(4,1,3), plot(t,data_filterout(:,5)),title('Detrended instantaneous phase')
         xlim([min(data(:,1)),max(data(:,1))])
-        ylabel('phase (radians)')
+        
         set(gca,'XMinorTick','on','YMinorTick','on')
         
-        subplot(4,1,4), plot(t(1:(length(t)-1)),handles.ifreq),title('Instantaneous frequency')
+        subplot(4,1,4), plot(t(1:(length(t)-1)),handles.ifreq),
+        if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+            title('Instantaneous frequency')
+        else
+            [~, ft21] = ismember('ft21',handles.lang_id);
+            title(lang_var{ft21})
+        end
         xlim([min(data(:,1)),max(data(:,1))])
         set(gca,'XMinorTick','on','YMinorTick','on')
-        if handles.unit_type == 0;
-            xlabel(['Unit (',handles.unit,')'])
-        elseif handles.unit_type == 1;
-            xlabel(['Depth (',handles.unit,')'])
-        else
-            xlabel(['Time (',handles.unit,')'])
-        end
         
+        if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+            if handles.unit_type == 0
+                xlabel(['Unit (',handles.unit,')'])
+            elseif handles.unit_type == 1
+                xlabel(['Depth (',handles.unit,')'])
+            else
+                xlabel(['Time (',handles.unit,')'])
+            end
+        else
+            [~, main34] = ismember('main34',handles.lang_id); % unit
+            [~, main23] = ismember('main23',handles.lang_id);
+            [~, main21] = ismember('main21',handles.lang_id);
+
+            if handles.unit_type == 0
+                xlabel([lang_var{main34},' (',handles.unit,')'])
+            elseif handles.unit_type == 1
+                xlabel([lang_var{main23},' (',handles.unit,')'])
+            else
+                xlabel([lang_var{main21},' (',handles.unit,')'])
+            end
+        end
+    
         dlmwrite(handles.add_list_ufazedet, [t,iphasedet], 'delimiter', ' ', 'precision', 9);
         %dlmwrite(handles.add_list_ufazedet, [t,data_filterout(:,5)], 'delimiter', ' ', 'precision', 9);
     end
     cd(pre_dirML); % return to matlab view folder
-    
-    disp('>> Done. See AC main window for the filtered output file(s)')
+    if handles.lang_choice == 0
+        disp('>> Done. See AC main window for the filtered output file(s)')
+    else
+        [~, ft22] = ismember('ft22',handles.lang_id);
+        disp(lang_var{ft22});
+    end
     % refresh AC main window
     figure(handles.acfigmain);
     CDac_pwd; % cd working dir
