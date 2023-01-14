@@ -174,17 +174,6 @@ if handles.lang_choice > 0
     set(handles.radiobutton1,'String',lang_var{ec20})
     set(handles.text16,'String',lang_var{main32})
     set(handles.checkbox1median,'String',lang_var{main40})
-    
-    % menu
-    [~, menu01] = ismember('menu01',handles.lang_id); % File
-    set(handles.menu_file,'Text',lang_var{menu01}) % File
-    set(handles.file_import,'Text',lang_var{dynot23})
-    [~, dynot40] = ismember('dynot40',handles.lang_id);
-    [~, menu07] = ismember('menu07',handles.lang_id);
-    [~, dynot41] = ismember('dynot41',handles.lang_id);
-    set(handles.menu_help,'Text',lang_var{menu07})
-    set(handles.menu_about,'Text',lang_var{dynot40})
-    set(handles.menu_website,'Text',lang_var{dynot41})
 end
 % uipanels
 set(handles.uipanel6,'position', [0.015,0.9,0.124,0.076])
@@ -368,7 +357,7 @@ numcore = handles.numcore;
 % language
 lang_var = handles.lang_var;
 lang_choice = handles.lang_choice;
-lang_id = handles.lang_id;
+
 %
 numcorereal = feature('numCores');
 numcore(numcore>numcorereal) = numcorereal;
@@ -472,7 +461,7 @@ set(hwaitbar_find,'EdgeColor',[0 0.9 0],'FaceColor',[0 0.9 0]) % changes the col
 if handles.lang_choice == 0
     setappdata(hwaitbar,'canceling',0)
 else
-    setappdata(hwaitbar,'canceling',0)
+    setappdata(hwaitbar,hwaitbarText,0)
 end
 steps = 100;
 % step estimation for waitbar
@@ -486,7 +475,7 @@ if nmc > 199
   if numcore == 1  % can not use parpool or matlabpool
     for i=1:nmc
 
-        if getappdata(hwaitbar,'canceling')
+        if getappdata(hwaitbar,hwaitbarText)
             break
         end
         dat = [];
@@ -546,9 +535,7 @@ if nmc > 199
             if handles.lang_choice == 0
                 dispstat(sprintf(' Progress %.2f%%. Remain %d:%d:%.0f',100*i/nmc,hh,mm,sec),'timestamp')
             else
-                [~, dynot29] = ismember('dynot29',lang_id);
-                [~, dynot30] = ismember('dynot30',lang_id);
-                dispstat([lang_var{dynot29},sprintf(' %.2f%%. ',100*i/nmc),lang_var{dynot30},sprintf(' %d:%d:%.0f',hh,mm,sec)],'timestamp')
+                dispstat(lang_var{dynot29},sprintf(' %.2f%%. ',100*i/nmc),lang_var{dynot30},sprintf(' %d:%d:%.0f',hh,mm,sec),'timestamp')
             end
             
             % waitbar
@@ -568,7 +555,7 @@ if nmc > 199
             else
                 [~, dynot18] = ismember('dynot18',lang_id);
                 [~, dynot32] = ismember('dynot32',lang_id);
-                dispstat([lang_var{dynot18},sprintf(' %d ',itinerary),lang_var{dynot32},':',lang_var{dynot30},sprintf(' >= %dh:%dm:%ds',hh,mm,sec)],'timestamp')
+                dispstat(lang_var{dynot18},sprintf(' %d ',itinerary),lang_var{dynot32},':',lang_var{dynot30},sprintf(' >= %dh:%dm:%ds',hh,mm,sec),'timestamp')
             end
   %end   
             if ishandle(hwaitbar)
@@ -658,7 +645,7 @@ else
         else
             [~, dynot29] = ismember('dynot29',lang_id);
             [~, dynot30] = ismember('dynot30',lang_id);
-            dispstat([lang_var{dynot29},sprintf(' %.1f%%. ',100*i/nmc),lang_var{dynot30},sprintf(' %d:%d:%.0f',hh,mm,sec)],'timestamp')
+            dispstat(lang_var{dynot29},sprintf(' %.1f%%. ',100*i/nmc),lang_var{dynot30},sprintf(' %d:%d:%.0f',hh,mm,sec),'timestamp')
         end
         
         %
@@ -687,12 +674,9 @@ end
 % No adjust??
 %powyadjust= powy;
 %
-if handles.lang_choice == 0
-    dispstat('>>  Done.','keepprev');  % done
-else
-    [~, main45] = ismember('main45',lang_id);
-    dispstat(['>>  ',lang_var{main45},'.'],'keepprev');  % done
-end
+
+[~, main45] = ismember('main45',lang_id);
+dispstat(['>>  ',lang_var{main45},'.'],'keepprev');  % done
 %%
 npercent  = length(percent);
 npercent2 = (length(percent)-1)/2;
@@ -779,17 +763,9 @@ if exist([pwd,handles.slash_v,name1]) || exist([pwd,handles.slash_v,name2])
         end
     end
 end
-if handles.lang_choice == 0
 
-    disp(['>>  Save DYNOT median    : ',name1])
-    disp(['>>  Save DYNOT percentile: ',name2])
-else
-    [~, main52] = ismember('main52',lang_id); % save
-    [~, main40] = ismember('main40',lang_id); % median
-    [~, main56] = ismember('main56',lang_id); % percentile
-    disp(['>>  ',lang_var{main52},' DYNOT ',lang_var{main40},' : ',name1])
-    disp(['>>  ',lang_var{main52},' DYNOT ',lang_var{main56},' : ',name2])
-end
+disp(['>>  Save DYNOT median    : ',name1])
+disp(['>>  Save DYNOT percentile: ',name2])
 dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9); 
 dlmwrite(name2, data2, 'delimiter', ' ', 'precision', 9); 
 cd(pre_dirML); % return to matlab view folder

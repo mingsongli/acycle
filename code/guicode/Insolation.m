@@ -67,8 +67,80 @@ h1=findobj(h,'FontUnits','norm');  % find all font units as points
 set(h1,'FontUnits','points','FontSize',12);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',12);  % set as norm
-set(gcf,'Name','Acycle: Insolation')
+
 set(gcf,'position',[0.4,0.1,0.35,0.65]* handles.MonZoom)
+
+% language
+lang_choice = varargin{1}.lang_choice;
+handles.lang_choice = lang_choice;
+lang_id = varargin{1}.lang_id;
+lang_var = varargin{1}.lang_var;
+handles.lang_id = lang_id;
+handles.lang_var = lang_var;
+handles.main_unit_selection = varargin{1}.main_unit_selection;
+if handles.lang_choice == 0
+    set(gcf,'Name','Acycle: Insolation')
+else
+    [~, menu50] = ismember('menu50',lang_id);
+    set(gcf,'Name',['Acycle: ',lang_var{menu50}])
+end
+
+% language
+if handles.lang_choice > 0
+    [~, insol01] = ismember('insol01',handles.lang_id);
+    [~, insol02] = ismember('insol02',handles.lang_id);
+    [~, insol03] = ismember('insol03',handles.lang_id);
+    [~, insol04] = ismember('insol04',handles.lang_id);
+    [~, insol05] = ismember('insol05',handles.lang_id);
+    [~, insol06] = ismember('insol06',handles.lang_id);
+    [~, insol07] = ismember('insol07',handles.lang_id);
+    [~, insol08] = ismember('insol08',handles.lang_id);
+    %[~, insol09] = ismember('insol09',handles.lang_id);
+    [~, insol10] = ismember('insol10',handles.lang_id);
+    [~, insol11] = ismember('insol11',handles.lang_id);
+    [~, insol12] = ismember('insol12',handles.lang_id);
+    [~, insol13] = ismember('insol13',handles.lang_id);
+    [~, insol14] = ismember('insol14',handles.lang_id);
+    [~, insol15] = ismember('insol15',handles.lang_id);
+    [~, insol16] = ismember('insol16',handles.lang_id);
+    [~, insol17] = ismember('insol17',handles.lang_id);
+    [~, insol18] = ismember('insol18',handles.lang_id);
+    [~, insol19] = ismember('insol19',handles.lang_id);
+    [~, insol20] = ismember('insol20',handles.lang_id);
+    [~, main01] = ismember('main01',handles.lang_id); % OK
+    [~, main16] = ismember('main16',handles.lang_id); % from
+    [~, main17] = ismember('main17',handles.lang_id); % to
+    [~, main32] = ismember('main32',handles.lang_id); % step
+    
+    set(handles.uibuttongroup1,'Title',lang_var{insol01})
+    set(handles.radiobutton1,'String',lang_var{insol02})
+    set(handles.radiobutton2,'String',lang_var{insol03})    
+    set(handles.uibuttongroup2,'Title',lang_var{insol04})
+    set(handles.uibuttongroup3,'Title',lang_var{insol05})
+    set(handles.text2,'String',lang_var{insol06})  
+    set(handles.text3,'String',lang_var{main16})  
+    set(handles.text4,'String',lang_var{main17})  
+    set(handles.text5,'String',lang_var{main32})  
+    set(handles.text6,'String',lang_var{insol07})  
+    set(handles.text19,'String',lang_var{insol08})  
+    set(handles.text21,'String',' ') 
+    set(handles.uibuttongroup4,'Title',lang_var{insol10})
+    set(handles.text8,'String',lang_var{insol11})  
+    set(handles.text11,'String',lang_var{insol14})   % starting day
+    set(handles.text12,'String',lang_var{insol15})  
+    set(handles.text13,'String',lang_var{insol16})  
+    set(handles.text14,'String',lang_var{insol15})  
+    set(handles.radiobutton5,'String',lang_var{insol12})  
+    set(handles.radiobutton6,'String',lang_var{insol13})  
+    set(handles.uibuttongroup5,'Title',lang_var{insol17}) 
+    set(handles.radiobutton3,'String',[lang_var{insol18},' ',lang_var{insol17}]) 
+    set(handles.radiobutton4,'String',[lang_var{insol17},' ',lang_var{insol19}]) 
+    set(handles.text15,'String',lang_var{insol20}) 
+    set(handles.text16,'String',lang_var{main32})  % step
+    set(handles.text17,'String',lang_var{main17}) 
+    set(handles.text18,'String',lang_var{main16}) 
+    set(handles.push_OK,'String',lang_var{main01}) 
+end
 %type
 set(handles.uibuttongroup1,'position',[0.03,0.852,0.386,0.107])
 set(handles.radiobutton1,'position',[0.089,0.244,0.384,0.561])
@@ -213,18 +285,37 @@ author = handles.author; % 1= la04; 2 = la10a; 3 = la10b; 4 = la10c; 5 = la10d; 
 res = handles.res;
 L = handles.solarconstant;
 unit_t = handles.unit_t; % unit time 1 = kyr; 2 = myr; 3 = year
+lang_var = handles.lang_var;
+
 if t1<0
-    warndlg('time scale must be NO less than 0')
+    if handles.lang_choice == 0
+        warndlg('time scale must be NO less than 0')
+    else
+        [~, insol21] = ismember('insol21',handles.lang_id);
+        warndlg(lang_var{insol21})
+    end
     return
 end
 if ismember(author,[1,2,3,4,5])
     if (and(unit_t==1,t2>249000) + and(unit_t==2,t2>249) + and(unit_t==3,t2>249000000) ) > 0
-        warndlg('time scale must be NO larger than 249 000 ka')
+        
+        if handles.lang_choice == 0
+            warndlg('time scale must be NO larger than 249 000 ka')
+        else
+            [~, insol22] = ismember('insol22',handles.lang_id);
+            warndlg(lang_var{insol22})
+        end
         return
     end
 elseif author == 6
     if (and(unit_t==1,t2>5000) + and(unit_t==2,t2>5) + and(unit_t==3,t2>5000000) ) > 0
-            warndlg('time scale must be NO larger than 5 000 ka')
+            
+            if handles.lang_choice == 0
+                warndlg('time scale must be NO larger than 5 000 ka')
+            else
+                [~, insol23] = ismember('insol23',handles.lang_id);
+                warndlg(lang_var{insol23})
+            end
             return
     end
 end
@@ -255,13 +346,23 @@ else
     lat = lat1;
 end
 qinso = handles.qinso;
-
-figmsgbox = msgbox('Please wait','Wait');
-
+if handles.lang_choice == 0
+    figmsgbox = msgbox('Please wait','Wait');
+else
+    [~, dd57] = ismember('dd57',handles.lang_id);
+    [~, main44] = ismember('main44',handles.lang_id);
+    figmsgbox = msgbox(lang_var{dd57},lang_var{main44});
+end
 try
     [I, ~, xorb, yorb, veq, Insol_a_m, Ix,II]=insoML(t,day,lat,qinso,author,res, L);
 catch
-    warndlg('Check time scale input, t must be larger than 0 and less than 249000 ka')
+    if handles.lang_choice == 0
+        warndlg('Check time scale input, t must be larger than 0 and less than 249000 ka')
+    else
+        [~, insol24] = ismember('insol24',handles.lang_id);
+        warndlg(lang_var{insol24})
+    end
+    
     return
 end
 %
@@ -304,9 +405,18 @@ dlmwrite(name_insol_all, [t0',Ix'], 'delimiter', ' ', 'precision', 9);
 figdata = figure; 
 plot(t0',Ix');
 xlim([min(t0),max(t0)]);
-xlabel(['Time (', unit_t_r,')'])
-ylabel('Insolation (W/m^2)')
-title(name_insol)
+if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+    xlabel(['Time (', unit_t_r,')'])
+    ylabel('Insolation (W/m^2)')
+    title(name_insol)
+else
+    [~, main21] = ismember('main21',handles.lang_id);
+    [~, menu50] = ismember('menu50',handles.lang_id);
+    xlabel([lang_var{main21},' (', unit_t_r,')'])
+    ylabel([lang_var{menu50},' (W/m^2)'])
+    title(name_insol)
+end
+
 %dlmwrite(name_insol_annual, [t0',Insol_a_m'], 'delimiter', ' ', 'precision', 9);
 if and((type == 1),(handles.latrange == 1))
     InsolLatDayGif(II,t0,lat,day,unit_t_r,name_insol);
