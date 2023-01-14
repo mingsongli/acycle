@@ -55,7 +55,45 @@ handles.MonZoom = varargin{1}.MonZoom;
 handles.sortdata = varargin{1}.sortdata;
 handles.val1 = varargin{1}.val1;
 
-set(gcf,'Name','Acycle: Milankovitch Calculator')
+% language
+lang_choice = varargin{1}.lang_choice;
+handles.lang_choice = lang_choice;
+lang_id = varargin{1}.lang_id;
+lang_var = varargin{1}.lang_var;
+handles.lang_id = lang_id;
+handles.lang_var = lang_var;
+handles.main_unit_selection = varargin{1}.main_unit_selection;
+if handles.lang_choice == 0
+    set(gcf,'Name','Acycle: Milankovitch Calculator')
+else
+    [~, menu52] = ismember('menu52',lang_id);
+    set(gcf,'Name',['Acycle: ',lang_var{menu52}])
+end
+
+[~, mical01] = ismember('mical01',lang_id);
+[~, mical02] = ismember('mical02',lang_id);
+[~, mical03] = ismember('mical03',lang_id);
+[~, mical04] = ismember('mical04',lang_id);
+[~, mical05] = ismember('mical05',lang_id);
+[~, mical06] = ismember('mical06',lang_id);
+
+[~, main00] = ismember('main00',lang_id); % ok
+[~, main16] = ismember('main16',lang_id); % from
+[~, main17] = ismember('main17',lang_id); % to 
+[~, main32] = ismember('main32',lang_id); % step
+%[~, mical23] = ismember('mical23',lang_id);
+set(handles.uibuttongroup1,'Title',lang_var{mical01})
+set(handles.uipanel1,'Title',lang_var{mical03})
+set(handles.uipanel2,'Title',lang_var{mical04})
+set(handles.uipanel3,'Title',lang_var{mical05})
+
+set(handles.radiobutton1,'String',lang_var{mical02})
+set(handles.radiobutton2,'String',lang_var{mical01})
+set(handles.pushbutton1,'String',lang_var{main00})
+set(handles.text2,'String',lang_var{main16})
+set(handles.text3,'String',lang_var{main17})
+set(handles.text4,'String',lang_var{main32})
+
 set(gcf,'position',[0.4,0.55,0.313,0.289]* handles.MonZoom) % set position
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
@@ -82,12 +120,13 @@ set(handles.text5, 'Position',[0.3, 0.6, 0.055, 0.2])
 set(handles.text6, 'Position',[0.64, 0.6, 0.055, 0.2])
 set(handles.text7, 'Position',[0.93, 0.6, 0.055, 0.2])
 set(handles.edit1, 'Position',[0.13, 0.56, 0.17, 0.25])
-set(handles.edit1, 'String','-10')
+set(handles.edit1, 'String','10')
 set(handles.edit2, 'Position',[0.47, 0.56, 0.17, 0.25])
 set(handles.edit2, 'String','250')  
 set(handles.edit3, 'Position',[0.806, 0.56, 0.11, 0.25])
 set(handles.edit3, 'String','10')
 set(handles.text8, 'Position',[0.03, 0.2, 0.94, 0.2])
+set(handles.text8, 'String',[lang_var{mical06},' 10, ... , 250 Ma'])
 set(handles.edit4, 'Position',[0.03, 0.25, 0.94, 0.6])
 set(handles.pushbutton1, 'Position',[0.71, 0.7, 0.2, 0.2])
 
@@ -98,8 +137,6 @@ set(handles.text3, 'Visible','on')
 set(handles.text4, 'Visible','on')
 set(handles.text6, 'Visible','on')
 set(handles.text7, 'Visible','on')
-
-set(handles.text8, 'String','will calculate: -10, 0, 10, ... , 250 Ma')
 
 handles.listbox_acmain = varargin{1}.listbox_acmain; % save path
 handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
@@ -132,15 +169,37 @@ function pushbutton1_Callback(hObject, eventdata, handles)
 single0 = get(handles.radiobutton1,'Value');
 single1 = get(handles.radiobutton2,'Value');
 model = get(handles.popupmenu1,'Value');
+% language
+lang_id = handles.lang_id;
+lang_var = handles.lang_var;
+[~, mical08] = ismember('mical08',lang_id);
+[~, mical09] = ismember('mical09',lang_id);
+[~, mical10] = ismember('mical10',lang_id);
+[~, mical11] = ismember('mical11',lang_id);
+[~, mical12] = ismember('mical12',lang_id);
+[~, mical13] = ismember('mical13',lang_id);
+[~, mical14] = ismember('mical14',lang_id);
+[~, mical15] = ismember('mical15',lang_id);
+[~, mical16] = ismember('mical16',lang_id);
+[~, mical17] = ismember('mical17',lang_id);
+[~, mical18] = ismember('mical18',lang_id);
+[~, mical19] = ismember('mical19',lang_id);
+[~, mical21] = ismember('mical21',lang_id);
+[~, mical22] = ismember('mical22',lang_id);
+[~, MainUnit9] = ismember('MainUnit9',lang_id);
+[~, menu52] = ismember('menu52',lang_id);
+[~, menu03] = ismember('menu03',lang_id);
+[~, main22] = ismember('main22',lang_id); % age
+
 if model == 1
     if single0 == 1
         % single time
         T1 = str2double(get(handles.edit1,'string'));
         if T1 >=4500 || T1<=-4500
             if T1 >=4500
-                errordlg('Given age is too large')
+                errordlg(lang_var{mical08})
             else
-                errordlg('Given age is too small')
+                errordlg(lang_var{mical09})
             end
         else            
             [daymin, daymax,amin, amax, kmin, kmax, obmin,...
@@ -203,17 +262,28 @@ if model == 1
             %disp([num2str(p4), ' +/- ', num2str(p4sigma)])
             
             prompt = {...
-                'Earth-Moon Distance (x1000 km)'; ...
-                'Earth Day (hours)';...
-                'Earth Axis Mean Obliquity (degrees)'; ...
-                'Earth Axis Precession Period (kyr)';...
-                'Main Obliquity Period (kyr)';...
-                'Climatic Precession Periods #1 (kyr)';...
-                'Climatic Precession Periods #2 (kyr)';...
-                'Climatic Precession Periods #3 (kyr)';...
-                'Climatic Precession Periods #4 (kyr)';...
-                'Details in: Waltham, D., 2015. JSR. doi: 10.2110/jsr.2015.66'};
-            dlg_title = 'Milankovitch Calculator';
+                lang_var{mical11}; ...
+                lang_var{mical12};...
+                lang_var{mical13}; ...
+                lang_var{mical14};...
+                lang_var{mical15};...
+                [lang_var{mical16},' #1 (',lang_var{MainUnit9},')'];...
+                [lang_var{mical16},' #2 (',lang_var{MainUnit9},')'];...
+                [lang_var{mical16},' #3 (',lang_var{MainUnit9},')'];...
+                [lang_var{mical16},' #4 (',lang_var{MainUnit9},')'];...
+                [lang_var{mical17},' Waltham, D., 2015. JSR. doi: 10.2110/jsr.2015.66']};
+%             prompt = {...
+%                 'Earth-Moon Distance (x1000 km)'; ...
+%                 'Earth Day (hours)';...
+%                 'Earth Axis Mean Obliquity (degrees)'; ...
+%                 'Earth Axis Precession Period (kyr)';...
+%                 'Main Obliquity Period (kyr)';...
+%                 'Climatic Precession Periods #1 (kyr)';...
+%                 'Climatic Precession Periods #2 (kyr)';...
+%                 'Climatic Precession Periods #3 (kyr)';...
+%                 'Climatic Precession Periods #4 (kyr)';...
+%                 'Details in: Waltham, D., 2015. JSR. doi: 10.2110/jsr.2015.66'};
+            dlg_title = lang_var{menu52};
             num_lines = 1;
             defaultans = {...
                 [num2str(distance), ' +/- ', num2str(distsigma)],...
@@ -249,42 +319,42 @@ if model == 1
             end
             
             figure;
-            set(gcf,'Name','Acycle: Milankovitch Calculator | Plot')
+            set(gcf,'Name',['Acycle: ',lang_var{menu52},' | ',lang_var{menu03}])
             set(gcf,'color','white')
             subplot(3,2,1); hold on;
             plot(T1,calmi(:,3),'k--')
             plot(T1,calmi(:,4),'k--')
             plot(T1,(calmi(:,3) + calmi(:,4))/2,'r-','LineWidth',1)
-            ylabel('Earth-Moon Distance (x1000 km)')
+            ylabel(lang_var{mical11})
             xlim([age1, age2])
             
             subplot(3,2,2); hold on;
             plot(T1,calmi(:,1),'k--')
             plot(T1,calmi(:,2),'k--')
             plot(T1,(calmi(:,1) + calmi(:,2))/2,'r-','LineWidth',1)
-            ylabel('Earth Day (hours)')
+            ylabel(lang_var{mical12})
             xlim([age1, age2])
                       
             subplot(3,2,4); hold on;
             plot(T1,360.0*3.6./calmi(:,5),'k--')
             plot(T1,360.0*3.6./calmi(:,6),'k--')
             plot(T1,0.5*( 360.0*3.6./calmi(:,5) + 360.0*3.6./calmi(:,6)),'r-','LineWidth',1)
-            ylabel('Earth Axis Precession Period (kyr)')
+            ylabel(lang_var{mical14})
             xlim([age1, age2])
             
             subplot(3,2,3); hold on;
             plot(T1,calmi(:,7),'k--')
             plot(T1,calmi(:,8),'k--')
             plot(T1,(calmi(:,7) + calmi(:,8))/2,'r-','LineWidth',1)
-            ylabel('Earth Axis Mean Obliquity (degrees)')
+            ylabel(lang_var{mical13})
             xlim([age1, age2])
             
             subplot(3,2,5); hold on;
             plot(T1,calmi(:,9),'k--')
             plot(T1,calmi(:,10),'k--')
             plot(T1,(calmi(:,9) + calmi(:,10))/2,'r-','LineWidth',1)
-            ylabel('Main Obliquity Period (kyr)')
-            xlabel('Age (Ma)')
+            ylabel(lang_var{mical15})
+            xlabel([lang_var{main22}, ' (Ma)'])
             xlim([age1, age2])
             
             subplot(3,2,6); hold on;
@@ -303,10 +373,9 @@ if model == 1
             plot(T1,calmi(:,17),'r--')
             plot(T1,calmi(:,18),'r--')
             plot(T1,(calmi(:,17) + calmi(:,18))/2,'r-','LineWidth',1)
-            xlabel('Age (Ma)')
-            ylabel('Climatic Precession Periods (kyr)','LineWidth',1)
+            xlabel([lang_var{main22}, ' (Ma)'])
+            ylabel([lang_var{mical16},' (kyr)'],'LineWidth',1)
             xlim([age1, age2])
-            
             
             % reorder
             CalMiR = [...
@@ -315,8 +384,8 @@ if model == 1
                 calmi(:,9:end)];
             name1 = ['CalMi_',num2str(age1),'_',num2str(age2),'-Ma-step_',num2str(step),'.txt'];
             CDac_pwd
-            disp(['>> data saved: ', name1])
-            disp('  col #1, #2, #3, ... , #19')
+            disp([lang_var{mical18}, name1])
+            disp(['  ',lang_var{mical19},' #1, #2, #3, ... , #19'])
             disp('  age, amin, amax, daymin, daymax, obmin, obmax, kmin, kmax, o1min, o1max, p1min, p1max, p2min, p2max, p3min, p3max, p4min, p4max')
             dlmwrite(name1, [T1,CalMiR], 'delimiter', ' ', 'precision', 9);
             d = dir; %get files
@@ -324,7 +393,7 @@ if model == 1
             refreshcolor;
             cd(pre_dirML); % return to matlab view folder
         else
-            errordlg('Input age error !')
+            errordlg(lang_var{mical10})
         end
     end
 elseif model == 2
@@ -333,9 +402,9 @@ elseif model == 2
         T1 = str2double(get(handles.edit1,'string'));
         if T1 >=4500 || T1<=-4500
             if T1 >=4500
-                errordlg('Given age is too large')
+                errordlg(lang_var{mical08})
             else
-                errordlg('Given age is too small')
+                errordlg(lang_var{mical09})
             end
         else
 
@@ -352,15 +421,15 @@ elseif model == 2
             cd(pre_dirML); % return to matlab view folder
 
             figure;
-            set(gcf,'Name','Acycle: Lenght-of-day & Day-of-year | plot')
+            set(gcf,'Name',lang_var{mical21})
             set(gcf,'color','w');
             subplot(2,1,1)
             plot(T1,lod,'-ko')
-            ylabel('length of day (hour)')
+            ylabel(lang_var{mical12})
             subplot(2,1,2)
             plot(T1,doy,'-ko')
-            xlabel('Age (Ma)')
-            ylabel('stellar day of year')
+            xlabel([lang_var{main22}, ' (Ma)'])
+            ylabel(lang_var{mical22})
         end
     elseif single1 == 1
         % time series
@@ -372,29 +441,26 @@ elseif model == 2
         if isempty(T1) == 0
             [lod, doy] = lodla04(T1/-1000);
 
-            %name1 = ['LOD_',num2str(age1),'_',num2str(step),'_',num2str(age2),'Ma.txt'];
             name1 = ['LOD-',num2str(age1),'_',num2str(age2),'_Ma-step_',num2str(step),'.txt'];
-            %name2 = ['LOD_DOY_',num2str(age1),'_',num2str(step),'_',num2str(age2),'Ma.txt'];
             CDac_pwd
             dlmwrite(name1, [T1,lod,doy], 'delimiter', ' ', 'precision', 9);
-            %dlmwrite(name2, [T1,doy], 'delimiter', ' ', 'precision', 9);
             d = dir; %get files
             set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
             refreshcolor;
             cd(pre_dirML); % return to matlab view folder
 
             figure;
-            set(gcf,'Name','Acycle: Lenght-of-day & Day-of-year | plot')
+            set(gcf,'Name',lang_var{mical21})
             set(gcf,'color','w');
             subplot(2,1,1)
             plot(T1,lod,'-ko')
-            ylabel('length of day (hours)')
+            ylabel(lang_var{mical12})
             subplot(2,1,2)
             plot(T1,doy,'-ko')
-            xlabel('Age (Ma)')
-            ylabel('stellar day of year')
+            xlabel([lang_var{main22}, ' (Ma)'])
+            ylabel(lang_var{mical22})
         else
-            errordlg('Input age error !')
+            errordlg(lang_var{mical10})
         end
     end
 end
@@ -429,17 +495,26 @@ function edit1_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit1 as text
 %        str2double(get(hObject,'String')) returns contents of edit1 as a double
+% language
+lang_id = handles.lang_id;
+lang_var = handles.lang_var;
+[~, mical07] = ismember('mical07',lang_id);
+[~, mical08] = ismember('mical08',lang_id);
+[~, mical09] = ismember('mical09',lang_id);
+[~, mical10] = ismember('mical10',lang_id);
+
 single0 = get(handles.radiobutton1,'Value');
+
 if single0 == 1
     T = str2double(get(handles.edit1,'string'));
     if T >=4500 || T<=-4500
         if T >=4500
-            set(handles.text8, 'String','Given age is too large')
+            set(handles.text8, 'String',lang_var{mical08})
         else
-            set(handles.text8, 'String','Given age is too small')
+            set(handles.text8, 'String',lang_var{mical09})
         end
     else
-        string0 = ['will calculate length of day and days in a year: ',num2str(T),' Ma'];
+        string0 = [lang_var{mical07},num2str(T),' Ma'];
         set(handles.text8, 'String',string0)
     end
 else
@@ -449,18 +524,18 @@ else
     T = age1:step:age2;
     if isempty(T) == 0
         if max(T) >=4500 || min(T)<=-4500
-            set(handles.text8, 'String','Input time error !')
+            set(handles.text8, 'String',lang_var{mical10})
         end
         if length(T)>3
-            string0 = ['will calculate length of day and days in a year: ',num2str(T(1)),', ',...
+            string0 = [lang_var{mical07},num2str(T(1)),', ',...
                 num2str(T(2)),', ... , ', num2str(T(end)),' Ma'];
         else
-            string0 = ['will calculate length of day and days in a year: ',...
+            string0 = [lang_var{mical07},...
                 num2str(T(1)),' - ', num2str(T(end)),' Ma'];
         end
         set(handles.text8, 'String',string0)
     else
-        set(handles.text8, 'String','Input time error !')
+        set(handles.text8, 'String',lang_var{mical10})
     end
 end
 
@@ -485,6 +560,11 @@ function edit2_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit2 as text
 %        str2double(get(hObject,'String')) returns contents of edit2 as a double
+% language
+lang_id = handles.lang_id;
+lang_var = handles.lang_var;
+[~, mical07] = ismember('mical07',lang_id);
+[~, mical10] = ismember('mical10',lang_id);
 
 age1 = str2double(get(handles.edit1,'string'));
 age2 = str2double(get(handles.edit2,'string'));
@@ -492,18 +572,18 @@ step = str2double(get(handles.edit3,'string'));
 T = age1:step:age2;
 if isempty(T) == 0
     if max(T) >=4500 || min(T)<=-4500
-        set(handles.text8, 'String','Input time error !')
+        set(handles.text8, 'String',lang_var{mical10})
     end
     if length(T)>3
-        string0 = ['will calculate length of day and days in a year: ',num2str(T(1)),', ',...
+        string0 = [lang_var{mical07},num2str(T(1)),', ',...
             num2str(T(2)),', ... , ', num2str(T(end)),' Ma'];
     else
-        string0 = ['will calculate length of day and days in a year: ',...
+        string0 = [lang_var{mical07},...
             num2str(T(1)),' - ', num2str(T(end)),' Ma'];
     end
     set(handles.text8, 'String',string0)
 else
-    set(handles.text8, 'String','Input time error !')
+    set(handles.text8, 'String',lang_var{mical10})
 end
 
 
@@ -528,24 +608,30 @@ function edit3_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit3 as text
 %        str2double(get(hObject,'String')) returns contents of edit3 as a double
+% language
+lang_id = handles.lang_id;
+lang_var = handles.lang_var;
+[~, mical07] = ismember('mical07',lang_id);
+[~, mical10] = ismember('mical10',lang_id);
+
 age1 = str2double(get(handles.edit1,'string'));
 age2 = str2double(get(handles.edit2,'string'));
 step = str2double(get(handles.edit3,'string'));
 T = age1:step:age2;
 if isempty(T) == 0
     if max(T) >=4500 || min(T)<=-4500
-        set(handles.text8, 'String','Input time error !')
+        set(handles.text8, 'String',lang_var{mical10})
     end
     if length(T)>3
-        string0 = ['will calculate length of day and days in a year: ',num2str(T(1)),', ',...
+        string0 = [lang_var{mical07},num2str(T(1)),', ',...
             num2str(T(2)),', ... , ', num2str(T(end)),' Ma'];
     else
-        string0 = ['will calculate length of day and days in a year: ',...
+        string0 = [lang_var{mical07},...
             num2str(T(1)),' - ', num2str(T(end)),' Ma'];
     end
     set(handles.text8, 'String',string0)
 else
-    set(handles.text8, 'String','Input time error !')
+    set(handles.text8, 'String',lang_var{mical10})
 end
 
 % --- Executes during object creation, after setting all properties.
@@ -589,10 +675,15 @@ function radiobutton2_Callback(hObject, eventdata, handles)
 % hObject    handle to radiobutton2 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+% language
+lang_id = handles.lang_id;
+lang_var = handles.lang_var;
+[~, mical07] = ismember('mical07',lang_id);
+[~, mical10] = ismember('mical10',lang_id);
+[~, main16] = ismember('main16',lang_id);
 % Hint: get(hObject,'Value') returns toggle state of radiobutton2
 if get(hObject,'Value')
-    set(handles.text2, 'String','From')
+    set(handles.text2, 'String',lang_var{main16})
     set(handles.edit2, 'Visible','on')
     set(handles.edit3, 'Visible','on')
     set(handles.text3, 'Visible','on')
@@ -606,18 +697,18 @@ if get(hObject,'Value')
     T = age1:step:age2;
     if isempty(T) == 0
         if max(T) >=4500 || min(T)<=-4500
-            set(handles.text8, 'String','Input time error !')
+            set(handles.text8, 'String',lang_var{mical10})
         end
         if length(T)>3
-            string0 = ['will calculate length of day and days in a year: ',num2str(T(1)),', ',...
+            string0 = [lang_var{mical07},num2str(T(1)),', ',...
                 num2str(T(2)),', ... , ', num2str(T(end)),' Ma'];
         else
-            string0 = ['will calculate length of day and days in a year: ',...
+            string0 = [lang_var{mical07},...
                 num2str(T(1)),' - ', num2str(T(end)),' Ma'];
         end
         set(handles.text8, 'String',string0)
     else
-        set(handles.text8, 'String','Input time error !')
+        set(handles.text8, 'String',lang_var{mical10})
     end
 end
 
@@ -626,11 +717,17 @@ function radiobutton1_Callback(hObject, eventdata, handles)
 % hObject    handle to radiobutton1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+% language
+lang_id = handles.lang_id;
+lang_var = handles.lang_var;
+[~, mical07] = ismember('mical07',lang_id);
+[~, mical08] = ismember('mical08',lang_id);
+[~, mical09] = ismember('mical09',lang_id);
+[~, main22] = ismember('main22',lang_id);
 % Hint: get(hObject,'Value') returns toggle state of radiobutton1
 single = get(hObject,'Value');
 if single == 1
-    set(handles.text2, 'String','Age')
+    set(handles.text2, 'String',lang_var{main22})
     set(handles.edit2, 'Visible','off')
     set(handles.edit3, 'Visible','off')
     set(handles.text3, 'Visible','off')
@@ -641,12 +738,12 @@ if single == 1
     T = str2double(get(handles.edit1,'string'));
     if T >=4500 || T<=-4500
         if T >=4500
-            set(handles.text8, 'String','Given age is too large')
+            set(handles.text8, 'String',lang_var{mical08})
         else
-            set(handles.text8, 'String','Given age is too small')
+            set(handles.text8, 'String',lang_var{mical09})
         end
     else
-        string0 = ['will calculate length of day and days in a year: ',num2str(T),' Ma'];
+        string0 = [lang_var{mical07},num2str(T),' Ma'];
         set(handles.text8, 'String',string0)
     end
 

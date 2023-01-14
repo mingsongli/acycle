@@ -8,7 +8,7 @@ assignin('base','tbl',PlotAdvSetting);
 try
     figure(handles.plotpro2dfig); 
 catch
-    handles.plotpro2dfig=figure('Name','Acycle: Plot Pro Preview','NumberTitle','off');
+    handles.plotpro2dfig=figure('Name',handles.FigNameText,'NumberTitle','off');
     set(handles.plotpro2dfig,'units','norm') % set location
     set(0,'Units','normalized') % set units as normalized
     set(handles.plotpro2dfig,'position',[0.62,0.2,0.35,0.5],'Color','white') % set position

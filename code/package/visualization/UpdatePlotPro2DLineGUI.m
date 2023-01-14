@@ -173,7 +173,7 @@ for i = 1: datan
             % marker style
             set(handles.panel_mspec_markerstyle_input,'Value',find(strcmp(PlotAdvSetting.marker_style(i), get(handles.panel_mspec_markerstyle_input, 'String'))))
             % marker size
-            set(handles.panel_mspec_markeralpha_text,'String',['Alpha ',num2str(100*PlotAdvSetting.marker_alpha(i), '%.0f'),'%'])
+            set(handles.panel_mspec_markeralpha_text,'String',[handles.alphatext,' ',num2str(100*PlotAdvSetting.marker_alpha(i), '%.0f'),'%'])
             set(handles.panel_mspec_markersize_input,'Value',find(strcmp(num2str(PlotAdvSetting.marker_size(i)), get(handles.panel_mspec_markersize_input,'String'))))
             % marker face color
             set(handles.panel_mspec_markerfacecolor_input,'BackgroundColor',PlotAdvSetting.marker_face_color{i})
@@ -263,7 +263,7 @@ for i = 1: datan
                 set(handles.panel_lspec_basevalu_input,'Visible','on')
                 set(handles.panel_lspec_areaFaceColor_input,'Visible','on')
                 set(handles.panel_lspec_linecolor_text,'Visible','off')
-                set(handles.panel_lspec_linecolor_input,'Position',[0.6 0.04 0.3 0.1],'String','edge')
+                set(handles.panel_lspec_linecolor_input,'Position',[0.6 0.04 0.3 0.1],'String',handles.edgetext)
                 set(handles.panel_mspec_markeralpha_input,'Enable','on')
             else
                 set(handles.panel_lspec_basevalue_text,'Visible','off')
@@ -271,9 +271,9 @@ for i = 1: datan
                 set(handles.panel_lspec_areaFaceColor_input,'Visible','off')
                 set(handles.panel_lspec_linecolor_text,'Visible','on')
                 if strcmp(PlotAdvSetting.line_plot{i}, 'errorbar')
-                    set(handles.panel_lspec_linecolor_input,'String','select')
+                    set(handles.panel_lspec_linecolor_input,'String',handles.selecttext)
                 else
-                    set(handles.panel_lspec_linecolor_input,'Position',[0.5 0.125 0.4 0.1],'String','select')
+                    set(handles.panel_lspec_linecolor_input,'Position',[0.5 0.125 0.4 0.1],'String',handles.selecttext)
                 end
             end
             
