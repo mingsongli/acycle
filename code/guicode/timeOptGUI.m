@@ -71,6 +71,72 @@ handles.val1 = varargin{1}.val1;
 
 set(handles.hmain,'position',[0.2,0.3,0.35,0.6]* handles.MonZoom) % set position
 
+% language
+lang_choice = varargin{1}.lang_choice;
+handles.lang_choice = lang_choice;
+lang_id = varargin{1}.lang_id;
+lang_var = varargin{1}.lang_var;
+handles.lang_id = lang_id;
+handles.lang_var = lang_var;
+handles.main_unit_selection = varargin{1}.main_unit_selection;
+set(gcf,'Name','Acycle: TimeOpt')
+
+[~, main02] = ismember('main02',lang_id); % Data
+set(handles.text2,'String',lang_var{main02})
+[~, topt02] = ismember('topt02',lang_id); % Detrend
+set(handles.checkbox2,'String',lang_var{topt02})
+
+[~, ec01] = ismember('ec01',lang_id); % test sed rate
+set(handles.panel_sedrate,'Title',lang_var{ec01})
+[~, main03] = ismember('main03',lang_id); % linear
+set(handles.radiobutton1,'String',lang_var{main03})
+[~, main04] = ismember('main04',lang_id); % log
+set(handles.radiobutton2,'String',lang_var{main04})
+[~, main05] = ismember('main05',lang_id); % Min
+set(handles.text4,'String',lang_var{main05})
+[~, main06] = ismember('main06',lang_id); % Maximum
+set(handles.text5,'String',lang_var{main06})
+
+[~, main58] = ismember('main58',lang_id); % number
+set(handles.text6,'String',lang_var{main58})
+[~, main14] = ismember('main14',lang_id); %  Frequency
+set(handles.uipanelfreq,'Title',lang_var{main14})
+[~, ec20] = ismember('ec20',lang_id); % Middle age of data
+set(handles.radiobutton3,'String',lang_var{ec20})
+[~, topt03] = ismember('topt03',lang_id); % Eccentricity
+set(handles.radiobutton4,'String',lang_var{topt03})
+[~, topt04] = ismember('topt04',lang_id); % Precession
+set(handles.text10,'String',lang_var{topt04})
+[~, topt05] = ismember('topt05',lang_id); % Fit to precession modulation
+set(handles.radiobutton5,'String',lang_var{topt05})
+[~, topt06] = ismember('topt06',lang_id); % short eccentricity modulation
+set(handles.radiobutton6,'String',lang_var{topt06})
+[~, topt07] = ismember('topt07',lang_id); % Taner bandpass cut-off frequencies
+set(handles.text11,'String',lang_var{topt07})
+[~, main59] = ismember('main59',lang_id); % Low
+set(handles.text12,'String',lang_var{main59})
+[~, main60] = ismember('main60',lang_id); % High
+set(handles.text13,'String',lang_var{main60})
+[~, topt08] = ismember('topt08',lang_id); % Roll-off rate
+set(handles.text14,'String',lang_var{topt08})
+[~, ec21] = ismember('ec21',lang_id); % Correlation method
+set(handles.text15,'String',lang_var{ec21})
+[~, topt09] = ismember('topt09',lang_id); % Spearman
+set(handles.radiobutton7,'String',lang_var{topt09})
+[~, topt10] = ismember('topt10',lang_id); % Pearson
+set(handles.radiobutton8,'String',lang_var{topt10})
+
+[~, a187] = ismember('a187',lang_id); % Monte Carlo Simulation
+set(handles.uipanelMC,'Title',lang_var{a187})
+[~, ec49] = ismember('ec49',lang_id); % number of simulations
+set(handles.checkbox1,'String',lang_var{ec49})
+[~, main01] = ismember('main01',lang_id); % save data
+set(handles.checkbox3,'String',lang_var{main01})
+[~, topt25] = ismember('topt25',lang_id); % save plot
+set(handles.checkbox4,'String',lang_var{topt25})
+[~, main00] = ismember('main00',lang_id); % OK
+set(handles.pushbutton1,'String',lang_var{main00})
+
 set(handles.text2,'position',[0.044,0.92,0.1,0.05])
 set(handles.text3,'position',[0.16,0.92,0.6,0.05])
 set(handles.checkbox2,'position',[0.77,0.92,0.159,0.05])
@@ -120,7 +186,7 @@ set(handles.checkbox4,'position',[0.6,0.06,0.2,0.056])
 set(handles.text16,'position',[0.05,0.01,0.9,0.04])
 set(handles.text16,'FontSize',10);  % set as norm
 
-set(gcf,'Name','Acycle: TimeOpt')
+
 dat = varargin{1}.current_data;  % data
 handles.unit = varargin{1}.unit; % unit
 handles.unit_type = varargin{1}.unit_type; % unit type
@@ -132,43 +198,54 @@ handles.path_temp = varargin{1}.path_temp; % save path
 handles.listbox_acmain = varargin{1}.listbox_acmain; % save path
 handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
 
+%
+[~, a178] = ismember('a178',lang_id); % in ascend
+[~, ec25] = ismember('ec25',lang_id); % 
+[~, topt11] = ismember('topt11',lang_id); %
+[~, topt12] = ismember('topt12',lang_id); %
+
+[~, topt13] = ismember('topt13',lang_id); %
+[~, topt14] = ismember('topt14',lang_id); %
+[~, topt15] = ismember('topt15',lang_id); %
+[~, topt17] = ismember('topt17',lang_id); %
+
 datx = dat(:,1);  % unit should be cm
 daty = dat(:,2);
 diffx = diff(datx);
 npts = length(datx);
 % check data
 if sum(diffx <= 0) > 0
-    disp('>>  Waning: data has to be in ascending order, no duplicated number allowed')
+    disp(lang_var{a178})
     dat = sortrows(dat);
 end
 % check data
 if abs((max(diffx)-min(diffx))/2) > 10*eps('single')
-    hwarn1 = warndlg('Data may not be evenly spaced!');
+    hwarn1 = warndlg(lang_var{ec25});
 end
 %
 
 % check unit
 if handles.unit_type == 0
-    hwarn = warndlg('Unit is assumed to be m. If not, choose correct unit and restart TimeOpt');
+    hwarn = warndlg(lang_var{topt11});
     dat(:,1) = dat(:,1)*100;
 elseif handles.unit_type == 2
-    hwarn = warndlg('Unit type is Time! Make sure the unit should be m');
+    hwarn = warndlg(lang_var{topt12});
 else
     if strcmp(handles.unit,'m')
         dat(:,1) = dat(:,1)*100;
-        %msgbox('Unit is m, now changes to cm','Unit transform')
+
     elseif strcmp(handles.unit,'dm')
         dat(:,1) = dat(:,1)*10;
-        msgbox('Unit is dm, now changes to cm','Unit transform')
+        msgbox([lang_var{topt13},' dm, ',lang_var{topt14},' cm'],lang_var{topt15})
     elseif strcmp(handles.unit,'mm')
         dat(:,1) = dat(:,1)/10;
-        msgbox('Unit is mm, now changes to cm','Unit transform')
+        msgbox([lang_var{topt13},' mm, ',lang_var{topt14},' cm'],lang_var{topt15})
     elseif strcmp(handles.unit,'km')
         dat(:,1) = dat(:,1)* 1000 * 100;
-        msgbox('Unit is km, now changes to cm','Unit transform')
+        msgbox([lang_var{topt13},' km, ',lang_var{topt14},' cm'],lang_var{topt15})
     elseif strcmp(handles.unit,'ft')
         dat(:,1) = dat(:,1)* 30.48;
-        msgbox('Unit is ft, now changes to cm','Unit transform')
+        msgbox([lang_var{topt13},' ft, ',lang_var{topt14},' cm'],lang_var{topt15})
     end
 end
 %
@@ -218,7 +295,7 @@ end
 set(handles.edit2,'String',num2str(handles.sedmax))
 %
 sr = linspace(handles.sedmin,handles.sedmax,handles.numsed);
-sedinfo = ['test sed. rates of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+sedinfo = [lang_var{topt17},' ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
     ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
 set(handles.text7,'String',sedinfo)
 %
@@ -266,6 +343,12 @@ fh = str2double(get(handles.edit8,'String'));
 targetE = strread(get(handles.edit5,'String'));
 targetP = strread(get(handles.edit6,'String'));
 
+lang_var = handles.lang_var;
+lang_id = handles.lang_id;
+[~, topt20] = ismember('topt20',lang_id); %
+[~, dynot38] = ismember('dynot38',lang_id); % wait
+[~, main01] = ismember('main01',lang_id);
+
 dat= handles.dat;  
 %sedmin = handles.sedmin;
 %sedmax = handles.sedmax;
@@ -273,7 +356,7 @@ dat= handles.dat;
 nsim = handles.nsim;
 if handles.nsim > 0
     nsim = str2double(get(handles.edit10,'String'));
-    hwarn = msgbox('Monte Carlo simulations can be very slow, please wait','Wait');
+    hwarn = msgbox(lang_var{topt20},lang_var{dynot38});
 end
 
 linLog = handles.linLog; 
@@ -326,14 +409,14 @@ if handles.savedata == 1
     fprintf(fileID,'%s\n',['maximum tested sedimentation rate: ',num2str(sedmax)]);
     fprintf(fileID,'%s\n',['number of tested sedimentation rate: ',num2str(numsed)]);
     if linLog == 1
-    fprintf(fileID,'%s\n',['Scaling for sedimentation rate grid spacing: Log']);
+        fprintf(fileID,'%s\n',['Scaling for sedimentation rate grid spacing: Log']);
     elseif linLog == 2
-    fprintf(fileID,'%s\n',['Scaling for sedimentation rate grid spacing: Linear']);
+        fprintf(fileID,'%s\n',['Scaling for sedimentation rate grid spacing: Linear']);
     end
     if fit == 1
-    fprintf(fileID,'%s\n',['Test for (1) precession amplitude modulation']);
+        fprintf(fileID,'%s\n',['Test for (1) precession amplitude modulation']);
     elseif fit == 2
-    fprintf(fileID,'%s\n',['Test for (2) short eccentricity amplitude modulation']);
+        fprintf(fileID,'%s\n',['Test for (2) short eccentricity amplitude modulation']);
     end
     fprintf(fileID,'%s\n',['Low frequency cut-off for Taner bandpass: ',num2str(fl)]);
     fprintf(fileID,'%s\n',['High frequency cut-off for Taner bandpass: ',num2str(fh)]);
@@ -380,8 +463,8 @@ if handles.savedata == 1
     set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
     refreshcolor;
     cd(pre_dirML); % return to matlab view folder
-    disp(['>> saved data: ',name1])
-    disp(['>> saved data: ',name2])
+    disp(['>> ',lang_var{main01},': ',name1])
+    disp(['>> ',lang_var{main01},': ',name2])
 end
 guidata(hObject,handles)
 
@@ -425,7 +508,11 @@ else
         sr(ii) = 10^(  log10(handles.sedmin)  +  (ii-1) * sedinc ) ;
     end
 end
-sedinfo = ['test sed. rates of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+lang_var = handles.lang_var;
+lang_id = handles.lang_id;
+[~, topt17] = ismember('topt17',lang_id); %
+
+sedinfo = [lang_var{topt17},num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
     ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
 set(handles.text7,'String',sedinfo)
 guidata(hObject, handles);
@@ -451,7 +538,11 @@ else
     handles.linLog = 2;
     sr = linspace(handles.sedmin,handles.sedmax,handles.numsed);
 end
-sedinfo = ['test sed. rates of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+lang_var = handles.lang_var;
+lang_id = handles.lang_id;
+[~, topt17] = ismember('topt17',lang_id); %
+
+sedinfo = [lang_var{topt17},num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
     ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
 set(handles.text7,'String',sedinfo)
 guidata(hObject, handles);
@@ -464,14 +555,21 @@ function edit1_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit1 as text
 %        str2double(get(hObject,'String')) returns contents of edit1 as a double
+lang_var = handles.lang_var;
+lang_id = handles.lang_id;
+[~, topt17] = ismember('topt17',lang_id); %
+[~, topt26] = ismember('topt26',lang_id); %
+[~, main29] = ismember('main29',lang_id); % warning
+
 handles.sedmin = str2double(get(hObject,'String'));
 fnyq = handles.sedmin/(2*handles.dt);
 if handles.fh > fnyq
     sedmin = 2 * handles.dt * handles.fh;
-    msgbox(['Minimum sed. rate may beyond the detection limit ', num2str(sedmin),' cm/kyr'],'Warning')
+    msgbox([lang_var{topt26},' ', num2str(sedmin),' cm/kyr'],lang_var{main29})
 end
 sr = linspace(handles.sedmin,handles.sedmax,handles.numsed);
-sedinfo = ['test sed. rates of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+
+sedinfo = [lang_var{topt17},num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
     ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
 set(handles.text7,'String',sedinfo)
 
@@ -498,21 +596,30 @@ function edit2_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit2 as text
 %        str2double(get(hObject,'String')) returns contents of edit2 as a double
+lang_var = handles.lang_var;
+lang_id = handles.lang_id;
+[~, topt17] = ismember('topt17',lang_id); %
+[~, topt27] = ismember('topt27',lang_id); %
+[~, main29] = ismember('main29',lang_id); % warning
+
 handles.sedmax = str2double(get(hObject,'String'));
 % warning
-fray = handles.sedmax/(handles.npts * handles.dt);
+dt = handles.dt;
+fray = handles.sedmax/(handles.npts * dt);
 flow = 1/max(handles.targetP);
 if fray > handles.fl
-    sedmax = handles.npts * handles.dt * flow;
-    msgbox(['Maximum sed. rate may beyond the detection limit ', num2str(sedmax),' cm/kyr'],'Warning')
+    sedmax = handles.npts * dt * flow;
+    msgbox([lang_var{topt27},' ', num2str(sedmax),' cm/kyr'],lang_var{main29})
 end
 % display
 sr = linspace(handles.sedmin,handles.sedmax,handles.numsed);
-sedinfo = ['test sed. rates of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+
+sedinfo = [lang_var{topt17},num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
     ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
 set(handles.text7,'String',sedinfo)
 
 guidata(hObject,handles)
+
 
 % --- Executes during object creation, after setting all properties.
 function edit2_CreateFcn(hObject, eventdata, handles)
@@ -537,23 +644,31 @@ function edit3_Callback(hObject, eventdata, handles)
 %        str2double(get(hObject,'String')) returns contents of edit3 as a double
 handles.numsed = str2double(get(hObject,'String'));
 sr = linspace(handles.sedmin,handles.sedmax,handles.numsed);
+
+lang_var = handles.lang_var;
+lang_id = handles.lang_id;
+[~, topt17] = ismember('topt17',lang_id); %
+[~, topt19] = ismember('topt19',lang_id); %
+[~, topt20] = ismember('topt20',lang_id); %
+[~, main29] = ismember('main29',lang_id); %
+
 if handles.numsed > 3
-    sedinfo = ['test sed. rates of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+    sedinfo = [lang_var{topt17},num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
     ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
     set(handles.text7,'String',sedinfo)
 elseif handles.numsed == 3
-    sedinfo = ['test sed. rates of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+    sedinfo = [lang_var{topt17},num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
         ', ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
     set(handles.text7,'String',sedinfo)
 elseif handles.numsed == 2
-    sedinfo = ['test sed. rates of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),' cm/kyr'];
+    sedinfo = [lang_var{topt17},num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),' cm/kyr'];
     set(handles.text7,'String',sedinfo)
 else
-    msgbox('Number should be no less than 2','Warning')
+    msgbox(lang_var{topt19},lang_var{main29})
 end
 
 if handles.numsed > 500
-    msgbox('Large number, may be very slow','Warning')
+    msgbox(lang_var{topt20},lang_var{main29})
 end
 guidata(hObject,handles)
 
@@ -601,14 +716,22 @@ function edit4_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit4 as text
 %        str2double(get(hObject,'String')) returns contents of edit4 as a double
+lang_var = handles.lang_var;
+lang_id = handles.lang_id;
+[~, topt21] = ismember('topt21',lang_id); %
+[~, topt22] = ismember('topt22',lang_id); %
+[~, topt23] = ismember('topt23',lang_id); %
+[~, topt24] = ismember('topt24',lang_id); %
+[~, main29] = ismember('main29',lang_id); %
+
 t1 = str2double(get(handles.edit4,'String'));
 if t1 < 0
-    msgbox('Age cannot < 0 Ma','Error')
+    msgbox(lang_var{topt22},lang_var{topt21})
 elseif t1 > 4500
-    msgbox('Age cannot > 4500 Ma','Error')
+    msgbox(lang_var{topt23},lang_var{topt21})
 end
 if t1 > 249
-    msgbox('Age > 249 Ma, beyond age limit of Laskar solutions','Reminder')
+    msgbox(lang_var{topt24},lang_var{main29})
 end
 handles.age = t1;
 t1= 1000 * t1; % Ma to ka

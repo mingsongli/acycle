@@ -37,6 +37,7 @@ if handles.lang_choice > 0
         vq = interp1(data(:,1),data(:,2),xq);
         title(['(',lang_var{interpGUI04},') ',lang_var{interpGUI05},lang_var{interpGUI06}]);
         legendi = 'linear';
+        titlei = lang_var{interpGUI05};
     elseif method == 2
         vq = interp1(data(:,1),data(:,2),xq, 'nearest');
         titlei = lang_var{interpGUI07};

@@ -71,6 +71,79 @@ set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
 
 set(handles.hmain,'position',[0.2,0.3,0.35,0.6]* handles.MonZoom) % set position
 
+% language
+lang_choice = varargin{1}.lang_choice;
+handles.lang_choice = lang_choice;
+lang_id = varargin{1}.lang_id;
+lang_var = varargin{1}.lang_var;
+handles.lang_id = lang_id;
+handles.lang_var = lang_var;
+handles.main_unit_selection = varargin{1}.main_unit_selection;
+set(gcf,'Name','Acycle: eTimeOpt')
+
+[~, main02] = ismember('main02',lang_id); % Data
+set(handles.text2,'String',lang_var{main02})
+[~, topt01] = ismember('topt01',lang_id); % edge padding
+set(handles.checkbox6,'String',lang_var{topt01})
+
+[~, topt02] = ismember('topt02',lang_id); % Detrend
+set(handles.checkbox2,'String',lang_var{topt02})
+[~, ec01] = ismember('ec01',lang_id); % test sed rate
+set(handles.panel_sedrate,'Title',lang_var{ec01})
+[~, main03] = ismember('main03',lang_id); % linear
+set(handles.radiobutton1,'String',lang_var{main03})
+[~, main04] = ismember('main04',lang_id); % log
+set(handles.radiobutton2,'String',lang_var{main04})
+[~, main05] = ismember('main05',lang_id); % Min
+set(handles.text4,'String',lang_var{main05})
+[~, main06] = ismember('main06',lang_id); % Maximum
+set(handles.text5,'String',lang_var{main06})
+
+[~, main58] = ismember('main58',lang_id); % number
+set(handles.text6,'String',lang_var{main58})
+[~, main14] = ismember('main14',lang_id); %  Frequency
+set(handles.uipanelfreq,'Title',lang_var{main14})
+
+[~, ec20] = ismember('ec20',lang_id); % Middle age of data
+set(handles.radiobutton3,'String',lang_var{ec20})
+[~, topt03] = ismember('topt03',lang_id); % Eccentricity
+set(handles.radiobutton4,'String',lang_var{topt03})
+[~, topt04] = ismember('topt04',lang_id); % Precession
+set(handles.text10,'String',lang_var{topt04})
+[~, topt05] = ismember('topt05',lang_id); % Fit to precession modulation
+set(handles.radiobutton5,'String',lang_var{topt05})
+[~, topt06] = ismember('topt06',lang_id); % short eccentricity modulation
+set(handles.radiobutton6,'String',lang_var{topt06})
+[~, topt07] = ismember('topt07',lang_id); % Taner bandpass cut-off frequencies
+set(handles.text11,'String',lang_var{topt07})
+[~, main59] = ismember('main59',lang_id); % Low
+set(handles.text12,'String',lang_var{main59})
+[~, main60] = ismember('main60',lang_id); % High
+set(handles.text13,'String',lang_var{main60})
+[~, topt08] = ismember('topt08',lang_id); % Roll-off rate
+set(handles.text14,'String',lang_var{topt08})
+[~, ec21] = ismember('ec21',lang_id); % Correlation method
+set(handles.text15,'String',lang_var{ec21})
+[~, topt09] = ismember('topt09',lang_id); % Spearman
+set(handles.radiobutton7,'String',lang_var{topt09})
+[~, topt10] = ismember('topt10',lang_id); % Pearson
+set(handles.radiobutton8,'String',lang_var{topt10})
+
+[~, main07] = ismember('main07',lang_id); % Sliding Window
+set(handles.uipanelMC,'Title',lang_var{main07})
+[~, main32] = ismember('main32',lang_id); % step
+set(handles.text17,'String',lang_var{main32})
+[~, menu03] = ismember('menu03',lang_id); % plot
+set(handles.radiobutton9,'String',['2D ',lang_var{menu03}])
+set(handles.radiobutton10,'String',['3D ',lang_var{menu03}])
+[~, dd35] = ismember('dd35',lang_id); % Normalize window
+set(handles.checkbox1,'String',lang_var{dd35})
+[~, main10] = ismember('main10',lang_id); % Flip Y-axis
+set(handles.checkbox4,'String',lang_var{main10})
+
+[~, main00] = ismember('main00',lang_id); % OK
+set(handles.pushbutton1,'String',lang_var{main00})
+
 set(handles.text2,'position',[0.044,0.91,0.1,0.05])
 set(handles.text3,'position',[0.16,0.91,0.6,0.05])
 set(handles.checkbox2,'position',[0.83,0.95,0.159,0.05])
@@ -112,7 +185,7 @@ set(handles.text15,'position',[0.05,0.05,0.281,0.08])
 set(handles.radiobutton7,'position',[0.37,0.05,0.24,0.08])
 set(handles.radiobutton8,'position',[0.67,0.05,0.24,0.08])
 
-set(handles.uipanelMC,'position',[0.05,0.03,0.5,0.15])
+set(handles.uipanelMC,'position',[0.05,0.032,0.5,0.15])
 set(handles.checkbox1,'position',[0.07,0.18,0.595,0.59])
 set(handles.edit10,'position',[0.03,0.267,0.203,0.556])
 set(handles.text17,'position',[0.24,0.378,0.15,0.356])
@@ -125,10 +198,10 @@ set(handles.pushbutton1,'position',[0.84,0.06,0.11,0.1])
 set(handles.checkbox1,'position',[0.57,0.11,0.26,0.056])
 set(handles.checkbox4,'position',[0.57,0.05,0.26,0.056])
 
-set(handles.text16,'position',[0.05,0.96,0.78,0.04])
+set(handles.text16,'position',[0.05,0.001,0.78,0.03])
 set(handles.text16,'FontSize',10);  % set as norm
 
-set(gcf,'Name','Acycle: eTimeOpt')
+
 dat = varargin{1}.current_data;  % data
 handles.unit = varargin{1}.unit; % unit
 handles.unit_type = varargin{1}.unit_type; % unit type
@@ -142,15 +215,25 @@ handles.path_temp = varargin{1}.path_temp; % save path
 handles.listbox_acmain = varargin{1}.listbox_acmain; % save path
 handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
 %
+[~, a178] = ismember('a178',lang_id); % in ascend
+[~, ec25] = ismember('ec25',lang_id); % 
+[~, topt11] = ismember('topt11',lang_id); %
+[~, topt12] = ismember('topt12',lang_id); %
+
+[~, topt13] = ismember('topt13',lang_id); %
+[~, topt14] = ismember('topt14',lang_id); %
+[~, topt15] = ismember('topt15',lang_id); %
+[~, topt16] = ismember('topt16',lang_id); %
+[~, topt17] = ismember('topt17',lang_id); %
 diffx = diff(dat(:,1));
 % check data
 if sum(diffx <= 0) > 0
-    disp('>>  Waning: data has to be in ascending order, no duplicated number allowed')
+    disp(lang_var{a178})
     dat = sortrows(dat);
 end
 % check data
 if abs((max(diffx)-min(diffx))/2) > 10*eps('single')
-    hwarn1 = warndlg('Data may not be evenly spaced!');
+    hwarn1 = warndlg(lang_var{ec25});
 end
 %
 datx = dat(:,1);  % unit should be cm
@@ -169,38 +252,38 @@ if handles.step <= dt
 end
 % check unit, set to cm
 if handles.unit_type == 0
-    hwarn = warndlg('Unit is assumed to be m. If not, choose correct unit and restart eTimeOpt');
+    hwarn = warndlg(lang_var{topt11});
     dat(:,1) = dat(:,1)*100;
     dt = dt * 100;
     dtr = dtr * 100;
 elseif handles.unit_type == 2
-    hwarn = warndlg('Unit type is Time! Make sure the unit is m');
+    hwarn = warndlg(lang_var{topt12});
 else
     if strcmp(handles.unit,'m')
         dat(:,1) = dat(:,1)*100;
         dtr = dt * 100;
         dt = dt * 100;
-        %msgbox('Unit is m, now changes to cm','Unit transform')
+        
     elseif strcmp(handles.unit,'dm')
         dat(:,1) = dat(:,1)*10;
         dtr = dt*10;
         dt = dt * 10;
-        msgbox('Unit is dm, now changes to cm','Unit transform')
+        msgbox([lang_var{topt13},' dm, ',lang_var{topt14},' cm'],lang_var{topt15})
     elseif strcmp(handles.unit,'mm')
         dat(:,1) = dat(:,1)/10;
         dtr = dt/10;
         dt = dt / 10;
-        msgbox('Unit is mm, now changes to cm','Unit transform')
+        msgbox([lang_var{topt13},' mm, ',lang_var{topt14},' cm'],lang_var{topt15})
     elseif strcmp(handles.unit,'km')
         dat(:,1) = dat(:,1)* 1000 * 100;
         dtr = dt*100*1000;
         dt = dt * 100*1000;
-        msgbox('Unit is km, now changes to cm','Unit transform')
+        msgbox([lang_var{topt13},' km, ',lang_var{topt14},' cm'],lang_var{topt15})
     elseif strcmp(handles.unit,'ft')
         dat(:,1) = dat(:,1)* 30.48;
         dtr = dt * 30.48; 
         dt = dt * 30.48;
-        msgbox('Unit is ft, now changes to cm','Unit transform')
+        msgbox([lang_var{topt13},' ft, ',lang_var{topt14},' cm'],lang_var{topt15})
     end
 end
 %
@@ -249,11 +332,11 @@ end
 set(handles.edit2,'String',num2str(handles.sedmax))
 %
 sr = linspace(handles.sedmin,handles.sedmax,handles.numsed);
-sedinfo = ['test sed. rates of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+sedinfo = [lang_var{topt17},' ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
     ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
 set(handles.text7,'String',sedinfo)
 
-s_push_ok = sprintf('Check parameters in BLUE\nclick OK to run eTimeOpt');
+s_push_ok = sprintf(lang_var{topt16});
 set(handles.pushbutton1,'TooltipString',s_push_ok)
 %
 handles.npts = npts;
@@ -311,12 +394,16 @@ roll = handles.roll;
 detrend = handles.detrend;
 cormethod = handles.cormethod;
 
+lang_var = handles.lang_var;
+lang_id = handles.lang_id;
+[~, topt11] = ismember('topt11',lang_id); %
+
 %
 % check unit, change units of window and step to cm
 if handles.unit_type == 0
     window = window*100;
     step = step*100;
-    hwarn = warndlg('Is the Unit m? If not, set unit in Acycle and restart eTimeOpt');
+    hwarn = warndlg(lang_var{topt11});
 elseif handles.unit_type == 2
     
 else
@@ -377,6 +464,11 @@ end
 
 eTimeOptfig = figure;
 set(gcf,'color','w');
+[~, main26] = ismember('main26',lang_id); % Sed. rate
+[~, main34] = ismember('main34',lang_id); % Unit
+[~, main23] = ismember('main23',lang_id); % Depth
+[~, main21] = ismember('main21',lang_id); % Time
+[~, topt18] = ismember('topt18',lang_id); %
 
 subplot(1,3,1)
 if handles.plot_2d == 1
@@ -389,15 +481,30 @@ else
 end
 colormap parula
 shading interp
-xlabel('Sedimentation rate (cm/kyr)')
-title('r^2_e_n_v_e_l_o_p_e')
-if handles.unit_type == 0;
-    ylabel(['Unit (',handles.unit,')'])
-elseif handles.unit_type == 1;
-    ylabel(['Depth (',handles.unit,')'])
+if or(handles.main_unit_selection == 0, handles.lang_choice == 0)
+    xlabel('Sedimentation rate (cm/kyr)')
+    title('r^2_e_n_v_e_l_o_p_e')
+    if handles.unit_type == 0;
+        ylabel(['Unit (',handles.unit,')'])
+    elseif handles.unit_type == 1;
+        ylabel(['Depth (',handles.unit,')'])
+    else
+        ylabel(['Time (',handles.unit,')'])
+    end
 else
-    ylabel(['Time (',handles.unit,')'])
+    %%
+    xlabel([lang_var{main26},' (cm/kyr)'])
+    title('r^2_e_n_v_e_l_o_p_e')
+    if handles.unit_type == 0
+        ylabel([lang_var{main34},' (',handles.unit,')'])
+    elseif handles.unit_type == 1
+        ylabel([lang_var{main23},' (',handles.unit,')'])
+    else
+        ylabel([lang_var{main21},' (',handles.unit,')'])
+    end
+    
 end
+
 if handles.flipy == 1;
     set(gca,'Ydir','reverse')
 end
@@ -414,7 +521,11 @@ else
 end
 colormap parula
 shading interp
-xlabel('Sedimentation rate (cm/kyr)')
+if or(handles.main_unit_selection == 0, handles.lang_choice == 0)
+    xlabel('Sedimentation rate (cm/kyr)')
+else
+    xlabel([lang_var{main26},' (cm/kyr)'])
+end
 title('r^2_p_o_w_e_r')
 if handles.flipy == 1;
     set(gca,'Ydir','reverse')
@@ -432,7 +543,11 @@ else
 end
 colormap parula
 shading interp
-xlabel('Sedimentation rate (cm/kyr)')
+if or(handles.main_unit_selection == 0, handles.lang_choice == 0)
+    xlabel('Sedimentation rate (cm/kyr)')
+else
+    xlabel([lang_var{main26},' (cm/kyr)'])
+end
 title('r^2_o_p_t')
 if handles.flipy == 1;
     set(gca,'Ydir','reverse')
@@ -470,7 +585,7 @@ for row = 1: length(y_grid);
     fprintf(fileID,'%s, %s, %s, %s, %s, %s, %s\n',y_grid(row),sr_p(row,1),sr_p(row,2),sr_p(row,3),sr_p(row,4),sr_p(row,5),sr_p(row,6));
 end
 fclose(fileID);
-disp('>> Done. See Acycle main window for the output figures')
+disp(lang_var{topt18})
 figure(handles.acfigmain);
 refreshcolor;
 cd(pre_dirML); % return view dir
@@ -518,7 +633,12 @@ else
         sr(ii) = 10^(  log10(handles.sedmin)  +  (ii-1) * sedinc ) ;
     end
 end
-sedinfo = ['test sed. rates of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+
+lang_var = handles.lang_var;
+lang_id = handles.lang_id;
+[~, topt17] = ismember('topt17',lang_id); %
+
+sedinfo = [lang_var{topt17},num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
     ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
 set(handles.text7,'String',sedinfo)
 guidata(hObject, handles);
@@ -544,7 +664,13 @@ else
     handles.linLog = 2;
     sr = linspace(handles.sedmin,handles.sedmax,handles.numsed);
 end
-sedinfo = ['test sed. rates of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+
+
+lang_var = handles.lang_var;
+lang_id = handles.lang_id;
+[~, topt17] = ismember('topt17',lang_id); %
+
+sedinfo = [lang_var{topt17},num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
     ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
 set(handles.text7,'String',sedinfo)
 guidata(hObject, handles);
@@ -557,19 +683,26 @@ function edit1_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit1 as text
 %        str2double(get(hObject,'String')) returns contents of edit1 as a double
+lang_var = handles.lang_var;
+lang_id = handles.lang_id;
+[~, topt17] = ismember('topt17',lang_id); %
+[~, topt26] = ismember('topt26',lang_id); %
+[~, main29] = ismember('main29',lang_id); % warning
+
 handles.sedmin = str2double(get(hObject,'String'));
-dt = handles.dt;
-fnyq = handles.sedmin/(2*dt);
+fnyq = handles.sedmin/(2*handles.dt);
 if handles.fh > fnyq
-    sedmin = 2 * dt * handles.fh;
-    msgbox(['Minimum sed. rate may beyond the detection limit ', num2str(sedmin),' cm/kyr'],'Warning')
+    sedmin = 2 * handles.dt * handles.fh;
+    msgbox([lang_var{topt26},' ', num2str(sedmin),' cm/kyr'],lang_var{main29})
 end
 sr = linspace(handles.sedmin,handles.sedmax,handles.numsed);
-sedinfo = ['test sed. rates of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+
+sedinfo = [lang_var{topt17},num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
     ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
 set(handles.text7,'String',sedinfo)
 
 guidata(hObject,handles)
+
 
 % --- Executes during object creation, after setting all properties.
 function edit1_CreateFcn(hObject, eventdata, handles)
@@ -592,6 +725,13 @@ function edit2_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit2 as text
 %        str2double(get(hObject,'String')) returns contents of edit2 as a double
+
+lang_var = handles.lang_var;
+lang_id = handles.lang_id;
+[~, topt17] = ismember('topt17',lang_id); %
+[~, topt27] = ismember('topt27',lang_id); %
+[~, main29] = ismember('main29',lang_id); % warning
+
 handles.sedmax = str2double(get(hObject,'String'));
 % warning
 dt = handles.dt;
@@ -599,11 +739,12 @@ fray = handles.sedmax/(handles.npts * dt);
 flow = 1/max(handles.targetP);
 if fray > handles.fl
     sedmax = handles.npts * dt * flow;
-    msgbox(['Maximum sed. rate may beyond the detection limit ', num2str(sedmax),' cm/kyr'],'Warning')
+    msgbox([lang_var{topt27},' ', num2str(sedmax),' cm/kyr'],lang_var{main29})
 end
 % display
 sr = linspace(handles.sedmin,handles.sedmax,handles.numsed);
-sedinfo = ['test sed. rates of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+
+sedinfo = [lang_var{topt17},num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
     ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
 set(handles.text7,'String',sedinfo)
 
@@ -632,23 +773,31 @@ function edit3_Callback(hObject, eventdata, handles)
 %        str2double(get(hObject,'String')) returns contents of edit3 as a double
 handles.numsed = str2double(get(hObject,'String'));
 sr = linspace(handles.sedmin,handles.sedmax,handles.numsed);
+
+lang_var = handles.lang_var;
+lang_id = handles.lang_id;
+[~, topt17] = ismember('topt17',lang_id); %
+[~, topt19] = ismember('topt19',lang_id); %
+[~, topt20] = ismember('topt20',lang_id); %
+[~, main29] = ismember('main29',lang_id); %
+
 if handles.numsed > 3
-    sedinfo = ['test sed. rates of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+    sedinfo = [lang_var{topt17},num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
     ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
     set(handles.text7,'String',sedinfo)
 elseif handles.numsed == 3
-    sedinfo = ['test sed. rates of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+    sedinfo = [lang_var{topt17},num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
         ', ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
     set(handles.text7,'String',sedinfo)
 elseif handles.numsed == 2
-    sedinfo = ['test sed. rates of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),' cm/kyr'];
+    sedinfo = [lang_var{topt17},num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),' cm/kyr'];
     set(handles.text7,'String',sedinfo)
 else
-    msgbox('Number should be no less than 2','Warning')
+    msgbox(lang_var{topt19},lang_var{main29})
 end
 
 if handles.numsed > 500
-    msgbox('Large number, may be very slow','Warning')
+    msgbox(lang_var{topt20},lang_var{main29})
 end
 guidata(hObject,handles)
 
@@ -696,14 +845,22 @@ function edit4_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit4 as text
 %        str2double(get(hObject,'String')) returns contents of edit4 as a double
+lang_var = handles.lang_var;
+lang_id = handles.lang_id;
+[~, topt21] = ismember('topt21',lang_id); %
+[~, topt22] = ismember('topt22',lang_id); %
+[~, topt23] = ismember('topt23',lang_id); %
+[~, topt24] = ismember('topt24',lang_id); %
+[~, main29] = ismember('main29',lang_id); %
+
 t1 = str2double(get(handles.edit4,'String'));
 if t1 < 0
-    msgbox('Age cannot < 0 Ma','Error')
+    msgbox(lang_var{topt22},lang_var{topt21})
 elseif t1 > 4500
-    msgbox('Age cannot > 4500 Ma','Error')
+    msgbox(lang_var{topt23},lang_var{topt21})
 end
 if t1 > 249
-    msgbox('Age > 249 Ma, beyond age limit of Laskar solutions','Reminder')
+    msgbox(lang_var{topt24},lang_var{main29})
 end
 handles.age = t1;
 t1= 1000 * t1; % Ma to ka
