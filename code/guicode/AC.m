@@ -3806,7 +3806,7 @@ if nplot == 1
         end 
         
             x = data(:,1);
-            if handles.lang_choice
+            if handles.lang_choice == 0
                 dlg_title = 'Find Max/Min value and indice';
                 prompt = {'Interval start','Interval end','Max or Min (1 = max, else = min)','Tested column'};
             else
@@ -4190,38 +4190,41 @@ nplot = length(plot_selected);   % length
 
 %language
 lang_id = handles.lang_id;
-if handles.lang_choice > 0
-    [~, locb1] = ismember('a147',lang_id);
-    a147 = handles.lang_var{locb1};
-    [~, locb1] = ismember('a148',lang_id);
-    a148 = handles.lang_var{locb1};
-    [~, locb1] = ismember('a149',lang_id);
-    a149 = handles.lang_var{locb1};
-    [~, locb1] = ismember('a150',lang_id);
-    a150 = handles.lang_var{locb1};
-    [~, locb1] = ismember('a151',lang_id);
-    a151 = handles.lang_var{locb1};
-    [~, locb1] = ismember('a152',lang_id);
-    a152 = handles.lang_var{locb1};
-    [~, locb1] = ismember('a153',lang_id);
-    a153 = handles.lang_var{locb1};
-    [~, locb1] = ismember('a154',lang_id);
-    a154 = handles.lang_var{locb1};
-    [~, locb1] = ismember('a155',lang_id);
-    a155 = handles.lang_var{locb1};
-    [~, locb1] = ismember('a156',lang_id);
-    a156 = handles.lang_var{locb1};
-    [~, locb1] = ismember('dd24',lang_id);
-    dd24 = handles.lang_var{locb1};
-    [~, locb1] = ismember('dd01',lang_id);
-    dd01 = handles.lang_var{locb1};
-    [~, locb1] = ismember('main24',lang_id);
-    main24 = handles.lang_var{locb1};
-    [~, locb1] = ismember('main36',lang_id);
-    main36 = handles.lang_var{locb1};
-    [~, locb1] = ismember('main37',lang_id);
-    main37 = handles.lang_var{locb1};
-end
+[~, locb1] = ismember('a145',lang_id);
+a145 = handles.lang_var{locb1};
+[~, locb1] = ismember('a147',lang_id);
+a147 = handles.lang_var{locb1};
+[~, locb1] = ismember('a148',lang_id);
+a148 = handles.lang_var{locb1};
+[~, locb1] = ismember('a149',lang_id);
+a149 = handles.lang_var{locb1};
+[~, locb1] = ismember('a150',lang_id);
+a150 = handles.lang_var{locb1};
+[~, locb1] = ismember('a151',lang_id);
+a151 = handles.lang_var{locb1};
+[~, locb1] = ismember('a152',lang_id);
+a152 = handles.lang_var{locb1};
+[~, locb1] = ismember('a153',lang_id);
+a153 = handles.lang_var{locb1};
+[~, locb1] = ismember('a154',lang_id);
+a154 = handles.lang_var{locb1};
+[~, locb1] = ismember('a155',lang_id);
+a155 = handles.lang_var{locb1};
+[~, locb1] = ismember('a156',lang_id);
+a156 = handles.lang_var{locb1};
+[~, locb1] = ismember('a157',lang_id);
+a157 = handles.lang_var{locb1};
+[~, locb1] = ismember('dd24',lang_id);
+dd24 = handles.lang_var{locb1};
+[~, locb1] = ismember('dd01',lang_id);
+dd01 = handles.lang_var{locb1};
+[~, locb1] = ismember('main24',lang_id);
+main24 = handles.lang_var{locb1};
+[~, locb1] = ismember('main36',lang_id);
+main36 = handles.lang_var{locb1};
+[~, locb1] = ismember('main37',lang_id);
+main37 = handles.lang_var{locb1};
+
 
 if nplot == 1
     data_name = char(contents(plot_selected));
@@ -4232,210 +4235,194 @@ if nplot == 1
             [~,dat_name,ext] = fileparts(data_name);
             if sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
                 %try
-                    if handles.lang_choice == 0
-                        hwarn = warndlg('Wait, large image? can be very slow ...');
-                    else
-                        hwarn = warndlg(dd01);
-                    end
-                    I = imread(data_name);
-                    imfinfo1 = imfinfo(data_name); % image information
-                    figI = figure;
-                    lastwarn('') % Clear last warning message
+                hwarn = warndlg(dd01);
+                I = imread(data_name);
+                imfinfo1 = imfinfo(data_name); % image information
+                figI = figure;
+                lastwarn('') % Clear last warning message
 
-                    
-                    if strcmp(imfinfo1.ColorType,'CIELab')
-                        aDouble = double(I); 
-                        cielab(:,:,1) = aDouble(:,:,1) ./ (255/100);
-                        cielab(:,:,2) = aDouble(:,:,2)-128;
-                        cielab(:,:,3) = aDouble(:,:,3)-128;
-                        %I = lab2rgb(cielab);
-                        I = cielab(:,:,1);
-                        imshow(I,[0 100]);
-                    else
-                        imshow(I);
-                    end
-
-                    [warnMsg, warnId] = lastwarn;
-                    if ~isempty(warnMsg)
-                        close(figI)
-                        imscrollpanel_ac(data_name);
-                        figI = gcf;
-                    end
-                    try close(hwarn)
-                    catch
-                    end
-
-                    if strcmp(imfinfo1.ColorType,'CIELab')
-                        set(gcf,'Name',[dat_name,' L*: Press "SHIFT"or"ALT" & select cursors now'],'NumberTitle','off')
-                    else
-                        set(gcf,'Name',[dat_name,': Press "SHIFT"or"ALT" & select cursors now'],'NumberTitle','off')
-                    end
-                    
-                    choice = questdlg('Steps: 1) click the "DataCursor" tool; 2) select (2) cursors; 3) press "Enter" in the COMMAND window', ...
-                        'Press "SHIFT"or"ALT" key & select cursors', 'Continue','Cancel','Continue');
-
-                    end
-                    if handles.lang_choice == 0
-                        case1 = 'Continue';
-                        case2 = 'Cancel';
-                    else
-                        case1 = main36;
-                        case2 = main37;
-                    end
-                    switch choice
-                        %case 'Continue'
-                        case case1
-                            figure(figI)
-                            hold on; 
-                            dcm_obj = datacursormode(figI);
-                            set(dcm_obj,'DisplayStyle','datatip','SnapToDataVertex','off','Enable','on')
-
-                            if handles.lang_choice == 0
-                                Sure = input('>>  Press "Enter"');
-                            else
-                                Sure = input(a150);
-                            end
-
-                            c_info = getCursorInfo(dcm_obj);
-                            % number of cursors
-                            m = length(c_info);
-                            
-                            CursorInfo_value = zeros(m,2);
-
-                            if m >= 2
-                                
-                                for i = 1 : m
-                                   CursorInfo_value(i,1)=c_info(i).Position(:,1);
-                                   CursorInfo_value(i,2)=c_info(i).Position(:,2);
-                                end
-
-                                if strcmp(imfinfo1.ColorType,'CIELab')
-                                    figure(figI)
-                                    plot(CursorInfo_value(:,1), CursorInfo_value(:,2), 'g-','LineWidth',3)
-                                    hold off
-                                    pause(0.1)
-                                    figure
-                                    imshow(cielab(:,:,1),[0 100]);
-                                    hold on
-                                    plot(CursorInfo_value(:,1), CursorInfo_value(:,2), 'g-','LineWidth',3)
-                                    set(gcf,'Name',[dat_name,': L*'],'NumberTitle','off')
-                                    pause(0.1)
-                                    [cx,cy,c1,xi,yi] = improfile(I,CursorInfo_value(:,1),CursorInfo_value(:,2));
-                                    
-                                    figure;
-                                    imshow(cielab(:,:,2),[-128 127]);
-                                    hold on
-                                    plot(CursorInfo_value(:,1), CursorInfo_value(:,2), 'g-','LineWidth',3)
-                                    hold off
-                                    set(gcf,'Name',[dat_name,': a*'],'NumberTitle','off')
-                                    [~,~,c2,~,~] = improfile(cielab(:,:,2),CursorInfo_value(:,1),CursorInfo_value(:,2));
-                                    pause(0.1)
-                                    
-                                    figure;
-                                    imshow(cielab(:,:,3),[-128 127]);
-                                    hold on
-                                    plot(CursorInfo_value(:,1), CursorInfo_value(:,2), 'g-','LineWidth',3)
-                                    hold off
-                                    set(gcf,'Name',[dat_name,': b*'],'NumberTitle','off')
-                                    [~,~,c3,~,~] = improfile(cielab(:,:,3),CursorInfo_value(:,1),CursorInfo_value(:,2));
-                                    pause(0.1)
-                                else
-                                    % RGB or grayscale
-                                    plot(CursorInfo_value(:,1), CursorInfo_value(:,2), 'g-','LineWidth',3)
-                                    [cx,cy,c,xi,yi] = improfile(I,CursorInfo_value(:,1),CursorInfo_value(:,2));
-                                end
-                                
-                                % pixels
-                                cxd = diff(cx);
-                                cyd = diff(cy);
-                                czd = cxd.*cxd + cyd.*cyd;
-                                z = cumsum(sqrt(czd));
-                                cz = [0;z];
-                                % control pixels
-                                cxd = diff(xi);
-                                cyd = diff(yi);
-                                czd = cxd.*cxd + cyd.*cyd;
-                                zc = cumsum(sqrt(czd));
-                                czp = [0;zc];
-                                czp = [(1:length(xi))',czp];
-
-                                if strcmp(imfinfo1.ColorType,'CIELab')
-                                    data = [cz,c1,c2,c3];
-                                else
-                                    if strcmp(imfinfo1.ColorType,'grayscale')
-                                        data = [cz,c];
-                                    elseif strcmp(imfinfo1.ColorType,'truecolor')
-                                        c = reshape(c,[],3);
-                                        data = [cz,c];
-                                    else
-                                        c = reshape(c,[],4);
-                                        data = [cz,c];
-                                    end
-                                end
-
-                                name = [dat_name,'-profile.txt'];
-                                name1= [dat_name,'-controlpoints.txt'];
-                                name2= [dat_name,'-controlpixels.txt'];
-                                data1 = [xi,yi];
-
-                                CDac_pwd
-                                dlmwrite(name , data, 'delimiter', ' ', 'precision', 9);
-                                dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9);
-                                if handles.lang_choice == 0
-                                    disp(['>>  save profile data as   ',name1])
-                                    disp(['>>  save control points as ',name1])
-                                else
-                                    disp([a154,name1])
-                                    disp([a155,name1])
-                                end                                    
-
-                                dlmwrite(name2, czp, 'delimiter', ' ', 'precision', 9);
-                                disp(['>>  save control pixels as ',name2])
-                                d = dir; %get files
-                                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-                                refreshcolor;
-                                cd(pre_dirML); % return to matlab view folder
-                                
-                                % plot
-                                figure;
-                                plot(data(:,1),data(:,2:end));
-                                hold on
-                                for i = 1:length(zc)
-                                    xline(zc(i),'k--')
-                                end
-                                hold off
-                                title(name, 'Interpreter', 'none'); 
-                                xlabel('Pixels (lower left -> upper right)');
-                                xlim([0,z(end)])
-                                set(gca,'XMinorTick','on','YMinorTick','on')
-                                if strcmp(imfinfo1.ColorType,'grayscale')
-                                    ylabel('Grayscale')
-                                elseif strcmp(imfinfo1.ColorType,'CIELab')
-                                    ylabel('CIELab')
-                                    legend('L*','a*','b*')
-                                elseif strcmp(imfinfo1.ColorType,'truecolor')
-                                    ylabel('RGB')
-                                    legend('Red','Green','Blue')
-                                else
-                                    if handles.lang_choice == 0
-                                        ylabel('Value')
-                                    else
-                                        ylabel(main24)
-                                    end
-                                end
-                            else
-                                warndlg('At least two cursors needed!')
-                            end
-                        %case 'Cancel'
-                        case case2
-                            
-                            try close(figI)
-                            catch
-                            end
-                    end
-
+                if strcmp(imfinfo1.ColorType,'CIELab')
+                    aDouble = double(I); 
+                    cielab(:,:,1) = aDouble(:,:,1) ./ (255/100);
+                    cielab(:,:,2) = aDouble(:,:,2)-128;
+                    cielab(:,:,3) = aDouble(:,:,3)-128;
+                    %I = lab2rgb(cielab);
+                    I = cielab(:,:,1);
+                    imshow(I,[0 100]);
+                else
+                    imshow(I);
                 end
-                    
+
+                [warnMsg, warnId] = lastwarn;
+                if ~isempty(warnMsg)
+                    close(figI)
+                    imscrollpanel_ac(data_name);
+                    figI = gcf;
+                end
+                
+                try close(hwarn)
+                catch
+                end
+
+                if strcmp(imfinfo1.ColorType,'CIELab')
+                    set(gcf,'Name',[dat_name,' L*',a147],'NumberTitle','off')
+                else
+                    set(gcf,'Name',[dat_name,a147],'NumberTitle','off')
+                end
+
+                choice = questdlg(a148, ...
+                    a147, 'Continue','Cancel','Continue');
+
+            
+                case1 = 'Continue';
+                case2 = 'Cancel';
+
+                switch choice
+                    %case 'Continue'
+                    case case1
+                        figure(figI)
+                        hold on; 
+                        dcm_obj = datacursormode(figI);
+                        set(dcm_obj,'DisplayStyle','datatip','SnapToDataVertex','off','Enable','on')
+                        Sure = input(a150);
+
+                        c_info = getCursorInfo(dcm_obj);
+                        % number of cursors
+                        m = length(c_info);
+
+                        CursorInfo_value = zeros(m,2);
+
+                        if m >= 2
+
+                            for i = 1 : m
+                               CursorInfo_value(i,1)=c_info(i).Position(:,1);
+                               CursorInfo_value(i,2)=c_info(i).Position(:,2);
+                            end
+
+                            if strcmp(imfinfo1.ColorType,'CIELab')
+                                figure(figI)
+                                plot(CursorInfo_value(:,1), CursorInfo_value(:,2), 'g-','LineWidth',3)
+                                hold off
+                                pause(0.1)
+                                figure
+                                imshow(cielab(:,:,1),[0 100]);
+                                hold on
+                                plot(CursorInfo_value(:,1), CursorInfo_value(:,2), 'g-','LineWidth',3)
+                                set(gcf,'Name',[dat_name,': L*'],'NumberTitle','off')
+                                pause(0.1)
+                                [cx,cy,c1,xi,yi] = improfile(I,CursorInfo_value(:,1),CursorInfo_value(:,2));
+
+                                figure;
+                                imshow(cielab(:,:,2),[-128 127]);
+                                hold on
+                                plot(CursorInfo_value(:,1), CursorInfo_value(:,2), 'g-','LineWidth',3)
+                                hold off
+                                set(gcf,'Name',[dat_name,': a*'],'NumberTitle','off')
+                                [~,~,c2,~,~] = improfile(cielab(:,:,2),CursorInfo_value(:,1),CursorInfo_value(:,2));
+                                pause(0.1)
+
+                                figure;
+                                imshow(cielab(:,:,3),[-128 127]);
+                                hold on
+                                plot(CursorInfo_value(:,1), CursorInfo_value(:,2), 'g-','LineWidth',3)
+                                hold off
+                                set(gcf,'Name',[dat_name,': b*'],'NumberTitle','off')
+                                [~,~,c3,~,~] = improfile(cielab(:,:,3),CursorInfo_value(:,1),CursorInfo_value(:,2));
+                                pause(0.1)
+                            else
+                                % RGB or grayscale
+                                plot(CursorInfo_value(:,1), CursorInfo_value(:,2), 'g-','LineWidth',3)
+                                [cx,cy,c,xi,yi] = improfile(I,CursorInfo_value(:,1),CursorInfo_value(:,2));
+                            end
+
+                            % pixels
+                            cxd = diff(cx);
+                            cyd = diff(cy);
+                            czd = cxd.*cxd + cyd.*cyd;
+                            z = cumsum(sqrt(czd));
+                            cz = [0;z];
+                            % control pixels
+                            cxd = diff(xi);
+                            cyd = diff(yi);
+                            czd = cxd.*cxd + cyd.*cyd;
+                            zc = cumsum(sqrt(czd));
+                            czp = [0;zc];
+                            czp = [(1:length(xi))',czp];
+
+                            if strcmp(imfinfo1.ColorType,'CIELab')
+                                data = [cz,c1,c2,c3];
+                            else
+                                if strcmp(imfinfo1.ColorType,'grayscale')
+                                    data = [cz,c];
+                                elseif strcmp(imfinfo1.ColorType,'truecolor')
+                                    c = reshape(c,[],3);
+                                    data = [cz,c];
+                                else
+                                    c = reshape(c,[],4);
+                                    data = [cz,c];
+                                end
+                            end
+
+                            name = [dat_name,'-profile.txt'];
+                            name1= [dat_name,'-controlpoints.txt'];
+                            name2= [dat_name,'-controlpixels.txt'];
+                            data1 = [xi,yi];
+
+                            CDac_pwd
+                            dlmwrite(name , data, 'delimiter', ' ', 'precision', 9);
+                            dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9);
+                            disp([a154,name1])
+                            disp([a155,name1])                                
+
+                            dlmwrite(name2, czp, 'delimiter', ' ', 'precision', 9);
+                            disp([a149,name2])
+                            d = dir; %get files
+                            set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+                            refreshcolor;
+                            cd(pre_dirML); % return to matlab view folder
+
+                            % plot
+                            figure;
+                            plot(data(:,1),data(:,2:end));
+                            hold on
+                            for i = 1:length(zc)
+                                xline(zc(i),'k--')
+                            end
+                            hold off
+                            title(name, 'Interpreter', 'none'); 
+                            
+                            xlabel(a157);
+
+                            xlim([0,z(end)])
+                            set(gca,'XMinorTick','on','YMinorTick','on')
+                            if strcmp(imfinfo1.ColorType,'grayscale')
+                                ylabel(a156)
+                            elseif strcmp(imfinfo1.ColorType,'CIELab')
+                                ylabel('CIELab')
+                                legend('L*','a*','b*')
+                            elseif strcmp(imfinfo1.ColorType,'truecolor')
+                                ylabel('RGB')
+                                legend('Red','Green','Blue')
+                            else
+                                if handles.lang_choice == 0
+                                    ylabel('Value')
+                                else
+                                    ylabel(main24)
+                                end
+                            end
+                        else
+                            warndlg(a145)
+                        end
+                    %case 'Cancel'
+                    case case2
+
+                        try close(figI)
+                        catch
+                        end
+                end
+
+            end
+        end        
 end
 guidata(hObject, handles);
 
@@ -6785,8 +6772,13 @@ if check == 1;
       
     %language
     lang_id = handles.lang_id;
+    [~, locb1] = ismember('a268',lang_id);
+    a268 = handles.lang_var{locb1};
+    
+    [~, locb1] = ismember('a269',lang_id);
+    a269 = handles.lang_var{locb1};
+    
     if handles.lang_choice > 0
-
         [~, locb1] = ismember('a270',lang_id);
         a270 = handles.lang_var{locb1};
 
@@ -6846,26 +6838,11 @@ if check == 1;
             data_new = [data_pca, data_new];
         end
     end
-%<<<<<<< HEAD
-    if handles.lang_choice 
-        disp('>>  Principal component analysis: Done')
-    else
-        disp(a272)
-    end
-%=======
-    disp('>>  %=======%=======%=======%=======%============')
-    disp('>>Principal component analysis:')
-    disp('>>  *-PCA-coeff.txt')
-    disp('>>    principal component coefficients')
-    disp('>>  *-PCA-latent-explained-mu.txt')
-    disp('>>    col#1: PC variances; col#2: % of each PC; col#3: mean of each variable')
-    disp('>>  *-tsquared.txt')
-    disp('>>    Hotelling T-squared statistic for each observation')
-    disp('>>  *-PCA.txt')
-    disp('>>    principal component')
+
+
     
-    prompt = {'Is the 1st column time or depth? (yes=1, no=0)'};
-    dlg_title = 'PCA data type inquiry';
+    prompt = {a269};
+    dlg_title = a268;
     num_lines = 1;
     defaultans = {'1'};
     options.Resize='on';
@@ -6878,48 +6855,64 @@ if check == 1;
         else
             data_new2 = data_new;
         end
-%>>>>>>> dev_nolang
+
+        % pca
+        [coeff, pc, latent, tsquared, explained, mu] = pca(data_new2); 
+        if depthtime == 1
+            pcn = [data_new(:,1),pc];
+            disp('>>    col#1: depth/time; col#2: PC1; col#3: PC2 ...')
+        else
+            pcn = pc;
+            disp('>>    col#1: PC1; col#2: PC2; col#3: PC3 ...')
+        end
+        disp('>>  %=======%=======%=======%=======%============')
+        % coeff: principal component coefficients
+        % pc: principal component scores
+        % latent: principal component variances
+        % tsquared: Hotelling's T-squared statistic for each observation in X.
+        % explained: the percentage of the total variance explained by each principal component 
+        % mu, the estimated mean of each variable in X.
+        [~,dat_name,~] = fileparts(char(contents(plot_selected(1))));% first file name
+        ext = '.txt';
+        if nplot == 1
+            name1 = [dat_name,'-PCA',ext];
+            name2 = [dat_name,'-PCA-coeff',ext];
+            name3 = [dat_name,'-PCA-latent-explained-mu',ext];
+            name4 = [dat_name,'-PCA-tsquared',ext];
+        else
+            name1 = [dat_name,'-w-others-PCA',ext];  % New name
+            name2 = [dat_name,'-w-others-PCA-coeff',ext];
+            name3 = [dat_name,'-w-others-PCA-latent-explained-mu',ext];
+            name4 = [dat_name,'-w-others-PCA-tsquared',ext];
+        end
+
+        CDac_pwd; % cd ac_pwd dir
+        dlmwrite(name1, pcn, 'delimiter', ' ', 'precision', 9);
+        dlmwrite(name2, coeff, 'delimiter', ' ', 'precision', 9);
+        dlmwrite(name3, [latent,explained,mu'], 'delimiter', ' ', 'precision', 9);
+        dlmwrite(name4, [data_new(:,1),tsquared], 'delimiter', ' ', 'precision', 9);
+        d = dir; %get files
+        set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+        refreshcolor;
+        cd(pre_dirML); % return to matlab view folder
+        
+        if handles.lang_choice 
+            disp('>>  Principal component analysis: Done')
+        else
+            disp(a272)
+        end
+
+        disp('>>  %=======%=======%=======%=======%============')
+        disp('>>Principal component analysis:')
+        disp('>>  *-PCA-coeff.txt')
+        disp('>>    principal component coefficients')
+        disp('>>  *-PCA-latent-explained-mu.txt')
+        disp('>>    col#1: PC variances; col#2: % of each PC; col#3: mean of each variable')
+        disp('>>  *-tsquared.txt')
+        disp('>>    Hotelling T-squared statistic for each observation')
+        disp('>>  *-PCA.txt')
+        disp('>>    principal component')
     end
-    
-    % pca
-    [coeff, pc, latent, tsquared, explained, mu] = pca(data_new2); 
-    if depthtime == 1
-        pcn = [data_new(:,1),pc];
-        disp('>>    col#1: depth/time; col#2: PC1; col#3: PC2 ...')
-    else
-        pcn = pc;
-        disp('>>    col#1: PC1; col#2: PC2; col#3: PC3 ...')
-    end
-    disp('>>  %=======%=======%=======%=======%============')
-    % coeff: principal component coefficients
-    % pc: principal component scores
-    % latent: principal component variances
-    % tsquared: Hotelling's T-squared statistic for each observation in X.
-    % explained: the percentage of the total variance explained by each principal component 
-    % mu, the estimated mean of each variable in X.
-    [~,dat_name,~] = fileparts(char(contents(plot_selected(1))));% first file name
-    ext = '.txt';
-    if nplot == 1
-        name1 = [dat_name,'-PCA',ext];
-        name2 = [dat_name,'-PCA-coeff',ext];
-        name3 = [dat_name,'-PCA-latent-explained-mu',ext];
-        name4 = [dat_name,'-PCA-tsquared',ext];
-    else
-        name1 = [dat_name,'-w-others-PCA',ext];  % New name
-        name2 = [dat_name,'-w-others-PCA-coeff',ext];
-        name3 = [dat_name,'-w-others-PCA-latent-explained-mu',ext];
-        name4 = [dat_name,'-w-others-PCA-tsquared',ext];
-    end
-    
-    CDac_pwd; % cd ac_pwd dir
-    dlmwrite(name1, pcn, 'delimiter', ' ', 'precision', 9);
-    dlmwrite(name2, coeff, 'delimiter', ' ', 'precision', 9);
-    dlmwrite(name3, [latent,explained,mu'], 'delimiter', ' ', 'precision', 9);
-    dlmwrite(name4, [data_new(:,1),tsquared], 'delimiter', ' ', 'precision', 9);
-    d = dir; %get files
-    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-    refreshcolor;
-    cd(pre_dirML); % return to matlab view folder
 end
 guidata(hObject,handles)
 

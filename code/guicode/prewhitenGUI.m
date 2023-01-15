@@ -82,20 +82,39 @@ set(handles.pushbutton1,'position',[0.3,0.005,0.442,0.23]) % COCO
 set(handles.radiobutton1,'Value',0) % model = 2
 set(handles.radiobutton2,'Value',1) % model = 2
 set(handles.radiobutton3,'Value',0) % model = 2
+% language
+lang_choice = varargin{1}.lang_choice;
+handles.lang_choice = lang_choice;
+lang_id = varargin{1}.lang_id;
+lang_var = varargin{1}.lang_var;
+handles.lang_id = lang_id;
+handles.lang_var = lang_var;
+[~, a177] = ismember('a177',lang_id);
+[~, a173] = ismember('a173',lang_id);
+[~, a174] = ismember('a174',lang_id);
+[~, a175] = ismember('a175',lang_id);
+[~, a176] = ismember('a176',lang_id);
+[~, a178] = ismember('a178',lang_id);
+[~, ec25] = ismember('ec25',lang_id);
+set(gcf,'Name',['Acycle: ',lang_var{a177}])
+set(handles.uibuttongroup1,'Title',lang_var{a173})
+set(handles.radiobutton1,'String',lang_var{a174})
+set(handles.radiobutton2,'String',lang_var{a175})
+set(handles.radiobutton3,'String',lang_var{a176})
+set(handles.pushbutton1,'String',lang_var{a177})
 
-set(gcf,'Name','Acycle: Prewhiten')
 dat = varargin{1}.current_data;  % data
 
 diffx = diff(dat(:,1));
 % check data
 if sum(diffx <= 0) > 0
-    disp('>>  Waning: data has to be in ascending order, no duplicated number allowed')
+    disp(lang_var{a178})
     dat = sortrows(dat);
 end
 
 % check data
 if abs((max(diffx)-min(diffx))/2) > 10*eps('single')
-    hwarn1 = warndlg('Data may not be evenly spaced!');
+    hwarn1 = warndlg(lang_var{ec25});
 end
 % convential rho1 (lag-1 autocorrelation coefficient)
 [rho]=rhoAR1ML(dat(:,2));
@@ -242,6 +261,14 @@ function pushbutton1_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+lang_id = handles.lang_id;
+lang_var = handles.lang_var;
+[~, main21] = ismember('main21',lang_id); % time
+[~, main23] = ismember('main23',lang_id); % depth
+[~, main24] = ismember('main24',lang_id); % value
+[~, main01] = ismember('main01',lang_id); % save data
+
 if get(handles.radiobutton1,'Value')
     rho1 = handles.rho;
 end
@@ -255,10 +282,14 @@ end
 
 data = handles.dat;
 datp = prewhitening(data,rho1);
+
 % plot data
 figure;
 plot(datp(:,1),datp(:,2),'k','LineWidth',1);
-xlabel('Depth/Time');ylabel('Value');title('Prewhiten')
+
+xlabel([lang_var{main23},'/',lang_var{main21}]);
+ylabel(lang_var{main24});
+%title('Prewhiten')
 xlim([min(datp(:,1)) max(datp(:,1))])
 
 % write data
@@ -266,7 +297,9 @@ name0 = [handles.dat_name,'-','prewhiten-',num2str(rho1)];
 name1 = [name0,handles.ext];
 CDac_pwd
 dlmwrite(name1, datp, 'delimiter', ' ', 'precision', 9);
-disp(['>> Sedimentation rate file: ',name1])
+
+disp(['>> ',lang_var{main01},' : ',name1])
+
 d = dir; %get files
 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;

@@ -62,7 +62,7 @@ handles.sortdata = varargin{1}.sortdata;
 handles.val1 = varargin{1}.val1;
 
 handles.hmain = gcf;
-set(handles.hmain,'Name', 'Acycle: Lead-lag relationship')
+
 % GUI settings
 set(0,'Units','normalized') % set units as normalized
 h=get(gcf,'Children');  % get all content
@@ -70,6 +70,39 @@ h1=findobj(h,'FontUnits','norm');  % find all font units as points
 set(h1,'FontUnits','points','FontSize',11.5);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
+
+% language
+lang_choice = varargin{1}.lang_choice;
+handles.lang_choice = lang_choice;
+lang_id = varargin{1}.lang_id;
+lang_var = varargin{1}.lang_var;
+handles.lang_id = lang_id;
+handles.lang_var = lang_var;
+handles.main_unit_selection = varargin{1}.main_unit_selection;
+
+[~, menu112] = ismember('menu112',lang_id);
+set(handles.hmain,'Name',['Acycle: ',lang_var{menu112}])
+
+[~, intser01] = ismember('intser01',lang_id);
+[~, intser02] = ismember('intser02',lang_id);
+[~, intser04] = ismember('intser04',lang_id);
+[~, intser06] = ismember('intser06',lang_id);
+[~, leadlag02] = ismember('leadlag02',lang_id);
+[~, leadlag01] = ismember('leadlag01',lang_id);
+[~, main32] = ismember('main32',lang_id);
+[~, main01] = ismember('main01',lang_id);
+[~, main00] = ismember('main00',lang_id);
+
+set(handles.uipanel1,'Title',lang_var{intser01})
+set(handles.text2,'String',lang_var{intser02})
+set(handles.pushbutton3,'String',lang_var{intser04})
+set(handles.pushbutton4,'String',lang_var{intser04})
+set(handles.text3,'String',lang_var{intser06})
+set(handles.text6,'String',lang_var{leadlag02})
+set(handles.text4,'String',lang_var{leadlag01})
+set(handles.text5,'String',lang_var{main32})
+set(handles.checkbox1,'String',lang_var{main01})
+set(handles.pushbutton1,'String',lang_var{main00})
 
 set(handles.hmain,'position',[0.38,0.2,0.6,0.25]* handles.MonZoom) % set position
 set(handles.uipanel1,'position',[0.025,0.286,0.947,0.649]) % Data
