@@ -105,11 +105,11 @@ if handles.lang_choice > 0
 end
 
 set(handles.uipanel,'position', [0.05,0.75,0.9,0.2])
-set(handles.text2,'position', [0.01,0.6,0.46,0.2])
-set(handles.text3,'position', [0.01,0.2,0.15,0.2])
-set(handles.edit1,'position', [0.16,0.15,0.078,0.3])
-set(handles.text4,'position', [0.25,0.2,0.08,0.2])
-set(handles.popupmenu1,'position', [0.32,0.15,0.15,0.3])
+set(handles.text2,'position', [0.01,0.5,0.46,0.3])
+set(handles.text3,'position', [0.01,0.08,0.15,0.3])
+set(handles.edit1,'position', [0.16,0.1,0.078,0.3])
+set(handles.text4,'position', [0.25,0.08,0.08,0.3])
+set(handles.popupmenu1,'position', [0.32,0.1,0.15,0.3])
 set(handles.text5,'position', [0.5,0.6,0.06,0.2])
 set(handles.edit2,'position', [0.56,0.55,0.11,0.3])
 set(handles.text6,'position', [0.5,0.2,0.06,0.2])

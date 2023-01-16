@@ -710,8 +710,13 @@ function evofft_tips_win_pushbutton_Callback(hObject, eventdata, handles)
 % hObject    handle to evofft_tips_win_pushbutton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-evofft_tips_win = 'Tips: window  << total data length; window ~ = 1 - 1.5 x aimed cycle. i.e. 500 kyr for a 400 kyr cycles';
-warndlg(evofft_tips_win,'Tips: window length')
+lang_var = handles.lang_var;
+
+[~, evofft16] = ismember('evofft16',handles.lang_id);
+[~, evofft15] = ismember('evofft15',handles.lang_id);
+
+warndlg(lang_var{evofft16},lang_var{evofft15})
+
 
 
 % --- Executes during object creation, after setting all properties.
@@ -1094,8 +1099,13 @@ function pushbutton8_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton8 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-evofft_tips_step = 'Tips: Step  >= mean sample rate';
-warndlg(evofft_tips_step,'Tips: Step length')
+
+lang_var = handles.lang_var;
+
+[~, dd46] = ismember('dd46',handles.lang_id);
+[~, dd45] = ismember('dd45',handles.lang_id);
+
+warndlg(lang_var{dd45},lang_var{dd46})
 
 
 % --- Executes during object creation, after setting all properties.

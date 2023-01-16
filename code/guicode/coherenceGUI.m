@@ -119,6 +119,9 @@ if lang_choice>0
     set(handles.checkbox3,'string',lang_var{locb})
     [~, locb] = ismember('c48',lang_id);
     set(handles.pushbutton8,'string',lang_var{locb})
+    
+    set(handles.text9,'string',handles.unit)
+    set(handles.text10,'string',handles.unit)
 else
     set(gcf,'Name','Acycle: Coherence & Phase Analysis')
 end

@@ -63,11 +63,7 @@ h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
 handles.MonZoom = varargin{1}.MonZoom;
 handles.sortdata = varargin{1}.sortdata;
-if ismac
-    set(gcf,'position',[0.45,0.2,0.4,0.35]* handles.MonZoom) % set position
-elseif ispc
-    set(gcf,'position',[0.45,0.2,0.4,0.35]* handles.MonZoom) % set position
-end
+set(gcf,'position',[0.25,0.2,0.5,0.35]* handles.MonZoom) % set position
 
 set(handles.text2,'position',[0.02,0.85,0.1,0.06])
 set(handles.edit1,'position',[0.13,0.85,0.65,0.06])

@@ -110,9 +110,9 @@ handles.sortdata = varargin{1}.sortdata;
 handles.val1 = varargin{1}.val1;
 
 set(handles.uipanel6,'position',[0.025,0.254,0.95,0.666])
-set(handles.text21,'position',[0.021,0.852,0.26,0.07])
+set(handles.text21,'position',[0.021,0.862,0.26,0.07])
 set(handles.edit10,'position',[0.284,0.852,0.24,0.1])
-set(handles.text20,'position',[0.538,0.873,0.13,0.07])
+set(handles.text20,'position',[0.538,0.862,0.13,0.07])
 set(handles.edit11,'position',[0.69,0.852,0.18,0.1])
 set(handles.text23,'position',[0.871,0.852,0.13,0.07])
 set(handles.slider4,'position',[0.03,0.729,0.94,0.09])

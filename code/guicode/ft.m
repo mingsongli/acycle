@@ -159,8 +159,7 @@ set(handles.edit10,'String',num2str(handles.x_1))
 set(handles.edit12,'String',num2str(handles.y_1))
 set(handles.edit11,'String',num2str(handles.x_2))
 set(handles.edit13,'String',num2str(handles.y_2))
-set(handles.popupmenu4,'Value',5)
-set(handles.popupmenu5,'Value',1)
+
 set(handles.radiobutton6,'Value',1)
 set(handles.radiobutton7,'Value',0)
 set(handles.radiobutton8,'Value',0)
@@ -239,6 +238,8 @@ if handles.lang_choice > 0
     set(handles.pushbutton26,'String',lang_var{main01})
 end
 %
+set(handles.popupmenu4,'Value',5)
+set(handles.popupmenu5,'Value',2)
 guidata(hObject,handles)
 
 diffx = diff(data_s(:,1));

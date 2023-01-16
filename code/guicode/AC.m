@@ -127,7 +127,7 @@ end
 
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'position',[0.5,0.1,0.45,0.8] * handles.MonZoom) % set position
-set(gcf,'Name','Acycle v2.6')
+
 set(gcf,'DockControls', 'off')
 set(gcf,'Color', 'white')
 set(gcf,'units','norm') % set location
@@ -139,6 +139,9 @@ langdict = readtable('langdict.xlsx');
 lang_id = langdict.ID;
 lang_var = table2cell(langdict(:, 2 + lang_choice));
 
+[~, c61] = ismember('c61',lang_id);
+set(gcf,'Name',lang_var{c61})
+    
 if lang_choice > 0
     % menu
     [~, locb] = ismember('menu01',lang_id);
@@ -230,9 +233,9 @@ if lang_choice > 0
     [~, locb] = ismember('menu65',lang_id);
     set(handles.menu_example_plotdigitizer,'text',lang_var{locb})
     [~, locb] = ismember('menu66',lang_id);
-    set(handles.menu_example_sphalerite,'text',lang_var{locb})
-    [~, locb] = ismember('menu67',lang_id);
     set(handles.menu_extinction_CSA,'text',lang_var{locb})
+    [~, locb] = ismember('menu67',lang_id);
+    set(handles.menu_example_sphalerite,'text',lang_var{locb})
     % Math
     [~, locb] = ismember('menu70',lang_id);
     set(handles.menu_sort,'text',lang_var{locb})
@@ -5767,6 +5770,7 @@ if check == 1
                     ylabel(handles.unit)
                 end
                 title([[dat_name,ext],': ','sampling rate'], 'Interpreter', 'none')
+                
             else
                 set(gcf,'Name', a205,'NumberTitle','off')
                 if handles.unit_type == 0
@@ -5819,7 +5823,7 @@ if check == 1
                     xlabel([a208,handles.unit,')'])
                 end
                 ylabel(a209)
-                note = [main06,':',num2str(max(dt)),',','mean',': ',num2str(mean(dt)),...
+                note = [main06,':',num2str(max(dt)),',',dd40,': ',num2str(mean(dt)),...
                     ',',lower(main40),': ',num2str(median(dt)),',',main05,': ',num2str(min(dt)),...
                     ',',lower(main42),': ',num2str(var(dt))];
             end
@@ -5854,6 +5858,9 @@ if handles.lang_choice > 0
     main40 = handles.lang_var{locb1};
     [~, locb1] = ismember('main42',lang_id);
     main42 = handles.lang_var{locb1};
+    
+    [~, locb1] = ismember('dd40',lang_id);
+    dd40 = handles.lang_var{locb1};
 end
 
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
@@ -5907,7 +5914,7 @@ if check == 1
                 set(gcf,'Name', a210,'NumberTitle','off')
                 title([[dat_name,ext],a211], 'Interpreter', 'none')
                 xlabel(main02)
-                note = [main06,':',num2str(max(datax)),',','mean',': ',num2str(mean(datax)),...
+                note = [main06,':',num2str(max(datax)),',',dd40,': ',num2str(mean(datax)),...
                     ',',lower(main40),': ',num2str(median(datax)),',',main05,': ',num2str(min(datax)),...
                     ',',lower(main42),': ',num2str(var(datax))];
             end
@@ -7240,7 +7247,7 @@ if nplot == 1
             time = data(:,1);
             value = data(:,2);
             npts = length(time);
-            if handles.lang_choice 
+            if handles.lang_choice == 0
                 dlg_title = 'Moving Median';
                 prompt = {'Window (number of data points, e.g., 3, 5, 7, ...):'};
             else
@@ -7486,6 +7493,15 @@ function menu_extinction_CSA_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 data_name = which('Example-CSA-extinction.txt');
+data = load(data_name);
+
+figure;
+scatter(data,data,200,[0 0.4470 0.7410],'filled','MarkerFaceAlpha',0.5);
+xlim([0 300])
+ylim([0 300])
+xlabel('Ma')
+ylabel('Ma')
+%axis equal
 
 CDac_pwd
 copyfile(data_name,pwd);
