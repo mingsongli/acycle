@@ -103,7 +103,6 @@ if handles.lang_choice > 0
     set(handles.prewhiten_pushbutton,'string',lang_var{locb})
 end
 
-
 handles.MonZoom = varargin{1}.MonZoom;
 set(gcf,'position',[0.45,0.3,0.25,0.5]* handles.MonZoom) % set position
 handles.sortdata = varargin{1}.sortdata;
@@ -231,6 +230,8 @@ else
     handles.prewhiten_lowess = 'notlowess';
 end
 
+update_detrend_plot_fig
+
 guidata(hObject, handles);
 
 % --- Executes on button press in prewhiten_rlowess_checkbox.
@@ -248,7 +249,7 @@ if prewhitenok == 1
 else
     handles.prewhiten_rlowess = 'notrlowess';
 end
-
+update_detrend_plot_fig
 guidata(hObject, handles);
 
 % --- Executes on button press in prewhiten_loess_checkbox.
@@ -266,7 +267,7 @@ if prewhitenok == 1
 else
     handles.prewhiten_loess = 'notloess';
 end
-
+update_detrend_plot_fig
 guidata(hObject, handles);
 
 
@@ -285,7 +286,7 @@ if prewhitenok == 1
 else
     handles.prewhiten_rloess = 'notloess';
 end
-
+update_detrend_plot_fig
 guidata(hObject, handles);
 
 
@@ -305,7 +306,7 @@ if prewhitenok == 1
 else
     handles.prewhiten_sgolay = 'notsgolay';
 end
-
+update_detrend_plot_fig
 guidata(hObject, handles);
 
 
@@ -322,7 +323,7 @@ if prewhitenok == 1
 else
     handles.prewhiten_mean = 'notmean';
 end
-
+update_detrend_plot_fig
 guidata(hObject, handles);
 
 
@@ -338,7 +339,7 @@ if prewhitenok == 1
 else
     handles.prewhiten_linear = 'notlinear';
 end
-
+update_detrend_plot_fig
 guidata(hObject, handles);
 
 
@@ -356,7 +357,7 @@ if prewhitenok == 1
 else
     handles.prewhiten_polynomial2 = 'not2nd';
 end
-
+update_detrend_plot_fig
 guidata(hObject, handles);
 
 % --- Executes on button press in checkbox13.
@@ -373,6 +374,7 @@ if prewhitenok == 1
 else
     handles.prewhiten_polynomialmore = 'notmore';
 end
+update_detrend_plot_fig
 guidata(hObject, handles);
 
 
@@ -393,109 +395,7 @@ prewhitenwinpercent = 100*(handles.smooth_win);
 set(handles.edit11, 'String', num2str(prewhitenwinpercent));
 set(handles.slider4, 'Value', handles.smooth_win);
 
-try figure(handles.detrendfig)
-    set(gcf,'Color', 'white')
-    current_data = handles.current_data;
-    smooth_win = handles.smooth_win;
-    unit = handles.unit;
-    datax=current_data(:,1);
-    datay=current_data(:,2);
-    dataymean = nanmean(datay);
-    npts=length(datax);
-    win = smooth_win * (max(datax)-min(datax));
-
-    plot(datax,datay,'-k');
-    axis([min(datax) max(datax) min(datay) max(datay)])
-    if handles.unit_type == 1
-        xlabel(['Depth (',unit,')'])
-    elseif handles.unit_type == 2
-        xlabel(['Time (',unit,')'])
-    elseif handles.unit_type == 0
-        xlabel(['(',unit,')'])
-    end
-
-    fig = gcf;
-
-    hold on;
-    prewhiten_list = 1;
-    prewhiten = {};
-    prewhiten(prewhiten_list,1)={'No_prewhiten (black)'};
-    prewhiten(prewhiten_list,1)={'Raw'};
-
-    if strcmp(handles.prewhiten_mean,'Mean')
-        datamean = dataymean * ones(npts,1);
-        hlin = line([min(datax),max(datax)],[dataymean,dataymean]);
-        set(hlin,'Linewidth',2.5,'Color','k')
-        prewhiten_list = prewhiten_list + 1;
-        prewhiten(prewhiten_list,1) = {'Mean (Thick black)'};
-    end
-
-    if strcmp(handles.prewhiten_linear,'1 order (Linear)')
-        sdat=polyfit(datax,datay,1);
-        datalinear=datax*sdat(1)+sdat(2);
-        plot(datax,datalinear,'-y','Linewidth',2)
-        prewhiten_list = prewhiten_list + 1;
-        prewhiten(prewhiten_list,1) = {'Linear (Yellow)'};
-    end
-
-    if strcmp(handles.prewhiten_polynomial2,'2 order')
-        sdat=polyfit(datax,datay,2);
-        data2nd=polyval(sdat,datax);
-        plot(datax,data2nd,':r','Linewidth',2)
-        prewhiten_list = prewhiten_list + 1;
-        prewhiten(prewhiten_list,1) = {'2nd order (dashed red)'};
-    end
-
-    polynomialmore = get(handles.checkbox13,'Value');
-    if polynomialmore == 1
-        polynomial_value = str2double(get(handles.edit23,'String'));
-        sdat=polyfit(datax,datay,polynomial_value);
-        datamore=polyval(sdat,datax);
-        plot(datax,datamore,'b-.','Linewidth',2)
-        prewhiten_list = prewhiten_list + 1;
-        prewhiten(prewhiten_list,1) = {'3+ order (Dashed blue)'};
-    end
-
-    if strcmp(handles.prewhiten_lowess,'LOWESS')
-        datalowess=smooth(datax,datay, smooth_win,'lowess');
-        plot(datax,datalowess,'-g','Linewidth',2)
-        prewhiten_list = prewhiten_list + 1;
-        prewhiten(prewhiten_list,1) = {'LOWESS  (Green)'};
-        title(['Raw data & ',num2str(win),'-',unit,' trend'])
-    end
-
-    if strcmp(handles.prewhiten_rlowess,'rLOWESS')
-        datarlowess=smooth(datax,datay, smooth_win,'rlowess');
-        plot(datax,datarlowess,':b','Linewidth',2)
-        prewhiten_list = prewhiten_list + 1;
-        prewhiten(prewhiten_list,1) = {'rLOWESS (Blue)'};
-        title(['Raw data & ',num2str(win),'-',unit,' trend'])
-    end
-
-    if strcmp(handles.prewhiten_loess,'LOESS')
-        dataloess=smooth(datax,datay, smooth_win,'loess');
-        plot(datax,dataloess,'--r','Linewidth',2)
-        prewhiten_list = prewhiten_list + 1;
-        prewhiten(prewhiten_list,1) = {'LOESS      (Red)'};
-        title(['Raw data & ',num2str(win),'-',unit,' trend'])
-    end
-
-    if strcmp(handles.prewhiten_rloess,'rLOESS')
-        datarloess=smooth(datax,datay, smooth_win,'rloess');
-        plot(datax,datarloess,'--m','Linewidth',2)
-        prewhiten_list = prewhiten_list + 1;
-        prewhiten(prewhiten_list,1) = {'rLOESS     (Magenta)'};
-        title(['Raw data & ',num2str(win),'-',unit,' trend'])
-    end
-    hold off
-    
-    legendlist = [];
-    for j = 1: prewhiten_list
-        legendlist = [legendlist, prewhiten(j,1)];
-    end
-    legend(legendlist)
-catch
-end
+update_detrend_plot_fig
 
 guidata(hObject, handles);
 
@@ -526,109 +426,7 @@ handles.prewhiten_win = handles.xrange * prewhiten_win_edit2/100;
 set(handles.edit10, 'String', num2str(handles.prewhiten_win));
 set(handles.slider4, 'Value', handles.smooth_win);
 
-try figure(handles.detrendfig)
-    set(gcf,'Color', 'white')
-    current_data = handles.current_data;
-    smooth_win = handles.smooth_win;
-    unit = handles.unit;
-    datax=current_data(:,1);
-    datay=current_data(:,2);
-    dataymean = nanmean(datay);
-    npts=length(datax);
-    win = smooth_win * (max(datax)-min(datax));
-
-    plot(datax,datay,'-k');
-    axis([min(datax) max(datax) min(datay) max(datay)])
-    if handles.unit_type == 1
-        xlabel(['Depth (',unit,')'])
-    elseif handles.unit_type == 2
-        xlabel(['Time (',unit,')'])
-    elseif handles.unit_type == 0
-        xlabel(['(',unit,')'])
-    end
-
-    fig = gcf;
-
-    hold on;
-    prewhiten_list = 1;
-    prewhiten = {};
-    prewhiten(prewhiten_list,1)={'No_prewhiten (black)'};
-    prewhiten(prewhiten_list,1)={'Raw'};
-
-    if strcmp(handles.prewhiten_mean,'Mean')
-        datamean = dataymean * ones(npts,1);
-        hlin = line([min(datax),max(datax)],[dataymean,dataymean]);
-        set(hlin,'Linewidth',2.5,'Color','k')
-        prewhiten_list = prewhiten_list + 1;
-        prewhiten(prewhiten_list,1) = {'Mean (Thick black)'};
-    end
-
-    if strcmp(handles.prewhiten_linear,'1 order (Linear)')
-        sdat=polyfit(datax,datay,1);
-        datalinear=datax*sdat(1)+sdat(2);
-        plot(datax,datalinear,'-y','Linewidth',2)
-        prewhiten_list = prewhiten_list + 1;
-        prewhiten(prewhiten_list,1) = {'Linear (Yellow)'};
-    end
-
-    if strcmp(handles.prewhiten_polynomial2,'2 order')
-        sdat=polyfit(datax,datay,2);
-        data2nd=polyval(sdat,datax);
-        plot(datax,data2nd,':r','Linewidth',2)
-        prewhiten_list = prewhiten_list + 1;
-        prewhiten(prewhiten_list,1) = {'2nd order (dashed red)'};
-    end
-
-    polynomialmore = get(handles.checkbox13,'Value');
-    if polynomialmore == 1
-        polynomial_value = str2double(get(handles.edit23,'String'));
-        sdat=polyfit(datax,datay,polynomial_value);
-        datamore=polyval(sdat,datax);
-        plot(datax,datamore,'b-.','Linewidth',2)
-        prewhiten_list = prewhiten_list + 1;
-        prewhiten(prewhiten_list,1) = {'3+ order (Dashed blue)'};
-    end
-
-    if strcmp(handles.prewhiten_lowess,'LOWESS')
-        datalowess=smooth(datax,datay, smooth_win,'lowess');
-        plot(datax,datalowess,'-g','Linewidth',2)
-        prewhiten_list = prewhiten_list + 1;
-        prewhiten(prewhiten_list,1) = {'LOWESS  (Green)'};
-        title(['Raw data & ',num2str(win),'-',unit,' trend'])
-    end
-
-    if strcmp(handles.prewhiten_rlowess,'rLOWESS')
-        datarlowess=smooth(datax,datay, smooth_win,'rlowess');
-        plot(datax,datarlowess,':b','Linewidth',2)
-        prewhiten_list = prewhiten_list + 1;
-        prewhiten(prewhiten_list,1) = {'rLOWESS (Blue)'};
-        title(['Raw data & ',num2str(win),'-',unit,' trend'])
-    end
-
-    if strcmp(handles.prewhiten_loess,'LOESS')
-        dataloess=smooth(datax,datay, smooth_win,'loess');
-        plot(datax,dataloess,'--r','Linewidth',2)
-        prewhiten_list = prewhiten_list + 1;
-        prewhiten(prewhiten_list,1) = {'LOESS      (Red)'};
-        title(['Raw data & ',num2str(win),'-',unit,' trend'])
-    end
-
-    if strcmp(handles.prewhiten_rloess,'rLOESS')
-        datarloess=smooth(datax,datay, smooth_win,'rloess');
-        plot(datax,datarloess,'--m','Linewidth',2)
-        prewhiten_list = prewhiten_list + 1;
-        prewhiten(prewhiten_list,1) = {'rLOESS     (Magenta)'};
-        title(['Raw data & ',num2str(win),'-',unit,' trend'])
-    end
-    hold off
-    
-    legendlist = [];
-    for j = 1: prewhiten_list
-        legendlist = [legendlist, prewhiten(j,1)];
-    end
-    legend(legendlist)
-catch
-end
+update_detrend_plot_fig
 
 guidata(hObject, handles);
 
@@ -679,7 +477,7 @@ if prewhitenok == 1
     
     set(handles.prewhiten_pushbutton,'Enable','on')
 end
-
+update_detrend_plot_fig
 guidata(hObject, handles);
 
 % --- Executes on button press in prewhiten_clear_pushbutton.
@@ -687,16 +485,15 @@ function prewhiten_clear_pushbutton_Callback(hObject, eventdata, handles)
 % hObject    handle to prewhiten_clear_pushbutton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-handles.prewhiten_mean = 'notmean';
-handles.prewhiten_linear = 'notlinear';
-handles.prewhiten_lowess = 'notlowess';
-handles.prewhiten_rlowess = 'notrlowess';
-handles.prewhiten_loess = 'notloess';
-handles.prewhiten_rloess = 'notloess';
-handles.prewhiten_sgolay = 'notsgolay';
-handles.prewhiten_polynomial2 = 'not2nd';
-handles.prewhiten_polynomialmore = 'notmore';
-
+handles.prewhiten_mean = '';
+handles.prewhiten_linear = '';
+handles.prewhiten_lowess = '';
+handles.prewhiten_rlowess = '';
+handles.prewhiten_loess = '';
+handles.prewhiten_rloess = '';
+handles.prewhiten_sgolay = '';
+handles.prewhiten_polynomial2 = '';
+handles.prewhiten_polynomialmore = '';
 % set checkbox
 set(handles.prewhiten_lowess_checkbox,'Value',0)
 set(handles.prewhiten_loess_checkbox,'Value',0)
@@ -708,6 +505,7 @@ set(handles.prewhiten_all_checkbox,'Value',0)
 set(handles.checkbox11,'Value',0)
 set(handles.checkbox13,'Value',0)
 %set(handles.prewhiten_pushbutton,'Enable','off')
+update_detrend_plot_fig
 guidata(hObject, handles);
 
 % --- Executes on slider movement.
@@ -724,109 +522,7 @@ handles.smooth_win = win_ratio;  % windows for smooth
 set(handles.edit10,'String',num2str(handles.prewhiten_win))
 set(handles.edit11,'String',num2str(win_ratio*100))
 
-try figure(handles.detrendfig)
-    set(gcf,'Color', 'white')
-    current_data = handles.current_data;
-    smooth_win = handles.smooth_win;
-    unit = handles.unit;
-    datax=current_data(:,1);
-    datay=current_data(:,2);
-    dataymean = nanmean(datay);
-    npts=length(datax);
-    win = smooth_win * (max(datax)-min(datax));
-
-    plot(datax,datay,'-k');
-    axis([min(datax) max(datax) min(datay) max(datay)])
-    if handles.unit_type == 1
-        xlabel(['Depth (',unit,')'])
-    elseif handles.unit_type == 2
-        xlabel(['Time (',unit,')'])
-    elseif handles.unit_type == 0
-        xlabel(['(',unit,')'])
-    end
-
-    fig = gcf;
-
-    hold on;
-    prewhiten_list = 1;
-    prewhiten = {};
-    prewhiten(prewhiten_list,1)={'No_prewhiten (black)'};
-    prewhiten(prewhiten_list,1)={'Raw'};
-
-    if strcmp(handles.prewhiten_mean,'Mean')
-        datamean = dataymean * ones(npts,1);
-        hlin = line([min(datax),max(datax)],[dataymean,dataymean]);
-        set(hlin,'Linewidth',2.5,'Color','k')
-        prewhiten_list = prewhiten_list + 1;
-        prewhiten(prewhiten_list,1) = {'Mean (Thick black)'};
-    end
-
-    if strcmp(handles.prewhiten_linear,'1 order (Linear)')
-        sdat=polyfit(datax,datay,1);
-        datalinear=datax*sdat(1)+sdat(2);
-        plot(datax,datalinear,'-y','Linewidth',2)
-        prewhiten_list = prewhiten_list + 1;
-        prewhiten(prewhiten_list,1) = {'Linear (Yellow)'};
-    end
-
-    if strcmp(handles.prewhiten_polynomial2,'2 order')
-        sdat=polyfit(datax,datay,2);
-        data2nd=polyval(sdat,datax);
-        plot(datax,data2nd,':r','Linewidth',2)
-        prewhiten_list = prewhiten_list + 1;
-        prewhiten(prewhiten_list,1) = {'2nd order (dashed red)'};
-    end
-
-    polynomialmore = get(handles.checkbox13,'Value');
-    if polynomialmore == 1
-        polynomial_value = str2double(get(handles.edit23,'String'));
-        sdat=polyfit(datax,datay,polynomial_value);
-        datamore=polyval(sdat,datax);
-        plot(datax,datamore,'b-.','Linewidth',2)
-        prewhiten_list = prewhiten_list + 1;
-        prewhiten(prewhiten_list,1) = {'3+ order (Dashed blue)'};
-    end
-
-    if strcmp(handles.prewhiten_lowess,'LOWESS')
-        datalowess=smooth(datax,datay, smooth_win,'lowess');
-        plot(datax,datalowess,'-g','Linewidth',2)
-        prewhiten_list = prewhiten_list + 1;
-        prewhiten(prewhiten_list,1) = {'LOWESS  (Green)'};
-        title(['Raw data & ',num2str(win),'-',unit,' trend'])
-    end
-
-    if strcmp(handles.prewhiten_rlowess,'rLOWESS')
-        datarlowess=smooth(datax,datay, smooth_win,'rlowess');
-        plot(datax,datarlowess,':b','Linewidth',2)
-        prewhiten_list = prewhiten_list + 1;
-        prewhiten(prewhiten_list,1) = {'rLOWESS (Blue)'};
-        title(['Raw data & ',num2str(win),'-',unit,' trend'])
-    end
-
-    if strcmp(handles.prewhiten_loess,'LOESS')
-        dataloess=smooth(datax,datay, smooth_win,'loess');
-        plot(datax,dataloess,'--r','Linewidth',2)
-        prewhiten_list = prewhiten_list + 1;
-        prewhiten(prewhiten_list,1) = {'LOESS      (Red)'};
-        title(['Raw data & ',num2str(win),'-',unit,' trend'])
-    end
-
-    if strcmp(handles.prewhiten_rloess,'rLOESS')
-        datarloess=smooth(datax,datay, smooth_win,'rloess');
-        plot(datax,datarloess,'--m','Linewidth',2)
-        prewhiten_list = prewhiten_list + 1;
-        prewhiten(prewhiten_list,1) = {'rLOESS     (Magenta)'};
-        title(['Raw data & ',num2str(win),'-',unit,' trend'])
-    end
-    hold off
-    
-    legendlist = [];
-    for j = 1: prewhiten_list
-        legendlist = [legendlist, prewhiten(j,1)];
-    end
-    legend(legendlist)
-catch
-end
+update_detrend_plot_fig
 
 guidata(hObject,handles)
 
@@ -886,158 +582,10 @@ end
 
 handles.detrendfig = figure;
 set(gcf,'Color', 'white')
-plot(datax,datay,'-k');
-axis([min(datax) max(datax) min(datay) max(datay)])
-if handles.unit_type == 1
-    xlabel(['Depth (',unit,')'])
-elseif handles.unit_type == 2
-    xlabel(['Time (',unit,')'])
-elseif handles.unit_type == 0
-    xlabel(['(',unit,')'])
-end
-ylabel('Value')
-title('Raw data & trend')
-%fig = gcf;
-%set(gcf,'Color', 'white')
-set(gcf,'Units','normalized','position',[0.09,0.3,0.35,0.4]) % set position
-hold on;
-prewhiten_list = 1;
-prewhiten = {};
-%prewhiten(prewhiten_list,1)={'No_prewhiten (black)'};
-prewhiten(prewhiten_list,1)={'Raw'};
 
-if strcmp(handles.prewhiten_mean,'Mean')
-    datamean = dataymean * ones(npts,1);
-    hlin = line([min(datax),max(datax)],[dataymean,dataymean]);
-    set(hlin,'Linewidth',2.5,'Color','k')
-    prewhiten_list = prewhiten_list + 1;
-    prewhiten(prewhiten_list,1) = {'Mean (Thick black)'};
-end
+update_detrend_plot_fig
 
-if strcmp(handles.prewhiten_linear,'1 order (Linear)')
-    sdat=polyfit(datax,datay,1);
-    datalinear=datax*sdat(1)+sdat(2);
-    plot(datax,datalinear,'-y','Linewidth',2)
-    prewhiten_list = prewhiten_list + 1;
-    prewhiten(prewhiten_list,1) = {'Linear (Yellow)'};
-end
 
-if strcmp(handles.prewhiten_polynomial2,'2 order')
-    sdat=polyfit(datax,datay,2);
-    data2nd=polyval(sdat,datax);
-    plot(datax,data2nd,':r','Linewidth',2)
-    prewhiten_list = prewhiten_list + 1;
-    prewhiten(prewhiten_list,1) = {'2nd order (dashed red)'};
-end
-
-polynomialmore = get(handles.checkbox13,'Value');
-if polynomialmore == 1
-    polynomial_value = str2double(get(handles.edit23,'String'));
-    sdat=polyfit(datax,datay,polynomial_value);
-    datamore=polyval(sdat,datax);
-    plot(datax,datamore,'b-.','Linewidth',2)
-    prewhiten_list = prewhiten_list + 1;
-    prewhiten(prewhiten_list,1) = {'3+ order (Dashed blue)'};
-end
-
-if strcmp(handles.prewhiten_lowess,'LOWESS')
-    datalowess=smooth(datax,datay, smooth_win,'lowess');
-    plot(datax,datalowess,'-g','Linewidth',2)
-    prewhiten_list = prewhiten_list + 1;
-    prewhiten(prewhiten_list,1) = {'LOWESS  (Green)'};
-    title(['Raw data & ',num2str(win),'-',unit,' trend'])
-end
-
-if strcmp(handles.prewhiten_rlowess,'rLOWESS')
-    datarlowess=smooth(datax,datay, smooth_win,'rlowess');
-    plot(datax,datarlowess,':b','Linewidth',2)
-    prewhiten_list = prewhiten_list + 1;
-    prewhiten(prewhiten_list,1) = {'rLOWESS (Blue)'};
-    title(['Raw data & ',num2str(win),'-',unit,' trend'])
-end
-
-if strcmp(handles.prewhiten_loess,'LOESS')
-    dataloess=smooth(datax,datay, smooth_win,'loess');
-    plot(datax,dataloess,'--r','Linewidth',2)
-    prewhiten_list = prewhiten_list + 1;
-    prewhiten(prewhiten_list,1) = {'LOESS      (Red)'};
-    title(['Raw data & ',num2str(win),'-',unit,' trend'])
-end
-
-if strcmp(handles.prewhiten_rloess,'rLOESS')
-    datarloess=smooth(datax,datay, smooth_win,'rloess');
-    plot(datax,datarloess,'--m','Linewidth',2)
-    prewhiten_list = prewhiten_list + 1;
-    prewhiten(prewhiten_list,1) = {'rLOESS     (Magenta)'};
-    title(['Raw data & ',num2str(win),'-',unit,' trend'])
-end
-
-% Mingsong Li, Peking Univ, May 20, 2021
-if strcmp(handles.prewhiten_sgolay,'Savitzky-Golay')
-    datasgolay=smooth(datax,datay, smooth_win,'sgolay');
-    plot(datax,datasgolay,'--',[0.8500, 0.3250, 0.0980],'Linewidth',2)
-    prewhiten_list = prewhiten_list + 1;
-    prewhiten(prewhiten_list,1) = {'SGolay     (Brown)'};
-    title(['Raw data & ',num2str(win),'-',unit,' trend'])
-end
-
-hold off
-
-legendlist = [];
-for j = 1: prewhiten_list
-    legendlist = [legendlist, prewhiten(j,1)];
-end
-legend(legendlist)
-% prepare data for export
-if exist('datamean')
-else
-    datamean = zeros(npts,1);
-end
-if exist('datalinear')
-else
-    datalinear = zeros(npts,1);
-end
-if exist('data2nd')
-else
-    data2nd = zeros(npts,1);
-end
-if exist('datamore')
-else
-    datamore = zeros(npts,1);
-end
-if exist('datalowess')
-else
-    datalowess = (zeros(npts,1));
-end
-if exist('datarlowess')
-else
-    datarlowess = (zeros(npts,1));
-end
-if exist('dataloess')
-else
-    dataloess = (zeros(npts,1));
-end
-if exist('datarloess')
-else
-    datarloess = (zeros(npts,1));
-end
-if exist('datasgolay')
-else
-    datasgolay = (zeros(npts,1));
-end
-
-%fig.Color = [.95 .95 .95];
-set(handles.prewhiten_select_popupmenu,'String',prewhiten,'Value',1);
-set(gca,'XMinorTick','on','YMinorTick','on')
-
-try close(fwarndlg);
-catch
-end
-handles.prewhiten_data1 = [datax,datay,(datay-datalinear),datalinear,(datay-datamean),datamean];
-handles.prewhiten_data2 = [(datay-datalowess),datalowess,(datay-datarlowess),datarlowess,...
-    (datay-dataloess),dataloess,(datay-datarloess),datarloess,...
-    (datay-data2nd),data2nd,(datay-datamore),datamore];
-%set(handles.pushbutton14,'Enable','on')
 guidata(hObject, handles);
 
 
@@ -1051,6 +599,19 @@ function prewhiten_select_popupmenu_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns prewhiten_select_popupmenu contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from prewhiten_select_popupmenu
+% lang
+lang_id = handles.lang_id;
+lang_var = handles.lang_var;
+[~, Fitting14] = ismember('Fitting14',lang_id);
+[~, Fitting15] = ismember('Fitting15',lang_id);
+[~, Fitting16] = ismember('Fitting16',lang_id);
+[~, Fitting17] = ismember('Fitting17',lang_id);
+[~, Fitting18] = ismember('Fitting18',lang_id);
+[~, Fitting19] = ismember('Fitting19',lang_id);
+[~, Fitting20] = ismember('Fitting20',lang_id);
+[~, Fitting21] = ismember('Fitting21',lang_id);
+[~, Fitting22] = ismember('Fitting22',lang_id);
+
 handles.prewhiten_popupmenu_selection = 'Raw';
 
 str = get(hObject, 'String');
@@ -1061,54 +622,54 @@ current_data1 = handles.prewhiten_data1(:,1);
 
 switch str{val};
 %case 'No_prewhiten (black)' % User selects.
-case 'Raw' % User selects.
+case lang_var{Fitting14} % User selects.
    prewhiten_s = 'No_prewhiten';
    current_data2 = handles.prewhiten_data1(:,2);
    trend = zeros(length(current_data2),1);
    nametype = 0;
-case 'LOWESS  (Green)' % User selects.
+case lang_var{Fitting22} % User selects.
    prewhiten_s = 'LOWESS';
    current_data2 = handles.prewhiten_data2(:,1);
    trend = handles.prewhiten_data2(:,2);
    nametype = 1;
-case 'rLOWESS (Blue)' % User selects.
+case lang_var{Fitting19} % User selects.
    prewhiten_s = 'rLOWESS';
    current_data2 = handles.prewhiten_data2(:,3);
    trend = handles.prewhiten_data2(:,4);
    nametype = 1;
-case 'LOESS      (Red)' % User selects.
+case lang_var{Fitting20} % User selects.
    prewhiten_s = 'LOESS';
    current_data2 = handles.prewhiten_data2(:,5);
    trend = handles.prewhiten_data2(:,6);
    nametype = 1;
-case 'rLOESS     (Magenta)' % User selects.
+case lang_var{Fitting21} % User selects.
    prewhiten_s = 'rLOESS';
    current_data2 = handles.prewhiten_data2(:,7);
    trend = handles.prewhiten_data2(:,8);
    nametype = 1;
-case 'Mean (Thick black)' % User selects.
+case lang_var{Fitting15} % User selects.
    prewhiten_s = 'Mean';
    current_data2 = handles.prewhiten_data1(:,5);
    trend = handles.prewhiten_data1(:,6);
    nametype = 2; % see below
-case 'Linear (Yellow)' % User selects.
+case lang_var{Fitting16} % User selects.
    prewhiten_s = 'Linear';
    current_data2 = handles.prewhiten_data1(:,3);
    trend = handles.prewhiten_data1(:,4);
    nametype = 3;
-case '2nd order (dashed red)' % User selects.
+case lang_var{Fitting17} % User selects.
    prewhiten_s = '2nd';
    current_data2 = handles.prewhiten_data2(:,9);
    trend = handles.prewhiten_data2(:,10);
    nametype = 3;
-case '3+ order (Dashed blue)' % User selects.
+case lang_var{Fitting18} % User selects.
    prewhiten_s = '3+order';
    current_data2 = handles.prewhiten_data2(:,11);
    trend = handles.prewhiten_data2(:,12);
    nametype = 3;
 end
 
-handles.prewhiten_popupmenu_selection = prewhiten_s;
+%handles.prewhiten_popupmenu_selection = prewhiten_s;
 new_data = [current_data1,current_data2];
 handles.new_data = new_data;
 current_trend = [current_data1,trend];

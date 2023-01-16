@@ -8149,15 +8149,23 @@ if nplot == 1
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
     if isdir(data_name) == 1
     else
+        
+        lang_id = handles.lang_id;
+        lang_var = handles.lang_var;
+        [~, sound01] = ismember('sound01',lang_id);
+        [~, sound02] = ismember('sound02',lang_id);
+        [~, sound03] = ismember('sound03',lang_id);
+        [~, sound04] = ismember('sound04',lang_id);
+        
         [~,dat_name,ext] = fileparts(data_name);
         if sum(strcmp(ext,handles.filetype)) > 0
 
             data = load(data_name);
 
-            prompt = {'Repeat series: # times',...
-                'Sample rate: 8192 x ?',...
-                'Remove mean (1 = yes; 0 = no)'};
-            dlg_title = 'Sound';
+            prompt = {lang_var{sound02},...
+                lang_var{sound03},...
+                lang_var{sound04}};
+            dlg_title = lang_var{sound01};
             num_lines = 1;
             defaultans = {'5','1','1'};
             options.Resize='on';

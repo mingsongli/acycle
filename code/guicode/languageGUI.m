@@ -71,8 +71,11 @@ set(handles.pushbutton1,'position',[0.4,0.2,0.2,0.2]) % set position
 
 % language
 lang_choice = varargin{1}.lang_choice;
+handles.lang_choice = lang_choice;
 lang_id = varargin{1}.lang_id;
 lang_var = varargin{1}.lang_var;
+handles.lang_id = lang_id;
+handles.lang_var = lang_var;
 
 if lang_choice>0
     [~, locb] = ismember('l00',lang_id);
@@ -148,20 +151,20 @@ end
 
 ac_lang_ini = load('ac_lang.txt');
 
+lang_id = handles.lang_id;
+
 if lang_choice ~= ac_lang_ini
     % msg box
-    langdlg = readtable('lang.dlg.xlsx');
-    lang_id2 = langdlg.ID;
-    lang_var2 = table2cell(langdlg(:, 2 + lang_choice));
-    [~, locb] = ismember('msg1',lang_id2);
-    s = msgbox(lang_var2{locb},'Acycle');
+    langdict = readtable('langdict.xlsx');
+    lang_var2 = table2cell(langdict(:, 2 + lang_choice));
+    
+    [~, msg1] = ismember('msg1',handles.lang_id);
+    s = msgbox(lang_var2{msg1},'Acycle');
     % new language
     fid = fopen(which('ac_lang.txt'),'wt');
     fprintf(fid, num2str(lang_choice));
     fclose(fid);
     % set default language
-    langdict = readtable('langdict.xlsx');
-    lang_id = langdict.ID;
     lang_var = table2cell(langdict(:, 2 + lang_choice));
 
     pause(0.01)

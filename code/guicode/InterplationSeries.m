@@ -109,7 +109,7 @@ set(handles.edit2,'position',[0.125,0.03,0.88,0.208])
 set(handles.pushbutton3,'position',[0.015,0.557,0.1,0.208]) % plot
 set(handles.pushbutton4,'position',[0.015,0.03,0.1,0.208]) % plot
 
-set(handles.pushbutton1,'position',[0.1,0.1,0.16,0.168]) % plot
+set(handles.pushbutton1,'position',[0.1,0.1,0.16,0.168],'Visible','Off') % plot
 set(handles.pushbutton2,'position',[0.5,0.1,0.25,0.168]) % plot
 
 
@@ -146,7 +146,7 @@ try
     handles.plot_s{1} = get(handles.edit1,'string');
     handles.plot_s{2} = get(handles.edit2,'string');
     guidata(hObject, handles);
-    PlotAdv(handles);
+    PlotPro2DLineGUI(handles);
 catch
     errordlg('Selected Series Format NOT Supported or NOT Existed')
 end
