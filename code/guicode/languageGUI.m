@@ -73,6 +73,7 @@ set(handles.pushbutton1,'position',[0.4,0.2,0.2,0.2]) % set position
 lang_choice = varargin{1}.lang_choice;
 lang_id = varargin{1}.lang_id;
 lang_var = varargin{1}.lang_var;
+
 if lang_choice>0
     [~, locb] = ismember('l00',lang_id);
     set(gcf,'Name',lang_var{locb})
@@ -139,9 +140,12 @@ if ismember(language_choice,'English')
     lang_choice = 0;
 elseif ismember(language_choice,'中文简体')
     lang_choice = 1;
+elseif ismember(language_choice,'中文繁體')
+    lang_choice = 2;
 else
     lang_choice = 0;
 end
+
 ac_lang_ini = load('ac_lang.txt');
 
 if lang_choice ~= ac_lang_ini
