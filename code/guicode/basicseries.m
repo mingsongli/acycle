@@ -56,41 +56,13 @@ handles.listbox_acmain = varargin{1}.listbox_acmain;
 handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
 handles.MonZoom = varargin{1}.MonZoom;
 handles.sortdata = varargin{1}.sortdata;
+handles.val1 = varargin{1}.val1;
+handles.lang_choice = varargin{1}.lang_choice;
+handles.lang_id = varargin{1}.lang_id;
+handles.lang_var = varargin{1}.lang_var;
 
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
-
-
-% language
-lang_choice = varargin{1}.lang_choice;
-if lang_choice>0
-    lang_id = varargin{1}.lang_id;
-    lang_var = varargin{1}.lang_var;
-    [~, locb] = ismember('b00',lang_id);
-    set(gcf,'Name',lang_var{locb})
-    [~, locb] = ismember('b01',lang_id);
-    set(handles.text2,'string',lang_var{locb})
-    [~, locb] = ismember('b02',lang_id);
-    set(handles.text3,'string',lang_var{locb})
-    [~, locb] = ismember('b03',lang_id);
-    set(handles.text4,'string',lang_var{locb})
-    [~, locb] = ismember('b04',lang_id);
-    set(handles.text5,'string',lang_var{locb})
-    [~, locb] = ismember('b05',lang_id);
-    set(handles.text6,'string',lang_var{locb})
-    [~, locb] = ismember('main00',lang_id);
-    set(handles.pushbutton1,'string',lang_var{locb})
-    [~, locb] = ismember('b07',lang_id);
-    set(handles.uipanel_ETP,'title',lang_var{locb})
-    [~, locb] = ismember('b08',lang_id);
-    set(handles.text13,'string',lang_var{locb})
-    [~, locb] = ismember('b09',lang_id);
-    set(handles.text14,'string',lang_var{locb})
-    [~, locb] = ismember('b10',lang_id);
-    set(handles.text15,'string',lang_var{locb})
-else
-    set(gcf,'Name','Acycle: Astronomical Solutions')
-end
 
 h=get(gcf,'Children');  % get all content
 h1=findobj(h,'FontUnits','norm');  % find all font units as points
@@ -98,20 +70,52 @@ set(h1,'FontUnits','points','FontSize',11.5);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
 
-set(gcf,'position',[0.45,0.55,0.4,0.3] * handles.MonZoom) % set position
+set(gcf,'position',[0.25,0.25,0.5,0.3] * handles.MonZoom) % set position
+
+% language
+lang_choice = varargin{1}.lang_choice;
+lang_id = varargin{1}.lang_id;
+lang_var = varargin{1}.lang_var;
+
+[~, locb] = ismember('b00',lang_id);
+set(gcf,'Name',lang_var{locb})
+[~, locb] = ismember('b01',lang_id);
+set(handles.text2,'string',lang_var{locb})
+[~, locb] = ismember('b02',lang_id);
+set(handles.text3,'string',lang_var{locb})
+[~, locb] = ismember('b03',lang_id);
+set(handles.text4,'string',lang_var{locb})
+[~, locb] = ismember('b04',lang_id);
+set(handles.text5,'string',lang_var{locb})
+[~, locb] = ismember('b05',lang_id);
+set(handles.text6,'string',lang_var{locb})
+[~, locb] = ismember('main00',lang_id);
+set(handles.pushbutton1,'string',lang_var{locb})
+[~, b06] = ismember('b06',lang_id);
+set(handles.uipanel_ETP,'title',lang_var{b06})
+[~, b07] = ismember('b07',lang_id);
+set(handles.uipanel_ETP,'title',lang_var{b07})
+[~, b08] = ismember('b08',lang_id);
+set(handles.text13,'string',lang_var{b08})
+[~, b09] = ismember('b09',lang_id);
+set(handles.text14,'string',lang_var{b09})
+[~, b10] = ismember('b10',lang_id);
+set(handles.text15,'string',lang_var{b10})
+
 set(handles.text2,'position', [0.064,0.84,0.2,0.06])
 set(handles.text4,'position', [0.47,0.84,0.2,0.06])
 set(handles.popupmenu1,'position', [0.043,0.67,0.3,0.1])
 set(handles.popupmenu1,'value', 1)
 set(handles.text3,'position', [0.043,0.568,0.2,0.06])
 set(handles.popupmenu3,'position', [0.043,0.407,0.3,0.1])
+set(handles.popupmenu3,'String', {lang_var{b06}, lang_var{b08}, lang_var{b09}, lang_var{b10}})
 set(handles.popupmenu3,'value', 1)
 set(handles.text5,'position', [0.4,0.707,0.07,0.06])
 set(handles.text6,'position', [0.4,0.619,0.07,0.06])
 set(handles.text7,'position', [0.628,0.707,0.07,0.06])
 set(handles.text9,'position', [0.628,0.619,0.07,0.06])
 set(handles.edit1,'position', [0.48,0.69,0.13,0.09])
-set(handles.edit1,'string', '1')
+set(handles.edit1,'string', '0')
 set(handles.edit2,'position', [0.48,0.585,0.13,0.09])
 set(handles.edit2,'string', '1000')
 set(handles.pushbutton1,'position', [0.4,0.407,0.25,0.1])
@@ -181,11 +185,19 @@ function popupmenu1_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns popupmenu1 contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupmenu1
+lang_id = handles.lang_id;
+lang_var = handles.lang_var;
+[~, b06] = ismember('b06',lang_id);
+[~, b08] = ismember('b08',lang_id);
+[~, b09] = ismember('b09',lang_id);
+[~, b10] = ismember('b10',lang_id);
+[~, b11] = ismember('b11',lang_id);
+
 contents = cellstr(get(hObject,'String'));
 solution = contents{get(hObject,'Value')};
 parameters_list0 = {''};
-parameters_list1 = {'ETP';'Eccentricity';'Obliquity';'Precession'};
-parameters_list2 = {'Eccentricity';'Inclination'};
+parameters_list1 = {lang_var{b06}, lang_var{b08}, lang_var{b09}, lang_var{b10}};
+parameters_list2 = {lang_var{b08}, lang_var{b11}};
 handles.solution = solution;
 
 if strcmp(solution,'')
@@ -377,6 +389,14 @@ function pushbutton1_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+lang_id = handles.lang_id;
+lang_var = handles.lang_var;
+[~, b06] = ismember('b06',lang_id); % ETP
+[~, b08] = ismember('b08',lang_id); % ecc
+[~, b09] = ismember('b09',lang_id); % obl
+[~, b10] = ismember('b10',lang_id); % pre
+[~, b11] = ismember('b11',lang_id); % inc
+
 t1=min(handles.t1,handles.t2);
 t2=max(handles.t1,handles.t2);
 parameter=handles.parameter;
@@ -407,7 +427,7 @@ end
 data = select_interval(dat,t1,t2);
 %data = dat(t1:t2,:);
 clear dat
-if strcmp(parameter,'ETP')
+if strcmp(parameter,lang_var{b06})
     % get weight
     wE = str2double(get(handles.edit3,'String'));
     wT = str2double(get(handles.edit4,'String'));
@@ -418,27 +438,34 @@ if strcmp(parameter,'ETP')
     if wE ~= 1 || wT~= 1 || wP ~= 1
         parameter = [get(handles.edit3,'String'),'E',get(handles.edit4,'String'),'T',get(handles.edit5,'String'),'P'];
     end
-elseif strcmp(parameter,'Eccentricity')
+elseif strcmp(parameter,lang_var{b08})
     dat=[data(:,1),data(:,2)];
-elseif strcmp(parameter,'Obliquity')
+elseif strcmp(parameter,lang_var{b09})
     dat=[data(:,1),data(:,3)];
-elseif strcmp(parameter,'Precession')
+elseif strcmp(parameter,lang_var{b10})
     dat=[data(:,1),data(:,4)];
-elseif strcmp(parameter,'Inclination')
+elseif strcmp(parameter,lang_var{b11})
     dat=[data(:,1),data(:,3)];
 end
 
 name = [handles.solution,'-',parameter,'-',num2str(t1),'-',num2str(t2),'.txt'];
 %csvwrite(name,dat)
 CDac_pwd; % cd ac_pwd dir
-dlmwrite(name, dat, 'delimiter', ',', 'precision', 9);
+dlmwrite(name, dat, 'delimiter', ' ', 'precision', 9);
 cd(pre_dirML); % return to matlab view folder
 % close
 figdata = figure; 
 plot(dat(:,1),dat(:,2));
 set(gca,'XMinorTick','on','YMinorTick','on')
 xlim([min(dat(:,1)),max(dat(:,1))]);
-xlabel('Time (kyr)')
+if handles.lang_choice==0
+    xlabel('Time (kyr)')
+else
+    [~, locb1] = ismember('a231',handles.lang_id);
+    lang_var = handles.lang_var;
+    xlabel(lang_var{locb1})
+end
+
 title(name, 'Interpreter', 'none')
 % refresh AC main window
 figure(handles.acfigmain);

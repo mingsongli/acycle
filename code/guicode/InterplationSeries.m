@@ -59,10 +59,11 @@ handles.unit = varargin{1}.unit;
 handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
 handles.MonZoom = varargin{1}.MonZoom;
 handles.sortdata = varargin{1}.sortdata;
+handles.val1 = varargin{1}.val1;
 
 %
 handles.hmain = gcf;
-set(handles.hmain,'Name', 'Acycle: Interpolation Plus')
+
 % GUI settings
 set(0,'Units','normalized') % set units as normalized
 h=get(gcf,'Children');  % get all content
@@ -70,6 +71,33 @@ h1=findobj(h,'FontUnits','norm');  % find all font units as points
 set(h1,'FontUnits','points','FontSize',11.5);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
+
+% language
+lang_choice = varargin{1}.lang_choice;
+handles.lang_choice = lang_choice;
+lang_id = varargin{1}.lang_id;
+lang_var = varargin{1}.lang_var;
+handles.lang_id = lang_id;
+handles.lang_var = lang_var;
+handles.main_unit_selection = varargin{1}.main_unit_selection;
+
+[~, menu72] = ismember('menu72',lang_id);
+set(gcf,'Name',['Acycle: ',lang_var{menu72}])
+
+[~, intser01] = ismember('intser01',lang_id);
+[~, intser02] = ismember('intser02',lang_id);
+[~, intser03] = ismember('intser03',lang_id);
+[~, intser04] = ismember('intser04',lang_id);
+[~, intser06] = ismember('intser05',lang_id);
+[~, menu03] = ismember('menu03',lang_id);
+
+set(handles.uipanel1,'Title',lang_var{intser01})
+set(handles.text2,'String',lang_var{intser02})
+set(handles.text3,'String',lang_var{intser03})
+set(handles.pushbutton3,'String',lang_var{intser04})
+set(handles.pushbutton4,'String',lang_var{intser04})
+set(handles.pushbutton1,'String',lang_var{menu03})
+set(handles.pushbutton2,'String',lang_var{intser06})
 
 set(handles.hmain,'position',[0.38,0.2,0.6,0.25]* handles.MonZoom) % set position
 set(handles.uipanel1,'position',[0.025,0.286,0.947,0.649]) % Data
@@ -81,7 +109,7 @@ set(handles.edit2,'position',[0.125,0.03,0.88,0.208])
 set(handles.pushbutton3,'position',[0.015,0.557,0.1,0.208]) % plot
 set(handles.pushbutton4,'position',[0.015,0.03,0.1,0.208]) % plot
 
-set(handles.pushbutton1,'position',[0.1,0.1,0.16,0.168]) % plot
+set(handles.pushbutton1,'position',[0.1,0.1,0.16,0.168],'Visible','Off') % plot
 set(handles.pushbutton2,'position',[0.5,0.1,0.25,0.168]) % plot
 
 
@@ -118,7 +146,7 @@ try
     handles.plot_s{1} = get(handles.edit1,'string');
     handles.plot_s{2} = get(handles.edit2,'string');
     guidata(hObject, handles);
-    PlotAdv(handles);
+    PlotPro2DLineGUI(handles);
 catch
     errordlg('Selected Series Format NOT Supported or NOT Existed')
 end
@@ -131,6 +159,13 @@ function pushbutton2_Callback(hObject, eventdata, handles)
 pre_dirML = pwd;
 handles.plot_s{1} = get(handles.edit1,'string');
 handles.plot_s{2} = get(handles.edit2,'string');
+lang_id = handles.lang_id;
+lang_var = handles.lang_var;
+[~, menu72] = ismember('menu72',lang_id);
+[~, menu40] = ismember('menu40',lang_id);
+[~, intser02] = ismember('intser02',lang_id);
+[~, intser06] = ismember('intser06',lang_id);
+[~, intser07] = ismember('intser07',lang_id);
 % dat1: reference
 % dat2: target
 try
@@ -153,28 +188,30 @@ xmax = max( max(dat1(:,1), max(dat2(:,1))));
 dat2int2 = interp1(dat2(:,1),dat2(:,2),dat1(:,1));
 dat2int  = [dat1(:,1),dat2int2];
 
+
+
 figure;
-set(gcf,'Name', 'Acycle: Interpolation Plus Results')
+set(gcf,'Name', ['Acycle: ',lang_var{menu72},' ',lang_var{menu40}])
 subplot(3,1,1)
 
 plot(dat1(:,1),dat1(:,2),'b--o')
 xlim( [xmin, xmax] )
-title('Reference')
+title(lang_var{intser02})
 subplot(3,1,2)
 plot(dat2(:,1),dat2(:,2),'r-s')
 xlim( [xmin, xmax] )
-title('Target')
+title(lang_var{intser06})
 subplot(3,1,3)
 plot(dat2int(:,1),dat2int(:,2),'r-o')
 xlim( [xmin, xmax] )
 xlabel([handles.unit])
-title('Target Interpolated')
+title([lang_var{intser06},' ',lang_var{intser07}])
 
 CDac_pwd; % cd ac_pwd dir
 [~,name1,~] = fileparts(handles.plot_s{1});
 [~,name2,ext2] = fileparts(handles.plot_s{2});
 name1 = [name2,'-IntP-',name1,ext2];
-dlmwrite(name1, dat2int, 'delimiter', ',', 'precision', 9);
+dlmwrite(name1, dat2int, 'delimiter', ' ', 'precision', 9);
 d = dir; %get files
 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
@@ -187,10 +224,15 @@ function pushbutton3_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 pre_dirML = pwd;
 CDac_pwd; % cd ac_pwd dir
-[file,path] = uigetfile({'*.*',  'All Files (*.*)'},...
-                        'Select a Reference Series');
+lang_id = handles.lang_id;
+lang_var = handles.lang_var;
+[~, intser08] = ismember('intser08',lang_id);
+[~, intser09] = ismember('intser09',lang_id);
+[~, intser11] = ismember('intser11',lang_id);
+[file,path] = uigetfile({'*.*',  lang_var{intser08}},...
+                        lang_var{intser09});
 if isequal(file,0)
-    disp('User selected Cancel')
+    disp(lang_var{intser11})
 else
     set(handles.edit1,'string',fullfile(path,file))
 end
@@ -205,10 +247,17 @@ function pushbutton4_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 pre_dirML = pwd;
 CDac_pwd; % cd ac_pwd dir
-[file,path] = uigetfile({'*.*',  'All Files (*.*)'},...
-                        'Select a Reference Series');
+
+lang_id = handles.lang_id;
+lang_var = handles.lang_var;
+[~, intser08] = ismember('intser08',lang_id);
+[~, intser10] = ismember('intser10',lang_id);
+[~, intser11] = ismember('intser11',lang_id);
+
+[file,path] = uigetfile({'*.*',  lang_var{intser08}},...
+                        lang_var{intser10});
 if isequal(file,0)
-    disp('User selected Cancel')
+    disp(lang_var{intser11})
 else
     set(handles.edit2,'string',fullfile(path,file))
 end

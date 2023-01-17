@@ -1,4 +1,8 @@
-if plot_spectrum
+% lang
+lang_var = handles.lang_var;
+[~, menu129] = ismember('menu129',handles.lang_id);
+
+if plot_phase
     
     figure(handles.figwave)
     if plot_series == 1
@@ -16,7 +20,7 @@ if plot_spectrum
     end
     
     dt = mean(diff(datax));
-    wcoherence(dat1y,dat2y,seconds(dt),'PhaseDisplayThreshold',dss);
+    wcoherence(dat1y,dat2y,seconds(dt),'PhaseDisplayThreshold',wtcthreshold);
     colorbar('off')
     set(gca,'XMinorTick','on')
     set(gca,'TickDir','out');
@@ -46,19 +50,39 @@ if plot_spectrum
         'YTick',log2(Yticks(:)),'YTickLabel',Yticks)
     
     if plot_swap == 0
-        if handles.unit_type == 0
-           xlabel(['Unit (',handles.unit,')'])
-        elseif handles.unit_type == 1
-           xlabel(['Depth (',handles.unit,')'])
+        if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+            if handles.unit_type == 0
+                xlabel(['Unit (',handles.unit,')'])
+            elseif handles.unit_type == 1
+                xlabel(['Depth (',handles.unit,')'])
+            else
+                xlabel(['Time (',handles.unit,')'])
+            end
         else
-           xlabel(['Time (',handles.unit,')'])
+            [~, main34] = ismember('main34',handles.lang_id); % Unit
+            [~, main23] = ismember('main23',handles.lang_id); % Depth
+            [~, main21] = ismember('main21',handles.lang_id); % Time
+            [~, main15] = ismember('main15',handles.lang_id); % Period
+
+            if handles.unit_type == 0
+                xlabel([lang_var{main34},' (',handles.unit,')'])
+            elseif handles.unit_type == 1
+                xlabel([lang_var{main23},' (',handles.unit,')'])
+            else
+                xlabel([lang_var{main21},' (',handles.unit,')'])
+            end
         end
     else
         xlabel([])
     end
-    
-    ylabel(['Period (',handles.unit,')'])
-    title('cross spectrum')
+    if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+        ylabel(['Period (',handles.unit,')'])
+        title('phase')
+    else
+        [~, main61] = ismember('main61',handles.lang_id);
+        ylabel([lang_var{main15},' (',handles.unit,')'])
+        title(lang_var{main61})
+    end
     
     if isempty(plot_colorgrid)
         try
@@ -128,14 +152,34 @@ else
             end
         end
     end
-    if handles.unit_type == 0
-        xlabel(['Unit (',handles.unit,')'])
-    elseif handles.unit_type == 1
-        xlabel(['Depth (',handles.unit,')'])
+    if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+        if handles.unit_type == 0
+            xlabel(['Unit (',handles.unit,')'])
+        elseif handles.unit_type == 1
+            xlabel(['Depth (',handles.unit,')'])
+        else
+            xlabel(['Time (',handles.unit,')'])
+        end
     else
-        xlabel(['Time (',handles.unit,')'])
+        [~, main34] = ismember('main34',handles.lang_id); % Unit
+        [~, main23] = ismember('main23',handles.lang_id); % Depth
+        [~, main21] = ismember('main21',handles.lang_id); % Time
+        [~, main15] = ismember('main15',handles.lang_id); % Period
+
+        if handles.unit_type == 0
+            xlabel([lang_var{main34},' (',handles.unit,')'])
+        elseif handles.unit_type == 1
+            xlabel([lang_var{main23},' (',handles.unit,')'])
+        else
+            xlabel([lang_var{main21},' (',handles.unit,')'])
+        end
     end
-    ylabel(['Period (',handles.unit,')'])
+    if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+        ylabel(['Period (',handles.unit,')'])
+    else
+        [~, main61] = ismember('main61',handles.lang_id);
+        ylabel([lang_var{main15},' (',handles.unit,')'])
+    end
     set(gca,'XLim',xlim(:))
 
     % 95% significance contour, levels at -99 (fake) and 1 (95% signif)
@@ -154,6 +198,9 @@ else
             end
         else   % log y axis
             if plot_2d == 1
+                %tt=[datax([1 1])-dt*.5;datax;datax([end end])+dt*.5];
+                %hcoi=fill(tt,log2([period([end 1]) coi period([1 end])]),'w');
+                %set(hcoi,'alphadatamapping','direct','facealpha',.4)
                 plot(datax,log2(1./coi),'w--','LineWidth',2)
             elseif plot_2d == 0
                 if plot_log2pow

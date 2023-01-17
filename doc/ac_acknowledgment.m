@@ -34,18 +34,25 @@
 %   Matthias Sinnesael (Spectral Moments)
 %   Stephen Meyers (TimeOpt/eTimeOpt)
 %   Christopher Torrence, Gilbert Compo (Wavelet)
+%   Aslak Grinsted (Wavelet coherence, wavelet cross spectrum)
+%   Yonggang Liu (Rectified Wavelet Power Spectrum)
 %
 % Acknowledgment:
-%   Feng Cheng, Anne-Christine Da Silva, Hewei Duan, Zheng Gong, Zhengtang Guo, 
-%   Yanan Fang, Marco Franceschi, Daniel R. Franco, Frits Hilgen, Xiaoni Hu, 
-%   Dorothée Husson, Arsenio Muñoz Jiménez, Ilja Kocken, Lee R. Kump, 
-%   Dongyang Liu, Kunyuan Ma, Mathieu Martinez, James Ogg, Paul Olsen, 
-%   Jeffrey Park, J. Fred Read, Chen Shen, Victor A. Piedrahita Velez, 
-%   Chuanyue Wang, Meng Wang, Xu Yao, Qiyan Zhang, Haotian Zhang, 
-%   Yang (Wendy) Zhang, Christian Zeeden
+%   Feng Cheng, Anne-Christine Da Silva, 
+%   Jaume Dinarès-Turell, Hewei Duan, 
+%   Zheng Gong, Zhengtang Guo, Yanan Fang, Marco Franceschi, 
+%   Daniel R. Franco, Frits Hilgen, Xiaoni Hu, 
+%   Dorothée Husson, Arsenio Muñoz Jiménez, 
+%   Ilja Kocken, Lee R. Kump, Dongyang Liu, 
+%   Kunyuan Ma, Mathieu Martinez, James Ogg, Paul Olsen, 
+%   Jeffrey Park, J. Fred Read, Chen Shen, 
+%   Victor A. Piedrahita Velez, 
+%   Chuanyue Wang, Meng Wang, Yujing Wu, 
+%   Deke Xu, Xu Yao, Qiyan Zhang, Haotian Zhang, Haoxun Zhang, 
+%   Xiaoyu Zhang, Yang Zhang, Ze Zhang, Hanyu Zhu, Christian Zeeden
 
 %**************************************************************************
-% Copyright (C) 2017-2021
+% Copyright (C) 2017-2023
 % This program is a free software; you can redistribute it and/or modify it
 % under the terms of the GNU GENERAL PUBLIC LICENSE as published by the 
 % Free Software Foundation < https://www.gnu.org/licenses/ >.

@@ -42,6 +42,16 @@ function [prt_sr,out_depth,out_ecc,out_ep,out_eci,out_ecoco,out_ecocorb,out_norb
 %   updated by Mingsong Li, Dec 25, 2017
 %   updated by Mingsong Li, May 29, 2021
 %
+%% For acycle language version (2.6 and after)
+% language
+% lang_choice = 0;  %
+% handles.main_unit_selection = 0;
+lang_choice = load('ac_lang.txt');
+langdict = readtable('langdict.xlsx');
+lang_id = langdict.ID;
+lang_var = table2cell(langdict(:, 2 + lang_choice));
+[~, ec79] = ismember('ec79',lang_id);
+[~, ec85] = ismember('ec85',lang_id);
 %%
 %f_nyq_target = target(length(target(:,1)),1);  % to estimate sr0 (turnpoint sed.rate)
 % nyquist = 1/(2*dt);             % Nyquist frequency of real data
@@ -91,8 +101,13 @@ corrCI =[];
 sr_p = zeros(m3,6);
 
 % Waitbar
-hwaitbar = waitbar(0,'eCOCO processing ... [CTRL + C to quit]',...    
-   'WindowStyle','modal');
+if lang_choice == 0
+    hwaitbar = waitbar(0,'eCOCO processing ... [CTRL + C to quit]',...    
+       'WindowStyle','modal');
+else
+    hwaitbar = waitbar(0,['eCOCO ',lang_var{ec79}],...    
+       'WindowStyle','modal');
+end
 hwaitbar_find = findobj(hwaitbar,'Type','Patch');
 set(hwaitbar_find,'EdgeColor',[0 0.9 0],'FaceColor',[0 0.9 0]) % changes the color to blue
 setappdata(hwaitbar,'canceling',0)
@@ -168,14 +183,18 @@ orbitn = length(orbit7);
          out_ecocorb(:,i) = out_norbit.*out_ecc(:,i);
      end
  end
- if ishandle(hwaitbar); 
+ if ishandle(hwaitbar)
     close(hwaitbar);
 end
 %    assignin('base','sr_disp',sr_p)
     out_depth = (linspace(data(1,1)+window/2,data(nrow,1)-window/2,m3))';
     
 if abs(plotn) > 0
-    hwarn = warndlg('Wait, eCOCO plot ...');
+    if lang_choice == 0
+        hwarn = warndlg('Wait, eCOCO plot ...');
+    else
+        hwarn = warndlg(lang_var{ec85});
+    end
     if nsim > 1
         [prt_sr] =  ecocoplot(corrCI(:,1),out_depth,out_ecc,out_ep,out_eci,out_ecoco,out_ecocorb,out_norbit,plotn);
     else

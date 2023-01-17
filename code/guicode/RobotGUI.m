@@ -115,7 +115,7 @@ evofft_windowedit = uicontrol('Style','edit','String',num2str(winevofft),...
 panel_wavelet = uipanel(h_robot,'Title','Wavelet','FontSize',12,...
     'Position',[0.5 0.2 0.45 0.17],'BackgroundColor','white');
 wavelet_check = uicontrol('Style','checkbox','String','Yes',...
-    'units','norm','Position',[0.51 0.23 0.1 0.08],'Value',1,...
+    'units','norm','Position',[0.51 0.23 0.1 0.08],'Value',0,...
     'FontSize',11,'Callback',@wavelet_check_Callback,'BackgroundColor','white');
 wavelet_periodt1 = uicontrol('Style','text','String','Period from',...
     'units','norm','Position',[0.61 0.23 0.14 0.055],'Value',1,...
@@ -349,7 +349,7 @@ set(runbt,'CData',imread('menu_robot.jpg'))
             if isdir(ac_pwd)
                 cd(ac_pwd)
             end
-            dlmwrite([name1,ext], dat, 'delimiter', ',', 'precision', 9);
+            dlmwrite([name1,ext], dat, 'delimiter', ' ', 'precision', 9);
             disp(['>>  Saving data. See main window: ', name1,ext])
             d = dir; %get files
             set(listbox_acmain,'String',{d.name},'Value',1) %set string
@@ -470,7 +470,7 @@ set(runbt,'CData',imread('menu_robot.jpg'))
                     if isdir(ac_pwd)
                         cd(ac_pwd)
                     end
-                    dlmwrite([name1,ext], dati, 'delimiter', ',', 'precision', 9);
+                    dlmwrite([name1,ext], dati, 'delimiter', ' ', 'precision', 9);
                     disp(['>>  Saving data. See main window: ', name1,ext])
                     d = dir; %get files
                     set(listbox_acmain,'String',{d.name},'Value',1) %set string
@@ -556,7 +556,7 @@ set(runbt,'CData',imread('menu_robot.jpg'))
                 if isdir(ac_pwd)
                     cd(ac_pwd)
                 end
-                dlmwrite([name1,ext], dat, 'delimiter', ',', 'precision', 9);
+                dlmwrite([name1,ext], dat, 'delimiter', ' ', 'precision', 9);
                 disp(['>>  Saving data. See main window: ', name1,ext])
                 d = dir; %get files
                 set(listbox_acmain,'String',{d.name},'Value',1) %set string
@@ -616,8 +616,8 @@ set(runbt,'CData',imread('menu_robot.jpg'))
                     if isdir(ac_pwd)
                         cd(ac_pwd)
                     end
-                    dlmwrite(name11, data11, 'delimiter', ',', 'precision', 9);
-                    dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9);
+                    dlmwrite(name11, data11, 'delimiter', ' ', 'precision', 9);
+                    dlmwrite(name2, data2, 'delimiter', ' ', 'precision', 9);
                     disp(['>>  Saving data. See main window: ', name11,ext])
                     disp(['>>  Saving data. See main window: ', name2,ext])
                     d = dir; %get files
@@ -674,7 +674,7 @@ set(runbt,'CData',imread('menu_robot.jpg'))
                     if isdir(ac_pwd)
                         cd(ac_pwd)
                     end
-                    dlmwrite(name11, data11, 'delimiter', ',', 'precision', 9);
+                    dlmwrite(name11, data11, 'delimiter', ' ', 'precision', 9);
                     disp(['>>  Saving data. See main window: ', name11,ext])
                     d = dir; %get files
                     set(listbox_acmain,'String',{d.name},'Value',1) %set string

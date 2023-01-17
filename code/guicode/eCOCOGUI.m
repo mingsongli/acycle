@@ -22,7 +22,7 @@ function varargout = eCOCOGUI(varargin)
 
 % Edit the above text to modify the response to help eCOCOGUI
 
-% Last Modified by GUIDE v2.5 06-Nov-2021 23:13:40
+% Last Modified by GUIDE v2.5 07-Jan-2023 19:56:38
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -59,6 +59,7 @@ handles.output = hObject;
 handles.hmain = gcf;
 handles.MonZoom = varargin{1}.MonZoom;
 handles.sortdata = varargin{1}.sortdata;
+handles.val1 = varargin{1}.val1;
 
 %
 set(0,'Units','normalized') % set units as normalized
@@ -132,7 +133,7 @@ set(handles.text16,'position',[0.54,0.7,0.3,0.25])
 set(handles.text17,'position',[0.54,0.24,0.3,0.25])
 set(handles.edit9,'position',[0.237,0.574,0.3,0.4])
 set(handles.edit10,'position',[0.237,0.14,0.3,0.4])
-set(handles.pushbutton1,'position',[0.83,0.118,0.09,0.08]) % Sliding window
+set(handles.pushbuttonOK,'position',[0.83,0.118,0.09,0.08]) % Sliding window
 
 set(handles.pushbutton2,'position',[0.58,0.153,0.23,0.058]) % ecoco plot
 set(handles.pushbutton2,'Visible','off','Enable','off') % 
@@ -143,9 +144,13 @@ set(handles.pushbutton4,'position',[0.82,0.083,0.15,0.229]) %
 % language
 lang_choice = varargin{1}.lang_choice;
 handles.lang_choice = lang_choice;
+lang_id = varargin{1}.lang_id;
+lang_var = varargin{1}.lang_var;
+handles.main_unit_selection = varargin{1}.main_unit_selection;
+
+assignin('base','main_unit_selection',handles.main_unit_selection)
+
 if lang_choice>0
-    lang_id = varargin{1}.lang_id;
-    lang_var = varargin{1}.lang_var;
     [~, locb] = ismember('ec00',lang_id);
     set(gcf,'Name',lang_var{locb})  % GUI title
     [~, locb] = ismember('ec02',lang_id);
@@ -261,7 +266,6 @@ else
 end
 
 %
-
 dat = varargin{1}.current_data;  % data
 %
 diffx = diff(dat(:,1));
@@ -472,7 +476,7 @@ if lang_choice == 0
 else
     s_push_ok = sprintf(ec34);
 end
-set(handles.pushbutton1,'TooltipString',s_push_ok) 
+set(handles.pushbuttonOK,'TooltipString',s_push_ok) 
 %
 %
 red = 0;
@@ -493,6 +497,12 @@ handles.ecocofigdata = figure;
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
 set(gcf,'color','w');
+if lang_choice>0
+    [~, locb] = ismember('main02',lang_id);
+    set(gcf,'Name',lang_var{locb});
+else
+    set(gcf,'Name','Data');
+end
 set(handles.ecocofigdata,'position',[0.01,0.01,0.2,0.9]) % set position
 if handles.flipy == 1
     plot(fliplr(daty),datx,'k')
@@ -513,9 +523,17 @@ handles.ecocofigspectrum = figure;
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
 set(gcf,'color','w');
+if lang_choice>0
+    [~, locb] = ismember('ec09',lang_id);
+    set(gcf,'Name',lang_var{locb});
+else
+    set(gcf,'Name','Periodogram of Data');
+end
 set(handles.ecocofigspectrum,'position',[0.2,0.4,0.2,0.4]) % set position
 dt = (median(diff(datx)));
+
 [p1,f] = periodogram(daty,[],handles.pad,1/dt);  % power of dat
+handles.fmaxdata = max(f);
 % remove AR1 noise
 if red == 0
     theored = p1;
@@ -558,16 +576,16 @@ if lang_choice == 0
 else
     xlabel(ax2,main14);ylabel(ax2,main46);title(ec36)
 end
-xlim([0 max(f)])
+%xlim([0 max(f)])
+xlim([0, handles.fmaxdata])
 
 handles.fmaxdata = max(f);
 set(handles.edit4, 'String', num2str(max(f)))
-if lang_choice>0
-    % language
-    handles.lang_choice = lang_choice;
-    handles.lang_id = lang_id;
-    handles.lang_var = lang_var;
-end
+
+handles.lang_choice = lang_choice;
+handles.lang_id = lang_id;
+handles.lang_var = lang_var;
+assignin('base','fmaxdata',handles.fmaxdata)
 % Update handles structure
 guidata(hObject, handles);
 
@@ -702,6 +720,12 @@ if get(hObject,'Value')
         set(0,'Units','normalized') % set units as normalized
         set(gcf,'units','norm') % set location
         set(gcf,'color','w');
+        if lang_choice>0
+            [~, locb] = ismember('main02',lang_id);
+            set(gcf,'Name',lang_var{locb});
+        else
+            set(gcf,'Name','Data');
+        end
         set(handles.ecocofigdata,'position',[0.01,0.01,0.2,0.9]) % set position
         if handles.flipy == 1
             plot(fliplr(dat(:,2)),dat(:,1),'k')
@@ -742,6 +766,13 @@ else
         set(0,'Units','normalized') % set units as normalized
         set(gcf,'units','norm') % set location
         set(gcf,'color','w');
+        
+        if lang_choice>0
+            [~, locb] = ismember('main02',lang_id);
+            set(gcf,'Name',lang_var{locb});
+        else
+            set(gcf,'Name','Data');
+        end
         set(handles.ecocofigdata,'position',[0.01,0.01,0.2,0.9]) % set position
         if handles.flipy == 1
             plot(fliplr(dat(:,2)),dat(:,1),'k')
@@ -795,6 +826,12 @@ catch
     set(0,'Units','normalized') % set units as normalized
     set(gcf,'units','norm') % set location
     set(gcf,'color','w');
+        if lang_choice>0
+            [~, locb] = ismember('main02',lang_id);
+            set(gcf,'Name',lang_var{locb});
+        else
+            set(gcf,'Name','Data');
+        end
     set(handles.ecocofigdata,'position',[0.01,0.01,0.2,0.9]) % set position
     if handles.flipy == 1
         plot(fliplr(dat(:,2)),dat(:,1),'k')
@@ -970,6 +1007,7 @@ function edit4_Callback(hObject, eventdata, handles)
 %        str2double(get(hObject,'String')) returns contents of edit4 as a double
 %
 handles.fmaxdata = str2double(get(hObject,'String'));
+
 if get(handles.checkbox4,'Value')
     red = get(handles.popupmenu3,'Value');
 else
@@ -978,8 +1016,8 @@ end
 dat = handles.dat;
 datx = dat(:,1);
 daty = dat(:,2);
+
 try figure(handles.ecocofigspectrum)
-    handles.fmaxdata = str2double(get(hObject,'String'));
     subplot(2,1,1);xlim([0, handles.fmaxdata])
     subplot(2,1,2);xlim([0, handles.fmaxdata])
 catch
@@ -987,6 +1025,13 @@ catch
     set(0,'Units','normalized') % set units as normalized
     set(gcf,'units','norm') % set location
     set(gcf,'color','w');
+    if handles.lang_choice>0
+        [~, locb] = ismember('ec09',handles.lang_id);
+        lang_var = handles.lang_var;
+        set(gcf,'Name',lang_var{locb});
+    else
+        set(gcf,'Name','Periodogram of Data');
+    end
     set(handles.ecocofigspectrum,'position',[0.2,0.4,0.2,0.4]) % set position
     dt = (median(diff(datx)));
     [p1,f] = periodogram(daty,[],handles.pad,1/dt);  % power of dat
@@ -1039,8 +1084,8 @@ catch
     
     %set(ax2, 'YScale', 'log')
     xlim([0, handles.fmaxdata])
-    
 end
+assignin('base','fmaxdata',handles.fmaxdata)
 % Update handles structure
 guidata(hObject, handles);
 
@@ -1083,6 +1128,13 @@ if handles.red > 0
     set(0,'Units','normalized') % set units as normalized
     set(gcf,'units','norm') % set location
     set(gcf,'color','w');
+    if handles.lang_choice>0
+        [~, locb] = ismember('ec09',handles.lang_id);
+        lang_var = handles.lang_var;
+        set(gcf,'Name',lang_var{locb});
+    else
+        set(gcf,'Name','Periodogram of Data');
+    end
     set(handles.ecocofigspectrum,'position',[0.2,0.4,0.2,0.4]) % set position
     dt = (median(diff(datx)));
     [p1,f] = periodogram(daty,[],handles.pad,1/dt);  % power of dat
@@ -1145,6 +1197,13 @@ else
     set(0,'Units','normalized') % set units as normalized
     set(gcf,'units','norm') % set location
     set(gcf,'color','w');
+    if handles.lang_choice>0
+        [~, locb] = ismember('ec09',handles.lang_id);
+        lang_var = handles.lang_var;
+        set(gcf,'Name',lang_var{locb});
+    else
+        set(gcf,'Name','Periodogram of Data');
+    end
     set(handles.ecocofigspectrum,'position',[0.2,0.4,0.2,0.4]) % set position
     dt = (median(diff(datx)));
     [p1,f] = periodogram(daty,[],handles.pad,1/dt);  % power of dat
@@ -1230,6 +1289,13 @@ if handles.red > 0
     set(0,'Units','normalized') % set units as normalized
     set(gcf,'units','norm') % set location
     set(gcf,'color','w');
+    if handles.lang_choice>0
+        [~, locb] = ismember('ec09',handles.lang_id);
+        lang_var = handles.lang_var;
+        set(gcf,'Name',lang_var{locb});
+    else
+        set(gcf,'Name','Periodogram of Data');
+    end
     set(handles.ecocofigspectrum,'position',[0.2,0.4,0.2,0.4]) % set position
     dt = (median(diff(datx)));
     [p1,f] = periodogram(daty,[],handles.pad,1/dt);  % power of dat
@@ -1496,6 +1562,12 @@ catch
     set(0,'Units','normalized') % set units as normalized
     set(gcf,'units','norm') % set location
     set(gcf,'color','w');
+        if lang_choice>0
+            [~, locb] = ismember('main02',lang_id);
+            set(gcf,'Name',lang_var{locb});
+        else
+            set(gcf,'Name','Data');
+        end
     set(handles.ecocofigdata,'position',[0.01,0.01,0.2,0.9]) % set position
     if handles.flipy == 1
         plot(fliplr(dat(:,2)),dat(:,1),'k')
@@ -1576,6 +1648,12 @@ catch
     set(0,'Units','normalized') % set units as normalized
     set(gcf,'units','norm') % set location
     set(gcf,'color','w');
+        if lang_choice>0
+            [~, locb] = ismember('main02',lang_id);
+            set(gcf,'Name',lang_var{locb});
+        else
+            set(gcf,'Name','Data');
+        end
     set(handles.ecocofigdata,'position',[0.01,0.01,0.2,0.9]) % set position
     if handles.flipy == 1
         plot(fliplr(dat(:,2)),dat(:,1),'k')
@@ -1692,9 +1770,9 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on button press in pushbutton1.
-function pushbutton1_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton1 (see GCBO)
+% --- Executes on button press in pushbuttonOK.
+function pushbuttonOK_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbuttonOK (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 data = handles.dat;
@@ -1782,6 +1860,7 @@ if handles.lang_choice==0
 else
     disp(ec40)
 end
+
 if handles.ecocoS == 0
     % COCO model
     tic
@@ -2360,12 +2439,13 @@ if ~isempty(answer)
     srn_map(:,2) = (sr1+handles.srstep*(srn_best(1,:)-1))';
     srn_map(:,1) = handles.out_depth;
     CDac_pwd
-    dlmwrite(name1, srn_map, 'delimiter', ',', 'precision', 9);
+    dlmwrite(name1, srn_map, 'delimiter', ' ', 'precision', 9);
     if handles.lang_choice==0 
         disp(['>> Sedimentation rate file: ',name1])
     else
         disp([ec77,name1])
     end
+
     % Log name
     log_name = [name0,'-log',handles.ext]; 
     if exist([pwd,handles.slash_v,log_name])

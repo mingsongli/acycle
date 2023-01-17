@@ -60,6 +60,96 @@ h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
 handles.MonZoom = varargin{1}.MonZoom;
 handles.sortdata = varargin{1}.sortdata;
+handles.val1 = varargin{1}.val1;
+% language
+lang_choice = varargin{1}.lang_choice;
+handles.lang_choice = lang_choice;
+lang_id = varargin{1}.lang_id;
+lang_var = varargin{1}.lang_var;
+handles.lang_id = lang_id;
+handles.lang_var = lang_var;
+handles.main_unit_selection = varargin{1}.main_unit_selection;
+
+
+if handles.lang_choice == 0
+    set(gcf,'Name','Acycle: Evolutionary Spectral Analysis')
+else
+    [~, menu108] = ismember('menu108',lang_id);
+    set(gcf,'Name',['Acycle: ',lang_var{menu108}])
+end
+% language
+if handles.lang_choice > 0
+    [~, main49] = ismember('main49',handles.lang_id);
+    set(handles.text5,'String',lang_var{main49})
+    
+    [~, evofft01] = ismember('evofft01',handles.lang_id);
+    set(handles.uipanel1,'Title',lang_var{evofft01})
+    
+    [~, evofft02] = ismember('evofft02',handles.lang_id);
+    set(handles.uipanel2,'Title',lang_var{evofft02})
+    
+    [~, evofft03] = ismember('evofft03',handles.lang_id);
+    set(handles.text6,'String',lang_var{evofft03})
+    
+    [~, evofft04] = ismember('evofft04',handles.lang_id);
+    set(handles.evofft_Nyquist_radiobutton,'String',lang_var{evofft04})
+    
+    [~, spectral14] = ismember('spectral14',handles.lang_id);
+    set(handles.radiobutton2,'String',lang_var{spectral14})
+    
+    [~, main32] = ismember('main32',handles.lang_id);
+    set(handles.uipanel5,'Title',lang_var{main32})
+    
+    [~, main33] = ismember('main33',handles.lang_id);
+    set(handles.pushbutton8,'String',lang_var{main33})
+    set(handles.evofft_tips_win_pushbutton,'String',lang_var{main33})
+    
+    [~, main34] = ismember('main34',handles.lang_id);
+    set(handles.text7,'String',lang_var{main34})
+    
+    [~, main07] = ismember('main07',handles.lang_id);
+    set(handles.uipanel3,'Title',lang_var{main07})
+    
+    [~, evofft05] = ismember('evofft05',handles.lang_id);
+    set(handles.checkbox8,'String',lang_var{evofft05})
+    
+    [~, evofft06] = ismember('evofft06',handles.lang_id);
+    set(handles.checkbox7,'String',lang_var{evofft06})
+    
+    [~, evofft07] = ismember('evofft07',handles.lang_id);
+    set(handles.uipanel6,'Title',lang_var{evofft07})
+    
+    [~, evofft08] = ismember('evofft08',handles.lang_id);
+    set(handles.rotation,'String',lang_var{evofft08})
+    
+    [~, evofft09] = ismember('evofft09',handles.lang_id);
+    set(handles.checkbox2,'String',lang_var{evofft09})
+    
+    [~, main10] = ismember('main10',handles.lang_id);
+    set(handles.checkbox3,'String',lang_var{main10})
+    
+    [~, evofft10] = ismember('evofft10',handles.lang_id);
+    set(handles.checkbox4,'String',lang_var{evofft10})
+    
+    [~, evofft11] = ismember('evofft11',handles.lang_id);
+    set(handles.checkbox5,'String',lang_var{evofft11})
+        
+    [~, main43] = ismember('main43',handles.lang_id);
+    set(handles.checkbox6,'String',['x ',lang_var{main43}])
+    
+    [~, main50] = ismember('main50',handles.lang_id);
+    set(handles.uipanel10,'Title',lang_var{main50})
+    
+    [~, evofft12] = ismember('evofft12',handles.lang_id);
+    set(handles.text8,'String',lang_var{evofft12})
+    
+    [~, main01] = ismember('main01',handles.lang_id);
+    set(handles.checkbox9,'String',lang_var{main01})
+    
+    [~, main00] = ismember('main00',handles.lang_id);
+    set(handles.evofft_ok_pushbutton,'String',lang_var{main00})
+end
+
 
 if ismac
     set(gcf,'position',[0.45,0.4,0.4,0.35]* handles.MonZoom) % set position
@@ -110,7 +200,6 @@ set(handles.rotation,'position',[0.06,0.127,0.881,0.365])
 % Choose default command line output for evofftGUI
 handles.output = hObject;
 
-set(gcf,'Name','Acycle: Evolutionary Spectral Analysis')
 data_s = varargin{1}.current_data;
 handles.unit = varargin{1}.unit;
 handles.unit_type = varargin{1}.unit_type;
@@ -170,9 +259,16 @@ set(handles.popupmenu3, 'Value',1);
 set(handles.edit9, 'String', '');
 set(handles.checkbox9, 'Value',0);
 
+
 diffx = diff(data_s(:,1));
 if max(diffx) - min(diffx) > 10*eps('single')
-    hwarn = warndlg('Not equally spaced data. Interpolated using mean sampling rate!');
+    
+    if handles.lang_choice == 0
+        hwarn = warndlg('Not equally spaced data. Interpolated using mean sampling rate!');
+    else
+        [~, evofft14] = ismember('evofft14',handles.lang_id);
+        hwarn = warndlg(lang_var{evofft14});
+    end
     interpolate_rate = mean(diffx);
     handles.current_data = interpolate(data_s,interpolate_rate);
     %set(0,'Units','normalized') % set units as normalized
@@ -198,6 +294,368 @@ handles.output = 0;
 varargout{1} = handles.output;
 
 guidata(hObject, handles);
+
+
+% --- Executes on button press in evofft_ok_pushbutton.
+function evofft_ok_pushbutton_Callback(hObject, eventdata, handles)
+% hObject    handle to evofft_ok_pushbutton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% handles = findobj('Tag','AutoC_main_figure');
+% lang
+lang_var = handles.lang_var;
+
+data =  handles.current_data;
+dataraw = data;
+window = handles.window;
+step = str2double(get(handles.edit_step,'String'));
+fmax_select = get(handles.evofft_Nyquist_radiobutton,'Value');
+freq_log = get(handles.checkbox5,'Value');
+method = handles.method;
+MTMred = get(handles.checkbox7,'Value');
+plotseries = get(handles.checkbox8,'Value');
+fmin = str2double(get(handles.edit7,'String'));
+unit = get(handles.edit8,'String');
+filename =  handles.filename;
+[~,dat_name,ext] = fileparts(filename);
+norm = handles.normal;
+if fmax_select == 1
+    fmax = handles.nyquist;
+else
+    fmax = str2double(get(handles.evofft_fmax_edit,'String'));
+end
+    
+if handles.time_0pad == 1
+    % restore time/depth
+    data = zeropad2(data,window,handles.padtype);
+else
+    data(:,2) = data(:,2) - mean(data(:,2));
+end
+% Evofft Plot
+if strcmp(method,'Periodogram')
+    [s,x_grid,y_grid]=evoperiodogram(data,window,step,fmin,handles.nyquist,norm);
+elseif strcmp(method,'Lomb-Scargle periodogram')
+    [s,x_grid,y_grid]=evoplomb(data,window,step,fmin,handles.nyquist,norm);
+elseif strcmp(method,'Multi-taper method')
+    [s,x_grid,y_grid] = evopmtm(data,window,step,fmin,handles.nyquist,norm);
+elseif strcmp(method,'Fast Fourier transform (MatLab)')
+    fmin = str2double(get(handles.edit7,'String'));
+    [s,x_grid,y_grid]=evofftML(data,window,step,fmin,handles.nyquist,norm);
+elseif strcmp(method,'Fast Fourier transform (LAH)')
+    dt = data(2,1)-data(1,1);
+    %[s,x_grid,y_grid]=evofftLAH(data,window,step,dt,fmin,fmax,norm);
+    [s,x_grid,y_grid]=evofft(data,window,step,dt,fmin,handles.nyquist,norm);
+end
+fmingrid = x_grid(2) - x_grid(1);
+handles.fmingrid = fmingrid;
+
+assignin('base','s',s);
+assignin('base','x',x_grid);
+assignin('base','y',y_grid);
+evofftfig = figure;
+set(gcf,'Color', 'white')
+
+[~, spectral30] = ismember('spectral30',handles.lang_id); % power
+[~, spectral06] = ismember('spectral06',handles.lang_id); % Robust AR(1)
+[~, main40] = ismember('main40',handles.lang_id); % median
+[~, main14] = ismember('main14',handles.lang_id); % Frequency
+[~, main34] = ismember('main34',handles.lang_id); % Unit
+[~, main23] = ismember('main23',handles.lang_id); % Depth
+[~, main21] = ismember('main21',handles.lang_id); % Time
+[~, menu108] = ismember('menu108',handles.lang_id); % 
+[~, main41] = ismember('main41',handles.lang_id); % Window
+[~, main32] = ismember('main32',handles.lang_id); % Step
+
+if handles.plot_2d == 1
+    if and(MTMred == 1, plotseries ==0)
+        % show MTM red noise, no data series is shown
+        dt = median(diff(data(:,1)));
+        nfft = length(data(:,1));
+        [~, ~,~,redconfML96]=redconfML(data(:,2),dt,2,5*nfft,2,0.25,fmax,0);
+        
+        subplot(4,1,1)
+        if handles.plot_log == 1
+            % log power
+            semilogy(redconfML96(:,1),redconfML96(:,2),'k')
+            hold on;
+            semilogy(redconfML96(:,1),redconfML96(:,3),'m-.');
+            semilogy(redconfML96(:,1),redconfML96(:,5),'r--','LineWidth',2);
+            semilogy(redconfML96(:,1),redconfML96(:,6),'b-.');
+        else
+            plot(redconfML96(:,1),redconfML96(:,2),'k')
+            hold on; 
+            plot(redconfML96(:,1),redconfML96(:,3),'m-.');
+            plot(redconfML96(:,1),redconfML96(:,5),'r--','LineWidth',2);
+            plot(redconfML96(:,1),redconfML96(:,6),'b-.');
+            ylabel(lang_var{spectral30})
+            legend(lang_var{spectral30},[lang_var{spectral06},' ',lang_var{main40}],...
+            [lang_var{spectral06},' 95%'],[lang_var{spectral06},' 99%'])
+        end
+        xlim([fmin fmax])
+        if freq_log == 1;
+            xlim([fmingrid fmax])
+            set(gca, 'XScale', 'log')
+        end
+        
+        subplot(4,1,[2 3 4])
+        if handles.plot_log == 0;
+            pcolor(x_grid,y_grid,s)
+        else
+            s = log10(s);
+            pcolor(x_grid(2:end),y_grid,s(:,2:end))
+        end
+        shading interp
+        xlim([fmin fmax])
+        
+        xlabel([lang_var{main14},' (1/',unit,')'])
+        
+        if handles.flipy == 1;
+            set(gca,'Ydir','reverse')
+        end
+        if freq_log == 1;
+            xlim([fmingrid fmax])
+            set(gca, 'XScale', 'log')
+        end
+        
+    elseif and(MTMred == 1, plotseries == 1)
+        % working
+        dt = median(diff(dataraw(:,1)));
+        nfft = length(dataraw(:,1));
+        [~, ~,~,redconfML96]=redconfML(data(:,2),dt,2,5*nfft,2,0.25,fmax,0);
+        subplot(4,4,[2 3 4])
+        if handles.plot_log == 1
+            % log power
+            semilogy(redconfML96(:,1),redconfML96(:,2),'k')
+            hold on; 
+            semilogy(redconfML96(:,1),redconfML96(:,3),'m-.');
+            semilogy(redconfML96(:,1),redconfML96(:,5),'r--','LineWidth',2);
+            semilogy(redconfML96(:,1),redconfML96(:,6),'b-.');
+        elseif handles.plot_log == 0
+            plot(redconfML96(:,1),redconfML96(:,2),'k')
+            hold on; 
+            plot(redconfML96(:,1),redconfML96(:,3),'m-.');
+            plot(redconfML96(:,1),redconfML96(:,5),'r--','LineWidth',2);
+            plot(redconfML96(:,1),redconfML96(:,6),'b-.');
+            ylabel(lang_var{spectral30})
+            legend(lang_var{spectral30},[lang_var{spectral06},' ',lang_var{main40}],...
+            [lang_var{spectral06},' 95%'],[lang_var{spectral06},' 99%'])
+        end
+        xlim([fmin fmax])
+        if freq_log == 1;
+            xlim([fmingrid fmax])
+            set(gca, 'XScale', 'log')
+        end
+        
+        subplot(4,4,[5 9 13])
+        plot(dataraw(:,2),dataraw(:,1), 'k')
+        ylim([dataraw(1,1) dataraw(end,1)])
+        xlim([min(dataraw(:,2)) max(dataraw(:,2))])
+        if handles.flipy == 1;
+            set(gca,'Ydir','reverse')
+        end
+        
+        subplot(4,4,[6,7,8,10,11,12,14,15,16])
+        if handles.plot_log == 0;
+            pcolor(x_grid,y_grid,s)
+        else
+            s = log10(s);
+            pcolor(x_grid,y_grid,s)
+            %pcolor(x_grid(2:end),y_grid,s(:,2:end))
+        end
+        shading interp
+        ylim([dataraw(1,1) dataraw(end,1)])
+        xlim([fmin fmax])
+        xlabel([lang_var{main14},' (1/',unit,')'])
+        if handles.flipy == 1;
+            set(gca,'Ydir','reverse')
+        end
+        if freq_log == 1;
+            xlim([fmingrid fmax])
+            set(gca, 'XScale', 'log')
+        end
+        
+    elseif and(MTMred == 0, plotseries == 1)
+        % done...
+        subplot(1,4,1)
+        plot(dataraw(:,2),dataraw(:,1), 'k')
+        ylim([dataraw(1,1) dataraw(end,1)])
+        xlim([min(dataraw(:,2)) max(dataraw(:,2))])
+        if handles.flipy == 1;
+            set(gca,'Ydir','reverse')
+        end
+        
+        if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+            if handles.unit_type == 0
+                ylabel(['Unit (',handles.unit,')'])
+            elseif handles.unit_type == 1
+                ylabel(['Depth (',handles.unit,')'])
+            else
+                ylabel(['Time (',handles.unit,')'])
+            end
+        else
+            if handles.unit_type == 0
+                ylabel([lang_var{main34},' (',handles.unit,')'])
+            elseif handles.unit_type == 1
+                ylabel([lang_var{main23},' (',handles.unit,')'])
+            else
+                ylabel([lang_var{main21},' (',handles.unit,')'])
+            end
+        end
+
+        subplot(1,4,[2 3 4])
+        if handles.plot_log == 0;
+            pcolor(x_grid,y_grid,s)
+        else
+            s = log10(s);
+            pcolor(x_grid(2:end),y_grid,s(:,2:end))
+        end
+        shading interp
+        xlabel([lang_var{main14},' (1/',unit,')'])
+        xlim([fmin fmax])
+        ylim([dataraw(1,1) dataraw(end,1)])
+        if handles.flipy == 1;
+            set(gca,'Ydir','reverse')
+        end
+        if freq_log == 1;
+            xlim([fmingrid fmax])
+            set(gca, 'XScale', 'log')
+        end
+        
+    elseif and(MTMred == 0, plotseries == 0)
+        % done
+        if handles.plot_log == 0;
+            pcolor(x_grid,y_grid,s)
+        else
+            s = log10(s);
+            pcolor(x_grid(2:end),y_grid,s(:,2:end))
+        end
+        shading interp
+        xlabel([lang_var{main14},' (1/',unit,')'])
+        xlim([fmin fmax])
+        if handles.flipy == 1;
+            set(gca,'Ydir','reverse')
+        end
+        if freq_log == 1;
+            xlim([fmingrid fmax])
+            set(gca, 'XScale', 'log')
+        end
+    end
+    
+    if plotseries == 0
+        if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+            if handles.unit_type == 0
+                ylabel(['Unit (',handles.unit,')'])
+            elseif handles.unit_type == 1
+                ylabel(['Depth (',handles.unit,')'])
+            else
+                ylabel(['Time (',handles.unit,')'])
+            end
+        else
+            if handles.unit_type == 0
+                ylabel([lang_var{main34},' (',handles.unit,')'])
+            elseif handles.unit_type == 1
+                ylabel([lang_var{main23},' (',handles.unit,')'])
+            else
+                ylabel([lang_var{main21},' (',handles.unit,')'])
+            end
+        end
+    else
+        if MTMred == 0
+            subplot(1,4,[2 3 4])
+            set(gca,'YTickLabel',[]);
+        else
+            subplot(4,4,[6,7,8,10,11,12,14,15,16])
+            set(gca,'YTickLabel',[]);
+        end
+    end
+    
+    % set
+    if MTMred == 0
+        title([method,'; ',lang_var{main41},' = ',num2str(window),' ',unit,'; ',lang_var{main32},' = ',num2str(step),' ', unit])
+    else
+        if plotseries == 0
+            subplot(4,1,1)
+            title([method,'; ',lang_var{main41},' = ',num2str(window),' ',unit,'; ',lang_var{main32},' = ',num2str(step),' ', unit])
+        else
+            subplot(4,4,[2 3 4])
+            title([method,'; ',lang_var{main41},' = ',num2str(window),' ',unit,'; ',lang_var{main32},' = ',num2str(step),' ', unit])
+        end
+        set(gca,'XTickLabel',[]);
+    end
+
+    
+else
+    % 3D
+    if handles.plot_log == 1;
+        s = log10(s); 
+        handles.rotate = get(handles.rotation,'Value');
+        surf(x_grid(2:end),y_grid,s(:,2:end))
+    else
+        handles.rotate = get(handles.rotation,'Value');
+        surf(x_grid,y_grid,s)
+    end
+    shading interp
+    xlabel([lang_var{main14},' (1/',unit,')'])
+    xlim([fmin fmax])
+    if handles.flipy == 1
+        set(gca,'Ydir','reverse')
+    end
+    if freq_log == 1
+        xlim([fmingrid fmax])
+        set(gca, 'XScale', 'log')
+    end
+end
+
+    %colormap(jet)
+    if isempty(handles.colorgrid)
+        % no grid
+        setcolor = handles.color;
+    else
+        setcolor = [handles.color,'(',round(num2str(handles.colorgrid)),')'];
+    end
+    
+    try colormap(setcolor)
+    catch
+        colormap default
+    end
+    
+    shading interp
+    
+    set(gcf,'Name',[dat_name,ext,': ',lang_var{menu108}])
+    
+
+    if handles.plot_2d == 1
+        set(gca,'XMinorTick','on','YMinorTick','on')
+        set(gca, 'TickDir', 'out')
+    else
+       set(gca, 'TickDir', 'out')
+       if handles.rotate == 0
+            view(10,70);
+        else
+            for i = 1: 370
+                view(i,70); 
+                pause(0.05); 
+            end
+       end
+    end
+handles.evofftfig = evofftfig;
+%
+if get(handles.checkbox9,'value')
+    CDac_pwd
+    filename = handles.filename;
+    name1 = [filename,'-evofft-s','.txt'];
+    name2 = [filename,'-evofft-freq','.txt'];
+    name3 = [filename,'-evofft-time','.txt'];
+    dlmwrite(name1, s, 'delimiter', ' ', 'precision', 9); 
+    dlmwrite(name2, x_grid', 'delimiter', ' ', 'precision', 9); 
+    dlmwrite(name3, y_grid', 'delimiter', ' ', 'precision', 9); 
+    d = dir; %get files
+    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+    refreshcolor;
+    cd(pre_dirML); % return to matlab view folder
+end
+guidata(hObject, handles);
+
 
 % --------------------------------------------------------------------
 function checkbox2_Callback(hObject, eventdata, handles)
@@ -598,24 +1056,29 @@ function radiobutton2_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of radiobutton2
-% val = get(handles.radiobutton2,'Value')
-% if val > 0
-%     set(handles.evofft_Nyquist_radiobutton,'Value',0)
-%     set(handles.radiobutton2, 'Value', 1);
-%     handles.evofft_fmax = str2double(get(handles.evofft_fmax_edit, 'String'));
-% else 
-%     set(handles.evofft_Nyquist_radiobutton,'Value',0)
-%     handles.evofft_fmax = handles.nyquist;
-% end
+%Hint: get(hObject,'Value') returns toggle state of radiobutton2
+val = get(handles.radiobutton2,'Value');
+if val > 0
+    set(handles.evofft_Nyquist_radiobutton,'Value',0)
+    set(handles.radiobutton2, 'Value', 1);
+    handles.evofft_fmax = str2double(get(handles.evofft_fmax_edit, 'String'));
+else 
+    set(handles.evofft_Nyquist_radiobutton,'Value',0)
+    handles.evofft_fmax = handles.nyquist;
+end
 
 % --- Executes on button press in evofft_tips_win_pushbutton.
 function evofft_tips_win_pushbutton_Callback(hObject, eventdata, handles)
 % hObject    handle to evofft_tips_win_pushbutton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-evofft_tips_win = 'Tips: window  << total data length; window ~ = 1 - 1.5 x aimed cycle. i.e. 500 kyr for a 400 kyr cycles';
-warndlg(evofft_tips_win,'Tips: window length')
+lang_var = handles.lang_var;
+
+[~, evofft16] = ismember('evofft16',handles.lang_id);
+[~, evofft15] = ismember('evofft15',handles.lang_id);
+
+warndlg(lang_var{evofft16},lang_var{evofft15})
+
 
 
 % --- Executes during object creation, after setting all properties.
@@ -628,325 +1091,6 @@ guidata(hObject, handles);
 function evofft_nyquist_text_Callback(hObject, eventdata, handles)
 evofft_nyquist_text = get(hObject, 'String');
 handles.evofft_nyquist_text = evofft_nyquist_text; % This overwrites the object's handle!
-guidata(hObject, handles);
-
-% --- Executes on button press in evofft_ok_pushbutton.
-function evofft_ok_pushbutton_Callback(hObject, eventdata, handles)
-% hObject    handle to evofft_ok_pushbutton (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-% handles = findobj('Tag','AutoC_main_figure');
-data =  handles.current_data;
-dataraw = data;
-window = handles.window;
-step = str2double(get(handles.edit_step,'String'));
-fmax_select = get(handles.evofft_Nyquist_radiobutton,'Value');
-freq_log = get(handles.checkbox5,'Value');
-method = handles.method;
-MTMred = get(handles.checkbox7,'Value');
-plotseries = get(handles.checkbox8,'Value');
-fmin = str2double(get(handles.edit7,'String'));
-unit = get(handles.edit8,'String');
-filename =  handles.filename;
-[~,dat_name,ext] = fileparts(filename);
-norm = handles.normal;
-if fmax_select == 1
-    fmax = handles.nyquist;
-else
-    fmax = str2double(get(handles.evofft_fmax_edit,'String'));
-end
-    
-if handles.time_0pad == 1
-    % restore time/depth
-    data = zeropad2(data,window,handles.padtype);
-else
-    data(:,2) = data(:,2) - mean(data(:,2));
-end
-% Evofft Plot
-if strcmp(method,'Periodogram')
-    [s,x_grid,y_grid]=evoperiodogram(data,window,step,fmin,handles.nyquist,norm);
-elseif strcmp(method,'Lomb-Scargle periodogram')
-    [s,x_grid,y_grid]=evoplomb(data,window,step,fmin,handles.nyquist,norm);
-elseif strcmp(method,'Multi-taper method')
-    [s,x_grid,y_grid] = evopmtm(data,window,step,fmin,handles.nyquist,norm);
-elseif strcmp(method,'Fast Fourier transform (MatLab)')
-    fmin = str2double(get(handles.edit7,'String'));
-    [s,x_grid,y_grid]=evofftML(data,window,step,fmin,handles.nyquist,norm);
-elseif strcmp(method,'Fast Fourier transform (LAH)')
-    dt = data(2,1)-data(1,1);
-    %[s,x_grid,y_grid]=evofftLAH(data,window,step,dt,fmin,fmax,norm);
-    [s,x_grid,y_grid]=evofft(data,window,step,dt,fmin,handles.nyquist,norm);
-end
-fmingrid = x_grid(2) - x_grid(1);
-handles.fmingrid = fmingrid;
-
-assignin('base','s',s);
-assignin('base','x',x_grid);
-assignin('base','y',y_grid);
-evofftfig = figure;
-set(gcf,'Color', 'white')
-
-if handles.plot_2d == 1
-    if and(MTMred == 1, plotseries ==0)
-        % show MTM red noise, no data series is shown
-        dt = median(diff(data(:,1)));
-        nfft = length(data(:,1));
-        [~, ~,~,redconfML96]=redconfML(data(:,2),dt,2,5*nfft,2,0.25,fmax,0);
-        
-        subplot(4,1,1)
-        if handles.plot_log == 1
-            % log power
-            semilogy(redconfML96(:,1),redconfML96(:,2),'k')
-            hold on;
-            semilogy(redconfML96(:,1),redconfML96(:,3),'m-.');
-            semilogy(redconfML96(:,1),redconfML96(:,5),'r--','LineWidth',2);
-            semilogy(redconfML96(:,1),redconfML96(:,6),'b-.');
-        else
-            plot(redconfML96(:,1),redconfML96(:,2),'k')
-            hold on; 
-            plot(redconfML96(:,1),redconfML96(:,3),'m-.');
-            plot(redconfML96(:,1),redconfML96(:,5),'r--','LineWidth',2);
-            plot(redconfML96(:,1),redconfML96(:,6),'b-.');
-            ylabel('Power')
-            legend('Power','Robust AR(1) median','Robust AR(1) 95%','Robust AR(1) 99%')
-        end
-        xlim([fmin fmax])
-        if freq_log == 1;
-            xlim([fmingrid fmax])
-            set(gca, 'XScale', 'log')
-        end
-        
-        subplot(4,1,[2 3 4])
-        if handles.plot_log == 0;
-            pcolor(x_grid,y_grid,s)
-        else
-            s = log10(s);
-            pcolor(x_grid(2:end),y_grid,s(:,2:end))
-        end
-        shading interp
-        xlim([fmin fmax])
-        xlabel(['Frequency (cycles/',unit,')'])
-        if handles.flipy == 1;
-            set(gca,'Ydir','reverse')
-        end
-        if freq_log == 1;
-            xlim([fmingrid fmax])
-            set(gca, 'XScale', 'log')
-        end
-        
-    elseif and(MTMred == 1, plotseries == 1)
-        % working
-        dt = median(diff(dataraw(:,1)));
-        nfft = length(dataraw(:,1));
-        [~, ~,~,redconfML96]=redconfML(data(:,2),dt,2,5*nfft,2,0.25,fmax,0);
-        subplot(4,4,[2 3 4])
-        if handles.plot_log == 1
-            % log power
-            semilogy(redconfML96(:,1),redconfML96(:,2),'k')
-            hold on; 
-            semilogy(redconfML96(:,1),redconfML96(:,3),'m-.');
-            semilogy(redconfML96(:,1),redconfML96(:,5),'r--','LineWidth',2);
-            semilogy(redconfML96(:,1),redconfML96(:,6),'b-.');
-        elseif handles.plot_log == 0
-            plot(redconfML96(:,1),redconfML96(:,2),'k')
-            hold on; 
-            plot(redconfML96(:,1),redconfML96(:,3),'m-.');
-            plot(redconfML96(:,1),redconfML96(:,5),'r--','LineWidth',2);
-            plot(redconfML96(:,1),redconfML96(:,6),'b-.');
-            ylabel('Power')
-            legend('Power','Robust AR(1) median','Robust AR(1) 95%','Robust AR(1) 99%')
-        end
-        xlim([fmin fmax])
-        if freq_log == 1;
-            xlim([fmingrid fmax])
-            set(gca, 'XScale', 'log')
-        end
-        
-        subplot(4,4,[5 9 13])
-        plot(dataraw(:,2),dataraw(:,1), 'k')
-        ylim([dataraw(1,1) dataraw(end,1)])
-        xlim([min(dataraw(:,2)) max(dataraw(:,2))])
-        if handles.flipy == 1;
-            set(gca,'Ydir','reverse')
-        end
-        
-        subplot(4,4,[6,7,8,10,11,12,14,15,16])
-        if handles.plot_log == 0;
-            pcolor(x_grid,y_grid,s)
-        else
-            s = log10(s);
-            pcolor(x_grid,y_grid,s)
-            %pcolor(x_grid(2:end),y_grid,s(:,2:end))
-        end
-        shading interp
-        ylim([dataraw(1,1) dataraw(end,1)])
-        xlim([fmin fmax])
-        xlabel(['Frequency (cycles/',unit,')'])
-        if handles.flipy == 1;
-            set(gca,'Ydir','reverse')
-        end
-        if freq_log == 1;
-            xlim([fmingrid fmax])
-            set(gca, 'XScale', 'log')
-        end
-        
-    elseif and(MTMred == 0, plotseries == 1)
-        % done...
-        subplot(1,4,1)
-        plot(dataraw(:,2),dataraw(:,1), 'k')
-        ylim([dataraw(1,1) dataraw(end,1)])
-        xlim([min(dataraw(:,2)) max(dataraw(:,2))])
-        if handles.flipy == 1;
-            set(gca,'Ydir','reverse')
-        end
-        if handles.unit_type == 0;
-            ylabel(['Unit (',handles.unit,')'])
-        elseif handles.unit_type == 1;
-            ylabel(['Depth (',handles.unit,')'])
-        else
-            ylabel(['Time (',handles.unit,')'])
-        end
-        
-        subplot(1,4,[2 3 4])
-        if handles.plot_log == 0;
-            pcolor(x_grid,y_grid,s)
-        else
-            s = log10(s);
-            pcolor(x_grid(2:end),y_grid,s(:,2:end))
-        end
-        shading interp
-        xlabel(['Frequency (cycles/',unit,')'])
-        xlim([fmin fmax])
-        ylim([dataraw(1,1) dataraw(end,1)])
-        if handles.flipy == 1;
-            set(gca,'Ydir','reverse')
-        end
-        if freq_log == 1;
-            xlim([fmingrid fmax])
-            set(gca, 'XScale', 'log')
-        end
-        
-    elseif and(MTMred == 0, plotseries == 0)
-        % done
-        if handles.plot_log == 0;
-            pcolor(x_grid,y_grid,s)
-        else
-            s = log10(s);
-            pcolor(x_grid(2:end),y_grid,s(:,2:end))
-        end
-        shading interp
-        xlabel(['Frequency (cycles/',unit,')'])
-        xlim([fmin fmax])
-        if handles.flipy == 1;
-            set(gca,'Ydir','reverse')
-        end
-        if freq_log == 1;
-            xlim([fmingrid fmax])
-            set(gca, 'XScale', 'log')
-        end
-    end
-    
-    if plotseries == 0
-        if handles.unit_type == 0;
-            ylabel(['Unit (',handles.unit,')'])
-        elseif handles.unit_type == 1;
-            ylabel(['Depth (',handles.unit,')'])
-        else
-            ylabel(['Time (',handles.unit,')'])
-        end
-    else
-        if MTMred == 0
-            subplot(1,4,[2 3 4])
-            set(gca,'YTickLabel',[]);
-        else
-            subplot(4,4,[6,7,8,10,11,12,14,15,16])
-            set(gca,'YTickLabel',[]);
-        end
-    end
-    
-    % set
-    if MTMred == 0
-        title([method,'; window',' = ',num2str(window),' ',unit,'; step = ',num2str(step),' ', unit])
-    else
-        if plotseries == 0
-            subplot(4,1,1)
-            title([method,'; window',' = ',num2str(window),' ',unit,'; step = ',num2str(step),' ', unit])
-        else
-            subplot(4,4,[2 3 4])
-            title([method,'; window',' = ',num2str(window),' ',unit,'; step = ',num2str(step),' ', unit])
-        end
-        set(gca,'XTickLabel',[]);
-    end
-
-    
-else
-    % 3D
-    if handles.plot_log == 1;
-        s = log10(s); 
-        handles.rotate = get(handles.rotation,'Value');
-        surf(x_grid(2:end),y_grid,s(:,2:end))
-    else
-        handles.rotate = get(handles.rotation,'Value');
-        surf(x_grid,y_grid,s)
-    end
-    shading interp
-    xlabel(['Frequency (cycles/',unit,')'])
-    xlim([fmin fmax])
-    if handles.flipy == 1;
-        set(gca,'Ydir','reverse')
-    end
-    if freq_log == 1;
-        xlim([fmingrid fmax])
-        set(gca, 'XScale', 'log')
-    end
-end
-
-    %colormap(jet)
-    if isempty(handles.colorgrid)
-        % no grid
-        setcolor = handles.color;
-    else
-        setcolor = [handles.color,'(',round(num2str(handles.colorgrid)),')'];
-    end
-    
-    try colormap(setcolor)
-    catch
-        colormap default
-    end
-    shading interp
-    set(gcf,'Name',[dat_name,ext,': Running Periodogram'])
-    
-
-    if handles.plot_2d == 1
-        set(gca,'XMinorTick','on','YMinorTick','on')
-        set(gca, 'TickDir', 'out')
-    else
-       set(gca, 'TickDir', 'out')
-       if handles.rotate == 0
-            view(10,70);
-        else
-            for i = 1: 370
-                view(i,70); 
-                pause(0.05); 
-            end
-       end
-    end
-handles.evofftfig = evofftfig;
-%
-if get(handles.checkbox9,'value')
-    CDac_pwd
-    filename = handles.filename;
-    name1 = [filename,'-evofft-s','.txt'];
-    name2 = [filename,'-evofft-freq','.txt'];
-    name3 = [filename,'-evofft-time','.txt'];
-    dlmwrite(name1, s, 'delimiter', ',', 'precision', 9); 
-    dlmwrite(name2, x_grid', 'delimiter', ',', 'precision', 9); 
-    dlmwrite(name3, y_grid', 'delimiter', ',', 'precision', 9); 
-    d = dir; %get files
-    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-    refreshcolor;
-    cd(pre_dirML); % return to matlab view folder
-end
 guidata(hObject, handles);
 
 % --------------------------------------------------------------------
@@ -998,8 +1142,13 @@ function pushbutton8_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton8 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-evofft_tips_step = 'Tips: Step  >= mean sample rate';
-warndlg(evofft_tips_step,'Tips: Step length')
+
+lang_var = handles.lang_var;
+
+[~, dd46] = ismember('dd46',handles.lang_id);
+[~, dd45] = ismember('dd45',handles.lang_id);
+
+warndlg(lang_var{dd45},lang_var{dd46})
 
 
 % --- Executes during object creation, after setting all properties.

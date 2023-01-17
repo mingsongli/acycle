@@ -20,7 +20,24 @@ if nargin < 9
         error('Too few input arguments')
     end
 end
+%% For acycle language version (2.6 and after)
+% language
+% lang_choice = 0;  %
+% handles.main_unit_selection = 0;
+lang_choice = load('ac_lang.txt');
+langdict = readtable('langdict.xlsx');
+lang_id = langdict.ID;
+lang_var = table2cell(langdict(:, 2 + lang_choice));
+handles.main_unit_selection = evalin('base','main_unit_selection');
+[~, main23] = ismember('main23',lang_id);
 
+[~, ec80] = ismember('ec80',lang_id);
+[~, ec81] = ismember('ec81',lang_id);
+[~, ec82] = ismember('ec82',lang_id);
+[~, ec83] = ismember('ec83',lang_id);
+[~, ec84] = ismember('ec84',lang_id);
+[~, ec85] = ismember('ec85',lang_id);
+[~, ec86] = ismember('ec86',lang_id);
 %% figure 1 - eCOCO
 figure
 set(gcf,'color','w');
@@ -36,13 +53,21 @@ else
     view([10,80])
 end
 colorbar('southoutside')
-colormap(jet)
+colormap('parula')
 shading interp
-ylabel('Depth (m)')
-xlabel('Sedimentation rate (cm/kyr)')
-zlabel('Correlation coefficient (\rho)')
+if or(lang_choice == 0, handles.main_unit_selection == 0)
+    ylabel('Depth (m)')
+    xlabel('Sedimentation rate (cm/kyr)')
+    zlabel('Correlation coefficient (\rho)')
+else
+    ylabel([lang_var{main23},' (m)'])
+    xlabel(lang_var{ec80})
+    zlabel([lang_var{ec81},' (\rho)'])
+end
 figurename ='eCOCO';
+
 title(figurename)
+
 if plotn < 0
     set(gca,'Ydir','reverse')
 end
@@ -79,12 +104,19 @@ end
 colorbar('southoutside',...
     'Ticks',(PlotPower.^(100-([20,10,5,4,3,2,1,.5,.1])))/z_h0_max,...
     'TickLabels',{'20','10','5','4','3','2','1','.5','.1'})
-colormap(jet)
+colormap('parula')
 shading interp
-xlabel('Sedimentation rate (cm/kyr)')
-%ylabel('Depth (m)')
-zlabel('H_0 significance level (%)')
-figurename ='eH_0 SL (%)';
+
+if or(lang_choice == 0, handles.main_unit_selection == 0)
+    xlabel('Sedimentation rate (cm/kyr)')
+    zlabel('H_0 significance level (%)')
+    figurename ='eH_0 SL (%)';
+else
+    xlabel(lang_var{ec80})
+    zlabel([lang_var{ec82},' (%)'])
+    figurename =lang_var{ec86};
+end
+
 title(figurename)
 if plotn < 0
     set(gca,'Ydir','reverse')
@@ -106,13 +138,22 @@ else
     surf(prt_sr,out_depth,out_norbit')
     view([10,80])
 end
-colormap(jet)
+colormap('parula')
 shading interp
 colorbar('southoutside')
-xlabel('Sedimentation rate (cm/kyr)')
-%ylabel('Depth (m)')
-zlabel('#')
-figurename ='No. of orbital parameters';
+
+    
+
+if or(lang_choice == 0, handles.main_unit_selection == 0)
+    xlabel('Sedimentation rate (cm/kyr)')
+    zlabel('#')
+    figurename ='No. of orbital parameters';
+else
+    xlabel(lang_var{ec80})
+    zlabel('#')
+    figurename =lang_var{ec84};
+end
+
 title(figurename)
 if plotn < 0
     set(gca,'Ydir','reverse')
@@ -138,14 +179,26 @@ else
     surf(prt_sr,out_depth,out_ecoco')
     view([10,80])
 end
-colormap(jet)
+colormap('parula')
 shading interp
 colorbar('southoutside')
-xlabel('Sedimentation rate (cm/kyr)')
-ylabel('Depth (m)')
-zlabel('CHO')
+
+    
+
+if or(lang_choice == 0, handles.main_unit_selection == 0)
+    xlabel('Sedimentation rate (cm/kyr)')
+    ylabel('Depth (m)')
+    zlabel('CHO')
+    figurename ='COCO * H_0 SL';
+else
+    xlabel(lang_var{ec80})
+    ylabel([lang_var{main23},' (m)'])
+    zlabel('CHO')
+    figurename =[lang_var{ec81},' * ',lang_var{ec82}];
+end
+
 %figurename ='\rho * H_0 SL * # orbital parameters';
-figurename ='COCO * H_0 SL';
+
 title(figurename)
 if plotn < 0
     set(gca,'Ydir','reverse')

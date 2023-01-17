@@ -53,6 +53,8 @@ function languageGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % varargin   command line arguments to languageGUI (see VARARGIN)
 handles.MonZoom = varargin{1}.MonZoom;
 handles.sortdata = varargin{1}.sortdata;
+handles.acfigmain = varargin{1}.acfigmain;
+handles.val1 = varargin{1}.val1;
 
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
@@ -69,9 +71,13 @@ set(handles.pushbutton1,'position',[0.4,0.2,0.2,0.2]) % set position
 
 % language
 lang_choice = varargin{1}.lang_choice;
+handles.lang_choice = lang_choice;
+lang_id = varargin{1}.lang_id;
+lang_var = varargin{1}.lang_var;
+handles.lang_id = lang_id;
+handles.lang_var = lang_var;
+
 if lang_choice>0
-    lang_id = varargin{1}.lang_id;
-    lang_var = varargin{1}.lang_var;
     [~, locb] = ismember('l00',lang_id);
     set(gcf,'Name',lang_var{locb})
     [~, locb1] = ismember('l01',lang_id);
@@ -81,7 +87,7 @@ if lang_choice>0
 else
     set(gcf,'Name','Acycle: Language')
 end
-
+handles.languageGUIfig = gcf;
 % Choose default command line output for languageGUI
 handles.output = hObject;
 
@@ -134,47 +140,52 @@ function pushbutton1_Callback(hObject, eventdata, handles)
 choices = get(handles.popupmenu1,'string');
 language_choice = choices{get(handles.popupmenu1,'value')};
 if ismember(language_choice,'English')
-    %disp('english')
     lang_choice = 0;
-    s = msgbox('Language has been changed to English. Please restart Acycle.','Acycle');
-
 elseif ismember(language_choice,'中文简体')
-    %disp('chinese')
     lang_choice = 1;
+elseif ismember(language_choice,'中文繁體')
+    lang_choice = 2;
+else
+    lang_choice = 0;
+end
+
+ac_lang_ini = load('ac_lang.txt');
+
+lang_id = handles.lang_id;
+
+if lang_choice ~= ac_lang_ini
+    % msg box
+    langdict = readtable('langdict.xlsx');
+    lang_var2 = table2cell(langdict(:, 2 + lang_choice));
+    
+    [~, msg1] = ismember('msg1',handles.lang_id);
+    s = msgbox(lang_var2{msg1},'Acycle');
+    % new language
     fid = fopen(which('ac_lang.txt'),'wt');
-    fprintf(fid, '1');
+    fprintf(fid, num2str(lang_choice));
     fclose(fid);
-    s = msgbox('语言已经更改为中文。正在重启软件。','Acycle');
-end
+    % set default language
+    lang_var = table2cell(langdict(:, 2 + lang_choice));
 
-fid = fopen(which('ac_lang.txt'),'wt');
+    pause(0.01)
 
-fprintf(fid, num2str(lang_choice));
-fclose(fid);
-
-lang_choice = load('ac_lang.txt');
-langdict = readtable('langdict.csv');
-lang_id = langdict.x_ID;
-if lang_choice == 0
-    % English
-    lang_var = langdict.en;
-elseif lang_choice == 1
-    % Chinese
-    lang_var = langdict.cn;
-    pause(0.5)
-end
-
-
-[~, locb] = ismember('l00',lang_id);
-set(gcf,'Name',lang_var{locb})
-[~, locb1] = ismember('l01',lang_id);
-set(handles.text1,'string',lang_var{locb1})
-[~, locb1] = ismember('main00',lang_id);
-set(handles.pushbutton1,'string',lang_var{locb1})
-
-if lang_choice > 0
+    [~, locb] = ismember('l00',lang_id);
+    set(gcf,'Name',lang_var{locb})
+    [~, locb1] = ismember('l01',lang_id);
+    set(handles.text1,'string',lang_var{locb1})
+    [~, locb1] = ismember('main00',lang_id);
+    set(handles.pushbutton1,'string',lang_var{locb1})
+    
     % restart Acycle GUI
-    AC
-    % delete splash screen
-    delete( s )
+    try close(handles.acfigmain)
+        AC
+    catch
+        
+    end
+    
+    try close(s)
+        pause (0.5)
+        close(handles.languageGUIfig)
+    catch
+    end
 end

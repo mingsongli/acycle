@@ -59,6 +59,7 @@ handles.hmain = gcf;
 %
 handles.MonZoom = varargin{1}.MonZoom;
 handles.sortdata = varargin{1}.sortdata;
+handles.val1 = varargin{1}.val1;
 
 %
 set(0,'Units','normalized') % set units as normalized
@@ -85,15 +86,20 @@ handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
 
 % language
 lang_choice = varargin{1}.lang_choice;
+lang_id = varargin{1}.lang_id;
+lang_var = varargin{1}.lang_var;
+
 if lang_choice>0
-    lang_id = varargin{1}.lang_id;
-    lang_var = varargin{1}.lang_var;
+    
     [~, locb] = ismember('c00',lang_id);
     set(gcf,'Name',lang_var{locb})
     [~, locb] = ismember('main02',lang_id);
     set(handles.text2,'string',lang_var{locb})
     [~, locb] = ismember('c02',lang_id);
     set(handles.uipanel1,'title',lang_var{locb})
+    [~, main07] = ismember('main07',lang_id);
+    set(handles.uipanel2,'title',lang_var{main07})
+    
     [~, locb] = ismember('main03',lang_id);
     set(handles.radiobutton1,'string',lang_var{locb})
     [~, locb] = ismember('main04',lang_id);
@@ -487,9 +493,9 @@ if savedata ==1
             name2 = [handles.filename,'-CSA-random-MonteCarlo','.txt'];
         end
         CDac_pwd
-        dlmwrite(name1, xx, 'delimiter', ',', 'precision', 9); 
+        dlmwrite(name1, xx, 'delimiter', ' ', 'precision', 9); 
         if clmodel == 2
-            dlmwrite(name2, Y1, 'delimiter', ',', 'precision', 9); 
+            dlmwrite(name2, Y1, 'delimiter', ' ', 'precision', 9); 
         end
         d = dir; %get files
         set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
@@ -506,7 +512,7 @@ if savedata ==1
         %xx = [P',R',Y'];
         name1 = [handles.filename,'-CSA-random-robustAR1','.txt'];
         CDac_pwd
-        dlmwrite(name1, xx, 'delimiter', ',', 'precision', 9); 
+        dlmwrite(name1, xx, 'delimiter', ' ', 'precision', 9); 
         d = dir; %get files
         set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
         refreshcolor;
@@ -524,7 +530,7 @@ if savedata ==1
         xx = [P',R',Y',pll(:,1)];
         name1 = [handles.filename,'-CSA-random-white','.txt'];
         CDac_pwd
-        dlmwrite(name1, xx, 'delimiter', ',', 'precision', 9); 
+        dlmwrite(name1, xx, 'delimiter', ' ', 'precision', 9); 
         d = dir; %get files
         set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
         refreshcolor;
@@ -653,6 +659,10 @@ function radiobutton1_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of radiobutton1
+lang_var = handles.lang_var;
+[~, locb] = ismember('c10',handles.lang_id);
+tips3 = lang_var{locb};
+    
 val = get(handles.radiobutton1,'Value');
 if val == 1
     set(handles.radiobutton2, 'Value', 0);
@@ -668,7 +678,7 @@ else
     end
 end
 
-sedinfo = ['test periods of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+sedinfo = [tips3,' ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
     ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' ', handles.unit];
 
 set(handles.text7,'String',sedinfo)
@@ -681,6 +691,9 @@ function radiobutton2_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of radiobutton2
+lang_var = handles.lang_var;
+[~, locb] = ismember('c10',handles.lang_id);
+tips3 = lang_var{locb};
 
 val = get(handles.radiobutton2,'Value');
 if val == 1
@@ -696,7 +709,7 @@ else
     handles.linLog = 2;
     sr = linspace(handles.sedmin,handles.sedmax,handles.numsed);
 end
-sedinfo = ['test periods of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+sedinfo = [tips3,' ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
     ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' ', handles.unit];
 
 set(handles.text7,'String',sedinfo)
@@ -710,6 +723,10 @@ function edit1_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit1 as text
 %        str2double(get(hObject,'String')) returns contents of edit1 as a double
+lang_var = handles.lang_var;
+[~, locb] = ismember('c10',handles.lang_id);
+tips3 = lang_var{locb};
+
 handles.sedmin = str2double(get(hObject,'String'));
 if handles.sedmin < handles.sedmax
     if handles.sedmin < handles.dt
@@ -719,7 +736,7 @@ if handles.sedmin < handles.sedmax
     sr = linspace(handles.sedmin,handles.sedmax,handles.numsed);
     
     
-    sedinfo = ['test periods of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+    sedinfo = [tips3,' ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
         ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' ',handles.unit];
     set(handles.text7,'String',sedinfo)
 else
@@ -748,6 +765,10 @@ function edit2_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit2 as text
 %        str2double(get(hObject,'String')) returns contents of edit2 as a double
+lang_var = handles.lang_var;
+[~, locb] = ismember('c10',handles.lang_id);
+tips3 = lang_var{locb};
+
 handles.sedmax = str2double(get(hObject,'String'));
 % warning
 if handles.sedmax > handles.sedmin    
@@ -756,7 +777,7 @@ if handles.sedmax > handles.sedmin
     end
     % display
     sr = linspace(handles.sedmin,handles.sedmax,handles.numsed);
-    sedinfo = ['test periods of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+    sedinfo = [tips3,' ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
     ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' ', handles.unit];
     set(handles.text7,'String',sedinfo)
 else
@@ -785,6 +806,10 @@ function edit3_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit3 as text
 %        str2double(get(hObject,'String')) returns contents of edit3 as a double
+lang_var = handles.lang_var;
+[~, locb] = ismember('c10',handles.lang_id);
+tips3 = lang_var{locb};
+
 handles.numsed = str2double(get(hObject,'String'));
 if handles.numsed > 0
     if rem(handles.numsed,1)
@@ -794,15 +819,15 @@ if handles.numsed > 0
     sr = linspace(handles.sedmin,handles.sedmax,handles.numsed);
     
     if handles.numsed > 3
-        sedinfo = ['test periods of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+        sedinfo = [tips3,' ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
     ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' ', handles.unit];
         set(handles.text7,'String',sedinfo)
     elseif handles.numsed == 3
-        sedinfo = ['test periods of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+        sedinfo = [tips3,' ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
     ', ..., ',num2str(sr(end),'% 3.3f'),' ', handles.unit];
         set(handles.text7,'String',sedinfo)
     elseif handles.numsed == 2
-        sedinfo = ['test periods of ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),' ', handles.unit];
+        sedinfo = [tips3,' ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),' ', handles.unit];
         set(handles.text7,'String',sedinfo)
     else
         msgbox('Number should be no less than 2','Warning')

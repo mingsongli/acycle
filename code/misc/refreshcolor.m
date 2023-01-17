@@ -17,19 +17,19 @@ fclose(fileID);
 
 T = struct2table(d); % convert the struct array to a table
 
-switch handles.sortdata
-case 'name a-z' % User selects unit.
-    sortedT = sortrows(T, 'name', 'ascend'); % sort the table by 'date'
-case 'name z-a' % User selects unit.
-    sortedT = sortrows(T, 'name', 'descend'); % sort the table by 'date'
-case 'date ascend' % User selects unit.
-    sortedT = sortrows(T, 'date', 'ascend'); % sort the table by 'date'
-case 'date descend' % User selects unit.
-    sortedT = sortrows(T, 'date', 'descend'); % sort the table by 'date'
-case 'size ascend' % User selects unit.
-    sortedT = sortrows(T, 'bytes', 'ascend'); % sort the table by 'date'
-case 'size descend' % User selects unit.
-    sortedT = sortrows(T, 'bytes', 'descend'); % sort the table by 'date'
+switch handles.val1
+    case 1 % User selects unit.
+        sortedT = sortrows(T, 'name', 'ascend'); % sort the table by 'date'
+    case 2 % User selects unit.
+        sortedT = sortrows(T, 'name', 'descend'); % sort the table by 'date'
+    case 3 % User selects unit.
+        sortedT = sortrows(T, 'date', 'ascend'); % sort the table by 'date'
+    case 4 % User selects unit.
+        sortedT = sortrows(T, 'date', 'descend'); % sort the table by 'date'
+    case 5 % User selects unit.
+        sortedT = sortrows(T, 'bytes', 'ascend'); % sort the table by 'date'
+    case 6 % User selects unit.
+        sortedT = sortrows(T, 'bytes', 'descend'); % sort the table by 'date'
 end
 
 sd = table2struct(sortedT); % change it back to struct array

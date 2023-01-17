@@ -87,7 +87,15 @@ if nargin < 13
 end
 
 display = 1;  % show simulation steps
-
+%% For acycle language version (2.6 and after)
+% language
+lang_choice = load('ac_lang.txt');
+langdict = readtable('langdict.xlsx');
+lang_id = langdict.ID;
+lang_var = table2cell(langdict(:, 2 + lang_choice));
+handles.main_unit_selection = evalin('base','main_unit_selection');
+[~, ec79] = ismember('ec79',lang_id);
+[~, ec87] = ismember('ec87',lang_id);
 %% Slice
 if isreal(slices) && slices > 0 && ~mod(slices,1)
    if slices > 1
@@ -177,8 +185,15 @@ mpts = length(sr_range);
 %critical = 100/mpts;% critical significance level by Meyers
 
 % Waitbar
-hwaitbar = waitbar(0,'Monte Carlo processing ...[CTRL + C to quit]',...    
-   'WindowStyle','modal');
+    
+if lang_choice == 0
+    hwaitbar = waitbar(0,'Monte Carlo processing ...[CTRL + C to quit]',...    
+       'WindowStyle','modal');
+else
+    hwaitbar = waitbar(0,[lang_var{ec87},' ',lang_var{ec79}],...    
+       'WindowStyle','modal');
+end
+
 hwaitbar_find = findobj(hwaitbar,'Type','Patch');
 set(hwaitbar_find,'EdgeColor',[0 0.9 0],'FaceColor',[0 0.9 0]) % changes the color to blue
 steps = 100;
@@ -238,15 +253,8 @@ if nsim > 0
         set(gcf,'color','w');
         ax1 = subplot(3,1,1) ;
         plot(ax1, corrxch,corry_rch,'r','LineWidth',1);
-%         hold on;
-%         plot(ax1, corrxch,corrloch,'k--');
-%         plot(ax1, corrxch,corrupch,'k--');
-%         hold off;
         xlabel(ax1, 'Sedimentation rates (cm/kyr)')
         ylabel(ax1, '\rho')
-%         legend(ax1, 'Corrcoef','95% CI ch','95% CI ch')
-%         line(ax1, [sr1, sr2],[.5, .5],'LineStyle','--','Color','b')
-%         line(ax1, [sr1, sr2],[.3, .3],'LineStyle',':','Color','b')
         title(ax1, 'Correlation coefficient')
         
         ax2 = subplot(3,1,2);

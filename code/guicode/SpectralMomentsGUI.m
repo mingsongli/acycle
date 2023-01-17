@@ -56,6 +56,7 @@ function SpectralMomentsGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.output = hObject;
 handles.MonZoom = varargin{1}.MonZoom;
 handles.sortdata = varargin{1}.sortdata;
+handles.val1 = varargin{1}.val1;
 
 %
 set(0,'Units','normalized') % set units as normalized
@@ -97,21 +98,61 @@ set(handles.text11,'position',[0.802,0.746,0.178,0.197]) % ref
 set(handles.pushbutton2,'position',[0.819,0.273,0.129,0.25]) % OK
 
 set(handles.text10,'position',[0.04,0.01,0.94,0.191]) % ref
-
+% language
+lang_choice = varargin{1}.lang_choice;
+handles.lang_choice = lang_choice;
+lang_id = varargin{1}.lang_id;
+lang_var = varargin{1}.lang_var;
+handles.lang_id = lang_id;
+handles.lang_var = lang_var;
+handles.main_unit_selection = varargin{1}.main_unit_selection;
 set(gcf,'Name','Acycle: Spectral Moments')
-set(gcf,'position',[0.5,0.5,0.3,0.28]* handles.MonZoom) % set position
+
+[~, a178] = ismember('a178',lang_id); % in ascend
+[~, ec25] = ismember('ec25',lang_id); % 
+[~, main02] = ismember('main02',lang_id); % data
+[~, specm04] = ismember('specm04',lang_id); % Zero padding edge
+
+set(handles.uipanel1,'Title',lang_var{main02})
+set(handles.checkbox1,'String',lang_var{specm04})
+
+[~, specm05] = ismember('specm05',lang_id); % Settings
+set(handles.uipanel3,'Title',lang_var{specm05})
+
+[~, main41] = ismember('main41',lang_id); % Window
+set(handles.text3,'String',lang_var{main41})
+
+[~, main32] = ismember('main32',lang_id); % step
+set(handles.text6,'String',lang_var{main32})
+
+[~, dynot06] = ismember('dynot06',lang_id); % 0-padding
+set(handles.text7,'String',lang_var{dynot06})
+
+[~, specm01] = ismember('specm01',lang_id); % 0-padding
+set(handles.checkbox2,'String',lang_var{specm01})
+
+[~, specm02] = ismember('specm02',lang_id); % Mean sed. rate
+set(handles.text8,'String',lang_var{specm02})
+
+[~, specm03] = ismember('specm03',lang_id); % 0-padding
+set(handles.text9,'String',lang_var{specm03})
+
+[~, main00] = ismember('main00',lang_id); % 0-padding
+set(handles.pushbutton2,'String',lang_var{main00})
+
+set(gcf,'position',[0.5,0.5,0.4,0.28]* handles.MonZoom) % set position
 dat = varargin{1}.current_data;  % data
 diffx = diff(dat(:,1));
 % check data
 if sum(diffx <= 0) > 0
-    disp('>>  Waning: data has to be in ascending order, no duplicated number allowed')
+    disp(lang_var{a178})
     dat = sortrows(dat);
 end
-
 % check data
 if abs((max(diffx)-min(diffx))/2) > 10*eps('single')
-    hwarn1 = warndlg('Data may not be evenly spaced!');
+    hwarn1 = warndlg(lang_var{ec25});
 end
+%
 handles.unit = varargin{1}.unit; % unit
 handles.unit_type = varargin{1}.unit_type; % unit type
 handles.slash_v = varargin{1}.slash_v;
@@ -223,7 +264,7 @@ if handles.sedrate == 0
     
     name1 = [handles.dat_name,'-SpecMoments-depth-uf-bw-win',num2str(window),'.txt'];
     CDac_pwd; % cd ac_pwd dir
-    dlmwrite(name1, [depth,uf,Bw], 'delimiter', ',', 'precision', 9);
+    dlmwrite(name1, [depth,uf,Bw], 'delimiter', ' ', 'precision', 9);
     d = dir; %get files
     set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
     refreshcolor;
@@ -242,8 +283,8 @@ else
     name1 = [handles.dat_name,'-SpecMoments-depth-uf-Bw-Btrend-win',num2str(window),'.txt'];
     name2 = [handles.dat_name,'-SpecMoments-sedrate-win',num2str(window),smoothmodel,'-SR',num2str(srmean),'.txt'];
     CDac_pwd; % cd ac_pwd dir
-    dlmwrite(name1, [depth,uf,Bw,Bwtrend], 'delimiter', ',', 'precision', 9);
-    dlmwrite(name2, [depth,sr], 'delimiter', ',', 'precision', 9);
+    dlmwrite(name1, [depth,uf,Bw,Bwtrend], 'delimiter', ' ', 'precision', 9);
+    dlmwrite(name2, [depth,sr], 'delimiter', ' ', 'precision', 9);
     d = dir; %get files
     set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
     refreshcolor;

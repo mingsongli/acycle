@@ -55,6 +55,12 @@ function spectrum_OpeningFcn(hObject, eventdata, handles, varargin)
 % varargin   command line arguments to spectrum (see VARARGIN)
 handles.MonZoom = varargin{1}.MonZoom;
 handles.sortdata = varargin{1}.sortdata;
+handles.lang_choice = varargin{1}.lang_choice;
+handles.lang_id = varargin{1}.lang_id;
+handles.lang_var = varargin{1}.lang_var;
+lang_id = handles.lang_id;
+lang_var = handles.lang_var;
+handles.main_unit_selection = varargin{1}.main_unit_selection;
 
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
@@ -74,7 +80,7 @@ set(handles.popupmenu2,'position', [0.3,0.823,0.62,0.12])
 set(handles.uipanel2,'position', [0.05,0.41,0.445,0.37])
 set(handles.text3,'position', [0.04,0.6,0.6,0.38])
 set(handles.popupmenu_tapers,'position', [0.6,0.635,0.38,0.365])
-set(handles.text5,'position', [0.055,0.38,0.436,0.176])
+set(handles.text5,'position', [0.055,0.4,0.436,0.176])
 set(handles.radiobutton5,'position', [0.503,0.5,0.12,0.2])
 set(handles.radiobutton5,'Value', 0)
 set(handles.edit7,'position', [0.664,0.5,0.3,0.2])
@@ -117,8 +123,12 @@ set(handles.pushbutton3,'position', [0.67,0.082,0.282,0.12])
 set(handles.checkbox_ar1_check,'String','Classic AR(1)')
 % Choose default command line output for spectrum
 handles.output = hObject;
-
-set(gcf,'Name','Acycle: Spectral Analysis')
+if handles.lang_choice == 0
+    set(gcf,'Name','Acycle: Spectral Analysis')
+else
+    [~, locb] = ismember('menu107',handles.lang_id);
+    set(gcf,'Name',['Acycle: ',lang_var{locb}])
+end
 set(handles.checkbox_robust,'Value',1)
 set(handles.checkbox_ar1_check,'Value',0)
 set(handles.radiobutton4,'Value',1)
@@ -137,6 +147,8 @@ handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
 %
 data_s = varargin{1}.current_data;
 data_s = sortrows(data_s);
+handles.val1 = varargin{1}.val1;
+
 %
 data_s(:,2) = data_s(:,2) - mean(data_s(:,2));
 handles.current_data = data_s;
@@ -204,6 +216,66 @@ if fd1(poc1)/fd1(end) <= 0.85
     set(handles.radiobutton_input,'Value',1)
 else
     handles.BiasCorr = 0;
+end
+% language
+if handles.lang_choice > 0
+    [~, locb] = ismember('spectral01',lang_id);
+    set(handles.text7,'String',lang_var{locb})
+    
+    [~, locb] = ismember('spectral02',lang_id);
+    set(handles.uipanel2,'Title',lang_var{locb})
+    
+    [~, locb] = ismember('spectral03',lang_id);
+    set(handles.text3,'String',lang_var{locb})
+    
+    [~, locb] = ismember('spectral04',lang_id);
+    set(handles.text5,'String',lang_var{locb})
+    
+    [~, locb] = ismember('spectral05',lang_id);
+    set(handles.uipanel3,'Title',lang_var{locb})
+    
+    [~, locb] = ismember('spectral06',lang_id);
+    set(handles.checkbox_robust,'String',lang_var{locb})
+    
+    [~, locb] = ismember('spectral07',lang_id);
+    set(handles.checkbox_ar1_check,'String',lang_var{locb})
+    
+    [~, locb] = ismember('spectral08',lang_id);
+    set(handles.check_ftest,'String',lang_var{locb})
+    
+    [~, locb] = ismember('spectral09',lang_id);
+    set(handles.checkbox9,'String',lang_var{locb})
+    
+    [~, locb] = ismember('spectral10',lang_id);
+    set(handles.checkbox10,'String',lang_var{locb})
+    
+    [~, locb] = ismember('spectral12',lang_id);
+    set(handles.uibuttongroup1,'Title',lang_var{locb})
+    
+    [~, locb] = ismember('spectral13',lang_id);
+    set(handles.radiobutton_fmax,'String',lang_var{locb})
+    
+    [~, locb] = ismember('spectral14',lang_id);
+    set(handles.radiobutton_input,'String',lang_var{locb})
+    
+    [~, locb] = ismember('spectral15',lang_id);
+    set(handles.checkbox4,'String',lang_var{locb})
+    
+    [~, locb] = ismember('spectral16',lang_id);
+    set(handles.checkbox5,'String',lang_var{locb})
+    
+    [~, locb] = ismember('spectral17',lang_id);
+    set(handles.checkbox6,'String',lang_var{locb}) % log(freq.)
+    
+    [~, locb] = ismember('spectral18',lang_id);
+    set(handles.checkbox8,'String',lang_var{locb})
+    
+    [~, locb] = ismember('spectral19',lang_id);
+    set(handles.pushbutton3,'String',lang_var{locb})
+    
+    [~, locb] = ismember('spectral20',lang_id);
+    set(handles.pushbutton17,'String',lang_var{locb})
+    
 end
 %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %
 % Update handles structure
@@ -304,6 +376,9 @@ plot_x_period = get(handles.checkbox8,'Value');
 plot_fmax_input = str2double(get(handles.edit_fmax_input,'String'));
 nw = handles.timebandwidth;
 bw=2*nw*df;
+% language
+lang_id = handles.lang_id;
+lang_var = handles.lang_var;
 
 BiasCorr = handles.BiasCorr;
 
@@ -329,15 +404,26 @@ if strcmp(method,'Multi-taper method')
     end
     
     if handles.checkbox_robustAR1_v == 1
-        dlg_title = 'Robust AR(1) Estimation';
-        prompt = {'Median smoothing window: default 0.2 = 20%';...
-            'AR1 best fit model? 1 = linear; 2 = log power (default)';...
-            'Bias correction for ultra-high resolution data'};
+        if handles.lang_choice == 0
+            dlg_title = 'Robust AR(1) Estimation';
+            prompt = {'Median smoothing window: default 0.2 = 20%';...
+                'AR1 best fit model? 1 = linear （default）; 2 = log power';...
+                'Bias correction for ultra-high resolution data'};
+        else
+            [~, locb] = ismember('spectral25',lang_id);
+            dlg_title = lang_var{locb};
+            [~, locb1] = ismember('spectral26',lang_id);
+            [~, locb2] = ismember('spectral27',lang_id);
+            [~, locb3] = ismember('spectral28',lang_id);
+            prompt = {lang_var{locb1};...
+                lang_var{locb2};...
+                lang_var{locb3}};
+        end
         num_lines = 1;
         if BiasCorr == 0
-            defaultans = {num2str(0.2),num2str(2),num2str(0)};
+            defaultans = {num2str(0.2),num2str(1),num2str(0)};
         else
-            defaultans = {num2str(0.2),num2str(2),num2str(1)};
+            defaultans = {num2str(0.2),num2str(1),num2str(1)};
         end
         options.Resize='on';
         answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
@@ -348,7 +434,12 @@ if strcmp(method,'Multi-taper method')
             biascorr = str2double(answer{3});
             
             if length(datax)>2000
-                hwarn = warndlg('Large dataset, wait ...');
+                if handles.lang_choice > 0
+                    [~, locb] = ismember('spectral29',lang_id);
+                    hwarn = warndlg(lang_var{locb});
+                else
+                    hwarn = warndlg('Large dataset, wait ...');
+                end
             end
             if biascorr == 1
                 ValidNyqFreq = handles.ValidNyqFreqR;
@@ -373,16 +464,6 @@ if strcmp(method,'Multi-taper method')
             % true frequencies
             f0 = w/pi*fn;
             
-%             %theored1 = s0M * (1-rhoM^2)./(1-(2.*rhoM.*cos(pi.*f0./fmax))+rhoM^2);
-%             theored1 = s0M * (1-rhoM^2)./(1-(2.*rhoM.*cos(pi.*f0./ValidNyqFreq))+rhoM^2);
-%             K = 2*nw -1;
-%             nw2 = 2*(K);
-%             % Chi-square inversed distribution
-%             chi90 = theored1 * chi2inv(0.90,nw2)/nw2;
-%             chi95 = theored1 * chi2inv(0.95,nw2)/nw2;
-%             chi99 = theored1 * chi2inv(0.99,nw2)/nw2;
-%             f=f0;
-            
             f1 = redconfAR1(:,1);
             pxxsmooth0 = redconfAR1(:,3);
             f = redconfML96(:,1);
@@ -390,8 +471,7 @@ if strcmp(method,'Multi-taper method')
             chi90 = redconfML96(:,4);
             chi95 = redconfML96(:,5);
             chi99 = redconfML96(:,6);
-
-
+            
             figdata = figure; 
             set(gcf,'Color', 'white')
             semilogy(f0,pxx,'k')
@@ -401,19 +481,40 @@ if strcmp(method,'Multi-taper method')
             semilogy(f,chi90,'r-');
             semilogy(f,chi95,'r--','LineWidth',2);
             semilogy(f,chi99,'b-.');
-            ylabel('Power')
-            smthwin = [num2str(smoothwin*100),'%', ' median-smoothed'];
-            legend('Power',smthwin,'Robust AR(1) median',...
-                'Robust AR(1) 90%','Robust AR(1) 95%','Robust AR(1) 99%')
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                ylabel('Power')
+                smthwin = [num2str(smoothwin*100),'%', ' median-smoothed'];
+                legend('Power',smthwin,'Robust AR(1) median',...
+                    'Robust AR(1) 90%','Robust AR(1) 95%','Robust AR(1) 99%')
+            else
+                [~, locb] = ismember('spectral30',lang_id);
+                ylabel(lang_var{locb})
+                [~, locb1] = ismember('spectral31',lang_id);
+                smthwin = [num2str(smoothwin*100),'% ', lang_var{locb1}];
+                [~, locb6] = ismember('spectral06',lang_id);
+                [~, locb1] = ismember('spectral32',lang_id);
+                legend(lang_var{locb},smthwin,...
+                    [lang_var{locb6},lang_var{locb1}],...
+                    [lang_var{locb6},'90%'],...
+                    [lang_var{locb6},'95%'],...
+                    [lang_var{locb6},'99%'])
+            end
             set(gcf,'units','norm') % set location
             set(gcf,'position',[0.0,0.45,0.45,0.45]) % set position
             
             if plot_x_period
                 update_spectral_x_period_mtm
             else
+                if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                    xlabel(['Frequency (cycles/',num2str(unit),')']) 
+                    title([num2str(nw),'\pi-MTM-Robust-AR(1): \rho = ',num2str(rhoM),'. S0 = ',num2str(s0M),'; bw = ',num2str(bw)])   
+                else
+                    [~, locb] = ismember('spectral33',lang_id);
+                    [~, locb1] = ismember('spectral34',lang_id);
+                    xlabel([lang_var{locb},num2str(unit),')']) 
+                    title([num2str(nw),'\pi-MTM-',lang_var{locb6},': \rho = ',num2str(rhoM),'. S0 = ',num2str(s0M),'; ',lang_var{locb1},' = ',num2str(bw)])   
+                end
                 xlim([0 fmax]);
-                xlabel(['Frequency (cycles/',num2str(unit),')']) 
-                title([num2str(nw),'\pi-MTM-Robust-AR(1): \rho = ',num2str(rhoM),'. S0 = ',num2str(s0M),'; bw = ',num2str(bw)])                
                 set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'pi MTM'])
                 set(gca,'XMinorTick','on','YMinorTick','on')
                 set(gcf,'Color', 'white')
@@ -480,7 +581,12 @@ if strcmp(method,'Multi-taper method')
         if plot_x_period
             pt1 = 1./fd1;
             plot(pt1(2:end),po(2:end),'k-','LineWidth',1);
-            xlabel(['Period (',num2str(unit),')']) 
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                xlabel(['Period (',num2str(unit),')']) 
+            else
+                [~, locb] = ismember('main15',lang_id);
+                xlabel([lang_var{locb},' (',num2str(unit),')']) 
+            end
             xlim([1/fmax, pt1(3)]);
             set(gca, 'XDir','reverse')
             hold on
@@ -494,7 +600,12 @@ if strcmp(method,'Multi-taper method')
         else
             plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
             xlim([0 fmax]);
-            xlabel(['Frequency (cycles/',num2str(unit),')']) 
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                xlabel(['Frequency (cycles/',num2str(unit),')']) 
+            else
+                [~, locb] = ismember('spectral33',lang_id);
+                xlabel([lang_var{locb},num2str(unit),')']) 
+            end
             hold on
             plot(fd1,red99global,'r-.','LineWidth',1)
             plot(fd1,red95global,'r--','LineWidth',2)
@@ -504,11 +615,31 @@ if strcmp(method,'Multi-taper method')
             plot(fd1,red90,'b-','LineWidth',1)
             plot(fd1,pl,'k-','LineWidth',2)
         end
-        %legend('Power','95% global','99% local','95% local','90% local','Power law')
-        legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','Power law')
-        ylabel('Power')
-        title([num2str(nw),'\pi MTM & power law','; bw = ',num2str(bw)])        
-        set(gcf,'Name',[num2str(nw),'\pi MTM & power law: ',dat_name,ext])
+        
+        if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+            legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','Power law')
+            ylabel('Power')
+            title([num2str(nw),'\pi MTM & power law','; bw = ',num2str(bw)])   
+            set(gcf,'Name',[num2str(nw),'pi MTM & power law: ',dat_name,ext])
+        else
+            [~, locb] = ismember('spectral30',lang_id);
+            ylabel(lang_var{locb})
+            [~, locb0] = ismember('spectral34',lang_id);
+            [~, locb1] = ismember('spectral35',lang_id);
+            [~, locb2] = ismember('spectral36',lang_id);
+            [~, locb3] = ismember('spectral09',lang_id);
+            legend(lang_var{locb},...
+                ['99%',lang_var{locb1}],...
+                ['95%',lang_var{locb1}],...
+                ['90%',lang_var{locb1}],...
+                ['99%',lang_var{locb2}],...
+                ['95%',lang_var{locb2}],...
+                ['90%',lang_var{locb2}],...
+                lang_var{locb3})
+            title([num2str(nw),'\pi MTM & ',lang_var{locb3},'; ',lang_var{locb0},' = ',num2str(bw)])  
+            set(gcf,'Name',[num2str(nw),'pi MTM & ',lang_var{locb3},': ',dat_name,ext])
+        end
+        
         set(gca,'XMinorTick','on','YMinorTick','on')
         
         if handles.linlogY == 1
@@ -554,7 +685,13 @@ if strcmp(method,'Multi-taper method')
         if plot_x_period
             pt1 = 1./fd1;
             plot(pt1(2:end),po(2:end),'k-','LineWidth',1);
-            xlabel(['Period (',num2str(unit),')']) 
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                xlabel(['Period (',num2str(unit),')']) 
+            else
+                [~, locb] = ismember('main15',lang_id);
+                xlabel([lang_var{locb},' (',num2str(unit),')']) 
+            end
+            
             xlim([1/fmax, pt1(3)]);
             set(gca, 'XDir','reverse')
             hold on
@@ -568,7 +705,14 @@ if strcmp(method,'Multi-taper method')
         else
             plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
             xlim([0 fmax]);
-            xlabel(['Frequency (cycles/',num2str(unit),')']) 
+            
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                xlabel(['Frequency (cycles/',num2str(unit),')']) 
+            else
+                [~, locb] = ismember('spectral33',lang_id);
+                xlabel([lang_var{locb},num2str(unit),')']) 
+            end
+            
             hold on
             plot(fd1,red99global,'r-.','LineWidth',1)
             plot(fd1,red95global,'r--','LineWidth',2)
@@ -578,10 +722,32 @@ if strcmp(method,'Multi-taper method')
             plot(fd1,red90,'b-','LineWidth',1)
             plot(fd1,theored1,'k-','LineWidth',2)
         end
-        legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','BPL')
-        ylabel('Power')
-        title([num2str(nw),'\pi MTM & bending power law','; bw = ',num2str(bw)])
-        set(gcf,'Name',[num2str(nw),'\pi MTM & bending power law: ',dat_name,ext])
+        % language
+        if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+            legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','bending power law')
+            ylabel('Power')
+            title([num2str(nw),'\pi MTM & bending power law','; bw = ',num2str(bw)])  
+            set(gcf,'Name',[num2str(nw),'pi MTM & bending power law: ',dat_name,ext])
+        else
+            [~, locb] = ismember('spectral30',lang_id);
+            ylabel(lang_var{locb})
+            [~, locb0] = ismember('spectral34',lang_id);
+            [~, locb1] = ismember('spectral35',lang_id);
+            [~, locb2] = ismember('spectral36',lang_id);
+            [~, locb3] = ismember('spectral10',lang_id);
+            legend(lang_var{locb},...
+                ['99%',lang_var{locb1}],...
+                ['95%',lang_var{locb1}],...
+                ['90%',lang_var{locb1}],...
+                ['99%',lang_var{locb2}],...
+                ['95%',lang_var{locb2}],...
+                ['90%',lang_var{locb2}],...
+                lang_var{locb3})
+            title([num2str(nw),'\pi MTM & ',lang_var{locb3},'; ',lang_var{locb0},' = ',num2str(bw)])   
+            set(gcf,'Name',[num2str(nw),'pi MTM & ',lang_var{locb3},': ',dat_name,ext])
+        end
+        
+        
         set(gca,'XMinorTick','on','YMinorTick','on')
         
         if handles.linlogY == 1
@@ -593,6 +759,7 @@ if strcmp(method,'Multi-taper method')
             set(gca,'xscale','log')
         end
     end
+    
     % Plot figure MTM handles.checkbox_robustAR1_v = checkbox_robustAR1;
     % neither robust AR1 nor conventional AR1
     if and(get(handles.checkbox_ar1_check,'value') == 0, get(handles.checkbox_robust,'value') == 0)
@@ -600,14 +767,26 @@ if strcmp(method,'Multi-taper method')
         set(gcf,'Color', 'white')
         plot(fd1,po,'LineWidth',1); 
         line([0.7*fmax, 0.7*fmax+bw],[0.8*max(po), 0.8*max(po)],'Color','r')
-        xlabel(['Frequency (cycles/',num2str(unit),')']) 
-        ylabel('Power ')
-        legend('Power','bw')
-        title([num2str(nw),' \pi MTM method; Sampling rate = ',num2str(dt),' ', unit,'; bw = ',num2str(bw)])
+        if or(handles.lang_choice == 0, handles.main_unit_selection == 0) % english
+            xlabel(['Frequency (cycles/',num2str(unit),')']) 
+            ylabel('Power')
+            legend('Power','bw')
+            title([num2str(nw),' \pi MTM method; Sampling rate = ',num2str(dt),' ', unit,'; bw = ',num2str(bw)])
+        else
+            [~, locb] = ismember('spectral33',lang_id);
+            [~, locb1] = ismember('spectral30',lang_id);
+            [~, locb2] = ismember('spectral34',lang_id);
+            [~, locb3] = ismember('spectral37',lang_id);
+            
+            xlabel([lang_var{locb},num2str(unit),')']) 
+            ylabel(lang_var{locb1})
+            legend(lang_var{locb1},lang_var{locb2})
+            title([num2str(nw),' \pi MTM; ',lang_var{locb3},' = ',num2str(dt),' ', unit,'; ',lang_var{locb2},' = ',num2str(bw)])
+        end
         set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'pi MTM'])
         set(gca,'XMinorTick','on','YMinorTick','on')
         xlim([0 fmax]);
-        if handles.linlogY == 1;
+        if handles.linlogY == 1
             set(gca, 'YScale', 'log')
         else
             set(gca, 'YScale', 'linear')
@@ -622,8 +801,14 @@ if strcmp(method,'Multi-taper method')
 
     if handles.checkbox_ar1_v == 1
         % Waitbar
-        hwaitbar = waitbar(0,'Classic red noise estimation may take a few minutes...',...    
-           'WindowStyle','modal');
+        if handles.lang_choice == 0
+            hwaitbar = waitbar(0,'Estimation may take a few minutes...',...    
+               'WindowStyle','modal');
+        else
+            [~, locb] = ismember('spectral40',lang_id);
+            hwaitbar = waitbar(0,lang_var{locb},...    
+               'WindowStyle','modal');
+        end
         hwaitbar_find = findobj(hwaitbar,'Type','Patch');
         set(hwaitbar_find,'EdgeColor',[0 0.9 0],'FaceColor',[0 0.9 0]) % changes the color to blue
         %setappdata(hwaitbar,'canceling',0)
@@ -666,11 +851,26 @@ if strcmp(method,'Multi-taper method')
         plot(fd,tabtchi99,'b-.','LineWidth',1);
         plot(fd,tabtchi999,'g--','LineWidth',1);
         xlim([0 fmax]);
-        xlabel(['Frequency (cycles/',num2str(unit),')'])
-        ylabel('Power ')
-        title([num2str(nw),'\pi MTM classic AR1: \rho = ',num2str(rho),'; Sampling rate = ',num2str(dt),' ', unit,'; bw = ',num2str(bw)])
         
-        legend('Power','AR1','90%','95%','99%','99.9%')
+        
+        if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+            xlabel(['Frequency (cycles/',num2str(unit),')'])
+            ylabel('Power')
+            title([num2str(nw),'\pi MTM classic AR1: \rho = ',num2str(rho),'; Sampling rate = ',num2str(dt),' ', unit,'; bw = ',num2str(bw)])
+            legend('Power','AR1','90%','95%','99%','99.9%')
+        else
+            [~, locb] = ismember('spectral33',lang_id);
+            xlabel([lang_var{locb},num2str(unit),')']) 
+             [~, locb1] = ismember('spectral30',lang_id);
+            ylabel(lang_var{locb1})
+            legend(lang_var{locb1},'AR1','90%','95%','99%','99.9%')
+            [~, locb1] = ismember('spectral34',lang_id);
+            [~, locb7] = ismember('spectral07',lang_id);
+            [~, locb3] = ismember('spectral37',lang_id);
+            title([num2str(nw),'\pi-MTM-',lang_var{locb7},': \rho = ',num2str(rho),'; ',...
+                lang_var{locb3},' = ',num2str(dt),'; ',lang_var{locb1},' = ',num2str(bw)])
+        end
+        
         step = 5.5;
         waitbar(step / steps)
         delete(hwaitbar)
@@ -709,12 +909,24 @@ if strcmp(method,'Multi-taper method')
             subplot(2,1,1); 
             plot(freq,dof,'color','k','LineWidth',1)
             xlim([0 fmax])
-            title('Adaptive weighted degrees of freedom')
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                title('Adaptive weighted degrees of freedom')
+            else
+                [~, locb] = ismember('spectral38',lang_id);
+                title(lang_var{locb})
+            end
             subplot(2,1,2); 
             plot(freq,Faz,'color','k','LineWidth',1)
             xlim([0 fmax])
-            title('Harmonic phase')
-            ylabel('Frequency')
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                title('Harmonic phase')
+                ylabel('Frequency')
+            else
+                [~, locb] = ismember('spectral39',lang_id);
+                [~, locb1] = ismember('main34',lang_id);
+                title(lang_var{locb})
+                ylabel(lang_var{locb1})
+            end
         end
     end
     
@@ -738,7 +950,14 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
             else
                 plot(pt1,po,'k-','LineWidth',1); 
             end
-            xlabel(['Period (',num2str(unit),')']) 
+            % language
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                xlabel(['Period (',num2str(unit),')']) 
+            else
+                [~, locb] = ismember('main15',lang_id);
+                xlabel([lang_var{locb},' (',num2str(unit),')']) 
+            end
+            
             xlim([1/fmax, pt1(3)]);
             set(gca, 'XDir','reverse')
         else
@@ -748,14 +967,28 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
             else
                 plot(fd1,po,'k-','LineWidth',1); 
             end
-
-            xlabel(['Frequency (cycles/',num2str(unit),')']) 
+            %language
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                xlabel(['Frequency (cycles/',num2str(unit),')'])
+            else
+                [~, locb] = ismember('spectral33',lang_id);
+                xlabel([lang_var{locb},num2str(unit),')']) 
+            end
             xlim([0 fmax]);
         end
-
-        ylabel('Power ')
-        title(['Lomb-Scargle spectrum','; bw = ',num2str(df)])
-        set(gcf,'Name',[dat_name,ext,': Lomb-Scargle spectrum'])
+        %language
+        if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+            ylabel('Power')
+            title(['Lomb-Scargle spectrum','; bw = ',num2str(df)])
+            set(gcf,'Name',[dat_name,ext,': Lomb-Scargle spectrum'])
+        else
+            [~, locb] = ismember('spectral30',lang_id);
+            ylabel(lang_var{locb})
+            [~, locb] = ismember('spectral41',lang_id);
+            [~, locb1] = ismember('spectral34',lang_id);
+            title([lang_var{locb},'; ',lang_var{locb1},' = ',num2str(df)])
+            set(gcf,'Name',[dat_name,ext,': ',lang_var{locb}])
+        end
         set(gca,'XMinorTick','on','YMinorTick','on')
 
         if handles.linlogY == 1
@@ -771,8 +1004,16 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
     % robust AR1
     if get(handles.checkbox_robust,'value') == 1
         plotn =  1; % show result
-        dlg_title = 'Robust AR(1)';
-        prompt = {'Median smoothing window: default 0.2=20%'};
+        %language
+        if handles.lang_choice == 0
+            dlg_title = 'Robust AR(1)';
+            prompt = {'Median smoothing window: default 0.2=20%'};
+        else
+            [~, locb] = ismember('spectral06',lang_id);
+            dlg_title = lang_var{locb};
+            [~, locb] = ismember('spectral26',lang_id);
+            prompt = {lang_var{locb}};
+        end
         num_lines = 1;
         defaultans = {num2str(0.2)};
         options.Resize='on';
@@ -792,17 +1033,48 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
                 semilogy(fd1,pth(1,:),'m-.');
                 semilogy(fd1,po,'k')
                 xlim([0,fmax])
-                xlabel(['Period (',num2str(unit),')']) 
-                ylabel('Power')
-                smthwin = [num2str(smoothwin*100),'%', ' median-smoothed'];
-                legend( 'Robust AR(1) 99%', 'Robust AR(1) 95%','Robust AR(1) 90%',...
-                    'Robust AR(1) median',smthwin,'Power')
+                % language
+                if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                    xlabel(['Period (',num2str(unit),')']) 
+                else
+                    [~, locb] = ismember('main15',lang_id);
+                    xlabel([lang_var{locb},' (',num2str(unit),')']) 
+                end
+
+                if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                    ylabel('Power')
+                    smthwin = [num2str(smoothwin*100),'%', ' median-smoothed'];
+                    legend( 'Robust AR(1) 99%', 'Robust AR(1) 95%','Robust AR(1) 90%',...
+                        'Robust AR(1) median',smthwin,'Power')
+                else
+                    [~, locb] = ismember('spectral30',lang_id);
+                    ylabel(lang_var{locb})
+                    [~, locb1] = ismember('spectral31',lang_id);
+                    smthwin = [num2str(smoothwin*100),'% ', lang_var{locb1}];
+                    [~, locb6] = ismember('spectral06',lang_id);
+                    [~, locb1] = ismember('spectral32',lang_id);
+                    legend([lang_var{locb6},'99%'],...
+                        [lang_var{locb6},'95%'],...
+                        [lang_var{locb6},'90%'],...
+                        [lang_var{locb6},lang_var{locb1}],...
+                        smthwin,lang_var{locb})
+                end
+                
                 set(gca,'XMinorTick','on','YMinorTick','on')
             else
                 [po,fd1, pth] = plomb_robustar1(datax,timex,fmax,smoothwin,plotn);   
             end
-            title(['Lomb-Scargle spectrum','; bw = ',num2str(df)])
-            set(gcf,'Name',[dat_name,ext,': Lomb-Scargle spectrum'])
+            
+            %language
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                title(['Lomb-Scargle spectrum','; bw = ',num2str(df)])
+                set(gcf,'Name',[dat_name,ext,': Lomb-Scargle spectrum'])
+            else
+                [~, locb] = ismember('spectral41',lang_id);
+                [~, locb1] = ismember('spectral34',lang_id);
+                title([lang_var{locb},'; ',lang_var{locb1},' = ',num2str(df)])
+                set(gcf,'Name',[dat_name,ext,': ',lang_var{locb}])
+            end
             if handles.linlogY == 1
                 set(gca, 'YScale', 'log')
             else
@@ -822,7 +1094,6 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
         timex = timex + abs(min(timex));
         %[po,fd1,pth] = plomb(datax,timex,fmax,'normalized','Pd',pd);
         [po,fd1,pth] = plomb(datax,timex,fmax,'Pd',pd);
-        
         
         N = length(datax);
         % With no padding or smoothing applied
@@ -852,7 +1123,13 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
         if plot_x_period
             pt1 = 1./fd1;
             plot(pt1(2:end),po(2:end),'k-','LineWidth',1);
-            xlabel(['Period (',num2str(unit),')']) 
+            % language
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                xlabel(['Period (',num2str(unit),')']) 
+            else
+                [~, locb] = ismember('main15',lang_id);
+                xlabel([lang_var{locb},' (',num2str(unit),')']) 
+            end
             xlim([1/fmax, pt1(3)]);
             set(gca, 'XDir','reverse')
             hold on
@@ -866,7 +1143,15 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
         else
             plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
             xlim([0 fmax]);
-            xlabel(['Frequency (cycles/',num2str(unit),')']) 
+            
+            %language
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                xlabel(['Frequency (cycles/',num2str(unit),')'])
+            else
+                [~, locb] = ismember('spectral33',lang_id);
+                xlabel([lang_var{locb},num2str(unit),')']) 
+            end
+            
             hold on
             plot(fd1,red99global,'r-.','LineWidth',1)
             plot(fd1,red95global,'r--','LineWidth',2)
@@ -876,11 +1161,33 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
             plot(fd1,red90,'b-','LineWidth',1)
             plot(fd1,pl,'k-','LineWidth',2)
         end
-        %legend('Power','95% global','99% local','95% local','90% local','Power law')
-        legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','Power law')
-        ylabel('Power')
-        title(['Lomb-Scargle spectrum & power law','; bw = ',num2str(df)])
-        set(gcf,'Name',['Lomb-Scargle spectrum & power law: ',dat_name,ext])
+        
+        if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+            legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','Power law')
+            ylabel('Power')
+            title(['Lomb-Scargle spectrum & power law','; bw = ',num2str(df)])
+            set(gcf,'Name',['Lomb-Scargle spectrum & power law: ',dat_name,ext])
+        else
+            [~, locb] = ismember('spectral30',lang_id);
+            ylabel(lang_var{locb})
+            [~, locb0] = ismember('spectral34',lang_id);
+            [~, locb1] = ismember('spectral35',lang_id);
+            [~, locb2] = ismember('spectral36',lang_id);
+            [~, locb3] = ismember('spectral09',lang_id);
+            legend(lang_var{locb},...
+                ['99%',lang_var{locb1}],...
+                ['95%',lang_var{locb1}],...
+                ['90%',lang_var{locb1}],...
+                ['99%',lang_var{locb2}],...
+                ['95%',lang_var{locb2}],...
+                ['90%',lang_var{locb2}],...
+                lang_var{locb3})
+            [~, locb41] = ismember('spectral41',lang_id);
+            [~, locb34] = ismember('spectral34',lang_id);
+            title([lang_var{locb41},' & ',lang_var{locb03},'; ',lang_var{locb34},' = ',num2str(df)])
+            set(gcf,'Name',[lang_var{locb41},' & ',lang_var{locb03},': ',dat_name,ext])
+        end
+        
         set(gca,'XMinorTick','on','YMinorTick','on')
         
         if handles.linlogY == 1;
@@ -928,7 +1235,14 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
         if plot_x_period
             pt1 = 1./fd1;
             plot(pt1(2:end),po(2:end),'k-','LineWidth',1);
-            xlabel(['Period (',num2str(unit),')']) 
+            
+            % language
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                xlabel(['Period (',num2str(unit),')']) 
+            else
+                [~, locb] = ismember('main15',lang_id);
+                xlabel([lang_var{locb},' (',num2str(unit),')']) 
+            end
             xlim([1/fmax, pt1(3)]);
             set(gca, 'XDir','reverse')
             hold on
@@ -942,7 +1256,14 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
         else
             plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
             xlim([0 fmax]);
-            xlabel(['Frequency (cycles/',num2str(unit),')']) 
+            
+            %language
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                xlabel(['Frequency (cycles/',num2str(unit),')'])
+            else
+                [~, locb] = ismember('spectral33',lang_id);
+                xlabel([lang_var{locb},num2str(unit),')']) 
+            end
             hold on
             plot(fd1,red99global,'r-.','LineWidth',1)
             plot(fd1,red95global,'r--','LineWidth',2)
@@ -952,10 +1273,36 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
             plot(fd1,red90,'b-','LineWidth',1)
             plot(fd1,pl,'k-','LineWidth',2)
         end
-        legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','BPL')
-        ylabel('Power')
-        title(['Lomb-Scargle spectrum & bending power law','; bw = ',num2str(df)])
-        set(gcf,'Name',['Lomb-Scargle spectrum & bending power law: ',dat_name,ext])
+        
+        
+        
+        
+        % language
+        if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+            legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','bending power law')
+            ylabel('Power')
+            title(['Lomb-Scargle spectrum & bending power law','; bw = ',num2str(df)])
+            set(gcf,'Name',['Lomb-Scargle spectrum & bending power law: ',dat_name,ext])
+        else
+            [~, locb] = ismember('spectral30',lang_id);
+            ylabel(lang_var{locb})
+            [~, locb0] = ismember('spectral34',lang_id);
+            [~, locb1] = ismember('spectral35',lang_id);
+            [~, locb2] = ismember('spectral36',lang_id);
+            [~, locb3] = ismember('spectral10',lang_id);
+            legend(lang_var{locb},...
+                ['99%',lang_var{locb1}],...
+                ['95%',lang_var{locb1}],...
+                ['90%',lang_var{locb1}],...
+                ['99%',lang_var{locb2}],...
+                ['95%',lang_var{locb2}],...
+                ['90%',lang_var{locb2}],...
+                lang_var{locb3})
+            [~, locb41] = ismember('spectral41',lang_id);
+            title([lang_var{locb41},' & ',lang_var{locb3},'; ',lang_var{locb0},' = ',num2str(df)])
+            set(gcf,'Name',[lang_var{locb41},' & ',lang_var{locb3},': ',dat_name,ext])
+        end
+                
         set(gca,'XMinorTick','on','YMinorTick','on')
         
         if handles.linlogY == 1
@@ -970,10 +1317,6 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
     
 elseif  strcmp(method,'Periodogram')
     
-    %if max(diffx) - min(diffx) > 10 * eps('single')
-    %    figwarn = warndlg({'Data may be interpolated to an uniform sampling interval';...
-    %        '';'    Or select : Lomb-Scargle spectrum'});
-    %end
     if padtimes > 1
         [po,fd1] = periodogram(datax,[],nzeropad,1/dt);
     else 
@@ -985,7 +1328,14 @@ elseif  strcmp(method,'Periodogram')
     if plot_x_period
         pt1 = 1./fd1;
         plot(pt1(2:end),po(2:end),'k-','LineWidth',1);
-        xlabel(['Period (',num2str(unit),')']) 
+        
+        % language
+        if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+            xlabel(['Period (',num2str(unit),')']) 
+        else
+            [~, locb] = ismember('main15',lang_id);
+            xlabel([lang_var{locb},' (',num2str(unit),')']) 
+        end
         xlim([1/fmax, pt1(3)]);
         set(gca, 'XDir','reverse')
         if handles.checkbox_ar1_v == 1
@@ -999,34 +1349,62 @@ elseif  strcmp(method,'Periodogram')
             plot(pt1,tabtchired90,'r-','LineWidth',1)
             plot(pt1,tabtchired95,'r--','LineWidth',2)
             plot(pt1,tabtchired99,'b-.','LineWidth',1)
-            %plot(pt1,tabtchired999,'g--','LineWidth',1)
-            %legend('Power','Mean','90%','95%','99%','99.9')
-            legend('Power','Mean','90%','95%','99%')
+            % language
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                legend('Power','Mean','90%','95%','99%')
+            else
+                [~, main46] = ismember('main46',lang_id);
+                [~, spectral42] = ismember('spectral42',lang_id);
+                legend(lang_var{main46},lang_var{spectral42},'90%','95%','99%')
+            end
         end
     else
         plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
-        xlabel(['Frequency (cycles/',num2str(unit),')']) 
+        
+        %language
+        if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+            xlabel(['Frequency (cycles/',num2str(unit),')'])
+        else
+            [~, locb] = ismember('spectral33',lang_id);
+            xlabel([lang_var{locb},num2str(unit),')']) 
+        end
         xlim([0 fmax]);
         if handles.checkbox_ar1_v == 1
             [theored]=theoredar1ML(datax,fd1,mean(po),dt);
             tabtchired90 = theored * chi2inv(90/100,2)/2;
             tabtchired95 = theored * chi2inv(95/100,2)/2;
             tabtchired99 = theored * chi2inv(99/100,2)/2;
-            %tabtchired999 = theored * chi2inv(99.9/100,2)/2;
             hold on
             plot(fd1,theored,'k-','LineWidth',2)
             plot(fd1,tabtchired90,'r-','LineWidth',1)
             plot(fd1,tabtchired95,'r--','LineWidth',2)
             plot(fd1,tabtchired99,'b-.','LineWidth',1)
-            %plot(fd1,tabtchired999,'g--','LineWidth',1)
-            %legend('Power','Mean','90%','95%','99%','99.9%')
-            legend('Power','Mean','90%','95%','99%')
+                
+            % language
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                legend('Power','Mean','90%','95%','99%')
+            else
+                [~, main46] = ismember('main46',lang_id);
+                [~, spectral42] = ismember('spectral42',lang_id);
+                legend(lang_var{main46},lang_var{spectral42},'90%','95%','99%')
+            end
         end
     end
+    % language
+    if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+        ylabel('Power')
+        title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit,'; bw = ',num2str(df)])
+        set(gcf,'Name',['Periodogram & AR1: ',dat_name,ext])
+    else
+        [~, spectral30] = ismember('spectral30',lang_id);
+        ylabel(lang_var{spectral30})
+        [~, spectral43] = ismember('spectral43',lang_id);
+        [~, spectral37] = ismember('spectral37',lang_id);
+        [~, spectral34] = ismember('spectral34',lang_id);
+        title([lang_var{spectral43},'; ',lang_var{spectral37},' = ',num2str(dt),' ', unit,'; ',lang_var{spectral34},' = ',num2str(df)])
+        set(gcf,'Name',[lang_var{spectral43},' & AR1: ',dat_name,ext])
+    end
     
-    ylabel('Power ')
-    title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit,'; bw = ',num2str(df)])
-    set(gcf,'Name',['Periodogram & AR1: ',dat_name,ext])
     set(gca,'XMinorTick','on','YMinorTick','on')
     
     if handles.linlogY == 1;
@@ -1068,7 +1446,14 @@ elseif  strcmp(method,'Periodogram')
         if plot_x_period
             pt1 = 1./fd1;
             plot(pt1(2:end),po(2:end),'k-','LineWidth',1);
-            xlabel(['Period (',num2str(unit),')']) 
+            
+            % language
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                xlabel(['Period (',num2str(unit),')']) 
+            else
+                [~, locb] = ismember('main15',lang_id);
+                xlabel([lang_var{locb},' (',num2str(unit),')']) 
+            end
             xlim([1/fmax, pt1(3)]);
             set(gca, 'XDir','reverse')
             hold on
@@ -1082,7 +1467,14 @@ elseif  strcmp(method,'Periodogram')
         else
             plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
             xlim([0 fmax]);
-            xlabel(['Frequency (cycles/',num2str(unit),')']) 
+            
+            %language
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                xlabel(['Frequency (cycles/',num2str(unit),')'])
+            else
+                [~, locb] = ismember('spectral33',lang_id);
+                xlabel([lang_var{locb},num2str(unit),')']) 
+            end
             hold on
             plot(fd1,red99global,'r-.','LineWidth',1)
             plot(fd1,red95global,'r--','LineWidth',2)
@@ -1092,11 +1484,33 @@ elseif  strcmp(method,'Periodogram')
             plot(fd1,red90,'b-','LineWidth',1)
             plot(fd1,pl,'k-','LineWidth',2)
         end
-        %legend('Power','95% global','99% local','95% local','90% local','Power law')
-        legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','Power law')
-        ylabel('Power')
-        title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit,'; bw = ',num2str(df)])
-        set(gcf,'Name',['Periodogram & power law: ',dat_name,ext])
+        
+        if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+            legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','Power law')
+            ylabel('Power')
+            title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit,'; bw = ',num2str(df)])
+            set(gcf,'Name',['Periodogram & power law: ',dat_name,ext])
+        else
+            [~, locb] = ismember('spectral30',lang_id);
+            ylabel(lang_var{locb})
+            [~, locb0] = ismember('spectral34',lang_id);
+            [~, locb1] = ismember('spectral35',lang_id);
+            [~, locb2] = ismember('spectral36',lang_id);
+            [~, locb3] = ismember('spectral09',lang_id);
+            legend(lang_var{locb},...
+                ['99%',lang_var{locb1}],...
+                ['95%',lang_var{locb1}],...
+                ['90%',lang_var{locb1}],...
+                ['99%',lang_var{locb2}],...
+                ['95%',lang_var{locb2}],...
+                ['90%',lang_var{locb2}],...
+                lang_var{locb3})
+            [~, spectral43] = ismember('spectral43',lang_id);
+            [~, spectral37] = ismember('spectral37',lang_id);
+            title([lang_var{spectral43},'; ',lang_var{spectral37},' = ',num2str(dt),' ', unit,'; ',lang_var{locb0},' = ',num2str(df)])
+            set(gcf,'Name',[lang_var{spectral43},' & ',lang_var{locb3},': ',dat_name,ext])
+        end
+        
         set(gca,'XMinorTick','on','YMinorTick','on')
         
         if handles.linlogY == 1;
@@ -1141,7 +1555,14 @@ elseif  strcmp(method,'Periodogram')
         if plot_x_period
             pt1 = 1./fd1;
             plot(pt1(2:end),po(2:end),'k-','LineWidth',1);
-            xlabel(['Period (',num2str(unit),')']) 
+            
+            % language
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                xlabel(['Period (',num2str(unit),')']) 
+            else
+                [~, locb] = ismember('main15',lang_id);
+                xlabel([lang_var{locb},' (',num2str(unit),')']) 
+            end
             xlim([1/fmax, pt1(3)]);
             set(gca, 'XDir','reverse')
             hold on
@@ -1155,7 +1576,14 @@ elseif  strcmp(method,'Periodogram')
         else
             plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
             xlim([0 fmax]);
-            xlabel(['Frequency (cycles/',num2str(unit),')']) 
+            
+            %language
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                xlabel(['Frequency (cycles/',num2str(unit),')'])
+            else
+                [~, locb] = ismember('spectral33',lang_id);
+                xlabel([lang_var{locb},num2str(unit),')']) 
+            end
             hold on
             plot(fd1,red99global,'r-.','LineWidth',1)
             plot(fd1,red95global,'r--','LineWidth',2)
@@ -1165,10 +1593,33 @@ elseif  strcmp(method,'Periodogram')
             plot(fd1,red90,'b-','LineWidth',1)
             plot(fd1,pl,'k-','LineWidth',2)
         end
-        legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','BPL')
-        ylabel('Power')
-        title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit,'; bw = ',num2str(df)])
-        set(gcf,'Name',['Periodogram & bending power law: ',dat_name,ext])
+        
+        if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+            legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','BPL')
+            ylabel('Power')
+            title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit,'; bw = ',num2str(df)])
+            set(gcf,'Name',['Periodogram & bending power law: ',dat_name,ext])
+        else
+            [~, locb] = ismember('spectral30',lang_id);
+            ylabel(lang_var{locb})
+            [~, locb0] = ismember('spectral34',lang_id);
+            [~, locb1] = ismember('spectral35',lang_id);
+            [~, locb2] = ismember('spectral36',lang_id);
+            [~, locb3] = ismember('spectral10',lang_id);
+            legend(lang_var{locb},...
+                ['99%',lang_var{locb1}],...
+                ['95%',lang_var{locb1}],...
+                ['90%',lang_var{locb1}],...
+                ['99%',lang_var{locb2}],...
+                ['95%',lang_var{locb2}],...
+                ['90%',lang_var{locb2}],...
+                lang_var{locb3})
+            [~, spectral43] = ismember('spectral43',lang_id);
+            [~, spectral37] = ismember('spectral37',lang_id);
+            title([lang_var{spectral43},'; ',lang_var{spectral37},' = ',num2str(dt),' ', unit,'; ',lang_var{locb0},' = ',num2str(df)])
+            set(gcf,'Name',[lang_var{spectral43},' & ',lang_var{locb3},': ',dat_name,ext])
+        end
+        
         set(gca,'XMinorTick','on','YMinorTick','on')
         
         if handles.linlogY == 1
@@ -1262,15 +1713,26 @@ if strcmp(method,'Multi-taper method')
         %set(figwarn,'position',[0.5,0.8,0.225,0.09]) % set position
     end
     if handles.checkbox_robustAR1_v == 1
-        dlg_title = 'Robust AR(1) Estimation';
-        prompt = {'Median smoothing window: default 0.2 = 20%';...
-            'AR1 best fit model? 1 = linear; 2 = log power (default)';...
-            'Bias correction for ultra-high resolution data'};
+        if handles.lang_choice == 0
+            dlg_title = 'Robust AR(1) Estimation';
+            prompt = {'Median smoothing window: default 0.2 = 20%';...
+                'AR1 best fit model? 1 = linear （default）; 2 = log power';...
+                'Bias correction for ultra-high resolution data'};
+        else
+            [~, locb] = ismember('spectral25',lang_id);
+            dlg_title = lang_var{locb};
+            [~, locb1] = ismember('spectral26',lang_id);
+            [~, locb2] = ismember('spectral27',lang_id);
+            [~, locb3] = ismember('spectral28',lang_id);
+            prompt = {lang_var{locb1};...
+                lang_var{locb2};...
+                lang_var{locb3}};
+        end
         num_lines = 1;
         if BiasCorr == 0
-            defaultans = {num2str(0.2),num2str(2),num2str(0)};
+            defaultans = {num2str(0.2),num2str(1),num2str(0)};
         else
-            defaultans = {num2str(0.2),num2str(2),num2str(1)};
+            defaultans = {num2str(0.2),num2str(1),num2str(1)};
         end
         options.Resize='on';
         answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
@@ -1281,7 +1743,12 @@ if strcmp(method,'Multi-taper method')
             biascorr = str2double(answer{3});
             
             if length(datax)>2000
-                hwarn = warndlg('Large dataset, wait ...');
+                if handles.lang_choice > 0
+                    [~, locb] = ismember('spectral29',lang_id);
+                    hwarn = warndlg(lang_var{locb});
+                else
+                    hwarn = warndlg('Large dataset, wait ...');
+                end
             end
 
             if biascorr == 1
@@ -1324,10 +1791,24 @@ if strcmp(method,'Multi-taper method')
             semilogy(f,chi90,'r-');
             semilogy(f,chi95,'r--','LineWidth',2);
             semilogy(f,chi99,'b-.');
-            ylabel('Power')
-            smthwin = [num2str(smoothwin*100),'%', ' median-smoothed'];
-            legend('Power',smthwin,'Robust AR(1) median',...
-                'Robust AR(1) 90%','Robust AR(1) 95%','Robust AR(1) 99%')
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                ylabel('Power')
+                smthwin = [num2str(smoothwin*100),'%', ' median-smoothed'];
+                legend('Power',smthwin,'Robust AR(1) median',...
+                    'Robust AR(1) 90%','Robust AR(1) 95%','Robust AR(1) 99%')
+            else
+                [~, locb] = ismember('spectral30',lang_id);
+                ylabel(lang_var{locb})
+                [~, locb1] = ismember('spectral31',lang_id);
+                smthwin = [num2str(smoothwin*100),'% ', lang_var{locb1}];
+                [~, locb6] = ismember('spectral06',lang_id);
+                [~, locb1] = ismember('spectral32',lang_id);
+                legend(lang_var{locb},smthwin,...
+                    [lang_var{locb6},lang_var{locb1}],...
+                    [lang_var{locb6},'90%'],...
+                    [lang_var{locb6},'95%'],...
+                    [lang_var{locb6},'99%'])
+            end
             set(gcf,'units','norm') % set location
             set(gcf,'position',[0.0,0.45,0.45,0.45]) % set position
             %end
@@ -1335,9 +1816,15 @@ if strcmp(method,'Multi-taper method')
             if plot_x_period
                 update_spectral_x_period_mtm
             else
-                title([dat_name,'-',num2str(nw),'\pi-MTM-Robust-AR1: \rho = ',num2str(rhoM),'. S0 =',num2str(s0M),'; bw = ',num2str(bw)])
-                
-                xlabel(['Frequency (cycles/',num2str(unit),')']) 
+                if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                    xlabel(['Frequency (cycles/',num2str(unit),')']) 
+                    title([num2str(nw),'\pi-MTM-Robust-AR(1): \rho = ',num2str(rhoM),'. S0 = ',num2str(s0M),'; bw = ',num2str(bw)])   
+                else
+                    [~, locb] = ismember('spectral33',lang_id);
+                    [~, locb1] = ismember('spectral34',lang_id);
+                    xlabel([lang_var{locb},num2str(unit),')']) 
+                    title([num2str(nw),'\pi-MTM-',lang_var{locb6},': \rho = ',num2str(rhoM),'. S0 = ',num2str(s0M),'; ',lang_var{locb1},' = ',num2str(bw)])   
+                end
                 set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'pi MTM'])
                 set(gca,'XMinorTick','on','YMinorTick','on')
                 xlim([0 fmax]);
@@ -1358,9 +1845,14 @@ if strcmp(method,'Multi-taper method')
             data2 = [f1,pxxsmooth0];
             
             CDac_pwd;
-            dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
-            dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9);
-            disp('>>  Refresh main window to see red noise estimation data files: ')
+            dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9);
+            dlmwrite(name2, data2, 'delimiter', ' ', 'precision', 9);
+            if handles.lang_choice == 0
+                disp('>>  Refresh main window to see red noise estimation data files: ')
+            else
+                [~, spectral44] = ismember('spectral44',lang_id);
+                disp(lang_var{spectral44})
+            end
             disp(name1)
             disp(name2)
             cd(pre_dirML);
@@ -1417,9 +1909,14 @@ if strcmp(method,'Multi-taper method')
         name2 = [dat_name,'-',num2str(nw),'piMTM-PL-global',ext];
         data2 = [fd1,po,pl,red90global,red95global,red99global];
         CDac_pwd;
-        dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
-        dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9);
-        disp('>>  Refresh main window to see red noise estimation data files: ')
+        dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9);
+        dlmwrite(name2, data2, 'delimiter', ' ', 'precision', 9);
+        if handles.lang_choice == 0
+            disp('>>  Refresh main window to see red noise estimation data files: ')
+        else
+            [~, spectral44] = ismember('spectral44',lang_id);
+            disp(lang_var{spectral44})
+        end
         disp(name1)
         disp(name2)
         cd(pre_dirML);
@@ -1429,7 +1926,14 @@ if strcmp(method,'Multi-taper method')
         if plot_x_period
             pt1 = 1./fd1;
             plot(pt1(2:end),po(2:end),'k-','LineWidth',1);
-            xlabel(['Period (',num2str(unit),')']) 
+            
+            % language
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                xlabel(['Period (',num2str(unit),')']) 
+            else
+                [~, locb] = ismember('main15',lang_id);
+                xlabel([lang_var{locb},' (',num2str(unit),')']) 
+            end
             xlim([1/fmax, pt1(3)]);
             set(gca, 'XDir','reverse')
             hold on
@@ -1443,7 +1947,14 @@ if strcmp(method,'Multi-taper method')
         else
             plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
             xlim([0 fmax]);
-            xlabel(['Frequency (cycles/',num2str(unit),')']) 
+            
+            %language
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                xlabel(['Frequency (cycles/',num2str(unit),')'])
+            else
+                [~, locb] = ismember('spectral33',lang_id);
+                xlabel([lang_var{locb},num2str(unit),')']) 
+            end
             hold on
             plot(fd1,red99global,'r-.','LineWidth',1)
             plot(fd1,red95global,'r--','LineWidth',2)
@@ -1453,10 +1964,30 @@ if strcmp(method,'Multi-taper method')
             plot(fd1,red90,'b-','LineWidth',1)
             plot(fd1,pl,'k-','LineWidth',2)
         end
-        legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','Power law')
-        ylabel('Power')
-        title([num2str(nw),'\pi MTM & power law','; bw = ',num2str(bw)])
-        set(gcf,'Name',[num2str(nw),'\pi MTM & power law: ',dat_name,ext])
+        
+        if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+            legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','Power law')
+            ylabel('Power')
+            title([num2str(nw),'\pi MTM & power law','; bw = ',num2str(bw)])   
+            set(gcf,'Name',[num2str(nw),'pi MTM & power law: ',dat_name,ext])
+        else
+            [~, locb] = ismember('spectral30',lang_id);
+            ylabel(lang_var{locb})
+            [~, locb0] = ismember('spectral34',lang_id);
+            [~, locb1] = ismember('spectral35',lang_id);
+            [~, locb2] = ismember('spectral36',lang_id);
+            [~, locb3] = ismember('spectral09',lang_id);
+            legend(lang_var{locb},...
+                ['99%',lang_var{locb1}],...
+                ['95%',lang_var{locb1}],...
+                ['90%',lang_var{locb1}],...
+                ['99%',lang_var{locb2}],...
+                ['95%',lang_var{locb2}],...
+                ['90%',lang_var{locb2}],...
+                lang_var{locb3})
+            title([num2str(nw),'\pi MTM & ',lang_var{locb3},'; ',lang_var{locb0},' = ',num2str(bw)])  
+            set(gcf,'Name',[num2str(nw),'pi MTM & ',lang_var{locb3},': ',dat_name,ext])
+        end
         set(gca,'XMinorTick','on','YMinorTick','on')
         
         if handles.linlogY == 1
@@ -1501,9 +2032,14 @@ if strcmp(method,'Multi-taper method')
         name2 = [dat_name,'-',num2str(nw),'piMTM-BPL-global',ext];
         data2 = [fd1,po,theored1,red90global,red95global,red99global];
         CDac_pwd;
-        dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
-        dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9);
-        disp('>>  Refresh main window to see red noise estimation data files: ')
+        dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9);
+        dlmwrite(name2, data2, 'delimiter', ' ', 'precision', 9);
+        if handles.lang_choice == 0
+            disp('>>  Refresh main window to see red noise estimation data files: ')
+        else
+            [~, spectral44] = ismember('spectral44',lang_id);
+            disp(lang_var{spectral44})
+        end
         disp(name1)
         disp(name2)
         cd(pre_dirML);
@@ -1513,7 +2049,14 @@ if strcmp(method,'Multi-taper method')
         if plot_x_period
             pt1 = 1./fd1;
             plot(pt1(2:end),po(2:end),'k-','LineWidth',1);
-            xlabel(['Period (',num2str(unit),')']) 
+            
+            % language
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                xlabel(['Period (',num2str(unit),')']) 
+            else
+                [~, locb] = ismember('main15',lang_id);
+                xlabel([lang_var{locb},' (',num2str(unit),')']) 
+            end
             xlim([1/fmax, pt1(3)]);
             set(gca, 'XDir','reverse')
             hold on
@@ -1527,7 +2070,14 @@ if strcmp(method,'Multi-taper method')
         else
             plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
             xlim([0 fmax]);
-            xlabel(['Frequency (cycles/',num2str(unit),')']) 
+            
+            %language
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                xlabel(['Frequency (cycles/',num2str(unit),')'])
+            else
+                [~, locb] = ismember('spectral33',lang_id);
+                xlabel([lang_var{locb},num2str(unit),')']) 
+            end
             hold on
             plot(fd1,red99global,'r-.','LineWidth',1)
             plot(fd1,red95global,'r--','LineWidth',2)
@@ -1537,10 +2087,33 @@ if strcmp(method,'Multi-taper method')
             plot(fd1,red90,'b-','LineWidth',1)
             plot(fd1,theored1,'k-','LineWidth',2)
         end
-        legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','BPL')
-        ylabel('Power')
-        title([num2str(nw),'\pi MTM & bending power law','; bw = ',num2str(bw)])
-        set(gcf,'Name',[num2str(nw),'\pi MTM & bending power law: ',dat_name,ext])
+        
+        
+        % language
+        if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+            legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','bending power law')
+            ylabel('Power')
+            title([num2str(nw),'\pi MTM & bending power law','; bw = ',num2str(bw)])  
+            set(gcf,'Name',[num2str(nw),'pi MTM & bending power law: ',dat_name,ext])
+        else
+            [~, locb] = ismember('spectral30',lang_id);
+            ylabel(lang_var{locb})
+            [~, locb0] = ismember('spectral34',lang_id);
+            [~, locb1] = ismember('spectral35',lang_id);
+            [~, locb2] = ismember('spectral36',lang_id);
+            [~, locb3] = ismember('spectral10',lang_id);
+            legend(lang_var{locb},...
+                ['99%',lang_var{locb1}],...
+                ['95%',lang_var{locb1}],...
+                ['90%',lang_var{locb1}],...
+                ['99%',lang_var{locb2}],...
+                ['95%',lang_var{locb2}],...
+                ['90%',lang_var{locb2}],...
+                lang_var{locb3})
+            title([num2str(nw),'\pi MTM & ',lang_var{locb3},'; ',lang_var{locb0},' = ',num2str(bw)])   
+            set(gcf,'Name',[num2str(nw),'pi MTM & ',lang_var{locb3},': ',dat_name,ext])
+        end
+        
         set(gca,'XMinorTick','on','YMinorTick','on')
         
         if handles.linlogY == 1
@@ -1564,10 +2137,22 @@ if strcmp(method,'Multi-taper method')
             set(gcf,'Color', 'white')
             plot(fd1,po,'LineWidth',1); 
             line([0.7*fmax, 0.7*fmax+bw],[0.8*max(po), 0.8*max(po)],'Color','r')
-            xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
-            ylabel('Power ')
-            legend('Power','bw')
-            title([num2str(nw),' \pi MTM method; Sampling rate = ',num2str(dt),' ', unit,'; bw = ',num2str(bw)])
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0) % english
+                xlabel(['Frequency (cycles/',num2str(unit),')']) 
+                ylabel('Power')
+                legend('Power','bw')
+                title([num2str(nw),' \pi MTM method; Sampling rate = ',num2str(dt),' ', unit,'; bw = ',num2str(bw)])
+            else
+                [~, locb] = ismember('spectral33',lang_id);
+                [~, locb1] = ismember('spectral30',lang_id);
+                [~, locb2] = ismember('spectral34',lang_id);
+                [~, locb3] = ismember('spectral37',lang_id);
+
+                xlabel([lang_var{locb},num2str(unit),')']) 
+                ylabel(lang_var{locb1})
+                legend(lang_var{locb1},lang_var{locb2})
+                title([num2str(nw),' \pi MTM; ',lang_var{locb3},' = ',num2str(dt),' ', unit,'; ',lang_var{locb2},' = ',num2str(bw)])
+            end
             set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'pi MTM'])
             xlim([0 fmax]);
             set(gca,'XMinorTick','on','YMinorTick','on')
@@ -1585,8 +2170,14 @@ if strcmp(method,'Multi-taper method')
     
     if handles.checkbox_ar1_v == 1
         % Waitbar
-        hwaitbar = waitbar(0,'Classic red noise estimation may take a few minutes...',...    
-           'WindowStyle','modal');
+        if handles.lang_choice == 0
+            hwaitbar = waitbar(0,'Estimation may take a few minutes...',...    
+               'WindowStyle','modal');
+        else
+            [~, locb] = ismember('spectral40',lang_id);
+            hwaitbar = waitbar(0,lang_var{locb},...    
+               'WindowStyle','modal');
+        end
         hwaitbar_find = findobj(hwaitbar,'Type','Patch');
         set(hwaitbar_find,'EdgeColor',[0 0.9 0],'FaceColor',[0 0.9 0]) % changes the color to blue
         setappdata(hwaitbar,'canceling',0)
@@ -1633,15 +2224,30 @@ if strcmp(method,'Multi-taper method')
             legend('Power','AR1','90%','95%','99%','99.9%')
             set(gca,'XMinorTick','on','YMinorTick','on')
             xlim([0 fmax]);
-            xlabel(['Frequency (cycles/',num2str(unit),')']) 
-            ylabel('Power ')
-            title([num2str(nw),'\pi MTM classic AR1: \rho = ',num2str(rho),'; Sampling rate = ',num2str(dt),' ', unit,'; bw = ',num2str(bw)])
+            
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                xlabel(['Frequency (cycles/',num2str(unit),')'])
+                ylabel('Power')
+                title([num2str(nw),'\pi MTM classic AR1: \rho = ',num2str(rho),'; Sampling rate = ',num2str(dt),' ', unit,'; bw = ',num2str(bw)])
+                legend('Power','AR1','90%','95%','99%','99.9%')
+            else
+                [~, locb] = ismember('spectral33',lang_id);
+                xlabel([lang_var{locb},num2str(unit),')']) 
+                 [~, locb1] = ismember('spectral30',lang_id);
+                ylabel(lang_var{locb1})
+                legend(lang_var{locb1},'AR1','90%','95%','99%','99.9%')
+                [~, locb1] = ismember('spectral34',lang_id);
+                [~, locb7] = ismember('spectral07',lang_id);
+                [~, locb3] = ismember('spectral37',lang_id);
+                title([num2str(nw),'\pi-MTM-',lang_var{locb7},': \rho = ',num2str(rho),'; ',...
+                    lang_var{locb3},' = ',num2str(dt),'; ',lang_var{locb1},' = ',num2str(bw)])
+            end
             
     step = 5.5;
         waitbar(step / steps)
         delete(hwaitbar)
         xlim([0 fmax]);
-        if handles.linlogY == 1;
+        if handles.linlogY == 1
             set(gca, 'YScale', 'log')
         else
             set(gca, 'YScale', 'linear')
@@ -1652,9 +2258,8 @@ if strcmp(method,'Multi-taper method')
         %filename_mtm = [dat_name,'-',num2str(nw),'piMTMspectrum.txt'];
         filename_mtm_cl = [dat_name,'-',num2str(nw),'piMTM-ClassicAR1.txt'];
         CDac_pwd; % cd ac_pwd dir
-        dlmwrite(filename_mtm_cl, [fd,po,theored,tabtchi90,tabtchi95,tabtchi99,tabtchi999], 'delimiter', ',', 'precision', 9);
-        disp('>>  Refresh the Main Window to see output data')
-        %disp(filename_mtm)
+        dlmwrite(filename_mtm_cl, [fd,po,theored,tabtchi90,tabtchi95,tabtchi99,tabtchi999], 'delimiter', ' ', 'precision', 9);
+
         disp(filename_mtm_cl)
         cd(pre_dirML); % return to matlab view folder
         figdata = figHandle;
@@ -1685,12 +2290,24 @@ if strcmp(method,'Multi-taper method')
             subplot(2,1,1); 
             plot(freq,dof,'color','k','LineWidth',1)
             xlim([0 fmax])
-            title('Adaptive weighted degrees of freedom')
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                title('Adaptive weighted degrees of freedom')
+            else
+                [~, locb] = ismember('spectral38',lang_id);
+                title(lang_var{locb})
+            end
             subplot(2,1,2); 
             plot(freq,Faz,'color','k','LineWidth',1)
             xlim([0 fmax])
-            title('Harmonic phase')
-            ylabel('Frequency')
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                title('Harmonic phase')
+                ylabel('Frequency')
+            else
+                [~, locb] = ismember('spectral39',lang_id);
+                [~, locb1] = ismember('main34',lang_id);
+                title(lang_var{locb})
+                ylabel(lang_var{locb1})
+            end
         end
         
         fnyq = 1/(2*dt);
@@ -1708,10 +2325,10 @@ if strcmp(method,'Multi-taper method')
         [dataftest] = select_interval(dataftest,0,fnyq);
         [datafsig] = select_interval(datafsig,0,fnyq);
         [dataamp] = select_interval(dataamp,0,fnyq);
-        dlmwrite(nameftest, dataftest, 'delimiter', ',', 'precision', 9);
-        dlmwrite(namefsig, datafsig, 'delimiter', ',', 'precision', 9);
-        dlmwrite(namefamp, dataamp, 'delimiter', ',', 'precision', 9);
-        dlmwrite(namefrest, datarest, 'delimiter', ',', 'precision', 9);
+        dlmwrite(nameftest, dataftest, 'delimiter', ' ', 'precision', 9);
+        dlmwrite(namefsig, datafsig, 'delimiter', ' ', 'precision', 9);
+        dlmwrite(namefamp, dataamp, 'delimiter', ' ', 'precision', 9);
+        dlmwrite(namefrest, datarest, 'delimiter', ' ', 'precision', 9);
         %disp('>>  Refresh main window to see red noise estimation data files: ')
         disp(nameftest)
         disp(namefsig)
@@ -1740,7 +2357,14 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
             else
                 plot(pt1,po,'LineWidth',1); 
             end
-            xlabel(['Period (',num2str(unit),')']) 
+            
+            % language
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                xlabel(['Period (',num2str(unit),')']) 
+            else
+                [~, locb] = ismember('main15',lang_id);
+                xlabel([lang_var{locb},' (',num2str(unit),')']) 
+            end
             xlim([1/fmax, pt1(3)]);
             set(gca, 'XDir','reverse')
         else
@@ -1750,12 +2374,31 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
             else
                 plot(fd1,po,'LineWidth',1); 
             end
-            xlabel(['Frequency (cycles/',num2str(unit),')']) 
+            
+            %language
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                xlabel(['Frequency (cycles/',num2str(unit),')'])
+            else
+                [~, locb] = ismember('spectral33',lang_id);
+                xlabel([lang_var{locb},num2str(unit),')']) 
+            end
             xlim([0 fmax]);
         end
-        ylabel('Power ')
-        title(['Lomb-Scargle spectrum','; bw = ',num2str(df)])
-        set(gcf,'Name',[dat_name,ext,': Lomb-Scargle spectrum'])
+        
+        %language
+        if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+            ylabel('Power')
+            title(['Lomb-Scargle spectrum','; bw = ',num2str(df)])
+            set(gcf,'Name',[dat_name,ext,': Lomb-Scargle spectrum'])
+        else
+            [~, locb] = ismember('spectral30',lang_id);
+            ylabel(lang_var{locb})
+            [~, locb] = ismember('spectral41',lang_id);
+            [~, locb1] = ismember('spectral34',lang_id);
+            title([lang_var{locb},'; ',lang_var{locb1},' = ',num2str(df)])
+            set(gcf,'Name',[dat_name,ext,': ',lang_var{locb}])
+        end
+        
         set(gca,'XMinorTick','on','YMinorTick','on')
 
         if handles.linlogY == 1
@@ -1770,9 +2413,9 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
         
         filename_LS = [dat_name,'-Lomb-Scargle.txt'];
         CDac_pwd; % cd ac_pwd dir
-        dlmwrite(filename_LS, [fd1,po,(pth*ones(size(fd1')))'], 'delimiter', ',', 'precision', 9);
+        dlmwrite(filename_LS, [fd1,po,(pth*ones(size(fd1')))'], 'delimiter', ' ', 'precision', 9);
         cd(pre_dirML); % return to matlab view folder
-        disp('Refresh the Main Window:')
+        %disp('Refresh the Main Window:')
         disp(filename_LS)
     
     end
@@ -1780,8 +2423,18 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
     % robust AR1
     if get(handles.checkbox_robust,'value') == 1
         plotn =  1; % show result
-        dlg_title = 'Robust AR(1)';
-        prompt = {'Median smoothing window: default 0.2=20%'};
+        
+        %language
+        if handles.lang_choice == 0
+            dlg_title = 'Robust AR(1)';
+            prompt = {'Median smoothing window: default 0.2=20%'};
+        else
+            [~, locb] = ismember('spectral06',lang_id);
+            dlg_title = lang_var{locb};
+            [~, locb] = ismember('spectral26',lang_id);
+            prompt = {lang_var{locb}};
+        end
+        
         num_lines = 1;
         defaultans = {num2str(0.2)};
         options.Resize='on';
@@ -1802,17 +2455,48 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
                 semilogy(fd1,pth(1,:),'m-.');
                 semilogy(fd1,po,'k')
                 xlim([0,fmax])
-                xlabel(['Period (',num2str(unit),')'])
-                ylabel('Power')
-                smthwin = [num2str(smoothwin*100),'%', ' median-smoothed'];
-                legend( 'Robust AR(1) 99%', 'Robust AR(1) 95%','Robust AR(1) 90%',...
-                    'Robust AR(1) median',smthwin,'Power')
+                
+                % language
+                if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                    xlabel(['Period (',num2str(unit),')']) 
+                else
+                    [~, locb] = ismember('main15',lang_id);
+                    xlabel([lang_var{locb},' (',num2str(unit),')']) 
+                end
+                if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                    ylabel('Power')
+                    smthwin = [num2str(smoothwin*100),'%', ' median-smoothed'];
+                    legend( 'Robust AR(1) 99%', 'Robust AR(1) 95%','Robust AR(1) 90%',...
+                        'Robust AR(1) median',smthwin,'Power')
+                else
+                    [~, locb] = ismember('spectral30',lang_id);
+                    ylabel(lang_var{locb})
+                    [~, locb1] = ismember('spectral31',lang_id);
+                    smthwin = [num2str(smoothwin*100),'% ', lang_var{locb1}];
+                    [~, locb6] = ismember('spectral06',lang_id);
+                    [~, locb1] = ismember('spectral32',lang_id);
+                    legend([lang_var{locb6},'99%'],...
+                        [lang_var{locb6},'95%'],...
+                        [lang_var{locb6},'90%'],...
+                        [lang_var{locb6},lang_var{locb1}],...
+                        smthwin,lang_var{locb})
+                end
                 set(gca,'XMinorTick','on','YMinorTick','on')
             else
                 [po,fd1, pth] = plomb_robustar1(datax,timex,fmax,smoothwin,plotn);  
             end
-            title(['Lomb-Scargle spectrum','; bw = ',num2str(df)])
-            set(gcf,'Name',[dat_name,ext,': Lomb-Scargle spectrum'])
+            
+            %language
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                title(['Lomb-Scargle spectrum','; bw = ',num2str(df)])
+                set(gcf,'Name',[dat_name,ext,': Lomb-Scargle spectrum'])
+            else
+                [~, locb] = ismember('spectral41',lang_id);
+                [~, locb1] = ismember('spectral34',lang_id);
+                title([lang_var{locb},'; ',lang_var{locb1},' = ',num2str(df)])
+                set(gcf,'Name',[dat_name,ext,': ',lang_var{locb}])
+            end
+            
             set(gca,'XMinorTick','on','YMinorTick','on')
             if handles.linlogY == 1
                 set(gca, 'YScale', 'log')
@@ -1826,8 +2510,13 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
             name1 = [dat_name,'-Lomb-robustAR1',ext];
             data1 = [fd1,po,pth'];
             CDac_pwd;
-            dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
-            disp('>>  Refresh main window to see red noise estimation data files: ')
+            dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9);
+            if handles.lang_choice == 0
+                disp('>>  Refresh main window to see red noise estimation data files: ')
+            else
+                [~, spectral44] = ismember('spectral44',lang_id);
+                disp(lang_var{spectral44})
+            end
             disp(name1)
             cd(pre_dirML);
         
@@ -1844,7 +2533,6 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
         timex = timex + abs(min(timex));
         %[po,fd1,pth] = plomb(datax,timex,fmax,'normalized','Pd',pd);
         [po,fd1,pth] = plomb(datax,timex,fmax,'Pd',pd);
-        
         
         N = length(datax);
         % With no padding or smoothing applied
@@ -1873,9 +2561,14 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
         name2 = [dat_name,'-Lomb-PL-global',ext];
         data2 = [fd1,po,pl,red90global,red95global,red99global];
         CDac_pwd;
-        dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
-        dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9);
-        disp('>>  Refresh main window to see red noise estimation data files: ')
+        dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9);
+        dlmwrite(name2, data2, 'delimiter', ' ', 'precision', 9);
+        if handles.lang_choice == 0
+            disp('>>  Refresh main window to see red noise estimation data files: ')
+        else
+            [~, spectral44] = ismember('spectral44',lang_id);
+            disp(lang_var{spectral44})
+        end
         disp(name1)
         disp(name2)
         cd(pre_dirML);
@@ -1885,7 +2578,14 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
         if plot_x_period
             pt1 = 1./fd1;
             plot(pt1(2:end),po(2:end),'k-','LineWidth',1);
-            xlabel(['Period (',num2str(unit),')']) 
+            
+            % language
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                xlabel(['Period (',num2str(unit),')']) 
+            else
+                [~, locb] = ismember('main15',lang_id);
+                xlabel([lang_var{locb},' (',num2str(unit),')']) 
+            end
             xlim([1/fmax, pt1(3)]);
             set(gca, 'XDir','reverse')
             hold on
@@ -1899,7 +2599,14 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
         else
             plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
             xlim([0 fmax]);
-            xlabel(['Frequency (cycles/',num2str(unit),')']) 
+            
+            %language
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                xlabel(['Frequency (cycles/',num2str(unit),')'])
+            else
+                [~, locb] = ismember('spectral33',lang_id);
+                xlabel([lang_var{locb},num2str(unit),')']) 
+            end
             hold on
             plot(fd1,red99global,'r-.','LineWidth',1)
             plot(fd1,red95global,'r--','LineWidth',2)
@@ -1909,13 +2616,34 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
             plot(fd1,red90,'b-','LineWidth',1)
             plot(fd1,pl,'k-','LineWidth',2)
         end
-        legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','Power law')
-        ylabel('Power')
-        title(['Lomb-Scargle spectrum & power law','; bw = ',num2str(df)])
-        set(gcf,'Name',['Lomb-Scargle spectrum & power law: ',dat_name,ext])
+        if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+            legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','Power law')
+            ylabel('Power')
+            title(['Lomb-Scargle spectrum & power law','; bw = ',num2str(df)])
+            set(gcf,'Name',['Lomb-Scargle spectrum & power law: ',dat_name,ext])
+        else
+            [~, locb] = ismember('spectral30',lang_id);
+            ylabel(lang_var{locb})
+            [~, locb0] = ismember('spectral34',lang_id);
+            [~, locb1] = ismember('spectral35',lang_id);
+            [~, locb2] = ismember('spectral36',lang_id);
+            [~, locb3] = ismember('spectral09',lang_id);
+            legend(lang_var{locb},...
+                ['99%',lang_var{locb1}],...
+                ['95%',lang_var{locb1}],...
+                ['90%',lang_var{locb1}],...
+                ['99%',lang_var{locb2}],...
+                ['95%',lang_var{locb2}],...
+                ['90%',lang_var{locb2}],...
+                lang_var{locb3})
+            [~, locb41] = ismember('spectral41',lang_id);
+            [~, locb34] = ismember('spectral34',lang_id);
+            title([lang_var{locb41},' & ',lang_var{locb03},'; ',lang_var{locb34},' = ',num2str(df)])
+            set(gcf,'Name',[lang_var{locb41},' & ',lang_var{locb03},': ',dat_name,ext])
+        end
         set(gca,'XMinorTick','on','YMinorTick','on')
         
-        if handles.linlogY == 1;
+        if handles.linlogY == 1
             set(gca, 'YScale', 'log')
         else
             set(gca, 'YScale', 'linear')
@@ -1960,9 +2688,14 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
         name2 = [dat_name,'-Lomb-BPL-global',ext];
         data2 = [fd1,po,pl,red90global,red95global,red99global];
         CDac_pwd;
-        dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
-        dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9);
-        disp('>>  Refresh main window to see red noise estimation data files: ')
+        dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9);
+        dlmwrite(name2, data2, 'delimiter', ' ', 'precision', 9);
+        if handles.lang_choice == 0
+            disp('>>  Refresh main window to see red noise estimation data files: ')
+        else
+            [~, spectral44] = ismember('spectral44',lang_id);
+            disp(lang_var{spectral44})
+        end
         disp(name1)
         disp(name2)
         cd(pre_dirML);
@@ -1972,7 +2705,14 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
         if plot_x_period
             pt1 = 1./fd1;
             plot(pt1(2:end),po(2:end),'k-','LineWidth',1);
-            xlabel(['Period (',num2str(unit),')']) 
+            
+            % language
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                xlabel(['Period (',num2str(unit),')']) 
+            else
+                [~, locb] = ismember('main15',lang_id);
+                xlabel([lang_var{locb},' (',num2str(unit),')']) 
+            end
             xlim([1/fmax, pt1(3)]);
             set(gca, 'XDir','reverse')
             hold on
@@ -1986,7 +2726,14 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
         else
             plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
             xlim([0 fmax]);
-            xlabel(['Frequency (cycles/',num2str(unit),')']) 
+            
+            %language
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                xlabel(['Frequency (cycles/',num2str(unit),')'])
+            else
+                [~, locb] = ismember('spectral33',lang_id);
+                xlabel([lang_var{locb},num2str(unit),')']) 
+            end
             hold on
             plot(fd1,red99global,'r-.','LineWidth',1)
             plot(fd1,red95global,'r--','LineWidth',2)
@@ -1996,10 +2743,31 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
             plot(fd1,red90,'b-','LineWidth',1)
             plot(fd1,pl,'k-','LineWidth',2)
         end
-        legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','BPL')
-        ylabel('Power')
-        title(['Lomb-Scargle spectrum & bending power law','; bw = ',num2str(df)])
-        set(gcf,'Name',['Lomb-Scargle spectrum & bending power law: ',dat_name,ext])
+        % language
+        if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+            legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','bending power law')
+            ylabel('Power')
+            title(['Lomb-Scargle spectrum & bending power law','; bw = ',num2str(df)])
+            set(gcf,'Name',['Lomb-Scargle spectrum & bending power law: ',dat_name,ext])
+        else
+            [~, locb] = ismember('spectral30',lang_id);
+            ylabel(lang_var{locb})
+            [~, locb0] = ismember('spectral34',lang_id);
+            [~, locb1] = ismember('spectral35',lang_id);
+            [~, locb2] = ismember('spectral36',lang_id);
+            [~, locb3] = ismember('spectral10',lang_id);
+            legend(lang_var{locb},...
+                ['99%',lang_var{locb1}],...
+                ['95%',lang_var{locb1}],...
+                ['90%',lang_var{locb1}],...
+                ['99%',lang_var{locb2}],...
+                ['95%',lang_var{locb2}],...
+                ['90%',lang_var{locb2}],...
+                lang_var{locb3})
+            [~, locb41] = ismember('spectral41',lang_id);
+            title([lang_var{locb41},' & ',lang_var{locb3},'; ',lang_var{locb0},' = ',num2str(df)])
+            set(gcf,'Name',[lang_var{locb41},' & ',lang_var{locb3},': ',dat_name,ext])
+        end
         set(gca,'XMinorTick','on','YMinorTick','on')
         
         if handles.linlogY == 1
@@ -2014,10 +2782,8 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
     
     
 elseif  strcmp(method,'Periodogram')
-    %if max(diffx) - min(diffx) > 10 * eps('single')
-    %    figwarn = warndlg({'Data may be interpolated to an uniform sampling interval';...
-    %        '';'    Or select : Lomb-Scargle spectrum'});
-    %end
+
+    
     if padtimes > 1
         [po,fd1] = periodogram(datax,[],nzeropad,1/dt);
     else 
@@ -2026,13 +2792,34 @@ elseif  strcmp(method,'Periodogram')
     figdata = figure;  
     set(gcf,'Color', 'white')
     plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
-    xlabel(['Frequency ( cycles/ ',num2str(unit),' )']) 
-    ylabel('Power ')
-    title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit,'; bw = ',num2str(df)])
-    set(gcf,'Name',[dat_name,ext,': periodogram'])
+    %language
+    if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+        xlabel(['Frequency (cycles/',num2str(unit),')'])
+    else
+        [~, locb] = ismember('spectral33',lang_id);
+        xlabel([lang_var{locb},num2str(unit),')']) 
+    end
+
+    
+    
+    % language
+    if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+        ylabel('Power')
+        title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit,'; bw = ',num2str(df)])
+        set(gcf,'Name',[dat_name,ext,': periodogram'])
+    else
+        [~, spectral30] = ismember('spectral30',lang_id);
+        ylabel(lang_var{spectral30})
+        [~, spectral43] = ismember('spectral43',lang_id);
+        [~, spectral37] = ismember('spectral37',lang_id);
+        [~, spectral34] = ismember('spectral34',lang_id);
+        title([lang_var{spectral43},'; ',lang_var{spectral37},' = ',num2str(dt),' ', unit,'; ',lang_var{spectral34},' = ',num2str(df)])
+        set(gcf,'Name',[dat_name,ext,': ',lang_var{spectral43}])
+    end
+    
     set(gca,'XMinorTick','on','YMinorTick','on')
     xlim([0 fmax]);
-    if handles.linlogY == 1;
+    if handles.linlogY == 1
         set(gca, 'YScale', 'log')
     else
         set(gca, 'YScale', 'linear')
@@ -2052,7 +2839,14 @@ elseif  strcmp(method,'Periodogram')
         plot(fd1,tabtchired95,'r--','LineWidth',2)
         plot(fd1,tabtchired99,'b-.','LineWidth',1)
         plot(fd1,tabtchired999,'g--','LineWidth',1)
-        legend('Power','Mean','90%','95%','99%','99.9')
+        % language
+        if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+            legend('Power','Mean','90%','95%','99%')
+        else
+            [~, main46] = ismember('main46',lang_id);
+            [~, spectral42] = ismember('spectral42',lang_id);
+            legend(lang_var{main46},lang_var{spectral42},'90%','95%','99%')
+        end
         hold off
     end
     
@@ -2085,9 +2879,14 @@ elseif  strcmp(method,'Periodogram')
         name2 = [dat_name,'-Periodogram-PL-global',ext];
         data2 = [fd1,po,pl,red90global,red95global,red99global];
         CDac_pwd;
-        dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
-        dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9);
-        disp('>>  Refresh main window to see red noise estimation data files: ')
+        dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9);
+        dlmwrite(name2, data2, 'delimiter', ' ', 'precision', 9);
+        if handles.lang_choice == 0
+            disp('>>  Refresh main window to see red noise estimation data files: ')
+        else
+            [~, spectral44] = ismember('spectral44',lang_id);
+            disp(lang_var{spectral44})
+        end
         disp(name1)
         disp(name2)
         cd(pre_dirML);
@@ -2097,7 +2896,14 @@ elseif  strcmp(method,'Periodogram')
         if plot_x_period
             pt1 = 1./fd1;
             plot(pt1(2:end),po(2:end),'k-','LineWidth',1);
-            xlabel(['Period (',num2str(unit),')']) 
+            
+            % language
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                xlabel(['Period (',num2str(unit),')']) 
+            else
+                [~, locb] = ismember('main15',lang_id);
+                xlabel([lang_var{locb},' (',num2str(unit),')']) 
+            end
             xlim([1/fmax, pt1(3)]);
             set(gca, 'XDir','reverse')
             hold on
@@ -2111,7 +2917,14 @@ elseif  strcmp(method,'Periodogram')
         else
             plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
             xlim([0 fmax]);
-            xlabel(['Frequency (cycles/',num2str(unit),')']) 
+            
+            %language
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                xlabel(['Frequency (cycles/',num2str(unit),')'])
+            else
+                [~, locb] = ismember('spectral33',lang_id);
+                xlabel([lang_var{locb},num2str(unit),')']) 
+            end
             hold on
             plot(fd1,red99global,'r-.','LineWidth',1)
             plot(fd1,red95global,'r--','LineWidth',2)
@@ -2121,14 +2934,34 @@ elseif  strcmp(method,'Periodogram')
             plot(fd1,red90,'b-','LineWidth',1)
             plot(fd1,pl,'k-','LineWidth',2)
         end
-        %legend('Power','95% global','99% local','95% local','90% local','Power law')
-        legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','Power law')
-        ylabel('Power')
-        title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit,'; bw = ',num2str(df)])
-        set(gcf,'Name',['Periodogram & power law: ',dat_name,ext])
+        if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+            legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','Power law')
+            ylabel('Power')
+            title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit,'; bw = ',num2str(df)])
+            set(gcf,'Name',['Periodogram & power law: ',dat_name,ext])
+        else
+            [~, locb] = ismember('spectral30',lang_id);
+            ylabel(lang_var{locb})
+            [~, locb0] = ismember('spectral34',lang_id);
+            [~, locb1] = ismember('spectral35',lang_id);
+            [~, locb2] = ismember('spectral36',lang_id);
+            [~, locb3] = ismember('spectral09',lang_id);
+            legend(lang_var{locb},...
+                ['99%',lang_var{locb1}],...
+                ['95%',lang_var{locb1}],...
+                ['90%',lang_var{locb1}],...
+                ['99%',lang_var{locb2}],...
+                ['95%',lang_var{locb2}],...
+                ['90%',lang_var{locb2}],...
+                lang_var{locb3})
+            [~, spectral43] = ismember('spectral43',lang_id);
+            [~, spectral37] = ismember('spectral37',lang_id);
+            title([lang_var{spectral43},'; ',lang_var{spectral37},' = ',num2str(dt),' ', unit,'; ',lang_var{locb0},' = ',num2str(df)])
+            set(gcf,'Name',[lang_var{spectral43},' & ',lang_var{locb3},': ',dat_name,ext])
+        end
         set(gca,'XMinorTick','on','YMinorTick','on')
         
-        if handles.linlogY == 1;
+        if handles.linlogY == 1
             set(gca, 'YScale', 'log')
         else
             set(gca, 'YScale', 'linear')
@@ -2168,9 +3001,14 @@ elseif  strcmp(method,'Periodogram')
         name2 = [dat_name,'-Periodogram-BPL-global',ext];
         data2 = [fd1,po,pl,red90global,red95global,red99global];
         CDac_pwd;
-        dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9);
-        dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9);
-        disp('>>  Refresh main window to see red noise estimation data files: ')
+        dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9);
+        dlmwrite(name2, data2, 'delimiter', ' ', 'precision', 9);
+        if handles.lang_choice == 0
+            disp('>>  Refresh main window to see red noise estimation data files: ')
+        else
+            [~, spectral44] = ismember('spectral44',lang_id);
+            disp(lang_var{spectral44})
+        end
         disp(name1)
         disp(name2)
         cd(pre_dirML);
@@ -2180,7 +3018,14 @@ elseif  strcmp(method,'Periodogram')
         if plot_x_period
             pt1 = 1./fd1;
             plot(pt1(2:end),po(2:end),'k-','LineWidth',1);
-            xlabel(['Period (',num2str(unit),')']) 
+            
+            % language
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                xlabel(['Period (',num2str(unit),')']) 
+            else
+                [~, locb] = ismember('main15',lang_id);
+                xlabel([lang_var{locb},' (',num2str(unit),')']) 
+            end
             xlim([1/fmax, pt1(3)]);
             set(gca, 'XDir','reverse')
             hold on
@@ -2194,7 +3039,14 @@ elseif  strcmp(method,'Periodogram')
         else
             plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
             xlim([0 fmax]);
-            xlabel(['Frequency (cycles/',num2str(unit),')']) 
+            
+            %language
+            if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+                xlabel(['Frequency (cycles/',num2str(unit),')'])
+            else
+                [~, locb] = ismember('spectral33',lang_id);
+                xlabel([lang_var{locb},num2str(unit),')']) 
+            end
             hold on
             plot(fd1,red99global,'r-.','LineWidth',1)
             plot(fd1,red95global,'r--','LineWidth',2)
@@ -2204,10 +3056,31 @@ elseif  strcmp(method,'Periodogram')
             plot(fd1,red90,'b-','LineWidth',1)
             plot(fd1,pl,'k-','LineWidth',2)
         end
-        legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','BPL')
-        ylabel('Power')
-        title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit,'; bw = ',num2str(df)])
-        set(gcf,'Name',['Periodogram & bending power law: ',dat_name,ext])
+        if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+            legend('Power','99% global','95% global','90% global','99% local','95% local','90% local','BPL')
+            ylabel('Power')
+            title(['Periodogram; Sampling rate = ',num2str(dt),' ', unit,'; bw = ',num2str(df)])
+            set(gcf,'Name',['Periodogram & bending power law: ',dat_name,ext])
+        else
+            [~, locb] = ismember('spectral30',lang_id);
+            ylabel(lang_var{locb})
+            [~, locb0] = ismember('spectral34',lang_id);
+            [~, locb1] = ismember('spectral35',lang_id);
+            [~, locb2] = ismember('spectral36',lang_id);
+            [~, locb3] = ismember('spectral10',lang_id);
+            legend(lang_var{locb},...
+                ['99%',lang_var{locb1}],...
+                ['95%',lang_var{locb1}],...
+                ['90%',lang_var{locb1}],...
+                ['99%',lang_var{locb2}],...
+                ['95%',lang_var{locb2}],...
+                ['90%',lang_var{locb2}],...
+                lang_var{locb3})
+            [~, spectral43] = ismember('spectral43',lang_id);
+            [~, spectral37] = ismember('spectral37',lang_id);
+            title([lang_var{spectral43},'; ',lang_var{spectral37},' = ',num2str(dt),' ', unit,'; ',lang_var{locb0},' = ',num2str(df)])
+            set(gcf,'Name',[lang_var{spectral43},' & ',lang_var{locb3},': ',dat_name,ext])
+        end
         set(gca,'XMinorTick','on','YMinorTick','on')
         
         if handles.linlogY == 1
@@ -2224,11 +3097,11 @@ elseif  strcmp(method,'Periodogram')
     
     try filename_Periodogram = [dat_name,'-PeriodogramAR1.txt'];   
         dlmwrite(filename_Periodogram, [fd1,po,theored,tabtchired90,tabtchired95,tabtchired99,tabtchired999], ...
-            'delimiter', ',', 'precision', 9);
+            'delimiter', ' ', 'precision', 9);
     catch
         filename_Periodogram = [dat_name,'-Periodogram.txt'];
         dlmwrite(filename_Periodogram, [fd1,po], ...
-            'delimiter', ',', 'precision', 9);
+            'delimiter', ' ', 'precision', 9);
     end
     cd(pre_dirML); % return to matlab view folder
     disp(filename_Periodogram)
@@ -2509,31 +3382,63 @@ function popupmenu2_Callback(hObject, eventdata, handles)
 contents = cellstr(get(hObject,'String'));
 method = contents{get(hObject,'Value')};
 handles.method = method;
+lang_var = handles.lang_var;
+lang_id = handles.lang_id;
+
 if strcmp(method,'Multi-taper method')
     if handles.datasample == 1
-        msgbox('Sampling rate may not be uneven! Ignore if this is not ture.','Waning')
+        if handles.lang_choice > 0
+            [~, locb0] = ismember('spectral22',lang_id);
+            [~, locb1] = ismember('main29',lang_id);
+            msgbox(lang_var{locb0},lang_var{locb1})
+        else
+            msgbox('Sampling rate may not be uneven! Ignore if this is not ture.','Waning')
+        end
     end
     set(handles.popupmenu_tapers,'Enable','on')
     set(handles.checkbox_robust,'Enable','on')
     set(handles.checkbox_ar1_check,'Enable','on')
-    set(handles.checkbox_ar1_check,'String','Classical AR(1)')
+    if handles.lang_choice > 0
+        [~, locb0] = ismember('spectral07',lang_id);
+        set(handles.checkbox_ar1_check,'String',lang_var{locb0})
+    else
+        set(handles.checkbox_ar1_check,'String','Classical AR(1)')
+    end
     set(handles.check_ftest,'Value', handles.check_ftest_value)
     set(handles.check_ftest,'Visible','on')
 elseif strcmp(method,'Periodogram')
     if handles.datasample == 1
-        msgbox('Sampling rate may not be uneven! Ignore if this is not ture.','Waning')
+        if handles.lang_choice > 0
+            [~, locb0] = ismember('spectral22',lang_id);
+            [~, locb1] = ismember('main29',lang_id);
+            msgbox(lang_var{locb0},lang_var{locb1})
+        else
+            msgbox('Sampling rate may not be uneven! Ignore if this is not ture.','Waning')
+        end
     end
     set(handles.popupmenu_tapers,'Enable','off')
     set(handles.checkbox_robust,'Enable','off')
     set(handles.checkbox_ar1_check,'Enable','on')
-    set(handles.checkbox_ar1_check,'String','Classical AR(1)')
+    if handles.lang_choice > 0
+        [~, locb0] = ismember('spectral07',lang_id);
+        set(handles.checkbox_ar1_check,'String',lang_var{locb0})
+    else
+        set(handles.checkbox_ar1_check,'String','Classical AR(1)')
+    end
+    
     set(handles.check_ftest,'Visible','off')
 elseif strcmp(method,'Lomb-Scargle spectrum')
     set(handles.popupmenu_tapers,'Enable','off')
     set(handles.checkbox_robust,'Enable','on')
     set(handles.checkbox_robust,'Value',1)
     set(handles.checkbox_ar1_check,'Value',0)
-    set(handles.checkbox_ar1_check,'String','White noise')
+    
+    if handles.lang_choice > 0
+        [~, locb0] = ismember('spectral11',lang_id);
+        set(handles.checkbox_ar1_check,'String',lang_var{locb0})
+    else
+        set(handles.checkbox_ar1_check,'String','White noise')
+    end
     set(handles.check_ftest,'Visible','off')
 else
     

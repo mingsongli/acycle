@@ -69,22 +69,24 @@ set(handles.edit1,'position',[0.02,0.02,0.96,0.74]) % set position
 
 % language
 lang_choice = varargin{1}.lang_choice;
+lang_id = varargin{1}.lang_id;
+lang_var = varargin{1}.lang_var;
 if lang_choice>0
-    lang_id = varargin{1}.lang_id;
-    lang_var = varargin{1}.lang_var;
     [~, locb] = ismember('c60',lang_id);
     set(gcf,'Name',lang_var{locb})
-    [~, locb1] = ismember('c61',lang_id);
-    [~, locb2] = ismember('c62',lang_id);
-    [~, locb3] = ismember('c63',lang_id);
-    [~, locb4] = ismember('c64',lang_id);
-    
-    set(handles.text5,'string',{'',lang_var{locb1},'',lang_var{locb2},'',...
-        lang_var{locb3},lang_var{locb4},})
 else
     set(gcf,'Name','Acycle: Copyright')
 
 end
+
+[~, locb1] = ismember('c61',lang_id);
+[~, c65] = ismember('c65',lang_id);
+[~, locb2] = ismember('c62',lang_id);
+[~, locb3] = ismember('c63',lang_id);
+[~, locb4] = ismember('c64',lang_id);
+
+set(handles.text5,'string',{'',[lang_var{locb1},' (',lang_var{c65},') '],'',lang_var{locb2},'',...
+    lang_var{locb3},lang_var{locb4},})
 
 [I,m] = imread('acycle_logo.png');
 imshow(I,m,'parent',handles.logo_axes1);

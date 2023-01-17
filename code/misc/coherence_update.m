@@ -113,9 +113,9 @@ for i = 1:nrow
             pre_dirML = pwd;
             CDac_pwd; % cd working dir
             add_list = [dat_name,'-COH-',targetname];
-            dlmwrite(add_list, [F1,Cxy], 'delimiter', ',', 'precision', 9);
+            dlmwrite(add_list, [F1,Cxy], 'delimiter', ' ', 'precision', 9);
             add_list2 = [dat_name,'-Phase-',targetname];
-            dlmwrite(add_list2, [F2,Pxy/pi * 180], 'delimiter', ',', 'precision', 9);
+            dlmwrite(add_list2, [F2,Pxy/pi * 180], 'delimiter', ' ', 'precision', 9);
             d = dir; %get files
             set(handles.listbox1,'String',{d.name},'Value',1) %set string
             %

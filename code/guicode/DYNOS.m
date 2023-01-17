@@ -57,6 +57,7 @@ function DYNOS_OpeningFcn(hObject, eventdata, handles, varargin)
 % varargin   command line arguments to DYNOS (see VARARGIN)
 handles.MonZoom = varargin{1}.MonZoom;
 handles.sortdata = varargin{1}.sortdata;
+handles.val1 = varargin{1}.val1;
 
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
@@ -71,10 +72,120 @@ set(h1,'FontUnits','points','FontSize',fontsize);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',fontsize);  % set as norm
 
-set(gcf,'Name','Acycle: Sedimentary Noise Model - DYNOT')
+% language
+lang_choice = varargin{1}.lang_choice;
+handles.lang_choice = lang_choice;
+lang_id = varargin{1}.lang_id;
+lang_var = varargin{1}.lang_var;
+handles.lang_id = lang_id;
+handles.lang_var = lang_var;
+handles.main_unit_selection = varargin{1}.main_unit_selection;
+
+if handles.lang_choice == 0
+    set(gcf,'Name','Acycle: Sedimentary Noise Model - DYNOT')
+else
+    [~, dynot24] = ismember('dynot24',lang_id);
+    set(gcf,'Name',['Acycle: ',lang_var{dynot24}])
+end
 
 % Choose default command line output for DYNOS
 set(gcf,'position',[0.05,0.05,0.85,0.85] * handles.MonZoom) % set position
+
+% language
+if handles.lang_choice > 0
+    [~, dynot01] = ismember('dynot01',handles.lang_id);
+    [~, dynot02] = ismember('dynot02',handles.lang_id);
+    [~, dynot03] = ismember('dynot03',handles.lang_id);
+    [~, dynot04] = ismember('dynot04',handles.lang_id);
+    [~, dynot05] = ismember('dynot05',handles.lang_id);
+    [~, dynot06] = ismember('dynot06',handles.lang_id);
+    [~, dynot07] = ismember('dynot07',handles.lang_id);
+    [~, dynot08] = ismember('dynot08',handles.lang_id);
+    [~, dynot09] = ismember('dynot09',handles.lang_id);
+    [~, dynot10] = ismember('dynot10',handles.lang_id);
+    [~, dynot11] = ismember('dynot11',handles.lang_id);
+    [~, dynot12] = ismember('dynot12',handles.lang_id);
+    [~, dynot13] = ismember('dynot13',handles.lang_id);
+    [~, dynot14] = ismember('dynot14',handles.lang_id);
+    [~, dynot15] = ismember('dynot15',handles.lang_id);
+    [~, dynot16] = ismember('dynot16',handles.lang_id);
+    [~, dynot17] = ismember('dynot17',handles.lang_id);
+    [~, dynot18] = ismember('dynot18',handles.lang_id);
+    [~, dynot19] = ismember('dynot19',handles.lang_id);
+    [~, dynot20] = ismember('dynot20',handles.lang_id);
+    [~, dynot21] = ismember('dynot21',handles.lang_id);
+    [~, dynot22] = ismember('dynot22',handles.lang_id);
+    [~, dynot23] = ismember('dynot23',handles.lang_id);
+    [~, main02] = ismember('main02',handles.lang_id);
+    [~, menu71] = ismember('menu71',handles.lang_id);
+    [~, menu03] = ismember('menu03',handles.lang_id);
+    [~, dynot25] = ismember('dynot25',handles.lang_id); % from
+    [~, dynot26] = ismember('dynot26',handles.lang_id); % to
+    [~, main41] = ismember('main41',handles.lang_id); % window
+    [~, MainUnit13] = ismember('MainUnit13',handles.lang_id); % ka
+    [~, a218] = ismember('a218',handles.lang_id); % nw
+    [~, main32] = ismember('main32',handles.lang_id); % step
+    [~, main14] = ismember('main14',handles.lang_id); % freq
+    [~, ec20] = ismember('ec20',handles.lang_id); % middle age of the data
+    [~, main40] = ismember('main40',handles.lang_id); % median
+    set(handles.uipanel6,'Title',lang_var{main02})  % data
+    set(handles.uipanel2,'Title',lang_var{main02})  % data
+    set(handles.uipanel8,'Title',lang_var{menu71})
+    set(handles.uipanel9,'Title',lang_var{dynot05})
+    set(handles.uipanel10,'Title',lang_var{main14})
+    set(handles.uipanel11,'Title',lang_var{menu03})
+    set(handles.uipanel12,'Title',lang_var{dynot16})
+    set(handles.pushbutton4,'String',[lang_var{main02},lang_var{dynot01}])
+    set(handles.pushbutton5,'String',lang_var{dynot02})
+    
+    set(handles.text45,'String',[lang_var{dynot03},lang_var{main02}])
+    set(handles.text44,'String',lang_var{dynot26}) % to
+    set(handles.text10,'String',lang_var{dynot26}) % to
+    set(handles.text13,'String',lang_var{dynot26})
+    set(handles.text17,'String',lang_var{dynot26})
+    set(handles.text25,'String',lang_var{dynot26})
+    set(handles.text28,'String',lang_var{dynot26})
+    set(handles.pushbutton_cut,'String',lang_var{dynot03}) % cut
+    set(handles.text8,'String',lang_var{dynot04})
+    set(handles.text18,'String',lang_var{dynot06})
+    set(handles.text40,'String',lang_var{dynot07}) % Number of Monte Carlo Simulations
+    set(handles.radiobutton2,'String',lang_var{dynot08})
+    set(handles.text23,'String',lang_var{dynot09})
+    set(handles.text26,'String',lang_var{dynot10})
+    set(handles.text27,'String',lang_var{dynot11})
+    set(handles.text47,'String',lang_var{dynot12})
+    set(handles.text30,'String',lang_var{dynot13})
+    set(handles.text29,'String',lang_var{dynot14})
+    set(handles.text36,'String',lang_var{dynot15})
+    set(handles.text48,'String',lang_var{dynot17})
+    set(handles.text37,'String',lang_var{dynot18})
+    set(handles.text50,'String',lang_var{dynot19})
+    set(handles.text41,'String',lang_var{dynot20})
+    %set(handles.text42,'String',lang_var{dynot21})
+    set(handles.text2,'String',lang_var{dynot22})
+
+    set(handles.text46,'String',lang_var{MainUnit13})
+    set(handles.text14,'String',lang_var{MainUnit13})
+    set(handles.text43,'String',lang_var{MainUnit13})
+    set(handles.text11,'String',[lang_var{main41},' ',lang_var{dynot25}])
+    set(handles.text15,'String',lang_var{a218})
+    set(handles.text16,'String',lang_var{main32})
+    
+    set(handles.radiobutton1,'String',lang_var{ec20})
+    set(handles.text16,'String',lang_var{main32})
+    set(handles.checkbox1median,'String',lang_var{main40})
+    
+    % menu
+    [~, menu01] = ismember('menu01',handles.lang_id); % File
+    set(handles.menu_file,'Text',lang_var{menu01}) % File
+    set(handles.file_import,'Text',lang_var{dynot23})
+    [~, dynot40] = ismember('dynot40',handles.lang_id);
+    [~, menu07] = ismember('menu07',handles.lang_id);
+    [~, dynot41] = ismember('dynot41',handles.lang_id);
+    set(handles.menu_help,'Text',lang_var{menu07})
+    set(handles.menu_about,'Text',lang_var{dynot40})
+    set(handles.menu_website,'Text',lang_var{dynot41})
+end
 % uipanels
 set(handles.uipanel6,'position', [0.015,0.9,0.124,0.076])
 set(handles.uipanel7,'position', [0.14,0.9,0.167,0.076])
@@ -253,6 +364,12 @@ function pushbutton5_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 numcore = handles.numcore;
+
+% language
+lang_var = handles.lang_var;
+lang_choice = handles.lang_choice;
+lang_id = handles.lang_id;
+%
 numcorereal = feature('numCores');
 numcore(numcore>numcorereal) = numcorereal;
 useparpool = handles.useparpool;
@@ -324,7 +441,15 @@ powmean = zeros(1,nmc);
 %% Main function. Very heavy loads
 tic;
 dispstat('','init'); % One time only initialization
-dispstat(sprintf(' Begin the process ...'),'keepthis','timestamp');
+if lang_choice == 0
+    dispstat(sprintf(' Begin the process ...'),'keepthis','timestamp');
+    hwaitbarText = 'canceling';
+else
+    [~, dynot28] = ismember('dynot28',lang_id);
+    dispstat(sprintf([lang_var{dynot28},' ...']),'keepthis','timestamp');
+    [~, dynot31] = ismember('dynot31',lang_id);
+    hwaitbarText = lang_var{dynot31};
+end
 %%
 if shiftwin == 1
     shiftwin1 = 0;
@@ -333,11 +458,22 @@ else
 end
 
 % Waitbar
-hwaitbar = waitbar(0,'Very heavy loads, may take several hours ...',...    
-   'WindowStyle','modal');
-hwaitbar_find = findobj(hwaitbar,'Type','Patch');
+if handles.lang_choice == 0
+    hwaitbar = waitbar(0,'Very heavy loads, may take several hours ...',...    
+       'WindowStyle','modal');
+else
+    [~, dynot27] = ismember('dynot27',lang_id);
+    hwaitbar = waitbar(0,lang_var{dynot27},...    
+       'WindowStyle','modal');
+end
+   hwaitbar_find = findobj(hwaitbar,'Type','Patch');
 set(hwaitbar_find,'EdgeColor',[0 0.9 0],'FaceColor',[0 0.9 0]) % changes the color to blue
-setappdata(hwaitbar,'canceling',0)
+
+if handles.lang_choice == 0
+    setappdata(hwaitbar,'canceling',0)
+else
+    setappdata(hwaitbar,'canceling',0)
+end
 steps = 100;
 % step estimation for waitbar
 nmc_n = round(nmc/steps);
@@ -349,6 +485,7 @@ if nmc > 199
     
   if numcore == 1  % can not use parpool or matlabpool
     for i=1:nmc
+
         if getappdata(hwaitbar,'canceling')
             break
         end
@@ -366,7 +503,13 @@ if nmc > 199
 
         time = toc; t_rem = (time*nmc/i)-time;
         hh = fix(t_rem/3600); mm = fix((t_rem-hh*3600)/60); sec = t_rem-hh*3600-mm*60;
-        dispstat(sprintf(' Progress %.1f%%. Remain %d:%d:%.0f',100*i/nmc,hh,mm,sec),'timestamp')
+        if handles.lang_choice == 0
+            dispstat(sprintf(' Progress %.1f%%. Remain %d:%d:%.0f',100*i/nmc,hh,mm,sec),'timestamp')
+        else
+            [~, dynot29] = ismember('dynot29',lang_id);
+            [~, dynot30] = ismember('dynot30',lang_id);
+            dispstat(lang_var{dynot29},sprintf(' %.1f%%. ',100*i/nmc),lang_var{dynot30},sprintf(' %d:%d:%.0f',hh,mm,sec),'timestamp')
+        end
         % waitbar
         if rem(i,nmc_n) == 0
             waitbarstep = waitbarstep+1; 
@@ -400,7 +543,14 @@ if nmc > 199
 
             time = toc; t_rem = (time*nmc/i)-time;
             hh = fix(t_rem/3600); mm = fix((t_rem-hh*3600)/60); sec = t_rem-hh*3600-mm*60;
-            dispstat(sprintf(' Progress %.2f%%. Remain %d:%d:%.0f',100*i/nmc,hh,mm,sec),'timestamp')
+            if handles.lang_choice == 0
+                dispstat(sprintf(' Progress %.2f%%. Remain %d:%d:%.0f',100*i/nmc,hh,mm,sec),'timestamp')
+            else
+                [~, dynot29] = ismember('dynot29',lang_id);
+                [~, dynot30] = ismember('dynot30',lang_id);
+                dispstat([lang_var{dynot29},sprintf(' %.2f%%. ',100*i/nmc),lang_var{dynot30},sprintf(' %d:%d:%.0f',hh,mm,sec)],'timestamp')
+            end
+            
             % waitbar
             if rem(i,nmc_n) == 0
                 waitbarstep = waitbarstep+1; 
@@ -413,13 +563,34 @@ if nmc > 199
             hh = fix(t_rem/3600); 
             mm = fix((t_rem-hh*3600)/60); 
             sec = round(t_rem-hh*3600-mm*60);
-            dispstat(sprintf(' First %d iterations suggest: remain >= %dh:%dm:%dsec',itinerary,hh,mm,sec),'timestamp')
+            if handles.lang_choice == 0
+                dispstat(sprintf(' First %d iterations suggest: remain >= %dh:%dm:%dsec',itinerary,hh,mm,sec),'timestamp')
+            else
+                [~, dynot18] = ismember('dynot18',lang_id);
+                [~, dynot32] = ismember('dynot32',lang_id);
+                dispstat([lang_var{dynot18},sprintf(' %d ',itinerary),lang_var{dynot32},':',lang_var{dynot30},sprintf(' >= %dh:%dm:%ds',hh,mm,sec)],'timestamp')
+            end
   %end   
-            if ishandle(hwaitbar); close(hwaitbar);end
-            msgbox_v = {'Remaining time is likely:';...
-                [num2str(hh),' hr ',num2str(mm),' min ', num2str(sec), ' sec'];...
-                ['Come back at ~ ',datestr(now + t_rem/86400,'dd-mm-yyyy HH:MM:SS FFF')]};
-            msgbox1 = msgbox(msgbox_v,'Wait ...');
+            if ishandle(hwaitbar)
+                close(hwaitbar);
+            end
+            if handles.lang_choice == 0
+                msgbox_v = {'Remaining time is likely:';...
+                    [num2str(hh),' hr ',num2str(mm),' min ', num2str(sec), ' sec'];...
+                    ['Come back at ~ ',datestr(now + t_rem/86400,'dd-mm-yyyy HH:MM:SS FFF')]};
+                msgbox1 = msgbox(msgbox_v,'Wait ...');
+            else
+                [~, dynot33] = ismember('dynot33',lang_id);
+                [~, dynot34] = ismember('dynot34',lang_id);
+                [~, dynot35] = ismember('dynot35',lang_id);
+                [~, dynot36] = ismember('dynot36',lang_id);
+                [~, dynot37] = ismember('dynot37',lang_id);
+                [~, dynot38] = ismember('dynot38',lang_id);
+                msgbox_v = {lang_var{dynot33};...
+                    [num2str(hh),lang_var{dynot34},num2str(mm),lang_var{dynot35}, num2str(sec), lang_var{dynot36}];...
+                    [lang_var{dynot37},datestr(now + t_rem/86400,'dd-mm-yyyy HH:MM:SS FFF')]};
+                msgbox1 = msgbox(msgbox_v,lang_var{dynot38});
+            end
 %           use parpool when version of matlab is higher than 8.2, else use matlabpool
         if useparpool
             poolobj = parpool('local',numcore);
@@ -443,14 +614,14 @@ if nmc > 199
             powy(:,i)=interp1((power(:,1)+y_grid_rand/shiftwin),power(:,2),y_grid);
             power2=power(:,2); %
             powmean(1,i)=mean(power2(~isnan(power2))); % mean power of each calculation
-            dispstat(sprintf(' Current iteration takes %.2f seconds',toc),'timestamp')
+            if lang_choice == 0
+                dispstat(sprintf(' Current iteration takes %.2f seconds',toc),'timestamp')
+            else
+                [~, dynot39] = ismember('dynot39',lang_id);
+                dispstat(sprintf(lang_var{dynot39},toc),'timestamp')
+            end
             %
-%             if rem(i,nmc_n) == 0
-%                 waitbarstep1 = round(i/nmc_n); 
-%                 if waitbarstep1 > steps; waitbarstep1 = steps; end
-%                 pause(0.001);%
-%                 waitbar(waitbarstep1 / steps)
-%             end
+
         end
         if useparpool
               delete(poolobj);
@@ -463,7 +634,7 @@ if nmc > 199
 else
     %figdat = msgbox('Heavy loads, please wait','Wait ...');
     for i=1:nmc
-        if getappdata(hwaitbar,'canceling')
+        if getappdata(hwaitbar,hwaitbarText)
             break
         end
         dat = [];
@@ -480,7 +651,16 @@ else
 
         time = toc; t_rem = (time*nmc/i)-time;
         hh = fix(t_rem/3600); mm = fix((t_rem-hh*3600)/60); sec = t_rem-hh*3600-mm*60;
-        dispstat(sprintf(' Progress %.1f%%. Remain %d:%d:%.0f',100*i/nmc,hh,mm,sec),'timestamp')
+           %dispstat(sprintf(' Progress %.1f%%. Remain %d:%d:%.0f',100*i/nmc,hh,mm,sec),'timestamp')
+        
+        if handles.lang_choice == 0
+            dispstat(sprintf(' Progress %.1f%%. Remain %d:%d:%.0f',100*i/nmc,hh,mm,sec),'timestamp')
+        else
+            [~, dynot29] = ismember('dynot29',lang_id);
+            [~, dynot30] = ismember('dynot30',lang_id);
+            dispstat([lang_var{dynot29},sprintf(' %.1f%%. ',100*i/nmc),lang_var{dynot30},sprintf(' %d:%d:%.0f',hh,mm,sec)],'timestamp')
+        end
+        
         %
         %
         if rem(i,nmc_n) == 0
@@ -507,7 +687,12 @@ end
 % No adjust??
 %powyadjust= powy;
 %
-dispstat('>>  Done.','keepprev');
+if handles.lang_choice == 0
+    dispstat('>>  Done.','keepprev');  % done
+else
+    [~, main45] = ismember('main45',lang_id);
+    dispstat(['>>  ',lang_var{main45},'.'],'keepprev');  % done
+end
 %%
 npercent  = length(percent);
 npercent2 = (length(percent)-1)/2;
@@ -594,10 +779,19 @@ if exist([pwd,handles.slash_v,name1]) || exist([pwd,handles.slash_v,name2])
         end
     end
 end
-disp(['>>  Save DYNOT median    : ',name1])
-disp(['>>  Save DYNOT percentile: ',name2])
-dlmwrite(name1, data1, 'delimiter', ',', 'precision', 9); 
-dlmwrite(name2, data2, 'delimiter', ',', 'precision', 9); 
+if handles.lang_choice == 0
+
+    disp(['>>  Save DYNOT median    : ',name1])
+    disp(['>>  Save DYNOT percentile: ',name2])
+else
+    [~, main52] = ismember('main52',lang_id); % save
+    [~, main40] = ismember('main40',lang_id); % median
+    [~, main56] = ismember('main56',lang_id); % percentile
+    disp(['>>  ',lang_var{main52},' DYNOT ',lang_var{main40},' : ',name1])
+    disp(['>>  ',lang_var{main52},' DYNOT ',lang_var{main56},' : ',name2])
+end
+dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9); 
+dlmwrite(name2, data2, 'delimiter', ' ', 'precision', 9); 
 cd(pre_dirML); % return to matlab view folder
 %
 % refresh AC main window

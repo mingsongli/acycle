@@ -56,6 +56,7 @@ function linegenerator_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.output = hObject;
 handles.MonZoom = varargin{1}.MonZoom;
 handles.sortdata = varargin{1}.sortdata;
+handles.val1 = varargin{1}.val1;
 
 handles.acfigmain = varargin{1}.acfigmain;
 handles.listbox_acmain = varargin{1}.listbox_acmain;
@@ -63,7 +64,56 @@ handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
 %
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
-set(gcf,'Name','Acycle: Signal Noise Generator')
+% language
+lang_choice = varargin{1}.lang_choice;
+handles.lang_choice = lang_choice;
+lang_id = varargin{1}.lang_id;
+lang_var = varargin{1}.lang_var;
+handles.lang_id = lang_id;
+handles.lang_var = lang_var;
+handles.main_unit_selection = varargin{1}.main_unit_selection;
+if handles.lang_choice == 0
+    set(gcf,'Name','Acycle: Signal Noise Generator')
+else
+    [~, menu53] = ismember('menu53',lang_id);
+    set(gcf,'Name',['Acycle: ',lang_var{menu53}])
+end
+[~, dd14] = ismember('dd14',lang_id); % x axis
+[~, dd15] = ismember('dd15',lang_id); % y axis
+[~, main16] = ismember('main16',lang_id); % from 
+[~, main17] = ismember('main17',lang_id); % to 
+[~, main32] = ismember('main32',lang_id); % step
+[~, main01] = ismember('main01',lang_id);
+
+[~, sngen01] = ismember('sngen01',lang_id);
+[~, sngen02] = ismember('sngen02',lang_id);
+[~, sngen03] = ismember('sngen03',lang_id);
+[~, sngen04] = ismember('sngen04',lang_id);
+[~, sngen05] = ismember('sngen05',lang_id);
+[~, sngen06] = ismember('sngen06',lang_id);
+[~, sngen07] = ismember('sngen07',lang_id);
+[~, sngen08] = ismember('sngen08',lang_id);
+[~, sngen09] = ismember('sngen09',lang_id);
+
+set(handles.text2,'String',lang_var{dd14})
+set(handles.text34,'String',lang_var{dd15})
+
+set(handles.text3,'String',lang_var{main16})
+set(handles.text4,'String',lang_var{main17})
+set(handles.text5,'String',lang_var{main32})
+
+set(handles.text33,'String',lang_var{sngen01})
+set(handles.radiobutton1,'String',lang_var{sngen02})
+set(handles.radiobutton2,'String',lang_var{sngen03})
+set(handles.radiobutton3,'String',lang_var{sngen04})
+set(handles.radiobutton4,'String',lang_var{sngen05})
+
+set(handles.text30,'String',lang_var{sngen06})
+set(handles.text31,'String',lang_var{sngen07})
+set(handles.radiobutton5,'String',lang_var{sngen08})
+set(handles.radiobutton6,'String',lang_var{sngen09})
+set(handles.pushbutton1,'String',lang_var{main01})
+
 set(gcf,'position',[0.05,0.1,0.6,0.6]* handles.MonZoom)
 % set x axis position
 set(handles.text2,'Position',[0.013, 0.933, 0.069, 0.029])  % X axis:
@@ -273,7 +323,7 @@ if get(handles.radiobutton4,'Value')
 end
 
 CDac_pwd; % cd ac_pwd dir
-dlmwrite(handles.filename, [handles.x,handles.y], 'delimiter', ',', 'precision', 9);
+dlmwrite(handles.filename, [handles.x,handles.y], 'delimiter', ' ', 'precision', 9);
 % refresh AC main window
 figure(handles.acfigmain);
 %CDac_pwd; % cd working dir

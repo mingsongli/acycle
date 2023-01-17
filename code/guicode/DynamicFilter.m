@@ -53,6 +53,7 @@ function DynamicFilter_OpeningFcn(hObject, eventdata, handles, varargin)
 % varargin   command line arguments to DynamicFilter (see VARARGIN)
 handles.MonZoom = varargin{1}.MonZoom;
 handles.sortdata = varargin{1}.sortdata;
+handles.val1 = varargin{1}.val1;
 
 
 set(0,'Units','normalized') % set units as normalized
@@ -354,7 +355,7 @@ if exist([pwd,handles.slash_v,log_name]) || exist([pwd,handles.slash_v,name1]) |
     end
 end
 
-dlmwrite(name1, [time,xdata_filtered'], 'delimiter', ',', 'precision', 9);
+dlmwrite(name1, [time,xdata_filtered'], 'delimiter', ' ', 'precision', 9);
 
 figure(figdynfilter);
 savefig(dynfilfigname1) % save ac.fig

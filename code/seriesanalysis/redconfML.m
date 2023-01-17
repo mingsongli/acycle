@@ -105,9 +105,15 @@ theored0 = mean(pxxsmooth) * (1-rho^2)./(1-(2.*rho.*cos(pi.*ft0./fmax)+rho^2));
     % June 5, 2020
 try
     cospara = cos(pi.*ft./fmax);
-    funrobust = @(v,f)v(1) * (1-v(2)^2)./(1-(2.*v(2).*cospara)+v(2)^2);
-    v1 = [s0,rho];
-    x = lsqcurvefit(funrobust,v1,ft,pxxsmooth);
+    if linlog == 1
+        funrobust = @(v,f)v(1) * (1-v(2)^2)./(1-(2.*v(2).*cospara)+v(2)^2);
+        v1 = [s0,rho];
+        x = lsqcurvefit(funrobust,v1,ft,pxxsmooth);
+    else
+        funrobust = @(v,f)log10(v(1) * (1-v(2)^2)./(1-(2.*v(2).*cospara)+v(2)^2));
+        v1 = [s0,rho];
+        x = lsqcurvefit(funrobust,v1,ft,log10(pxxsmooth));
+    end
     rhoM = x(2);
     s0M = x(1);
     disp('>>  MTM rho and S0 estimation: curve fitting method')
