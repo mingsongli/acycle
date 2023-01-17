@@ -28,7 +28,15 @@ else
 end
 
 hold off
-xlabel('Power (value^2)')
+% lang
+lang_var = handles.lang_var;
+[~, wave25] = ismember('wave25',handles.lang_id);
+
+if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+    xlabel('Power (value^2)')
+else
+    xlabel(lang_var{wave25})
+end
 %title('C) Global Wavelet Spectrum')
 set(gca,'XLim',[0,1.25*max(global_ws)])
 if plot_flipy

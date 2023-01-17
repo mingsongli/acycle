@@ -51,6 +51,7 @@ function waveletGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to waveletGUI (see VARARGIN)
+handles.val1 = varargin{1}.val1;
 
 handles.waveletGUIfig = gcf;
 set(0,'Units','normalized') % set units as normalized
@@ -62,11 +63,7 @@ h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
 handles.MonZoom = varargin{1}.MonZoom;
 handles.sortdata = varargin{1}.sortdata;
-if ismac
-    set(gcf,'position',[0.45,0.2,0.4,0.35]* handles.MonZoom) % set position
-elseif ispc
-    set(gcf,'position',[0.45,0.2,0.4,0.35]* handles.MonZoom) % set position
-end
+set(gcf,'position',[0.25,0.2,0.5,0.35]* handles.MonZoom) % set position
 
 set(handles.text2,'position',[0.02,0.85,0.1,0.06])
 set(handles.edit1,'position',[0.13,0.85,0.65,0.06])
@@ -139,13 +136,25 @@ handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
 handles.lengthdata = lengthdata;
 handles.wavehastorerun = 1;
 handles.switchdata = 0;
+% language
+lang_choice = varargin{1}.lang_choice;
+handles.lang_choice = lang_choice;
+lang_id = varargin{1}.lang_id;
+lang_var = varargin{1}.lang_var;
+handles.lang_id = lang_id;
+handles.lang_var = lang_var;
+handles.main_unit_selection = varargin{1}.main_unit_selection;
 
 set(handles.edit9,'string','2')
 
 if lengthdata == 1
     % wavelet
-    set(gcf,'Name','Acycle: Wavelet')
-    
+    if handles.lang_choice == 0
+        set(gcf,'Name','Acycle: Wavelet')
+    else
+        [~, menu109] = ismember('menu109',lang_id);
+        set(gcf,'Name',['Acycle: ',lang_var{menu109}])
+    end
     data = varargin{1}.current_data;
     handles.current_data = data;
     [dat_dir,handles.filename1,exten] = fileparts(data_name);
@@ -155,22 +164,33 @@ if lengthdata == 1
     set(handles.pushbutton1,'visible','off')
     set(handles.edit1,'string',[handles.filename1,exten])
     set(handles.edit5,'string','0.1')
-    set(handles.popupmenu1, 'Value', 1);
     set(handles.popupmenu2,'enable','on')
     set(handles.edit7,'enable','on')
     set(handles.edit10,'visible','off')
     set(handles.checkbox1,'Value',1,'enable','on')
-    set(handles.checkbox3,'Value',0,'enable','on','string','plot spectrum')
+    if handles.lang_choice == 0
+        set(handles.checkbox3,'Value',0,'enable','on','string','plot spectrum')
+    else
+        [~, menu03] = ismember('menu03',lang_id);
+        [~, wave06] = ismember('wave06',lang_id);
+        set(handles.checkbox3,'Value',0,'enable','on','string',[lang_var{menu03},' ', lang_var{wave06}])
+    end
     set(handles.checkbox9,'Value',1,'enable','on')
     set(handles.checkbox10,'Value',1,'enable','on')
     method_list = {'Wavelet';'Continous Wavelet Transform';'Wavelet (Torrence & Compo, 1998)'};
-    set(handles.popupmenu1,'Value',1,'enable','on','string',method_list)
+    set(handles.popupmenu1,'Value',2,'enable','on','string',method_list)
     
     set(handles.text13,'Visible','off')
     set(handles.edit11,'Visible','off')
 else
     % wcoherence
-    set(gcf,'Name','Acycle: Wavelet coherence and cross-spectrum')
+    if handles.lang_choice == 0
+        set(gcf,'Name','Acycle: Wavelet coherence and cross-spectrum')
+    else
+        [~, wave15] = ismember('wave15',lang_id);
+        set(gcf,'Name',['Acycle: ',lang_var{wave15}])
+    end
+    
     [handles.dat_dir,handles.filename1,handles.exten] = fileparts(data_name(1,:));
     [handles.dat_dir,handles.filename2,handles.exten] = fileparts(data_name(2,:));
     set(handles.text3,'enable','on')
@@ -184,8 +204,12 @@ else
     set(handles.edit5,'string','0.1')
     set(handles.edit10,'visible','on')
     set(handles.checkbox1,'Value',1,'enable','on')
-    %set(handles.checkbox3,'Value',0,'enable','off','string','cross-spectrum')
-    set(handles.checkbox3,'Value',0,'enable','on','string','phase, wtc threshold')
+    if handles.lang_choice == 0
+        set(handles.checkbox3,'Value',0,'enable','on','string','phase, wtc threshold')
+    else
+        [~, wave16] = ismember('wave16',lang_id);
+        set(handles.checkbox3,'Value',0,'enable','on','string',lang_var{wave16})
+    end
     set(handles.checkbox9,'Value',1,'enable','on')
     set(handles.checkbox10,'Value',0,'enable','off')
     set(handles.checkbox12,'Value',0,'enable','off')
@@ -198,14 +222,121 @@ else
 end
 
 
+% language
+if handles.lang_choice > 0
+    [~, main12] = ismember('main12',handles.lang_id);
+    set(handles.text2,'String',[lang_var{main12},'1']) %  series 1
+    set(handles.text3,'String',[lang_var{main12},'2'])%  series 2
+    
+    [~, wave01] = ismember('wave01',handles.lang_id);
+    set(handles.pushbutton1,'String',lang_var{wave01})
+    
+    [~, menu81] = ismember('menu81',handles.lang_id);
+    set(handles.checkbox11,'String',lang_var{menu81})
+    
+    [~, main51] = ismember('main51',handles.lang_id); % set
+    [~, main15] = ismember('main15',handles.lang_id); % period
+    set(handles.uibuttongroup1,'Title',[lang_var{main51}, lang_var{main15}])
+    
+    [~, wave02] = ismember('wave02',handles.lang_id);
+    set(handles.text4,'String',lang_var{wave02})
+    
+    [~, wave03] = ismember('wave03',handles.lang_id);
+    set(handles.text5,'String',lang_var{wave03})
+    
+    [~, wave04] = ismember('wave04',handles.lang_id);
+    set(handles.text6,'String',lang_var{wave04})
+    
+    [~, wave05] = ismember('wave05',handles.lang_id);
+    set(handles.text8,'String',lang_var{wave05})
+    
+    [~, wave06] = ismember('wave06',handles.lang_id);
+    set(handles.checkbox3,'String',lang_var{wave06})
+    
+    [~, wave07] = ismember('wave07',handles.lang_id);
+    set(handles.checkbox8,'String',lang_var{wave07})
+    
+    [~, wave08] = ismember('wave08',handles.lang_id);
+    set(handles.checkbox4,'String',lang_var{wave08})
+    
+    [~, wave09] = ismember('wave09',handles.lang_id);
+    set(handles.checkbox5,'String',lang_var{wave09})
+    
+    [~, wave10] = ismember('wave10',handles.lang_id);
+    set(handles.checkbox6,'String',lang_var{wave10})
+    
+    [~, wave11] = ismember('wave11',handles.lang_id);
+    set(handles.checkbox9,'String',lang_var{wave11})
+    
+    [~, wave12] = ismember('wave12',handles.lang_id);
+    set(handles.checkbox10,'String',lang_var{wave12})
+    
+    [~, wave13] = ismember('wave13',handles.lang_id);
+    set(handles.checkbox12,'String',lang_var{wave13})
+    
+    [~, wave14] = ismember('wave14',handles.lang_id);
+    set(handles.text12,'String',lang_var{wave14})
+    
+    [~, main03] = ismember('main03',handles.lang_id);
+    set(handles.radiobutton1,'String',lang_var{main03})
+    
+    [~, main04] = ismember('main04',handles.lang_id);
+    set(handles.radiobutton2,'String',[lang_var{main04},'2']) % log2
+    
+    [~, main43] = ismember('main43',handles.lang_id);
+    set(handles.checkbox1,'String',lang_var{main43}) % padding
+    
+    [~, menu03] = ismember('menu03',handles.lang_id);
+    set(handles.uipanel2,'Title',lang_var{menu03})
+    
+    [~, main12] = ismember('main12',handles.lang_id);
+    set(handles.checkbox2,'String',[lang_var{menu03}, lang_var{main12}]) % plot series
+    
+    [~, wave06] = ismember('wave06',handles.lang_id);
+    set(handles.checkbox3,'String',[lang_var{menu03}, lang_var{wave06}]) % plot spectrum
+    
+    [~, main50] = ismember('main50',handles.lang_id);
+    set(handles.text9,'String',lang_var{main50})  % colormap
+    
+    [~, evofft12] = ismember('evofft12',handles.lang_id);
+    set(handles.text10,'String',lang_var{evofft12}) % grid #
+    
+    [~, main01] = ismember('main01',handles.lang_id);
+    set(handles.uipanel3,'Title',lang_var{main01}) % save data
+
+    set(handles.checkbox7,'String',lang_var{main01}) % save data
+    
+    [~, main00] = ismember('main00',handles.lang_id);
+     set(handles.pushbutton2,'String',lang_var{main00})
+     
+    [~, c37] = ismember('c37',handles.lang_id);
+    set(handles.text7,'String',lang_var{c37})
+    set(handles.uipanel1,'Title',lang_var{c37})
+    
+    [~, c36] = ismember('c36',handles.lang_id);
+    set(handles.text11,'String',lang_var{c36})
+%     
+%     [~, mainxx] = ismember('mainxx',handles.lang_id);
+%     set(handles.mainxx,'String',lang_var{mainxx})
+%     
+%     [~, mainxx] = ismember('mainxx',handles.lang_id);
+%     set(handles.mainxx,'String',lang_var{mainxx})
+    
+end
+
 if lengthdata == 1
     time = data(:,1);
     timelen = (time(end)-time(1));
     Dti = diff(time);
     dt = mean(Dti);
     if max(Dti) - min(Dti) > 10 * eps('single')
-        f = warndlg('Interpolation needed. Mean sampling rate was used.','Warning');
-        
+        if handles.lang_choice == 0
+            f = warndlg('Interpolation needed. Mean sampling rate was used.','Warning');
+        else
+            [~, evofft14] = ismember('evofft14',lang_id);
+            [~, main29] = ismember('main29',lang_id);
+            f = warndlg(lang_var{evofft14},lang_var{main29});
+        end
         [data]=interpolate(data,dt);
         handles.current_data = data;
     end
@@ -230,13 +361,25 @@ else
     dt = mean(Dti1);
     
     if max(Dti1) - min(Dti1) > 10 * eps('single')
-        f = warndlg('Series 1: Interpolation needed! Done!','Warning');
+        if handles.lang_choice == 0
+            f = warndlg('Series 1: Interpolation needed! Done!','Warning');
+        else
+            [~, wave17] = ismember('wave17',lang_id);
+            [~, main29] = ismember('main29',lang_id);
+            f = warndlg(lang_var{wave17},lang_var{main29});
+        end
         [dat1]=interpolate(dat1,dt);
     end
     if isequal(dat1(:,1),dat2(:,1))
         
     else
-        f2 = warndlg('Time ranges are not equal. Inerpolation series applied.','Warning');
+        if handles.lang_choice == 0
+            f2 = warndlg('Time ranges are not equal. Inerpolation series applied.','Warning');
+        else
+            [~, wave18] = ismember('wave18',lang_id);
+            [~, main29] = ismember('main29',lang_id);
+            f2 = warndlg(lang_var{wave18},lang_var{main29});
+        end
         dat2int2 = interp1(dat2(:,1),dat2(:,2),dat1(:,1));
         dat2  = [dat1(:,1),dat2int2];
     end
@@ -1182,7 +1325,14 @@ function pushbutton3_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton3 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-msgbox({'User defined tick labels, space delimited values, e.g.,';'10 20 41 100 405 1200 2400'},'Help: format')
+
+%lang
+
+lang_var = handles.lang_var;
+[~, wave19] = ismember('wave19',handles.lang_id);
+[~, wave26] = ismember('wave26',handles.lang_id);
+[~, wave21] = ismember('wave21',handles.lang_id);
+msgbox({lang_var{wave19};lang_var{wave26}},lang_var{wave21})
 
 
 % --- Executes when figure1 is resized.

@@ -21,15 +21,27 @@ if fhigh<=flow
     
     flch = [flow fc fhigh];
     flch = sort(flch);
-    ftext3 = ['f center: ',num2str(fc)];
+    if handles.lang_choice == 0
+        ftext3 = ['f center: ',num2str(fc)];
+    else
+        lang_var = handles.lang_var;
+        [~, ft07] = ismember('ft07',handles.lang_id);
+        ftext3 = [lang_var{ft07},': ',num2str(fc)];
+    end
     set(handles.edit2,'string',num2str(fhigh))
     set(handles.text3,'string',ftext3)
 else
     fc = (flow+fhigh)/2;
     flch = [flow fc fhigh];
     flch = sort(flch);
-    ftext3 = ['f center: ',num2str(fc)];
-    %ftext3 = ['f_low-f_high: ',num2str(flch(1)),' ~ ',num2str(flch(3))];
+    
+    if handles.lang_choice == 0
+        ftext3 = ['f center: ',num2str(fc)];
+    else
+        lang_var = handles.lang_var;
+        [~, ft07] = ismember('ft07',handles.lang_id);
+        ftext3 = [lang_var{ft07},': ',num2str(fc)];
+    end
     set(handles.text3,'string',ftext3)
 end
 

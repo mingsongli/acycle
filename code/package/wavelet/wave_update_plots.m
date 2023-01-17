@@ -9,11 +9,15 @@
 %   acycle.org
 %   Nov 11, 2021
 
+% lang
+lang_var = handles.lang_var;
+[~, menu109] = ismember('menu109',handles.lang_id);
+
 if and(plot_spectrum == 1,plot_series ==1)
     try figure(handles.figwave)
     catch
         handles.figwave = figure;
-        set(gcf,'Name','Acycle: wavelet plot')
+        set(gcf,'Name',['Acycle: ',lang_var{menu109}])
         set(gcf,'units','norm') % set location
         set(gcf, 'color','white')
     end
@@ -56,7 +60,7 @@ elseif and(plot_spectrum == 0,plot_series ==1)
     catch
         
         handles.figwave = figure;
-        set(gcf,'Name','Acycle: wavelet plot')
+        set(gcf,'Name',['Acycle: ',lang_var{menu109}])
         set(gcf,'units','norm') % set location
         set(gcf, 'color','white')
 
@@ -87,7 +91,7 @@ elseif and(plot_spectrum == 1,plot_series == 0)
     try figure(handles.figwave)
     catch
         handles.figwave = figure;
-        set(gcf,'Name','Acycle: wavelet plot')
+        set(gcf,'Name',['Acycle: ',lang_var{menu109}])
         set(gcf,'units','norm') % set location
         set(gcf, 'color','white')
     end
@@ -115,7 +119,7 @@ elseif and(plot_spectrum == 0,plot_series == 0)
     try figure(handles.figwave)
     catch
         handles.figwave = figure;
-        set(gcf,'Name','Acycle: wavelet plot')
+        set(gcf,'Name',['Acycle: ',lang_var{menu109}])
         set(gcf,'units','norm') % set location
         set(gcf, 'color','white')
     end

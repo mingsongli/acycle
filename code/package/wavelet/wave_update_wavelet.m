@@ -219,14 +219,35 @@ else
     end
 end
 %imagesc(time,log2(period),log2(power));  %*** uncomment for 'image' plot
-if handles.unit_type == 0
-    xlabel(['Unit (',handles.unit,')'])
-elseif handles.unit_type == 1
-    xlabel(['Depth (',handles.unit,')'])
+
+% lang
+lang_var = handles.lang_var;
+
+if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+    if handles.unit_type == 0
+        xlabel(['Unit (',handles.unit,')'])
+    elseif handles.unit_type == 1
+        xlabel(['Depth (',handles.unit,')'])
+    else
+        xlabel(['Time (',handles.unit,')'])
+    end
+    ylabel(['Period (',handles.unit,')'])
 else
-    xlabel(['Time (',handles.unit,')'])
+    [~, main34] = ismember('main34',handles.lang_id); % Unit
+    [~, main23] = ismember('main23',handles.lang_id); % Depth
+    [~, main21] = ismember('main21',handles.lang_id); % Time
+    [~, main15] = ismember('main15',handles.lang_id); % Period
+
+    if handles.unit_type == 0
+        xlabel([lang_var{main34},' (',handles.unit,')'])
+    elseif handles.unit_type == 1
+        xlabel([lang_var{main23},' (',handles.unit,')'])
+    else
+        xlabel([lang_var{main21},' (',handles.unit,')'])
+    end
+    ylabel([lang_var{main15},' (',handles.unit,')'])
 end
-ylabel(['Period (',handles.unit,')'])
+
 %title('B) Wavelet Power Spectrum')
 set(gca,'XLim',xlim(:))
 

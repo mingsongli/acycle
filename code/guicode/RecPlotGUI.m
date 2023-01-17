@@ -61,6 +61,7 @@ h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
 handles.MonZoom = varargin{1}.MonZoom;
 handles.sortdata = varargin{1}.sortdata;
+handles.val1 = varargin{1}.val1;
 
 data_s = varargin{1}.current_data;
 handles.unit = varargin{1}.unit;
@@ -72,12 +73,7 @@ handles.listbox_acmain = varargin{1}.listbox_acmain; % save path
 handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
 [dat_dir,handles.filename,exten] = fileparts(handles.data_name);
 
-
-if ismac
-    set(gcf,'position',[0.35,0.4,0.35,0.25]* handles.MonZoom) % set position
-elseif ispc
-    set(gcf,'position',[0.35,0.4,0.45,0.35]* handles.MonZoom) % set position
-end
+set(gcf,'position',[0.35,0.4,0.45,0.35]* handles.MonZoom) % set position
 
 set(handles.text2,'position',[0.05,0.82,0.09,0.064])
 set(handles.edit1,'position',[0.145,0.8,0.5,0.1])
@@ -106,7 +102,55 @@ set(handles.pushbutton1,'position',[0.87,0.1,0.12,0.12])
 % Choose default command line output for RecPlotGUI
 handles.output = hObject;
 handles.RecPlotGUI = gcf;
-set(gcf,'Name','Acycle: Recurrence Plot')
+
+% language
+lang_choice = varargin{1}.lang_choice;
+handles.lang_choice = lang_choice;
+lang_id = varargin{1}.lang_id;
+lang_var = varargin{1}.lang_var;
+handles.lang_id = lang_id;
+handles.lang_var = lang_var;
+handles.main_unit_selection = varargin{1}.main_unit_selection;
+if handles.lang_choice == 0
+    set(gcf,'Name','Acycle: Recurrence Plot')
+else
+    [~, menu128] = ismember('menu128',lang_id);
+    set(gcf,'Name',['Acycle: ',lang_var{menu128}])
+end
+
+% language
+if handles.lang_choice > 0
+    [~, main12] = ismember('main12',handles.lang_id);
+    [~, main24] = ismember('main24',handles.lang_id);
+    [~, main53] = ismember('main53',handles.lang_id);
+    [~, main54] = ismember('main54',handles.lang_id);
+    [~, recPlot03] = ismember('recPlot03',handles.lang_id);
+    [~, main10] = ismember('main10',handles.lang_id);
+    [~, main07] = ismember('main07',handles.lang_id);
+    
+    [~, recPlot01] = ismember('recPlot01',handles.lang_id);
+    [~, recPlot02] = ismember('recPlot02',handles.lang_id);
+    [~, c39] = ismember('c39',handles.lang_id);
+    [~, main55] = ismember('main55',handles.lang_id);
+    [~, main32] = ismember('main32',handles.lang_id);
+    [~, main41] = ismember('main41',handles.lang_id);
+    [~, main01] = ismember('main01',handles.lang_id);
+    
+    set(handles.text2,'String',lang_var{main12})
+    set(handles.edit7,'String',lang_var{main24})
+    set(handles.text3,'String',lang_var{main53})
+    set(handles.checkbox1,'String',[lang_var{main54},lang_var{main12}])
+    set(handles.checkbox3,'String',lang_var{recPlot03})
+    set(handles.checkbox2,'String',[lang_var{main54},'DET'])
+    set(handles.checkbox4,'String',lang_var{main10})
+    set(handles.uipanel1,'Title',lang_var{main07})
+    
+    set(handles.text4,'String',lang_var{c39})
+    set(handles.text6,'String',[lang_var{recPlot01},lang_var{main41}])
+    set(handles.text5,'String',[lang_var{main55},' ',lang_var{main32}])
+    set(handles.text7,'String',lang_var{recPlot02})
+    set(handles.pushbutton1,'String',lang_var{main01})
+end
 
 % size of data
 [N, ncol] = size(data_s);
@@ -128,7 +172,13 @@ if ncol == 1
 else
     diffx = diff(data_s(:,1));
     if max(diffx) - min(diffx) > 10*eps('single')
-        hwarn = warndlg('Not equally spaced data. Interpolated using mean sampling rate!');
+        % language
+        if handles.lang_choice ==  0
+            hwarn = warndlg('Not equally spaced data. Interpolated using mean sampling rate!');
+        else
+            [~, dd37] = ismember('dd37',handles.lang_id);
+            hwarn = warndlg(lang_var{dd37});
+        end
         interpolate_rate = mean(diffx);
         handles.current_data = interpolate(data_s,interpolate_rate);
         figure(hwarn);

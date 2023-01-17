@@ -22,7 +22,7 @@ function varargout = eCOCOGUI(varargin)
 
 % Edit the above text to modify the response to help eCOCOGUI
 
-% Last Modified by GUIDE v2.5 06-Nov-2021 23:13:40
+% Last Modified by GUIDE v2.5 07-Jan-2023 19:56:38
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -59,6 +59,7 @@ handles.output = hObject;
 handles.hmain = gcf;
 handles.MonZoom = varargin{1}.MonZoom;
 handles.sortdata = varargin{1}.sortdata;
+handles.val1 = varargin{1}.val1;
 
 %
 set(0,'Units','normalized') % set units as normalized
@@ -132,7 +133,7 @@ set(handles.text16,'position',[0.54,0.7,0.3,0.25])
 set(handles.text17,'position',[0.54,0.24,0.3,0.25])
 set(handles.edit9,'position',[0.237,0.574,0.3,0.4])
 set(handles.edit10,'position',[0.237,0.14,0.3,0.4])
-set(handles.pushbutton1,'position',[0.83,0.118,0.09,0.08]) % Sliding window
+set(handles.pushbuttonOK,'position',[0.83,0.118,0.09,0.08]) % Sliding window
 
 set(handles.pushbutton2,'position',[0.58,0.153,0.23,0.058]) % ecoco plot
 set(handles.pushbutton2,'Visible','off','Enable','off') % 
@@ -140,20 +141,152 @@ set(handles.pushbutton3,'position',[0.58,0.1,0.23,0.058]) % track sed. rates
 set(handles.pushbutton3,'Visible','off','Enable','off') %
 set(handles.pushbutton4,'position',[0.82,0.083,0.15,0.229]) %
 
+% language
+lang_choice = varargin{1}.lang_choice;
+handles.lang_choice = lang_choice;
+lang_id = varargin{1}.lang_id;
+lang_var = varargin{1}.lang_var;
+handles.main_unit_selection = varargin{1}.main_unit_selection;
+
+assignin('base','main_unit_selection',handles.main_unit_selection)
+
+if lang_choice>0
+    [~, locb] = ismember('ec00',lang_id);
+    set(gcf,'Name',lang_var{locb})  % GUI title
+    [~, locb] = ismember('ec02',lang_id);
+    set(handles.uibuttongroup7,'title',lang_var{locb})
+    [~, locb] = ismember('ec03',lang_id);
+    set(handles.radiobutton1,'string',lang_var{locb})
+    [~, locb] = ismember('ec04',lang_id);
+    set(handles.radiobutton2,'string',lang_var{locb})
+    [~, locb] = ismember('main02',lang_id);
+    set(handles.uibuttongroup1,'title',lang_var{locb})
+    set(handles.text2,'string',lang_var{locb})
+    set(handles.text3,'string',lang_var{locb})
+    [~, locb] = ismember('ec05',lang_id);
+    set(handles.checkbox1,'string',lang_var{locb})
+    [~, locb1] = ismember('ec06',lang_id);
+    [~, locb2] = ismember('dd39',lang_id);
+    [~, locb3] = ismember('dd40',lang_id);
+    [~, locb4] = ismember('dd41',lang_id);
+    set(handles.popupmenu1,'string',{lang_var{locb1},lang_var{locb2},lang_var{locb3},lang_var{locb4}})
+    [~, locb] = ismember('ec07',lang_id);
+    set(handles.checkbox5,'string',lang_var{locb})
+    [~, locb] = ismember('ec08',lang_id);
+    set(handles.checkbox6,'string',lang_var{locb})
+    %
+    [~, locb] = ismember('ec09',lang_id);
+    set(handles.uibuttongroup2,'title',lang_var{locb})
+    [~, locb] = ismember('ec10',lang_id);
+    set(handles.checkbox2,'string',lang_var{locb})
+    [~, locb] = ismember('main06',lang_id);
+    set(handles.text8,'string',lang_var{locb})
+    [~, locb] = ismember('ec11',lang_id);
+    set(handles.checkbox4,'string',lang_var{locb})
+    [~, locb12] = ismember('ec12',lang_id);
+    [~, locb13] = ismember('ec13',lang_id);
+    [~, locb14] = ismember('ec14',lang_id);
+    set(handles.popupmenu3,'string',{lang_var{locb12};lang_var{locb13};lang_var{locb14}})
+    [~, locb] = ismember('a209',lang_id);
+    set(handles.text18,'string',lang_var{locb})
+    %
+    [~, locb] = ismember('ec01',lang_id);
+    set(handles.uipanel1,'title',lang_var{locb})
+    [~, locb] = ismember('main05',lang_id);
+    set(handles.text4,'string',lang_var{locb})
+    [~, locb] = ismember('main06',lang_id);
+    set(handles.text5,'string',lang_var{locb})
+    [~, locb] = ismember('main32',lang_id);
+    set(handles.text6,'string',lang_var{locb})
+    set(handles.text19,'string',lang_var{locb})
+    %
+    [~, locb] = ismember('ec15',lang_id);
+    set(handles.uibuttongroup3,'title',lang_var{locb})
+    [~, locb] = ismember('ec16',lang_id);
+    set(handles.radiobutton6,'string',lang_var{locb})
+    [~, locb] = ismember('ec17',lang_id);
+    set(handles.radiobutton7,'string',lang_var{locb})
+    [~, locb] = ismember('ec18',lang_id);
+    set(handles.radiobutton8,'string',lang_var{locb})
+    [~, locb] = ismember('ec19',lang_id);
+    set(handles.text10,'string',lang_var{locb})
+    [~, locb] = ismember('ec20',lang_id);
+    set(handles.text22,'string',lang_var{locb})
+    %
+    [~, locb] = ismember('ec21',lang_id);
+    set(handles.uibuttongroup4,'title',lang_var{locb})
+    %
+    [~, locb] = ismember('main39',lang_id);
+    set(handles.uibuttongroup5,'title',lang_var{locb})
+    [~, locb] = ismember('ec22',lang_id);
+    set(handles.text13,'string',lang_var{locb})
+    %
+    [~, locb] = ismember('main07',lang_id);
+    set(handles.uibuttongroup6,'title',lang_var{locb})
+    [~, locb] = ismember('c39',lang_id);
+    set(handles.text14,'string',lang_var{locb})
+    [~, locb] = ismember('main32',lang_id);
+    set(handles.text15,'string',lang_var{locb})
+    [~, locb] = ismember('main34',lang_id);
+    set(handles.text16,'string',lang_var{locb})
+    set(handles.text17,'string',lang_var{locb})
+    [~, locb] = ismember('ec23',lang_id);
+    set(handles.pushbutton2,'string',lang_var{locb})
+    [~, locb] = ismember('ec67',lang_id);
+    set(handles.pushbutton3,'string',lang_var{locb})
+    %
+    [~, locb] = ismember('ec24',lang_id);
+    ec24 = lang_var{locb};
+    [~, locb] = ismember('ec25',lang_id);
+    ec25 = lang_var{locb};
+    [~, locb] = ismember('ec26',lang_id);
+    ec26 = lang_var{locb};
+    [~, locb] = ismember('ec27',lang_id);
+    ec27 = lang_var{locb};
+    [~, locb] = ismember('ec28',lang_id);
+    ec28 = lang_var{locb};
+    [~, locb] = ismember('ec29',lang_id);
+    ec29 = lang_var{locb};
+    [~, locb] = ismember('ec30',lang_id);
+    ec30 = lang_var{locb};
+    [~, locb] = ismember('ec31',lang_id);
+    ec31 = lang_var{locb};
+    [~, locb] = ismember('ec32',lang_id);
+    ec32 = lang_var{locb};
+    [~, locb] = ismember('ec33',lang_id);
+    ec33 = lang_var{locb};
+    [~, locb] = ismember('ec34',lang_id);
+    ec34 = lang_var{locb};
+    [~, locb] = ismember('ec35',lang_id);
+    ec35 = lang_var{locb};
+    [~, locb] = ismember('ec36',lang_id);
+    ec36 = lang_var{locb};
+else
+    set(gcf,'Name','Acycle: (Evolutionary) Correlation Coefficient / (e)COCO')
+end
+
 %
-set(gcf,'Name','Acycle: (Evolutionary) Correlation Coefficient / (e)COCO')
 dat = varargin{1}.current_data;  % data
 %
 diffx = diff(dat(:,1));
 % check data
 if sum(diffx <= 0) > 0
-    disp('>>  Waning: data has to be in ascending order, no duplicated number allowed')
+    if lang_choice == 0
+        disp('>>  Waning: data has to be in ascending order, no duplicated number allowed')
+    else
+        disp(ec24)
+    end
     dat = sortrows(dat);
 end
 
 % check data
 if abs((max(diffx)-min(diffx))/2) > 10*eps('single')
-    hwarn1 = warndlg('Data may not be evenly spaced!');
+    if lang_choice == 0
+        hwarn1 = warndlg('Data may not be evenly spaced!');
+    else
+        hwarn1 = warndlg(ec25);
+    end
+    
 end
 %
 datx = dat(:,1);  % unit should be cm
@@ -206,12 +339,20 @@ handles.slices = 1;
 handles.ecocoS = 0; % 0 = COCO; 1 = eCOCO
 % check unit, set to cm
 if handles.unit_type == 0
-    hwarn = warndlg('Is the Unit m? If not, set unit in Acycle and restart COCO/eCOCO');
+    if lang_choice == 0
+        hwarn = warndlg('Is the Unit m? If not, set unit in Acycle and restart COCO/eCOCO');
+    else
+        hwarn = warndlg(ec26);
+    end
     dat(:,1) = dat(:,1)*100;
     dt = dt * 100;
     dtr = dt*100;
 elseif handles.unit_type == 2
-    hwarn = warndlg('Unit type is Time! Make sure the unit is m');
+    if lang_choice == 0
+        hwarn = warndlg('Unit type is Time! Make sure the unit is m');
+    else
+        hwarn = warndlg(ec27);
+    end
 else
     if strcmp(handles.unit,'m')
         dat(:,1) = dat(:,1)*100;
@@ -220,19 +361,39 @@ else
     elseif strcmp(handles.unit,'dm')
         dat(:,1) = dat(:,1)*10;
         dtr = dt*10;dt = dt * 10;
-        msgbox('Unit is dm, now changes to cm','Unit transform')
+        if lang_choice == 0
+            msgbox('Unit is dm, now changes to cm','Unit transform')
+        else
+            msgbox(ec29,ec28)
+        end
+        
     elseif strcmp(handles.unit,'mm')
         dat(:,1) = dat(:,1)/10;
         dtr = dt/10;dt = dt / 10;
-        msgbox('Unit is mm, now changes to cm','Unit transform')
+        if lang_choice == 0
+            msgbox('Unit is mm, now changes to cm','Unit transform')
+        else
+            msgbox(ec30,ec28)
+        end
+        
     elseif strcmp(handles.unit,'km')
         dat(:,1) = dat(:,1)* 1000 * 100;
         dtr = dt*100*1000;dt = dt * 100*1000;
-        msgbox('Unit is km, now changes to cm','Unit transform')
+        if lang_choice == 0
+            msgbox('Unit is km, now changes to cm','Unit transform')
+        else
+            msgbox(ec31,ec28)
+        end
+        
     elseif strcmp(handles.unit,'ft')
         dat(:,1) = dat(:,1)* 30.48;
         dtr = dt * 30.48; dt = dt * 30.48;
-        msgbox('Unit is ft, now changes to cm','Unit transform')
+        if lang_choice == 0
+            msgbox('Unit is ft, now changes to cm','Unit transform')
+        else
+            msgbox(ec32,ec28)
+        end
+        
     end
 end
 
@@ -300,13 +461,22 @@ set(handles.edit3,'String',num2str(handles.sedstep))
 % test sed. rate info
 
 sr = handles.sedmin:handles.sedstep:handles.sedmax;
-sedinfo = [num2str(length(sr)),' test sed. rates: ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
-    ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
+if lang_choice == 0
+    sedinfo = [num2str(length(sr)),' test sed. rates: ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+        ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
+else
+    sedinfo = [num2str(length(sr)),ec33,num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+        ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
+end
 set(handles.text7,'String',sedinfo)
 
 % tooltips for OK button
-s_push_ok = sprintf('Check parameters in BLUE\nclick OK to run eTimeOpt');
-set(handles.pushbutton1,'TooltipString',s_push_ok) 
+if lang_choice == 0
+    s_push_ok = sprintf('Check parameters in BLUE\nclick OK to run eTimeOpt');
+else
+    s_push_ok = sprintf(ec34);
+end
+set(handles.pushbuttonOK,'TooltipString',s_push_ok) 
 %
 %
 red = 0;
@@ -327,22 +497,43 @@ handles.ecocofigdata = figure;
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
 set(gcf,'color','w');
+if lang_choice>0
+    [~, locb] = ismember('main02',lang_id);
+    set(gcf,'Name',lang_var{locb});
+else
+    set(gcf,'Name','Data');
+end
 set(handles.ecocofigdata,'position',[0.01,0.01,0.2,0.9]) % set position
 if handles.flipy == 1
     plot(fliplr(daty),datx,'k')
 else
     plot(daty,datx,'k')
 end
-xlabel('Value'); ylabel(['Depth (',handles.unit,')'])
+if lang_choice == 0
+    xlabel('Value'); ylabel(['Depth',' (',handles.unit,')'])
+else
+    [~, locb] = ismember('main24',lang_id);
+    main24 = lang_var{locb};
+    [~, locb] = ismember('main23',lang_id);
+    main23 = lang_var{locb};
+    xlabel(main24); ylabel([main23,' (',handles.unit,')'])
+end
 %
 handles.ecocofigspectrum = figure;
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
 set(gcf,'color','w');
+if lang_choice>0
+    [~, locb] = ismember('ec09',lang_id);
+    set(gcf,'Name',lang_var{locb});
+else
+    set(gcf,'Name','Periodogram of Data');
+end
 set(handles.ecocofigspectrum,'position',[0.2,0.4,0.2,0.4]) % set position
 dt = (median(diff(datx)));
-pad = handles.pad;
+
 [p1,f] = periodogram(daty,[],handles.pad,1/dt);  % power of dat
+handles.fmaxdata = max(f);
 % remove AR1 noise
 if red == 0
     theored = p1;
@@ -366,15 +557,35 @@ ax1 = subplot(2,1,1);
 plot(ax1,f,p1,'k','LineWidth',1);
 hold on;
 plot(ax1,f,theored,'r','LineWidth',2)
-xlabel(ax1,'Frequency');ylabel(ax1,'Power');title('raw periodogram (& red noise)')
+if lang_choice > 0
+    [~, locb] = ismember('main14',lang_id);
+    main14 = lang_var{locb};
+    [~, locb] = ismember('main46',lang_id);
+    main46 = lang_var{locb};
+end
+if lang_choice == 0
+    xlabel(ax1,'Frequency');ylabel(ax1,'Power');title('raw periodogram (& red noise)')
+else
+    xlabel(ax1,main14);ylabel(ax1,main46);title(ec35)
+end
 xlim([0 max(f)])
 ax2 = subplot(2,1,2);
 plot(ax2,f,p,'k','LineWidth',1);
-xlabel(ax2,'Frequency');ylabel(ax2,'Power');title('red noise removed ?')
-xlim([0 max(f)])
+if lang_choice == 0
+    xlabel(ax2,'Frequency');ylabel(ax2,'Power');title('red noise removed ?')
+else
+    xlabel(ax2,main14);ylabel(ax2,main46);title(ec36)
+end
+%xlim([0 max(f)])
+xlim([0, handles.fmaxdata])
 
 handles.fmaxdata = max(f);
 set(handles.edit4, 'String', num2str(max(f)))
+
+handles.lang_choice = lang_choice;
+handles.lang_id = lang_id;
+handles.lang_var = lang_var;
+assignin('base','fmaxdata',handles.fmaxdata)
 % Update handles structure
 guidata(hObject, handles);
 
@@ -409,7 +620,16 @@ function radiobutton1_Callback(hObject, eventdata, handles)
 % Hint: get(hObject,'Value') returns toggle state of radiobutton1
 if get(hObject,'Value')
     set(handles.radiobutton2,'Value',0)
-    set(handles.checkbox6,'String','0 padding')
+    
+    if handles.lang_choice==0
+        set(handles.checkbox6,'String','0 padding')
+    else
+        [~, locb1] = ismember('ec08',handles.lang_id);
+        lang_var = handles.lang_var;
+        set(handles.checkbox6,'String',lang_var{locb1})
+    end   
+    
+    
     % adjust padding
     % set zeropadding
     if handles.npts <= 2500
@@ -442,7 +662,14 @@ function radiobutton2_Callback(hObject, eventdata, handles)
 % Hint: get(hObject,'Value') returns toggle state of radiobutton2
 if get(hObject,'Value')
     set(handles.radiobutton1,'Value',0)
-    set(handles.checkbox6,'String','0 padding')
+    
+    if handles.lang_choice==0
+        set(handles.checkbox6,'String','0 padding')
+    else
+        [~, locb1] = ismember('ec08',handles.lang_id);
+        lang_var = handles.lang_var;
+        set(handles.checkbox6,'String',lang_var{locb1})
+    end   
     nptsi = round(handles.window/handles.dt*100);
     % adjust padding
     % set zeropadding
@@ -493,6 +720,12 @@ if get(hObject,'Value')
         set(0,'Units','normalized') % set units as normalized
         set(gcf,'units','norm') % set location
         set(gcf,'color','w');
+        if lang_choice>0
+            [~, locb] = ismember('main02',lang_id);
+            set(gcf,'Name',lang_var{locb});
+        else
+            set(gcf,'Name','Data');
+        end
         set(handles.ecocofigdata,'position',[0.01,0.01,0.2,0.9]) % set position
         if handles.flipy == 1
             plot(fliplr(dat(:,2)),dat(:,1),'k')
@@ -500,7 +733,14 @@ if get(hObject,'Value')
             plot(dat(:,2),dat(:,1),'k')
         end
         ylim([min(dat(:,1)),max(dat(:,1))]);
-        xlabel('Value'); ylabel(['Depth (',handles.unit,')'])
+        if handles.lang_choice==0
+            xlabel('Value'); ylabel(['Depth (',handles.unit,')'])
+        else
+            [~, locb1] = ismember('main24',handles.lang_id);
+            [~, locb2] = ismember('main23',handles.lang_id);
+            lang_var = handles.lang_var;
+            xlabel(lang_var{locb1}); ylabel([lang_var{locb2},' (',handles.unit,')'])
+        end
     end
 else
     handles.time_0pad = 0;
@@ -512,13 +752,27 @@ else
             plot(dat(:,2),dat(:,1),'k')
         end
 
-        xlabel('Value'); ylabel(['Depth (',handles.unit,')'])
+        if handles.lang_choice==0
+            xlabel('Value'); ylabel(['Depth (',handles.unit,')'])
+        else
+            [~, locb1] = ismember('main24',handles.lang_id);
+            [~, locb2] = ismember('main23',handles.lang_id);
+            lang_var = handles.lang_var;
+            xlabel(lang_var{locb1}); ylabel([lang_var{locb2},' (',handles.unit,')'])
+        end
         ylim([min(dat(:,1)),max(dat(:,1))]);
     catch
         handles.ecocofigdata = figure;
         set(0,'Units','normalized') % set units as normalized
         set(gcf,'units','norm') % set location
         set(gcf,'color','w');
+        
+        if lang_choice>0
+            [~, locb] = ismember('main02',lang_id);
+            set(gcf,'Name',lang_var{locb});
+        else
+            set(gcf,'Name','Data');
+        end
         set(handles.ecocofigdata,'position',[0.01,0.01,0.2,0.9]) % set position
         if handles.flipy == 1
             plot(fliplr(dat(:,2)),dat(:,1),'k')
@@ -526,7 +780,14 @@ else
             plot(dat(:,2),dat(:,1),'k')
         end
         ylim([min(dat(:,1)),max(dat(:,1))]);
-        xlabel('Value'); ylabel(['Depth (',handles.unit,')'])
+        if handles.lang_choice==0
+            xlabel('Value'); ylabel(['Depth (',handles.unit,')'])
+        else
+            [~, locb1] = ismember('main24',handles.lang_id);
+            [~, locb2] = ismember('main23',handles.lang_id);
+            lang_var = handles.lang_var;
+            xlabel(lang_var{locb1}); ylabel([lang_var{locb2},' (',handles.unit,')'])
+        end
     end
 
 end
@@ -551,13 +812,26 @@ try figure(handles.ecocofigdata)
         plot(dat(:,2),dat(:,1),'k')
     end
     
-    xlabel('Value'); ylabel(['Depth (',handles.unit,')'])
+    if handles.lang_choice==0
+        xlabel('Value'); ylabel(['Depth (',handles.unit,')'])
+    else
+        [~, locb1] = ismember('main24',handles.lang_id);
+        [~, locb2] = ismember('main23',handles.lang_id);
+        lang_var = handles.lang_var;
+        xlabel(lang_var{locb1}); ylabel([lang_var{locb2},' (',handles.unit,')'])
+    end
     ylim([min(dat(:,1)),max(dat(:,1))]);
 catch
     handles.ecocofigdata = figure;
     set(0,'Units','normalized') % set units as normalized
     set(gcf,'units','norm') % set location
     set(gcf,'color','w');
+        if lang_choice>0
+            [~, locb] = ismember('main02',lang_id);
+            set(gcf,'Name',lang_var{locb});
+        else
+            set(gcf,'Name','Data');
+        end
     set(handles.ecocofigdata,'position',[0.01,0.01,0.2,0.9]) % set position
     if handles.flipy == 1
         plot(fliplr(dat(:,2)),dat(:,1),'k')
@@ -565,7 +839,14 @@ catch
         plot(dat(:,2),dat(:,1),'k')
     end
     ylim([min(dat(:,1)),max(dat(:,1))]);
-    xlabel('Value'); ylabel(['Depth (',handles.unit,')'])
+    if handles.lang_choice==0
+        xlabel('Value'); ylabel(['Depth (',handles.unit,')'])
+    else
+        [~, locb1] = ismember('main24',handles.lang_id);
+        [~, locb2] = ismember('main23',handles.lang_id);
+        lang_var = handles.lang_var;
+        xlabel(lang_var{locb1}); ylabel([lang_var{locb2},' (',handles.unit,')'])
+    end
 end
 
 guidata(hObject, handles);
@@ -598,8 +879,16 @@ set(handles.edit3,'String',num2str(handles.sedstep))
 % test sed. rate info
 
 sr = handles.sedmin:handles.sedstep:handles.sedmax;
-sedinfo = [num2str(length(sr)),' test sed. rates: ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
-    ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
+if handles.lang_choice==0
+    sedinfo = [num2str(length(sr)),' test sed. rates: ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+        ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
+else
+    [~, locb1] = ismember('ec33',handles.lang_id);
+    lang_var = handles.lang_var;
+    sedinfo = [num2str(length(sr)),lang_var{locb1},num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+        ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
+end
+    
 set(handles.text7,'String',sedinfo)
 guidata(hObject, handles);
 
@@ -631,8 +920,16 @@ set(handles.edit3,'String',num2str(handles.sedstep))
 % test sed. rate info
 
 sr = handles.sedmin:handles.sedstep:handles.sedmax;
-sedinfo = [num2str(length(sr)), ' test sed. rates: ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
-    ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
+if handles.lang_choice==0
+    sedinfo = [num2str(length(sr)),' test sed. rates: ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+        ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
+else
+    [~, locb1] = ismember('ec33',handles.lang_id);
+    lang_var = handles.lang_var;
+    sedinfo = [num2str(length(sr)),lang_var{locb1},num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+        ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
+end
+
 set(handles.text7,'String',sedinfo)
 guidata(hObject, handles);
 
@@ -664,8 +961,16 @@ set(handles.edit3,'String',num2str(handles.sedstep))
 % test sed. rate info
 
 sr = handles.sedmin:handles.sedstep:handles.sedmax;
-sedinfo = [num2str(length(sr)),' test sed. rates: ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
-    ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
+if handles.lang_choice==0
+    sedinfo = [num2str(length(sr)),' test sed. rates: ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+        ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
+else
+    [~, locb1] = ismember('ec33',handles.lang_id);
+    lang_var = handles.lang_var;
+    sedinfo = [num2str(length(sr)),lang_var{locb1},num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
+        ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
+end
+
 set(handles.text7,'String',sedinfo)
 
 guidata(hObject, handles);
@@ -702,6 +1007,7 @@ function edit4_Callback(hObject, eventdata, handles)
 %        str2double(get(hObject,'String')) returns contents of edit4 as a double
 %
 handles.fmaxdata = str2double(get(hObject,'String'));
+
 if get(handles.checkbox4,'Value')
     red = get(handles.popupmenu3,'Value');
 else
@@ -710,8 +1016,8 @@ end
 dat = handles.dat;
 datx = dat(:,1);
 daty = dat(:,2);
+
 try figure(handles.ecocofigspectrum)
-    handles.fmaxdata = str2double(get(hObject,'String'));
     subplot(2,1,1);xlim([0, handles.fmaxdata])
     subplot(2,1,2);xlim([0, handles.fmaxdata])
 catch
@@ -719,6 +1025,13 @@ catch
     set(0,'Units','normalized') % set units as normalized
     set(gcf,'units','norm') % set location
     set(gcf,'color','w');
+    if handles.lang_choice>0
+        [~, locb] = ismember('ec09',handles.lang_id);
+        lang_var = handles.lang_var;
+        set(gcf,'Name',lang_var{locb});
+    else
+        set(gcf,'Name','Periodogram of Data');
+    end
     set(handles.ecocofigspectrum,'position',[0.2,0.4,0.2,0.4]) % set position
     dt = (median(diff(datx)));
     [p1,f] = periodogram(daty,[],handles.pad,1/dt);  % power of dat
@@ -745,16 +1058,34 @@ catch
     plot(ax1,f,p1,'k','LineWidth',1);
     hold on;
     plot(ax1,f,theored,'r','LineWidth',2)
-    xlabel(ax1,'Frequency');ylabel(ax1,'Power');title('raw periodogram (& red noise)')
-    %set(ax1, 'YScale', 'log')
+    
+    if handles.lang_choice==0
+        xlabel(ax1,'Frequency');ylabel(ax1,'Power');title('raw periodogram (& red noise)')
+    else
+        [~, locb1] = ismember('main14',handles.lang_id);
+        [~, locb2] = ismember('main46',handles.lang_id);
+        [~, locb3] = ismember('ec35',handles.lang_id);
+        lang_var = handles.lang_var;
+        xlabel(ax1,lang_var{locb1});ylabel(ax1,lang_var{locb2});title(lang_var{locb3})
+    end
+        
     xlim([0, handles.fmaxdata])
     ax2 = subplot(2,1,2);
     plot(ax2,f,p,'k','LineWidth',1);
-    xlabel(ax2,'Frequency');ylabel(ax2,'Power');title('red noise removed ?')
+    if handles.lang_choice==0
+        xlabel(ax2,'Frequency');ylabel(ax2,'Power');title('red noise removed ?')
+    else
+        [~, locb1] = ismember('main14',handles.lang_id);
+        [~, locb2] = ismember('main46',handles.lang_id);
+        [~, locb3] = ismember('ec36',handles.lang_id);
+        lang_var = handles.lang_var;
+        xlabel(ax2,lang_var{locb1});ylabel(ax2,lang_var{locb2});title(lang_var{locb3})
+    end
+    
     %set(ax2, 'YScale', 'log')
     xlim([0, handles.fmaxdata])
-    
 end
+assignin('base','fmaxdata',handles.fmaxdata)
 % Update handles structure
 guidata(hObject, handles);
 
@@ -797,6 +1128,13 @@ if handles.red > 0
     set(0,'Units','normalized') % set units as normalized
     set(gcf,'units','norm') % set location
     set(gcf,'color','w');
+    if handles.lang_choice>0
+        [~, locb] = ismember('ec09',handles.lang_id);
+        lang_var = handles.lang_var;
+        set(gcf,'Name',lang_var{locb});
+    else
+        set(gcf,'Name','Periodogram of Data');
+    end
     set(handles.ecocofigspectrum,'position',[0.2,0.4,0.2,0.4]) % set position
     dt = (median(diff(datx)));
     [p1,f] = periodogram(daty,[],handles.pad,1/dt);  % power of dat
@@ -823,12 +1161,29 @@ if handles.red > 0
     plot(ax1,f,p1,'k','LineWidth',1);
     hold on;
     plot(ax1,f,theored,'r','LineWidth',2)
-    xlabel(ax1,'Frequency');ylabel(ax1,'Power');title('raw periodogram (& red noise)')
+    
+    if handles.lang_choice==0
+        xlabel(ax1,'Frequency');ylabel(ax1,'Power');title('raw periodogram (& red noise)')
+    else
+        [~, locb1] = ismember('main14',handles.lang_id);
+        [~, locb2] = ismember('main46',handles.lang_id);
+        [~, locb3] = ismember('ec35',handles.lang_id);
+        lang_var = handles.lang_var;
+        xlabel(ax1,lang_var{locb1});ylabel(ax1,lang_var{locb2});title(lang_var{locb3})
+    end   
+    
     xlim([0, handles.fmaxdata])
-
     ax2 = subplot(2,1,2);
     plot(ax2,f,p,'k','LineWidth',1);
-    xlabel(ax2,'Frequency');ylabel(ax2,'Power');title('red noise removed ?')
+    if handles.lang_choice==0
+        xlabel(ax2,'Frequency');ylabel(ax2,'Power');title('red noise removed ?')
+    else
+        [~, locb1] = ismember('main14',handles.lang_id);
+        [~, locb2] = ismember('main46',handles.lang_id);
+        [~, locb3] = ismember('ec36',handles.lang_id);
+        lang_var = handles.lang_var;
+        xlabel(ax2,lang_var{locb1});ylabel(ax2,lang_var{locb2});title(lang_var{locb3})
+    end
     xlim([0, handles.fmaxdata])
 else
     try close(handles.ecocofigspectrum)
@@ -842,6 +1197,13 @@ else
     set(0,'Units','normalized') % set units as normalized
     set(gcf,'units','norm') % set location
     set(gcf,'color','w');
+    if handles.lang_choice>0
+        [~, locb] = ismember('ec09',handles.lang_id);
+        lang_var = handles.lang_var;
+        set(gcf,'Name',lang_var{locb});
+    else
+        set(gcf,'Name','Periodogram of Data');
+    end
     set(handles.ecocofigspectrum,'position',[0.2,0.4,0.2,0.4]) % set position
     dt = (median(diff(datx)));
     [p1,f] = periodogram(daty,[],handles.pad,1/dt);  % power of dat
@@ -868,14 +1230,27 @@ else
     plot(ax1,f,p1,'k','LineWidth',1);
     hold on;
     plot(ax1,f,theored,'r','LineWidth',2)
-    xlabel(ax1,'Frequency');ylabel(ax1,'Power');
-    %set(ax1, 'YScale', 'log')
+    if handles.lang_choice==0
+        xlabel(ax1,'Frequency');ylabel(ax1,'Power');
+    else
+        [~, locb1] = ismember('main14',handles.lang_id);
+        [~, locb2] = ismember('main46',handles.lang_id);
+        lang_var = handles.lang_var;
+        xlabel(ax1,lang_var{locb1});ylabel(ax1,lang_var{locb2});
+    end
+
     xlim([0, handles.fmaxdata])
 
     ax2 = subplot(2,1,2);
     plot(ax2,f,p,'k','LineWidth',1);
-    xlabel(ax2,'Frequency');ylabel(ax2,'Power');
-    %set(ax2, 'YScale', 'log')
+    if handles.lang_choice==0
+        xlabel(ax2,'Frequency');ylabel(ax2,'Power');
+    else
+        [~, locb1] = ismember('main14',handles.lang_id);
+        [~, locb2] = ismember('main46',handles.lang_id);
+        lang_var = handles.lang_var;
+        xlabel(ax2,lang_var{locb1});ylabel(ax2,lang_var{locb2});
+    end
     xlim([0, handles.fmaxdata])
 end
 % Update handles structure
@@ -914,6 +1289,13 @@ if handles.red > 0
     set(0,'Units','normalized') % set units as normalized
     set(gcf,'units','norm') % set location
     set(gcf,'color','w');
+    if handles.lang_choice>0
+        [~, locb] = ismember('ec09',handles.lang_id);
+        lang_var = handles.lang_var;
+        set(gcf,'Name',lang_var{locb});
+    else
+        set(gcf,'Name','Periodogram of Data');
+    end
     set(handles.ecocofigspectrum,'position',[0.2,0.4,0.2,0.4]) % set position
     dt = (median(diff(datx)));
     [p1,f] = periodogram(daty,[],handles.pad,1/dt);  % power of dat
@@ -940,13 +1322,27 @@ if handles.red > 0
     plot(ax1,f,p1,'k','LineWidth',1);
     hold on;
     plot(ax1,f,theored,'r','LineWidth',2)
-    xlabel(ax1,'Frequency');ylabel(ax1,'Power');
-    %set(ax1, 'YScale', 'log')
+    if handles.lang_choice==0
+        xlabel(ax1,'Frequency');ylabel(ax1,'Power');
+    else
+        [~, locb1] = ismember('main14',handles.lang_id);
+        [~, locb2] = ismember('main46',handles.lang_id);
+        lang_var = handles.lang_var;
+        xlabel(ax1,lang_var{locb1});ylabel(ax1,lang_var{locb2});
+    end
+
     xlim([0, handles.fmaxdata])
 
     ax2 = subplot(2,1,2);
     plot(ax2,f,p,'k','LineWidth',1);
-    xlabel(ax2,'Frequency');ylabel(ax2,'Power');
+    if handles.lang_choice==0
+        xlabel(ax2,'Frequency');ylabel(ax2,'Power');
+    else
+        [~, locb1] = ismember('main14',handles.lang_id);
+        [~, locb2] = ismember('main46',handles.lang_id);
+        lang_var = handles.lang_var;
+        xlabel(ax2,lang_var{locb1});ylabel(ax2,lang_var{locb2});
+    end
     %set(ax2, 'YScale', 'log')
     xlim([0, handles.fmaxdata])
     
@@ -983,12 +1379,25 @@ if age> 250
 end
 handles.age = age;
 if age < 0
-    errordlg('Error: Age of the data must be no smaller than 0')
+    if handles.lang_choice==0
+        errordlg('Error: Age of the data must be no smaller than 0')
+    else
+        [~, locb1] = ismember('ec37',handles.lang_id);
+        lang_var = handles.lang_var;
+        errordlg(lang_var{locb1})
+    end
     return;
 elseif age == 0 
     age = .001;
 elseif age > 4000
-    errordlg('Error: Age of the data is too large')
+    if handles.lang_choice==0
+        errordlg('Error: Age of the data is too large')
+    else
+        [~, locb1] = ismember('ec38',handles.lang_id);
+        lang_var = handles.lang_var;
+        errordlg(lang_var{locb1})
+    end
+    
 end
 if age > 0
     o7 = getBerger89Period(age);
@@ -1139,14 +1548,26 @@ try figure(handles.ecocofigdata)
     else
         plot(dat(:,2),dat(:,1),'k')
     end
-    
-    xlabel('Value'); ylabel(['Depth (',handles.unit,')'])
+    if handles.lang_choice==0
+        xlabel('Value'); ylabel(['Depth (',handles.unit,')'])
+    else
+        [~, locb1] = ismember('main24',handles.lang_id);
+        [~, locb2] = ismember('main23',handles.lang_id);
+        lang_var = handles.lang_var;
+        xlabel(lang_var{locb1}); ylabel([lang_var{locb2},' (',handles.unit,')'])
+    end
     ylim([min(dat(:,1)),max(dat(:,1))]);
 catch
     handles.ecocofigdata = figure;
     set(0,'Units','normalized') % set units as normalized
     set(gcf,'units','norm') % set location
     set(gcf,'color','w');
+        if lang_choice>0
+            [~, locb] = ismember('main02',lang_id);
+            set(gcf,'Name',lang_var{locb});
+        else
+            set(gcf,'Name','Data');
+        end
     set(handles.ecocofigdata,'position',[0.01,0.01,0.2,0.9]) % set position
     if handles.flipy == 1
         plot(fliplr(dat(:,2)),dat(:,1),'k')
@@ -1154,7 +1575,15 @@ catch
         plot(dat(:,2),dat(:,1),'k')
     end
     ylim([min(dat(:,1)),max(dat(:,1))]);
-    xlabel('Value'); ylabel(['Depth (',handles.unit,')'])
+
+    if handles.lang_choice==0
+        xlabel('Value'); ylabel(['Depth (',handles.unit,')'])
+    else
+        [~, locb1] = ismember('main24',handles.lang_id);
+        [~, locb2] = ismember('main23',handles.lang_id);
+        lang_var = handles.lang_var;
+        xlabel(lang_var{locb1}); ylabel([lang_var{locb2},' (',handles.unit,')'])
+    end
 end
 
 guidata(hObject, handles);
@@ -1219,6 +1648,12 @@ catch
     set(0,'Units','normalized') % set units as normalized
     set(gcf,'units','norm') % set location
     set(gcf,'color','w');
+        if lang_choice>0
+            [~, locb] = ismember('main02',lang_id);
+            set(gcf,'Name',lang_var{locb});
+        else
+            set(gcf,'Name','Data');
+        end
     set(handles.ecocofigdata,'position',[0.01,0.01,0.2,0.9]) % set position
     if handles.flipy == 1
         plot(fliplr(dat(:,2)),dat(:,1),'k')
@@ -1226,7 +1661,15 @@ catch
         plot(dat(:,2),dat(:,1),'k')
     end
     ylim([min(dat(:,1)),max(dat(:,1))]);
-    xlabel('Value'); ylabel(['Depth (',handles.unit,')'])
+    
+    if handles.lang_choice==0
+        xlabel('Value'); ylabel(['Depth (',handles.unit,')'])
+    else
+        [~, locb1] = ismember('main24',handles.lang_id);
+        [~, locb2] = ismember('main23',handles.lang_id);
+        lang_var = handles.lang_var;
+        xlabel(lang_var{locb1}); ylabel([lang_var{locb2},' (',handles.unit,')'])
+    end
 end
 
 guidata(hObject, handles);
@@ -1277,7 +1720,14 @@ function edit12_Callback(hObject, eventdata, handles)
 handles.pad = str2double(get(hObject,'String'));
 if handles.pad < 2000
     handles.pad = 2000;
-    warndlg('Padding number changed to 2000')
+    if handles.lang_choice==0
+        warndlg('Padding number changed to 2000')
+    else
+        [~, locb1] = ismember('ec39',handles.lang_id);
+        lang_var = handles.lang_var;
+        warndlg(lang_var{locb1})
+    end
+    
     set(handles.edit12,'String',num2str(handles.pad))
 end
 guidata(hObject, handles);
@@ -1320,9 +1770,9 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on button press in pushbutton1.
-function pushbutton1_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton1 (see GCBO)
+% --- Executes on button press in pushbuttonOK.
+function pushbuttonOK_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbuttonOK (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 data = handles.dat;
@@ -1374,7 +1824,42 @@ else
     method = 'Spearman';
 end
 
-disp('>> Wait ...')
+if handles.lang_choice>0
+    lang_var = handles.lang_var;
+    [~, locb] = ismember('ec40',handles.lang_id);
+    ec40 = lang_var{locb};
+    [~, locb] = ismember('ec41',handles.lang_id);
+    ec41 = lang_var{locb};
+    [~, locb] = ismember('ec42',handles.lang_id);
+    ec42 = lang_var{locb};
+    [~, locb] = ismember('ec43',handles.lang_id);
+    ec43 = lang_var{locb};
+    [~, locb] = ismember('ec44',handles.lang_id);
+    ec44 = lang_var{locb};
+    [~, locb] = ismember('ec45',handles.lang_id);
+    ec45 = lang_var{locb};
+    [~, locb] = ismember('ec46',handles.lang_id);
+    ec46 = lang_var{locb};
+    [~, locb] = ismember('main46',handles.lang_id);
+    main46 = lang_var{locb};
+    
+    
+    [~, locb] = ismember('dd38',handles.lang_id);
+    dd38 = lang_var{locb};
+    [~, locb] = ismember('dd39',handles.lang_id);
+    dd39 = lang_var{locb};
+    [~, locb] = ismember('dd40',handles.lang_id);
+    dd40 = lang_var{locb};
+    [~, locb] = ismember('dd41',handles.lang_id);
+    dd41 = lang_var{locb};
+    [~, locb] = ismember('main31',handles.lang_id);
+    main31 = lang_var{locb};
+end
+if handles.lang_choice==0 
+    disp('>> Wait ...')
+else
+    disp(ec40)
+end
 
 if handles.ecocoS == 0
     % COCO model
@@ -1384,10 +1869,16 @@ if handles.ecocoS == 0
     ax1 = subplot(2,1,1);
     plot(ax1,target(:,1),target(:,2),'LineWidth',1)
     xlim(ax1,[f1 f2])
-    xlabel(ax1,'Frequency (cycle/kyr)')
-    ylabel(ax1,'Power')
     set(ax1,'XMinorTick','on','YMinorTick','on')
-    title(ax1,'Target power spectrum')
+    if handles.lang_choice==0 
+        xlabel(ax1,'Frequency (cycle/kyr)')
+        ylabel(ax1,'Power')
+        title(ax1,'Target power spectrum')
+    else
+        xlabel(ax1,ec41)
+        ylabel(ax1,main46)
+        title(ax1,ec42)
+    end
     %
     data = handles.datbackup;
     [corrCI,corr_h0,corry] = corrcoefslices_rank(data,target,orbit7,srm,pad,sr1,sr2,srstep,adjust,red,nsim,plotn,slices,method);
@@ -1401,35 +1892,66 @@ else
     slices = 1;
     time_0pad = handles.time_0pad;
     handles.padedgestyle = get(handles.popupmenu1,'Value');
-    if time_0pad == 1
-        if handles.padedgestyle == 1
-            padedgemodel = 'zero';
-        elseif handles.padedgestyle == 2
-            padedgemodel = 'mirror';
-        elseif handles.padedgestyle == 3
-            padedgemodel = 'mean';
-        elseif handles.padedgestyle == 4
-            padedgemodel = 'random';
+    if handles.lang_choice==0 
+        if time_0pad == 1
+            if handles.padedgestyle == 1
+                padedgemodel = 'zero';
+            elseif handles.padedgestyle == 2
+                padedgemodel = 'mirror';
+            elseif handles.padedgestyle == 3
+                padedgemodel = 'mean';
+            elseif handles.padedgestyle == 4
+                padedgemodel = 'random';
+            end
+            data = zeropad2(handles.datbackup,handles.window,handles.padtype);
+        else
+            padedgemodel = 'no';
+            data = handles.datbackup;
         end
-        data = zeropad2(handles.datbackup,handles.window,handles.padtype);
     else
-        padedgemodel = 'no';
-        data = handles.datbackup;
+        if time_0pad == 1
+            if handles.padedgestyle == 1
+                padedgemodel = dd38;
+            elseif handles.padedgestyle == 2
+                padedgemodel = dd39;
+            elseif handles.padedgestyle == 3
+                padedgemodel = dd40;
+            elseif handles.padedgestyle == 4
+                padedgemodel = dd41;
+            end
+            data = zeropad2(handles.datbackup,handles.window,handles.padtype);
+        else
+            padedgemodel = main31;
+            data = handles.datbackup;
+        end
+        
     end
     tic
     [prt_sr,out_depth,out_ecc,out_ep,out_eci,out_ecoco,out_ecocorb,out_norbit,sr_p] = ...
         ecoco(data,target,orbit7,window,srm,step,delinear,red,pad,sr1,sr2,srstep,nsim,adjust,slices,plotn);
     toc
 end
-% for output
-if red == 0
-    redmodel = 'no removal';
-elseif red == 2
-    redmodel = 'classic AR1 removed (F./Fred - 1)';
-elseif red == 1
-    redmodel = 'classic AR1 removed (F - Fred)';
-elseif red == 3
-    redmodel = 'robust AR1 removed (F - Fred)';
+if handles.lang_choice==0 
+    % for output
+    if red == 0
+        redmodel = 'no';
+    elseif red == 2
+        redmodel = 'classic AR1 removed (F./Fred - 1)';
+    elseif red == 1
+        redmodel = 'classic AR1 removed (F - Fred)';
+    elseif red == 3
+        redmodel = 'robust AR1 removed (F - Fred)';
+    end
+else
+    if red == 0
+        redmodel = main31;
+    elseif red == 2
+        redmodel = ec43;
+    elseif red == 1
+        redmodel = ec44;
+    elseif red == 3
+        redmodel = ec45;
+    end
 end
 if get(handles.radiobutton6,'Value')
     solutionmodel = 'Berger89';
@@ -1438,27 +1960,87 @@ if get(handles.radiobutton7,'Value')
     solutionmodel = 'Laskar04';
 end
 if get(handles.radiobutton8,'Value')
-    solutionmodel = 'User-defined';
+    if handles.lang_choice==0 
+        solutionmodel = 'User-defined';
+    else
+        solutionmodel = ec46;
+    end
 end
-param1 = ['Data: ',num2str(data(1,1)),' to ',num2str(data(end,1)),'m. Sampling rate: ', num2str(srm),'. Number of data points: ', num2str(npts)];
-param2 = ['Data: Number of slices is ', num2str(slices),'. Number of simulations is ',num2str(nsim)];
-param3 = ['Data: Remove red noise model: ',num2str(redmodel),'. Correlation method: ',method];
-param5 = ['Tested sedimentation rate step is ', num2str(srstep),' cm/kyr from ',num2str(sr1),' to ',num2str(sr2),' cm/kyr'];
-param6 = ['Target age is ',num2str(t1),' ka. Zero padding is ',num2str(pad), '. Freq. is ',num2str(f1),'-',num2str(f2),' cycles/kyr'];
-param7 = ['Astronomical solution: ', solutionmodel];
-%param8 = ['Astronomical cycles are: ',num2str(orbit7(1)),', ',num2str(orbit7(2)),', ',num2str(orbit7(3)),', ',...
-%    num2str(orbit7(4)),', ',num2str(orbit7(5)),', ',num2str(orbit7(6)),', ',num2str(orbit7(7))];
-param8 = ['Astronomical cycles are: ',num2str(orbit7)];
+if handles.lang_choice==0 
+    param1 = ['Data',': ',num2str(data(1,1)),' to ',num2str(data(end,1)),'m. Sampling rate: ', num2str(srm),'. Number of data points: ', num2str(npts)];
+    param2 = ['Data: Number of slices is ', num2str(slices),'. Number of simulations is ',num2str(nsim)];
+    param3 = ['Data: Remove red noise model: ',num2str(redmodel),'. Correlation method: ',method];
+    param5 = ['Tested sedimentation rate step is ', num2str(srstep),' cm/kyr from ',num2str(sr1),' to ',num2str(sr2),' cm/kyr'];
+    param6 = ['Target age is ',num2str(t1),' ka. Zero padding is ',num2str(pad), '. Freq. is ',num2str(f1),'-',num2str(f2),' cycles/kyr'];
+    param7 = ['Astronomical solution: ', solutionmodel];
+    param8 = ['Astronomical cycles are: ',num2str(orbit7)];
 
-if handles.ecocoS == 0
-    param4 = ['Zero padding for the data is ',num2str(pad)];
-    
+    if handles.ecocoS == 0
+        param4 = ['Zero padding for the data is ',num2str(pad)];
+    else
+        handles.padedgestyle = get(handles.popupmenu1,'Value');
+        param4 = ['Zero padding for each window is ',num2str(pad),'; Zero padding for the edge of data: ',padedgemodel];
+    end
 else
-    handles.padedgestyle = get(handles.popupmenu1,'Value');
-    
-    param4 = ['Zero padding for each window is ',num2str(pad),'; Zero padding for the edge of data: ',padedgemodel];
-end
 
+    lang_var = handles.lang_var;
+    [~, locb] = ismember('main02',handles.lang_id);
+    main02 = lang_var{locb};
+    [~, locb] = ismember('main17',handles.lang_id);
+    main17 = lang_var{locb};
+    [~, locb] = ismember('main16',handles.lang_id);
+    main16 = lang_var{locb};
+    [~, locb] = ismember('menu46',handles.lang_id);
+    menu46 = lang_var{locb};
+    [~, locb] = ismember('ec47',handles.lang_id);
+    ec47 = lang_var{locb};
+    [~, locb] = ismember('ec49',handles.lang_id);
+    ec49 = lang_var{locb};
+    [~, locb] = ismember('ec48',handles.lang_id);
+    ec48 = lang_var{locb};
+    [~, locb] = ismember('ec50',handles.lang_id);
+    ec50 = lang_var{locb};
+
+
+    [~, locb] = ismember('ec51',handles.lang_id);
+    ec51 = lang_var{locb};
+    [~, locb] = ismember('ec52',handles.lang_id);
+    ec52 = lang_var{locb};
+    [~, locb] = ismember('ec53',handles.lang_id);
+    ec53 = lang_var{locb};
+    [~, locb] = ismember('ec54',handles.lang_id);
+    ec54 = lang_var{locb};
+    [~, locb] = ismember('ec55',handles.lang_id);
+    ec55 = lang_var{locb};
+    [~, locb] = ismember('ec56',handles.lang_id);
+    ec56 = lang_var{locb};
+    [~, locb] = ismember('ec57',handles.lang_id);
+    ec57 = lang_var{locb};
+    [~, locb] = ismember('ec58',handles.lang_id);
+    ec58 = lang_var{locb};
+    [~, locb] = ismember('a222',handles.lang_id);
+    a222 = lang_var{locb};
+    [~, locb] = ismember('main14',handles.lang_id);
+    main14 = lang_var{locb};
+    [~, locb] = ismember('menu51',handles.lang_id);
+    menu51 = lang_var{locb};
+
+
+    param1 = [main02,': ',num2str(data(1,1)),main17,num2str(data(end,1)),'m. ',menu46,': ', num2str(srm),ec47, num2str(npts)];
+    param2 = [main02,ec48, num2str(slices),'. ',ec49,num2str(nsim)];
+    param3 = [main02,': ',ec50,': ',num2str(redmodel),'. ',ec51,': ',method];
+    param5 = [ec52, num2str(srstep),' cm/kyr ',main16,num2str(sr1),main17,num2str(sr2),' cm/kyr'];
+    param6 = [ec53,num2str(t1),' ka. ',a222,num2str(pad), '. ',main14,num2str(f1),'-',num2str(f2),ec54];
+    param7 = [menu51,': ', solutionmodel];
+    param8 = [ec55,': ',num2str(orbit7)];
+
+    if handles.ecocoS == 0
+        param4 = [ec56,num2str(pad)];
+    else
+        handles.padedgestyle = get(handles.popupmenu1,'Value');
+        param4 = [ec57,num2str(pad),'; ',ec58,': ',padedgemodel];
+    end
+end
 CDac_pwd;
 if handles.ecocoS == 0
     
@@ -1507,7 +2089,13 @@ end
 
 % open and write log into log_name file
 fileID = fopen(fullfile(dat_dir,log_name),'w+');
-fprintf(fileID,'%s\n',' - - - - - - - - - - - - - Summary - - - - - - - - - - -');
+if handles.lang_choice==0 
+    fprintf(fileID,'%s\n',' - - - - - - - - - - - - - Summary - - - - - - - - - - -');
+else
+    [~, locb] = ismember('ec59',handles.lang_id);
+    ec59 = lang_var{locb};
+    fprintf(fileID,'%s\n',ec59);
+end
 fprintf(fileID,'%s\n',datestr(datetime('now')));
 fprintf(fileID,'%s\n',log_name);
 fprintf(fileID,'%s\n',param1);
@@ -1518,11 +2106,24 @@ fprintf(fileID,'%s\n',param5);
 fprintf(fileID,'%s\n',param6);
 fprintf(fileID,'%s\n',param7);
 fprintf(fileID,'%s\n',param8);
-fprintf(fileID,'%s\n',' - - - - - - - - - - - - - - End - - - - - - - - - - - -');
+if handles.lang_choice==0 
+    fprintf(fileID,'%s\n',' - - - - - - - - - - - - - - End - - - - - - - - - - - -');
+else
+    [~, locb] = ismember('ec60',handles.lang_id);
+    ec60 = lang_var{locb};
+    fprintf(fileID,'%s\n',ec60);
+end
 fclose(fileID);
 if handles.ecocoS == 1
     fileID = fopen(fullfile(dat_dir,savefile_name),'w+');
-    fprintf(fileID,'%s\n','%location, Optimal Sed.Rate, CorrCoef, H0-SL, #Orbits, COCOxH0x#Orbits');                    
+    if handles.lang_choice==0 
+        fprintf(fileID,'%s\n','%location, Optimal Sed.Rate, CorrCoef, H0-SL, #Orbits, COCOxH0x#Orbits');   
+    else
+        [~, locb] = ismember('ec61',handles.lang_id);
+        ec61 = lang_var{locb};
+        fprintf(fileID,'%s\n',ec61);
+    end
+                     
     %fprintf(fileID,'%s\n\n',mat2str(sr_p));
     for row = 1: length(prt_sr)
         try
@@ -1553,7 +2154,13 @@ cd(pre_dirML);
 
 % display info
 disp('')
-disp(' - - - - - - - - - - - - - Summary - - - - - - - - - - - ')
+if handles.lang_choice==0 
+    disp(' - - - - - - - - - - - - - Summary - - - - - - - - - - -');
+else
+    [~, locb] = ismember('ec59',handles.lang_id);
+    ec59 = lang_var{locb};
+    disp(ec59);
+end
 disp(handles.filename);
 disp(param1);
 disp(param2);
@@ -1563,9 +2170,24 @@ disp(param5);
 disp(param6);
 disp(param7);
 disp(param8);
-disp(' - - - - - - - - - - - - - - End - - - - - - - - - - - - ')
-disp('>> Writing log file ...')
-disp('>> Done')
+if handles.lang_choice==0 
+    disp(' - - - - - - - - - - - - - - End - - - - - - - - - - - -');
+else
+    [~, locb] = ismember('ec60',handles.lang_id);
+    ec60 = lang_var{locb};
+    disp(ec60);
+end
+if handles.lang_choice==0
+    disp('>> Writing log file ...')
+    disp('>> Done')
+else
+    [~, locb] = ismember('ec62',handles.lang_id);
+    ec62 = lang_var{locb};
+    [~, locb] = ismember('ec63',handles.lang_id);
+    ec63 = lang_var{locb};
+    disp(ec62)
+    disp(ec63)
+end
 
 %
 handles.t1 = t1/1000;
@@ -1679,9 +2301,20 @@ function pushbutton2_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton2 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+if handles.lang_choice==0 
+    prompt = {'Plot: 1 = one fig; 2 = multi-figs; 3 = 3D figs; reverse Y-axis = (-1,-2,or -3)'};
+    dlg_title = 'Plot eCOCO results';
+else
+    lang_var = handles.lang_var;
+    [~, locb] = ismember('ec64',handles.lang_id);
+    ec64 = lang_var{locb};
+    [~, locb] = ismember('ec65',handles.lang_id);
+    ec65 = lang_var{locb};
+    
+    prompt = {ec64};
+    dlg_title = ec65;
+end
 
-prompt = {'Plot: 1 = one fig; 2 = multi-figs; 3 = 3D figs; reverse Y-axis = (-1,-2,or -3)'};
-dlg_title = 'Plot eCOCO results';
 num_lines = 1;
 defaultans = {'1'};
 options.Resize='on';
@@ -1703,17 +2336,52 @@ function pushbutton3_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton3 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-prompt = {'How many peaks within each window?',...
-    'Threshold H0 significant level',...
-    'Threshold correlation coefficient',...
-    'Threshold number of orbital parameters',...
-    'Threshold sedimentation rate searching radius',...
-    'How many intervals to cut the series?',...
-    'Plot? 1 = Yes, 0 = No',...
-    'Optional: sedimentation rate ranges from',...
-    'Optional: sedimentation rate ranges to'};
-dlg_title = 'Track optimal sedimentation rates';
+if handles.lang_choice==0 
+    prompt = {'How many peaks within each window?',...
+        'Threshold H0 significant level',...
+        'Threshold correlation coefficient',...
+        'Threshold number of orbital parameters',...
+        'Threshold sedimentation rate searching radius',...
+        'How many intervals to cut the series?',...
+        'Plot? 1 = Yes, 0 = No',...
+        'Optional: sedimentation rate ranges from',...
+        'Optional: sedimentation rate ranges to'};
+    dlg_title = 'Track optimal sedimentation rates';
+else
+    lang_var = handles.lang_var;
+    [~, locb] = ismember('ec59',handles.lang_id);
+    ec59 = lang_var{locb};
+    [~, locb] = ismember('ec60',handles.lang_id);
+    ec60 = lang_var{locb};
+    [~, locb] = ismember('ec67',handles.lang_id);
+    ec67 = lang_var{locb};
+    [~, locb] = ismember('ec68',handles.lang_id);
+    ec68 = lang_var{locb};
+    [~, locb] = ismember('ec69',handles.lang_id);
+    ec69 = lang_var{locb};
+    [~, locb] = ismember('ec70',handles.lang_id);
+    ec70 = lang_var{locb};
+    [~, locb] = ismember('ec71',handles.lang_id);
+    ec71 = lang_var{locb};
+    [~, locb] = ismember('ec72',handles.lang_id);
+    ec72 = lang_var{locb};
+    [~, locb] = ismember('ec73',handles.lang_id);
+    ec73 = lang_var{locb};
+    [~, locb] = ismember('ec74',handles.lang_id);
+    ec74 = lang_var{locb};
+    [~, locb] = ismember('ec75',handles.lang_id);
+    ec75 = lang_var{locb};
+    [~, locb] = ismember('ec76',handles.lang_id);
+    ec76 = lang_var{locb};
+    [~, locb] = ismember('ec77',handles.lang_id);
+    ec77 = lang_var{locb};
+    [~, locb] = ismember('ec78',handles.lang_id);
+    ec78 = lang_var{locb};
+    
+    prompt = {ec68,ec69,ec70,ec71,ec72,ec73,ec74,ec75,ec76};
+    dlg_title = ec67;
+end
+    
 num_lines = 1;
 defaultans = {'3','5','0.3','4','2','3','1',num2str(handles.sr1),num2str(handles.sr2)};
 options.Resize='on';
@@ -1772,7 +2440,12 @@ if ~isempty(answer)
     srn_map(:,1) = handles.out_depth;
     CDac_pwd
     dlmwrite(name1, srn_map, 'delimiter', ' ', 'precision', 9);
-    disp(['>> Sedimentation rate file: ',name1])
+    if handles.lang_choice==0 
+        disp(['>> Sedimentation rate file: ',name1])
+    else
+        disp([ec77,name1])
+    end
+
     % Log name
     log_name = [name0,'-log',handles.ext]; 
     if exist([pwd,handles.slash_v,log_name])
@@ -1784,30 +2457,58 @@ if ~isempty(answer)
             end
         end
     end
-    disp(['>> Log file: ',log_name])
+    if handles.lang_choice==0 
+        disp(['>> Log file: ',log_name])
+    else
+        disp([ec78,log_name])
+    end
     % open and write log into log_name file
     fileID = fopen(fullfile(pwd,handles.slash_v,log_name),'w+');
-    fprintf(fileID,'%s\n',' - - - - - - - - - - - - - Summary - - - - - - - - - - -');
-    fprintf(fileID,'%s\n\n',datestr(datetime('now')));
-    fprintf(fileID,'%s\n\n',log_name);
-    fprintf(fileID,'%s\n','How many peaks each window?');
-    fprintf(fileID,'%s\n',num2str(n));
-    fprintf(fileID,'%s\n','Threshold H0 significant level');
-    fprintf(fileID,'%s\n',num2str(ci));
-    fprintf(fileID,'%s\n','Threshold correlation coefficient');
-    fprintf(fileID,'%s\n',num2str(corrcf));
-    fprintf(fileID,'%s\n','Threshold number of orbital parameters?');
-    fprintf(fileID,'%s\n',num2str(sh_norb));
-    fprintf(fileID,'%s\n','Threshold sedimentation rate');
-    fprintf(fileID,'%s\n',num2str(srsh));
-    fprintf(fileID,'%s\n','How many intervals to cut the series?');
-    fprintf(fileID,'%s\n',num2str(srslice));
-    fprintf(fileID,'%s\n','Optional: sedimentation rate ranges from');
-    fprintf(fileID,'%s\n',num2str(sr1));
-    fprintf(fileID,'%s\n','Optional: sedimentation rate ranges to');
-    fprintf(fileID,'%s\n',num2str(sr2));
-    fprintf(fileID,'%s\n',' - - - - - - - - - - - - - - End - - - - - - - - - - - -');
-    fclose(fileID);
+    if handles.lang_choice==0 
+        fprintf(fileID,'%s\n',' - - - - - - - - - - - - - Summary - - - - - - - - - - -');
+        fprintf(fileID,'%s\n\n',datestr(datetime('now')));
+        fprintf(fileID,'%s\n\n',log_name);
+        fprintf(fileID,'%s\n','How many peaks each window?');
+        fprintf(fileID,'%s\n',num2str(n));
+        fprintf(fileID,'%s\n','Threshold H0 significant level');
+        fprintf(fileID,'%s\n',num2str(ci));
+        fprintf(fileID,'%s\n','Threshold correlation coefficient');
+        fprintf(fileID,'%s\n',num2str(corrcf));
+        fprintf(fileID,'%s\n','Threshold number of orbital parameters?');
+        fprintf(fileID,'%s\n',num2str(sh_norb));
+        fprintf(fileID,'%s\n','Threshold sedimentation rate');
+        fprintf(fileID,'%s\n',num2str(srsh));
+        fprintf(fileID,'%s\n','How many intervals to cut the series?');
+        fprintf(fileID,'%s\n',num2str(srslice));
+        fprintf(fileID,'%s\n','Optional: sedimentation rate ranges from');
+        fprintf(fileID,'%s\n',num2str(sr1));
+        fprintf(fileID,'%s\n','Optional: sedimentation rate ranges to');
+        fprintf(fileID,'%s\n',num2str(sr2));
+        fprintf(fileID,'%s\n',' - - - - - - - - - - - - - - End - - - - - - - - - - - -');
+        fclose(fileID);
+    else
+        fprintf(fileID,'%s\n',ec59);
+        fprintf(fileID,'%s\n\n',datestr(datetime('now')));
+        fprintf(fileID,'%s\n\n',log_name);
+        fprintf(fileID,'%s\n',ec68);
+        fprintf(fileID,'%s\n',num2str(n));
+        fprintf(fileID,'%s\n',ec69);
+        fprintf(fileID,'%s\n',num2str(ci));
+        fprintf(fileID,'%s\n',ec70);
+        fprintf(fileID,'%s\n',num2str(corrcf));
+        fprintf(fileID,'%s\n',ec71);
+        fprintf(fileID,'%s\n',num2str(sh_norb));
+        fprintf(fileID,'%s\n',ec72);
+        fprintf(fileID,'%s\n',num2str(srsh));
+        fprintf(fileID,'%s\n',ec73);
+        fprintf(fileID,'%s\n',num2str(srslice));
+        fprintf(fileID,'%s\n',ec75);
+        fprintf(fileID,'%s\n',num2str(sr1));
+        fprintf(fileID,'%s\n',ec76);
+        fprintf(fileID,'%s\n',num2str(sr2));
+        fprintf(fileID,'%s\n',ec60);
+        fclose(fileID);
+    end
     
     d = dir; %get files
     set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string

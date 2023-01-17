@@ -3,13 +3,14 @@ _______________________________________
 
 
 Version : Acycle_v2.6
-Date    : Dec 11, 2022 -
+Date    : Dec 11, 2022 - Jan 16, 2023
 By      : Mingsong Li (Peking University)
 
     1. Recurrence Plot: Timeseries-Recurrence Plot tool!
     2. Main Window - Unit listbox: add more options
     3. Save text data: save SPACE delimited files, rather than COMMA delimited files
-
+    4. Plot Pro: new design. Supports line/scatter/stairs/errorbar/area plot 
+    5. Chinese version 简体中文版（测试版）
 _______________________________________
 
 Version : Acycle_v2.5.0
@@ -44,6 +45,18 @@ Version : Acycle_v2.4.0
 Date    : Nov 4, 2021 - Nov 15, 2021
 By      : Mingsong Li (Peking University)
 
+<<<<<<< HEAD
+    1. Newly designed Wavelet GUI
+    2. Wavelet coherence and cross-spectrum (NEW)
+    3. Lomb-Scargle spectrum test against red noise using robust AR(1) model
+    4. Milankovitch Calculator (Waltham, 2015)
+    4. Add Gauss smoothing
+    5. Debug confidence levels using classic AR1 for MTM
+    6. Spectral analysis: show confidence levels as a function of frequency
+    7. Circular spectral analysis: confidence level estimates using Monte Carlo simulations with fixed / random distance, and red noise model
+    8. An User's Guide in Chinese is available now. 用户指南中文版发布
+
+=======
     1. Circular spectral analysis: CL using Monte Carlo with fixed / random distance, and red noise model
     2. Lomb-Scargle spectrum test against red noise using Robust AR(1) model
     3. Add moving Gauss smoothing
@@ -53,6 +66,7 @@ By      : Mingsong Li (Peking University)
     7. Wavelet (NEW GUI)
     8. Wavelet coherence and cross-spectrum (NEW)
     9. User's Guide in Chinese
+>>>>>>> dev_nolang
 _______________________________________
 
 Version : Acycle_v2.3.1
