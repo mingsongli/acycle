@@ -34,10 +34,14 @@
 %---------------------------------------------------------------------------
 
 % Revised by Mingsong Li for Acycle v2.4.1
+% lang
+lang_var = handles.lang_var;
+[~, wave28] = ismember('wave28',handles.lang_id);
+
 try figure(handles.figxwt)
 catch
     handles.figxwt = figure;
-    set(gcf,'Name','Acycle: cross wavelet transform plot')
+    set(gcf,'Name',['Acycle: ',lang_var{wave28}])
     set(gcf,'units','norm') % set location
     set(gcf, 'color','white')
     set(gcf,'position',[0.1,0.1,0.4,0.3]* handles.MonZoom)
@@ -107,14 +111,35 @@ else
     end
 end
 
-if handles.unit_type == 0
-    xlabel(['Unit (',handles.unit,')'])
-elseif handles.unit_type == 1
-    xlabel(['Depth (',handles.unit,')'])
+if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+    if handles.unit_type == 0
+        xlabel(['Unit (',handles.unit,')'])
+    elseif handles.unit_type == 1
+        xlabel(['Depth (',handles.unit,')'])
+    else
+        xlabel(['Time (',handles.unit,')'])
+    end
 else
-    xlabel(['Time (',handles.unit,')'])
+    [~, main34] = ismember('main34',handles.lang_id); % Unit
+    [~, main23] = ismember('main23',handles.lang_id); % Depth
+    [~, main21] = ismember('main21',handles.lang_id); % Time
+    [~, main15] = ismember('main15',handles.lang_id); % Period
+
+    if handles.unit_type == 0
+        xlabel([lang_var{main34},' (',handles.unit,')'])
+    elseif handles.unit_type == 1
+        xlabel([lang_var{main23},' (',handles.unit,')'])
+    else
+        xlabel([lang_var{main21},' (',handles.unit,')'])
+    end
 end
-ylabel(['Period (',handles.unit,')'])
+
+if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+    ylabel(['Period (',handles.unit,')'])
+else
+    [~, main61] = ismember('main61',handles.lang_id);
+    ylabel([lang_var{main15},' (',handles.unit,')'])
+end
 set(gca,'XLim',xlim(:))
 title('XWT')
 if plot_linelog

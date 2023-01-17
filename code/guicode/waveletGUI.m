@@ -1325,7 +1325,14 @@ function pushbutton3_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton3 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-msgbox({'User defined tick labels, space delimited values, e.g.,';'10 20 41 100 405 1200 2400'},'Help: format')
+
+%lang
+
+lang_var = handles.lang_var;
+[~, wave19] = ismember('wave19',handles.lang_id);
+[~, wave26] = ismember('wave26',handles.lang_id);
+[~, wave21] = ismember('wave21',handles.lang_id);
+msgbox({lang_var{wave19};lang_var{wave26}},lang_var{wave21})
 
 
 % --- Executes when figure1 is resized.

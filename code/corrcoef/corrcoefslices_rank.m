@@ -44,6 +44,7 @@ function [corrCI,corr_h0,corry] = corrcoefslices_rank(dat,target,orbit7,dt,pad,s
 %   cyclecorr5   % Monte Carlo simulation for H0 significant level
 %   
 %   Mingsong Li, June 2017 @ Penn State
+%   update Jan 18, 2023 for language plot
 %%
 if nargin > 14
     error('Too many input arguments')
@@ -106,6 +107,20 @@ else
     disp('Error: Number of split slices must be a real, positive AND integer number.')
     return;
 end
+%% For acycle language version (2.6 and after)
+% language
+lang_choice = load('ac_lang.txt');
+langdict = readtable('langdict.xlsx');
+lang_id = langdict.ID;
+lang_var = table2cell(langdict(:, 2 + lang_choice));
+handles.main_unit_selection = evalin('base','main_unit_selection');
+[~, ec79] = ismember('ec79',lang_id);
+
+[~, ec80] = ismember('ec80',lang_id);
+[~, ec81] = ismember('ec81',lang_id);
+[~, ec82] = ismember('ec82',lang_id);
+[~, ec83] = ismember('ec83',lang_id);
+[~, ec84] = ismember('ec84',lang_id);
 %% data
 dataf =[];
 datap =[];
@@ -150,13 +165,25 @@ end
         end
         fmaxdata = evalin('base','fmaxdata');
         xlim(ax2,[0, fmaxdata])
-        xlabel(ax2,'Frequency (cycle/m)');
-        ylabel(ax2,'Power');
-        title(ax2,'Data power spectrum');
-        legend(ax2,'Power spectrum of data series')
+        
         set(ax2,'XMinorTick','on','YMinorTick','on')
-        
-        
+        if or(lang_choice == 0, handles.main_unit_selection == 0)
+            xlabel(ax2,'Frequency (cycle/m)');
+            ylabel(ax2,'Power');
+            title(ax2,'Data power spectrum');
+            legend(ax2,'Power spectrum of data series')
+        else
+            %%
+            [~, main14] = ismember('main14',lang_id); % freq
+            [~, main46] = ismember('main46',lang_id); % power
+            [~, main02] = ismember('main02',lang_id); % data
+            [~, menu107] = ismember('menu107',lang_id);
+
+            xlabel(ax2,[lang_var{main14},' (1/m)']);
+            ylabel(ax2,lang_var{main46});
+            title(ax2,[lang_var{main02},' ',lang_var{menu107}]);
+            %legend(ax2,'Power spectrum of data series')
+        end
     % save data to workspace
         assignin('base','dataf',dataf)
         assignin('base','datap',datap)
@@ -191,8 +218,13 @@ mpts = length(sr_range);
 
 if nsim > 0
     % Waitbar
-    hwaitbar = waitbar(0,'Monte Carlo processing ... [CTRL + C to quit]',...    
-       'WindowStyle','modal');
+    if lang_choice == 0
+        hwaitbar = waitbar(0,'Monte Carlo processing ... [CTRL + C to quit]',...    
+           'WindowStyle','modal');
+    else
+        hwaitbar = waitbar(0,lang_var{ec79},...    
+           'WindowStyle','modal');
+    end
     hwaitbar_find = findobj(hwaitbar,'Type','Patch');
     set(hwaitbar_find,'EdgeColor',[0 0.9 0],'FaceColor',[0 0.9 0]) % changes the color to blue
     setappdata(hwaitbar,'canceling',0)
@@ -261,36 +293,52 @@ if nsim > 0
         
         figure;
         set(gcf,'color','w');
+        
         ax1 = subplot(3,1,1);
         plot(ax1,corrxch,corry_rch,'r','LineWidth',1);
-        xlabel(ax1,'Sedimentation rate (cm/kyr)')
+        if or(lang_choice == 0, handles.main_unit_selection == 0)
+            xlabel(ax1,'Sedimentation rate (cm/kyr)')
+            title(ax1,'Correlation coefficient')
+        else
+            xlabel(ax1,lang_var{ec80})
+            title(ax1,lang_var{ec81})
+        end
         ylabel(ax1,'\rho')
-%       legend('Corrcoef','95% CI ch','95% CI ch')
-        %legend(['Corrcoef ',method])
-        %line([sr1, sr2],[.5, .5],'LineStyle','--','Color','b')
-        %line([sr1, sr2],[.3, .3],'LineStyle',':','Color','b')
-        title(ax1,'Correlation coefficient')
         set(ax1,'XMinorTick','on','YMinorTick','on')
+        
         % plot H0 test of Monte carlo simulation
         ax2 = subplot(3,1,2);
         semilogy(ax2,corrxch,corry_per,'r','LineWidth',1); 
-        xlabel(ax2,'Sedimentation rate (cm/kyr)')
-        ylabel(ax2,'H_0 significance level')
-        title(ax2,'Null hypothesis')
+        if or(lang_choice == 0, handles.main_unit_selection == 0)
+            xlabel(ax2,'Sedimentation rate (cm/kyr)')
+            ylabel(ax2,'H_0 significance level')
+            title(ax2,'Null hypothesis')
+        else
+            xlabel(ax2,lang_var{ec80})
+            ylabel(ax2,lang_var{ec82})
+            title(ax2,lang_var{ec83})
+        end
+        
         ylim(ax2,[0.5*min(corry_per) 1])
         line([sr1, sr2],[.10, .10],'LineStyle',':','Color','k')
         line([sr1, sr2],[.05, .05],'LineStyle',':','Color','k')
         line([sr1, sr2],[.01, .01],'LineStyle','--','Color','k')
         line([sr1, sr2],[.001, .001],'LineStyle',':','Color','k')
-        %legend(ax2,'H_0 Sig.level','10%','5%','1 %','0.1%')
         set(ax2,'Ydir','reverse')
         set(ax1,'XMinorTick','on')
+        
         % Plot number of orbital cycles
         ax3 = subplot(3,1,3);
         plot(ax3,corrxch,corr_h0(:,2),'b','LineWidth',1);
-        xlabel(ax3,'Sedimentation rate (cm/kyr)')
+        
+        if or(lang_choice == 0, handles.main_unit_selection == 0)
+            xlabel(ax3,'Sedimentation rate (cm/kyr)')
+            title(ax3,'Number of contributing astronomical parameters')
+        else
+            xlabel(ax3,lang_var{ec80})
+            title(ax3,lang_var{ec84})
+        end
         ylabel(ax3,'#')
-        title(ax3,'Number of contributing astronomical parameters')
         ylim(ax3,[0 orbitn+0.5])
         set(ax1,'XMinorTick','on')
     end

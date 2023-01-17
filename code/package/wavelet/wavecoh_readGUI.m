@@ -83,12 +83,24 @@ else
     set(handles.edit6,'string','')
 end
 
+%lang
+
+lang_var = handles.lang_var;
+[~, wave19] = ismember('wave19',handles.lang_id);
+[~, wave26] = ismember('wave26',handles.lang_id);
+[~, wave20] = ismember('wave20',handles.lang_id);
+[~, wave21] = ismember('wave21',handles.lang_id);
+[~, wave22] = ismember('wave22',handles.lang_id);
+[~, wave23] = ismember('wave23',handles.lang_id);
+[~, wave24] = ismember('wave24',handles.lang_id);
+[~, main01] = ismember('main01',handles.lang_id);
+
 try
     Yticks = strread(get(handles.edit8,'String'));
     Yticks = sort(Yticks);
 catch
     Yticks = [];
-    msgbox({'User defined tick labels, space delimited values, e.g.,';'10 20 41 100 405 1200 2400'},'Help: format')
+    msgbox({lang_var{wave19};lang_var{wave26}},lang_var{wave21})
 end
 
 if get(handles.radiobutton3,'value')
@@ -108,7 +120,7 @@ if handles.wavehastorerun
     handles.datax = datax;
     handles.dat1y = dat1y;
     handles.dat2y = dat2y;
-    disp('  Key parameters updated/changed. Re-run Wavelet coherence and cross-spectrum : done')
+    disp(lang_var{wave20})
     if method_sel == 1 
         variance = std(dat1y)^2;
         variance2 = std(dat2y)^2;
@@ -143,10 +155,11 @@ if handles.wavehastorerun
             name5 = [dn1,'-',dn2,'-wcoh-wcoh.txt'];
             CDac_pwd
             try savefig(handles.figwave,name1)
-                disp(['>>  Save as: ',name1, '. Folder: '])
+                
+                disp(['>>  ',lang_var{main01},': ',name1, ' @ '])
                 disp(pwd)
             catch
-                disp('>>  Error. Wavelet figure unsaved. Save manually if needed ...')
+                disp(lang_var{wave23})
             end
             try close(figwarnwave)
             catch
@@ -193,16 +206,16 @@ if handles.wavehastorerun
             name8 = [dn1,'-',dn2,'-wct-coi.txt'];
             CDac_pwd
             try savefig(handles.figwave,name1)
-                disp(['>>  Save as: ',name1, '. Folder: '])
+                disp(['>>  ',lang_var{main01},': ',name1, ' @ '])
                 disp(pwd)
             catch
-                disp('>>  Error. cwt unsaved. Save manually if needed ...')
+                disp(lang_var{wave23})
             end
             try savefig(handles.figxwt,name2)
-                disp(['>>  Save as: ',name2, '. Folder: '])
+                disp(['>>  ',lang_var{main01},': ',name2, ' @ '])
                 disp(pwd)
             catch
-                disp('>>  Error. xwt unsaved. Save manually if needed ...')
+                disp(lang_var{wave23})
             end
             try close(figwarnwave)
             catch
@@ -223,9 +236,7 @@ if handles.wavehastorerun
         
     end
 else
-    disp('  Wavelet: Parameters unchanged. Use existing analysis for plots')
-
-    
+    disp(lang_var{wave24})
         
     if method_sel == 1
         % read memory to save time because wavelet analysis can be time

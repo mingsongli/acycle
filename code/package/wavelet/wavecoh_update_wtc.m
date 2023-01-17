@@ -46,23 +46,46 @@ set(gca,'YLim',log2([pt1,pt2]))
 % end
 % set(gca,'XTick',Xticks_raw, ...
 % 'XTickLabel',Xticks)
+% lang
+lang_var = handles.lang_var;
+[~, menu129] = ismember('menu129',handles.lang_id);
 
 set(gca,'YLim',log2([pt1,pt2]), ...
     'YTick',log2(Yticks(:)),'YTickLabel',Yticks)
 
 if plot_swap == 0
-    if handles.unit_type == 0
-       xlabel(['Unit (',handles.unit,')'])
-    elseif handles.unit_type == 1
-       xlabel(['Depth (',handles.unit,')'])
+    if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+        if handles.unit_type == 0
+            xlabel(['Unit (',handles.unit,')'])
+        elseif handles.unit_type == 1
+            xlabel(['Depth (',handles.unit,')'])
+        else
+            xlabel(['Time (',handles.unit,')'])
+        end
     else
-       xlabel(['Time (',handles.unit,')'])
+        [~, main34] = ismember('main34',handles.lang_id); % Unit
+        [~, main23] = ismember('main23',handles.lang_id); % Depth
+        [~, main21] = ismember('main21',handles.lang_id); % Time
+        [~, main15] = ismember('main15',handles.lang_id); % Period
+
+        if handles.unit_type == 0
+            xlabel([lang_var{main34},' (',handles.unit,')'])
+        elseif handles.unit_type == 1
+            xlabel([lang_var{main23},' (',handles.unit,')'])
+        else
+            xlabel([lang_var{main21},' (',handles.unit,')'])
+        end
     end
 else
     xlabel([])
 end
 
-ylabel(['Period (',handles.unit,')'])
+if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+    ylabel(['Period (',handles.unit,')'])
+else
+    [~, main61] = ismember('main61',handles.lang_id);
+    ylabel([lang_var{main15},' (',handles.unit,')'])
+end
 title('WTC')
 
 % colormap and grid
@@ -120,11 +143,6 @@ if plot_sl
     end
     hold off
 end
-    %if plot_linelog
-    %    if plot_2d == 1
-    %        if plot_log2pow
-    %            pcolor(datax,period,log2(power))
-    
     
 if plot_swap == 1
     view([-90 90])

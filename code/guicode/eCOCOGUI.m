@@ -146,6 +146,10 @@ lang_choice = varargin{1}.lang_choice;
 handles.lang_choice = lang_choice;
 lang_id = varargin{1}.lang_id;
 lang_var = varargin{1}.lang_var;
+handles.main_unit_selection = varargin{1}.main_unit_selection;
+
+assignin('base','main_unit_selection',handles.main_unit_selection)
+
 if lang_choice>0
     [~, locb] = ismember('ec00',lang_id);
     set(gcf,'Name',lang_var{locb})  % GUI title

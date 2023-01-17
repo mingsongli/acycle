@@ -9,6 +9,7 @@
 %   Nov 11, 2021
 
 % read data and settings
+
 dat_name = handles.filename1;
 data = handles.current_data;
 data_standardize = get(handles.checkbox11,'value');
@@ -53,12 +54,25 @@ else
     set(handles.edit6,'string','')
 end
 
+%lang
+
+lang_var = handles.lang_var;
+[~, wave19] = ismember('wave19',handles.lang_id);
+[~, wave26] = ismember('wave26',handles.lang_id);
+[~, wave20] = ismember('wave20',handles.lang_id);
+[~, wave21] = ismember('wave21',handles.lang_id);
+[~, wave22] = ismember('wave22',handles.lang_id);
+[~, wave23] = ismember('wave23',handles.lang_id);
+[~, wave24] = ismember('wave24',handles.lang_id);
+[~, main01] = ismember('main01',handles.lang_id);
+
+
 try
     Yticks = strread(get(handles.edit8,'String'));
     Yticks = sort(Yticks);
 catch
     Yticks = [];
-    msgbox({'User defined tick labels, space delimited values, e.g.,';'10 20 41 100 405 1200 2400'},'Help: format')
+    msgbox({lang_var{wave19};lang_var{wave26}},lang_var{wave21})
 end
 
 if get(handles.radiobutton3,'value')
@@ -70,7 +84,7 @@ plot_save = get(handles.checkbox7,'value');
 
 % If has to rerun wavelet
 if handles.wavehastorerun
-    disp('  Key parameters updated/changed. Re-run wavelet : done')
+    disp(lang_var{wave20})
     
     % Continous Wavelet Transform by (C) Aslak Grinsted 2002-2014
     if method_sel == 2
@@ -87,7 +101,7 @@ if handles.wavehastorerun
         j1=round(log2(MaxScale/s0)/dss);
         lag1 = ar1nv(data(:,2));
         if any(isnan(lag1))
-            error('Automatic AR1 estimation failed. Specify it manually (use arcov or arburg).')
+            error(lang_var{wave22})
         end
     else
         datax = data(:,1);
@@ -172,10 +186,10 @@ if handles.wavehastorerun
         name5 = [dat_name,'-wavelet-siglev.txt'];
         CDac_pwd
         try savefig(handles.figwave,name1)
-            disp(['>>  Save as: ',name1, '. Folder: '])
+            disp(['>>  ',lang_var{main01},': ',name1, ' @ '])
             disp(pwd)
         catch
-            disp('>>  Error. Wavelet figure unsaved. Save manually if needed ...')
+            disp(lang_var{wave23})
         end
         try close(figwarnwave)
         catch
@@ -192,7 +206,7 @@ if handles.wavehastorerun
     end
     
 else
-    disp('  Wavelet: Parameters unchanged. Use existing analysis for plots')
+    disp(lang_var{wave24})
     % read memory to save time because wavelet analysis can be time
     % consuming
     datax = handles.datax;
