@@ -27,12 +27,12 @@ for j = 1: PlotAdvSetting.panel_nrow(1) * PlotAdvSetting.panel_ncol(1)  % for al
         if PlotAdvSetting.panel_i(i) == k  % if the time series i is for the panel k
 
             % read y
-            data = load(PlotAdvSetting.y_axis_file(i,:));  % load the data for y axis
+            data = load(fullfile(handles.plot_no_dir,PlotAdvSetting.y_axis_file(i,:)));  % load the data for y axis
             y = data(:, PlotAdvSetting.y_axis_col(i));    % read the user-defined column
 
             if PlotAdvSetting.x_axis_col(i) > 0  % use user-defined column # as the first column (x)
             % read x
-                data = load(PlotAdvSetting.x_axis_file(i,:));
+                data = load(fullfile(handles.plot_no_dir,PlotAdvSetting.x_axis_file(i,:)));
                 x = data(:, PlotAdvSetting.x_axis_col(i));
             else  % use a datapoint number series as the first column (x)
                 x = 1 : length(y);
@@ -74,19 +74,19 @@ for j = 1: PlotAdvSetting.panel_nrow(1) * PlotAdvSetting.panel_ncol(1)  % for al
                 % errorbar
                 dat_tmp = nan(length(y),4);
                 if PlotAdvSetting.erroryneg(i) > 0
-                    data = load(PlotAdvSetting.y_axis_file(i,:));
+                    data = load(fullfile(handles.plot_no_dir,PlotAdvSetting.y_axis_file(i,:)));
                     dat_tmp(:,1) = data(:,PlotAdvSetting.erroryneg(i));
                 end
                 if PlotAdvSetting.errorypos(i) > 0
-                    data = load(PlotAdvSetting.y_axis_file(i,:));
+                    data = load(fullfile(handles.plot_no_dir,PlotAdvSetting.y_axis_file(i,:)));
                     dat_tmp(:,2) = data(:,PlotAdvSetting.errorypos(i));
                 end
                 if PlotAdvSetting.errorxneg(i) > 0
-                    data = load(PlotAdvSetting.y_axis_file(i,:));
+                    data = load(fullfile(handles.plot_no_dir,PlotAdvSetting.y_axis_file(i,:)));
                     dat_tmp(:,3) = data(:,PlotAdvSetting.errorxneg(i));
                 end
                 if PlotAdvSetting.errorxpos(i) > 0
-                    data = load(PlotAdvSetting.y_axis_file(i,:));
+                    data = load(fullfile(handles.plot_no_dir,PlotAdvSetting.y_axis_file(i,:)));
                     dat_tmp(:,4) = data(:,PlotAdvSetting.errorxpos(i));
                 end
                 plotHd = errorbar(x, y,dat_tmp(:,1),dat_tmp(:,2),dat_tmp(:,3),dat_tmp(:,4));

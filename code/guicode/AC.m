@@ -5188,6 +5188,7 @@ if check == 1
         plot_no = plot_selected(i);
         handles.plot_s{i} = fullfile(ac_pwd,char(contents(plot_no)));
     end
+    assignin('base','ac_pwd',ac_pwd);  % save current folder
     current_data = load(handles.plot_s{1});
     handles.current_data = current_data;
     handles.dat_name = handles.plot_s{1};
@@ -5650,7 +5651,7 @@ if ~isempty(answer)
     if ~isdeployed
         % add path for MatLab version
         addpath(genpath([ac_pwd,handles.slash_v,foldername]));
-    end  
+    end
     cd(ac_pwd);
     refreshcolor;
     cd(pre_dirML);
