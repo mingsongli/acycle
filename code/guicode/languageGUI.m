@@ -145,6 +145,38 @@ elseif ismember(language_choice,'中文简体')
     lang_choice = 1;
 elseif ismember(language_choice,'中文繁體')
     lang_choice = 2;
+elseif ismember(language_choice,'हिंदी')  % hindi
+    lang_choice = 3;
+elseif ismember(language_choice,'Español')  % spanish
+    lang_choice = 4;
+elseif ismember(language_choice,'Español') % french
+    lang_choice = 5;
+elseif ismember(language_choice,'Español') % arabic
+    lang_choice = 6;
+elseif ismember(language_choice,'Español') % bengali
+    lang_choice = 7;
+elseif ismember(language_choice,'Español') % rassian
+    lang_choice = 8;
+elseif ismember(language_choice,'Português') % portuguese
+    lang_choice = 9;
+elseif ismember(language_choice,'Português') % german
+    lang_choice = 10;
+elseif ismember(language_choice,'日本') % japanese
+    lang_choice = 11;
+elseif ismember(language_choice,'日本') % italian
+    lang_choice = 12;
+elseif ismember(language_choice,'Español') % turkish
+    lang_choice = 13;
+elseif ismember(language_choice,'Español') % ukranian
+    lang_choice = 14;
+elseif ismember(language_choice,'Español') % polish
+    lang_choice = 15;
+elseif ismember(language_choice,'Español') % romanian
+    lang_choice = 16;
+elseif ismember(language_choice,'Español') % deutsch
+    lang_choice = 17;
+elseif ismember(language_choice,'Español') % korean
+    lang_choice = 18;
 else
     lang_choice = 0;
 end

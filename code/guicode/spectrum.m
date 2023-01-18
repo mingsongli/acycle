@@ -1170,7 +1170,6 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
         else
             [~, locb] = ismember('spectral30',lang_id);
             ylabel(lang_var{locb})
-            [~, locb0] = ismember('spectral34',lang_id);
             [~, locb1] = ismember('spectral35',lang_id);
             [~, locb2] = ismember('spectral36',lang_id);
             [~, locb3] = ismember('spectral09',lang_id);
@@ -1184,7 +1183,7 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
                 lang_var{locb3})
             [~, locb41] = ismember('spectral41',lang_id);
             [~, locb34] = ismember('spectral34',lang_id);
-            title([lang_var{locb41},' & ',lang_var{locb03},'; ',lang_var{locb34},' = ',num2str(df)])
+            title([lang_var{locb41},' & ',lang_var{locb3},'; ',lang_var{locb34},' = ',num2str(df)])
             set(gcf,'Name',[lang_var{locb41},' & ',lang_var{locb03},': ',dat_name,ext])
         end
         
@@ -1668,6 +1667,9 @@ function pushbutton3_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton3 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+lang_id = handles.lang_id;
+lang_var = handles.lang_var;
+
 figspectrum = gcf;
 data = handles.current_data; % load current_data
 data_name = handles.filename;
