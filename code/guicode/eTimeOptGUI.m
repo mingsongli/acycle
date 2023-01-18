@@ -519,7 +519,8 @@ if handles.flipy == 1;
     set(gca,'Ydir','reverse')
 end
 colorbar('southoutside')
-
+set(gca,'XMinorTick','on','YMinorTick','on')
+set(gca,'TickDir','out');
 subplot(1,3,2)
 if handles.plot_2d == 1
     pcolor(x_grid,y_grid,spow)
@@ -541,7 +542,8 @@ if handles.flipy == 1;
     set(gca,'Ydir','reverse')
 end
 colorbar('southoutside')
-
+set(gca,'XMinorTick','on','YMinorTick','on')
+set(gca,'TickDir','out');
 subplot(1,3,3)
 if handles.plot_2d == 1
     pcolor(x_grid,y_grid,sopt)
@@ -564,7 +566,8 @@ if handles.flipy == 1;
 end
 %colorbar
 colorbar('southoutside')
-
+set(gca,'XMinorTick','on','YMinorTick','on')
+set(gca,'TickDir','out');
 dat_name = handles.dat_name;
 acfig_name = [dat_name,'-',num2str(window),handles.unit,'-win-',num2str(sedmin),'-',num2str(sedmax),'SAR-eTimeOpt.AC.fig'];
 % Log name
