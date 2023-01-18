@@ -46,15 +46,16 @@ if plotn == 1
     figure;
     set (gcf,'color','w','Name','Recurrence Plot')
     % imagesc(t, t, S < 0.2);
-    imagesc(t, t, S < threshold);
-
+    rep = imagesc(t, t, S < threshold);
+    
     axis square; 
     colormap([1 1 1;0 0 0]); 
     xlabel(labelx), 
     ylabel(labelx)
     %set (gca, 'xdir', 'reverse' )
     ylabel(labelx)
-    
+    set(rep,'XMinorTick','on','YMinorTick','on')
+    set(rep,'TickDir','out');
 elseif plotn == 2
     
     figure;
@@ -77,23 +78,27 @@ elseif plotn == 2
         colormap([1 1 1;0 0 0]); 
         xlabel(labelx)
         ylabel(labelx)
+        set(gcf,'XMinorTick','on','YMinorTick','on')
         %set (gca, 'xdir', 'reverse' )
-        
+        set(gcf,'TickDir','out');
     catch
         subplot(2,1,1)
         plot(t,x)
         xlim([min(t), max(t)])
         axis square; 
         ylabel(labely)
+        set(gcf,'TickDir','out');
         %set (gca, 'xdir', 'reverse' )
-
+        
         subplot(2,1,2)
-
+        
         imagesc(t, t, S < threshold);
         axis square; 
         colormap([1 1 1;0 0 0]); 
         xlabel(labelx)
         ylabel(labelx)
         %set (gca, 'xdir', 'reverse' )
+        set(gcf,'XMinorTick','on','YMinorTick','on')
+        set(gcf,'TickDir','out');
     end
 end

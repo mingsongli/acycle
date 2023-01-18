@@ -12,7 +12,7 @@ By      : Mingsong Li (Peking University)
     4. Plot Pro: new design. Supports line/scatter/stairs/errorbar/area plot 
     5. Chinese version 简体中文版（测试版）
     6. Traditional Chinese version (繁体中文版）
-    7. eCOCO colormap update
+    7. eCOCO colormap update; tickdir sets to out
 _______________________________________
 
 Version : Acycle_v2.5.0

@@ -337,6 +337,13 @@ handles.f1 = 0;
 handles.f2 = 0.06;
 handles.slices = 1;
 handles.ecocoS = 0; % 0 = COCO; 1 = eCOCO
+
+[~, MainUnit2] = ismember('MainUnit2',lang_id); % m
+[~, MainUnit3] = ismember('MainUnit3',lang_id); % dm
+[~, MainUnit5] = ismember('MainUnit5',lang_id); % mm
+[~, MainUnit7] = ismember('MainUnit7',lang_id); % km
+[~, MainUnit6] = ismember('MainUnit6',lang_id); % ft
+
 % check unit, set to cm
 if handles.unit_type == 0
     if lang_choice == 0
@@ -346,7 +353,7 @@ if handles.unit_type == 0
     end
     dat(:,1) = dat(:,1)*100;
     dt = dt * 100;
-    dtr = dt*100;
+    dtr = dt * 100;
 elseif handles.unit_type == 2
     if lang_choice == 0
         hwarn = warndlg('Unit type is Time! Make sure the unit is m');
@@ -354,11 +361,11 @@ elseif handles.unit_type == 2
         hwarn = warndlg(ec27);
     end
 else
-    if strcmp(handles.unit,'m')
+    if strcmp(handles.unit,lang_var{MainUnit2})
         dat(:,1) = dat(:,1)*100;
         dtr = dt*100;dt = dt * 100;
         %msgbox('Unit is m, now changes to cm','Unit transform')
-    elseif strcmp(handles.unit,'dm')
+    elseif strcmp(handles.unit,lang_var{MainUnit3})
         dat(:,1) = dat(:,1)*10;
         dtr = dt*10;dt = dt * 10;
         if lang_choice == 0
@@ -367,7 +374,7 @@ else
             msgbox(ec29,ec28)
         end
         
-    elseif strcmp(handles.unit,'mm')
+    elseif strcmp(handles.unit,lang_var{MainUnit5})
         dat(:,1) = dat(:,1)/10;
         dtr = dt/10;dt = dt / 10;
         if lang_choice == 0
@@ -376,7 +383,7 @@ else
             msgbox(ec30,ec28)
         end
         
-    elseif strcmp(handles.unit,'km')
+    elseif strcmp(handles.unit,lang_var{MainUnit7})
         dat(:,1) = dat(:,1)* 1000 * 100;
         dtr = dt*100*1000;dt = dt * 100*1000;
         if lang_choice == 0
@@ -385,7 +392,7 @@ else
             msgbox(ec31,ec28)
         end
         
-    elseif strcmp(handles.unit,'ft')
+    elseif strcmp(handles.unit,lang_var{MainUnit6})
         dat(:,1) = dat(:,1)* 30.48;
         dtr = dt * 30.48; dt = dt * 30.48;
         if lang_choice == 0
@@ -393,7 +400,9 @@ else
         else
             msgbox(ec32,ec28)
         end
-        
+    else % m
+        dat(:,1) = dat(:,1)*100;
+        dtr = dt*100;dt = dt * 100;
     end
 end
 
