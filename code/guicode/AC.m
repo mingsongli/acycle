@@ -7025,16 +7025,16 @@ if nplot == 1
                 handles.dat_name = dat_name;
                 guidata(hObject, handles);
                 timeOptGUI(handles);
-                if handles.lang_choice > 0
-
-                    h=warndlg(['(e)TimeOpt may have advanced version in astrochron. ',...
-                    'Visit',' https://cran.r-project.org/package=astrochron',' for more infomation'],...
-                    '(e)TimeOpt');
-                else
-                    
-                    h=warndlg([a274,a275,' https://cran.r-project.org/package=astrochron',a276],...
-                    '(e)TimeOpt');
-                end
+%                 if handles.lang_choice > 0
+% 
+%                     h=warndlg(['(e)TimeOpt may have advanced version in astrochron. ',...
+%                     'Visit',' https://cran.r-project.org/package=astrochron',' for more infomation'],...
+%                     '(e)TimeOpt');
+%                 else
+%                     
+%                     h=warndlg([a274,a275,' https://cran.r-project.org/package=astrochron',a276],...
+%                     '(e)TimeOpt');
+%                 end
             end
         end
 end
@@ -7080,14 +7080,14 @@ if nplot == 1
                 handles.dat_name = dat_name;
                 guidata(hObject, handles);
                 eTimeOptGUI(handles);
-                if handles.lang_choice
-                    h=warndlg(['(e)TimeOpt may have advanced version in astrochron. ',...
-                    'Visit',' https://cran.r-project.org/package=astrochron',' for more infomation'],...
-                    '(e)TimeOpt');
-                else
-                    h=warndlg([a274,a275,' https://cran.r-project.org/package=astrochron',a276],...
-                    '(e)TimeOpt');
-                end
+%                 if handles.lang_choice
+%                     h=warndlg(['(e)TimeOpt may have advanced version in astrochron. ',...
+%                     'Visit',' https://cran.r-project.org/package=astrochron',' for more infomation'],...
+%                     '(e)TimeOpt');
+%                 else
+%                     h=warndlg([a274,a275,' https://cran.r-project.org/package=astrochron',a276],...
+%                     '(e)TimeOpt');
+%                 end
             end
         end
 end
