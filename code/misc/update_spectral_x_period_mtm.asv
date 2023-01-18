@@ -131,8 +131,9 @@ if and(get(handles.checkbox_ar1_check,'value') == 0, get(handles.checkbox_robust
         [~, spectral30] = ismember('spectral30',lang_id);
         xlabel([lang_var{main15},' (',handles.unit,')'])
         ylabel(lang_var{spectral30})
+        [~, locb7] = ismember('spectral07',lang_id);
         [~, spectral37] = ismember('spectral37',lang_id);
-        title([num2str(nw),'\pi MTM','; ',lang_var{spectral37},' = ',num2str(dt),' ', handles.unit])
+        title([num2str(nw),'\pi MTM',lang_var{locb7},'; ',lang_var{spectral37},' = ',num2str(dt),' ', handles.unit])
     end
     
     set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'pi MTM'])
@@ -158,15 +159,10 @@ if handles.check_ftest_value
     subplot(3,1,1)
     
     plot(pt, Amp,'color',[0, 0.4470, 0.7410],'LineWidth',1.5)
-    if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
-        title(['Amplitude, F-test significance level : ', num2str(nw), '\pi'])
-        ylabel('Amplitude')
-    else
-        [~, spectral45] = ismember('spectral45',lang_id);
-        [~, spectral46] = ismember('spectral46',lang_id);
-        title([lang_var{spectral45},', ',lang_var{spectral46},' : ', num2str(nw), '\pi'])
-        ylabel(lang_var{spectral45})
-    end
+    
+    title(['Amplitude, F-test & significance level : ', num2str(nw), '\pi'])
+    ylabel('Amplitude')
+    
     xlim([1/fmax, pt(3)]);set(gca, 'XDir','reverse')
     if handles.logfreq == 1
         set(gca,'xscale','log')
@@ -174,12 +170,9 @@ if handles.check_ftest_value
     
     subplot(3,1,2)
     plot(pt, ftest,'color','k','LineWidth',1);
-    if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
-        ylabel('F-ratio')
-    else
-        [~, spectral47] = ismember('spectral47',lang_id);
-        ylabel(lang_var{spectral47})
-    end
+    
+    ylabel('F-ratio')
+    
     xlim([1/fmax, pt(3)]);set(gca, 'XDir','reverse')
     if handles.logfreq == 1
         set(gca,'xscale','log')
@@ -199,15 +192,9 @@ if handles.check_ftest_value
     yticks([0.0 0.01 0.05 0.10 0.15])
     yticklabels({'0','0.01','0.05','0.10','0.15'})
     
-    if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
-        ylabel('F-test significance level')
-        xlabel(['Period (',unit,')'])
-    else
-        [~, spectral46] = ismember('spectral46',lang_id);
-        ylabel(lang_var{spectral46})
-        [~, main15] = ismember('main15',lang_id);
-        xlabel([lang_var{main15},' (',handles.unit,')'])
-    end
+    ylabel('F-test significance level')
+    xlabel('Period')
+    
     set(gca, 'YDir','reverse')
     xlim([1/fmax, pt(3)]);set(gca, 'XDir','reverse')
     if handles.logfreq == 1
