@@ -61,12 +61,8 @@ handles.alphatext =  lang_var{plt45}; % alpha text
 handles.edgetext =  lang_var{plt39}; % edge text
 %% GUI settings
 
-if handles.lang_choice == 0
-    h_PlotPro2DLineGUI = figure('MenuBar','none','Name','Acycle: Plot Pro','NumberTitle','off');
-else
-    [~, menu41] = ismember('menu41',lang_id);
-    h_PlotPro2DLineGUI = figure('MenuBar','none','Name',['Acycle: ',lang_var{menu41}],'NumberTitle','off');
-end
+[~, menu41] = ismember('menu41',lang_id);
+h_PlotPro2DLineGUI = figure('MenuBar','none','Name',['Acycle: ',lang_var{menu41}],'NumberTitle','off');
 
 handles.h_PlotPro2DLineGUI = h_PlotPro2DLineGUI;
 set(h_PlotPro2DLineGUI,'units','norm') % set location
@@ -796,7 +792,7 @@ function callbk_panel_mspec_markeredgeshow_input1(source,eventdata)
     UpdatePlotPro2DLineGUI
     UpdatePlotPro2DLinePlot
 end
-handles.panel_mspec_markeredgeshow_input2 = uicontrol('Parent',handles.bg11,'Style','radiobutton','String',lang_var{main30},...
+handles.panel_mspec_markeredgeshow_input2 = uicontrol('Parent',handles.bg11,'Style','radiobutton','String',lang_var{main31},...
     'units','norm','Position',[0.6 0.05 0.3 0.9],'Value',0,...
     'FontSize',11,'Callback',@callbk_panel_mspec_markeredgeshow_input2,'BackgroundColor','white');
 function callbk_panel_mspec_markeredgeshow_input2(source,eventdata)
@@ -881,7 +877,6 @@ for i = 1: handles.nplot
         return
     end
     [handles.plot_no_dir,plotseries,ext] = fileparts(plot_no);
-    addpath(handles.plot_no_dir);  % add path
     handles.plot_list{i} = plotseries;
     handles.plot_list_ext{i} = [plotseries,ext];
     try dat = load(plot_no);
@@ -1114,7 +1109,7 @@ function callbk_panel_datapanel_data_input(source,eventdata)
         % find the row = selection
         if i == val
             try
-                data = load(str{i});
+                data = load( fullfile(handles.plot_no_dir, str{i} ) );
                 uit.Data = data;
             catch
                 warning([lang_var{handles.plt48}, str{i}])  % Warning: Load data failed. Please check 
@@ -1162,7 +1157,8 @@ function callbk_panel_datapanel_x_input(source,eventdata)
     for i = 1 : datan
         if and(strcmp(PlotAdvSetting.y_axis_file(i,:), str(val)), PlotAdvSetting.panel_i(i) == panel_i)
             % load data
-            data = load(PlotAdvSetting.x_axis_file(i,:));
+            data = load( fullfile(handles.plot_no_dir, PlotAdvSetting.x_axis_file(i,:) ) );
+            %data = load(PlotAdvSetting.x_axis_file(i,:));
             % read number of rows (m) and columns(n);
             [m,n] = size(data); 
             int_gt_0 = @(n) (rem(n,1) == 0) & (n >= 0);  % 0 or positive interger
@@ -1210,7 +1206,7 @@ function callbk_panel_datapanel_y_input(source,eventdata)
     for i = 1 : datan
         if and(strcmp(PlotAdvSetting.y_axis_file(i,:), str(val)), PlotAdvSetting.panel_i(i) == panel_i)
             % load data
-            data = load(PlotAdvSetting.y_axis_file(i,:));
+            data = load( fullfile(handles.plot_no_dir, PlotAdvSetting.y_axis_file(i,:)));
             % read number of rows (m) and columns(n);
             [m,n] = size(data);
             % check each member
@@ -1287,8 +1283,8 @@ function callbk_panel_datapanel_y_input(source,eventdata)
                     PlotAdvSettingSeed.marker_edge_color = cellstr(mat2str(handles.c_map0(i,:)));
 
                     % x y limits limits for each panel
-                    data1 = load(PlotAdvSettingSeed.x_axis_file);
-                    data2 = load(PlotAdvSettingSeed.y_axis_file);
+                    data1 = load(fullfile(handles.plot_no_dir, PlotAdvSettingSeed.x_axis_file));
+                    data2 = load(fullfile(handles.plot_no_dir, PlotAdvSettingSeed.y_axis_file));
                     %PlotAdvSettingSeed.x_axis_col(1)
                     y = data2(:, PlotAdvSettingSeed.y_axis_col(1));
                     try
@@ -1327,8 +1323,8 @@ function callbk_panel_datapanel_y_input(source,eventdata)
                 PlotAdvSettingSeed.marker_edge_color = cellstr(mat2str(handles.c_map1(1,:)));
 
                 % x y limits limits for each panel
-                data1 = load(PlotAdvSettingSeed.x_axis_file);
-                data2 = load(PlotAdvSettingSeed.y_axis_file);
+                data1 = load(fullfile(handles.plot_no_dir, PlotAdvSettingSeed.x_axis_file));
+                data2 = load(fullfile(handles.plot_no_dir, PlotAdvSettingSeed.y_axis_file));
                 %PlotAdvSettingSeed.x_axis_col(1)
                 y = data2(:, PlotAdvSettingSeed.y_axis_col(1));
                 try

@@ -293,7 +293,7 @@ for i = 1: datan
             if strcmp(PlotAdvSetting.line_plot(i,:),'stairs')
                 % min
                 if PlotAdvSetting.x_axis_col(i) > 0
-                    data = load(PlotAdvSetting.x_axis_file(i,:));
+                    data = load(fullfile(handles.plot_no_dir,PlotAdvSetting.x_axis_file(i,:)));
                     x = data(:, PlotAdvSetting.x_axis_col(i));
                 else
                     x = 1;
@@ -323,7 +323,7 @@ for i = 1: datan
                 end
                 % max
                 if PlotAdvSetting.x_axis_col(i) <= 0
-                    data = load(PlotAdvSetting.y_axis_file(i,:));
+                    data = load(fullfile(handles.plot_no_dir,PlotAdvSetting.y_axis_file(i,:)));
                     y = data(:, PlotAdvSetting.y_axis_col(i));
                 end
                 if PlotAdvSetting.stairsEdge2(i) == 1e36 % empty
