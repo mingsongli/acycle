@@ -130,6 +130,7 @@ if showseries == 1
         subplot('position',[0.15 0.86 0.7 0.11]);
         plot(t,x,'k','LineWidth',1)
         set(gca,'XMinorTick','on','YMinorTick','on')
+        set(gca,'TickDir','out');
         xlim([min(t), max(t)])
         ylabel(ylabeli)
         set(gca,'xticklabel',{[]})
@@ -149,6 +150,7 @@ if showseries == 1
         ylabel('DET')
         set(gca,'xticklabel',{[]})
         set(gca,'XMinorTick','on','YMinorTick','on')
+        set(gca,'TickDir','out');
         if fliptime == 1
             set (gca, 'xdir', 'reverse' )
         else
@@ -159,6 +161,7 @@ if showseries == 1
         imagesc(t, t, S < threshold);
         axis square; 
         set(gca,'XMinorTick','on','YMinorTick','on')
+        set(gca,'TickDir','out');
         colormap([1 1 1;0 0 0]); 
 
         if handles.unit_type == 0
@@ -187,6 +190,7 @@ if showseries == 1
         plot(t,x,'k','LineWidth',1)
         xlim([min(t), max(t)])
         set(gca,'XMinorTick','on','YMinorTick','on')
+        set(gca,'TickDir','out');
         ylabel(ylabeli)
         set(gca,'xticklabel',{[]})
         if fliptime == 1
@@ -204,6 +208,7 @@ if showseries == 1
         subplot('position',[0.15 0.05 0.7 0.7]);
         imagesc(t, t, S < threshold);
         set(gca,'XMinorTick','on','YMinorTick','on')
+        set(gca,'TickDir','out');
         axis square; 
         colormap([1 1 1;0 0 0]); 
 
@@ -242,11 +247,12 @@ else
         else
             set (gca, 'xdir', 'normal' )
         end
-        
+        set(gca,'TickDir','out');
         subplot('position',[0.15 0.05 0.7 0.7]);
         imagesc(t, t, S < threshold);
         axis square; 
         set(gca,'XMinorTick','on','YMinorTick','on')
+        set(gca,'TickDir','out');
         colormap([1 1 1;0 0 0]); 
 
         if handles.unit_type == 0
@@ -274,6 +280,7 @@ else
         axis square; 
         colormap([1 1 1;0 0 0]); 
         set(gca,'XMinorTick','on','YMinorTick','on')
+        set(gca,'TickDir','out');
         if handles.unit_type == 0
             xlabel('')
             ylabel('')

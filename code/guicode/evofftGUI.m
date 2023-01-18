@@ -406,9 +406,9 @@ if handles.plot_2d == 1
         end
         shading interp
         xlim([fmin fmax])
-        
+        set(gca,'XMinorTick','on','YMinorTick','on')
         xlabel([lang_var{main14},' (1/',unit,')'])
-        
+        set(gca,'TickDir','out');
         if handles.flipy == 1;
             set(gca,'Ydir','reverse')
         end
@@ -454,7 +454,26 @@ if handles.plot_2d == 1
             set(gca,'Ydir','reverse')
         end
         
+        if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+            if handles.unit_type == 0
+                ylabel(['Unit (',handles.unit,')'])
+            elseif handles.unit_type == 1
+                ylabel(['Depth (',handles.unit,')'])
+            else
+                ylabel(['Time (',handles.unit,')'])
+            end
+        else
+            if handles.unit_type == 0
+                ylabel([lang_var{main34},' (',handles.unit,')'])
+            elseif handles.unit_type == 1
+                ylabel([lang_var{main23},' (',handles.unit,')'])
+            else
+                ylabel([lang_var{main21},' (',handles.unit,')'])
+            end
+        end
+        
         subplot(4,4,[6,7,8,10,11,12,14,15,16])
+        
         if handles.plot_log == 0;
             pcolor(x_grid,y_grid,s)
         else
@@ -473,7 +492,8 @@ if handles.plot_2d == 1
             xlim([fmingrid fmax])
             set(gca, 'XScale', 'log')
         end
-        
+        set(gca,'TickDir','out');
+        set(gca,'XMinorTick','on','YMinorTick','on')
     elseif and(MTMred == 0, plotseries == 1)
         % done...
         subplot(1,4,1)
@@ -520,7 +540,8 @@ if handles.plot_2d == 1
             xlim([fmingrid fmax])
             set(gca, 'XScale', 'log')
         end
-        
+        set(gca,'XMinorTick','on','YMinorTick','on')
+        set(gca,'TickDir','out');
     elseif and(MTMred == 0, plotseries == 0)
         % done
         if handles.plot_log == 0;
@@ -532,6 +553,7 @@ if handles.plot_2d == 1
         shading interp
         xlabel([lang_var{main14},' (1/',unit,')'])
         xlim([fmin fmax])
+        set(gca,'XMinorTick','on','YMinorTick','on')
         if handles.flipy == 1;
             set(gca,'Ydir','reverse')
         end
@@ -539,6 +561,7 @@ if handles.plot_2d == 1
             xlim([fmingrid fmax])
             set(gca, 'XScale', 'log')
         end
+        set(gca,'TickDir','out');
     end
     
     if plotseries == 0
@@ -595,6 +618,8 @@ else
         surf(x_grid,y_grid,s)
     end
     shading interp
+    set(gca,'TickDir','out');
+    set(gca,'XMinorTick','on','YMinorTick','on')
     xlabel([lang_var{main14},' (1/',unit,')'])
     xlim([fmin fmax])
     if handles.flipy == 1
@@ -606,38 +631,35 @@ else
     end
 end
 
-    %colormap(jet)
-    if isempty(handles.colorgrid)
-        % no grid
-        setcolor = handles.color;
-    else
-        setcolor = [handles.color,'(',round(num2str(handles.colorgrid)),')'];
-    end
-    
-    try colormap(setcolor)
-    catch
-        colormap default
-    end
-    
-    shading interp
-    
-    set(gcf,'Name',[dat_name,ext,': ',lang_var{menu108}])
-    
+%colormap(jet)
+if isempty(handles.colorgrid)
+    % no grid
+    setcolor = handles.color;
+else
+    setcolor = [handles.color,'(',round(num2str(handles.colorgrid)),')'];
+end
 
-    if handles.plot_2d == 1
-        set(gca,'XMinorTick','on','YMinorTick','on')
-        set(gca, 'TickDir', 'out')
+try colormap(setcolor)
+catch
+    colormap default
+end
+
+shading interp
+set(gcf,'Name',[dat_name,ext,': ',lang_var{menu108}])
+set(gca,'XMinorTick','on','YMinorTick','on')
+if handles.plot_2d == 1
+    set(gca, 'TickDir', 'out')
+else
+   set(gca, 'TickDir', 'out')
+   if handles.rotate == 0
+        view(10,70);
     else
-       set(gca, 'TickDir', 'out')
-       if handles.rotate == 0
-            view(10,70);
-        else
-            for i = 1: 370
-                view(i,70); 
-                pause(0.05); 
-            end
-       end
-    end
+        for i = 1: 370
+            view(i,70); 
+            pause(0.05); 
+        end
+   end
+end
 handles.evofftfig = evofftfig;
 %
 if get(handles.checkbox9,'value')

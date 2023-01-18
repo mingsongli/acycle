@@ -223,7 +223,11 @@ if abs((max(diffx)-min(diffx))/2) > 10*eps('single')
     hwarn1 = warndlg(lang_var{ec25});
 end
 %
-
+[~, MainUnit2] = ismember('MainUnit2',lang_id); % m
+[~, MainUnit3] = ismember('MainUnit3',lang_id); % dm
+[~, MainUnit5] = ismember('MainUnit5',lang_id); % mm
+[~, MainUnit7] = ismember('MainUnit7',lang_id); % km
+[~, MainUnit6] = ismember('MainUnit6',lang_id); % ft
 % check unit
 if handles.unit_type == 0
     hwarn = warndlg(lang_var{topt11});
@@ -231,21 +235,23 @@ if handles.unit_type == 0
 elseif handles.unit_type == 2
     hwarn = warndlg(lang_var{topt12});
 else
-    if strcmp(handles.unit,'m')
+    if strcmp(handles.unit,lang_var{MainUnit2})
         dat(:,1) = dat(:,1)*100;
 
-    elseif strcmp(handles.unit,'dm')
+    elseif strcmp(handles.unit,lang_var{MainUnit3})
         dat(:,1) = dat(:,1)*10;
         msgbox([lang_var{topt13},' dm, ',lang_var{topt14},' cm'],lang_var{topt15})
-    elseif strcmp(handles.unit,'mm')
+    elseif strcmp(handles.unit,lang_var{MainUnit5})
         dat(:,1) = dat(:,1)/10;
         msgbox([lang_var{topt13},' mm, ',lang_var{topt14},' cm'],lang_var{topt15})
-    elseif strcmp(handles.unit,'km')
+    elseif strcmp(handles.unit,lang_var{MainUnit7})
         dat(:,1) = dat(:,1)* 1000 * 100;
         msgbox([lang_var{topt13},' km, ',lang_var{topt14},' cm'],lang_var{topt15})
-    elseif strcmp(handles.unit,'ft')
+    elseif strcmp(handles.unit,lang_var{MainUnit6})
         dat(:,1) = dat(:,1)* 30.48;
         msgbox([lang_var{topt13},' ft, ',lang_var{topt14},' cm'],lang_var{topt15})
+    else % m
+        dat(:,1) = dat(:,1)*100;
     end
 end
 %

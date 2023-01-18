@@ -71,7 +71,8 @@ title(figurename)
 if plotn < 0
     set(gca,'Ydir','reverse')
 end
-
+set(gca,'XMinorTick','on','YMinorTick','on')
+set(gca,'TickDir','out');
 %% figure 2 - eH0
 if abs(plotn) == 1
     subplot(1,3,2)
@@ -121,6 +122,8 @@ title(figurename)
 if plotn < 0
     set(gca,'Ydir','reverse')
 end
+set(gca,'XMinorTick','on','YMinorTick','on')
+set(gca,'TickDir','out');
 %% figure 3 - eNumberOfOrbits
 if abs(plotn) == 1
     subplot(1,3,3)
@@ -142,7 +145,8 @@ colormap('parula')
 shading interp
 colorbar('southoutside')
 
-    
+set(gca,'XMinorTick','on','YMinorTick','on')
+set(gca,'TickDir','out');  
 
 if or(lang_choice == 0, handles.main_unit_selection == 0)
     xlabel('Sedimentation rate (cm/kyr)')
@@ -183,7 +187,8 @@ colormap('parula')
 shading interp
 colorbar('southoutside')
 
-    
+set(gca,'XMinorTick','on','YMinorTick','on')
+set(gca,'TickDir','out');    
 
 if or(lang_choice == 0, handles.main_unit_selection == 0)
     xlabel('Sedimentation rate (cm/kyr)')

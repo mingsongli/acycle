@@ -54,6 +54,8 @@ end
 figurename ='eCOCO';
 title(figurename)
 set(gca,'Ydir','reverse')
+set(gca,'XMinorTick','on','YMinorTick','on')
+set(gca,'TickDir','out');
 
 subplot(1,3,2)
 cl = -1*log10(out_ep);
@@ -63,7 +65,8 @@ colormap('parula')
 shading interp
 colorbar('southoutside')
 
-    
+set(gca,'XMinorTick','on','YMinorTick','on')
+set(gca,'TickDir','out');
 
 if or(lang_choice == 0, handles.main_unit_selection == 0)
     xlabel('Sedimentation rate (cm/kyr)')
@@ -95,3 +98,5 @@ end
 
 title(figurename)
 set(gca,'Ydir','reverse')
+set(gca,'XMinorTick','on','YMinorTick','on')
+set(gca,'TickDir','out');

@@ -247,6 +247,12 @@ handles.step = 0.65 * abs(datx(end)-datx(1))/200;
 set(handles.edit10,'String',num2str(handles.window))
 set(handles.edit11,'String',num2str(handles.step))
 
+[~, MainUnit2] = ismember('MainUnit2',lang_id); % m
+[~, MainUnit3] = ismember('MainUnit3',lang_id); % dm
+[~, MainUnit5] = ismember('MainUnit5',lang_id); % mm
+[~, MainUnit7] = ismember('MainUnit7',lang_id); % km
+[~, MainUnit6] = ismember('MainUnit6',lang_id); % ft
+
 if handles.step <= dt
     handles.step = dt;
 end
@@ -259,31 +265,35 @@ if handles.unit_type == 0
 elseif handles.unit_type == 2
     hwarn = warndlg(lang_var{topt12});
 else
-    if strcmp(handles.unit,'m')
+    if strcmp(handles.unit,lang_var{MainUnit2})
         dat(:,1) = dat(:,1)*100;
         dtr = dt * 100;
         dt = dt * 100;
         
-    elseif strcmp(handles.unit,'dm')
+    elseif strcmp(handles.unit,lang_var{MainUnit3})
         dat(:,1) = dat(:,1)*10;
         dtr = dt*10;
         dt = dt * 10;
         msgbox([lang_var{topt13},' dm, ',lang_var{topt14},' cm'],lang_var{topt15})
-    elseif strcmp(handles.unit,'mm')
+    elseif strcmp(handles.unit,lang_var{MainUnit5})
         dat(:,1) = dat(:,1)/10;
         dtr = dt/10;
         dt = dt / 10;
         msgbox([lang_var{topt13},' mm, ',lang_var{topt14},' cm'],lang_var{topt15})
-    elseif strcmp(handles.unit,'km')
+    elseif strcmp(handles.unit,lang_var{MainUnit7})
         dat(:,1) = dat(:,1)* 1000 * 100;
         dtr = dt*100*1000;
         dt = dt * 100*1000;
         msgbox([lang_var{topt13},' km, ',lang_var{topt14},' cm'],lang_var{topt15})
-    elseif strcmp(handles.unit,'ft')
+    elseif strcmp(handles.unit,lang_var{MainUnit6})
         dat(:,1) = dat(:,1)* 30.48;
         dtr = dt * 30.48; 
         dt = dt * 30.48;
         msgbox([lang_var{topt13},' ft, ',lang_var{topt14},' cm'],lang_var{topt15})
+    else
+        dat(:,1) = dat(:,1)*100;
+        dtr = dt * 100;
+        dt = dt * 100;
     end
 end
 %
@@ -509,7 +519,8 @@ if handles.flipy == 1;
     set(gca,'Ydir','reverse')
 end
 colorbar('southoutside')
-
+set(gca,'XMinorTick','on','YMinorTick','on')
+set(gca,'TickDir','out');
 subplot(1,3,2)
 if handles.plot_2d == 1
     pcolor(x_grid,y_grid,spow)
@@ -531,7 +542,8 @@ if handles.flipy == 1;
     set(gca,'Ydir','reverse')
 end
 colorbar('southoutside')
-
+set(gca,'XMinorTick','on','YMinorTick','on')
+set(gca,'TickDir','out');
 subplot(1,3,3)
 if handles.plot_2d == 1
     pcolor(x_grid,y_grid,sopt)
@@ -554,7 +566,8 @@ if handles.flipy == 1;
 end
 %colorbar
 colorbar('southoutside')
-
+set(gca,'XMinorTick','on','YMinorTick','on')
+set(gca,'TickDir','out');
 dat_name = handles.dat_name;
 acfig_name = [dat_name,'-',num2str(window),handles.unit,'-win-',num2str(sedmin),'-',num2str(sedmax),'SAR-eTimeOpt.AC.fig'];
 % Log name

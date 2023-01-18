@@ -3,7 +3,7 @@ _______________________________________
 
 
 Version : Acycle_v2.6
-Date    : Dec 11, 2022 - Jan 16, 2023
+Date    : Dec 11, 2022 - Jan 18, 2023
 By      : Mingsong Li (Peking University)
 
     1. Recurrence Plot: Timeseries-Recurrence Plot tool!
@@ -11,6 +11,8 @@ By      : Mingsong Li (Peking University)
     3. Save text data: save SPACE delimited files, rather than COMMA delimited files
     4. Plot Pro: new design. Supports line/scatter/stairs/errorbar/area plot 
     5. Chinese version 简体中文版（测试版）
+    6. Traditional Chinese version (繁体中文版）
+    7. eCOCO colormap update; tickdir sets to out
 _______________________________________
 
 Version : Acycle_v2.5.0

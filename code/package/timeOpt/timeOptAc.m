@@ -125,7 +125,6 @@ if nargin < 1 % if no input date ...
     n = 300; dat(:,1) = (1:n)'; dat(:,2) = filter(1,[1;-0.5],randn(n,1));
 end 
 
-
 %%
 lsmethod = 1;  % least square method, useless
 %%
