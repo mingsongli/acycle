@@ -1184,7 +1184,7 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
             [~, locb41] = ismember('spectral41',lang_id);
             [~, locb34] = ismember('spectral34',lang_id);
             title([lang_var{locb41},' & ',lang_var{locb3},'; ',lang_var{locb34},' = ',num2str(df)])
-            set(gcf,'Name',[lang_var{locb41},' & ',lang_var{locb03},': ',dat_name,ext])
+            set(gcf,'Name',[lang_var{locb41},' & ',lang_var{locb3},': ',dat_name,ext])
         end
         
         set(gca,'XMinorTick','on','YMinorTick','on')
@@ -2640,8 +2640,8 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
                 lang_var{locb3})
             [~, locb41] = ismember('spectral41',lang_id);
             [~, locb34] = ismember('spectral34',lang_id);
-            title([lang_var{locb41},' & ',lang_var{locb03},'; ',lang_var{locb34},' = ',num2str(df)])
-            set(gcf,'Name',[lang_var{locb41},' & ',lang_var{locb03},': ',dat_name,ext])
+            title([lang_var{locb41},' & ',lang_var{locb3},'; ',lang_var{locb34},' = ',num2str(df)])
+            set(gcf,'Name',[lang_var{locb41},' & ',lang_var{locb3},': ',dat_name,ext])
         end
         set(gca,'XMinorTick','on','YMinorTick','on')
         
