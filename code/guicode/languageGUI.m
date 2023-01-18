@@ -65,9 +65,10 @@ h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',12);  % set as norm
 
 set(gcf,'position',[0.5,0.7,0.15,0.15]* handles.MonZoom) % set position
-set(handles.text1,'position',[0.2,0.6,0.6,0.2]) % set position
-set(handles.popupmenu1,'position',[0.2,0.4,0.6,0.2]) % set position
-set(handles.pushbutton1,'position',[0.4,0.2,0.2,0.2]) % set position
+
+set(handles.text1,'position',[0.2,0.7,0.6,0.2]) % set position
+set(handles.popupmenu1,'position',[0.2,0.4,0.6,0.3]) % set position
+set(handles.pushbutton1,'position',[0.35,0.1,0.3,0.3]) % set position
 
 % language
 lang_choice = varargin{1}.lang_choice;
