@@ -1891,9 +1891,11 @@ if handles.ecocoS == 0
     %
     data = handles.datbackup;
     [corrCI,corr_h0,corry] = corrcoefslices_rank(data,target,orbit7,srm,pad,sr1,sr2,srstep,adjust,red,nsim,plotn,slices,method);
+    cocoFigure = gcf;
     toc
 else
     % eCOCO model
+
     window = handles.window;
     stepM = handles.step;  % this 
     step = round(stepM/srm); % sliding step in meter to sliding step in number
@@ -2050,15 +2052,19 @@ else
         param4 = [ec57,num2str(pad),'; ',ec58,': ',padedgemodel];
     end
 end
+
 CDac_pwd;
+
 if handles.ecocoS == 0
     
     % Log name
     log_name = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-COCO-log',ext];
+    log_name_CI = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-COCO-data',ext];
     log_name_coco = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-COCO.fig'];
     if exist([pwd,handles.slash_v,log_name]) || exist([pwd,handles.slash_v,log_name_coco])
         for i = 1:100
             log_name = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-COCO-log-',num2str(i),ext];
+            log_name_CI = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-COCO-data-',num2str(i),ext];
             log_name_coco = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-COCO-',num2str(i),'.fig'];
             if exist([pwd,handles.slash_v,log_name]) || exist([pwd,handles.slash_v,log_name_coco])
             else
@@ -2066,17 +2072,22 @@ if handles.ecocoS == 0
             end
         end
     end
+    figure(cocoFigure);
     savefig(log_name_coco) % save ac.fig automatically
+    data_COCOCI = [corrCI(:,1:2),corr_h0(:,1:2)];   % corrCI,corr_h0
+    dlmwrite(log_name_CI, data_COCOCI, 'delimiter', ',', 'precision', 9); 
     
 else
     % Log name
     log_name = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-',num2str(window),'win-ECOCO-log',ext];
     acfig_name = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-',num2str(window),'win-ECOCO.AC.fig'];
+    log_name_eCOCOdata = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-',num2str(window),'win-ECOCO.data.xlsx'];
     savefile_name =[dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-',num2str(window),'win-ECOCO.Optimal',ext];
     if exist([pwd,handles.slash_v,acfig_name]) || exist([pwd,handles.slash_v,log_name]) || exist([pwd,handles.slash_v,savefile_name])
         for i = 1:100
             acfig_name = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-',num2str(window),'win-ECOCO-',num2str(i),'.AC.fig'];
             log_name   = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-',num2str(window),'win-ECOCO-',num2str(i),'.log',ext];
+            log_name_eCOCOdata = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-',num2str(window),'win-ECOCO.data-',num2str(i),'.xlsx'];
             savefile_name =[dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-',num2str(window),'win-ECOCO-',num2str(i),'.Optimal',ext];
             if exist([pwd,handles.slash_v,acfig_name]) || exist([pwd,handles.slash_v,log_name]) || exist([pwd,handles.slash_v,savefile_name])
             else
@@ -2094,6 +2105,25 @@ else
     assignin('base','out_ecoco',out_ecoco)
     assignin('base','out_ecocorb',out_ecocorb)
     assignin('base','out_norbit',out_norbit)
+    
+    variables = {prt_sr, out_depth, out_ecc, out_eci, out_norbit, out_ecoco};
+    sheetNames = {'Sed.Rate', 'Depth', 'COCO', 'Conf.Int.', '#Orbits','COCOxH0'};
+    
+    for i = 1:numel(variables)
+        var = variables{i};
+        sheetName = sheetNames{i};
+
+        % Determine the size of the variable
+        %[rows, cols] = size(var);
+
+        % Write the variable to the Excel sheet
+        %if isnumeric(var) || islogical(var)
+            writematrix(var, log_name_eCOCOdata, 'Sheet', sheetName);%, 'Range', ['A1:', excelColumn(cols), num2str(rows)]);
+        %else
+        %    writecell(var, log_name_eCOCOdata, 'Sheet', sheetName, 'Range', 'A1');
+        %end
+    end
+
 end
 
 % open and write log into log_name file
@@ -2141,16 +2171,11 @@ if handles.ecocoS == 1
         end
     end
     fclose(fileID);
-    figure(handles.hmain)
-    savefig(acfig_name)
 end
 
-% update acycle main figure for both COCO and eCOCO
-d = dir; %get files
-set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-refreshcolor;
+
 if handles.ecocoS == 1
-    saveacfigyes = 1;
+
     figure(handles.acfigmain);
     disp('>>  *ECOCO.AC.fig file:')
     disp(acfig_name)
@@ -2211,7 +2236,9 @@ handles.red = red;
 handles.adjust = adjust;
 handles.slices = slices;
 handles.target = target;
-saveacfigyes = 1;
+
+set(handles.pushbutton2,'Enable','on') % 
+set(handles.pushbutton3,'Enable','on') %
 if handles.ecocoS == 1
     handles.window = window;
     handles.step = step;
@@ -2223,9 +2250,13 @@ if handles.ecocoS == 1
     handles.out_ecoco = out_ecoco;
     handles.out_ecocorb = out_ecocorb;
     handles.out_norbit = out_norbit;
+
 end
-set(handles.pushbutton2,'Enable','on') % 
-set(handles.pushbutton3,'Enable','on') %
+
+% update acycle main figure for both COCO and eCOCO
+d = dir; %get files
+set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+refreshcolor;
 
 guidata(hObject, handles);
 
