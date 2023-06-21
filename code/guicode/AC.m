@@ -2549,117 +2549,142 @@ guidata(hObject, handles);
 
 % --------------------------------------------------------------------
 function menu_bootstrap_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_smooth (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
-
 if nplot == 1
-    
-    %language
-    lang_id = handles.lang_id;
-    if handles.lang_choice > 0
-        [~, locb1] = ismember('menu102',lang_id);
-        menu102 = handles.lang_var{locb1};
-        [~, locb1] = ismember('a70',lang_id);
-        a70 = handles.lang_var{locb1};
-        [~, locb1] = ismember('a71',lang_id);
-        a71 = handles.lang_var{locb1};
-        [~, locb1] = ismember('a72',lang_id);
-        a72 = handles.lang_var{locb1};
-        [~, locb1] = ismember('a73',lang_id);
-        a73 = handles.lang_var{locb1};
-        [~, locb1] = ismember('a74',lang_id);
-        a74 = handles.lang_var{locb1};
-        [~, locb1] = ismember('a75',lang_id);
-        a75 = handles.lang_var{locb1};
-        [~, locb1] = ismember('a76',lang_id);
-        a76 = handles.lang_var{locb1};
-        [~, locb1] = ismember('a77',lang_id);
-        a77 = handles.lang_var{locb1};
-    end
-    
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
         if isdir(data_name) == 1
         else
-            [~,dat_name,ext] = fileparts(data_name);
-        if sum(strcmp(ext,handles.filetype)) > 0
+            [~,~,ext] = fileparts(data_name);
+            if sum(strcmp(ext,handles.filetype)) > 0
 
-        try
-            fid = fopen(data_name);
-            data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
-            fclose(fid);
-            if iscell(data_ft)
-                data = cell2mat(data_ft);
+                current_data = load(data_name);
+                handles.current_data = current_data;
+                handles.data_name = data_name;
+                guidata(hObject, handles);
+                SmoothBootGUI(handles);
             end
-        catch
-            data = load(data_name);
-        end 
-
-            time = data(:,1);
-            value = data(:,2);
-            span_d = (time(end)-time(1))* 0.1;
-            if handles.lang_choice == 0
-                dlg_title = 'Bootstrap';
-                prompt = {'Window (unit)','Method: "loess/lowess/rloess/rlowess"',...
-                    'Number of bootstrap sampling'};
-            else
-                dlg_title = menu102;
-                prompt = {a70,a71,a72};
-            end
-            num_lines = 1;
-            defaultans = {num2str(span_d),'loess','1000'};
-            options.Resize='on';
-            answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-            if ~isempty(answer)
-                span_v = str2double(answer{1});
-                method = (answer{2});
-                bootn = str2double(answer{3});
-                
-                span = span_v/(time(end)-time(1));
-                if handles.lang_choice == 0
-                    hwarn1 = warndlg('Slow process. Wait ...','Smoothing');
-                else
-                    hwarn1 = warndlg(a73,a74);
-                end
-                [meanboot,bootstd,bootprt] = smoothciML(time,value,method,span,bootn);
-                try close(hwarn1)
-                catch
-                end
-                data(:,4) = meanboot;
-                data(:,2) = meanboot - 2*bootstd;
-                data(:,3) = meanboot - bootstd;
-                data(:,5) = meanboot + bootstd;
-                data(:,6) = meanboot + 2*bootstd;
-                data1 = [time,bootprt];
-                name = [dat_name,'_',num2str(span_v),'_',method,'_',num2str(bootn),'_bootstp_meanstd',ext];  % New name
-                name1 = [dat_name,'_',num2str(span_v),'_',method,'_',num2str(bootn),'_bootstp_percentile',ext];
-                if handles.lang_choice == 0
-                    disp(['>>  Save [time, mean-2std, mean-std, mean, mean+std, mean+2std] as :',name])
-                    disp(['>>  Save [time, percentiles] as :',name1])
-                    disp('>>        Percentiles are ')
-                else
-                    disp([a75,name])
-                    disp([a76,name1])
-                    disp(a77)
-                end
-                disp('>>        [0.5,2.5,5,25,50,75,95,97.5,99.5]')
-                CDac_pwd
-                dlmwrite(name, data, 'delimiter', ' ', 'precision', 9); 
-                dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9); 
-                d = dir; %get files
-                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-                refreshcolor;
-                cd(pre_dirML); % return to matlab view folder
-            end
-        end
         end
 end
 guidata(hObject, handles);
+
+
+% % --------------------------------------------------------------------
+% function menu_bootstrap_Callback(hObject, eventdata, handles)
+% % hObject    handle to menu_smooth (see GCBO)
+% % eventdata  reserved - to be defined in a future version of MATLAB
+% % handles    structure with handles and user data (see GUIDATA)
+% contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+% plot_selected = get(handles.listbox_acmain,'Value');
+% nplot = length(plot_selected);   % length
+% 
+% if nplot == 1
+%     
+%     %language
+%     lang_id = handles.lang_id;
+%     if handles.lang_choice > 0
+%         [~, locb1] = ismember('menu102',lang_id);
+%         menu102 = handles.lang_var{locb1};
+%         [~, locb1] = ismember('a70',lang_id);
+%         a70 = handles.lang_var{locb1};
+%         [~, locb1] = ismember('a71',lang_id);
+%         a71 = handles.lang_var{locb1};
+%         [~, locb1] = ismember('a72',lang_id);
+%         a72 = handles.lang_var{locb1};
+%         [~, locb1] = ismember('a73',lang_id);
+%         a73 = handles.lang_var{locb1};
+%         [~, locb1] = ismember('a74',lang_id);
+%         a74 = handles.lang_var{locb1};
+%         [~, locb1] = ismember('a75',lang_id);
+%         a75 = handles.lang_var{locb1};
+%         [~, locb1] = ismember('a76',lang_id);
+%         a76 = handles.lang_var{locb1};
+%         [~, locb1] = ismember('a77',lang_id);
+%         a77 = handles.lang_var{locb1};
+%     end
+%     
+%     data_name = char(contents(plot_selected));
+%     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+%     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
+%         if isdir(data_name) == 1
+%         else
+%             [~,dat_name,ext] = fileparts(data_name);
+%         if sum(strcmp(ext,handles.filetype)) > 0
+% 
+%         try
+%             fid = fopen(data_name);
+%             data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
+%             fclose(fid);
+%             if iscell(data_ft)
+%                 data = cell2mat(data_ft);
+%             end
+%         catch
+%             data = load(data_name);
+%         end 
+% 
+%             time = data(:,1);
+%             value = data(:,2);
+%             span_d = (time(end)-time(1))* 0.1;
+%             if handles.lang_choice == 0
+%                 dlg_title = 'Bootstrap';
+%                 prompt = {'Window (unit)','Method: "loess/lowess/rloess/rlowess"',...
+%                     'Number of bootstrap sampling'};
+%             else
+%                 dlg_title = menu102;
+%                 prompt = {a70,a71,a72};
+%             end
+%             num_lines = 1;
+%             defaultans = {num2str(span_d),'loess','1000'};
+%             options.Resize='on';
+%             answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+%             if ~isempty(answer)
+%                 span_v = str2double(answer{1});
+%                 method = (answer{2});
+%                 bootn = str2double(answer{3});
+%                 
+%                 span = span_v/(time(end)-time(1));
+%                 if handles.lang_choice == 0
+%                     hwarn1 = warndlg('Slow process. Wait ...','Smoothing');
+%                 else
+%                     hwarn1 = warndlg(a73,a74);
+%                 end
+%                 [meanboot,bootstd,bootprt] = smoothciML(time,value,method,span,bootn);
+%                 try close(hwarn1)
+%                 catch
+%                 end
+%                 data(:,4) = meanboot;
+%                 data(:,2) = meanboot - 2*bootstd;
+%                 data(:,3) = meanboot - bootstd;
+%                 data(:,5) = meanboot + bootstd;
+%                 data(:,6) = meanboot + 2*bootstd;
+%                 data1 = [time,bootprt];
+%                 name = [dat_name,'_',num2str(span_v),'_',method,'_',num2str(bootn),'_bootstp_meanstd',ext];  % New name
+%                 name1 = [dat_name,'_',num2str(span_v),'_',method,'_',num2str(bootn),'_bootstp_percentile',ext];
+%                 if handles.lang_choice == 0
+%                     disp(['>>  Save [time, mean-2std, mean-std, mean, mean+std, mean+2std] as :',name])
+%                     disp(['>>  Save [time, percentiles] as :',name1])
+%                     disp('>>        Percentiles are ')
+%                 else
+%                     disp([a75,name])
+%                     disp([a76,name1])
+%                     disp(a77)
+%                 end
+%                 disp('>>        [0.5,2.5,5,25,50,75,95,97.5,99.5]')
+%                 CDac_pwd
+%                 dlmwrite(name, data, 'delimiter', ' ', 'precision', 9); 
+%                 dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9); 
+%                 d = dir; %get files
+%                 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+%                 refreshcolor;
+%                 cd(pre_dirML); % return to matlab view folder
+%             end
+%         end
+%         end
+% end
+% guidata(hObject, handles);
 
 
 

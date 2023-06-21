@@ -109,11 +109,13 @@ handles.sortdata = varargin{1}.sortdata;
 handles.val1 = varargin{1}.val1;
 
 set(handles.uipanel6,'position',[0.025,0.254,0.95,0.666])
-set(handles.text21,'position',[0.021,0.862,0.26,0.07])
-set(handles.edit10,'position',[0.284,0.852,0.24,0.1])
-set(handles.text20,'position',[0.538,0.862,0.13,0.07])
-set(handles.edit11,'position',[0.69,0.852,0.18,0.1])
-set(handles.text23,'position',[0.871,0.852,0.13,0.07])
+set(handles.text21,'position',[0.021,0.862,0.2,0.07])
+set(handles.edit10,'position',[0.23,0.852,0.2,0.1])
+set(handles.text20,'position',[0.45,0.862,0.11,0.07])
+set(handles.edit11,'position',[0.57,0.852,0.15,0.1])
+set(handles.text23,'position',[0.73,0.852,0.08,0.07])
+set(handles.pushbutton12,'position',[0.82,0.852,0.13,0.1])
+
 set(handles.slider4,'position',[0.03,0.729,0.94,0.09])
 set(handles.uipanel8,'position',[0.413,0.249,0.606,0.485])
 
@@ -137,7 +139,6 @@ set(handles.uipanel7,'position',[0.025,0.03,0.95,0.213])
 set(handles.prewhiten_select_popupmenu,'position',[0.043,0.2,0.9,0.5])
 set(handles.prewhiten_select_popupmenu,'String','Raw','Value',1);
 
-handles.smooth_win = 0.35;  % windows for smooth 
 % contact with acycle main window
 handles.acfigmain = varargin{1}.acfigmain;
 handles.listbox_acmain = varargin{1}.listbox_acmain;
@@ -147,7 +148,8 @@ handles.unit = varargin{1}.unit;
 handles.unit_type = varargin{1}.unit_type;
 handles.val1 = varargin{1}.val1;
 
-handles.current_data = varargin{1}.current_data;
+current_data = varargin{1}.current_data;
+handles.current_data = current_data;
 handles.data_name = varargin{1}.data_name;
 xmin = min(handles.current_data(:,1));
 xmax = max(handles.current_data(:,1));
@@ -155,9 +157,11 @@ handles.xrange = xmax -xmin; % length of data
 prewhiten={};
 prewhiten(1,1) = {'Raw'};
 handles.prewhiten_popupmenu_selection = prewhiten;
+
+handles.smooth_win = 0.35;  % windows for smooth 
 handles.prewhiten_win = (xmax-xmin) * handles.smooth_win;
 set(handles.edit10,'String', num2str(handles.prewhiten_win));
-set(handles.edit11,'String', '35');
+set(handles.edit11,'String', num2str(handles.smooth_win*100));
 set(handles.slider4, 'Value', handles.smooth_win);
 set(handles.prewhiten_lowess_checkbox,'Value', 0);
 set(handles.prewhiten_rlowess_checkbox,'Value', 0);
@@ -182,7 +186,6 @@ handles.prewhiten_rloess = 'notloess';
 handles.prewhiten_sgolay = 'notsgolay';
 handles.prewhiten_polynomial2 = 'not2nd';
 handles.prewhiten_polynomialmore = 'notmore';
-
 
 % Update handles structure
 guidata(hObject, handles);
@@ -699,3 +702,40 @@ if nametype > 0
     %figure(figdata); % return plot
 end
 guidata(hObject,handles)
+
+function pushbutton12_Callback(hObject, eventdata, handles)
+
+% % best span?
+% %   method: smooth method
+% %   alpha: Penalty parameters
+% %   beta: Penalty parameters
+current_data = handles.current_data;
+t = current_data(:,1);
+xmax = max(t);
+xmin = min(t);
+y = current_data(:,2);
+method = 'lowess'; 
+num_iterations = 100;
+wtb = 1; % waitbar
+[bestSpan,bestAlpha, bestBeta] = smoothbestSpanRand(t,y,method,num_iterations,wtb)
+if bestSpan <= 0.01; warndlg('Warning: too small, careful'); end
+if bestSpan >= 0.99; warndlg('Warning: too big, careful'); end
+
+handles.smooth_win = bestSpan;  % windows for smooth 
+handles.prewhiten_win = (xmax-xmin) * handles.smooth_win;
+set(handles.edit10,'String', num2str(handles.prewhiten_win));
+set(handles.edit11,'String', num2str(handles.smooth_win*100));
+set(handles.slider4, 'Value', handles.smooth_win);
+guidata(hObject,handles)
+
+% --- Executes during object creation, after setting all properties.
+function pushbutton12_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit11 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

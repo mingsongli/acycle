@@ -2,6 +2,18 @@
 _______________________________________
 
 
+Version : Acycle_v2.7
+Date    : Jun 17, 2023
+By      : Mingsong Li (Peking University)
+
+    1. COCO: Save correct figure 
+    2. eCOCO: Save data in an Excel file
+    3. Curve Fitting: estimate the optimal span using Generalized Cross-Validation (GCV) method
+    4. Japanese version is ready (Thank Prof. Masayuki Ikeda)
+_______________________________________
+
+
+
 Version : Acycle_v2.6
 Date    : Dec 11, 2022 - Jan 18, 2023
 By      : Mingsong Li (Peking University)
@@ -40,6 +52,10 @@ By      : Mingsong Li (Peking University)
         Bug report: Prof. Zhengtang Guo.
     3. Wavelet cross spectrum
         Code by Aslak Grinsted http://www.glaciology.net/wavelet-coherence
+        Citation: Grinsted, A., J. C. Moore, S. Jevrejeva (2004), 
+                  Application of the cross wavelet transform and wavelet 
+                  coherence to geophysical time series, Nonlin. Process. Geophys., 
+                  11, 561566.
     4. Plot - Convert to sound: hear your data
 _______________________________________
 

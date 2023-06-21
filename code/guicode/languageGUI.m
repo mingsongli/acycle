@@ -150,34 +150,36 @@ elseif ismember(language_choice,'हिंदी')  % hindi
     lang_choice = 3;
 elseif ismember(language_choice,'Español')  % spanish
     lang_choice = 4;
-elseif ismember(language_choice,'Español') % french
+elseif ismember(language_choice,'Français') % french
     lang_choice = 5;
-elseif ismember(language_choice,'Español') % arabic
+elseif ismember(language_choice,'عربي') % arabic
     lang_choice = 6;
-elseif ismember(language_choice,'Español') % bengali
+elseif ismember(language_choice,'বাংলা') % bengali
     lang_choice = 7;
-elseif ismember(language_choice,'Español') % rassian
+elseif ismember(language_choice,'Русский') % russian
     lang_choice = 8;
 elseif ismember(language_choice,'Português') % portuguese
     lang_choice = 9;
-elseif ismember(language_choice,'Português') % german
+elseif ismember(language_choice,'Deutsch') % german
     lang_choice = 10;
-elseif ismember(language_choice,'日本') % japanese
+elseif ismember(language_choice,'やまと') % japanese
     lang_choice = 11;
-elseif ismember(language_choice,'日本') % italian
+elseif ismember(language_choice,'Italiano') % italian
     lang_choice = 12;
-elseif ismember(language_choice,'Español') % turkish
+elseif ismember(language_choice,'Türk') % turkish
     lang_choice = 13;
-elseif ismember(language_choice,'Español') % ukranian
+elseif ismember(language_choice,'українська') % ukranian
     lang_choice = 14;
-elseif ismember(language_choice,'Español') % polish
+elseif ismember(language_choice,'Polski') % polish
     lang_choice = 15;
-elseif ismember(language_choice,'Español') % romanian
+elseif ismember(language_choice,'rumuński') % romanian
     lang_choice = 16;
-elseif ismember(language_choice,'Español') % deutsch
+elseif ismember(language_choice,'Nederlands') % deutsch
     lang_choice = 17;
-elseif ismember(language_choice,'Español') % korean
+elseif ismember(language_choice,'한국인') % korean
     lang_choice = 18;
+elseif ismember(language_choice,'Português do Brasil')    % Português do Brasil
+    lang_choice = 19;
 else
     lang_choice = 0;
 end
