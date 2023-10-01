@@ -11,6 +11,7 @@ By      : Mingsong Li (Peking University)
     3. Curve Fitting: estimate the optimal span using Generalized Cross-Validation (GCV) method
     4. Japanese version is ready (Thank Prof. Masayuki Ikeda)
     5. CENOGRID (Westerhold et al., 2020, Science, doi: 10.1126/science.aba6853)
+    6. Dynamic filter: bug free.
 _______________________________________
 
 

@@ -242,8 +242,9 @@ if nsim > 0
         %sim_spectum = [frand,prand]; % Mingsong Li, 20180417
         corryi = cyclecorrsig(sim_spectum,targetf,targetp,target_real,orbit7,dat_ray,sr1,sr2,srstep,sr0,adjust,method);
         if display == 1
-            disp(['>> Step 2: Simulation ',num2str(i),' of ',num2str(nsim)])
-            %disp(['>> Step 2: Simulation ',num2str(i),' of ',num2str(nsim),'. mpts ',num2str(mpts),' corryi ',num2str(length(corryi))])
+            if rem(i,10) == 0
+                disp(['>> Step 2: Simulation ',num2str(i),' of ',num2str(nsim)])
+            end
         end
         corry(:,i) = corryi;
 
@@ -258,22 +259,19 @@ if nsim > 0
             %delete(hwaitbar)
         end
     end
-    if ishandle(hwaitbar); 
+    if ishandle(hwaitbar)
         close(hwaitbar);
     end
     assignin('base','sim_spectum',sim_spectum)
     %% MC results
+    
     corry_sim_sort = sort(corry,2);
     corrlength = length(corry_rch);  % number of tested sed. rate
     corry_per = zeros(corrlength,1);
-    %
-    %assignin('base','corry_rch',corry_rch)
-    %assignin('base','corry',corry)
-    %
+    
     for i = 1: corrlength
         corry_r1 = corry_rch(i);
         corry_sim_sort1 = corry_sim_sort(i,:);
-        %corry_sim_sort2 = [];
         corry_sim_sort2 = corry_sim_sort1(corry_sim_sort1<corry_r1); % number of corr-value that is less than real data
         totallength = length(corry_sim_sort1(~isnan(corry_sim_sort1))); % number of not-null value
         %corry_per(i) = (totallength-length(corry_sim_sort2))/nsim;
@@ -282,6 +280,9 @@ if nsim > 0
             corry_per(i) = 1/(totallength+1);
         end
     end
+    
+%     assignin('base','corry_per',corry_per)
+%     assignin('base','corrxch',corrxch)
     %% confidence interval estimation for correlation coefficient
     
     corr_h0 = corry_per;  % percentile of the value

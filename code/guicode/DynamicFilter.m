@@ -385,7 +385,7 @@ end
 fprintf(fileID,'\n');
 fprintf(fileID,'%s\n','%higher frequency boundary');
 fprintf(fileID,'\n');
-for ii = 1:size(freqboundlow,1)
+for ii = 1:size(freqboundhigh,1)
     fprintf(fileID,'%f\t',freqboundhigh(ii,:));
     fprintf(fileID,'\n');
 end

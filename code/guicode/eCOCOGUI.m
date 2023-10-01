@@ -1895,7 +1895,6 @@ if handles.ecocoS == 0
     toc
 else
     % eCOCO model
-
     window = handles.window;
     stepM = handles.step;  % this 
     step = round(stepM/srm); % sliding step in meter to sliding step in number
