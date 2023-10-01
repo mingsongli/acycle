@@ -2960,7 +2960,7 @@ if nplot == 1
                 nyquist = 1/(2*dt);
                 fl = 0;
                 fh = nyquist;
-                fc = 1/2*nyquist;
+                fc = nyquist/2;
 
                 [tanhilb,~,~] = tanerhilbertML(data,fc,fl,fh);
 
