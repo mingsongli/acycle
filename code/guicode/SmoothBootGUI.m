@@ -153,13 +153,14 @@ function test111(~,~, editOr, slider, radioLowess, radioLoess, radioRLowess, rad
     
     %
     [meanboot,bootstd,bootprt] = smoothciML(x,y,method,span,bootn);
-    data2(:,4) = meanboot;
+    data2(:,1) = x;
     data2(:,2) = meanboot - 2*bootstd;
     data2(:,3) = meanboot - bootstd;
+    data2(:,4) = meanboot;
     data2(:,5) = meanboot + bootstd;
     data2(:,6) = meanboot + 2*bootstd;
     data1 = [x,bootprt];
-    ext = '.txt';
+    ext = '.csv';
     name = [dat_name,'_',num2str(span),'_',method,'_',num2str(bootn),'_bootstp_meanstd',ext];  % New name
     name1 = [dat_name,'_',num2str(span),'_',method,'_',num2str(bootn),'_bootstp_percentile',ext];
     if handles.lang_choice == 0
@@ -179,8 +180,19 @@ function test111(~,~, editOr, slider, radioLowess, radioLoess, radioRLowess, rad
         cd(ac_pwd)
     end
     %
-    dlmwrite(name, data2, 'delimiter', ' ', 'precision', 9); 
-    dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9); 
+    %dlmwrite(name, data2, 'delimiter', ' ', 'precision', 9); 
+    %dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9); 
+    % Create a table with headers
+    headers = {'%time', 'mean-2std', 'mean-1std', 'mean', 'mean+1std', 'mean+2std'};
+    dataTable = array2table(data2, 'VariableNames', headers);
+    % Save the table to an Excel file
+    writetable(dataTable, name, 'WriteVariableNames', true);
+    
+    headers = {'%time', '0.5%', '2.5%', '5%', '25%', '50%', '75%', '95%', '97.5%', '99.5%'};
+    dataTable = array2table(data1, 'VariableNames', headers);
+    % Save the table to an Excel file
+    writetable(dataTable, name1,  'WriteVariableNames', true);
+    
     d = dir; %get files
     set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
     % define some nested parameters

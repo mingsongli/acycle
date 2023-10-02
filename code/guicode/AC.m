@@ -2960,7 +2960,7 @@ if nplot == 1
                 nyquist = 1/(2*dt);
                 fl = 0;
                 fh = nyquist;
-                fc = 1/2*nyquist;
+                fc = nyquist/2;
 
                 [tanhilb,~,~] = tanerhilbertML(data,fc,fl,fh);
 
@@ -7611,6 +7611,82 @@ set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
 cd(pre_dirML); % return to matlab view folder
 
+
+% --------------------------------------------------------------------
+function menu_cenogrid_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_cenogrid (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+data_name = which('Example-cenogrid-d18o.txt');
+data_name2 = which('Example-cenogrid-d13c.txt');
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('a291',lang_id);
+    a291 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a295',lang_id);
+    a295 = handles.lang_var{locb1};
+end
+
+% Example-cenogrid-d18o.txt
+[~,dat_name,ext] = fileparts(data_name);
+data = load(data_name);
+time = data(:,1);
+value = data(:,2);
+
+[~,dat_name2,ext] = fileparts(data_name2);
+data = load(data_name2);
+time2 = data(:,1);
+value2 = data(:,2);
+
+figure('Color', 'white');
+
+subplot(2,1,1)
+plot(time,value)
+xlim([0 67102])
+% Flip the y-axis
+axis ij;
+% Set the axis properties
+ax = gca;
+ax.Color = 'white'; % Set background color to white
+ax.TickDir = 'out'; % Set tick direction to outward
+ax.XMinorTick = 'on'; % Turn on minor tick marks on the x-axis
+ax.YMinorTick = 'on'; % Turn on minor tick marks on the y-axis
+title(dat_name, 'Interpreter', 'none')
+ylabel('CENOGRID d18O')
+if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
+    xlabel('Age (ka)')
+else
+    xlabel(a291)
+    %ylabel(a295)
+end
+
+subplot(2,1,2)
+plot(time2,value2)
+xlim([0 67102])
+% Set the axis properties
+ax = gca;
+ax.Color = 'white'; % Set background color to white
+ax.TickDir = 'out'; % Set tick direction to outward
+ax.XMinorTick = 'on'; % Turn on minor tick marks on the x-axis
+ax.YMinorTick = 'on'; % Turn on minor tick marks on the y-axis
+title(dat_name2, 'Interpreter', 'none')
+ylabel('CENOGRID d13C')
+if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
+    xlabel('Age (ka)')
+else
+    xlabel(a291)
+    %ylabel(a295)
+end
+    
+CDac_pwd
+copyfile(data_name,pwd);
+copyfile(data_name2,pwd);
+d = dir; %get files
+set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+refreshcolor;
+cd(pre_dirML); % return to matlab view folder
+
 % --------------------------------------------------------------------
 function menu_example_redp7_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_example_redp7 (see GCBO)
@@ -8281,3 +8357,4 @@ else
 end
 handles.main_unit_selection = get(handles.main_unit_en,'Value');
 guidata(hObject, handles);
+

@@ -138,7 +138,7 @@ handles.output = hObject;
 %
 handles.solution = 'La2004';
 handles.parameter = 'ETP';
-handles.t1 = 1;
+handles.t1 = 0;
 handles.t2 = 1000;
 handles.notela04 = ['Laskar, J., Robutel, P., Joutel, F., Gastineau, M.,',...
     ' Correia, A.C.M., Levrard, B., 2004. A long-term numerical solution',...
@@ -335,7 +335,7 @@ function edit2_Callback(hObject, eventdata, handles)
 handles.t2 = str2double(get(hObject,'String'));
 if (handles.t2 < 0 || handles.t2 > 249000)
     tips = 'Must be a number larger than t1 and between 0 and 249000';
-    helpdlg(tips,'Tips')
+    helpdlg(tips,'Tips') 
 end
 guidata(hObject, handles);
 
