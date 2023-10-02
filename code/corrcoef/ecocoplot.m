@@ -39,7 +39,7 @@ handles.main_unit_selection = evalin('base','main_unit_selection');
 [~, ec85] = ismember('ec85',lang_id);
 [~, ec86] = ismember('ec86',lang_id);
 %% figure 1 - eCOCO
-figure
+figure_eCOCO = figure;
 set(gcf,'color','w');
 if abs(plotn) == 1
     subplot(1,3,1)
@@ -52,17 +52,21 @@ else
     surf(prt_sr,out_depth,out_ecc')
     view([10,80])
 end
-colorbar('southoutside')
+
+hcolorbar = colorbar('southoutside');
+
 colormap('parula')
 shading interp
 if or(lang_choice == 0, handles.main_unit_selection == 0)
     ylabel('Depth (m)')
     xlabel('Sedimentation rate (cm/kyr)')
-    zlabel('Correlation coefficient (\rho)')
+    %zlabel('Correlation coefficient (\rho)')
+    hcolorbar.Label.String = 'Correlation coefficient (\rho)';
 else
     ylabel([lang_var{main23},' (m)'])
     xlabel(lang_var{ec80})
-    zlabel([lang_var{ec81},' (\rho)'])
+    %zlabel([lang_var{ec81},' (\rho)'])
+    hcolorbar.Label.String = [lang_var{ec81},' (\rho)'];
 end
 figurename ='eCOCO';
 
@@ -73,6 +77,7 @@ if plotn < 0
 end
 set(gca,'XMinorTick','on','YMinorTick','on')
 set(gca,'TickDir','out');
+
 %% figure 2 - eH0
 if abs(plotn) == 1
     subplot(1,3,2)
@@ -102,20 +107,22 @@ else
     view([10,80])
 end
 %contourcbar
-colorbar('southoutside',...
+hcolorbar = colorbar('southoutside',...
     'Ticks',(PlotPower.^(100-([20,10,5,4,3,2,1,.5,.1])))/z_h0_max,...
-    'TickLabels',{'20','10','5','4','3','2','1','.5','.1'})
+    'TickLabels',{'20','10','5','4','3','2','1','.5','.1'});
 colormap('parula')
 shading interp
 
 if or(lang_choice == 0, handles.main_unit_selection == 0)
     xlabel('Sedimentation rate (cm/kyr)')
-    zlabel('H_0 significance level (%)')
+    %zlabel('H_0 significance level (%)')
+    hcolorbar.Label.String = 'H_0 significance level (%)';
     figurename ='eH_0 SL (%)';
 else
     xlabel(lang_var{ec80})
-    zlabel([lang_var{ec82},' (%)'])
+    %zlabel([lang_var{ec82},' (%)'])
     figurename =lang_var{ec86};
+    hcolorbar.Label.String = [lang_var{ec82},' (%)'];
 end
 
 title(figurename)
@@ -143,19 +150,20 @@ else
 end
 colormap('parula')
 shading interp
-colorbar('southoutside')
-
+hcolorbar = colorbar('southoutside');
 set(gca,'XMinorTick','on','YMinorTick','on')
 set(gca,'TickDir','out');  
 
 if or(lang_choice == 0, handles.main_unit_selection == 0)
     xlabel('Sedimentation rate (cm/kyr)')
-    zlabel('#')
+    %zlabel('#')
     figurename ='No. of orbital parameters';
+    hcolorbar.Label.String = '#';
 else
     xlabel(lang_var{ec80})
-    zlabel('#')
+    %zlabel('#')
     figurename =lang_var{ec84};
+    hcolorbar.Label.String = '#';
 end
 
 title(figurename)
@@ -165,11 +173,11 @@ end
 
 %% ecocob
 if abs(plotn) == 1
-    figure;
+    figure_ecocob = figure;
     set(gcf,'color','w');
 end
 if abs(plotn) == 2
-    figure;
+    figure_ecocob = figure;
     set(gcf,'color','w');
 end
 if or((abs(plotn) == 1), (abs(plotn) == 2))
@@ -183,9 +191,10 @@ else
     surf(prt_sr,out_depth,out_ecoco')
     view([10,80])
 end
+
 colormap('parula')
 shading interp
-colorbar('southoutside')
+hcolorbar = colorbar('southoutside');
 
 set(gca,'XMinorTick','on','YMinorTick','on')
 set(gca,'TickDir','out');    
@@ -193,13 +202,15 @@ set(gca,'TickDir','out');
 if or(lang_choice == 0, handles.main_unit_selection == 0)
     xlabel('Sedimentation rate (cm/kyr)')
     ylabel('Depth (m)')
-    zlabel('CHO')
+    %zlabel('CHO')
+    hcolorbar.Label.String = 'CHO';
     figurename ='COCO * H_0 SL';
 else
     xlabel(lang_var{ec80})
     ylabel([lang_var{main23},' (m)'])
-    zlabel('CHO')
+    %zlabel('CHO')
     figurename =[lang_var{ec81},' * ',lang_var{ec82}];
+    hcolorbar.Label.String = 'CHO';
 end
 
 %figurename ='\rho * H_0 SL * # orbital parameters';

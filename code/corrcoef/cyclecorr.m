@@ -1,3 +1,5 @@
+function [corrx,corry,corrpy,nmi] = ...
+    cyclecorr(data,targetf,targetp,target,orbit7,rayleigh,sr1,sr2,srstep,sr0,adjust,method)
 % Calculate corr using different target with different rayleigh frequencies.
 % modified from cyclecorr4.m
 % INPUT
@@ -22,10 +24,6 @@
 % EXAMPLE
 %
 % Mingsong Li, May 2017
-
-function [corrx,corry,corrpy,nmi] = ...
-    cyclecorr(data,targetf,targetp,target,orbit7,rayleigh,sr1,sr2,srstep,sr0,adjust,method)
-
 if nargin > 12
     error('Too many input arguments in cyclecorr.m')
 elseif nargin < 12

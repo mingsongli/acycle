@@ -123,13 +123,20 @@ orbitn = length(orbit7);
      out_ep(:,i) = corrCI(:,3);  % evolutionary ecorrcoef p-value
      norbit1 = orbitn - corrCI(:,end);
      out_norbit(:,i) = norbit1;
-     for j = 1:nofsr
-         percent_value = findperct(corrCI(j,2),corry(j,:));
-         if percent_value == 0
-             percent_value = 1/(nsim+1);
+     for j = 1 : nofsr
+         %percent_value = findperct(corrCI(j,2),corry(j,:));
+         %if percent_value == 0
+         %    percent_value = 1/(nsim+1);
+         %end
+         %out_ecoco(j,i) = (- log10(out_eci(j,i))) * out_ecc(j,i);
+         %out_ecocorb(j,i) = out_norbit(j,i) / orbitn * out_ecoco(j,i);
+         % M. Li; Oct. 2023
+         prctile_value = (100-invprctile(corry(j,:), corrCI(j,2)))/100; 
+         if prctile_value == 0
+            prctile_value = 1/(nsim+1);
          end
-         out_eci(j,i) = percent_value;
-         out_ecoco(j,i) = (- log10(out_eci(j,i))) * out_ecc(j,i);
+         out_eci(j,i) = prctile_value;
+         out_ecoco(j,i) = (- log10(prctile_value)) * out_ecc(j,i);
          out_ecocorb(j,i) = out_norbit(j,i) / orbitn * out_ecoco(j,i);
      end
      
@@ -172,7 +179,7 @@ orbitn = length(orbit7);
          end
              disp(['    Correlation coeffcient ',num2str(prints_ecc(1)),...
                  '. H0 significance level ',num2str(prints_eci(1))]);
-             disp(['    COCOxH0-SL value ',num2str(prints_ecoco(1)), 'COCOxH0-SLxOrbits',num2str(prints_ecocorb(1)) ])
+             disp(['    COCOxH0-SL value ',num2str(prints_ecoco(1)), ' COCOxH0-SLxOrbits ',num2str(prints_ecocorb(1)) ])
              sr_p(i,1) = loci;
              sr_p(i,2) = prints_sr(1);
              sr_p(i,3) = prints_ecc(1);
@@ -205,3 +212,13 @@ if abs(plotn) > 0
     catch
     end
 end
+
+% plot sed. rate
+%figure(figure_eCOCO);
+%subplot(1,3,1)
+hold on
+plot(sr_p(:,2), sr_p(:,1), 'r-o')
+
+%subplot(1,3,2)
+%hold on
+%plot(sr_p(:,2), sr_p(:,1), 'w-o')

@@ -242,7 +242,7 @@ if nsim > 0
         %sim_spectum = [frand,prand]; % Mingsong Li, 20180417
         corryi = cyclecorrsig(sim_spectum,targetf,targetp,target_real,orbit7,dat_ray,sr1,sr2,srstep,sr0,adjust,method);
         if display == 1
-            if rem(i,10) == 0
+            if rem(i,20) == 0
                 disp(['>> Step 2: Simulation ',num2str(i),' of ',num2str(nsim)])
             end
         end
@@ -272,14 +272,20 @@ if nsim > 0
     for i = 1: corrlength
         corry_r1 = corry_rch(i);
         corry_sim_sort1 = corry_sim_sort(i,:);
-        corry_sim_sort2 = corry_sim_sort1(corry_sim_sort1<corry_r1); % number of corr-value that is less than real data
-        totallength = length(corry_sim_sort1(~isnan(corry_sim_sort1))); % number of not-null value
-        %corry_per(i) = (totallength-length(corry_sim_sort2))/nsim;
-        corry_per(i) = (totallength-length(corry_sim_sort2)+1)/(totallength+1); % Dec. 29, 2017 revised by M. Li
-        if corry_per(i) == 0
-            corry_per(i) = 1/(totallength+1);
-        end
+        corry_per(i) = (100 - invprctile(corry_sim_sort1, corry_r1))/100;
     end
+    
+%     for i = 1: corrlength
+%         corry_r1 = corry_rch(i);
+%         corry_sim_sort1 = corry_sim_sort(i,:);
+%         corry_sim_sort2 = corry_sim_sort1(corry_sim_sort1<corry_r1); % number of corr-value that is less than real data
+%         totallength = length(corry_sim_sort1(~isnan(corry_sim_sort1))); % number of not-null value
+%         %corry_per(i) = (totallength-length(corry_sim_sort2))/nsim;
+%         corry_per(i) = (totallength-length(corry_sim_sort2)+1)/(totallength+1); % Dec. 29, 2017 revised by M. Li
+%         if corry_per(i) == 0
+%             corry_per(i) = 1/(totallength+1);
+%         end
+%     end
     
 %     assignin('base','corry_per',corry_per)
 %     assignin('base','corrxch',corrxch)
@@ -307,9 +313,31 @@ if nsim > 0
         ylabel(ax1,'\rho')
         set(ax1,'XMinorTick','on','YMinorTick','on')
         
+%         % plot H0 test of Monte carlo simulation
+%         ax2 = subplot(3,1,2);
+%         semilogy(ax2,corrxch,corry_per,'r','LineWidth',1); 
+%         if or(lang_choice == 0, handles.main_unit_selection == 0)
+%             xlabel(ax2,'Sedimentation rate (cm/kyr)')
+%             ylabel(ax2,'H_0 significance level')
+%             title(ax2,'Null hypothesis')
+%         else
+%             xlabel(ax2,lang_var{ec80})
+%             ylabel(ax2,lang_var{ec82})
+%             title(ax2,lang_var{ec83})
+%         end        
+%         ylim(ax2,[0.5*min(corry_per) 1])
+%         line([sr1, sr2],[.10, .10],'LineStyle',':','Color','k')
+%         line([sr1, sr2],[.05, .05],'LineStyle',':','Color','k')
+%         line([sr1, sr2],[.01, .01],'LineStyle','--','Color','k')
+%         line([sr1, sr2],[.001, .001],'LineStyle',':','Color','k')
+%         set(ax2,'Ydir','reverse')
+%         set(ax2,'XMinorTick','on','YMinorTick','on')
+        
         % plot H0 test of Monte carlo simulation
         ax2 = subplot(3,1,2);
-        semilogy(ax2,corrxch,corry_per,'r','LineWidth',1); 
+        corry_per1 = corry_per;
+        corry_per1(corry_per1 > 0.15) = 0.15;
+        plot(ax2,corrxch,corry_per1,'r','LineWidth',1); 
         if or(lang_choice == 0, handles.main_unit_selection == 0)
             xlabel(ax2,'Sedimentation rate (cm/kyr)')
             ylabel(ax2,'H_0 significance level')
@@ -318,15 +346,14 @@ if nsim > 0
             xlabel(ax2,lang_var{ec80})
             ylabel(ax2,lang_var{ec82})
             title(ax2,lang_var{ec83})
-        end
-        
-        ylim(ax2,[0.5*min(corry_per) 1])
+        end        
+        ylim(ax2,[-0.01,0.15])
         line([sr1, sr2],[.10, .10],'LineStyle',':','Color','k')
         line([sr1, sr2],[.05, .05],'LineStyle',':','Color','k')
         line([sr1, sr2],[.01, .01],'LineStyle','--','Color','k')
         line([sr1, sr2],[.001, .001],'LineStyle',':','Color','k')
         set(ax2,'Ydir','reverse')
-        set(ax1,'XMinorTick','on')
+        set(ax2,'XMinorTick','on','YMinorTick','on')
         
         % Plot number of orbital cycles
         ax3 = subplot(3,1,3);
@@ -341,7 +368,7 @@ if nsim > 0
         end
         ylabel(ax3,'#')
         ylim(ax3,[0 orbitn+0.5])
-        set(ax1,'XMinorTick','on')
+        set(ax3,'XMinorTick','on','YMinorTick','on')
     end
 else
     corr_h0 = zeros(mpts,1);

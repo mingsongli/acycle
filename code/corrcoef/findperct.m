@@ -1,7 +1,7 @@
 function perct = findperct(va,m)
 % find percentile of a single value in a vector m
 % INPUT
-%   v: a single value
+%   va: a single value
 %   m: a vector series
 % OUTPUT
 %   p: percentile value

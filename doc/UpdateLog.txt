@@ -6,12 +6,13 @@ Version : Acycle_v2.7
 Date    : Jun 17, 2023
 By      : Mingsong Li (Peking University)
 
-    1. COCO: Save correct figure 
-    2. eCOCO: Save data in an Excel file
+    1. COCO: Save correct figure; use invpretile function to calculate percentiles
+    2. eCOCO: Save data in an Excel file;
     3. Curve Fitting: estimate the optimal span using Generalized Cross-Validation (GCV) method
     4. Japanese version is ready (Thank Prof. Masayuki Ikeda)
     5. CENOGRID (Westerhold et al., 2020, Science, doi: 10.1126/science.aba6853)
     6. Dynamic filter: bug free.
+    7. Insolation/astronomical solutions: debug. Start from 0. Thanks Lucas Lourens!
 _______________________________________
 
 
