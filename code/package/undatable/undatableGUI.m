@@ -58,6 +58,61 @@ delete([udinstallpath,'/guitemp/*.*'])
 mkdir([udinstallpath,'/guitemp/']); % in case user deleted it
 set(handles.speccombine,'value',1) % default
 
+% acycle
+set(gcf,'Name','Undatable for Acycle')
+set(0,'Units','normalized') % set units as normalized
+set(gcf,'units','norm') % set location
+h=get(gcf,'Children');  % get all content
+h1=findobj(h,'FontUnits','norm');  % find all font units as points
+set(h1,'FontUnits','points','FontSize',11.5);  % set as norm
+h2=findobj(h,'FontUnits','points');  % find all font units as points
+set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
+
+% get pwd
+GETac_pwd;
+% save acycle config for refresh acycle main window
+handles.acfigmain = varargin{1}.acfigmain;
+handles.listbox_acmain = varargin{1}.listbox_acmain;
+handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
+handles.val1 = varargin{1}.val1;
+
+try
+    % load selected data file
+    udinputfile = varargin{1}.dat_name;
+    udinputpath = [ac_pwd,varargin{1}.slash_v];
+    handles.udinputfile = udinputfile;
+    save([udinstallpath,'/guitemp/filename.mat'], 'udinputfile', 'udinputpath');
+    [tabdatelabel, tabdepth1, tabdepth2, tabdepth, tabage, tabageerr, tabdatetype, tabcalcurve, tabresage, tabreserr, tabdateboot] = udgetdata([udinputpath,udinputfile]);
+
+    tabdatetype = lower(tabdatetype);
+    tabcalcurve = lower(tabcalcurve);
+    tabcalcurve = strrep(tabcalcurve,'intcal','IntCal');
+    tabcalcurve = strrep(tabcalcurve,'marine','Marine');
+    tabcalcurve = strrep(tabcalcurve,'shcal','SHCal');
+    tabcalcurve = strrep(tabcalcurve,'none','None');
+
+    tp = cell(length(tabdepth1),11);
+    tp(:,1) = num2cell(true(size(tabdepth1,1),1));
+    tp(:,2) = tabdatelabel;
+    tp(:,3) = num2cell(tabdepth1);
+    tp(:,4) = num2cell(tabdepth2);
+    tp(:,5) = num2cell(tabage);
+    tp(:,6) = num2cell(tabageerr);
+    tp(:,7) = tabdatetype;
+    tp(:,8) = tabcalcurve;
+    tp(:,9) = num2cell(tabresage);
+    tp(:,10) = num2cell(tabreserr);
+    tp(:,11) = num2cell(logical(tabdateboot));
+    set(handles.bigtable,'data',tp)
+catch
+    disp('Select input file. Input file format see manual')
+end
+%
+CDac_pwd; % cd ac_pwd dir
+d = dir; %get files
+%set(handles.listbox1,'String',{d.name},'Value',1) %set string
+%set(handles.edit1,'String',pwd) % set position
+cd(pre_dirML); % return to matlab view folder
 % Choose default command line output for undatableGUI
 handles.output = hObject;
 
@@ -89,6 +144,7 @@ global udinstallpath
 if udinputfile == 0
 	return
 end
+handles.udinputfile = udinputfile;
 save([udinstallpath,'/guitemp/filename.mat'], 'udinputfile', 'udinputpath');
 [tabdatelabel, tabdepth1, tabdepth2, tabdepth, tabage, tabageerr, tabdatetype, tabcalcurve, tabresage, tabreserr, tabdateboot] = udgetdata([udinputpath,udinputfile]);
 
@@ -112,6 +168,8 @@ tp(:,9) = num2cell(tabresage);
 tp(:,10) = num2cell(tabreserr);
 tp(:,11) = num2cell(logical(tabdateboot));
 set(handles.bigtable,'data',tp)
+% Update handles structure
+guidata(hObject, handles);
 
 function specnsim_Callback(hObject, eventdata, handles)
 % hObject    handle to specnsim (see GCBO)
@@ -186,11 +244,12 @@ function runundatable_Callback(hObject, eventdata, handles)
 % hObject    handle to runundatable (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+figundatable = gcf;
 
 hwb = waitbar(0.5,'Running Undatable... please wait');
 
 % Write an undatable input file in the guitemp folder
-global udinstallpath ax1 ax2
+global udinstallpath udinputpath %ax1 ax2
 tp = get(handles.bigtable, 'data');
 tp = tp(cat(1,tp{:,1}) > 0,:); % https://fr.mathworks.com/matlabcentral/answers/128787-how-do-i-extract-a-row-of-data-from-a-cell-array
 bh = fopen([udinstallpath,'/guitemp/guitempinput.txt'],'w');
@@ -213,44 +272,9 @@ undatable([udinstallpath,'/guitemp/guitempinput.txt'],nsim,xfactor,bootpc,'write
 
 % Prep Figure window
 waitbar(0.8,hwb,'Plotting results')
-lpos = [0.1 0.1 0.35 0.8];
-rpos = [0.55 0.1 0.38 0.8];
-figure(822) % Call existing or open new
-existaxes = findall(822,'type','axes');
-if isempty(existaxes) == 1; % If figure window is new, make axes
-	lpos = [0.1 0.1 0.35 0.8];
-	rpos = [0.55 0.1 0.38 0.8];
-	ax1 = axes;
-	set(gca,'position',lpos);
-	xlabel('Age (ka)')
-	ylabel('Depth (cm)')
-	box on
-	ax2 = axes;
-	set(gca,'position',rpos);
-	xlabel('Age (ka)')
-	ylabel('Depth (cm)')
-	box on	
-end
-
-% Move previous plot to right
-allaxes = [ax1 ax2];
-for i = 1:2 %(1:2)
-	axes(allaxes(i))
-	axpos = get(gca,'position');
-	if axpos(1) < 0.2
-		set(gca,'Position',rpos) % move previous to right
-		title('Previous Undatable run')
-	end
-	if axpos(1) > 0.2
-		axtoplot = i;
-	end
-end
-
-% Clear axtoplot and plot new stuff in it and move to left
-axes(allaxes(axtoplot));
-cla
-title('Current undatable run')
-set(gca,'position',lpos)
+figundatablePDF = figure;
+box on
+title('undatable run')
 set(gca,'ydir','reverse')
 load([udinstallpath,'/guitemp/guitemp.mat']) % load age model stuff to plot
 
@@ -374,7 +398,6 @@ for i = 1:length(depth)
 end
 
 % automatic legend (do last so that it appears in the correct place)
-axes(allaxes(axtoplot))
 usedcolours = unique(usedcolours);
 txtxpos = min(xlim) + 0.97 * abs((max(xlim)-min(xlim)));
 txtypos = min(ylim) + 0.03 * abs((max(ylim)-min(ylim)));
@@ -399,32 +422,25 @@ xlabel('Age (ka)')
 ylabel('Depth (cm)')
 % / END OF PLOTTING SCRIPT FROM UNDATABLE.M
 
-% make xlims and ylims of current and previous plot identical
-axes(allaxes(1))
-xlim('auto')
-ylim('auto')
-axes(allaxes(2))
-xlim('auto')
-ylim('auto')
-for i = 1:2 %(1:2)
-	axes(allaxes(i))
-	xlims(i,1:2) = xlim;
-	ylims(i,1:2) = ylim;
-end
-minx = min(min(xlims));
-maxx = max(max(xlims));
-miny = min(min(ylims));
-maxy = max(max(ylims));
-axes(allaxes(1))
-xlim([minx maxx])
-ylim([miny maxy])
-axes(allaxes(2))
-xlim([minx maxx])
-ylim([miny maxy])
 run([udinstallpath,'/udplotoptions.m']);
 set(findall(gcf,'-property','FontSize'),'FontSize',textsize)
+% save pdf
+% make background white
+set(gcf,'InvertHardcopy','on');
+set(gcf,'color',[1 1 1]);
 
+udinputfile = handles.udinputfile;
 
+date = datestr(now,30);
+savename = [udinputpath, strrep(udinputfile, '.txt',''), ' adplot', ' (',date,').pdf'];
+print(gcf, '-dpdf', '-painters', savename);
+
+% refresh AC main window
+figure(handles.acfigmain);
+refreshcolor;
+%cd(pre_dirML); % return view dir
+figure(figundatable);
+figure(figundatablePDF);
 
 
 
@@ -433,7 +449,10 @@ function savebutton_Callback(hObject, eventdata, handles)
 % hObject    handle to savebutton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global udinstallpath ax1 ax2
+
+figundatable = gcf;
+
+global udinstallpath% ax1 ax2
 if isempty(dir([udinstallpath,'/guitemp/filename.mat'])) ~= 1
 	load([udinstallpath,'/guitemp/filename.mat'])
 else
@@ -456,44 +475,11 @@ if get(handles.specmatfile,'Value') == 1
 	copyfile([udinstallpath,'/guitemp/guitemp.mat'],savename);
 end
 
-% (4) copy of age-depth model plot
-figure(822)
-allaxes = findall(822,'type','axes');
-if isempty(allaxes) ~= 0
-	error('You closed the figure window before clicking Save to Disk. Unable to save the age-depth model plot')
-end
-allaxes = [ax1 ax2];
-for i = 1:numel(allaxes) %(1:2)
-	axes(allaxes(i))
-	axpos = get(gca,'position');
-	if axpos(i) < 0.2
-		axtosave = i;
-		set(allaxes(axtosave),'position',[0.1 0.1 0.8 0.8])
-	end
-	if axpos(i) > 0.2;
-		delete(allaxes(i))
-	end
-end
-
-run([udinstallpath,'/udplotoptions.m']); % call udplotoptions.m to workspace
-
-title('')
-
-set(findall(gcf,'-property','FontSize'),'FontSize',textsize)
-
-% set paper size (cm)f
-set(gcf,'PaperUnits','centimeters')
-set(gcf, 'PaperSize',[plotwidth plotheight])
-% put figure in top left of paper
-set(gcf,'PaperPosition',[0 0 plotwidth plotheight])
-% make background white
-set(gcf,'InvertHardcopy','on');
-set(gcf,'color',[1 1 1]);
-
-savename = [udinputpath, strrep(udinputfile, '.txt',''), ' adplot', ' (',date,').pdf'];
-print(822, '-dpdf', '-painters', savename);
-close(822)
-
+% refresh AC main window
+figure(handles.acfigmain);
+refreshcolor;
+%cd(pre_dirML); % return view dir
+figure(figundatable);
 
 % --- Executes on button press in bootall.
 function bootall_Callback(hObject, eventdata, handles)
