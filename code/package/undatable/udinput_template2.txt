@@ -1,0 +1,6 @@
+Sample ID	Depth 1	Depth 2	Age	Age error	Date type	Calibration	Resage	Reserr	Bootstrap	 
+Hekla-4	58.2	58.6	251880	189	tephra	None	NaN	NaN	No	
+Bob's NGRIP tie point	118	122	251941	169	tie point	None	NaN	NaN	Yes	
+Mary's U/Th date	150	160	251998	178	other	None	NaN	NaN	Yes	
+meishan01	200	203	252350	198	tephra	None	NaN	NaN	Yes	
+meishan02	300	305	252789	125	tephra	None	NaN	NaN	Yes	
