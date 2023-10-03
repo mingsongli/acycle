@@ -1,0 +1,15 @@
+Sample ID	Depth 1	Depth 2	Age	Age error	Date type	Calibration	Resage	Reserr	Bootstrap	 
+Lab-1234	20	21	1000	30	14C marine fossil	Marine13	100	100	Yes	
+Lab-1235	30	31	2000	30	14C marine fossil	Marine13	150	100	Yes	
+Lab-1236	41	42	3000	40	14C marine fossil	Marine13	250	150	Yes	
+Lab-1237	54	56	4000	80	14C marine fossil	Marine13	300	200	Yes	
+Hekla-4	58.2	58.6	4260	20	tephra	None	NaN	NaN	No	
+Lab-1238	61	62	5500	80	14C terrestrial fossil	IntCal13	NaN	NaN	Yes	
+Lab-1239	69	70	4900	60	14C terrestrial fossil	IntCal13	NaN	NaN	Yes	
+Lab-1240	75	76	6000	80	14C terrestrial fossil	IntCal13	NaN	NaN	Yes	
+Lab-1241	87	88	7000	110	14C terrestrial fossil	IntCal13	NaN	NaN	Yes	
+Lab-1242	91	92	7900	110	14C sediment	Marine13	400	200	Yes	
+Lab-1243	95	96	8500	115	14C marine fossil	Marine13	500	200	Yes	
+Lab-1244	106	107	10000	120	14C marine fossil	Marine13	600	200	Yes	
+Bob's NGRIP tie point	118	5	11650	100	tie point	None	NaN	NaN	Yes	
+Mary's U/Th date	150	160	18950	250	other	None	NaN	NaN	Yes	
