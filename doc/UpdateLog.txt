@@ -3,7 +3,7 @@ _______________________________________
 
 
 Version : Acycle_v2.7
-Date    : Jun 17, 2023
+Date    : Jun 17, 2023 - Oct 5, 2023
 By      : Mingsong Li (Peking University)
 
     1. COCO: Save correct figure; use invpretile function to calculate percentiles
@@ -13,9 +13,42 @@ By      : Mingsong Li (Peking University)
     5. CENOGRID (Westerhold et al., 2020, Science, doi: 10.1126/science.aba6853)
     6. Dynamic filter: bug free.
     7. Insolation/astronomical solutions: debug. Start from 0. Thanks Lucas Lourens!
+    8. Undatable: Age-depth modelling in Matlab.
+        Thank Lougheed, B. C. and Obrochta, S. P. for permission.
+        Reference:
+        Lougheed, B. C. and Obrochta, S. P. (2019), A rapid, deterministic 
+        age‐depth modelling routine for geological sequences with inherent 
+        depth uncertainty. Paleoceanography and Paleoclimatology. Accepted 
+        Author Manuscript. doi:10.1029/2018PA003457
+    9. Prof. Graham Weedon's SWA method included! Thank Graham!
+                The spectrum is derived from a periodogram based on the
+                Lomb-Scargle algorithm - allowing analysis of data with
+                varying sample intervals in time_ml/distance or data with
+                a fixed sample interval but data missing.
+                Weedon et al. (2019) introduced use of SWA as a
+                non-parametric method for locating the spectral background.
+                false_ml Discovery rates (FDR) are designed to control type I
+                errors (false_ml positive detection of significant spectral
+                peaks) while minimizing type II errors (false_ml rejection of
+                spectral peaks as significant).
+                Weedon (2020) illustrated multiple cases from cyclostratigraphy
+                using SWA and FDR. Weedon (2022) investigated the associated
+                false_ml detection rates.
+      Methodology/Fair use cite:
+            Weedon, G.P., 2022. Problems with the current practice of spectral
+                analysis in cyclostratigraphy: avoiding false_ml detection of regular
+                cyclicity. Earth-Sci. Rev. 235,
+                https://doi.org/10.1016/j.earscirev.2022.104261
+            Weedon, G.P., 2020. Confirmed detection of Palaeogene and Jurassic
+                orbitally-forced sedimentary cycles in the depth domain using
+                false_ml Discovery Rates and Bayesian probability spectra. Boletin
+                Geologico y Minero, 131, 207-230,
+                https://doi.org/10.2170/bolgeomin.131.2.001
+            Weedon, G.P., Page, K.N., and Jenkyns, H.C., 2019. Cyclostratigraphy,
+                stratigraphic gaps and the duration of the Hettangian (Jurassic):
+                insights from the Blue Lias Formation of Southern Britain. Geol.
+                Mag. 156, 1469-1509, https://doi.org/10.1017/S0016756818000808
 _______________________________________
-
-
 
 Version : Acycle_v2.6
 Date    : Dec 11, 2022 - Jan 18, 2023

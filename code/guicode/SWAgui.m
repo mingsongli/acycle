@@ -11,7 +11,7 @@ global freq
 MonZoom = 1;  % zoom GUI
 
 %%
-f = figure('Position', [100, 100, 600, 400] * MonZoom, 'MenuBar', 'none', 'Name', 'Acycle: SWA', 'NumberTitle', 'off', 'Resize', 'on');
+f = figure('Position', [100, 100, 600, 400] * MonZoom, 'MenuBar', 'none', 'NumberTitle', 'off', 'Resize', 'on');
 handles.f = f;
 set(f,'units','norm') % set location
 set(0,'Units','normalized') % set units as normalized
@@ -26,9 +26,46 @@ handles.unit_type = varargin{1}.unit_type;
 handles.listbox_acmain = varargin{1}.listbox_acmain;
 handles.edit_acfigmain_dir= varargin{1}.edit_acfigmain_dir;
 handles.val1 = varargin{1}.val1;
-
-% 第一个panel: Confidence levels
-p1 = uipanel(f, 'Title', 'Confidence levels', 'Position', [.02 .68 .96 .3]);
+%%
+%language
+handles.lang_choice = varargin{1}.lang_choice;
+handles.lang_id = varargin{1}.lang_id;
+handles.lang_var = varargin{1}.lang_var;
+lang_id = handles.lang_id;
+%if handles.lang_choice > 0
+    [~, locb1] = ismember('swa1',lang_id);
+    swa1 = handles.lang_var{locb1};
+    [~, locb1] = ismember('swa2',lang_id);
+    swa2 = handles.lang_var{locb1};
+    [~, locb1] = ismember('swa3',lang_id);
+    swa3 = handles.lang_var{locb1};
+    [~, locb1] = ismember('swa4',lang_id);
+    swa4 = handles.lang_var{locb1};
+    [~, locb1] = ismember('swa5',lang_id);
+    swa5 = handles.lang_var{locb1};
+    
+    [~, locb1] = ismember('menu03',lang_id); 
+    menu03 = handles.lang_var{locb1};  % Plot
+    [~, locb1] = ismember('specm05',lang_id);
+    specm05 = handles.lang_var{locb1};  % Settings
+    [~, locb1] = ismember('main05',lang_id); 
+    main05 = handles.lang_var{locb1};  % Minimum
+    [~, locb1] = ismember('main06',lang_id); 
+    main06 = handles.lang_var{locb1};  % Maximum
+    [~, locb1] = ismember('main14',lang_id); 
+    main14 = handles.lang_var{locb1};  % Frequency
+    [~, locb1] = ismember('spectral15',lang_id); 
+    spectral15 = handles.lang_var{locb1};  % Linear Y
+    [~, locb1] = ismember('spectral16',lang_id); 
+    spectral16 = handles.lang_var{locb1};  % Log Y
+    [~, locb1] = ismember('spectral17',lang_id); 
+    spectral17 = handles.lang_var{locb1};  % Log(freq)
+    [~, locb1] = ismember('spectral18',lang_id); 
+    spectral18 = handles.lang_var{locb1};  % X in period
+    set(f,'Name',['Acycle: ',swa2,' (SWA)'])
+%end
+%% 第一个panel: Confidence levels
+p1 = uipanel(f, 'Title', swa3, 'Position', [.02 .68 .96 .3]);
 checkBoxStrs = {'90% chi2 CL', '95% chi2 CL', '99% chi2 CL', '99.9% chi2 CL', '5% FDR', '1% FDR', '0.1% FDR', '0.01% FDR'};
 defaultVal = [0, 1, 1, 0, 1, 1, 0, 0];
 for i = 1:8
@@ -38,33 +75,33 @@ for i = 1:8
 end
 
 % 第二个panel: Plot Settings
-p2 = uipanel(f, 'Title', 'Plot Settings', 'Position', [.02 .37 .96 .3]);
-text1 = uicontrol(p2, 'Style', 'text', 'String', 'Min frequency',...
+p2 = uipanel(f, 'Title', [menu03,' ', specm05], 'Position', [.02 .37 .96 .3]);
+text1 = uicontrol(p2, 'Style', 'text', 'String', [main05, ' ', main14],...
     'Units', 'normalized', 'Position', [0, 0.5, 0.24, 0.4]);
 edit1 = uicontrol(p2, 'Style', 'edit', 'String', '0',...
     'Units', 'normalized', 'Position', [0.25, 0.5, 0.24, 0.4],...
     'Callback', @refreshSWAfigure);
-text2 = uicontrol(p2, 'Style', 'text', 'String', 'Max frequency',...
+text2 = uicontrol(p2, 'Style', 'text', 'String', [main06, ' ', main14],...
     'Units', 'normalized', 'Position', [0.5, 0.5, 0.24, 0.4]);
 edit2 = uicontrol(p2, 'Style', 'edit', 'String', '100',...
     'Units', 'normalized', 'Position', [0.75, 0.5, 0.24, 0.4],...
     'Callback', @refreshSWAfigure);
 
-checkbox21 = uicontrol(p2, 'Style', 'checkbox', 'String', 'Linear Y', 'Value', 0,...
+checkbox21 = uicontrol(p2, 'Style', 'checkbox', 'String', spectral15, 'Value', 0,...
     'Units', 'normalized', 'Position', [0, 0, 0.24, 0.4],...
     'Callback', {@checkboxCallback, 2});
-checkbox22 = uicontrol(p2, 'Style', 'checkbox', 'String', 'Log Y', 'Value', 1,...
+checkbox22 = uicontrol(p2, 'Style', 'checkbox', 'String', spectral16, 'Value', 1,...
     'Units', 'normalized', 'Position', [0.25, 0, 0.24, 0.4],...
     'Callback', {@checkboxCallback, 1});
-checkbox23 = uicontrol(p2, 'Style', 'checkbox', 'String', 'log(freq)', 'Value', 0,...
+checkbox23 = uicontrol(p2, 'Style', 'checkbox', 'String', spectral17, 'Value', 0,...
     'Units', 'normalized', 'Position', [0.5, 0, 0.24, 0.4],...
     'Callback', @refreshSWAfigure);
-checkbox24 = uicontrol(p2, 'Style', 'checkbox', 'String', 'X in period', 'Value', 0,...
+checkbox24 = uicontrol(p2, 'Style', 'checkbox', 'String', spectral18, 'Value', 0,...
     'Units', 'normalized', 'Position', [0.75, 0, 0.24, 0.4],...
     'Callback', {@checkboxCallback, 3});
 
 % 第三个panel: Multiple Figures
-p3 = uipanel(f, 'Title', 'Multiple Figures', 'Position', [.02 .02 .96 .3]);
+p3 = uipanel(f, 'Title', [swa4,' ',specm05], 'Position', [.02 .02 .96 .3]);
 checkboxStrs = {'1 Figure', '2 Figures', '3 Figures'};
 for i = 1:3
     checkbox3x(i) = uicontrol(p3, 'Style', 'checkbox', 'String', checkboxStrs{i}, 'Value', i == 1,...
@@ -79,7 +116,7 @@ data_r(any(isinf(data_r),2),:) = [];
 data_r = sortrows(data_r);
 diffx = diff(data_r(:,1));
 if any(diffx(:) == 0)
-    warndlg('Data: Duplicated time/depth detected')
+    warndlg(swa5)
 end
 
 [freq, power, swa, alphob, factoball, clfdr, chi2_inv_value] = specswafdr(data_r, 0); % main function SWA
@@ -234,6 +271,7 @@ refreshSWAfigure
             xlabel(xlabel1)
             xlim([fmin, fmax])
             set(gca,'XMinorTick','on','YMinorTick','on')
+            set(gcf,'Color', 'white')
             legend
             %hold off
             
@@ -273,8 +311,8 @@ refreshSWAfigure
             xlabel(xlabel1)
             xlim([fmin, fmax])
             set(gca,'XMinorTick','on','YMinorTick','on')
-            
-            % Bayesian Probability
+            set(gcf,'Color', 'white')
+            %% Bayesian Probability
             if checkbox3x(1).Value % All in 1 figure
                 subplot(3,1,3)
             else
@@ -294,7 +332,6 @@ refreshSWAfigure
             ylabel('Bayesian probability')
             ylim([min(bayesprob), 1.1])
 
-
             if checkbox21.Value  % linear Y
                 set(gca,'YScale','linear');
             end
@@ -312,6 +349,7 @@ refreshSWAfigure
             xlabel(xlabel1)
             xlim([fmin, fmax])
             set(gca,'XMinorTick','on','YMinorTick','on')
+            set(gcf,'Color', 'white')
             hold off
         %end
     end

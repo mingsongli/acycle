@@ -89,7 +89,6 @@ xlabel(handles.xlabel)
 %ylabel('Value')
 ylabel(handles.ylabel)
 title(handles.title)
-set(gca,'XMinorTick','on','YMinorTick','on')
 
 %  settings for x-axis 1st row and y-axis 2nd row
 %  1 column = start; 2 = end; 3 = linear(=1)/log(=0); 4 = set x or y
@@ -125,6 +124,7 @@ if handles.swapxy == 1
 else
     view([0 90]);
 end
+set(gca,'XMinorTick','on','YMinorTick','on')
 %handles.plotprofig = plotprofig;
 set(gcf,'color','w');
 legend(handles.plot_list)
