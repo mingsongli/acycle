@@ -36,6 +36,8 @@
 %   Christopher Torrence, Gilbert Compo (Wavelet)
 %   Aslak Grinsted (Wavelet coherence, wavelet cross spectrum)
 %   Yonggang Liu (Rectified Wavelet Power Spectrum)
+%   Graham Weedon (Power spectrum with Smoothed Window Averages)
+%   Bryan C. Lougheed, Stephen P. Obrochta (Undatable)
 %
 % Acknowledgment:
 %   Feng Cheng, Anne-Christine Da Silva, 
@@ -43,14 +45,15 @@
 %   Zheng Gong, Zhengtang Guo, Yanan Fang, Marco Franceschi, 
 %   Daniel R. Franco, Frits Hilgen, Xiaoni Hu, 
 %   Dorothée Husson, Arsenio Muñoz Jiménez, 
-%   Ilja Kocken, Lee R. Kump, Dongyang Liu, 
+%   Ilja Kocken, Lee R. Kump, Dongyang Liu, Lucas Lourens, 
 %   Kunyuan Ma, Mathieu Martinez, James Ogg, Paul Olsen, 
 %   Jeffrey Park, J. Fred Read, Chen Shen, 
 %   Victor A. Piedrahita Velez, 
 %   Chuanyue Wang, Meng Wang, Yujing Wu, 
 %   Deke Xu, Xu Yao, Qiyan Zhang, Haotian Zhang, Haoxun Zhang, 
 %   Xiaoyu Zhang, Yang Zhang, Ze Zhang, Hanyu Zhu, Christian Zeeden
-
+%   
+%
 %**************************************************************************
 % Copyright (C) 2017-2023
 % This program is a free software; you can redistribute it and/or modify it
