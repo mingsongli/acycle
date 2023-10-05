@@ -120,7 +120,7 @@ if any(diffx(:) == 0)
 end
 
 [freq, power, swa, alphob, factoball, clfdr, chi2_inv_value] = specswafdr(data_r, 0); % main function SWA
-[freq, pow2,bayesprob]=specbayes(data_r, 0);  % main function Bays. prob.
+[freqb, pow2,bayesprob]=specbayes(data_r, 0);  % main function Bays. prob.
 set(edit1,'String',min(freq))
 set(edit2,'String',max(freq))
 
@@ -203,10 +203,12 @@ refreshSWAfigure
         % Define refreshSWAfigure function here
         % define x axis value
         xvalue = freq;
+        xvalueb = freqb;  %
         xlabel1 = ['Frequency (cycles/',handles.unit,')'];
         if checkbox24.Value == 1  % x in period
             xvalue = 1./freq;
             xlabel1 = ['Period (',handles.unit,')'];
+            xvalueb = 1./freqb; 
         end
         fmin = str2double(edit1.String); % read min and max freq for plot
         fmax = str2double(edit2.String);
@@ -291,7 +293,7 @@ refreshSWAfigure
                     subplot(2,1,1)
                 end
             end
-            plot(xvalue, pow2,'k-','DisplayName','Power')
+            plot(xvalueb, pow2,'k-','DisplayName','Power')
             ylabel('Power')
             
             if checkbox21.Value  % linear Y
@@ -328,7 +330,7 @@ refreshSWAfigure
                     end
                 end
             end
-            plot(xvalue, bayesprob,'k-','DisplayName','Bayesian Probability')
+            plot(xvalueb, bayesprob,'k-','DisplayName','Bayesian Probability')
             ylabel('Bayesian probability')
             ylim([min(bayesprob), 1.1])
 

@@ -1086,7 +1086,7 @@ for i = 1:nout
         jdiff1 = alphsort(i) - jalpha1(i);
         jdiff01 = alphsort(i) - jalpha01(i);
         jdiff001 = alphsort(i) - jalpha001(i);
-
+        
         if jdiff10 < 0
             maxneg10 = i; 
         end
@@ -1103,12 +1103,18 @@ for i = 1:nout
             maxneg001 = i;
         end
     end
+    % debug
+%     if i < 10
+%         fprintf(' j=%d  asort=%.12f  ja1=%.12f  jd1=%.12f\n', i, alphsort(i), jalpha1(i), jdiff1);
+%         fprintf(' j=%d  asort=%.12f  ja5=%.12f  jd1=%.12f\n', i, alphsort(i), jalpha5(i), jdiff5);
+%     end
+
 end
 
 % debug
 disp(['maxneg CL% 10, 5, 1, 01, 001 = INDEX ', num2str(maxneg10),',  ', num2str(maxneg5),',  ',  num2str(maxneg1),',  ',  num2str(maxneg01), ',  ', num2str(maxneg001)])
 
-% Step 4 of Miller et al. (2001): Find maximum frequency index
+% Step 4 of Miller et al. (2001): Find probability rank index
 % where the diffence is negative.
 % Establish factors for FDR confidence levels.
 fprintf('\n');

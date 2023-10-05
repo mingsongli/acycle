@@ -944,7 +944,11 @@ if check == 1
         plot_no = plot_selected(i);
         handles.plot_s{i} = fullfile(ac_pwd,char(contents(plot_no)));
     end
-    current_data = load(handles.plot_s{1});
+    try
+        current_data = load(handles.plot_s{1});
+    catch
+        warndlg('Data loading error. Check data please')
+    end
     handles.current_data = current_data;
     handles.dat_name = handles.plot_s{1};
     handles.nplot = nplot;
