@@ -143,13 +143,17 @@ lang_var = table2cell(langdict(:, 2 + lang_choice));
 set(gcf,'Name',lang_var{c61})
     
 if lang_choice > 0
+    
+    [~, pltadv1] = ismember('pltadv1',lang_id);
+    
     % menu
     [~, locb] = ismember('menu01',lang_id);
     set(handles.menu_file,'text',lang_var{locb})
     [~, locb] = ismember('menu02',lang_id);
     set(handles.menu_edit,'text',lang_var{locb})
     [~, locb] = ismember('menu03',lang_id);
-    set(handles.menu_plotall,'text',lang_var{locb})
+    set(handles.menu_plotall,'text',lang_var{locb})   % Plot
+    set(handles.menu_plotadv,'text',[lang_var{locb},' ', lang_var{pltadv1}]) % plot advance
     [~, locb] = ismember('menu04',lang_id);
     set(handles.menu_basic,'text',lang_var{locb})
     [~, locb] = ismember('menu05',lang_id);
@@ -359,6 +363,9 @@ if lang_choice > 0
     set(handles.menu_contact,'text',lang_var{locb})
     [~, locb] = ismember('menu144',lang_id);
     set(handles.menu_email,'text',lang_var{locb})
+    
+    [~, locb] = ismember('swa1',lang_id);
+    set(handles.menu_swa,'text',lang_var{locb})
     % unit language
     set(handles.main_unit_en,'Visible','on','Value',0)
     % listbox 1
@@ -5249,6 +5256,102 @@ if check == 1
     handles.nplot = nplot;
     guidata(hObject, handles);
     PlotPro2DLineGUI(handles);
+end
+
+
+
+
+
+% --------------------------------------------------------------------
+function menu_plotadv_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_plotadv (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox_acmain,'Value');
+nplot = length(plot_selected);   % length
+check = 0;
+% check
+for i = 1:nplot
+    plot_no = plot_selected(i);
+    plot_filter_s = char(contents(plot_no));
+    plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
+    if isdir(plot_filter_s)
+        return
+    else
+        [~,dat_name,ext] = fileparts(plot_filter_s);
+        check = 0;
+        if sum(strcmp(ext,handles.filetype)) > 0
+            check = 1; % selection can be executed 
+        elseif sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
+            imfinfo1 = imfinfo(plot_filter_s); % image information
+            supportcolor = {'grayscale', 'truecolor'};
+
+            if strcmp(imfinfo1.ColorType,'CIELab')
+                im_name = imread(plot_filter_s);
+
+                aDouble = double(im_name); 
+
+                cielab(:,:,1) = aDouble(:,:,1) ./ (255/100);
+                cielab(:,:,2) = aDouble(:,:,2)-128;
+                cielab(:,:,3) = aDouble(:,:,3)-128;
+                hFig1 = figure;                    
+                subplot(3,1,1)
+                imshow(cielab(:,:,1),[0 100])
+                title('L*')
+                subplot(3,1,2)
+                imshow(cielab(:,:,2),[-128 127])
+                title('a*')
+                subplot(3,1,3)
+                imshow(cielab(:,:,3),[-128 127])
+                title('b*')
+                set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
+
+                hFig2 = figure;
+                imshow(lab2rgb(cielab));
+                set(gcf,'Name',[dat_name,'Lab2RGB',ext],'NumberTitle','off')
+
+            elseif any(strcmp(supportcolor,imfinfo1.ColorType))
+                im_name = imread(plot_filter_s);
+                hFig1 = figure;
+                imshow(im_name);
+                set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
+                [warnMsg, warnId] = lastwarn;
+                if ~isempty(warnMsg)
+                    close(hFig1)
+                    imscrollpanel_ac(plot_filter_s);
+                end
+            else
+                try
+                    % GRB and Grayscale supported here
+                    im_name = imread(plot_filter_s);
+                    hFig1 = figure;
+                    lastwarn('') % Clear last warning message
+                    imshow(im_name);
+                    set(gcf,'Name',[dat_name,ext],'NumberTitle','off')
+                    [warnMsg, warnId] = lastwarn;
+                    if ~isempty(warnMsg)
+                        close(hFig1)
+                        imscrollpanel_ac(data_name);
+                    end
+                catch
+                    warndlg('Image color space not supported.')
+                end
+            end
+        end
+    end
+end
+if check == 1
+    GETac_pwd; 
+    for i = 1: nplot
+        plot_no = plot_selected(i);
+        handles.plot_s{i} = fullfile(ac_pwd,char(contents(plot_no)));
+    end
+    handles.nplot = nplot;
+    guidata(hObject, handles);
+    PlotAdv(handles);
 end
 
 
