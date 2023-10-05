@@ -2862,6 +2862,35 @@ end
 guidata(hObject, handles);
 
 
+% --------------------------------------------------------------------
+function menu_swa_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_swa (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox_acmain,'Value');
+nplot = length(plot_selected);   % length
+if nplot == 1
+    data_name = char(contents(plot_selected));
+    dat_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; 
+    data_name = fullfile(ac_pwd,dat_name);
+        if isdir(data_name) == 1
+        else
+            [~,~,ext] = fileparts(data_name);
+            if sum(strcmp(ext,handles.filetype)) > 0
+                current_data = load(data_name);
+                handles.current_data = current_data;
+                handles.data_name = data_name;
+                handles.dat_name = dat_name;
+                guidata(hObject, handles);
+                SWAgui(handles);
+            end
+        end
+end
+guidata(hObject, handles);
+
+
 % --- Executes during object creation, after setting all properties.
 function menu_filter_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to axes_refresh (see GCBO)
@@ -8387,3 +8416,4 @@ if nplot == 1
 else
      undatableGUI(handles)
 end
+
