@@ -54,13 +54,19 @@ if get(handles.checkbox_robust,'value')
             [lang_var{locb6},'99%'])
     end
     
-    xlim([1/fmax, pt(3)]);
+    if fmin <= 0 
+        fmin_s = pt(3);
+    else
+        fmin_s = 1/fmin;
+    end
+    
+    xlim([1/fmax, fmin_s]);
     set(gca, 'XDir','reverse')
     
     set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'pi MTM'])
     set(gca,'XMinorTick','on','YMinorTick','on')
     set(gcf,'Color', 'white')
-    if handles.linlogY == 1;
+    if handles.linlogY == 1
         set(gca, 'YScale', 'log')
     else
         set(gca, 'YScale', 'linear')
@@ -84,7 +90,14 @@ if get(handles.checkbox_ar1_check,'value')
     plot(pt,tabtchi95,'r--','LineWidth',2);
     plot(pt,tabtchi99,'b-.','LineWidth',1);
     plot(pt,tabtchi999,'g--','LineWidth',1);
-    xlim([1/fmax, pt(3)]);
+    
+    if fmin <= 0 
+        fmin_s = pt(3);
+    else
+        fmin_s = 1/fmin;
+    end
+    
+    xlim([1/fmax, fmin_s]);
     set(gca, 'XDir','reverse')
     
     if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
@@ -137,7 +150,14 @@ if and(get(handles.checkbox_ar1_check,'value') == 0, get(handles.checkbox_robust
     
     set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'pi MTM'])
     set(gca,'XMinorTick','on','YMinorTick','on')
-    xlim([1/fmax, pt1(3)]);
+    
+    if fmin <= 0 
+        fmin_s = pt(3);
+    else
+        fmin_s = 1/fmin;
+    end
+    
+    xlim([1/fmax, fmin_s]);
     set(gca, 'XDir','reverse')
     if handles.linlogY == 1
         set(gca, 'YScale', 'log')
@@ -167,7 +187,15 @@ if handles.check_ftest_value
         title([lang_var{spectral45},', ',lang_var{spectral46},' : ', num2str(nw), '\pi'])
         ylabel(lang_var{spectral45})
     end
-    xlim([1/fmax, pt(3)]);set(gca, 'XDir','reverse')
+    
+    if fmin <= 0 
+        fmin_s = pt(3);
+    else
+        fmin_s = 1/fmin;
+    end
+    
+    xlim([1/fmax, fmin_s]);
+    set(gca, 'XDir','reverse')
     if handles.logfreq == 1
         set(gca,'xscale','log')
     end
@@ -180,7 +208,14 @@ if handles.check_ftest_value
         [~, spectral47] = ismember('spectral47',lang_id);
         ylabel(lang_var{spectral47})
     end
-    xlim([1/fmax, pt(3)]);set(gca, 'XDir','reverse')
+    if fmin <= 0 
+        fmin_s = pt(3);
+    else
+        fmin_s = 1/fmin;
+    end
+    
+    xlim([1/fmax, fmin_s]);
+    set(gca, 'XDir','reverse')
     if handles.logfreq == 1
         set(gca,'xscale','log')
     end
@@ -209,7 +244,14 @@ if handles.check_ftest_value
         xlabel([lang_var{main15},' (',handles.unit,')'])
     end
     set(gca, 'YDir','reverse')
-    xlim([1/fmax, pt(3)]);set(gca, 'XDir','reverse')
+    if fmin <= 0 
+        fmin_s = pt(3);
+    else
+        fmin_s = 1/fmin;
+    end
+    
+    xlim([1/fmax, fmin_s]);
+    set(gca, 'XDir','reverse')
     if handles.logfreq == 1
         set(gca,'xscale','log')
     end

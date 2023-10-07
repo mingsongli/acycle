@@ -22,7 +22,7 @@ function varargout = spectrum(varargin)
 
 % Edit the above text to modify the response to help spectrum
 
-% Last Modified by GUIDE v2.5 10-Dec-2020 21:31:32
+% Last Modified by GUIDE v2.5 07-Oct-2023 22:36:48
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -96,25 +96,31 @@ set(handles.edit4,'position', [0.664,0.089,0.3,0.23])
 set(handles.uipanel3,'position', [0.05,0.082,0.445,0.32])
 set(handles.checkbox_robust,'position', [0.05,0.65,0.7,0.3])
 set(handles.checkbox_ar1_check,'position', [0.05,0.35,0.7,0.3])
-set(handles.check_ftest,'position', [0.05,0.05,0.9,0.3])
+set(handles.check_ftest,'position', [0.05,0.05,0.5,0.3])
 set(handles.check_ftest,'Value', 0, 'tooltip','F-test and amplitude spectrum')
 set(handles.checkbox9,'position',  [0.65,0.65,0.35,0.3])
 set(handles.checkbox10,'position', [0.65,0.35,0.35,0.3])
+set(handles.checkboxSWA,'position', [0.65,0.05,0.35,0.3],'Value',1)
 %
 set(handles.checkbox9,'tooltip','Power Law')
 set(handles.checkbox10,'tooltip','Bending Power Law')
+set(handles.checkboxSWA,'tooltip','Smoothed Window Averages')
 
 set(handles.uibuttongroup1,'position', [0.5,0.25,0.45,0.52])
-set(handles.radiobutton_fmax,'position', [0.089,0.75,0.473,0.2])
-set(handles.text_nyquist,'position', [0.541,0.76,0.356,0.13])
-set(handles.radiobutton_input,'position', [0.089,0.5,0.4,0.2])
-set(handles.edit_fmax_input,'position', [0.541,0.52,0.356,0.2])
 
-set(handles.checkbox4,'position', [0.089,0.25,0.507,0.2])
-set(handles.checkbox5,'position', [0.5,0.25,0.507,0.2])
-set(handles.checkbox6,'position', [0.089,0.05,0.4,0.2])
+set(handles.text8,'position', [0.02,0.8,0.473,0.15],'String','Freq. min')  % f min
+set(handles.edit8,'position', [0.541,0.82,0.356,0.15],'String','0')  % f min
+
+set(handles.radiobutton_fmax,'position', [0.089,0.6,0.473,0.2])
+set(handles.text_nyquist,'position', [0.541,0.62,0.356,0.13])
+set(handles.radiobutton_input,'position', [0.089,0.4,0.4,0.2])
+set(handles.edit_fmax_input,'position', [0.541,0.42,0.356,0.15],'Enable','off')
+
+set(handles.checkbox4,'position', [0.089,0.2,0.507,0.15])
+set(handles.checkbox5,'position', [0.5,0.2,0.507,0.15])
+set(handles.checkbox6,'position', [0.089,0.05,0.4,0.15])
 set(handles.checkbox6,'String', 'log(freq.)')
-set(handles.checkbox8,'position', [0.5,0.05,0.48,0.2])
+set(handles.checkbox8,'position', [0.5,0.05,0.48,0.15])
 set(handles.checkbox8,'value', 0)
 
 set(handles.pushbutton17,'position', [0.5,0.082,0.166,0.12])
@@ -138,6 +144,7 @@ set(handles.checkbox5,'Value',1)
 set(handles.checkbox6,'Value', 0)
 set(handles.checkbox9,'Value', 0)
 set(handles.checkbox10,'Value', 0)
+set(handles.checkboxSWA,'Value', 0)
 set(handles.radiobutton_fmax,'Value',1)
 set(handles.radiobutton_input,'Value',0)
 % contact with acycle main window
@@ -167,6 +174,7 @@ handles.checkBPL= 0;
 handles.timebandwidth = 2;
 handles.datasample = 0;  % warning of sampling rate: uneven = 1
 Dt = diff(data_s(:,1));
+
 if max(Dt) - min(Dt) > 10 * eps('single')
     handles.datasample = 1;
     handles.method ='Lomb-Scargle spectrum';
@@ -177,11 +185,13 @@ if max(Dt) - min(Dt) > 10 * eps('single')
     set(handles.checkbox_ar1_check,'Value',0)
     set(handles.checkbox_ar1_check,'String','White noise')
     set(handles.check_ftest,'Visible', 'off')
+    set(handles.checkboxSWA,'Visible', 'off')
 else
     handles.method ='Multi-taper method';
     set(handles.popupmenu2, 'Value', 1);
     set(handles.popupmenu_tapers, 'Value', 1);
     set(handles.check_ftest,'Visible', 'on')
+    set(handles.checkboxSWA,'Visible', 'on','Value',1)
 end
 
 handles.mean = mean(Dt);
@@ -251,6 +261,9 @@ if handles.lang_choice > 0
     
     [~, locb] = ismember('spectral12',lang_id);
     set(handles.uibuttongroup1,'Title',lang_var{locb})
+    
+    [~, locb] = ismember('dd32',lang_id);
+    set(handles.text8,'String',lang_var{locb})
     
     [~, locb] = ismember('spectral13',lang_id);
     set(handles.radiobutton_fmax,'String',lang_var{locb})
@@ -376,6 +389,12 @@ plot_x_period = get(handles.checkbox8,'Value');
 plot_fmax_input = str2double(get(handles.edit_fmax_input,'String'));
 nw = handles.timebandwidth;
 bw=2*nw*df;
+SelectSWA = get(handles.checkboxSWA,'Value');
+fmin = str2double(get(handles.edit8,'String'));
+if fmin < 0
+    fmin = 0;
+end
+
 % language
 lang_id = handles.lang_id;
 lang_var = handles.lang_var;
@@ -514,7 +533,7 @@ if strcmp(method,'Multi-taper method')
                     xlabel([lang_var{locb},num2str(unit),')']) 
                     title([num2str(nw),'\pi-MTM-',lang_var{locb6},': \rho = ',num2str(rhoM),'. S0 = ',num2str(s0M),'; ',lang_var{locb1},' = ',num2str(bw)])   
                 end
-                xlim([0 fmax]);
+                xlim([fmin fmax]);
                 set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'pi MTM'])
                 set(gca,'XMinorTick','on','YMinorTick','on')
                 set(gcf,'Color', 'white')
@@ -587,7 +606,13 @@ if strcmp(method,'Multi-taper method')
                 [~, locb] = ismember('main15',lang_id);
                 xlabel([lang_var{locb},' (',num2str(unit),')']) 
             end
-            xlim([1/fmax, pt1(3)]);
+            if fmin <= 0 
+                fmin_s = pt(3);
+            else
+                fmin_s = 1/fmin;
+            end
+
+            xlim([1/fmax, fmin_s]);
             set(gca, 'XDir','reverse')
             hold on
             plot(pt1,red99global,'r-.','LineWidth',1)
@@ -599,7 +624,7 @@ if strcmp(method,'Multi-taper method')
             plot(pt1,pl,'k-','LineWidth',2)
         else
             plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
-            xlim([0 fmax]);
+            xlim([fmin fmax]);
             if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
                 xlabel(['Frequency (cycles/',num2str(unit),')']) 
             else
@@ -692,7 +717,13 @@ if strcmp(method,'Multi-taper method')
                 xlabel([lang_var{locb},' (',num2str(unit),')']) 
             end
             
-            xlim([1/fmax, pt1(3)]);
+            if fmin <= 0 
+                fmin_s = pt(3);
+            else
+                fmin_s = 1/fmin;
+            end
+
+            xlim([1/fmax, fmin_s]);
             set(gca, 'XDir','reverse')
             hold on
             plot(pt1,red99global,'r-.','LineWidth',1)
@@ -704,7 +735,7 @@ if strcmp(method,'Multi-taper method')
             plot(pt1,theored1,'k-','LineWidth',2)
         else
             plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
-            xlim([0 fmax]);
+            xlim([fmin fmax]);
             
             if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
                 xlabel(['Frequency (cycles/',num2str(unit),')']) 
@@ -762,7 +793,9 @@ if strcmp(method,'Multi-taper method')
     
     % Plot figure MTM handles.checkbox_robustAR1_v = checkbox_robustAR1;
     % neither robust AR1 nor conventional AR1
-    if and(get(handles.checkbox_ar1_check,'value') == 0, get(handles.checkbox_robust,'value') == 0)
+    noplot1 = handles.checkbox_robustAR1_v + handles.checkPL + handles.checkBPL ...
+        + handles.checkbox_ar1_v + handles.check_ftest_value + SelectSWA;
+    if noplot1 == 0
         figdata = figure;
         set(gcf,'Color', 'white')
         plot(fd1,po,'LineWidth',1); 
@@ -785,7 +818,7 @@ if strcmp(method,'Multi-taper method')
         end
         set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'pi MTM'])
         set(gca,'XMinorTick','on','YMinorTick','on')
-        xlim([0 fmax]);
+        xlim([fmin, fmax]);
         if handles.linlogY == 1
             set(gca, 'YScale', 'log')
         else
@@ -850,8 +883,7 @@ if strcmp(method,'Multi-taper method')
         plot(fd,tabtchi95,'r--','LineWidth',2);
         plot(fd,tabtchi99,'b-.','LineWidth',1);
         plot(fd,tabtchi999,'g--','LineWidth',1);
-        xlim([0 fmax]);
-        
+        xlim([fmin fmax]);
         
         if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
             xlabel(['Frequency (cycles/',num2str(unit),')'])
@@ -895,9 +927,9 @@ if strcmp(method,'Multi-taper method')
             update_spectral_x_period_mtm
         else
             [freq,ftest,fsig,Amp,Faz,Sig,Noi,dof,wt]=ftestmtmML(data,nw,padtimes,1);
-            subplot(3,1,1); xlim([0 fmax])
-            subplot(3,1,2); xlim([0 fmax])
-            subplot(3,1,3); xlim([0 fmax])
+            subplot(3,1,1); xlim([fmin fmax])
+            subplot(3,1,2); xlim([fmin fmax])
+            subplot(3,1,3); xlim([fmin fmax])
             set(gcf,'color','white');
             set(gcf,'units','norm') % set location
             set(gcf,'position',[0.0,0.05,0.45,0.45])
@@ -908,7 +940,7 @@ if strcmp(method,'Multi-taper method')
             set(gcf,'position',[0.2,0.05,0.45,0.45])
             subplot(2,1,1); 
             plot(freq,dof,'color','k','LineWidth',1)
-            xlim([0 fmax])
+            xlim([fmin fmax])
             if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
                 title('Adaptive weighted degrees of freedom')
             else
@@ -917,7 +949,7 @@ if strcmp(method,'Multi-taper method')
             end
             subplot(2,1,2); 
             plot(freq,Faz,'color','k','LineWidth',1)
-            xlim([0 fmax])
+            xlim([fmin fmax])
             if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
                 title('Harmonic phase')
                 ylabel('Frequency')
@@ -928,6 +960,142 @@ if strcmp(method,'Multi-taper method')
                 ylabel(lang_var{locb1})
             end
         end
+    end
+    
+    %% SWA method 
+    if SelectSWA == 1
+        [outputdata] = spectralswafdr(data, 'mtm', nw, padtimes, 0);
+        clfdr = outputdata(:, 9:13);
+        xvalue = outputdata(:,1);
+        pxx = outputdata(:,2);
+        swa = outputdata(:,3);
+        chi90 = outputdata(:,4);
+        chi95 = outputdata(:,5);
+        chi99 = outputdata(:,6);
+        chi999 = outputdata(:,7);
+        chi9999 = outputdata(:,8);
+        
+        f=figure; 
+        set(f,'Name',['Acycle: ',[dat_name,ext],'-',num2str(nw),'pi MTM SWA'])
+        set(f,'color','white');
+        set(f,'units','norm') % set location
+        
+        if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+            xlabel(['Frequency (cycles/',num2str(unit),')'])
+            ylabel('Power')
+            
+            if plot_x_period
+                xvalue = 1./xvalue;
+                xlabel(['Period (',handles.unit,')']);
+                pmin = 1/fmax;
+                if fmin <= 0 
+                    pmax = xvalue(3);
+                else
+                    pmax = 1/fmin;
+                end
+                
+                fmax = pmax;
+                fmin = pmin;
+            end
+            
+        else
+            
+            [~, locb] = ismember('spectral33',lang_id);
+            xlabel([lang_var{locb},num2str(unit),')']) 
+             [~, locb1] = ismember('spectral30',lang_id);
+            ylabel(lang_var{locb1})
+            
+            if plot_x_period
+                xvalue = 1./xvalue;
+                [~, locb] = ismember('main15',lang_id);
+                xlabel([lang_var{locb},' (',num2str(unit),')']) 
+                
+                pmin = 1/fmax;
+                if fmin <= 0 
+                    pmax = xvalue(3);
+                else
+                    pmax = 1/fmin;
+                end
+                
+                fmax = pmax;
+                fmin = pmin;
+            end
+        end
+            
+        hold on
+        % plot FDR
+        if ~isnan(clfdr(1,5))  % 0.01% FDR
+            plot(xvalue, clfdr(:,5),'k-.','LineWidth',0.5,'DisplayName','0.01% FDR');
+        end
+        if ~isnan(clfdr(1,4))  % 0.1% FDR
+            plot(xvalue, clfdr(:,4),'g-.','LineWidth',0.5,'DisplayName','0.1% FDR'); % 0.1% FDR
+        end
+        if ~isnan(clfdr(1,3))  % 1% FDR
+            plot(xvalue, clfdr(:,3),'b--','LineWidth',0.5,'DisplayName','1% FDR'); % 1% FDR
+        end
+        if ~isnan(clfdr(1,2))  % 5% FDR
+            plot(xvalue, clfdr(:,2),'r--','LineWidth',2,'DisplayName','5% FDR'); % 5% FDR
+        end
+        %plot(xvalue,chi9999,'g:','LineWidth',0.5,'DisplayName','Chi2 99.99% CL')
+        plot(xvalue,chi999,'m-','LineWidth',0.5,'DisplayName','Chi2 99.9% CL')
+        plot(xvalue,chi99,'b-','LineWidth',0.5,'DisplayName','Chi2 99% CL')
+        plot(xvalue,chi95,'r-','LineWidth',1.5,'DisplayName','Chi2 95% CL')
+        plot(xvalue,chi90,'k--','LineWidth',0.5,'DisplayName','Chi2 90% CL')
+        plot(xvalue,swa,'k-','LineWidth',1.5,'DisplayName','Backgnd')
+        plot(xvalue, pxx,'k-','LineWidth',0.5,'DisplayName','Power'); 
+        legend
+        set(gca,'YScale','log');
+        set(gca,'XMinorTick','on','YMinorTick','on')
+        set(gcf,'Color', 'white')
+        xlim([fmin, fmax])
+        if plot_x_period == 1
+            set(gca, 'XDir','reverse')
+        end
+        if handles.logfreq == 1
+            set(gca,'xscale','log')
+        end
+        % move data file to current working folder
+        % refresh main window
+        pre_dirML = pwd;
+        ac_pwd = fileread('ac_pwd.txt');
+        if isdir(ac_pwd)
+            cd(ac_pwd)
+        end
+        
+        if isfile( which( 'SWA-Spectrum-background-FDR.dat'))
+            date = datestr(now,30);
+            curr_dir_full1 = which( 'SWA-Spectrum-background-FDR.dat');
+            curr_dir_full2 = which('Spectrum-SWA-Chi2CL.dat');
+
+            curr_dir1 = fullfile(ac_pwd,[dat_name,'-',num2str(nw),'pi-MTM-SWA-Spectrum-FDR-',date,'.dat']);
+            curr_dir2 = fullfile(ac_pwd,[dat_name,'-',num2str(nw),'pi-MTM-Spectrum-SWA-Chi2CL-',date,'.dat']);
+
+            movefile(curr_dir_full1,curr_dir1);
+            movefile(curr_dir_full2,curr_dir2);
+        end
+        
+        
+        % refresh main window
+        d = dir; %get files
+        set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+        % define some nested parameters
+        pre  = '<HTML><FONT color="blue">';
+        post = '</FONT></HTML>';
+        address = pwd;
+        d = dir; %get files
+        d(1)=[];d(1)=[];
+        listboxStr = cell(numel(d),1);
+        ac_pwd_str = which('ac_pwd.txt');
+        [ac_pwd_dir,ac_pwd_name,ext] = fileparts(ac_pwd_str);
+        fileID = fopen(fullfile(ac_pwd_dir,'ac_pwd.txt'),'w');
+        T = struct2table(d);
+        sortedT = [];
+        sd = [];
+        str=[];
+        i=[];
+
+        refreshcolor;
+        cd(pre_dirML); % return to matlab view folder
     end
     
 elseif strcmp(method,'Lomb-Scargle spectrum')
@@ -958,7 +1126,13 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
                 xlabel([lang_var{locb},' (',num2str(unit),')']) 
             end
             
-            xlim([1/fmax, pt1(3)]);
+            if fmin <= 0 
+                fmin_s = pt(3);
+            else
+                fmin_s = 1/fmin;
+            end
+
+            xlim([1/fmax, fmin_s]);
             set(gca, 'XDir','reverse')
         else
             if handles.checkbox_ar1_v == 1
@@ -974,7 +1148,7 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
                 [~, locb] = ismember('spectral33',lang_id);
                 xlabel([lang_var{locb},num2str(unit),')']) 
             end
-            xlim([0 fmax]);
+            xlim([fmin fmax]);
         end
         %language
         if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
@@ -1032,7 +1206,7 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
                 semilogy(fd1,pth(2,:),'k-','LineWidth',2);
                 semilogy(fd1,pth(1,:),'m-.');
                 semilogy(fd1,po,'k')
-                xlim([0,fmax])
+                xlim([fmin,fmax])
                 % language
                 if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
                     xlabel(['Period (',num2str(unit),')']) 
@@ -1142,7 +1316,7 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
             plot(pt1,pl,'k-','LineWidth',2)
         else
             plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
-            xlim([0 fmax]);
+            xlim([fmin fmax]);
             
             %language
             if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
@@ -1254,7 +1428,7 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
             plot(pt1,pl,'k-','LineWidth',2)
         else
             plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
-            xlim([0 fmax]);
+            xlim([fmin fmax]);
             
             %language
             if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
@@ -1272,9 +1446,6 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
             plot(fd1,red90,'b-','LineWidth',1)
             plot(fd1,pl,'k-','LineWidth',2)
         end
-        
-        
-        
         
         % language
         if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
@@ -1367,7 +1538,7 @@ elseif  strcmp(method,'Periodogram')
             [~, locb] = ismember('spectral33',lang_id);
             xlabel([lang_var{locb},num2str(unit),')']) 
         end
-        xlim([0 fmax]);
+        xlim([fmin fmax]);
         if handles.checkbox_ar1_v == 1
             [theored]=theoredar1ML(datax,fd1,mean(po),dt);
             tabtchired90 = theored * chi2inv(90/100,2)/2;
@@ -1465,7 +1636,7 @@ elseif  strcmp(method,'Periodogram')
             plot(pt1,pl,'k-','LineWidth',2)
         else
             plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
-            xlim([0 fmax]);
+            xlim([fmin fmax]);
             
             %language
             if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
@@ -1574,7 +1745,7 @@ elseif  strcmp(method,'Periodogram')
             plot(pt1,pl,'k-','LineWidth',2)
         else
             plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
-            xlim([0 fmax]);
+            xlim([fmin fmax]);
             
             %language
             if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
@@ -1691,7 +1862,11 @@ plot_fmax_input = str2double(get(handles.edit_fmax_input,'String'));
 nw = handles.timebandwidth;
 bw=2*nw*df;
 BiasCorr = handles.BiasCorr;
-
+SelectSWA = get(handles.checkboxSWA,'Value');
+fmin = str2double(get(handles.edit8,'String'));
+if fmin < 0
+    fmin = 0;
+end
 if handles.pad > 0
     padtimes = str2double(get(handles.edit3,'String'));
     nzeropad = nlength*padtimes;
@@ -1829,7 +2004,7 @@ if strcmp(method,'Multi-taper method')
                 end
                 set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'pi MTM'])
                 set(gca,'XMinorTick','on','YMinorTick','on')
-                xlim([0 fmax]);
+                xlim([fmin fmax]);
                 set(gcf,'Color', 'white')
                 if handles.linlogY == 1
                     set(gca, 'YScale', 'log')
@@ -1948,7 +2123,7 @@ if strcmp(method,'Multi-taper method')
             plot(pt1,pl,'k-','LineWidth',2)
         else
             plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
-            xlim([0 fmax]);
+            xlim([fmin fmax]);
             
             %language
             if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
@@ -2071,7 +2246,7 @@ if strcmp(method,'Multi-taper method')
             plot(pt1,theored1,'k-','LineWidth',2)
         else
             plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
-            xlim([0 fmax]);
+            xlim([fmin fmax]);
             
             %language
             if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
@@ -2129,8 +2304,10 @@ if strcmp(method,'Multi-taper method')
     end
     
     % Plot figure MTM
-        
-    if and( handles.checkbox_robustAR1_v == 0, handles.checkbox_ar1_v == 0)
+    noplot1 = handles.checkbox_robustAR1_v + handles.checkPL + handles.checkBPL ...
+        + handles.checkbox_ar1_v + handles.check_ftest_value + SelectSWA;
+    if noplot1 == 0
+    %if and( handles.checkbox_robustAR1_v == 0, handles.checkbox_ar1_v == 0)
         if plot_x_period
             update_spectral_x_period_mtm
         else
@@ -2156,7 +2333,7 @@ if strcmp(method,'Multi-taper method')
                 title([num2str(nw),' \pi MTM; ',lang_var{locb3},' = ',num2str(dt),' ', unit,'; ',lang_var{locb2},' = ',num2str(bw)])
             end
             set(gcf,'Name',[dat_name,ext,' ',num2str(nw),'pi MTM'])
-            xlim([0 fmax]);
+            xlim([fmin fmax]);
             set(gca,'XMinorTick','on','YMinorTick','on')
 
             if handles.linlogY == 1
@@ -2225,7 +2402,7 @@ if strcmp(method,'Multi-taper method')
             plot(fd,tabtchi999,'g--','LineWidth',1);
             legend('Power','AR1','90%','95%','99%','99.9%')
             set(gca,'XMinorTick','on','YMinorTick','on')
-            xlim([0 fmax]);
+            xlim([fmin fmax]);
             
             if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
                 xlabel(['Frequency (cycles/',num2str(unit),')'])
@@ -2248,7 +2425,7 @@ if strcmp(method,'Multi-taper method')
     step = 5.5;
         waitbar(step / steps)
         delete(hwaitbar)
-        xlim([0 fmax]);
+        xlim([fmin fmax]);
         if handles.linlogY == 1
             set(gca, 'YScale', 'log')
         else
@@ -2280,7 +2457,7 @@ if strcmp(method,'Multi-taper method')
             set(gcf,'color','white');
             set(gcf,'units','norm') % set location
             set(gcf,'position',[0.0,0.05,0.45,0.45])
-            %xlim([0 fmax]);
+            %xlim([fmin fmax]);
             subplot(3,1,1); xlim([0 fmax])
             subplot(3,1,2); xlim([0 fmax])
             subplot(3,1,3); xlim([0 fmax])
@@ -2339,6 +2516,144 @@ if strcmp(method,'Multi-taper method')
     
     end
     
+    
+    %% SWA method 
+    if SelectSWA == 1
+        [outputdata] = spectralswafdr(data, 'mtm', nw, padtimes, 0);
+        clfdr = outputdata(:, 9:13);
+        xvalue = outputdata(:,1);
+        pxx = outputdata(:,2);
+        swa = outputdata(:,3);
+        chi90 = outputdata(:,4);
+        chi95 = outputdata(:,5);
+        chi99 = outputdata(:,6);
+        chi999 = outputdata(:,7);
+        chi9999 = outputdata(:,8);
+        
+        f=figure; 
+        set(f,'Name',['Acycle: ',[dat_name,ext],'-',num2str(nw),'pi MTM SWA'])
+        set(f,'color','white');
+        set(f,'units','norm') % set location
+        
+        if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
+            xlabel(['Frequency (cycles/',num2str(unit),')'])
+            ylabel('Power')
+            
+            if plot_x_period
+                xvalue = 1./xvalue;
+                xlabel(['Period (',handles.unit,')']);
+                pmin = 1/fmax;
+                if fmin <= 0 
+                    pmax = xvalue(3);
+                else
+                    pmax = 1/fmin;
+                end
+                
+                fmax = pmax;
+                fmin = pmin;
+            end
+            
+        else
+            
+            [~, locb] = ismember('spectral33',lang_id);
+            xlabel([lang_var{locb},num2str(unit),')']) 
+             [~, locb1] = ismember('spectral30',lang_id);
+            ylabel(lang_var{locb1})
+            
+            if plot_x_period
+                xvalue = 1./xvalue;
+                [~, locb] = ismember('main15',lang_id);
+                xlabel([lang_var{locb},' (',num2str(unit),')']) 
+                
+                pmin = 1/fmax;
+                if fmin <= 0 
+                    pmax = xvalue(3);
+                else
+                    pmax = 1/fmin;
+                end
+                
+                fmax = pmax;
+                fmin = pmin;
+            end
+        end
+            
+        hold on
+        % plot FDR
+        if ~isnan(clfdr(1,5))  % 0.01% FDR
+            plot(xvalue, clfdr(:,5),'k-.','LineWidth',0.5,'DisplayName','0.01% FDR');
+        end
+        if ~isnan(clfdr(1,4))  % 0.1% FDR
+            plot(xvalue, clfdr(:,4),'g-.','LineWidth',0.5,'DisplayName','0.1% FDR'); % 0.1% FDR
+        end
+        if ~isnan(clfdr(1,3))  % 1% FDR
+            plot(xvalue, clfdr(:,3),'b--','LineWidth',0.5,'DisplayName','1% FDR'); % 1% FDR
+        end
+        if ~isnan(clfdr(1,2))  % 5% FDR
+            plot(xvalue, clfdr(:,2),'r--','LineWidth',2,'DisplayName','5% FDR'); % 5% FDR
+        end
+        %plot(xvalue,chi9999,'g:','LineWidth',0.5,'DisplayName','Chi2 99.99% CL')
+        plot(xvalue,chi999,'m-','LineWidth',0.5,'DisplayName','Chi2 99.9% CL')
+        plot(xvalue,chi99,'b-','LineWidth',0.5,'DisplayName','Chi2 99% CL')
+        plot(xvalue,chi95,'r-','LineWidth',1.5,'DisplayName','Chi2 95% CL')
+        plot(xvalue,chi90,'k--','LineWidth',0.5,'DisplayName','Chi2 90% CL')
+        plot(xvalue,swa,'k-','LineWidth',1.5,'DisplayName','Backgnd')
+        plot(xvalue, pxx,'k-','LineWidth',0.5,'DisplayName','Power'); 
+        legend
+        set(gca,'YScale','log');
+        set(gca,'XMinorTick','on','YMinorTick','on')
+        set(gcf,'Color', 'white')
+        xlim([fmin, fmax])
+        if plot_x_period == 1
+            set(gca, 'XDir','reverse')
+        end
+        if handles.logfreq == 1
+            set(gca,'xscale','log')
+        end
+        % move data file to current working folder
+        % refresh main window
+        pre_dirML = pwd;
+        ac_pwd = fileread('ac_pwd.txt');
+        if isdir(ac_pwd)
+            cd(ac_pwd)
+        end
+        
+        if isfile( which( 'SWA-Spectrum-background-FDR.dat'))
+            date = datestr(now,30);
+            curr_dir_full1 = which( 'SWA-Spectrum-background-FDR.dat');
+            curr_dir_full2 = which('Spectrum-SWA-Chi2CL.dat');
+
+            curr_dir1 = fullfile(ac_pwd,[dat_name,'-',num2str(nw),'pi-MTM-SWA-Spectrum-FDR-',date,'.dat']);
+            curr_dir2 = fullfile(ac_pwd,[dat_name,'-',num2str(nw),'pi-MTM-Spectrum-SWA-Chi2CL-',date,'.dat']);
+
+            movefile(curr_dir_full1,curr_dir1);
+            movefile(curr_dir_full2,curr_dir2);
+        end
+        
+        
+        % refresh main window
+        d = dir; %get files
+        set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+        % define some nested parameters
+        pre  = '<HTML><FONT color="blue">';
+        post = '</FONT></HTML>';
+        address = pwd;
+        d = dir; %get files
+        d(1)=[];d(1)=[];
+        listboxStr = cell(numel(d),1);
+        ac_pwd_str = which('ac_pwd.txt');
+        [ac_pwd_dir,ac_pwd_name,ext] = fileparts(ac_pwd_str);
+        fileID = fopen(fullfile(ac_pwd_dir,'ac_pwd.txt'),'w');
+        T = struct2table(d);
+        sortedT = [];
+        sd = [];
+        str=[];
+        i=[];
+
+        refreshcolor;
+        cd(pre_dirML); % return to matlab view folder
+    end
+    
+    
 elseif strcmp(method,'Lomb-Scargle spectrum')
     
     if get(handles.checkbox_ar1_check,'value') == 1
@@ -2384,7 +2699,7 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
                 [~, locb] = ismember('spectral33',lang_id);
                 xlabel([lang_var{locb},num2str(unit),')']) 
             end
-            xlim([0 fmax]);
+            xlim([fmin fmax]);
         end
         
         %language
@@ -2456,7 +2771,7 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
                 semilogy(fd1,pth(2,:),'k-','LineWidth',2);
                 semilogy(fd1,pth(1,:),'m-.');
                 semilogy(fd1,po,'k')
-                xlim([0,fmax])
+                xlim([fmin,fmax])
                 
                 % language
                 if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
@@ -2600,7 +2915,7 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
             plot(pt1,pl,'k-','LineWidth',2)
         else
             plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
-            xlim([0 fmax]);
+            xlim([fmin fmax]);
             
             %language
             if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
@@ -2727,7 +3042,7 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
             plot(pt1,pl,'k-','LineWidth',2)
         else
             plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
-            xlim([0 fmax]);
+            xlim([fmin fmax]);
             
             %language
             if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
@@ -2820,7 +3135,7 @@ elseif  strcmp(method,'Periodogram')
     end
     
     set(gca,'XMinorTick','on','YMinorTick','on')
-    xlim([0 fmax]);
+    xlim([fmin fmax]);
     if handles.linlogY == 1
         set(gca, 'YScale', 'log')
     else
@@ -2918,7 +3233,7 @@ elseif  strcmp(method,'Periodogram')
             plot(pt1,pl,'k-','LineWidth',2)
         else
             plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
-            xlim([0 fmax]);
+            xlim([fmin fmax]);
             
             %language
             if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
@@ -3040,7 +3355,7 @@ elseif  strcmp(method,'Periodogram')
             plot(pt1,pl,'k-','LineWidth',2)
         else
             plot(fd1(2:end),po(2:end),'k-','LineWidth',1);
-            xlim([0 fmax]);
+            xlim([fmin fmax]);
             
             %language
             if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
@@ -3408,6 +3723,7 @@ if strcmp(method,'Multi-taper method')
     end
     set(handles.check_ftest,'Value', handles.check_ftest_value)
     set(handles.check_ftest,'Visible','on')
+    set(handles.checkboxSWA,'Visible', 'on')
 elseif strcmp(method,'Periodogram')
     if handles.datasample == 1
         if handles.lang_choice > 0
@@ -3427,14 +3743,14 @@ elseif strcmp(method,'Periodogram')
     else
         set(handles.checkbox_ar1_check,'String','Classical AR(1)')
     end
-    
+    set(handles.checkboxSWA,'Visible', 'off')
     set(handles.check_ftest,'Visible','off')
 elseif strcmp(method,'Lomb-Scargle spectrum')
     set(handles.popupmenu_tapers,'Enable','off')
     set(handles.checkbox_robust,'Enable','on')
     set(handles.checkbox_robust,'Value',1)
     set(handles.checkbox_ar1_check,'Value',0)
-    
+    set(handles.checkboxSWA,'Visible', 'off')
     if handles.lang_choice > 0
         [~, locb0] = ismember('spectral11',lang_id);
         set(handles.checkbox_ar1_check,'String',lang_var{locb0})
@@ -3593,3 +3909,35 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
+
+
+% --- Executes on button press in checkboxSWA.
+function checkboxSWA_Callback(hObject, eventdata, handles)
+% hObject    handle to checkboxSWA (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkboxSWA
+
+
+
+function edit8_Callback(hObject, eventdata, handles)
+% hObject    handle to edit8 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit8 as text
+%        str2double(get(hObject,'String')) returns contents of edit8 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit8_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit8 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

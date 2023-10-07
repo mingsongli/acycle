@@ -52,7 +52,6 @@ s0M = x(1);
 % median-smoothing reshape significance level
 theored1 = s0M * (1-rhoM^2)./(1-(2.*rhoM.*cos(pi.*f./fmax))+rhoM^2);
 
-
 nw2 = 2; % degree of freedom
 
 % Chi-square inversed distribution
