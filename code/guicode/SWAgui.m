@@ -153,7 +153,7 @@ if isfile( which( 'SWA-Periodogram-Bayes-prob.dat'))
     curr_dir_full2 = which('SWA-Spectrum-background-FDR.dat');
     
     curr_dir1 = fullfile(ac_pwd,[fName,'-Periodogram-Bayes-prob-',date,'.dat']);
-    curr_dir2 = fullfile(ac_pwd,[fName,'-Spectrum-SWA-FDR-',date,'-.dat']);
+    curr_dir2 = fullfile(ac_pwd,[fName,'-Spectrum-SWA-FDR-',date,'.dat']);
 
     movefile(curr_dir_full1,curr_dir1);
     movefile(curr_dir_full2,curr_dir2);

@@ -191,22 +191,14 @@ jdiff10 = 0;
 
 
 %% debug start
-%datfile = 'Kimmeridge-Clay-PEF.txt';
-%datfile = 'odp677-d18o-48-112m.txt';
-%datfile = 'bcaco3-sue.txt';
-%datfile = 'bcaco3_new.txt';
 %datfile = '607-d18O.txt';
-%datfile = 'bTOC-sue.txt';
-%datfile = 'AmmoniticoRossoLith.txt';
-
 %data_r= load(datfile);
+
 time_ml= data_r(:,1); 
 x1     = data_r(:,2); 
 ndata=length(x1);
 andata=ndata;
 % debug end
-%tsfile = datfile;
-%plotn = 1;  % plot results
 % Assuming NMAX is defined earlier in the program
 fprintf(' NB: Dimensioned for a maximum of %d time steps\n', nmax-1);
 %%
