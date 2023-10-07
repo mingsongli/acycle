@@ -19,7 +19,6 @@ set(0,'Units','normalized') % set units as normalized
 %% Read handles
 % read data and unit type
 handles.data = varargin{1}.current_data;
-handles.dat_name = varargin{1}.dat_name;
 handles.data_name = varargin{1}.data_name;
 handles.unit = varargin{1}.unit;
 handles.unit_type = varargin{1}.unit_type;
@@ -118,12 +117,18 @@ diffx = diff(data_r(:,1));
 if any(diffx(:) == 0)
     warndlg(swa5)
 end
-
+%%
+[~, fName, ext] = fileparts(handles.data_name);
+disp(' ********************  ')
+disp(' ')
+disp(['    ',fName, ext] )
+disp (' ')
+disp(' ********************  ')
 [freq, power, swa, alphob, factoball, clfdr, chi2_inv_value] = specswafdr(data_r, 0); % main function SWA
 [freqb, pow2,bayesprob]=specbayes(data_r, 0);  % main function Bays. prob.
 set(edit1,'String',min(freq))
 set(edit2,'String',max(freq))
-
+%%
 % set checkboxes
 for i = 1:4
     if ~isnan(clfdr(1,i+1)) % not NaN
@@ -142,60 +147,66 @@ if isdir(ac_pwd)
 end
 
 % move data file to current working folder
-[ filepath , ~ , ~ ] = fileparts( which( 'SWA-Periodogram-Bayes-prob.dat') );
-curr_dir_full1 = fullfile(filepath,'SWA-Periodogram-Bayes-prob.dat');
-curr_dir_full2 = fullfile(filepath,'SWA-Spectrum-background-FDR.dat');
-dat_name = handles.dat_name;
-curr_dir1 = fullfile(ac_pwd,['SWA-Periodogram-Bayes-prob-',dat_name(1:end-4),'.dat']);
-curr_dir2 = fullfile(ac_pwd,['SWA-Spectrum-background-FDR-',dat_name(1:end-4),'.dat']);
-movefile(curr_dir_full1,curr_dir1);
-movefile(curr_dir_full2,curr_dir2);
+if isfile( which( 'SWA-Periodogram-Bayes-prob.dat'))
+    date = datestr(now,30);
+    curr_dir_full1 = which( 'SWA-Periodogram-Bayes-prob.dat');
+    curr_dir_full2 = which('SWA-Spectrum-background-FDR.dat');
+    
+    curr_dir1 = fullfile(ac_pwd,[fName,'-Periodogram-Bayes-prob-',date,'.dat']);
+    curr_dir2 = fullfile(ac_pwd,[fName,'-Spectrum-SWA-FDR-',date,'-.dat']);
 
-%%  Save chi2 CL
-% 
-outfile = ['SWA-chi2CL-',dat_name(1:end-4),'.dat'];
-fidout = fopen(outfile, 'w');
+    movefile(curr_dir_full1,curr_dir1);
+    movefile(curr_dir_full2,curr_dir2);
 
-% Write out results
-fprintf(fidout, '%%Data filename = %s\n', dat_name);
-fprintf(fidout, '%%Multiplication factor for 99.99%% Chi2 CL = %7.5f\n', chi2_inv_value(5));
-fprintf(fidout, '%%Multiplication factor for  99.9%% Chi2 CL = %7.5f\n', chi2_inv_value(4));
-fprintf(fidout, '%%Multiplication factor for   99%% Chi2 CL = %7.5f\n', chi2_inv_value(3));
-fprintf(fidout, '%%Multiplication factor for   95%% Chi2 CL = %7.5f\n', chi2_inv_value(2));
-fprintf(fidout, '%%Multiplication factor for   90%% Chi2 CL = %7.5f\n', chi2_inv_value(1));
-formatspec_410 = '%%     Frequency       Real_Power   SWA_background        90%%Chi2CL        95%%Chi2CL        99%%Chi2CL      99.9%%Chi2CL     99.99%%Chi2CL\n';
-formatspec_420 = '%15.7f  %15.7f  %15.7f  %15.7f  %15.7f  %15.7f  %15.7f  %15.7f\n';
-nout = length(swa);
-for i = 1:nout
-    if i == 1
-        fprintf(fidout, formatspec_410); % Assuming you have format specifiers defined somewhere
+    %  Save chi2 CL
+    % 
+    outfile = [fName,'-Spectrum-SWA-Chi2CL-',date,'.dat'];
+    fidout = fopen(outfile, 'w');
+
+    % Write out results
+    fprintf(fidout, '%%Data filename = %s\n', [fName, ext]);
+    fprintf(fidout, '%%Multiplication factor for 99.99%% Chi2 CL = %7.5f\n', chi2_inv_value(5));
+    fprintf(fidout, '%%Multiplication factor for  99.9%% Chi2 CL = %7.5f\n', chi2_inv_value(4));
+    fprintf(fidout, '%%Multiplication factor for   99%% Chi2 CL = %7.5f\n', chi2_inv_value(3));
+    fprintf(fidout, '%%Multiplication factor for   95%% Chi2 CL = %7.5f\n', chi2_inv_value(2));
+    fprintf(fidout, '%%Multiplication factor for   90%% Chi2 CL = %7.5f\n', chi2_inv_value(1));
+    formatspec_410 = '%%     Frequency       Real_Power   SWA_background        90%%Chi2CL        95%%Chi2CL        99%%Chi2CL      99.9%%Chi2CL     99.99%%Chi2CL\n';
+    formatspec_420 = '%15.7f  %15.7f  %15.7f  %15.7f  %15.7f  %15.7f  %15.7f  %15.7f\n';
+    nout = length(swa);
+    for i = 1:nout
+        if i == 1
+            fprintf(fidout, formatspec_410); % Assuming you have format specifiers defined somewhere
+        end
+        fprintf(fidout, formatspec_420, freq(i), power(i), swa(i), swa(i)*chi2_inv_value(1), swa(i)*chi2_inv_value(2), swa(i)*chi2_inv_value(3), ...
+            swa(i)*chi2_inv_value(4), swa(i)*chi2_inv_value(5));
     end
-    fprintf(fidout, formatspec_420, freq(i), power(i), swa(i), swa(i)*chi2_inv_value(1), swa(i)*chi2_inv_value(2), swa(i)*chi2_inv_value(3), ...
-        swa(i)*chi2_inv_value(4), swa(i)*chi2_inv_value(5));
+    fclose(fidout);
+
+    % refresh main window
+    d = dir; %get files
+    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+    % define some nested parameters
+    pre  = '<HTML><FONT color="blue">';
+    post = '</FONT></HTML>';
+    address = pwd;
+    d = dir; %get files
+    d(1)=[];d(1)=[];
+    listboxStr = cell(numel(d),1);
+    ac_pwd_str = which('ac_pwd.txt');
+    [ac_pwd_dir,ac_pwd_name,ext] = fileparts(ac_pwd_str);
+    fileID = fopen(fullfile(ac_pwd_dir,'ac_pwd.txt'),'w');
+    T = struct2table(d);
+    sortedT = [];
+    sd = [];
+    str=[];
+    i=[];
+
+    refreshcolor;
+    cd(pre_dirML); % return to matlab view folder
+
+else
+    disp(['  Warning: no SWA data saved. Rerun the SWA.'])
 end
-fclose(fidout);
-
-% refresh main window
-d = dir; %get files
-set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-% define some nested parameters
-pre  = '<HTML><FONT color="blue">';
-post = '</FONT></HTML>';
-address = pwd;
-d = dir; %get files
-d(1)=[];d(1)=[];
-listboxStr = cell(numel(d),1);
-ac_pwd_str = which('ac_pwd.txt');
-[ac_pwd_dir,ac_pwd_name,ext] = fileparts(ac_pwd_str);
-fileID = fopen(fullfile(ac_pwd_dir,'ac_pwd.txt'),'w');
-T = struct2table(d);
-sortedT = [];
-sd = [];
-str=[];
-i=[];
-
-refreshcolor;
-cd(pre_dirML); % return to matlab view folder
 %%
 refreshSWAfigure
 %%
@@ -205,18 +216,22 @@ refreshSWAfigure
         xvalue = freq;
         xvalueb = freqb;  %
         xlabel1 = ['Frequency (cycles/',handles.unit,')'];
+        fmin = str2double(edit1.String); % read min and max freq for plot
+        fmax = str2double(edit2.String); %
         if checkbox24.Value == 1  % x in period
             xvalue = 1./freq;
             xlabel1 = ['Period (',handles.unit,')'];
-            xvalueb = 1./freqb; 
+            xvalueb = 1./freqb;
+            pmin = 1/fmax;
+            pmax = 1/fmin;
+            fmax = pmax;
+            fmin = pmin;
         end
-        fmin = str2double(edit1.String); % read min and max freq for plot
-        fmax = str2double(edit2.String);
         %
         %for i = 1:3
-            figHandle = findobj('Type', 'figure', 'Name', 'Acycle: SWA PLOT');
+            figHandle = findobj('Type', 'figure', 'Name', ['Acycle: SWA - ', fName, ext]);
             if isempty(figHandle)
-                figHandle = figure('Name', 'Acycle: SWA PLOT');
+                figHandle = figure('Name', ['Acycle: SWA - ', fName, ext]);
             else
                 clf(figHandle);  % Clear figure content
                 figure(figHandle); % Bring to focus
@@ -282,9 +297,9 @@ refreshSWAfigure
             if checkbox3x(1).Value  % All in 1 figure
                 subplot(3,1,2)
             else 
-                figHandle2 = findobj('Type', 'figure', 'Name', 'Acycle: SWA Periodogram');
+                figHandle2 = findobj('Type', 'figure', 'Name', ['Acycle: SWA Periodogram - ', fName, ext]);
                 if isempty(figHandle2)
-                    figHandle2 = figure('Name', 'Acycle: SWA Periodogram');
+                    figHandle2 = figure('Name', ['Acycle: SWA Periodogram - ', fName, ext]);
                 else
                     clf(figHandle2);  % Clear figure content
                     figure(figHandle2); % Bring to focus
@@ -321,9 +336,9 @@ refreshSWAfigure
                 if checkbox3x(2).Value % in two figures
                     subplot(2,1,2)
                 else  % in three figures
-                    figHandle3 = findobj('Type', 'figure', 'Name', 'Acycle: SWA Bayesian Probability');
+                    figHandle3 = findobj('Type', 'figure', 'Name', ['Acycle: SWA Bayesian Probability - ', fName, ext]);
                     if isempty(figHandle3)
-                        figHandle3 = figure('Name', 'Acycle: SWA Bayesian Probability');
+                        figHandle3 = figure('Name', ['Acycle: SWA Bayesian Probability - ', fName, ext]);
                     else
                         clf(figHandle3);  % Clear figure content
                         figure(figHandle3); % Bring to focus
@@ -355,7 +370,7 @@ refreshSWAfigure
             hold off
         %end
     end
-%%
+%% how many figures
     function checkboxCallback(src, event, id)
         switch id
             case 1
