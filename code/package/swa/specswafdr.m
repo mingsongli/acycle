@@ -108,7 +108,7 @@ function [freq, power, swa, alphob, factoball, clfdr, chi2_inv_value] = specswaf
 %%
 % Display the program info
 disp(' ');
-disp(' ***       Program specSWA-FDR.m:    ***');
+disp(' ***       Program specswafdf.m:    ***');
 disp(' ***  Lomb-Scargle-derived spectrum  ***');
 disp(' ***  with SWA-fitted spectral       ***');
 disp(' ***  background and FDR confidence  ***');
@@ -600,8 +600,6 @@ for  i=1:nout
     xlogp(i)=log10(pow1(i));    
 end
 
-%i=fix(nout+1);
-
 %% Find log spectrum averages in fixed-width windows.
 % Test WINWIDTH as an odd integer from 11 to 99.
 winwidth=9;
@@ -821,7 +819,6 @@ for  i = (finish-floor(winwidth./2)) : nout
     j=j+1;
 end
 nest=j;
-% nest=j-1; % debug mingsong li
 % Start polynomial (quadratic) fit of smoothed log power
 % v frequency. Algorithm of Davis (1973) p213.
 
@@ -931,7 +928,6 @@ fprintf('After smoothing RMSE = %.6f\n', rmset);
 for i = 1:nout
     swa(i) = 10.0 ^ fitsp(i);
 end
-
 swa = swa(:); % Ensure swa is a column vector
 
 %% False Discovery Rate (FDR, Benjamini & Hochberg, 1995) algorithm
@@ -997,21 +993,35 @@ end
 % the background spectrum (SWA)
 disp('  Find probability level (ALPHA) by frequency based on chi2 for DOF = 8')
 max_factob  = 0;
-alphob = zeros(1, nout);
-factoball = zeros(1, nout);
+alphob = zeros(nout,1);
+factoball = zeros(nout,1);
 
 for i = 1:nout
     factob = pow1(i) / swa(i);   % =Variance ratio (since the power is periodogram-based)
     factoball(i) = factob;
-    if factob > max_factob       % find max factob
-        max_factob = factob;
-    end
-    alphob(k) = 0.0;
+    %alphob(k) = 0.0;  % debug? Why k is used here??
+    
+%     for j = 1:nlevs-1
+%         if factor(1) < factob
+%             alphob(i) = alpha(1);
+%             break;  % exit for loop
+%         end
+% 
+%         if factor(j+1) <= factob && factor(j) > factob
+%             alphob(i) = alpha(j+1);
+%             break;  % exit for loop
+%         end
+% 
+%         if factor(nlevs) > factob
+%             alphob(i) = alpha(nlevs);
+%         end
+%     end
 
     if factor(1) < factob    % if p < 0.000000001 
         alphob(i) = alpha(1);  
     end
     j = find(factor > factob,1,'last');
+    
     if j < nlevs
         alphob(i) = alpha(j+1);
     elseif j == nlevs
@@ -1033,11 +1043,14 @@ for i = 1:nout
     end
 end
 
+max_factob = max(factoball); % find max factob
+
 disp('  Find probability level : completed')
 
 % Step 1 of Miller et al. (2001): Sort probabilities observed
 % (smallest to largest alpha).
-alphsort = alphob;
+%alphsort = alphob;
+alphsort = [0;alphob];  % debug, add 0
 alphsort = hpsort(alphsort);
 
 % Allow for correlation of spectral estimates by setting CN.
@@ -1104,7 +1117,7 @@ for i = 1:nout
         end
     end
     % debug
-%     if i < 10
+%     if i < 21
 %         fprintf(' j=%d  asort=%.12f  ja1=%.12f  jd1=%.12f\n', i, alphsort(i), jalpha1(i), jdiff1);
 %         fprintf(' j=%d  asort=%.12f  ja5=%.12f  jd1=%.12f\n', i, alphsort(i), jalpha5(i), jdiff5);
 %     end
@@ -1112,7 +1125,7 @@ for i = 1:nout
 end
 
 % debug
-disp(['maxneg CL% 10, 5, 1, 01, 001 = INDEX ', num2str(maxneg10),',  ', num2str(maxneg5),',  ',  num2str(maxneg1),',  ',  num2str(maxneg01), ',  ', num2str(maxneg001)])
+disp(['maxneg 10%, 5%, 1%, 0.1%, 0.01% FDR INDEX = ', num2str(maxneg10),',  ', num2str(maxneg5),',  ',  num2str(maxneg1),',  ',  num2str(maxneg01), ',  ', num2str(maxneg001)])
 
 % Step 4 of Miller et al. (2001): Find probability rank index
 % where the diffence is negative.
@@ -1347,6 +1360,7 @@ assignin('base','pow',pow);
 assignin('base','pow1',pow1(1:nout));
 assignin('base','swa',swa(1:nout));
 assignin('base','alphob',alphob);
+assignin('base','alphsort',alphsort);
 assignin('base','VarRatio',factoball);
 assignin('base','chi2invalue',chi2_inv_value);
 power = pow1(1:nout);
