@@ -120,8 +120,8 @@ specchi2cl = [chi90,chi95,chi99,chi999,chi9999];
 % based on Miller et al (2001).
 % Obtain variance ratio according to confidence level for
 % # degrees of freedom.
-nlevs = 1100000;
 disp('Setting up probability listing...')  % output here     
+nlevs = 1100000;
 alpha1 = 0.000000001 * ones(100001, 1);
 alpha1 = cumsum(alpha1);
 alpha2 = 0.0000001 * ones(nlevs-100001, 1);

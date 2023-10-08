@@ -70,9 +70,9 @@ set(h1,'FontUnits','points','FontSize',11.5);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
 set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
 if ismac
-    set(gcf,'position',[0.45,0.5,0.3,0.33]* handles.MonZoom) % set position
+    set(gcf,'position',[0.45,0.5,0.45,0.33]* handles.MonZoom) % set position
 elseif ispc
-    set(gcf,'position',[0.45,0.5,0.3,0.33]* handles.MonZoom) % set position
+    set(gcf,'position',[0.45,0.5,0.45,0.33]* handles.MonZoom) % set position
 end
 set(handles.text7,'position', [0.05,0.875,0.235,0.06])
 set(handles.popupmenu2,'position', [0.3,0.823,0.62,0.12])
@@ -94,16 +94,16 @@ set(handles.radiobutton4,'position', [0.503,0.054,0.195,0.365])
 set(handles.edit4,'position', [0.664,0.089,0.3,0.23])
 
 set(handles.uipanel3,'position', [0.05,0.082,0.445,0.32])
-set(handles.checkbox_robust,'position', [0.05,0.65,0.7,0.3])
-set(handles.checkbox_ar1_check,'position', [0.05,0.35,0.7,0.3])
-set(handles.check_ftest,'position', [0.05,0.05,0.5,0.3])
+set(handles.checkbox_robust,'position',    [0.05,0.65,0.35,0.3])
+set(handles.checkbox_ar1_check,'position', [0.05,0.35,0.35,0.3])
+set(handles.check_ftest,'position',        [0.05,0.05,0.35,0.3])
 set(handles.check_ftest,'Value', 0, 'tooltip','F-test and amplitude spectrum')
-set(handles.checkbox9,'position',  [0.65,0.65,0.35,0.3])
-set(handles.checkbox10,'position', [0.65,0.35,0.35,0.3])
-set(handles.checkboxSWA,'position', [0.65,0.05,0.35,0.3],'Value',1)
+set(handles.checkbox9,'position',   [0.4,0.05,0.55,0.3],'Value',0,'String','Power Law')   % PL
+set(handles.checkbox10,'position',  [0.4,0.35,0.55,0.3],'Value',0,'String','Bending Power Law')   % BPL
+set(handles.checkboxSWA,'position', [0.4,0.65,0.55,0.3],'Value',1,'String','Smoothed Window Averages')  % swa
 %
 set(handles.checkbox9,'tooltip','Power Law')
-set(handles.checkbox10,'tooltip','Bending Power Law')
+set(handles.checkbox10,'tooltip', 'Bending Power Law')
 set(handles.checkboxSWA,'tooltip','Smoothed Window Averages')
 
 set(handles.uibuttongroup1,'position', [0.5,0.25,0.45,0.52])
@@ -114,7 +114,7 @@ set(handles.edit8,'position', [0.541,0.82,0.356,0.15],'String','0')  % f min
 set(handles.radiobutton_fmax,'position', [0.089,0.6,0.473,0.2])
 set(handles.text_nyquist,'position', [0.541,0.62,0.356,0.13])
 set(handles.radiobutton_input,'position', [0.089,0.4,0.4,0.2])
-set(handles.edit_fmax_input,'position', [0.541,0.42,0.356,0.15],'Enable','off')
+set(handles.edit_fmax_input,'position', [0.541,0.42,0.356,0.15],'Enable','on')
 
 set(handles.checkbox4,'position', [0.089,0.2,0.507,0.15])
 set(handles.checkbox5,'position', [0.5,0.2,0.507,0.15])
@@ -288,6 +288,9 @@ if handles.lang_choice > 0
     
     [~, locb] = ismember('spectral20',lang_id);
     set(handles.pushbutton17,'String',lang_var{locb})
+    
+    [~, locb] = ismember('spectral21',lang_id);
+    set(handles.checkboxSWA,'String',lang_var{locb})
     
 end
 %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %  %
@@ -975,10 +978,13 @@ if strcmp(method,'Multi-taper method')
         chi999 = outputdata(:,7);
         chi9999 = outputdata(:,8);
         
-        f=figure; 
-        set(f,'Name',['Acycle: ',[dat_name,ext],'-',num2str(nw),'pi MTM SWA'])
-        set(f,'color','white');
-        set(f,'units','norm') % set location
+        % save for refresh plot
+        handles.outputdata = outputdata; 
+        fswa=figure; 
+        
+        set(fswa,'Name',['Acycle: ',[dat_name,ext],'-',num2str(nw),'pi MTM SWA'])
+        set(fswa,'color','white');
+        set(fswa,'units','norm') % set location
         
         if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
             xlabel(['Frequency (cycles/',num2str(unit),')'])
@@ -1021,7 +1027,12 @@ if strcmp(method,'Multi-taper method')
                 fmin = pmin;
             end
         end
-            
+        handles.fmax = fmax; 
+        handles.fmin = fmin; 
+        handles.xvalue = xvalue; 
+        handles.plot_x_period= plot_x_period;
+        handles.data_name = [dat_name,ext];
+        handles.fswa = fswa;
         hold on
         % plot FDR
         if ~isnan(clfdr(1,5))  % 0.01% FDR
@@ -1054,6 +1065,15 @@ if strcmp(method,'Multi-taper method')
         if handles.logfreq == 1
             set(gca,'xscale','log')
         end
+        
+        
+        try figure(fswa); 
+            set(fswa,'units','norm') % set location
+            set(fswa,'position',[0.0,0.45,0.45,0.45]) % set position
+        catch
+            
+        end
+        
         % move data file to current working folder
         % refresh main window
         pre_dirML = pwd;
@@ -1068,7 +1088,7 @@ if strcmp(method,'Multi-taper method')
             curr_dir_full2 = which('Spectrum-SWA-Chi2CL.dat');
 
             curr_dir1 = fullfile(ac_pwd,[dat_name,'-',num2str(nw),'pi-MTM-SWA-Spectrum-FDR-',date,'.dat']);
-            curr_dir2 = fullfile(ac_pwd,[dat_name,'-',num2str(nw),'pi-MTM-Spectrum-SWA-Chi2CL-',date,'.dat']);
+            curr_dir2 = fullfile(ac_pwd,[dat_name,'-',num2str(nw),'pi-MTM-SWA-Spectrum-Chi2CL-',date,'.dat']);
 
             movefile(curr_dir_full1,curr_dir1);
             movefile(curr_dir_full2,curr_dir2);
@@ -1096,6 +1116,11 @@ if strcmp(method,'Multi-taper method')
 
         refreshcolor;
         cd(pre_dirML); % return to matlab view folder
+        
+        figure(fswa);
+        % window for refresh plot
+        SWA_refreshplot_CL_GUI(handles);
+        
     end
     
 elseif strcmp(method,'Lomb-Scargle spectrum')
@@ -1814,11 +1839,11 @@ figure(figspectrum);
 try figure(figwarn);
 catch
 end
-try figure(figdata); 
-    set(figdata,'units','norm') % set location
-    set(figdata,'position',[0.0,0.45,0.45,0.45]) % set position
-catch
-end
+%try figure(figdata); 
+%    set(figdata,'units','norm') % set location
+%    set(figdata,'position',[0.0,0.45,0.45,0.45]) % set position
+%catch
+%end
 try figure(figpl); 
     set(figpl,'units','norm') % set location
     set(figpl,'position',[0.2,0.45,0.45,0.45]) % set position
