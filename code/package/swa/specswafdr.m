@@ -931,53 +931,16 @@ swa = swa(:); % Ensure swa is a column vector
 % USER: It is more efficient to output ALPHA, CLEV and FACTOR
 %       on first use, and then suppress the DO 300 calculations
 %       and for subsequent use read in these data.
-
-filename2 = which('Alpha-CLs-DOF-8-gw.mat');
-if isfile(filename2)
-    % File exists.
-     disp('')
-     disp('  Read in confidence level data ...')  % output here    
-     disp(filename2)
-     disp('')
-     load(filename2);
-     nlevs=length(alpha);
-else
-    % File does not exist.     
-    disp('Setting up probability listing...')  % output here     
-    alphaint = 0.000000001;
-    alphap = 0.0;
-    nlevs = nmax2;
-    alpha = zeros(1, nlevs);
-    clev  = zeros(1, nlevs);
-    factor= zeros(1, nlevs);
-
-    for i=1:100001
-
-        alphap = alphap + alphaint;
-        alpha(i) = alphap;
-        clev(i) = (1.0-alphap) * 100.0;
-        factor(i) = getchi2(8,alphap)/8;
-
-        if mod(i,50000) == 0
-            fprintf('   Number of simulations: %d / %d \n', i, nlevs);
-        end
-    end
-
-    alphaint=0.0000001;
-    for i=100002:nlevs
-
-        alphap = alphap + alphaint;
-        alpha(i) = alphap;
-        factor(i) = getchi2(8, alphap)/8;
-        if mod(i,50000) == 0
-            %disp(i)
-            fprintf('   Number of simulations: %d / %d \n', i, nlevs);
-        end
-    end
-
-    clev = (1.0 - alpha)*100.0;
-    disp('   ... completed') % output here
-end
+disp('Setting up probability listing...')  % output here     
+nlevs = 1100000;
+alpha1 = 0.000000001 * ones(100001, 1);
+alpha1 = cumsum(alpha1);
+alpha2 = 0.0000001 * ones(nlevs-100001, 1);
+alpha2 = cumsum(alpha2);
+alpha = [alpha1; alpha2 + alpha1(end)];
+dof = 8;
+factor = chi2inv(1-alpha, dof)/dof;
+disp('   ... completed') % output here
 
 %%
 % Find probability level (ALPHA) by frequency based on Chi2 
@@ -991,23 +954,6 @@ factoball = zeros(nout,1);
 for i = 1:nout
     factob = pow1(i) / swa(i);   % =Variance ratio (since the power is periodogram-based)
     factoball(i) = factob;
-    %alphob(k) = 0.0;  % debug? Why k is used here??
-    
-%     for j = 1:nlevs-1
-%         if factor(1) < factob
-%             alphob(i) = alpha(1);
-%             break;  % exit for loop
-%         end
-% 
-%         if factor(j+1) <= factob && factor(j) > factob
-%             alphob(i) = alpha(j+1);
-%             break;  % exit for loop
-%         end
-% 
-%         if factor(nlevs) > factob
-%             alphob(i) = alpha(nlevs);
-%         end
-%     end
 
     if factor(1) < factob    % if p < 0.000000001 
         alphob(i) = alpha(1);  
