@@ -12,9 +12,7 @@ function SWA_refreshplot_CL_GUI(handles)
     for k = 1:numel(labels)
         handles.checkbox1(k) = uicontrol('Style', 'checkbox', 'String', labels{k}, 'Position', [50, positions(k), 200, 20], 'Callback', @checkbox_callback);
     end
-    outputdata(1,:)
     clfdr = outputdata(:, 9:13);
-    clfdr(1,:)
     
     for k = 5:-1:1
         if isnan(clfdr(1,k)) %  nan value
@@ -106,34 +104,34 @@ function refreshSWAplot(handles)
     % plot FDR
     %if ~isnan(clfdr(1,5))  % 0.01% FDR
     if get(handles.checkbox1(1),'Value') == 1    
-        plot(xvalue, clfdr(:,5),'k-.','LineWidth',0.5,'DisplayName','0.01% FDR');
+        plot(xvalue, clfdr(:,5),'k--','LineWidth',0.5,'DisplayName','0.01% FDR');
     end
     if get(handles.checkbox1(2),'Value') == 1   
-        plot(xvalue, clfdr(:,4),'g-.','LineWidth',0.5,'DisplayName','0.1% FDR'); % 0.1% FDR
+        plot(xvalue, clfdr(:,4),'g--','LineWidth',0.5,'DisplayName','0.1% FDR'); % 0.1% FDR
     end
     if get(handles.checkbox1(3),'Value') == 1   
         plot(xvalue, clfdr(:,3),'b--','LineWidth',0.5,'DisplayName','1% FDR'); % 1% FDR
     end
     if get(handles.checkbox1(4),'Value') == 1    % 5% FDR
-        plot(xvalue, clfdr(:,2),'r--','LineWidth',2,'DisplayName','5% FDR'); % 5% FDR
+        plot(xvalue, clfdr(:,2),'r-.','LineWidth',2,'DisplayName','5% FDR'); % 5% FDR
     end
     if get(handles.checkbox1(5),'Value') == 1    % 10% FDR
-        plot(xvalue, clfdr(:,1),'m--','LineWidth',0.5,'DisplayName','5% FDR'); % 5% FDR
+        plot(xvalue, clfdr(:,1),'m--','LineWidth',0.5,'DisplayName','10% FDR'); % 10% FDR
     end
     if get(handles.checkbox1(6),'Value') == 1   
-        plot(xvalue,chi9999,'g:','LineWidth',0.5,'DisplayName','Chi2 99.99% CL')
+        plot(xvalue,chi9999,'g-.','LineWidth',0.5,'DisplayName','Chi2 99.99% CL')
     end
     if get(handles.checkbox1(7),'Value') == 1   
-        plot(xvalue,chi999,'m-','LineWidth',0.5,'DisplayName','Chi2 99.9% CL')
+        plot(xvalue,chi999,'m-.','LineWidth',0.5,'DisplayName','Chi2 99.9% CL')
     end
     if get(handles.checkbox1(8),'Value') == 1   
-        plot(xvalue,chi99,'b-','LineWidth',0.5,'DisplayName','Chi2 99% CL')
+        plot(xvalue,chi99,'b-.','LineWidth',0.5,'DisplayName','Chi2 99% CL')
     end
     if get(handles.checkbox1(9),'Value') == 1   
-        plot(xvalue,chi95,'r-','LineWidth',1.5,'DisplayName','Chi2 95% CL')
+        plot(xvalue,chi95,'r--','LineWidth',1.5,'DisplayName','Chi2 95% CL')
     end
     if get(handles.checkbox1(10),'Value') == 1   
-        plot(xvalue,chi90,'k--','LineWidth',0.5,'DisplayName','Chi2 90% CL')
+        plot(xvalue,chi90,'r-','LineWidth',0.5,'DisplayName','Chi2 90% CL')
     end
     if get(handles.checkbox1(11),'Value') == 1   
         plot(xvalue,swa,'k-','LineWidth',1.5,'DisplayName','Backgnd')

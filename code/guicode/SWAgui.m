@@ -153,14 +153,14 @@ if isfile( which( 'SWA-Periodogram-Bayes-prob.dat'))
     curr_dir_full2 = which('SWA-Spectrum-background-FDR.dat');
     
     curr_dir1 = fullfile(ac_pwd,[fName,'-Periodogram-Bayes-prob-',date,'.dat']);
-    curr_dir2 = fullfile(ac_pwd,[fName,'-Spectrum-SWA-FDR-',date,'.dat']);
+    curr_dir2 = fullfile(ac_pwd,[fName,'-SWA-Spectrum-FDR-',date,'.dat']);
 
     movefile(curr_dir_full1,curr_dir1);
     movefile(curr_dir_full2,curr_dir2);
 
     %  Save chi2 CL
     % 
-    outfile = [fName,'-Spectrum-SWA-Chi2CL-',date,'.dat'];
+    outfile = [fName,'-SWA-Spectrum-Chi2CL-',date,'.dat'];
     fidout = fopen(outfile, 'w');
 
     % Write out results
@@ -243,28 +243,29 @@ refreshSWAfigure
             hold on
             %% plot FDR
             if checkbox1x(8).Value  % 0.01% FDR
-                plot(xvalue, clfdr(:,5),'k-.','LineWidth',0.5,'DisplayName','0.01% FDR');
+                plot(xvalue, clfdr(:,5),'k--','LineWidth',0.5,'DisplayName','0.01% FDR');
             end
             if checkbox1x(7).Value  % 0.1% FDR
-                plot(xvalue, clfdr(:,4),'g-.','LineWidth',0.5,'DisplayName','0.1% FDR'); % 0.1% FDR
+                plot(xvalue, clfdr(:,4),'g--','LineWidth',0.5,'DisplayName','0.1% FDR'); % 0.1% FDR
             end
             if checkbox1x(6).Value  % 1% FDR
                 plot(xvalue, clfdr(:,3),'b--','LineWidth',0.5,'DisplayName','1% FDR'); % 1% FDR
             end
             if checkbox1x(5).Value  % 5% FDR
-                plot(xvalue, clfdr(:,2),'r--','LineWidth',2,'DisplayName','5% FDR'); % 5% FDR
+                plot(xvalue, clfdr(:,2),'r-.','LineWidth',2,'DisplayName','5% FDR'); % 5% FDR
             end
+            
             if checkbox1x(4).Value  % 99.9% chi2 CL
-                plot(xvalue, swa * chi2_inv_value(4),'m-','LineWidth',0.5,'DisplayName','99.9% chi^2 CL'); % 99%
+                plot(xvalue, swa * chi2_inv_value(4),'m-.','LineWidth',0.5,'DisplayName','99.9% chi^2 CL'); % 99.9%
             end
             if checkbox1x(3).Value  % 99% chi2 CL
-                plot(xvalue, swa * chi2_inv_value(3),'b-','LineWidth',0.5,'DisplayName','99% chi^2 CL'); % 99%
+                plot(xvalue, swa * chi2_inv_value(3),'b-.','LineWidth',0.5,'DisplayName','99% chi^2 CL'); % 99%
             end
             if checkbox1x(2).Value  % 95% chi2 CL
-                plot(xvalue, swa * chi2_inv_value(2),'r-','LineWidth',2,'DisplayName','95% chi^2 CL'); % 95%
+                plot(xvalue, swa * chi2_inv_value(2),'r--','LineWidth',1.5,'DisplayName','95% chi^2 CL'); % 95%
             end
             if checkbox1x(1).Value  % 90% chi2 CL
-                plot(xvalue, swa * chi2_inv_value(1),'k--','LineWidth',0.5,'DisplayName','90% chi^2 CL'); % 90%
+                plot(xvalue, swa * chi2_inv_value(1),'r-','LineWidth',0.5,'DisplayName','90% chi^2 CL'); % 90%
             end
             plot(xvalue, swa,'k-','LineWidth',2,'DisplayName','Background'); % SWA
             plot(xvalue, power,'k-','LineWidth',0.5,'DisplayName','Power'); % real power

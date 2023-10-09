@@ -540,6 +540,8 @@ if ismac
     handles.slash_v = '/';
 elseif ispc
     handles.slash_v = '\';
+else
+    handles.slash_v = '/';
 end
 
 handles.acfigmain = gcf;  %handles of the ac main window

@@ -3,7 +3,7 @@ _______________________________________
 
 
 Version : Acycle_v2.7
-Date    : Jun 17, 2023 - Oct 5, 2023
+Date    : Jun 17, 2023 - Oct 9, 2023
 By      : Mingsong Li (Peking University)
 
     1. COCO: Save correct figure; use invpretile function to calculate percentiles
@@ -48,6 +48,7 @@ By      : Mingsong Li (Peking University)
                 stratigraphic gaps and the duration of the Hettangian (Jurassic):
                 insights from the Blue Lias Formation of Southern Britain. Geol.
                 Mag. 156, 1469-1509, https://doi.org/10.1017/S0016756818000808
+    10. MTM + SWA method (NEW)
 _______________________________________
 
 Version : Acycle_v2.6
