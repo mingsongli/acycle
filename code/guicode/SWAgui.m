@@ -25,6 +25,7 @@ handles.unit_type = varargin{1}.unit_type;
 handles.listbox_acmain = varargin{1}.listbox_acmain;
 handles.edit_acfigmain_dir= varargin{1}.edit_acfigmain_dir;
 handles.val1 = varargin{1}.val1;
+handles.slash_v = varargin{1}.slash_v;
 %%
 %language
 handles.lang_choice = varargin{1}.lang_choice;
@@ -118,6 +119,17 @@ if any(diffx(:) == 0)
     warndlg(swa5)
 end
 %%
+
+% refresh main window
+pre_dirML = pwd;
+ac_pwd = fileread('ac_pwd.txt');
+if isdir(ac_pwd)
+    cd(ac_pwd)
+    disp([' Working Dir: ', ac_pwd])
+else
+    disp([' Data in Working Dir: ', pre_dirML])
+end
+
 [~, fName, ext] = fileparts(handles.data_name);
 disp(' ********************  ')
 disp(' ')
@@ -126,6 +138,7 @@ disp (' ')
 disp(' ********************  ')
 [freq, power, swa, alphob, factoball, clfdr, chi2_inv_value] = specswafdr(data_r, 0); % main function SWA
 [freqb, pow2,bayesprob]=specbayes(data_r, 0);  % main function Bays. prob.
+
 set(edit1,'String',min(freq))
 set(edit2,'String',max(freq))
 %%
@@ -139,74 +152,59 @@ for i = 1:4
     end
 end
 
-% refresh main window
-pre_dirML = pwd;
-ac_pwd = fileread('ac_pwd.txt');
-if isdir(ac_pwd)
-    cd(ac_pwd)
-end
-
 % move data file to current working folder
-if isfile( which( 'SWA-Periodogram-Bayes-prob.dat'))
-    date = datestr(now,30);
-    curr_dir_full1 = which( 'SWA-Periodogram-Bayes-prob.dat');
-    curr_dir_full2 = which('SWA-Spectrum-background-FDR.dat');
     
-    curr_dir1 = fullfile(ac_pwd,[fName,'-Periodogram-Bayes-prob-',date,'.dat']);
-    curr_dir2 = fullfile(ac_pwd,[fName,'-SWA-Spectrum-FDR-',date,'.dat']);
+date = datestr(now,30);
 
-    movefile(curr_dir_full1,curr_dir1);
-    movefile(curr_dir_full2,curr_dir2);
+movefile('SWA-Periodogram-Bayes-prob.dat', [fName,'-SWA-Periodogram-Bayes-prob-',date,'.dat']);
+movefile('SWA-Spectrum-background-FDR.dat',[fName,'-SWA-Spectrum-FDR-',date,'.dat']);
 
-    %  Save chi2 CL
-    % 
-    outfile = [fName,'-SWA-Spectrum-Chi2CL-',date,'.dat'];
-    fidout = fopen(outfile, 'w');
+%  Save chi2 CL
+% 
+outfile = [fName,'-SWA-Spectrum-Chi2CL-',date,'.dat'];
+fidout = fopen(outfile, 'w');
 
-    % Write out results
-    fprintf(fidout, '%%Data filename = %s\n', [fName, ext]);
-    fprintf(fidout, '%%Multiplication factor for 99.99%% Chi2 CL = %7.5f\n', chi2_inv_value(5));
-    fprintf(fidout, '%%Multiplication factor for  99.9%% Chi2 CL = %7.5f\n', chi2_inv_value(4));
-    fprintf(fidout, '%%Multiplication factor for   99%% Chi2 CL = %7.5f\n', chi2_inv_value(3));
-    fprintf(fidout, '%%Multiplication factor for   95%% Chi2 CL = %7.5f\n', chi2_inv_value(2));
-    fprintf(fidout, '%%Multiplication factor for   90%% Chi2 CL = %7.5f\n', chi2_inv_value(1));
-    formatspec_410 = '%%     Frequency       Real_Power   SWA_background        90%%Chi2CL        95%%Chi2CL        99%%Chi2CL      99.9%%Chi2CL     99.99%%Chi2CL\n';
-    formatspec_420 = '%15.7f  %15.7f  %15.7f  %15.7f  %15.7f  %15.7f  %15.7f  %15.7f\n';
-    nout = length(swa);
-    for i = 1:nout
-        if i == 1
-            fprintf(fidout, formatspec_410); % Assuming you have format specifiers defined somewhere
-        end
-        fprintf(fidout, formatspec_420, freq(i), power(i), swa(i), swa(i)*chi2_inv_value(1), swa(i)*chi2_inv_value(2), swa(i)*chi2_inv_value(3), ...
-            swa(i)*chi2_inv_value(4), swa(i)*chi2_inv_value(5));
+% Write out results
+fprintf(fidout, '%%Data filename = %s\n', [fName, ext]);
+fprintf(fidout, '%%Multiplication factor for 99.99%% Chi2 CL = %7.5f\n', chi2_inv_value(5));
+fprintf(fidout, '%%Multiplication factor for  99.9%% Chi2 CL = %7.5f\n', chi2_inv_value(4));
+fprintf(fidout, '%%Multiplication factor for   99%% Chi2 CL = %7.5f\n', chi2_inv_value(3));
+fprintf(fidout, '%%Multiplication factor for   95%% Chi2 CL = %7.5f\n', chi2_inv_value(2));
+fprintf(fidout, '%%Multiplication factor for   90%% Chi2 CL = %7.5f\n', chi2_inv_value(1));
+formatspec_410 = '%%     Frequency       Real_Power   SWA_background        90%%Chi2CL        95%%Chi2CL        99%%Chi2CL      99.9%%Chi2CL     99.99%%Chi2CL\n';
+formatspec_420 = '%15.7f  %15.7f  %15.7f  %15.7f  %15.7f  %15.7f  %15.7f  %15.7f\n';
+nout = length(swa);
+for i = 1:nout
+    if i == 1
+        fprintf(fidout, formatspec_410); % Assuming you have format specifiers defined somewhere
     end
-    fclose(fidout);
-
-    % refresh main window
-    d = dir; %get files
-    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-    % define some nested parameters
-    pre  = '<HTML><FONT color="blue">';
-    post = '</FONT></HTML>';
-    address = pwd;
-    d = dir; %get files
-    d(1)=[];d(1)=[];
-    listboxStr = cell(numel(d),1);
-    ac_pwd_str = which('ac_pwd.txt');
-    [ac_pwd_dir,ac_pwd_name,ext] = fileparts(ac_pwd_str);
-    fileID = fopen(fullfile(ac_pwd_dir,'ac_pwd.txt'),'w');
-    T = struct2table(d);
-    sortedT = [];
-    sd = [];
-    str=[];
-    i=[];
-
-    refreshcolor;
-    cd(pre_dirML); % return to matlab view folder
-
-else
-    disp(['  Warning: no SWA data saved. Rerun the SWA.'])
+    fprintf(fidout, formatspec_420, freq(i), power(i), swa(i), swa(i)*chi2_inv_value(1), swa(i)*chi2_inv_value(2), swa(i)*chi2_inv_value(3), ...
+        swa(i)*chi2_inv_value(4), swa(i)*chi2_inv_value(5));
 end
+fclose(fidout);
+
+% refresh main window
+d = dir; %get files
+set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+% define some nested parameters
+pre  = '<HTML><FONT color="blue">';
+post = '</FONT></HTML>';
+address = pwd;
+d = dir; %get files
+d(1)=[];d(1)=[];
+listboxStr = cell(numel(d),1);
+ac_pwd_str = which('ac_pwd.txt');
+[ac_pwd_dir,ac_pwd_name, ext] = fileparts(ac_pwd_str);
+fileID = fopen(fullfile(ac_pwd_dir,'ac_pwd.txt'),'w');
+T = struct2table(d);
+sortedT = [];
+sd = [];
+str=[];
+i=[];
+
+refreshcolor;
+cd(pre_dirML); % return to matlab view folder
+
 %%
 refreshSWAfigure
 %%

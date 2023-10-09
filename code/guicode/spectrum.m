@@ -61,6 +61,7 @@ handles.lang_var = varargin{1}.lang_var;
 lang_id = handles.lang_id;
 lang_var = handles.lang_var;
 handles.main_unit_selection = varargin{1}.main_unit_selection;
+handles.slash_v = varargin{1}.slash_v;
 
 set(0,'Units','normalized') % set units as normalized
 set(gcf,'units','norm') % set location
@@ -967,6 +968,18 @@ if strcmp(method,'Multi-taper method')
     
     %% SWA method 
     if SelectSWA == 1
+        
+        %  runfirst, ensure data saved in the current working dir
+        % move data file to current working folder
+        % refresh main window
+        pre_dirML = pwd;
+        ac_pwd = fileread('ac_pwd.txt');
+        if isdir(ac_pwd)
+            cd(ac_pwd)
+        else
+            disp([' Data in Working Dir: ', pre_dirML])
+        end
+        
         [outputdata] = spectralswafdr(data, 'mtm', nw, padtimes, 0);
         clfdr = outputdata(:, 9:13);
         xvalue = outputdata(:,1);
@@ -1074,27 +1087,11 @@ if strcmp(method,'Multi-taper method')
         catch
             
         end
-        
-        % move data file to current working folder
-        % refresh main window
-        pre_dirML = pwd;
-        ac_pwd = fileread('ac_pwd.txt');
-        if isdir(ac_pwd)
-            cd(ac_pwd)
-        end
-        
-        if isfile( which( 'SWA-Spectrum-background-FDR.dat'))
-            date = datestr(now,30);
-            curr_dir_full1 = which( 'SWA-Spectrum-background-FDR.dat');
-            curr_dir_full2 = which('Spectrum-SWA-Chi2CL.dat');
 
-            curr_dir1 = fullfile(ac_pwd,[dat_name,'-',num2str(nw),'pi-MTM-SWA-Spectrum-FDR-',date,'.dat']);
-            curr_dir2 = fullfile(ac_pwd,[dat_name,'-',num2str(nw),'pi-MTM-SWA-Spectrum-Chi2CL-',date,'.dat']);
+        date = datestr(now,30);
 
-            movefile(curr_dir_full1,curr_dir1);
-            movefile(curr_dir_full2,curr_dir2);
-        end
-        
+        movefile('SWA-Spectrum-background-FDR.dat',[dat_name,'-',num2str(nw),'pi-MTM-SWA-Spectrum-FDR-',date,'.dat']);
+        movefile('SWA-Spectrum-Chi2CL.dat',        [dat_name,'-',num2str(nw),'pi-MTM-SWA-Spectrum-Chi2CL-',date,'.dat']);
         
         % refresh main window
         d = dir; %get files
