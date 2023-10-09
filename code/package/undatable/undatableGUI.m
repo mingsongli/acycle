@@ -75,7 +75,7 @@ handles.acfigmain = varargin{1}.acfigmain;
 handles.listbox_acmain = varargin{1}.listbox_acmain;
 handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
 handles.val1 = varargin{1}.val1;
-
+handles.slash_v = varargin{1}.slash_v;
 try
     % load selected data file
     udinputfile = varargin{1}.dat_name;
@@ -431,9 +431,18 @@ set(gcf,'color',[1 1 1]);
 
 udinputfile = handles.udinputfile;
 
+% refresh main window
+ac_pwd = fileread('ac_pwd.txt');
+if isdir(ac_pwd)
+    cd(ac_pwd)
+end
+
 date = datestr(now,30);
-savename = [udinputpath, strrep(udinputfile, '.txt',''), ' adplot', ' (',date,').pdf'];
+%savename = [udinputpath, strrep(udinputfile, '.txt',''), ' adplot', ' (',date,').pdf'];
+savename = [ac_pwd, handles.slash_v, strrep(udinputfile, '.txt',''), ' adplot', ' (',date,').pdf'];
 print(gcf, '-dpdf', '-painters', savename);
+
+disp(['  Figure saved : ', savename])
 
 % refresh AC main window
 figure(handles.acfigmain);
@@ -441,7 +450,6 @@ refreshcolor;
 %cd(pre_dirML); % return view dir
 figure(figundatable);
 figure(figundatablePDF);
-
 
 
 % --- Executes on button press in savebutton.
@@ -461,17 +469,25 @@ end
 
 date = datestr(now,30);
 
+
+% refresh main window
+ac_pwd = fileread('ac_pwd.txt');
+if isdir(ac_pwd)
+    cd(ac_pwd)
+end
+
+
 % (1) copy of input dates used
-savename = [udinputpath, strrep(udinputfile, '.txt',''), ' inputfile', ' (',date,').txt'];
+savename = [ac_pwd, handles.slash_v,  strrep(udinputfile, '.txt',''), ' inputfile', ' (',date,').txt'];
 copyfile([udinstallpath,'/guitemp/guitempinput.txt'],savename);
 
 % (2) copy of age-depth model output
-savename = [udinputpath, strrep(udinputfile, '.txt',''), ' admodel', ' (',date,').txt'];
+savename = [ac_pwd, handles.slash_v,  strrep(udinputfile, '.txt',''), ' admodel', ' (',date,').txt'];
 copyfile([udinstallpath,'/guitemp/guitempinput_admodel.txt'],savename);
 
 % (3) copy of .mat file output (if wanted)
 if get(handles.specmatfile,'Value') == 1
-	savename = [udinputpath, strrep(udinputfile, '.txt',''), '_workspace', '_',date,'.mat'];
+	savename = [ac_pwd, handles.slash_v,  strrep(udinputfile, '.txt',''), '_workspace', '_',date,'.mat'];
 	copyfile([udinstallpath,'/guitemp/guitemp.mat'],savename);
 end
 

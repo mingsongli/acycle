@@ -92,13 +92,11 @@ specchi2cl = [chi90,chi95,chi99,chi999,chi9999];
 
 %  Save chi2 CL
     % 
-    date = datestr(now,30);
-    %outfile = ['Spectrum-SWA-Chi2CL-',date,'.dat'];
-    outfile = ['Spectrum-SWA-Chi2CL.dat'];
+    outfile = 'SWA-Spectrum-Chi2CL.dat';
     fidout = fopen(outfile, 'w');
 
     % Write out results
-    fprintf(fidout, '%%Data filename = %s\n');
+    fprintf(fidout, '%%Data filename = \n');
     fprintf(fidout, '%%Multiplication factor for 99.99%% Chi2 CL = %7.5f\n', chi2_inv_value(5));
     fprintf(fidout, '%%Multiplication factor for  99.9%% Chi2 CL = %7.5f\n', chi2_inv_value(4));
     fprintf(fidout, '%%Multiplication factor for   99%% Chi2 CL = %7.5f\n', chi2_inv_value(3));
