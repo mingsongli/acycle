@@ -194,8 +194,7 @@ disp('  Find probability level : completed')
 
 % Step 1 of Miller et al. (2001): Sort probabilities observed
 % (smallest to largest alpha).
-%alphsort = alphob;
-alphsort = [0;alphob];  % debug, add 0
+alphsort = alphob;
 alphsort = hpsort(alphsort);
 
 % Allow for correlation of spectral estimates by setting CN.
