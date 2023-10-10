@@ -6962,7 +6962,7 @@ if check == 1;
     data_new = [];
     nrow = [];
     data_pca = [];
-    if handles.lang_choice 
+    if handles.lang_choice  == 0
         disp('>>  Principal component analysis of ')
     else
         disp(a270)
@@ -6994,7 +6994,7 @@ if check == 1;
             else
                 [nrow(i-1),~] = size(data_new);
                 if nrow(i-1) ~= length(data_filterout(:,2))
-                    if handles.lang_choice 
+                    if handles.lang_choice == 0
                         errordlg('Error: number of rows of series must be the same')
                     else
                         errordlg(a271)
@@ -7067,7 +7067,7 @@ if check == 1;
         refreshcolor;
         cd(pre_dirML); % return to matlab view folder
         
-        if handles.lang_choice 
+        if handles.lang_choice  == 0
             disp('>>  Principal component analysis: Done')
         else
             disp(a272)
