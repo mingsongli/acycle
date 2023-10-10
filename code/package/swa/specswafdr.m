@@ -363,55 +363,7 @@ if(nint >= 1)
     end
     
     warndlg('The data are not uniformly spaced')
-%     ctlim=0;
-    
-    % allow users type three times
-    
-%     while ctlim < 3
-%         
-%         ctlim=fix(ctlim+1);
-%         
-%         if(ctlim > 5)
-%             [writeErrFlag]=writeFmt(1,[]);
-%             [writeErrFlag]=writeFmt(1,['%c'],''' *** No response registered ***''');
-%             [writeErrFlag]=writeFmt(1,['%c'],'''     Stopping...''');
-%         end
-%         
-%         [writeErrFlag]=writeFmt(1,[]);
-%         [writeErrFlag]=writeFmt(1,[format_22],'ndata');
-%         [writeErrFlag]=writeFmt(1,[]);
-%         [writeErrFlag]=writeFmt(1,['%c'],''' Do you want to stop the program here?''');
-%         [writeErrFlag]=writeFmt(1,['%c'],''' (e.g. if the no. of points is incorrect)''');
-%         
-%         if(nirr == 1)
-%             [writeErrFlag]=writeFmt(1,['%c'],''' (or the data are meant to be uniformly spaced)''');
-%         end
-%         
-%         [writeErrFlag]=writeFmt(1,['%c'],''' Proceed          = P''');
-%         [writeErrFlag]=writeFmt(1,['%c'],''' Stop the program = S''');
-        
-        %lmn=strAssign(lmn,[],[],input('','s'))
-%         lmn = input('','s');
-%         
-%         if(strcmp(deblank(lmn),deblank('P')) || strcmp(deblank(lmn),deblank('p')))
-%             tempBreak=1;
-%             break;
-%         end
-%         
-%         if(strcmp(deblank(lmn),deblank('S'))||strcmp(deblank(lmn),deblank('s')))           
-%             return
-%         end
-%         
-%         if(ios ~= 0)
-%             
-%             [writeErrFlag]=writeFmt(1,[]);
-%             [writeErrFlag]=writeFmt(1,['%c'],''' *** Enter P or S ***''');
-%             
-%         continue;
-%         
-%         end
-%     end
-    
+
 else
     
     if(tintmax ~= tintmin)
@@ -987,8 +939,7 @@ disp('  Find probability level : completed')
 
 % Step 1 of Miller et al. (2001): Sort probabilities observed
 % (smallest to largest alpha).
-%alphsort = alphob;
-alphsort = [0;alphob];  % debug, add 0
+alphsort = alphob;
 alphsort = hpsort(alphsort);
 
 % Allow for correlation of spectral estimates by setting CN.
