@@ -8526,3 +8526,31 @@ else
      undatableGUI(handles)
 end
 
+
+
+% --------------------------------------------------------------------
+function menu_datatransf_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_datatransf (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function menu_reciprocal_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_reciprocal (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function menu_squareroot_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_squareroot (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function menu_angular_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_angular (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)

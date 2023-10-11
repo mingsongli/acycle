@@ -1,4 +1,14 @@
 - - - - - -    What's New   - - - - - -
+
+_______________________________________
+
+
+Version : Acycle_v2.8
+Date    : Oct. 11, 2023 - 
+By      : Mingsong Li (Peking University)
+
+	1. Normalization
+
 _______________________________________
 
 
@@ -6,20 +16,20 @@ Version : Acycle_v2.7
 Date    : Jun 17, 2023 - Oct 10, 2023
 By      : Mingsong Li (Peking University)
 
-    1. COCO: Save correct figure; use invpretile function to calculate percentiles
-    2. eCOCO: Save data in an Excel file;
-    3. Curve Fitting: estimate the optimal span using Generalized Cross-Validation (GCV) method
-    4. Japanese version is ready (Thank Prof. Masayuki Ikeda)
-    5. CENOGRID (Westerhold et al., 2020, Science, doi: 10.1126/science.aba6853)
-    6. Dynamic filter: bug free.
-    7. Insolation/astronomical solutions: debug. Start from 0. Thanks Lucas Lourens!
-    8. Undatable: Age-depth modelling in Matlab.
-        Thank Lougheed, B. C. and Obrochta, S. P. for permission.
-        Reference:
-        Lougheed, B. C. and Obrochta, S. P. (2019), A rapid, deterministic 
-        age‐depth modelling routine for geological sequences with inherent 
-        depth uncertainty. Paleoceanography and Paleoclimatology. Accepted 
-        Author Manuscript. doi:10.1029/2018PA003457
+	1. COCO: Save the correct COCO figure; use the invpretile function to calculate percentiles;
+	2. eCOCO: Save data in an Excel file;
+	3. Curve Fitting: estimate the optimal span using the Generalized Cross-Validation (GCV) method;
+	4. Japanese version is ready (Thank Prof. Masayuki Ikeda);
+	5. CENOGRID (Westerhold et al., 2020, Science, doi: 10.1126/science.aba6853);
+	6. Dynamic filter: bug-free;
+	7. Insolation/astronomical solutions: debug. Start from 0. Thanks, Lucas Lourens!
+	8. Undatable: Age-depth modeling in Matlab.
+    	Thank Lougheed, B. C. and Obrochta, S. P. for permission.
+    	Reference:
+    	Lougheed, B. C. and Obrochta, S. P. (2019), A rapid, deterministic 
+    	age‐depth modelling routine for geological sequences with inherent 
+    	depth uncertainty. Paleoceanography and Paleoclimatology. Accepted 
+    	Author Manuscript. doi:10.1029/2018PA003457
     9. Prof. Graham Weedon's SWA method included! Thank Graham!
                 The spectrum is derived from a periodogram based on the
                 Lomb-Scargle algorithm - allowing analysis of data with
