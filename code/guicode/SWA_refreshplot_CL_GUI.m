@@ -55,12 +55,6 @@ function refreshSWAplot(handles)
     % lang
     lang_id = handles.lang_id;
     lang_var = handles.lang_var;
-% 
-%     figs = findall(0, 'Type', 'figure');
-%     
-%     figswaplot = ['Acycle: ',data_name,'-',num2str(nw),'pi MTM SWA'];
-%     
-%     idx = find(strcmp({figs.Name}, figswaplot));
     
     try figure(handles.fswa)
         hold off
@@ -68,15 +62,7 @@ function refreshSWAplot(handles)
     catch
         handles.fswa = figure('Name',['Acycle: ',data_name,'-',num2str(nw),'pi MTM SWA']);
     end
-%     % 如果figswaplot不存在，则创建它
-%     if isempty(idx)
-%         fig = figure('Name', figswaplot, 'NumberTitle', 'off');
-%     else
-%         % 如果figswaplot存在，清除其内容
-%         fig = figs(idx);
-%         hold off
-%     end
-%     
+
     set(gcf,'color','white');
     set(gcf,'units','norm') % set location
 
@@ -148,6 +134,5 @@ function refreshSWAplot(handles)
     if handles.logfreq == 1
         set(gca,'xscale','log')
     end
-    % 在fig上执行绘图代码
-    % 您的绘图代码放在这里
+
 end
