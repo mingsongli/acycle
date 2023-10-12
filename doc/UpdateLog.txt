@@ -7,7 +7,8 @@ Version : Acycle_v2.8
 Date    : Oct. 11, 2023 - 
 By      : Mingsong Li (Peking University)
 
-	1. Normalization
+	1. NEW: Data transformations. Thanks to Prof. Zhengtang Guo for his invaluable suggestions.
+    2. NEW: Column manipulate. Thanks to Prof. Zhengtang Guo for his invaluable suggestions.
 
 _______________________________________
 
