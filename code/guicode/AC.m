@@ -7088,15 +7088,8 @@ end
 guidata(hObject,handles)
 
 
-
 % --------------------------------------------------------------------
 function menu_smooth1_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_help (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% --------------------------------------------------------------------
-function menu_utilities_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_help (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -8527,30 +8520,94 @@ else
 end
 
 
-
 % --------------------------------------------------------------------
 function menu_datatransf_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_datatransf (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox_acmain,'Value');
+nplot = length(plot_selected);   % length
+if nplot <= 1
+    data_name = char(contents(plot_selected));
+    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; 
+    data_name = fullfile(ac_pwd,data_name);
+    if isdir(data_name) == 1
+    else
+        [~,dat_name,ext] = fileparts(data_name);
+        if sum(strcmp(ext,handles.filetype)) > 0
+            current_data = load(data_name);
+            handles.current_data = current_data;
+            handles.data_name = data_name;
+            handles.dat_name = dat_name;
+            handles.ext = ext;
+            guidata(hObject, handles);
+            datatransformationsGUI(handles);
+        end
+    end
+end
+guidata(hObject, handles);
+
+
 
 % --------------------------------------------------------------------
-function menu_reciprocal_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_reciprocal (see GCBO)
+function menu_colman_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_colman (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-
-% --------------------------------------------------------------------
-function menu_squareroot_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_squareroot (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --------------------------------------------------------------------
-function menu_angular_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_angular (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+plot_selected = handles.index_selected;  % read selection in listbox 1
+nplot = length(plot_selected);   % length
+% check
+check = 0;
+for i = 1:nplot
+    plot_no = plot_selected(i);
+    plot_filter_s = char(contents(plot_no));
+    plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; 
+    plot_filter_s = fullfile(ac_pwd,plot_filter_s);
+    if isdir(plot_filter_s)
+        return
+    else
+        [~,~,ext] = fileparts(plot_filter_s);
+        if sum(strcmp(ext,handles.filetype)) > 0
+            if nplot > 1
+                check = 1; % selection can be executed 
+            elseif nplot == 1
+                dat_new = load(plot_filter_s);
+                [~, ncol] = size(dat_new);
+                if ncol > 2
+                    check = 1;
+                else
+                    choice = questdlg('Data has only two columns!', ...
+                        'Warning', ...
+                        'OK', 'Cancel', 'OK'); 
+                    switch choice
+                        case 'OK'
+                            % Execute the code for the OK button here.
+                            check = 1;
+                        case 'Cancel'
+                            check = 0;
+                    end
+                end
+            end
+        else
+            return
+        end
+    end
+end
+if check == 1
+    plot_filter_s2 = char(contents(plot_selected(1)));
+    GETac_pwd; 
+    plot_filter_s2 = fullfile(ac_pwd,plot_filter_s2);
+    dat_new = load(plot_filter_s2);
+    
+    handles.plot_selected = plot_selected;
+    handles.nplot = nplot;
+    handles.contents = contents;
+    
+    guidata(hObject, handles);
+    column_manipulateGUI(handles);
+end
