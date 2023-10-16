@@ -3,12 +3,26 @@
 _______________________________________
 
 
-Version : Acycle_v2.8
+Version : Acycle_v2.7.1
 Date    : Oct. 11, 2023 - 
 By      : Mingsong Li (Peking University)
 
-	1. NEW: Data transformations. Thanks to Prof. Zhengtang Guo for his invaluable suggestions.
-    2. NEW: Column manipulate. Thanks to Prof. Zhengtang Guo for his invaluable suggestions.
+	1. NEW: Data transformations.
+        Specific columns of the dataset can be modified utilizing various
+        straightforward functions: Standardize, Normalize, Logarithm, 
+        Exponential, Reciprocal; Root, and Angular transformations.
+        Appreciation is extended to Prof. Zhengtang Guo for his invaluable
+         suggestions.
+    2. NEW: Column manipulate. 
+        Designated columns from the chosen datasets can be combined using
+        a specified weight.
+        Special thanks to Prof. Zhengtang Guo for his invaluable suggestions.
+    3. NEW: Moving Average - Fixed Bandwidth.
+        Inspired by STATNARY: Mean and variance evolution of unevenly 
+        spaced time series by Prof. Michael Schulz
+        https://www.marum.de/en/Prof.-Dr.-michael-schulz/
+        Michael-Schulz-Software.html
+        Thanks to Prof. Zhengtang Guo for his suggestions.
 
 _______________________________________
 
@@ -59,6 +73,7 @@ By      : Mingsong Li (Peking University)
                 stratigraphic gaps and the duration of the Hettangian (Jurassic):
                 insights from the Blue Lias Formation of Southern Britain. Geol.
                 Mag. 156, 1469-1509, https://doi.org/10.1017/S0016756818000808
+        Thank Nicolas Thibault for his suggestions!
     10. MTM + SWA method (NEW)
     11. Principal Component: language debug
 _______________________________________

@@ -4,7 +4,7 @@ function datatransformationsGUI(varargin)
     
     if isempty(fig_handle1)
         fig_handle1 = figure('Tag', 'figdatatransfGUI',...
-                 'Name', 'Data Transformations GUI', ...
+                 'Name', 'Acycle: Data Transformations', ...
                  'NumberTitle', 'off', ...
                  'MenuBar', 'none', ...
                  'ToolBar', 'none', ...
@@ -59,7 +59,8 @@ function datatransformationsGUI(varargin)
                   'Units', 'normalized', ...
                   'Position', [(col-1)*0.1, 1-row*0.5, 0.1, 0.5], ...
                   'Tag', ['checkbox' num2str(i)], ...
-                  'FontSize', 12);
+                  'FontSize', 12,...
+                  'Callback',@editcallback);
         % 2 checkbox default
         if i == 2
             set(checkBoxes(i), 'Value', 1);
@@ -184,9 +185,9 @@ function datatransformationsGUI(varargin)
 
 
     % Check for existence of figure, if not, create one
-    fig_handle = findobj('Type', 'figure', 'Tag', 'fig_data_transf');
+    fig_handle = findobj('Type', 'figure', 'Tag', 'fig_data_transf','Name', 'Acycle: Data Transformations | Plot');
     if isempty(fig_handle)
-        fig_handle = figure('Tag', 'fig_data_transf', 'Color', [1 1 1]);
+        fig_handle = figure('Tag', 'fig_data_transf', 'Color', [1 1 1],'Name', 'Acycle: Data Transformations | Plot');
     else
         figure(fig_handle);
     end
@@ -307,6 +308,7 @@ function datatransformationsGUI(varargin)
 
 %% call back of edit texts and update plot
     function editcallback(src,event)
+        j = [];
         % prep for norm
         if radioButtons(2).Value == 1
             j = 2;
@@ -334,7 +336,8 @@ function datatransformationsGUI(varargin)
             end
         end
         
-        if length(checkid) > 0
+        %checkid
+        if length(checkid) > 0  && ~isnan(checkid(1))
             % calculation
             dat = data(:,checkid);
             if j == 2 % normalize
@@ -382,7 +385,7 @@ function datatransformationsGUI(varargin)
                 end
             end
         end
-        % checkid
+        %checkid
         radioID = get(src,'Tag');
         j = str2double(radioID(6:end));  % read radio ID number
         for i =1:26
@@ -420,7 +423,7 @@ function datatransformationsGUI(varargin)
             set(radioButtons(20),'Value', 1)
         end
         
-        if length(checkid) > 0
+        if length(checkid) > 0 && ~isnan(checkid(1))
             % calculation
             dat = data(:,checkid);
             yt = data;
@@ -505,49 +508,57 @@ function datatransformationsGUI(varargin)
         end
     end
 
-
 %% Update plot figures only by using given transformed dat
     function updateplot1(src,dat)
+        
+            % check selected checkboxes
+            checkid = NaN;
+            checkn = 0;
+            ncolmin = min(ncol, checkmaxn);
+            for i = 1: ncolmin
+                vi = checkBoxes(i);
+                viv = vi.Value;
+                if viv == 1
+                    checkn = checkn + 1;
+                    checkid(checkn) = str2double(checkBoxes(i).String); % save col ID
+                    if isnan(checkid(checkn))  % ...
+                        checkid(checkn : checkn+ncol-20) = 19:(ncol-1);  
+                        checkn = checkn + ncol-19-1;
+                    end
+                end
+            end
+            
             % subplot
             % Check for existence of figure, if not, create one
             fig_handle = findobj('Type', 'figure', 'Tag', 'fig_data_transf');
             if isempty(fig_handle)
-                fig_handle = figure('Tag', 'fig_data_transf', 'Color', [1 1 1]);
-                
-                % Fetch the selected checkbox string and convert to index
-                coli = 0;
-                for i = 1: ncol
-                    vi = checkBoxes(i);
-                    viv = vi.Value;
-                    if viv == 1
-                        try
-                            coli = str2double(checkBoxes(i).String);
-                        catch
-                            error('Must select a valid column number!')
-                        end
-                        break
-                    end
-                end
-
-                if coli > 0
-                    x = data(:, 1);
-                    y = data(:, coli);
-
-                    subplot('Position', [0.05, 0.55, 0.6, 0.4]);
-                    plot(x, y);
-                    xlim([min(x), max(x)]);
-                    ylim([min(y), max(y)]);
-                    title('Raw data');
-                    ax = gca; ax.XMinorTick = 'on'; ax.YMinorTick = 'on';
-                    
-                    subplot('Position', [0.7, 0.55, 0.25, 0.4]);
-                    histfit(y, [], 'kernel');
-                    title('Raw data histogram');
-                    ax = gca; ax.XMinorTick = 'on'; ax.YMinorTick = 'on';
-                end
+                fig_handle = figure('Tag', 'fig_data_transf', 'Color', [1 1 1],'Name', 'Acycle: Data Transformations | Plot');
             else
                 figure(fig_handle);
             end            
+            
+            coli = checkid(1); % use the first for plot
+
+            if coli > 0
+                x = data(:, 1);
+                y = data(:, coli);
+
+                subplot('Position', [0.05, 0.55, 0.6, 0.4]);
+                plot(x, y);
+                xlim([min(x), max(x)]);
+                ylim([min(y), max(y)]);
+                title('Raw data');
+                ax = gca; 
+                ax.XMinorTick = 'on'; 
+                ax.YMinorTick = 'on';
+
+                subplot('Position', [0.7, 0.55, 0.25, 0.4]);
+                histfit(y, [], 'kernel');
+                title('Raw data histogram');
+                ax = gca; 
+                ax.XMinorTick = 'on'; 
+                ax.YMinorTick = 'on';
+            end
             
             subplot('Position', [0.05, 0.05, 0.6, 0.4]);
             plot(x,dat(:,1));
@@ -558,12 +569,16 @@ function datatransformationsGUI(varargin)
                 error('Error using ylim in subplot(2,2,3). Results may have complex values???')
             end
             title('New data');
-            ax = gca; ax.XMinorTick = 'on'; ax.YMinorTick = 'on';
+            ax = gca; 
+            ax.XMinorTick = 'on'; 
+            ax.YMinorTick = 'on';
 
             subplot('Position', [0.7, 0.05, 0.25, 0.4]);
             histfit(dat(:,1), [], 'kernel');
             title('New data histogram');
-            ax = gca; ax.XMinorTick = 'on'; ax.YMinorTick = 'on';
+            ax = gca; 
+            ax.XMinorTick = 'on'; 
+            ax.YMinorTick = 'on';
     end
 
 end

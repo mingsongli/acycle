@@ -299,11 +299,11 @@ if lang_choice > 0
     [~, locb] = ismember('menu102',lang_id);
     set(handles.menu_bootstrap,'text',lang_var{locb})
     [~, locb] = ismember('menu103',lang_id);
-    set(handles.menu_smooth,'text',lang_var{locb})
+    set(handles.menu_smooth_option,'text',lang_var{locb})
     [~, locb] = ismember('menu104',lang_id);
     set(handles.menu_movGauss,'text',lang_var{locb})
     [~, locb] = ismember('menu105',lang_id);
-    set(handles.menu_movmedian,'text',lang_var{locb})
+    set(handles.menu_movmedian_option,'text',lang_var{locb})
     [~, locb] = ismember('menu106',lang_id);
     set(handles.menu_whiten,'text',lang_var{locb})
     [~, locb] = ismember('menu107',lang_id);
@@ -2587,7 +2587,7 @@ guidata(hObject, handles);
 
 % % --------------------------------------------------------------------
 % function menu_bootstrap_Callback(hObject, eventdata, handles)
-% % hObject    handle to menu_smooth (see GCBO)
+% % hObject    handle to menu_smooth_option (see GCBO)
 % % eventdata  reserved - to be defined in a future version of MATLAB
 % % handles    structure with handles and user data (see GUIDATA)
 % contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
@@ -6853,7 +6853,8 @@ if check == 1
         answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
         if ~isempty(answer)
             c1 = str2double(answer{1});
-            c2 = str2double(answer{2});
+            c2 = str2double(strsplit(answer{2}, ','));
+            c22 = join(string(c2), ',');
             c0 = c2;
             if or(c1<1, c2<1)
                 if handles.lang_choice == 0
@@ -6878,10 +6879,10 @@ if check == 1
                 data = data(~any(isnan(data),2),:);
                 try
                     data_new(:,1) = data(:,c1);
-                    data_new(:,2) = data(:,c2);
+                    data_new(:,2:2+length(c2)-1) = data(:,c2);
                     CDac_pwd  % cd ac_pwd dir
                     % save data
-                    name1 = [dat_name,'-c',num2str(c1),'-c',num2str(c2),ext];  % New name
+                    name1 = [dat_name,'-c',num2str(c1),'-c',num2str(c22),ext];  % New name
 
                     dlmwrite(name1, data_new, 'delimiter', ' ', 'precision', 9);
                     if handles.lang_choice == 0
@@ -7253,8 +7254,150 @@ guidata(hObject, handles);
 
 
 % --------------------------------------------------------------------
+function menu_movmeanfbw_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_movmeanfbw (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox_acmain,'Value');
+nplot = length(plot_selected);   % length
+if nplot == 1
+    
+%     %language
+%     lang_id = handles.lang_id;
+%     if handles.lang_choice > 0
+% 
+%         [~, locb1] = ismember('main24',lang_id);
+%         main24 = handles.lang_var{locb1};
+%         [~, locb1] = ismember('menu103',lang_id);
+%         menu103 = handles.lang_var{locb1};
+% 
+%         [~, locb1] = ismember('a280',lang_id);
+%         a280 = handles.lang_var{locb1};
+%         [~, locb1] = ismember('a281',lang_id);
+%         a281 = handles.lang_var{locb1};
+%         [~, locb1] = ismember('a282',lang_id);
+%         a282 = handles.lang_var{locb1};
+%         [~, locb1] = ismember('a283',lang_id);
+%         a283 = handles.lang_var{locb1};
+%     end
+
+    data_name = char(contents(plot_selected));
+    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; 
+    data_name = fullfile(ac_pwd,data_name);
+    if isdir(data_name) == 1
+    else
+        [~,dat_name,ext] = fileparts(data_name);
+        if sum(strcmp(ext,handles.filetype)) > 0
+            try
+                fid = fopen(data_name);
+                data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
+                fclose(fid);
+                if iscell(data_ft)
+                    data = cell2mat(data_ft);
+                end
+            catch
+                data = load(data_name);
+            end 
+            
+            data = sortrows(data);  % sort
+            time = data(:,1);
+            value = data(:,2);
+            timespan = max(time) - min(time);
+            %if handles.lang_choice == 0
+                dlg_title = 'Time-dependent Mean (fixed bandwidth)';
+                prompt =  {['Window size (',handles.unit,'):                     '], ...
+                            ['Step (',handles.unit,')'], ...
+                            'Fill half-window: 1=yes; 0=no                                                      .',...
+                            'Alpha (default = 0.05)'};
+            %else
+            %    dlg_title = menu103;
+            %    prompt = {a280};
+            %end
+            num_lines = 1;
+            defaultans = {num2str(timespan*0.3), num2str(median(diff(time))), '0','0.05'};
+            options.Resize='on';
+            answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+            if ~isempty(answer)
+                window = str2double(answer{1});
+                step  = str2double(answer{2});
+                halfwindow = str2double(answer{3});
+                alpha = str2double(answer{4});
+                % have fun
+                [t, meantd, vartd, np, CI_lower, CI_upper, ~] ...
+                    = movmeanfbw(data, window, step, halfwindow, alpha, 1);
+                % save data
+                
+                %if handles.lang_choice == 0
+                name1 = [dat_name,'_win',num2str(window),handles.unit,'-step',num2str(step),'-TimeDepMeanVar',ext];  % New name
+                %else
+                %    name1 = [dat_name,'_',num2str(smooth_v),a283,ext];  % New name
+                %end
+                
+                % Open the file for reading acycle version
+                fileID = fopen('ac_version.txt', 'r'); 
+                % Check if file is opened successfully
+                if fileID == -1
+                    error('Cannot open the file');
+                end
+                % Read the first line from the file
+                a_string = fgets(fileID); 
+                % Close the file
+                fclose(fileID);
+                % Remove any newline characters from the read string
+                ac_version = strtrim(a_string);
+                
+                CDac_pwd
+                %dlmwrite(name1, data, 'delimiter', ' ', 'precision', 9); 
+                outfile = name1;
+                fidout = fopen(outfile, 'w');
+                % Write out results
+                fprintf(fidout, ['%% Acycle ',ac_version,'\n']);
+                fprintf(fidout, '%%\n');
+                fprintf(fidout, '%% INPUT:\n');
+                fprintf(fidout, '%% -----\n');
+                fprintf(fidout, '%%           File = %s\n', [dat_name,ext]);
+                fprintf(fidout, '%% Sliding window = %15.4f\n', window);
+                fprintf(fidout, '%%           Step = %15.4f\n', step);
+                fprintf(fidout, '%%          Alpha = %15.4f\n', alpha);
+                fprintf(fidout, '%%\n');
+                fprintf(fidout, '%% Result Columns:\n');
+                fprintf(fidout, '%% ---------------\n');
+                fprintf(fidout, '%% 1:  Time = Time or depth\n');
+                fprintf(fidout, '%% 2:  Mean = Time-dependent mean\n');
+                fprintf(fidout, '%% 3:   Var = Time-dependent variance\n');
+                fprintf(fidout, '%% 4:    Np = Number of points in window\n');
+                fprintf(fidout, '%% 5: VarLo = Lower confidence level for variance\n');
+                fprintf(fidout, '%% 6: VarHi = Upper confidence level for variance\n');
+                fprintf(fidout, '%%\n');
+                fprintf(fidout, '%%        Time             Mean             Var        Np          VarLo            VarHi\n');
+                nout = length(t);
+                formatspec_424 = '%15.5f  %15.7f  %15.7f  %5d  %15.7f  %15.7f\n';
+                for i = 1:nout
+                    fprintf(fidout, formatspec_424, t(i), meantd(i), vartd(i), np(i), CI_lower(i), CI_upper(i));
+                end
+                % Display output file
+                disp(' ');
+                disp(['Output file= ' outfile]);
+                disp(' ');
+                
+                fclose(fidout);
+                d = dir; %get files
+                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+                refreshcolor;
+                cd(pre_dirML); % return to matlab view folder
+                
+            end
+        end
+    end
+end
+guidata(hObject, handles);
+
+
+% --------------------------------------------------------------------
 function menu_smooth_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_smooth (see GCBO)
+% hObject    handle to menu_smooth_option (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
@@ -7351,8 +7494,164 @@ guidata(hObject, handles);
 
 
 % --------------------------------------------------------------------
+function menu_smooth_option_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_smooth_option (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% --------------------------------------------------------------------
+function menu_movmedian_option_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_movmedian_option (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function menu_movmedianfbw_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_movmedianfbw (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox_acmain,'Value');
+nplot = length(plot_selected);   % length
+if nplot == 1
+    
+%     %language
+%     lang_id = handles.lang_id;
+%     if handles.lang_choice > 0
+% 
+%         [~, locb1] = ismember('main24',lang_id);
+%         main24 = handles.lang_var{locb1};
+%         [~, locb1] = ismember('menu103',lang_id);
+%         menu103 = handles.lang_var{locb1};
+% 
+%         [~, locb1] = ismember('a280',lang_id);
+%         a280 = handles.lang_var{locb1};
+%         [~, locb1] = ismember('a281',lang_id);
+%         a281 = handles.lang_var{locb1};
+%         [~, locb1] = ismember('a282',lang_id);
+%         a282 = handles.lang_var{locb1};
+%         [~, locb1] = ismember('a283',lang_id);
+%         a283 = handles.lang_var{locb1};
+%     end
+
+    data_name = char(contents(plot_selected));
+    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; 
+    data_name = fullfile(ac_pwd,data_name);
+    if isdir(data_name) == 1
+    else
+        [~,dat_name,ext] = fileparts(data_name);
+        if sum(strcmp(ext,handles.filetype)) > 0
+            try
+                fid = fopen(data_name);
+                data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
+                fclose(fid);
+                if iscell(data_ft)
+                    data = cell2mat(data_ft);
+                end
+            catch
+                data = load(data_name);
+            end 
+            
+            data = sortrows(data);  % sort
+            time = data(:,1);
+            value = data(:,2);
+            timespan = max(time) - min(time);
+            %if handles.lang_choice == 0
+                dlg_title = 'Time-dependent Median (fixed bandwidth)';
+                prompt =  {['Window size (',handles.unit,'):                     '], ...
+                            ['Step (',handles.unit,')'], ...
+                            'Fill half-window: 1=yes; 0=no                                                      .'};
+            %else
+            %    dlg_title = menu103;
+            %    prompt = {a280};
+            %end
+            num_lines = 1;
+            defaultans = {num2str(timespan*0.3), num2str(median(diff(time))), '0'};
+            options.Resize='on';
+            answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+            if ~isempty(answer)
+                window = str2double(answer{1});
+                step  = str2double(answer{2});
+                halfwindow = str2double(answer{3});
+                % have fun
+                [t, ~, ~, ~, ~, ~, mediantd] ...
+                    = movmeanfbw(data, window, step, halfwindow);
+
+                %data = [t, mediantd];
+                %if handles.lang_choice == 0
+                name1 = [dat_name,'_',num2str(window),handles.unit,'-TimeDepMedian',ext];  % New name
+                %else
+                %    name1 = [dat_name,'_',num2str(smooth_v),a283,ext];  % New name
+                %end
+                
+                % Open the file for reading acycle version
+                fileID = fopen('ac_version.txt', 'r'); 
+                % Check if file is opened successfully
+                if fileID == -1
+                    error('Cannot open the file');
+                end
+                % Read the first line from the file
+                a_string = fgets(fileID); 
+                % Close the file
+                fclose(fileID);
+                % Remove any newline characters from the read string
+                ac_version = strtrim(a_string);
+                
+                CDac_pwd
+                
+                outfile = name1;
+                fidout = fopen(outfile, 'w');
+                % Write out results
+                fprintf(fidout, ['%% Acycle ',ac_version,'\n']);
+                fprintf(fidout, '%%\n');
+                fprintf(fidout, '%% INPUT:\n');
+                fprintf(fidout, '%% -----\n');
+                fprintf(fidout, '%%           File = %s\n', [dat_name,ext]);
+                fprintf(fidout, '%% Sliding window = %15.4f\n', window);
+                fprintf(fidout, '%%           Step = %15.4f\n', step);
+                fprintf(fidout, '%%\n');
+                fprintf(fidout, '%% Result Columns:\n');
+                fprintf(fidout, '%% ---------------\n');
+                fprintf(fidout, '%% 1:   Time = Time or depth\n');
+                fprintf(fidout, '%% 2: Median = Time-dependent mean\n');
+                fprintf(fidout, '%%\n');
+                fprintf(fidout, '%%        Time            Median\n');
+                nout = length(t);
+                formatspec_424 = '%15.5f  %15.7f\n';
+                for i = 1:nout
+                    fprintf(fidout, formatspec_424, t(i), mediantd(i));
+                end
+                % Display output file
+                disp(' ');
+                disp(['Output file= ' outfile]);
+                disp(' ');
+                
+                fclose(fidout);
+                
+                d = dir; %get files
+                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+                refreshcolor;
+                cd(pre_dirML); % return to matlab view folder
+                
+                figure
+                plot(time, value,'k-')
+                hold on
+                plot(t, mediantd,'ro-')
+                xlim([min(time), max(time)])
+                title(['Raw and time dependent median. Window = ', num2str(window)])
+
+            end
+        end
+    end
+end
+guidata(hObject, handles);
+
+
+% --------------------------------------------------------------------
 function menu_movmedian_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_movmedian (see GCBO)
+% hObject    handle to menu_movmedian_option (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
@@ -8611,3 +8910,4 @@ if check == 1
     guidata(hObject, handles);
     column_manipulateGUI(handles);
 end
+
