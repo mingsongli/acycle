@@ -146,6 +146,7 @@ while (revmin > 0 && winwidth < 99)
             fitsp(i)=fitsp1(i);
         end
     end
+    
     if(revmin > rev2)
         revmin=rev2;
         rmsemin=rmsef2;
@@ -175,9 +176,11 @@ while (revmin > 0 && winwidth < 99)
 end
 
 fprintf('\n');  % Displaying an empty line
-fprintf('winfinal = %d\n', winfinal);
-fprintf('rmsemin = %f\n', rmsemin);
-
+%try
+    fprintf('winfinal = %d\n', winfinal);
+    fprintf('rmsemin = %f\n', rmsemin);
+%catch
+%end
 rmsel1 = rmsemin;
 
 fprintf('\n');  % Displaying an empty line

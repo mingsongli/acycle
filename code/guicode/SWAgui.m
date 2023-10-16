@@ -289,8 +289,6 @@ function refreshSWAfigure(src, event)%,freq,power,swa,chi2_inv_value,pow2,bayesp
         set(gca,'XMinorTick','on','YMinorTick','on')
         set(gcf,'Color', 'white')
         legend
-        %hold off
-
 
         %% SWA
         if checkbox3x(1).Value  % All in 1 figure
