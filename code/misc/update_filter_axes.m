@@ -73,6 +73,8 @@ if strcmp(filter,'Gaussian')
     set(handles.edit18,'enable','off')
     % update data and names
     [gaussbandx,filter1,f1]=gaussfilter(datax,dt,flch(2),flch(1),flch(3));
+    % Use Hilbert transformation to extract envelope
+    gaussbandxAM = abs(hilbert(gaussbandx));
     % plot
     axes(handles.ft_axes3);
     plot(f,P1)
@@ -83,7 +85,7 @@ if strcmp(filter,'Gaussian')
     hold off
     axes(handles.ft_axes4);
     xlim([x_1, x_2])
-    data_filterout = [time,gaussbandx];
+    data_filterout = [time,gaussbandx,gaussbandxAM];
     add_list = [handles.dat_name,'-Gau-flow-',num2str(flch(1)),'-fhigh-',num2str(flch(3)),'.txt'];
     
 elseif strcmp(filter,'Taner-Hilbert')
@@ -128,7 +130,9 @@ elseif strcmp(filter,'Cheby1')
     'PassbandRipple',1,...
     'DesignMethod','cheby1');
     yb = filtfilt(d,datax);
-    data_filterout = [time,yb];
+    % Use Hilbert transformation to extract envelope
+    ybam = abs(hilbert(yb));
+    data_filterout = [time,yb,ybam];
     add_list = [handles.dat_name,'-Cheby1-flow-',num2str(flch(1)),'-fhigh-',num2str(flch(3)),'.txt'];
     
 elseif strcmp(filter,'Ellip')
@@ -143,7 +147,9 @@ elseif strcmp(filter,'Ellip')
     'DesignMethod','ellip');
 
     yb = filtfilt(d,datax);
-    data_filterout = [time,yb];
+    % Use Hilbert transformation to extract envelope
+    ybam = abs(hilbert(yb));
+    data_filterout = [time,yb,ybam];
     add_list = [handles.dat_name,'-Ellip-flow-',num2str(flch(1)),'-fhigh-',num2str(flch(3)),'.txt'];
 
 elseif strcmp(filter,'Butter')
@@ -154,7 +160,9 @@ elseif strcmp(filter,'Butter')
     'HalfPowerFrequency2',fhigh,...
     'DesignMethod','butter');
     yb = filtfilt(d,datax);  % filtfilt is okay. but it may not be included in some version of Matlab
-    data_filterout = [time,yb];
+    % Use Hilbert transformation to extract envelope
+    ybam = abs(hilbert(yb));
+    data_filterout = [time,yb,ybam];
     add_list = [handles.dat_name,'-Butter-flow-',num2str(flch(1)),'-fhigh-',num2str(flch(3)),'.txt'];
     
 else

@@ -265,18 +265,18 @@ if lang_choice > 0
     set(handles.menu_clip,'text',lang_var{locb})
     [~, locb] = ismember('menu80',lang_id);
     set(handles.menu_cpt,'text',lang_var{locb})
-    [~, locb] = ismember('menu81',lang_id);
-    set(handles.menu_norm,'text',lang_var{locb})
+    %[~, locb] = ismember('menu81',lang_id);
+    %set(handles.menu_norm,'text',lang_var{locb})
     [~, locb] = ismember('menu82',lang_id);
     set(handles.menu_pca,'text',lang_var{locb})
-    [~, locb] = ismember('menu83',lang_id);
-    set(handles.menu_log10,'text',lang_var{locb})
+%    [~, locb] = ismember('menu83',lang_id);
+%    set(handles.menu_log10,'text',lang_var{locb})
     [~, locb] = ismember('menu84',lang_id);
     set(handles.menu_derivative,'text',lang_var{locb})
     [~, locb] = ismember('menu85',lang_id);
     set(handles.menu_function,'text',lang_var{locb})
-    [~, locb] = ismember('menu86',lang_id);
-    set(handles.menu_utilities,'text',lang_var{locb})
+%    [~, locb] = ismember('menu86',lang_id);
+%    set(handles.menu_utilities,'text',lang_var{locb})
     [~, locb] = ismember('menu87',lang_id);
     set(handles.menu_maxmin,'text',lang_var{locb})
     [~, locb] = ismember('menu88',lang_id);
@@ -2961,71 +2961,63 @@ end
 if nplot == 1
     data_name = char(contents(plot_selected));
     dat_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
-    GETac_pwd; data_name = fullfile(ac_pwd,dat_name);
-        if isdir(data_name) == 1
-            if handles.lang_choice == 0
-                warndlg('Error: select the data file not a folder')
-            else
-                warndlg(a85)
-            end
+    GETac_pwd; 
+    data_name = fullfile(ac_pwd,dat_name);
+    
+    if isdir(data_name) == 1
+        if handles.lang_choice == 0
+            warndlg('Error: select the data file not a folder')
         else
-            [~,~,ext] = fileparts(data_name);
-            if sum(strcmp(ext,handles.filetype)) > 0
-                data = load(data_name);
-                
-                % sort
-                data = sortrows(data);
-                % unique
-                data=findduplicate(data);
-                % remove empty 
-                data(any(isinf(data),2),:) = [];
-                
-                diffx = diff(data(:,1));
-                if max(diffx) - min(diffx) > eps('single')
-                    if handles.lang_choice == 0
-                        hwarn = warndlg('Warning: Interpolation using median sampling rate');
-                    else
-                        hwarn = warndlg(a86);
-                    end
-                    set(gcf,'units','norm') % set location
-                    %set(gcf,'position',[0.2,0.6,0.2,0.1])
-                    figure(hwarn);
-                    interpolate_rate = median(diffx);
-                    [data]=interpolate(data,interpolate_rate);
-                end
-                
-                % remove mean of the 2nd column
-                data(:,2) = data(:,2) - mean(data(:,2));
-                %
-                t=data(:,1);
-                dt=t(2)-t(1);
-                nyquist = 1/(2*dt);
-                fl = 0;
-                fh = nyquist;
-                fc = nyquist/2;
-
-                [tanhilb,~,~] = tanerhilbertML(data,fc,fl,fh);
-
-                data_am = [tanhilb(:,1), tanhilb(:,3)];
-                
-                name1 = [dat_name,'-AM',ext];
-                name2 = [dat_name,'-AMf',ext];
-                CDac_pwd
-                dlmwrite(name1, data_am, 'delimiter', ' ', 'precision', 9);
-                dlmwrite(name2, [tanhilb(:,1), tanhilb(:,2)], 'delimiter', ' ', 'precision', 9);
-                if handles.lang_choice == 0
-                    msgbox('See main window for amplitude modulation')
-                else
-                    msgbox(a87)
-                end
-
-                d = dir; %get files
-                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-                refreshcolor;
-                cd(pre_dirML); % return to matlab view folder
-            
-            end
+            warndlg(a85)
         end
+    else
+        [~,dat_name1,ext] = fileparts(data_name);
+        if sum(strcmp(ext,handles.filetype)) > 0
+            data = load(data_name);
+
+            % sort
+            data = sortrows(data);
+            % unique
+            data=findduplicate(data);
+            % remove empty 
+            data(any(isinf(data),2),:) = [];
+
+            diffx = diff(data(:,1));
+            if max(diffx) - min(diffx) > eps('single')
+                if handles.lang_choice == 0
+                    hwarn = warndlg('Warning: Interpolation using median sampling rate');
+                else
+                    hwarn = warndlg(a86);
+                end
+                set(gcf,'units','norm') % set location
+                %set(gcf,'position',[0.2,0.6,0.2,0.1])
+                figure(hwarn);
+                interpolate_rate = median(diffx);
+                [data]=interpolate(data,interpolate_rate);
+            end
+
+            % remove mean of the 2nd column
+            data(:,2) = data(:,2) - mean(data(:,2));
+
+            % Use Hilbert transformation to extract envelope
+            envelope = abs(hilbert(data(:,2)));
+            data_am = [data(:,1), envelope];
+            name1 = [dat_name1,'-AM',ext];
+            CDac_pwd
+            dlmwrite(name1, data_am, 'delimiter', ' ', 'precision', 9);
+            if handles.lang_choice == 0
+                msgbox('See main window for amplitude modulation')
+            else
+                msgbox(a87)
+            end
+
+            d = dir; %get files
+            set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+            refreshcolor;
+            cd(pre_dirML); % return to matlab view folder
+
+        end
+    end
 end
 guidata(hObject, handles);
 
