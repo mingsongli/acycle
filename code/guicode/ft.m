@@ -250,9 +250,7 @@ if max(diffx) - min(diffx) > 10 * eps('single')
         [~, ec25] = ismember('ec25',handles.lang_id);
         hwarn = warndlg(lang_var{ec25});
     end
-    %set(0,'Units','normalized') % set units as normalized
     set(gcf,'units','norm') % set location
-    set(gcf,'position',[0.2,0.6,0.2,0.1])
     figure(hwarn);
 end
 
@@ -896,7 +894,6 @@ else
         end
     
         dlmwrite(handles.add_list_ufazedet, [t,iphasedet], 'delimiter', ' ', 'precision', 9);
-        %dlmwrite(handles.add_list_ufazedet, [t,data_filterout(:,5)], 'delimiter', ' ', 'precision', 9);
     end
     cd(pre_dirML); % return to matlab view folder
     if handles.lang_choice == 0

@@ -23,7 +23,10 @@ By      : Mingsong Li (Peking University)
         https://www.marum.de/en/Prof.-Dr.-michael-schulz/
         Michael-Schulz-Software.html
         Thanks to Prof. Zhengtang Guo for his suggestions.
-
+    4. Amplitude Modulation:
+        Use Hilbert transformation to extract envelope
+    5. Gauss filter, Cheby1, Ellip, and Butter fiters
+        Use Hilbert transformation to extract envelope
 _______________________________________
 
 
