@@ -1,0 +1,55 @@
+function [tout, ave_t, var_t, n_t, nsegout] = runavevar(tseg, t, x)
+    % Calculate np as the length of the t array
+    np = length(t);
+
+    % Initialize variables
+    segcnt = 0;
+    start = 0;
+    enddat = false;
+
+    % Preallocate arrays
+    tout = zeros(1, np);
+    ave_t = zeros(1, np);
+    var_t = zeros(1, np);
+    n_t = zeros(1, np);
+
+    while true
+        start = start + 1;
+        segcnt = segcnt + 1;
+
+        % Start time of the segcnt'th segment
+        t0 = t(start);
+        idx = start;
+
+        % Find end of the segment
+        while (t(idx) - t0 >= tseg) && (idx < np)
+            idx = idx + 1;
+        end
+
+        if idx == np
+            enddat = true;
+        end
+
+        % Points in the segment
+        npseg = idx - start + 1;
+
+        % Copy segment data into temporary workspace
+        xwk = x(start:start+npseg-1);
+        twk = t(start:start+npseg-1);
+
+        % Average observation interval for the segment -> used for output
+        tout(segcnt) = sum(twk) / npseg;
+
+        % Determine mean and variance for the segment
+        ave_t(segcnt) = sum(xwk) / npseg;
+        var_t(segcnt) = sum((xwk - ave_t(segcnt)).^2.0) / (npseg - 1);
+        n_t(segcnt) = npseg;
+
+        if enddat
+            break;
+        end
+    end
+
+    % Set nsegout
+    nsegout = segcnt - 1;
+end
