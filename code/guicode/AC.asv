@@ -7306,7 +7306,7 @@ if nplot == 1
             timespan = max(time) - min(time);
             %if handles.lang_choice == 0
                 dlg_title = 'Time-dependent Mean (fixed bandwidth)';
-                prompt =  {['Window size (',handles.unit,'):                     '],...
+                prompt =  {['Window size (',handles.unit,'):                     '],
                             'Fill half-window: 1=yes; 0=no                                                      .',...
                             'Alpha (default = 0.05)'};
             %else
@@ -7319,6 +7319,7 @@ if nplot == 1
             answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
             if ~isempty(answer)
                 window = str2double(answer{1});
+                
                 halfwindow = str2double(answer{2});
                 alpha = str2double(answer{3});
                 % have fun
@@ -7327,7 +7328,7 @@ if nplot == 1
                 % save data
                 
                 %if handles.lang_choice == 0
-                name1 = [dat_name,'_win',num2str(window),handles.unit,'-TimeDepMeanVar',ext];  % New name
+                name1 = [dat_name,'_win',num2str(window),handles.unit,'-step',num2str(step),'-TimeDepMeanVar',ext];  % New name
                 %else
                 %    name1 = [dat_name,'_',num2str(smooth_v),a283,ext];  % New name
                 %end

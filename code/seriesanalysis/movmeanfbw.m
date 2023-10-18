@@ -81,7 +81,7 @@ for t_start = allwindow
             % mean of the window
             window_mean = mean(values(mask,:), 1);
             % variance of the window
-            window_var = var(values(mask,:), 1, 1);
+            window_var = var(values(mask,:), 0, 1); % second input "0" uses N-1
             % median
             window_median = median(values(mask,:), 1);
             % size
