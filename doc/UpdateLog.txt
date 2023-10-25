@@ -1,10 +1,22 @@
 - - - - - -    What's New   - - - - - -
 
+
 _______________________________________
 
 
-Version : Acycle_v2.7.1
-Date    : Oct. 11, 2023 - 
+Version : Acycle_v3.0
+Date    : Oct. 19, 2023 
+By      : Mingsong Li (Peking University)
+    1. Allow Mac to use shortcut keys Command +C/V/X
+	1. Univariate menu
+        Summary Statistics
+        t test
+
+_______________________________________
+
+
+Version : Acycle_v2.8
+Date    : Oct. 11, 2023 - Oct. 19, 2023 
 By      : Mingsong Li (Peking University)
 
 	1. NEW: Data transformations.

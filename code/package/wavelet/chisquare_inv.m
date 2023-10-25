@@ -30,11 +30,16 @@ function X = chisquare_inv(P,V);
 		MAXX = MAXX*10.;
 % this calculates value for X, NORMALIZED by V
 % Note: We need two different versions, depending upon the version of Matlab.
-        if (vers >= 6)
-            X = fminbnd('chisquare_solve',MINN,MAXX,optimset('TolX',TOLERANCE),P,V);
-        else
+    % Since 2023b, ver is disabled.
+    try
+      %  if (vers >= 6)
+      %      X = fminbnd('chisquare_solve',MINN,MAXX,optimset('TolX',TOLERANCE),P,V);
+      %  else
     		X = fmin('chisquare_solve',MINN,MAXX,[0,TOLERANCE],P,V);
-        end
+      %   end
+    catch
+        X = fminbnd('chisquare_solve',MINN,MAXX,optimset('TolX',TOLERANCE),P,V);
+    end
 		MINN = MAXX;
 	end
 	

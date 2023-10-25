@@ -675,6 +675,7 @@ catch
     end
     msgbox([tooltip1,tooltip2],tooltip3);
 end
+AcycleDataTableGUI;
 
 % --- Outputs from this function are returned to the command line.
 function varargout = AC_OutputFcn(hObject, eventdata, handles) 
@@ -702,9 +703,8 @@ if handles.lang_choice > 0
 end
 
 
-if strcmp(EventData.Modifier,'control') 
+if ismember('control', EventData.Modifier) || ismember('command', EventData.Modifier)
     if strcmp(EventData.Key,'c')
-    %disp('ctrl + c')
     contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
     plot_selected = get(handles.listbox_acmain,'Value');
     nplot = length(plot_selected);   % length
@@ -722,9 +722,8 @@ if strcmp(EventData.Modifier,'control')
     guidata(hObject, handles);
     end
 end
-if strcmp(EventData.Modifier,'control')
+if ismember('control', EventData.Modifier) || ismember('command', EventData.Modifier)
     if strcmp(EventData.Key,'x')
-    %disp('ctrl + x')
     contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
     plot_selected = get(handles.listbox_acmain,'Value');
     nplot = length(plot_selected);   % length
@@ -742,9 +741,9 @@ if strcmp(EventData.Modifier,'control')
     guidata(hObject, handles);
     end
 end
-if strcmp(EventData.Modifier,'control')
+
+if ismember('control', EventData.Modifier) || ismember('command', EventData.Modifier)
     if strcmp(EventData.Key,'v')
-    %disp('ctrl + v')
     CDac_pwd;
     copycut = handles.copycut; % cut or copy
     nplot = handles.nplot; % number of selected files
@@ -1638,40 +1637,55 @@ if check == 1
         handles.plot_list{i} = plotseries;
         try
             data_filterout = load(plot_filter_s);
-        catch       
-            fid = fopen(plot_filter_s);
-            try data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
-                fclose(fid);
-                if iscell(data_ft)
-                    try
-                        data_filterout = cell2mat(data_ft);
-                    catch
-                        fid = fopen(plot_filter_s,'at');
-                        fprintf(fid,'%d\n',[]);
-                        fclose(fid);
-                        fid = fopen(plot_filter_s);
-                        data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
-                        fclose(fid);
+        catch
+            
+            try
+
+                T = readtable(plot_filter_s); % Adjust the 'HeaderLines' if more than one header line
+                % If T contains different data types per column, this step might not be straightforward
+                if all(varfun(@isnumeric, T, 'OutputFormat', 'uniform'))
+                    data_filterout = table2array(T);
+                    disp('Load data with header ...')
+                else
+                    disp('Data contains non-numeric values or multiple data types.');
+                end
+
+            catch
+    
+                fid = fopen(plot_filter_s);
+                try data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
+                    fclose(fid);
+                    if iscell(data_ft)
                         try
                             data_filterout = cell2mat(data_ft);
                         catch
-                            if handles.lang_choice == 0
-                                warndlg(['Check data: ',dat_name],'Data Error!')
-                            else
-                                warndlg([a26,dat_name],a27)
+                            fid = fopen(plot_filter_s,'at');
+                            fprintf(fid,'%d\n',[]);
+                            fclose(fid);
+                            fid = fopen(plot_filter_s);
+                            data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
+                            fclose(fid);
+                            try
+                                data_filterout = cell2mat(data_ft);
+                            catch
+                                if handles.lang_choice == 0
+                                    warndlg(['Check data: ',dat_name],'Data Error!')
+                                else
+                                    warndlg([a26,dat_name],a27)
+                                end
                             end
                         end
                     end
-                end
-            catch
-                if handles.lang_choice == 0
-                    warndlg({'Cannot find the data.'; 'Folder Name may contain NO language other than ENGLISH'})
-                else
-                    warndlg({a36; a37})
-                end
-                try
-                    close(figf);
                 catch
+                    if handles.lang_choice == 0
+                        warndlg({'Cannot find the data.'; 'Folder Name may contain NO language other than ENGLISH'})
+                    else
+                        warndlg({a36; a37})
+                    end
+                    try
+                        close(figf);
+                    catch
+                    end
                 end
             end
         end     
@@ -4592,7 +4606,6 @@ else
     case2 = 'No';
 end
 
-disp('debug 1')
 for i = 1:nplot
     if strcmp(copycut,'cut')
         % cut
@@ -4928,30 +4941,43 @@ for nploti = 1:nplot
                         try
                             data = load(data_name);
                         catch
-                            fid = fopen(data_name);
-                            data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
-                            fclose(fid);
-                            if iscell(data_ft)
-                                try
-                                    data = cell2mat(data_ft);
-                                catch
-                                    fid = fopen(data_name,'at');
-                                    fprintf(fid,'%d\n',[]);
-                                    fclose(fid);
-                                    fid = fopen(data_name);
-                                    data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
-                                    fclose(fid);
+
+                            try
+                                
+                                T = readtable(data_name); % Adjust the 'HeaderLines' if more than one header line
+                                % If T contains different data types per column, this step might not be straightforward
+                                if all(varfun(@isnumeric, T, 'OutputFormat', 'uniform'))
+                                    data = table2array(T);
+                                    disp(['Load data ',data_name,' with header ...'])
+                                else
+                                    disp('Data contains non-numeric values or multiple data types.');
+                                end
+                            catch
+                                fid = fopen(data_name);
+                                data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', NaN);
+                                fclose(fid);
+                                if iscell(data_ft)
                                     try
                                         data = cell2mat(data_ft);
                                     catch
-                                        if handles.lang_choice == 0
-                                            warndlg(['Check data file: ', dat_name],'Data Error!')
-                                            disp(['      Error! Skipped. Check the data file:', dat_name]);
-                                        else
-                                            warndlg([a168, dat_name],a169)
-                                            disp([a170, dat_name]);
+                                        fid = fopen(data_name,'at');
+                                        fprintf(fid,'%d\n',[]);
+                                        fclose(fid);
+                                        fid = fopen(data_name);
+                                        data_ft = textscan(fid,'%f%f','Delimiter',{';','*',',','\t','\b',' '},'EmptyValue', Inf);
+                                        fclose(fid);
+                                        try
+                                            data = cell2mat(data_ft);
+                                        catch
+                                            if handles.lang_choice == 0
+                                                warndlg(['Check data file: ', dat_name],'Data Error!')
+                                                disp(['      Error! Skipped. Check the data file:', dat_name]);
+                                            else
+                                                warndlg([a168, dat_name],a169)
+                                                disp([a170, dat_name]);
+                                            end
+                                            data_error = 1;
                                         end
-                                        data_error = 1;
                                     end
                                 end
                             end
@@ -8908,3 +8934,138 @@ if check == 1
     column_manipulateGUI(handles);
 end
 
+
+
+% --------------------------------------------------------------------
+function menu_univariate_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_univariate (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function menu_bivariate_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_bivariate (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function menu_multivariate_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_multivariate (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function menu_statsummary_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_statsummary (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+UniStatisticSum;
+
+
+% --------------------------------------------------------------------
+function menu_ttest_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_ttest (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+Unittest;
+
+% --------------------------------------------------------------------
+function menu_NewDataTable_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_NewDataTable (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox_acmain,'Value');
+nplot = length(plot_selected);   % length
+if nplot == 0
+    AcycleDataTableGUI;
+end
+check = 0;
+% check
+for i = 1:nplot
+    plot_no = plot_selected(i);
+    plot_filter_s = char(contents(plot_no));
+    plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
+    if isdir(plot_filter_s)
+        AcycleDataTableGUI;
+        return
+    else
+        [~,dat_name,ext] = fileparts(plot_filter_s);
+        if sum(strcmp(ext,handles.filetype)) > 0
+            check = 1; % selection can be executed 
+        end
+    end
+end
+
+if check == 1
+    GETac_pwd; 
+    for i = 1: nplot
+        plot_no = plot_selected(i);
+        handles.plot_s{i} = fullfile(ac_pwd,char(contents(plot_no)));
+    end
+    handles.nplot = nplot;
+    guidata(hObject, handles);
+    AcycleDataTableGUI(handles);
+end
+
+
+% --------------------------------------------------------------------
+function menu_uni2SamTest_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_uni2SamTest (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+UniTwoSampleTestsUI;
+
+
+% --------------------------------------------------------------------
+function menu_anova_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_anova (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+ANOVAUI;
+
+
+% --------------------------------------------------------------------
+function menu_normaltest_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_normaltest (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+UniNormalityUI;
+
+
+% --------------------------------------------------------------------
+function menu_chi2gof_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_chi2gof (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+UniChi2GOFUI;
+
+
+% --------------------------------------------------------------------
+function menu_corr_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_corr (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+BivCorrUI;
+
+
+% --------------------------------------------------------------------
+function menu_covariance_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_covariance (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+BivCovUI;
+
+
+% --------------------------------------------------------------------
+function menu_linearReg_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_linearReg (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+BivLinearRegUI;
