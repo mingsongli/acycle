@@ -43,7 +43,8 @@ function AcycleDataTableGUI(varargin)
                     data{j, colstart+k-1} = num2str(datai(j,k));
                 end
             end
-            
+            % add additional empty row or column
+            data{nrowi + 1, ncoli+1} = num2str([]);
             colstart = colstart + ncoli +1; % leave a empty column
         end
     catch
@@ -214,11 +215,9 @@ function AcycleDataTableGUI(varargin)
                 tdata{select_id1(1)+i-1, select_id2(1)+j-1} = num2str(dataMatrix(i,j));
             end
         end
-        %for i = dataMatrixRow
-        %    for j = 1: dataMatrixCol
-            tdata{select_id1(1)+ i, select_id2(1)+j} = num2str([]);
-        %end
-        %tdata
+        % add additional empty row or column
+        tdata{select_id1(1)+ i, select_id2(1)+j} = num2str([]);
+
         t.Data = tdata;
         
     end

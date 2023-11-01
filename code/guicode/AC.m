@@ -427,7 +427,6 @@ else
 end
 
 set(h_push_plot,'tooltip',tooltip,'CData',imread('menu_plot.jpg'))  % set tooltip and button image
-%set(h_push_plot,'Callback',@push_plot_clbk)  % set callback function
 set(h_push_plot,'Callback',@push_plot_clbk)  % set callback function
 
 %% push_refresh
@@ -1501,7 +1500,6 @@ function menu_plot_Callback(hObject, eventdata, handles)
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = handles.index_selected;  % read selection in listbox 1
 nplot = length(plot_selected);   % length
-
 
 %language
 lang_id = handles.lang_id;
@@ -8951,8 +8949,8 @@ function menu_bivariate_Callback(hObject, eventdata, handles)
 
 
 % --------------------------------------------------------------------
-function menu_multivariate_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_multivariate (see GCBO)
+function menu_multivariate1_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_multivariate1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
@@ -9069,3 +9067,78 @@ function menu_linearReg_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 BivLinearRegUI;
+
+
+% --------------------------------------------------------------------
+function Menu_EMDmenu_Callback(hObject, eventdata, handles)
+% hObject    handle to Menu_EMDmenu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function menu_emd_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_emd (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox_acmain,'Value');
+nplot = length(plot_selected);   % length
+loaddata4acycle;  % load data as data_filterout, must be evenly spaced sampling
+t = data_filterout(:,1); % first column
+dt = median(diff(t)); % sampling rate
+time_series = data_filterout(:,2); % 2nd column
+[imfs,residual,info] = emd(time_series);
+imfsn = size(imfs, 2);
+nw = 2;
+% plot
+figure
+subplot(imfsn + 2, 1, 1)
+plot(t,time_series);
+title('Raw data')
+pow = [];
+for k = 1:imfsn
+    subplot(imfsn+2, 1, k+1);
+    plot(t,imfs(:, k));
+    title(['IMF ', num2str(k)]);
+    % periodogram
+    [po,w]=pmtm(imfs(:, k),nw);
+    %[po,fd1]=periodogram(imfs(:, k),[],[],1/dt);
+    pow = [pow,po];
+end
+fd1=w/(2*pi*dt);
+subplot(imfsn + 2, 1, imfsn + 2)
+plot(t,residual);
+title('Residual')
+% plot periodogram
+figure
+for k = 1:imfsn
+    subplot(imfsn, 1, k);
+    plot(fd1, pow(:,k), 'DisplayName', ['IMF ', num2str(k)])
+    ylabel(['Power (IMF', num2str(k),')']);
+    ax = gca;
+    % Turn on minor ticks for the x-axis
+    ax.XAxis.MinorTick = 'on';
+end
+% Add labels, title, and legend
+xlabel('Frequency');
+% write data
+name1 = [plotseries,'-emd',ext];
+current_data = [t,imfs,residual];
+CDac_pwd; % cd working dir
+dlmwrite(name1, current_data, 'delimiter', ' ', 'precision', 9);
+refreshcolor;
+cd(pre_dirML); % return view dir
+
+% --------------------------------------------------------------------
+function menu_eemd_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_eemd (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function menu_memd_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_memd (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
