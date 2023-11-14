@@ -26,14 +26,20 @@ function datatransformationsGUI(varargin)
     handles.edit_acfigmain_dir= varargin{1}.edit_acfigmain_dir;
     handles.val1 = varargin{1}.val1;
     handles.slash_v = varargin{1}.slash_v;
-
+    filename = handles.data_name;
     data_name = handles.dat_name;
     checkmaxn = 20;
     
     ncol = size(data, 2);
     
     fnt = '';   % claim a variable
+    t=[];
     yt = [];    % claim a variable
+    lambda = []; % box-cox parameters
+    j=[];  % number of selection
+    edit1 = [];edit1find=[];
+    edit2=[];
+    edit3=[];
     nCheckbox = min(checkmaxn, ncol); % max number of checkbox    
     nRows = ceil(nCheckbox/10);  
     
@@ -139,6 +145,10 @@ function datatransformationsGUI(varargin)
               'Units', 'normalized', 'Position', [0.6, 1-6*0.1667, 0.1, 0.1667], ...
               'FontSize', 12, 'Tag', 'radio12',...
                 'Callback',{@checkradio});
+    radioButtons(13) = uicontrol(panel2, 'Style', 'radiobutton', 'String', 'Box-Cox', ...
+              'Units', 'normalized', 'Position', [0.8, 1-6*0.1667, 0.18, 0.1667], ...
+              'FontSize', 12, 'Tag', 'radio13',...
+                'Callback',{@checkradio});
 
     % 3rd Panel - Angular Transformation Radiobuttons
     panel3 = uipanel('Title', 'Angular Transformation Options', ...
@@ -242,10 +252,84 @@ function datatransformationsGUI(varargin)
         else
             disp([' Data in Working Dir: ', pre_dirML])
         end
-
+        
+        % Exporting the data to a text file
         % Save the transformed data
-        name1 = [data_name,'-',fnt,'.txt'];
-        dlmwrite(name1, yt, 'delimiter', ' ', 'precision', 9);
+        file_name = [data_name,'-',fnt,'.txt'];
+        %dlmwrite(name1, yt, 'delimiter', ' ', 'precision', 9);
+        file_id = fopen(file_name, 'wt'); % Open the file for writing text
+        fprintf(file_id, '%% Raw data: %s\n', filename);
+        if j == 1
+            fprintf(file_id, '%% Standardization or z-score normalization\n');
+        end
+        if j == 2
+            fprintf(file_id, '%% Normalization\n');
+            edit1 = str2double(get(editText(1),'String'));
+            edit2 = str2double(get(editText(2),'String'));
+            min_val = min(edit1, edit2);
+            max_val = max(edit1, edit2);
+            fprintf(file_id, '%% Min: %7.5f; Max: %7.5f\n', min_val,max_val);
+        end
+        if j == 5
+            fprintf(file_id, '%% Reciprocal\n');
+            fprintf(file_id, '%% 1/x\n');
+        end
+        if j == 7
+            fprintf(file_id, '%% Logarithm\n');
+            edit3 = str2double(get(editText(3),'String'));
+            fprintf(file_id, '%% Base: %f\n', edit3);
+        end
+        if j == 8
+            fprintf(file_id, '%% Logarithm\n');
+            fprintf(file_id, '%% Base: e\n');
+        end
+        if j == 9
+            fprintf(file_id, '%% Exponential function e^x, \n');
+            fprintf(file_id, '%% where e is the base of the natural logarithm, approximately equal to 2.71828\n');
+        end
+        if j == 10
+            edit3 = str2double(get(editText(4),'String'));
+            fprintf(file_id, '%% Exponential function n^x, where n is %f\n',edit3);
+        end
+        if j == 11 % sqrt
+            fprintf(file_id, '%% Square root\n');
+        end
+        if j == 12 % cube root
+            fprintf(file_id, '%% Cube root\n');
+        end
+        if j==13  % used box-cox
+            fprintf(file_id, '%% BOX-COX transformation\n');
+            fprintf(file_id, '%% Best lambda: %f\n', lambda);
+        end
+        
+        if j == 21 % 
+            fprintf(file_id, '%% Sine: sin(x)\n');
+        end
+        
+        if j == 22 % 
+            fprintf(file_id, '%% Cosine: cos(x)\n');
+        end
+        
+        if j == 23 % 
+            fprintf(file_id, '%% Tangent: tan(x)\n');
+        end
+
+        if j == 24 % 
+            fprintf(file_id, '%% Cotangent: cot(x)\n');
+        end
+        if j == 25 % 
+            fprintf(file_id, '%% Secant: sec(x)\n');
+        end
+        if j == 26 % 
+            fprintf(file_id, '%% Cosecant: csc(x)\n');
+        end
+        fprintf(file_id, '%% \n');
+        t = yt(:,1);
+        y = yt(:,2);
+        for ki = 1:length(t)
+            fprintf(file_id, '%7.9f\t%7.9f\n', t(ki), y(ki)); % Transpose for column-wise writing
+        end
+        fclose(file_id);
         
         % refresh main window
         d = dir; %get files
@@ -340,6 +424,7 @@ function datatransformationsGUI(varargin)
         if length(checkid) > 0  && ~isnan(checkid(1))
             % calculation
             dat = data(:,checkid);
+            yt = data;
             if j == 2 % normalize
                 edit1 = str2double(get(editText(1),'String'));  % Fetch min value
                 edit2 = str2double(get(editText(2),'String'));  % Fetch max value
@@ -360,6 +445,11 @@ function datatransformationsGUI(varargin)
             end
             % update demo
             updateplot1(src,dat);
+            
+            % put back to yt
+            for k = 1: length(checkid)
+                yt(:, checkid(k)) = dat(:,k);
+            end
         end
     end
 
@@ -388,6 +478,7 @@ function datatransformationsGUI(varargin)
         %checkid
         radioID = get(src,'Tag');
         j = str2double(radioID(6:end));  % read radio ID number
+
         for i =1:26
             try
                 set(radioButtons(i),'Value', 0)   % avoid error for empty radioButtons(i)
@@ -398,12 +489,15 @@ function datatransformationsGUI(varargin)
         % set related radio to 1
         if j == 3 % log
             set(radioButtons(7),'Value', 1)
+            j=7;
         end
         if j == 4 % log
             set(radioButtons(9),'Value', 1)
+            j=9;
         end
         if j == 6 % log
             set(radioButtons(11),'Value', 1)
+            j=11;
         end
         if j == 20 % log
             set(radioButtons(21),'Value', 1)
@@ -416,7 +510,10 @@ function datatransformationsGUI(varargin)
             set(radioButtons(4),'Value', 1)
         end
 
-        if j == 11 || j==12 %ln
+        if j == 11 || j==12  %ln
+            set(radioButtons(6),'Value', 1)
+        end
+        if j == 13 %
             set(radioButtons(6),'Value', 1)
         end
         if j >= 21 %ln
@@ -427,6 +524,7 @@ function datatransformationsGUI(varargin)
             % calculation
             dat = data(:,checkid);
             yt = data;
+            lambda = [];
             if j == 1  % Zscore
                 dat = zscore(dat);
                 fnt = 'standardized';
@@ -473,6 +571,14 @@ function datatransformationsGUI(varargin)
             if j == 12 % cube
                 dat = nthroot(dat,3);
                 fnt = 'cube';
+            end
+            if j == 13 % box-cox
+                if any(dat <= 0)
+                    warndlg('All elements of data must be positive for Box-Cox transformation.')
+                    dat = dat + abs(min(dat)) + eps;
+                end
+                [dat, lambda] = boxcox(dat);
+                fnt = 'box-cox';
             end
             if j == 21 % sine
                 dat = sin(dat);
@@ -538,7 +644,7 @@ function datatransformationsGUI(varargin)
             end            
             
             coli = checkid(1); % use the first for plot
-
+            % plot the raw data 
             if coli > 0
                 x = data(:, 1);
                 y = data(:, coli);
@@ -559,7 +665,7 @@ function datatransformationsGUI(varargin)
                 ax.XMinorTick = 'on'; 
                 ax.YMinorTick = 'on';
             end
-            
+            % transformed data
             subplot('Position', [0.05, 0.05, 0.6, 0.4]);
             plot(x,dat(:,1));
             xlim([min(x), max(x)]);
@@ -569,13 +675,16 @@ function datatransformationsGUI(varargin)
                 error('Error using ylim in subplot(2,2,3). Results may have complex values???')
             end
             title('New data');
+            if j == 13 % box-cox
+                title(['BOX-COX Transformed Data. Best lambda: ', num2str(lambda)]);
+            end
             ax = gca; 
             ax.XMinorTick = 'on'; 
             ax.YMinorTick = 'on';
-
+            
             subplot('Position', [0.7, 0.05, 0.25, 0.4]);
             histfit(dat(:,1), [], 'kernel');
-            title('New data histogram');
+            title('Transformed data histogram');
             ax = gca; 
             ax.XMinorTick = 'on'; 
             ax.YMinorTick = 'on';

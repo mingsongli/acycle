@@ -1,127 +1,125 @@
 function ac
 
 %% ACYCLE
-%% time-series analysis software for paleoclimate research and education
+%% Software for Time-Series Analysis in Paleoclimate Research and Education
 %%
-% This is a start-up script for the Acycle software (MatLab version)
+% Startup Instructions for Acycle Software (MATLAB Version)
 %
-% Option 1: Right click ac.m , then select "Run". All set.
+% Option 1: Right-click on the file 'ac.m' and choose "Run". That's it!
 %
-% Option 2: In MatLab Command Window, type:
-%           ac
-%           then press the "Enter" key. All set.
+% Option 2: Open the MATLAB Command Window, type 'ac', and hit "Enter". You're good to go!
 %
 %%
 %**************************************************************************
-% Please acknowledge the program author on any publication of scientific 
-% results based in part on use of the program and cite the following
-% article in which the program was described:
+% Acknowledgment and Citation Instructions for the Acycle Program:
+% 
+% If you use Acycle in your scientific work that leads to publication, 
+% please acknowledge the program's author. Also, reference the following
+% publication, which describes Acycle:
 %
-%           Mingsong Li, Linda Hinnov, Lee Kump. 2019. Acycle: Time-series  
-%           analysis software for paleoclimate projects and education,
-%           Computers & Geosciences, https://doi.org/10.1016/j.cageo.2019.02.011
+%   Mingsong Li, Linda Hinnov, Lee Kump. 2019. "Acycle: Time-Series 
+%   Analysis Software for Paleoclimate Projects and Education," 
+%   Computers & Geosciences. Available at: https://doi.org/10.1016/j.cageo.2019.02.011
 %
-% If you publish results using techniques such as correlation coefficient,
-% sedimentary noise model, power decomposition analysis, evolutionary fast
-% Fourier transform, wavelet transform, Bayesian changepoint, (e)TimeOpt,
-% or other approaches, please also cite original publications,
-% as detailed in Acycle Wiki and the "AC_Users_Guide.pdf" file at
+% Additionally, if your work involves specific techniques like correlation 
+% coefficient, sedimentary noise model, power decomposition analysis, 
+% evolutionary fast Fourier transform, wavelet transform, Bayesian changepoint,
+% (e)TimeOpt, or other methods, please also cite the respective original 
+% publications. Details on these references can be found in the 
+% "AC_Users_Guide.pdf" document.
 %
-% https://github.com/mingsongli/acycle/wiki
+%**************************************************************************
+%
+%
 % https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf
 %
-% Program Author:
+% Author Information for the Acycle Program:
 %
-%   Mingsong Li, PhD
-%   3417 Yifu No. 2 Bldg, 
-%   School of Earth and Space Sciences, Peking University
-%   No. 5 Yiheyuan Road, Haidian, Beijing 100871, China
-%   Contact:  msli@pku.edu.edu; limingsonglms@gmail.com
-%   Website:  http://acycle.org
+%   Dr. Mingsong Li
+%   Address: 3417 Yifu No. 2 Building, 
+%            School of Earth and Space Sciences, 
+%            Peking University, 
+%            No. 5 Yiheyuan Road, Haidian District, 
+%            Beijing 100871, China
+%   Email: msli@pku.edu.edu; limingsonglms@gmail.com
+%   Websites: http://acycle.org
 %             https://github.com/mingsongli/acycle
-%             
-% 
-%   Linda A. Hinnov
-%   Department of Atmospheric, Oceanic and Earth Sciences
-%   George Mason University
-%   3454 Exploratory Hall
-%   Fairfax, Virginia 22030, USA
-%   Email: lhinnov@gmu.edu
-%   Website: http://mason.gmu.edu/~lhinnov/
 %
-% Copyright (C) 2017-2023
+% Copyright (C) 2017-2023 by Mingsong Li
 %
-% This program is a free software; you can redistribute it and/or modify it
-% under the terms of the GNU GENERAL PUBLIC LICENSE as published by the 
-% Free Software Foundation.
+% License Information:
 %
-% This program is distributed in the hope that it will be useful, but 
-% WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-% or FITNESS FOR A PARTICULAR PURPOSE.
+% This software is freely available and can be redistributed and/or modified
+% under the terms of the GNU General Public License as published by 
+% the Free Software Foundation.
 %
-% You should have received a copy of the GNU General Public License. If
-% not, see < https://www.gnu.org/licenses/ >
+% This software is provided "as is" with no warranty of any kind, including
+% the warranty of design, merchantability, and fitness for a particular purpose.
+%
+% The GNU General Public License can be accessed at <https://www.gnu.org/licenses/>.
+
 %
 %**************************************************************************
 %%
-%help ac
+% Determine the directory of 'ac.m'
 ac_dir_str = which('ac.m');
-[path_root,~,~] = fileparts(ac_dir_str);
-% Test valid directory
+[path_root, ~, ~] = fileparts(ac_dir_str);
+% Store the initial working directory
 pwd_init = pwd;
 
-
-
 if ~isdeployed
-    
-    % MatLab version
-    
-    % add path for MatLab version
+    % If running in MATLAB (not compiled)
+
+    % Add Acycle's root directory and subdirectories to MATLAB's search path
     addpath(genpath(path_root));
-    % Please don't remove the following "Acknowledgment"
+    % Display an acknowledgment message (do not remove this line)
     help ac_acknowledgment
+
+    % Change to Acycle's root directory and then revert to initial directory
+    % This is necessary for Acycle's proper functioning
     try
-        eval(['cd ',path_root])
+        eval(['cd ', path_root])
         cd(pwd_init)
     catch
+        % Error message if the directory path contains non-standard characters
         errordlg('Directory may NOT contain non-English or non-numeric characters',...
-            'Path Error')
+                 'Path Error');
     end
+
+    % Display a splash screen with progress bar (if available)
     try
-        % splash screen
-        s = SplashScreen( 'Splashscreen', 'acycle_logo.jpg', ...
-                        'ProgressBar', 'on', ...
-                        'ProgressPosition', 1, ...
-                        'ProgressRatio', 0.05 );
-        s.addText( 160, 460, 'Loading ...', 'FontSize', 50, 'Color', 'white' )
-        % logo
-        pause(0.25)
+        s = SplashScreen('Splashscreen', 'acycle_logo.jpg', ...
+                         'ProgressBar', 'on', ...
+                         'ProgressPosition', 1, ...
+                         'ProgressRatio', 0.05);
+        s.addText(160, 460, 'Loading ...', 'FontSize', 50, 'Color', 'white');
+        pause(0.25);  % Short pause to display the splash screen
     catch
-        
+        % If splash screen fails to load, continue without it
     end
 else
+    % If running a compiled standalone version
+
+    % Similar splash screen setup for the standalone version
     try
-        % standalone version
-        % splash screen
-        s = SplashScreen( 'Splashscreen', 'acycle_logo.jpg', ...
-                        'ProgressBar', 'on', ...
-                        'ProgressPosition', 1, ...
-                        'ProgressRatio', 0.05 );
-        s.addText( 160, 460, 'Loading ...', 'FontSize', 50, 'Color', 'white' )
-        s.addText( 140, 488, 'may take 10-60 seconds', 'FontSize', 20, 'Color', 'white' )
-        pause(1)
-        set(s,'ProgressRatio', 0.3)
-        pause(1)
-        set(s,'ProgressRatio', 0.5)
-        pause(1)
+        s = SplashScreen('Splashscreen', 'acycle_logo.jpg', ...
+                         'ProgressBar', 'on', ...
+                         'ProgressPosition', 1, ...
+                         'ProgressRatio', 0.05);
+        s.addText(160, 460, 'Loading ...', 'FontSize', 50, 'Color', 'white');
+        s.addText(140, 488, 'may take 10-60 seconds', 'FontSize', 20, 'Color', 'white');
+        pause(1);
+        set(s,'ProgressRatio', 0.3);
+        pause(1);
+        set(s,'ProgressRatio', 0.5);
+        pause(1);  % Pauses to simulate loading progress
     catch
+        % If splash screen fails to load, continue without it
     end
 end
 
+% Launch the Acycle GUI
+AC;
 
-% start up Acycle GUI
-AC
-
-% delete splash screen
-delete( s )
-end
+% Close the splash screen at the end
+delete(s);

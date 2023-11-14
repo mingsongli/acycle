@@ -605,7 +605,7 @@ handles.MTMtabtchi = 'notabtchi';
 handles.nw = 2;
 handles.copycut = 'copy';
 handles.nplot = 0;
-handles.filetype = {'.txt','.csv','','.res','.dat','.out'};
+handles.filetype = {'.txt','.csv','','.res','.dat','.out','.tab'};
 handles.acfig = gcf;
 handles.math_sort = 1;
 handles.math_unique = 1;
@@ -674,7 +674,8 @@ catch
     end
     msgbox([tooltip1,tooltip2],tooltip3);
 end
-AcycleDataTableGUI;
+% open work table
+%AcycleDataTableGUI;
 
 % --- Outputs from this function are returned to the command line.
 function varargout = AC_OutputFcn(hObject, eventdata, handles) 
@@ -7536,25 +7537,6 @@ contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of lis
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
 if nplot == 1
-    
-%     %language
-%     lang_id = handles.lang_id;
-%     if handles.lang_choice > 0
-% 
-%         [~, locb1] = ismember('main24',lang_id);
-%         main24 = handles.lang_var{locb1};
-%         [~, locb1] = ismember('menu103',lang_id);
-%         menu103 = handles.lang_var{locb1};
-% 
-%         [~, locb1] = ismember('a280',lang_id);
-%         a280 = handles.lang_var{locb1};
-%         [~, locb1] = ismember('a281',lang_id);
-%         a281 = handles.lang_var{locb1};
-%         [~, locb1] = ismember('a282',lang_id);
-%         a282 = handles.lang_var{locb1};
-%         [~, locb1] = ismember('a283',lang_id);
-%         a283 = handles.lang_var{locb1};
-%     end
 
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
@@ -9085,6 +9067,7 @@ contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of lis
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
 loaddata4acycle;  % load data as data_filterout, must be evenly spaced sampling
+
 t = data_filterout(:,1); % first column
 dt = median(diff(t)); % sampling rate
 time_series = data_filterout(:,2); % 2nd column
@@ -9095,12 +9078,15 @@ nw = 2;
 figure
 subplot(imfsn + 2, 1, 1)
 plot(t,time_series);
-title('Raw data')
+xlim([min(t), max(t)])
+title('EMD')
+ylabel('Raw data')
 pow = [];
 for k = 1:imfsn
     subplot(imfsn+2, 1, k+1);
     plot(t,imfs(:, k));
-    title(['IMF ', num2str(k)]);
+    xlim([min(t), max(t)])
+    ylabel(['IMF', num2str(k)]);
     % periodogram
     [po,w]=pmtm(imfs(:, k),nw);
     %[po,fd1]=periodogram(imfs(:, k),[],[],1/dt);
@@ -9109,24 +9095,53 @@ end
 fd1=w/(2*pi*dt);
 subplot(imfsn + 2, 1, imfsn + 2)
 plot(t,residual);
-title('Residual')
+xlim([min(t), max(t)])
+ylabel('Residual')
+
 % plot periodogram
 figure
 for k = 1:imfsn
     subplot(imfsn, 1, k);
     plot(fd1, pow(:,k), 'DisplayName', ['IMF ', num2str(k)])
-    ylabel(['Power (IMF', num2str(k),')']);
+    ylabel(['IMF', num2str(k)]);
     ax = gca;
+    if k == 1
+        title('2 pi MTM power spectra')
+    end
     % Turn on minor ticks for the x-axis
     ax.XAxis.MinorTick = 'on';
 end
 % Add labels, title, and legend
 xlabel('Frequency');
-% write data
-name1 = [plotseries,'-emd',ext];
-current_data = [t,imfs,residual];
+
 CDac_pwd; % cd working dir
-dlmwrite(name1, current_data, 'delimiter', ' ', 'precision', 9);
+
+%% Dave data
+% write data
+file_name = [plotseries,'-emd',ext];
+current_data = [t,imfs,residual];
+[nrow, ncol] = size(imfs);
+file_id = fopen(file_name, 'wt'); % Open the file for writing text
+fprintf(file_id, '%% Acycle: Empirical Mode Decompostion (EMD)\n');
+fprintf(file_id, '%% \n');
+fprintf(file_id, '%% Raw data: %s\n', file_name);
+fprintf(file_id, '%% \n');
+% Dynamically create the header based on the number of columns
+header = ['% Time'];
+for i = 1:ncol % assuming ncol is the number of columns
+    header = [header, sprintf('\t\tIMF%d', i)];
+end
+header = [header, sprintf('\t\tResidual')];
+fprintf(file_id, '%s\n', header); % Write the header
+% Data
+for ki = 1:nrow
+    for kj = 1:(ncol+2)  % with t and residual
+        fprintf(file_id, '%7.9f\t', current_data(ki, kj)); % Modify here as per your matrix name
+    end
+    fprintf(file_id, '\n'); % New line at the end of each rowend
+end
+fclose(file_id);
+%%
 refreshcolor;
 cd(pre_dirML); % return view dir
 
@@ -9135,7 +9150,114 @@ function menu_eemd_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_eemd (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox_acmain,'Value');
+nplot = length(plot_selected);   % length
+loaddata4acycle;  % load data as data_filterout, must be evenly spaced sampling
 
+t = data_filterout(:,1); % first column
+dt = median(diff(t)); % sampling rate
+time_series = data_filterout(:,2); % 2nd column
+
+[imfs,~,~] = emd(time_series);
+[~, ncol] = size(imfs);
+
+dlg_title = 'Acycle: Ensemble Empirical Mode Decomposition (EEMD)';
+prompt = {...
+    'goal (Number of Intrinsic Mode Functions - IMFs)',...
+    'ens (Number of Ensemble Members)',...
+    'nos (Amplitude of Added Noise)'};
+
+num_lines = 1;
+defaultans = {num2str(ncol+2),'100','0.2'};
+options.Resize='on';
+answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+if ~isempty(answer)
+%     h1 = warndlg('EEMD: Slow! See command window');
+    goal = str2double(answer{1}); % default based on the emd IMFs + residual
+    ens = str2double(answer{2}); % default is 100
+    nos = str2double(answer{3}); % default is 20%
+    %run
+    imfs = eemd(time_series', goal, ens, nos);
+    % copy code above function menu_emd_Callback
+    imfs = imfs';
+    imfsn = size(imfs, 2);
+    nw = 2;
+    % plot
+    figure
+    subplot(imfsn + 1, 1, 1)
+    plot(t,time_series);
+    xlim([min(t), max(t)])
+    
+    ylabel('Raw data')
+    pow = [];
+    for k = 1:imfsn
+        subplot(imfsn+1, 1, k+1);
+        plot(t,imfs(:, k));
+        xlim([min(t), max(t)])
+        ylabel(['IMF', num2str(k)]);
+        if k == 1
+            title('EEMD')
+        end
+        % periodogram
+        [po,w]=pmtm(imfs(:, k),nw);
+        pow = [pow,po];
+    end
+    fd1=w/(2*pi*dt);
+
+    % plot periodogram
+    figure
+    
+    for k = 1:imfsn-1
+        subplot(imfsn-1, 1, k);
+        plot(fd1, pow(:,k), 'DisplayName', ['IMF ', num2str(k)])
+        if k == 1
+            title('2-pi MTM power spectra of IMFs')
+        end
+        ylabel(['IMF', num2str(k)]);
+        ax = gca;
+        % Turn on minor ticks for the x-axis
+        ax.XAxis.MinorTick = 'on';
+    end
+    % Add labels, title, and legend
+    xlabel('Frequency');
+    CDac_pwd; % cd working dir
+
+    %% Dave data
+    % write data
+    file_name = [plotseries,'-eemd',ext];
+    current_data = [t,imfs];
+    [nrow, ncol] = size(imfs);
+    file_id = fopen(file_name, 'wt'); % Open the file for writing text
+    fprintf(file_id, '%% Acycle: Ensemble Empirical Mode Decompostion (EEMD)\n');
+    fprintf(file_id, '%% \n');
+    fprintf(file_id, '%% Raw data: %s\n', file_name);
+    fprintf(file_id, '%% goal (Number of Intrinsic Mode Functions - IMFs): %d\n', goal);
+    fprintf(file_id, '%% ens  (Number of Ensemble Members):                %d\n', ens);
+    fprintf(file_id, '%% nos  (Amplitude of Added Noise):                  %f\n', nos);
+    fprintf(file_id, '%% \n');
+    % Dynamically create the header based on the number of columns
+    header = ['% Time'];
+    for i = 1:ncol-1 % assuming ncol is the number of columns
+        header = [header, sprintf('\t\tIMF%d', i)];
+    end
+    header = [header, sprintf('\t\tResidual')];
+    fprintf(file_id, '%s\n', header); % Write the header
+    % Data
+    for ki = 1:nrow
+        for kj = 1:(ncol+1)  % with t
+            fprintf(file_id, '%7.9f\t', current_data(ki, kj)); % Modify here as per your matrix name
+        end
+        fprintf(file_id, '\n'); % New line at the end of each rowend
+    end
+    fclose(file_id);
+    %%
+    refreshcolor;
+    cd(pre_dirML); % return view dir
+%     try close(h1)
+%     catch
+%     end
+end
 
 % --------------------------------------------------------------------
 function menu_memd_Callback(hObject, eventdata, handles)

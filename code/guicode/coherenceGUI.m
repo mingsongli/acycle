@@ -173,7 +173,7 @@ polarscatter(45,10,50,'filled','MarkerFaceAlpha',.5)
 axes(handles.axes1);
 plot(rand(20,2))
 
-handles.cohthreshold = 0;
+handles.cohthreshold = 0.05;
 set(handles.edit7,'string',num2str(handles.cohthreshold))
 
 % Choose default command line output for coherenceGUI

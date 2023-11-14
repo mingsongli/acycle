@@ -117,7 +117,7 @@ set(handles.text23,'position',[0.73,0.852,0.08,0.07])
 set(handles.pushbutton12,'position',[0.82,0.852,0.13,0.1])
 
 set(handles.slider4,'position',[0.03,0.729,0.94,0.09])
-set(handles.uipanel8,'position',[0.413,0.249,0.606,0.485])
+set(handles.uipanel8,'position',[0.3,0.249,0.4,0.485])
 
 set(handles.prewhiten_lowess_checkbox,'position',[0.043,0.61,0.4,0.1])
 set(handles.prewhiten_rlowess_checkbox,'position',[0.043,0.51,0.4,0.1])
@@ -127,13 +127,14 @@ set(handles.checkbox34,'position',[0.043,0.21,0.4,0.1])
 set(handles.prewhiten_all_checkbox,'position',[0.043,0.11,0.38,0.1])
 set(handles.prewhiten_clear_pushbutton,'position',[0.375,0.11,0.285,0.1])
 set(handles.prewhiten_pushbutton,'position',[0.673,0.11,0.235,0.1])
+set(handles.checkboxEMDres,'position',[0.7,0.61,0.29,0.1])
 
 set(handles.prewhiten_mean_checkbox,'position',  [0.057,0.737,0.533,0.212])
 set(handles.prewhiten_linear_checkbox,'position',[0.057,0.535,0.92,0.212])
 set(handles.checkbox11,'position',[0.057,0.333,0.607,0.212])
 set(handles.checkbox13,'position',[0.057,0.071,0.2,0.212])
-set(handles.edit23,'position',[0.28,0.071,0.214,0.208])
-set(handles.text25,'position',[0.5,0.123,0.321,0.123])
+set(handles.edit23,'position',[0.18,0.071,0.214,0.208])
+set(handles.text25,'position',[0.4,0.123,0.321,0.123])
 
 set(handles.uipanel7,'position',[0.025,0.03,0.95,0.213])
 set(handles.prewhiten_select_popupmenu,'position',[0.043,0.2,0.9,0.5])
@@ -167,6 +168,7 @@ set(handles.prewhiten_lowess_checkbox,'Value', 0);
 set(handles.prewhiten_rlowess_checkbox,'Value', 0);
 set(handles.prewhiten_loess_checkbox,'Value', 0);
 set(handles.prewhiten_rloess_checkbox,'Value', 0);
+set(handles.checkboxEMDres,'Value', 0);
 set(handles.checkbox34,'Value', 0);
 set(handles.prewhiten_mean_checkbox,'Value', 0);
 set(handles.prewhiten_linear_checkbox,'Value', 0);
@@ -186,7 +188,7 @@ handles.prewhiten_rloess = 'notloess';
 handles.prewhiten_sgolay = 'notsgolay';
 handles.prewhiten_polynomial2 = 'not2nd';
 handles.prewhiten_polynomialmore = 'notmore';
-
+handles.prewhiten_emdres = 'notemdres';
 % Update handles structure
 guidata(hObject, handles);
 
@@ -293,6 +295,37 @@ update_detrend_plot_fig
 guidata(hObject, handles);
 
 
+% --- Executes during object creation, after setting all properties.
+function checkboxEMDres_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit10 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+% --- Executes on button press in prewhiten_rloess_checkbox.
+function checkboxEMDres_Callback(hObject, eventdata, handles)
+% hObject    handle to prewhiten_rloess_checkbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of prewhiten_rloess_checkbox
+handles.prewhiten_emdres = get(handles.checkboxEMDres,'string');
+prewhitenok = get(handles.checkboxEMDres,'Value');
+
+if prewhitenok == 1
+    set(handles.checkboxEMDres,'Enable','on')
+else
+    handles.prewhiten_emdres = '';
+end
+
+update_detrend_plot_fig
+
+guidata(hObject, handles);
 
 % --- Executes on button press in prewhiten_rloess_checkbox.
 function checkbox34_Callback(hObject, eventdata, handles)
@@ -311,7 +344,6 @@ else
 end
 update_detrend_plot_fig
 guidata(hObject, handles);
-
 
 
 % --- Executes on button press in prewhiten_mean_checkbox.
@@ -467,6 +499,7 @@ if prewhitenok == 1
     set(handles.prewhiten_rloess_checkbox,'Value',1)
     set(handles.checkbox11,'Value',1)
     set(handles.checkbox13,'Value',1)
+    set(handles.checkboxEMDres,'Value',1)
     
     handles.prewhiten_mean = 'Mean';
     handles.prewhiten_linear = '1 order (Linear)';
@@ -476,6 +509,7 @@ if prewhitenok == 1
     handles.prewhiten_rlowess = 'rLOWESS';
     handles.prewhiten_loess = 'LOESS';
     handles.prewhiten_rloess = 'rLOESS';
+    handles.prewhiten_emdres = 'emdres';
     %handles.prewhiten_sgolay = 'Savitzky-Golay';
     
     set(handles.prewhiten_pushbutton,'Enable','on')
@@ -497,6 +531,7 @@ handles.prewhiten_rloess = '';
 handles.prewhiten_sgolay = '';
 handles.prewhiten_polynomial2 = '';
 handles.prewhiten_polynomialmore = '';
+handles.prewhiten_emdres = '';
 % set checkbox
 set(handles.prewhiten_lowess_checkbox,'Value',0)
 set(handles.prewhiten_loess_checkbox,'Value',0)
@@ -507,6 +542,7 @@ set(handles.prewhiten_rloess_checkbox,'Value',0)
 set(handles.prewhiten_all_checkbox,'Value',0)
 set(handles.checkbox11,'Value',0)
 set(handles.checkbox13,'Value',0)
+set(handles.checkboxEMDres,'Value',0)
 %set(handles.prewhiten_pushbutton,'Enable','off')
 update_detrend_plot_fig
 guidata(hObject, handles);
@@ -615,6 +651,8 @@ lang_var = handles.lang_var;
 [~, Fitting21] = ismember('Fitting21',lang_id);
 [~, Fitting22] = ismember('Fitting22',lang_id);
 
+[~, Fitting25] = ismember('Fitting25',lang_id);
+
 handles.prewhiten_popupmenu_selection = 'Raw';
 
 str = get(hObject, 'String');
@@ -670,6 +708,11 @@ case lang_var{Fitting18} % User selects.
    current_data2 = handles.prewhiten_data2(:,11);
    trend = handles.prewhiten_data2(:,12);
    nametype = 3;
+case lang_var{Fitting25} % User selects.
+   prewhiten_s = 'EMDres';
+   current_data2 = handles.prewhiten_data2(:,13);
+   trend = handles.prewhiten_data2(:,14);
+   nametype = 3;
 end
 
 %handles.prewhiten_popupmenu_selection = prewhiten_s;
@@ -694,8 +737,8 @@ if nametype > 0
 % refresh AC main window
     figure(handles.acfigmain);
     CDac_pwd; % cd ac_pwd dir
-    dlmwrite(handles.name1, new_data, 'delimiter', ' ', 'precision', 9);
-    dlmwrite(name2, current_trend, 'delimiter', ' ', 'precision', 9);
+    dlmwrite(handles.name1, new_data, 'delimiter', ' ', 'precision', 9); % detrended
+    dlmwrite(name2, current_trend, 'delimiter', ' ', 'precision', 9); % trend
     refreshcolor;
     disp('>>  AC main window: see trend and detrended data')
     cd(pre_dirML); % return to matlab view folder
