@@ -9071,79 +9071,106 @@ loaddata4acycle;  % load data as data_filterout, must be evenly spaced sampling
 t = data_filterout(:,1); % first column
 dt = median(diff(t)); % sampling rate
 time_series = data_filterout(:,2); % 2nd column
-[imfs,residual,info] = emd(time_series);
-imfsn = size(imfs, 2);
-nw = 2;
-% plot
-figure
-subplot(imfsn + 2, 1, 1)
-plot(t,time_series);
-xlim([min(t), max(t)])
-title('EMD')
-ylabel('Raw data')
-pow = [];
-for k = 1:imfsn
-    subplot(imfsn+2, 1, k+1);
-    plot(t,imfs(:, k));
-    xlim([min(t), max(t)])
-    ylabel(['IMF', num2str(k)]);
-    % periodogram
-    [po,w]=pmtm(imfs(:, k),nw);
-    %[po,fd1]=periodogram(imfs(:, k),[],[],1/dt);
+
+dlg_title = 'Acycle: Empirical Mode Decomposition (EMD)';
+prompt = {...
+    'goal (Number of Intrinsic Mode Functions - IMFs)',...
+    'Maximum number of extrema in the residual signal',...
+    'Interpolation method for envelope construction'};
+
+num_lines = 1;
+defaultans = {num2str(10),'1','pchip'};
+options.Resize='on';
+answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+if ~isempty(answer)
+%     h1 = warndlg('EEMD: Slow! See command window');
+    goal = str2double(answer{1}); % default based on the emd IMFs + residual
+    extrema = str2double(answer{2}); 
+    intp = answer{3};
+    emd(time_series,'MaxNumIMF',goal,'MaxNumExtrema',extrema,'Interpolation',intp,'Display',1);
+    [imfs,residual,~] = emd(time_series,'MaxNumIMF',goal,'MaxNumExtrema',extrema,'Interpolation',intp);
+    imfsn = size(imfs, 2);
+    nw = 2;
+    pow = [];
+    [po,w]=pmtm(time_series,nw);
     pow = [pow,po];
-end
-fd1=w/(2*pi*dt);
-subplot(imfsn + 2, 1, imfsn + 2)
-plot(t,residual);
-xlim([min(t), max(t)])
-ylabel('Residual')
-
-% plot periodogram
-figure
-for k = 1:imfsn
-    subplot(imfsn, 1, k);
-    plot(fd1, pow(:,k), 'DisplayName', ['IMF ', num2str(k)])
-    ylabel(['IMF', num2str(k)]);
-    ax = gca;
-    if k == 1
-        title('2 pi MTM power spectra')
+    for k = 1:imfsn
+        [po,w]=pmtm(imfs(:, k),nw);
+        pow = [pow,po];
     end
-    % Turn on minor ticks for the x-axis
+    fd1=w/(2*pi*dt);
+    % plot periodogram
+    figure
+    for k = 1:imfsn+1
+        subplot(imfsn+1, 1, k);
+        plot(fd1, pow(:,k))
+        if k == 1
+            ylabel('Raw')
+        else
+            ylabel(['IMF', num2str(k-1)]);
+        end
+        ax = gca;
+        if k == 1
+            title('2 pi MTM power spectra')
+        end
+        % Turn on minor ticks for the x-axis
+        ax.XAxis.MinorTick = 'on';
+    end
+    
+    % Add labels, title, and legend
+    xlabel('Frequency');
+    
+    % figure
+    figure
+    hold on
+    for k = 2:imfsn + 1
+            plot(fd1, pow(:,k), 'DisplayName', ['IMF ', num2str(k-1)])
+    end
+    set(gca, 'YScale', 'log')
+    title('2 pi MTM power spectra')
     ax.XAxis.MinorTick = 'on';
-end
-% Add labels, title, and legend
-xlabel('Frequency');
+    xlabel('Frequency')
+    ylabel('Power')
+    legend
+    hold off
+    
+    CDac_pwd; % cd working dir
 
-CDac_pwd; % cd working dir
-
-%% Dave data
-% write data
-file_name = [plotseries,'-emd',ext];
-current_data = [t,imfs,residual];
-[nrow, ncol] = size(imfs);
-file_id = fopen(file_name, 'wt'); % Open the file for writing text
-fprintf(file_id, '%% Acycle: Empirical Mode Decompostion (EMD)\n');
-fprintf(file_id, '%% \n');
-fprintf(file_id, '%% Raw data: %s\n', file_name);
-fprintf(file_id, '%% \n');
-% Dynamically create the header based on the number of columns
-header = ['% Time'];
-for i = 1:ncol % assuming ncol is the number of columns
-    header = [header, sprintf('\t\tIMF%d', i)];
-end
-header = [header, sprintf('\t\tResidual')];
-fprintf(file_id, '%s\n', header); % Write the header
-% Data
-for ki = 1:nrow
-    for kj = 1:(ncol+2)  % with t and residual
-        fprintf(file_id, '%7.9f\t', current_data(ki, kj)); % Modify here as per your matrix name
+    %% Dave data
+    % write data
+    file_name = [plotseries,'-emd',ext];
+    current_data = [t,imfs,residual];
+    [nrow, ncol] = size(imfs);
+    file_id = fopen(file_name, 'wt'); % Open the file for writing text
+    fprintf(file_id, '%% Empirical Mode Decompostion (EMD)\n');
+    fprintf(file_id, '%% \n');
+    fprintf(file_id, '%% Raw data: %s\n', file_name);
+    fprintf(file_id, '%% \n');
+    fprintf(file_id, '%% Number of Intrinsic Mode Functions:                %d\n', goal);
+    fprintf(file_id, '%% Maximum number of extrema in the residual signal:  %d\n', extrema);
+    fprintf(file_id, '%% Interpolation method for envelope construction:    %s\n', intp);
+    fprintf(file_id, '%% \n');
+    % Dynamically create the header based on the number of columns
+    header = ['% Time'];
+    for i = 1:ncol % assuming ncol is the number of columns
+        header = [header, sprintf('\t\tIMF%d', i)];
     end
-    fprintf(file_id, '\n'); % New line at the end of each rowend
+    header = [header, sprintf('\t\tResidual')];
+    fprintf(file_id, '%s\n', header); % Write the header
+    % Data
+    for ki = 1:nrow
+        for kj = 1:(ncol+2)  % with t and residual
+            fprintf(file_id, '%7.9f\t', current_data(ki, kj)); % Modify here as per your matrix name
+        end
+        fprintf(file_id, '\n'); % New line at the end of each rowend
+    end
+    fclose(file_id);
+    %%
+    refreshcolor;
+    cd(pre_dirML); % return view dir
 end
-fclose(file_id);
-%%
-refreshcolor;
-cd(pre_dirML); % return view dir
+
+
 
 % --------------------------------------------------------------------
 function menu_eemd_Callback(hObject, eventdata, handles)
