@@ -876,6 +876,7 @@ for i = 1:nplot
         check = 0;
         if sum(strcmp(ext,handles.filetype)) > 0
             check = 1; % selection can be executed 
+            
         elseif sum(strcmp(ext,{'.bmp','.BMP','.gif','.GIF','.jpg','.jpeg','.JPG','.JPEG','.png','.PNG','.tif','.tiff','.TIF','.TIFF'})) > 0
 
             imfinfo1 = imfinfo(plot_filter_s); % image information
@@ -939,6 +940,7 @@ for i = 1:nplot
         end
     end
 end
+
 if check == 1
     GETac_pwd; 
     for i = 1: nplot
@@ -1533,7 +1535,6 @@ if handles.lang_choice > 0
     main21 = handles.lang_var{locb1};
 end
 
-
 % check
 for i = 1:nplot
     plot_no = plot_selected(i);
@@ -1572,7 +1573,8 @@ for i = 1:nplot
                 cielab(:,:,1) = aDouble(:,:,1) ./ (255/100);
                 cielab(:,:,2) = aDouble(:,:,2)-128;
                 cielab(:,:,3) = aDouble(:,:,3)-128;
-                hFig1 = figure;                    
+                hFig1 = figure;      
+                set(gcf,'color','w');
                 subplot(3,1,1)
                 imshow(cielab(:,:,1),[0 100])
                 title('L*')
@@ -1587,7 +1589,7 @@ for i = 1:nplot
                 hFig2 = figure;
                 imshow(lab2rgb(cielab));
                 set(gcf,'Name',[dat_name,'Lab2RGB',ext],'NumberTitle','off')
-
+                set(gcf,'color','w');
             elseif any(strcmp(supportcolor,imfinfo1.ColorType))
                 im_name = imread(plot_filter_s);
                 hFig1 = figure;
@@ -1598,6 +1600,7 @@ for i = 1:nplot
                     close(hFig1)
                     imscrollpanel_ac(plot_filter_s);
                 end
+                set(gcf,'color','w');
             else
                 try
                     % GRB and Grayscale supported here
@@ -1611,6 +1614,7 @@ for i = 1:nplot
                         close(hFig1)
                         imscrollpanel_ac(data_name);
                     end
+                    set(gcf,'color','w');
                 catch
                     if handles.lang_choice == 0
                         warndlg('Image color space not supported. Convert to RGB or Grayscale')
@@ -1623,7 +1627,9 @@ for i = 1:nplot
         
     end
 end
+
 plotsucess = 0;
+
 if check == 1
     figf = figure;
     hold on;
@@ -1641,13 +1647,9 @@ if check == 1
             try
 
                 T = readtable(plot_filter_s); % Adjust the 'HeaderLines' if more than one header line
-                % If T contains different data types per column, this step might not be straightforward
-                if all(varfun(@isnumeric, T, 'OutputFormat', 'uniform'))
-                    data_filterout = table2array(T);
-                    disp('Load data with header ...')
-                else
-                    disp('Data contains non-numeric values or multiple data types.');
-                end
+                data_filterout = table2array(T);
+                data_header = T.Properties.VariableNames;
+                disp('Load data with header ...')
 
             catch
     
@@ -1691,18 +1693,17 @@ if check == 1
 
         data_filterout = data_filterout(~any(isnan(data_filterout),2),:);
         
-        
-        try plot(data_filterout(:,1),data_filterout(:,2:end),'LineWidth',1)
+        try figt = plot(data_filterout(:,1),data_filterout(:,2:end),'LineWidth',1);
             plotsucess = 1;
             % save current data for R
-            assignin('base','currentdata',data_filterout);
+            assignin('base','data',data_filterout);
             datar = num2str(data_filterout(1,2));
             for ii=2:length(data_filterout(:,1))
                 r1 =data_filterout(ii,2); 
                 datar = [datar,',',num2str(r1)];
             end
-            assignin('base','currentdataR',datar);
-            %
+            assignin('base','datar',datar);
+
         catch
             if handles.lang_choice == 0
                 errordlg([plot_filter_s1,' : data error. Check data'],'Data Error')
@@ -1740,7 +1741,7 @@ if check == 1
             xlabel([main21, ' (',handles.unit,')'])
         end
     end
-    %title(plot_filter_s1, 'Interpreter', 'none')
+    title(plot_filter_s1, 'Interpreter', 'none')
     legend(handles.plot_list, 'Interpreter', 'none')
     hold off
     set(gcf,'color','w');
@@ -1749,203 +1750,84 @@ if check == 1
     else
         set(gcf,'Name',a38,'NumberTitle','off');
     end
-    % multiple column data
+        % multiple column data
     if plotsucess > 0
         try
-        coln = length(data_filterout(1,:)); % 1: end
-        colnend = coln -1;
-        if and(nplot == 1, colnend > 1)            
-            if coln < 7
+            coln = length(data_filterout(1,:)); % 1: end
+            colnend = coln -1;
+            coln2 = [];
+            if and(nplot == 1, colnend > 1)            
                 figf2 = figure;
-                for colni = 2:coln
-                    subplot(colnend,1,colni-1)
-                    plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
-                    set(gca,'XMinorTick','on','YMinorTick','on')
-                    if handles.unit_type == 0
-                        title(['Column #', num2str(colni)], 'Interpreter', 'none')
-                    else
-                        title([a39, num2str(colni),a40], 'Interpreter', 'none')
-                    end
-                    set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
-                    if handles.unit_type == 0
-                        xlabel(['Unit (',handles.unit,')'])
-                    elseif handles.unit_type == 1
-                        xlabel(['Depth (',handles.unit,')'])
-                    else
-                        xlabel(['Time (',handles.unit,')'])
-                    end
-                end
-            elseif coln < 13
-                figf2 = figure;
-                colnhf= ceil(colnend/2);
-                for colni = 2:coln
-                    subplot(colnhf,2,colni-1)
-                    plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
-                    set(gca,'XMinorTick','on','YMinorTick','on')
-                    if handles.unit_type == 0
-                        title(['Column #', num2str(colni)], 'Interpreter', 'none')
-                    else
-                        title([a39, num2str(colni),a40], 'Interpreter', 'none')
-                    end
-                    set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
-                    
-                    if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
-                        if handles.unit_type == 0
-                            xlabel(['Unit (',handles.unit,')'])
-                        elseif handles.unit_type == 1
-                            xlabel(['Depth (',handles.unit,')'])
-                        else
-                            xlabel(['Time (',handles.unit,')'])
-                        end
-                    else
-                        if handles.unit_type == 0
-                            xlabel([main34,' (',handles.unit,')'])
-                        elseif handles.unit_type == 1
-                            xlabel([main23,' (',handles.unit,')'])
-                        else
-                            xlabel([main21, ' (',handles.unit,')'])
-                        end
-                    end
-                end
-            elseif coln < 19
-                figf2 = figure;
-                colnhf= ceil(colnend/3);
-                for colni = 2:coln
-                    subplot(colnhf,3,colni-1)
-                    plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
-                    set(gca,'XMinorTick','on','YMinorTick','on')
-                    if handles.unit_type == 0
-                        title(['Column #', num2str(colni)], 'Interpreter', 'none')
-                    else
-                        title([a39, num2str(colni),a40], 'Interpreter', 'none')
-                    end
-                    set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
-
-                    if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
-                        if handles.unit_type == 0
-                            xlabel(['Unit (',handles.unit,')'])
-                        elseif handles.unit_type == 1
-                            xlabel(['Depth (',handles.unit,')'])
-                        else
-                            xlabel(['Time (',handles.unit,')'])
-                        end
-                    else
-                        if handles.unit_type == 0
-                            xlabel([main34,' (',handles.unit,')'])
-                        elseif handles.unit_type == 1
-                            xlabel([main23,' (',handles.unit,')'])
-                        else
-                            xlabel([main21, ' (',handles.unit,')'])
-                        end
-                    end
-                end
-            elseif coln < 25
-                figf2 = figure;
-                colnhf= ceil(colnend/4);
-                for colni = 2:coln
-                    subplot(colnhf,4,colni-1)
-                    plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
-                    set(gca,'XMinorTick','on','YMinorTick','on')
-                    if handles.unit_type == 0
-                        title(['Column #', num2str(colni)], 'Interpreter', 'none')
-                    else
-                        title([a39, num2str(colni),a40], 'Interpreter', 'none')
-                    end
-                    set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
-
-                    if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
-                        if handles.unit_type == 0
-                            xlabel(['Unit (',handles.unit,')'])
-                        elseif handles.unit_type == 1
-                            xlabel(['Depth (',handles.unit,')'])
-                        else
-                            xlabel(['Time (',handles.unit,')'])
-                        end
-                    else
-                        if handles.unit_type == 0
-                            xlabel([main34,' (',handles.unit,')'])
-                        elseif handles.unit_type == 1
-                            xlabel([main23,' (',handles.unit,')'])
-                        else
-                            xlabel([main21, ' (',handles.unit,')'])
-                        end
-                    end
-                end
-            else
-                colnhf= ceil(24/4);
-                figf2 = figure;
-                for colni = 2:25
-                    subplot(colnhf,4,colni-1)
-                    plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
-                    set(gca,'XMinorTick','on','YMinorTick','on')
-                    set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
-                    if handles.unit_type == 0
-                        title(['Column #', num2str(colni)], 'Interpreter', 'none')
-                    else
-                        title([a39, num2str(colni),a40], 'Interpreter', 'none')
-                    end
-
-                    if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
-                        if handles.unit_type == 0
-                            xlabel(['Unit (',handles.unit,')'])
-                        elseif handles.unit_type == 1
-                            xlabel(['Depth (',handles.unit,')'])
-                        else
-                            xlabel(['Time (',handles.unit,')'])
-                        end
-                    else
-                        if handles.unit_type == 0
-                            xlabel([main34,' (',handles.unit,')'])
-                        elseif handles.unit_type == 1
-                            xlabel([main23,' (',handles.unit,')'])
-                        else
-                            xlabel([main21, ' (',handles.unit,')'])
-                        end
-                    end
-                end
-                if coln<50
-                    figf2 = figure;
-                    for colni = 26:coln
-                        subplot(colnhf,4,colni-25)
-                        plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
-                        set(gca,'XMinorTick','on','YMinorTick','on')
-                        if handles.unit_type == 0
-                            title(['Column #', num2str(colni)], 'Interpreter', 'none')
-                        else
-                            title([a39, num2str(colni),a40], 'Interpreter', 'none')
-                        end
-                        set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
-
-                        if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
-                            if handles.unit_type == 0
-                                xlabel(['Unit (',handles.unit,')'])
-                            elseif handles.unit_type == 1
-                                xlabel(['Depth (',handles.unit,')'])
-                            else
-                                xlabel(['Time (',handles.unit,')'])
-                            end
-                        else
-                            if handles.unit_type == 0
-                                xlabel([main34,' (',handles.unit,')'])
-                            elseif handles.unit_type == 1
-                                xlabel([main23,' (',handles.unit,')'])
-                            else
-                                xlabel([main21, ' (',handles.unit,')'])
-                            end
-                        end
-                    end
+                if coln < 7                    
+                    colnhf= colnend;
+                    colmhf = 1;
+                    coln1 = coln;
+                elseif coln < 13
+                    colnhf= ceil(colnend/2);
+                    colmhf = 2;
+                    coln1 = coln;
+                elseif coln < 19
+                    colnhf= ceil(colnend/3);
+                    colmhf = 3;
+                    coln1 = coln;
+                elseif coln < 25
+                    colnhf= ceil(colnend/4);
+                    colmhf = 4;
+                    coln1 = coln;
+                elseif coln < 50
+                    colnhf= ceil(24/4);
+                    colmhf = 4;
+                    coln1 = 25;
                 else
-                    figf2 = figure;
-                    for colni = 26:49
-                        subplot(6,4,colni-25)
-                        plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
-                        set(gca,'XMinorTick','on','YMinorTick','on')
+                    coln = 49;
+                    colnhf = 6;
+                    colmhf = 4;
+                end
+                for colni = 2:coln1
+                    subplot(colnhf,colmhf,colni-1)
+                    plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
+                    set(gca,'XMinorTick','on','YMinorTick','on')
+                    set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
+
+                    if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
+                        if handles.unit_type == 0
+                            xlabel(['Unit (',handles.unit,')'])
+                        elseif handles.unit_type == 1
+                            xlabel(['Depth (',handles.unit,')'])
+                        else
+                            xlabel(['Time (',handles.unit,')'])
+                        end
+                    else
+                        if handles.unit_type == 0
+                            xlabel([main34,' (',handles.unit,')'])
+                        elseif handles.unit_type == 1
+                            xlabel([main23,' (',handles.unit,')'])
+                        else
+                            xlabel([main21, ' (',handles.unit,')'])
+                        end
+                    end
+
+                    try
+                        title(data_header{1,colni})
+                        xlabel(data_header{1,1})
+                    catch
                         if handles.unit_type == 0
                             title(['Column #', num2str(colni)], 'Interpreter', 'none')
                         else
                             title([a39, num2str(colni),a40], 'Interpreter', 'none')
                         end
+                    end
+                end
+                set(gcf,'color','w');
+                if coln >= 25
+                    fig3 = figure;
+                    for colni = 26:coln
+                        subplot(colnhf,colmhf,colni-25)                       
+                        
+                        plot(data_filterout(:,1),data_filterout(:,colni),'LineWidth',1)
+                        set(gca,'XMinorTick','on','YMinorTick','on')
                         set(figf2,'Name',[dat_name,ext],'NumberTitle','off')
+
                         if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
                             if handles.unit_type == 0
                                 xlabel(['Unit (',handles.unit,')'])
@@ -1963,14 +1845,27 @@ if check == 1
                                 xlabel([main21, ' (',handles.unit,')'])
                             end
                         end
+
+                        try
+                            title(data_header{1,colni})
+                            xlabel(data_header{1,1})
+                        catch
+                            if handles.unit_type == 0
+                                title(['Column #', num2str(colni)], 'Interpreter', 'none')
+                            else
+                                title([a39, num2str(colni),a40], 'Interpreter', 'none')
+                            end
+                        end
                     end
                 end
-            end        
-        end
+                set(gcf,'color','w');
+            end
+        
         catch
             plot(data_filterout(:,1),data_filterout(:,2:end),'LineWidth',1)
         end
     end
+
 end
 guidata(hObject,handles)
 

@@ -237,8 +237,13 @@ for i = 1: handles.nplot
     handles.plot_list_ext{i} = [plotseries,ext];
     try dat = load(plot_no);
     catch
-        %errordlg([[plotseries,ext],' Error! try "Math -> Sort/Unique/Delete-empty" first'],'Data Error')
-        errordlg([[plotseries,ext],lang_var{pltadv27}],lang_var{pltadv26})
+        try
+            T = readtable(plot_no);
+            dat = table2array(T);
+        catch
+            %errordlg([[plotseries,ext],' Error! try "Math -> Sort/Unique/Delete-empty" first'],'Data Error')
+            errordlg([[plotseries,ext],lang_var{pltadv27}],lang_var{pltadv26})
+        end
     end
     dat = dat(~any(isnan(dat),2),:);
     if i == 1
@@ -707,10 +712,17 @@ for i = 1: handles.nplot
     try
         dat = load(handles.plot_s{i});
     catch
+        try
         fid = fopen(handles.plot_s{i});
         data_ft = textscan(fid,'%f%f','EmptyValue', Inf);
         dat = cell2mat(data_ft);
         fclose(fid);
+        catch
+            
+            T = readtable(plot_no);
+            dat = table2array(T);
+        
+        end
     end
         dat = dat(~any(isnan(dat),2),:);
         linestyle_list = handles.pop_linestyle_list;
