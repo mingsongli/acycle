@@ -156,7 +156,8 @@ while (revmin > 0 && winwidth < 99)
         end
     end
     
-    if(revmin == 0)
+    %if(revmin == 0)
+    if(revmin <= rev1 && revmin <= rev2) % BUG FIX - HY ZHU, 27 NOV 2023
         if(rmsemin > rmsef1)
             rmsemin=rmsef1;
             winfinal=winwidth;
