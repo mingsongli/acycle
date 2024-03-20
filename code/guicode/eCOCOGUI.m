@@ -1439,8 +1439,8 @@ age_p2 = 0.5 * (p1min + p1max);
 age_p1 = 0.5 * (p2min + p2max); 
 age_p3 = 0.5 * (p3min + p3max);
 o7waltham = [405 125 95 age_obl age_p2 age_p1 age_p3];
-orbit7waltham = [num2str(o7waltham(1),'% .1f'),' ',num2str(o7waltham(2),'% .1f'),' ',...
-    num2str(o7waltham(3),'% .1f'),' ',num2str(o7waltham(4),'% .1f'),' ',...
+orbit7waltham = [num2str(o7waltham(1),'%.0f'),' ',num2str(o7waltham(2),'%.0f'),' ',...
+    num2str(o7waltham(3),'%.0f'),' ',num2str(o7waltham(4),'% .1f'),' ',...
     num2str(o7waltham(5),'% .1f'),' ',num2str(o7waltham(6),'% .1f'),' ',num2str(o7waltham(7),'% .1f')];
 set(handles.edit11,'String',orbit7waltham)
 
@@ -1798,6 +1798,7 @@ p3 = .5;  % weight of precession
 handles.ext = ext;
 %
 orbit7 = handles.orbit7;
+disp(['Orbital cycles used: ', num2str(orbit7)])
 target = period2spectrum(orbit7,t1-1000,t1+1000,1,f1,f2,1,pad);
 if get(handles.radiobutton6,'Value')
     % berger89
@@ -2270,7 +2271,8 @@ function radiobutton8_Callback(hObject, eventdata, handles)
 if get(hObject,'Value')
     handles.orbit7 = strread(get(handles.edit11,'String'));
 end
-
+% Update handles structure
+guidata(hObject, handles);
 
 % --- Executes on button press in radiobutton6.
 function radiobutton6_Callback(hObject, eventdata, handles)

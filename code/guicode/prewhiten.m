@@ -188,7 +188,7 @@ handles.prewhiten_rloess = 'notloess';
 handles.prewhiten_sgolay = 'notsgolay';
 handles.prewhiten_polynomial2 = 'not2nd';
 handles.prewhiten_polynomialmore = 'notmore';
-handles.prewhiten_emdres = 'notemdres';
+handles.prewhiten_emdres = 'noteemdres';
 % Update handles structure
 guidata(hObject, handles);
 
@@ -509,7 +509,7 @@ if prewhitenok == 1
     handles.prewhiten_rlowess = 'rLOWESS';
     handles.prewhiten_loess = 'LOESS';
     handles.prewhiten_rloess = 'rLOESS';
-    handles.prewhiten_emdres = 'emdres';
+    handles.prewhiten_emdres = 'eemdres';
     %handles.prewhiten_sgolay = 'Savitzky-Golay';
     
     set(handles.prewhiten_pushbutton,'Enable','on')
@@ -709,7 +709,7 @@ case lang_var{Fitting18} % User selects.
    trend = handles.prewhiten_data2(:,12);
    nametype = 3;
 case lang_var{Fitting25} % User selects.
-   prewhiten_s = 'EMDres';
+   prewhiten_s = 'EEMDres';
    current_data2 = handles.prewhiten_data2(:,13);
    trend = handles.prewhiten_data2(:,14);
    nametype = 3;

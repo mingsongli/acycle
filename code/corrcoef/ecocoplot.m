@@ -108,16 +108,16 @@ else
 end
 %contourcbar
 hcolorbar = colorbar('southoutside',...
-    'Ticks',(PlotPower.^(100-([20,10,5,4,3,2,1,.5,.1])))/z_h0_max,...
-    'TickLabels',{'20','10','5','4','3','2','1','.5','.1'});
+    'Ticks',(PlotPower.^(100-([20,10,5,1,0.1])))/z_h0_max,...
+    'TickLabels',{'0.2','0.1','0.05','0.01','0.001'});
 colormap('parula')
 shading interp
 
 if or(lang_choice == 0, handles.main_unit_selection == 0)
     xlabel('Sedimentation rate (cm/kyr)')
     %zlabel('H_0 significance level (%)')
-    hcolorbar.Label.String = 'H_0 significance level (%)';
-    figurename ='eH_0 SL (%)';
+    hcolorbar.Label.String = 'p-value';
+    figurename ='Null Hypothesis';
 else
     xlabel(lang_var{ec80})
     %zlabel([lang_var{ec82},' (%)'])
@@ -204,7 +204,7 @@ if or(lang_choice == 0, handles.main_unit_selection == 0)
     ylabel('Depth (m)')
     %zlabel('CHO')
     hcolorbar.Label.String = 'CHO';
-    figurename ='COCO * H_0 SL';
+    figurename ='COCO * p-value';
 else
     xlabel(lang_var{ec80})
     ylabel([lang_var{main23},' (m)'])

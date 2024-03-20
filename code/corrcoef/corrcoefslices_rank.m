@@ -340,7 +340,7 @@ if nsim > 0
         plot(ax2,corrxch,corry_per1,'r','LineWidth',1); 
         if or(lang_choice == 0, handles.main_unit_selection == 0)
             xlabel(ax2,'Sedimentation rate (cm/kyr)')
-            ylabel(ax2,'H_0 significance level')
+            ylabel(ax2,'p-value')
             title(ax2,'Null hypothesis')
         else
             xlabel(ax2,lang_var{ec80})

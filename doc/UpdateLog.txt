@@ -8,9 +8,13 @@ Version : Acycle_v3.0
 Date    : Oct. 19, 2023 
 By      : Mingsong Li (Peking University)
     1. Allow Mac to use shortcut keys Command +C/V/X
+    2. Correct a bug in the COCO/eCOCO "Middle Age" feature. 
+        The earlier version might not function properly when the 
+        "user-defined period" radio button is chosen.
 	1. Univariate menu
         Summary Statistics
         t test
+
 
 _______________________________________
 
