@@ -282,7 +282,7 @@ lat1 = handles.lat1;
 lat2 = handles.lat2;
 dlat = handles.dlat;
 type = handles.type;
-author = handles.author; % 1= la04; 2 = la10a; 3 = la10b; 4 = la10c; 5 = la10d; 6 = BergerLoutre91
+author = handles.author; % 1= la04; 2 = la10a; 3 = la10b; 4 = la10c; 5 = la10d;
 res = handles.res;
 L = handles.solarconstant;
 unit_t = handles.unit_t; % unit time 1 = kyr; 2 = myr; 3 = year
@@ -307,17 +307,6 @@ if ismember(author,[1,2,3,4,5])
             warndlg(lang_var{insol22})
         end
         return
-    end
-elseif author == 6
-    if (and(unit_t==1,t2>5000) + and(unit_t==2,t2>5) + and(unit_t==3,t2>5000000) ) > 0
-            
-            if handles.lang_choice == 0
-                warndlg('time scale must be NO larger than 5 000 ka')
-            else
-                [~, insol23] = ismember('insol23',handles.lang_id);
-                warndlg(lang_var{insol23})
-            end
-            return
     end
 end
 %
@@ -392,7 +381,7 @@ if qinso == -1
 elseif qinso == -2
     name_insol = [name_insol,'meandaily-'];
 end
-auth_list = {'La04','La10a','La10b','La10c','La10d','BL91'};
+auth_list = {'La04','La10a','La10b','La10c','La10d'};
 name_insol = [name_insol,auth_list{author}];
 name_insol_all = [name_insol,'.txt'];
 %name_insol_annual = [name_insold, auth_list{author},'-FullEarth.txt'];

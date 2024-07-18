@@ -33,15 +33,11 @@ function [corrCI,corr_h0,corry] = corrcoefslices_rank(dat,target,orbit7,dt,pad,s
 %                   c3 = H0 SL X (correlation coefficient - 0.3)
 % 
 % CALLS FOR
-%   data_slices
 %   targetrebuilt
 %   theoredar1ML
-%   target_real
 %   findpeaks
-%   cyclecorr4
-%   cyclecorr4sig
+%   cyclecorr
 %   randspec_sin
-%   cyclecorr5   % Monte Carlo simulation for H0 significant level
 %   
 %   Mingsong Li, June 2017 @ Penn State
 %   update Jan 18, 2023 for language plot
@@ -205,8 +201,6 @@ sr0 = f_nyq_target * 100/dat_nyq;
 assignin('base','sr0',sr0)
 %% correlation coefficient and its 95% significant level
 
-% [corrxch,corry_rch,corrpych,corrloch,corrupch,nmi] = ...
-%     cyclecorr4(data,targetf,targetp,target_real,orbit7,dat_ray,sr1,sr2,srstep,sr0,adjust);
 [corrxch,corry_rch,corrpych,nmi] = ...
     cyclecorr(data,targetf,targetp,target_real,orbit7,dat_ray,sr1,sr2,srstep,sr0,adjust,method);
 corrCI = [corrxch,corry_rch,corrpych,nmi];
