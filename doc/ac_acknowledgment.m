@@ -47,7 +47,7 @@
 %   Dorothée Husson, Arsenio Muñoz Jiménez, 
 %   Ilja Kocken, Lee R. Kump, Dongyang Liu, Lucas Lourens, 
 %   Kunyuan Ma, Mathieu Martinez, James Ogg, Paul Olsen, 
-%   Jeffrey Park, J. Fred Read, Michael Schulz, Chen Shen, 
+%   Jeffrey Park, J. Fred Read, Michael Schulz, Chen Shen, Nicolas Thibault,
 %   Victor A. Piedrahita Velez, 
 %   Chuanyue Wang, Meng Wang, Yujing Wu, 
 %   Deke Xu, Xu Yao, Qiyan Zhang, Haotian Zhang, Haoxun Zhang, 
