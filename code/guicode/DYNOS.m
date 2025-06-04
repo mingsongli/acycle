@@ -156,7 +156,7 @@ if handles.lang_choice > 0
     set(handles.text47,'String',lang_var{dynot12})
     set(handles.text30,'String',lang_var{dynot13})
     set(handles.text29,'String',lang_var{dynot14})
-    set(handles.text36,'String',lang_var{dynot15})
+    set(handles.text36,'String',lang_var{dynot42})
     set(handles.text48,'String',lang_var{dynot17})
     set(handles.text37,'String',lang_var{dynot18})
     set(handles.text50,'String',lang_var{dynot19})
@@ -387,6 +387,7 @@ pad = handles.pad;
 step = handles.step;
 nout = handles.nout;
 shiftwin = handles.shiftwin;
+padwin = handles.padwin;
 f = handles.f;
 fza = handles.fza;
 fzb = handles.fzb;
@@ -492,8 +493,18 @@ if nmc > 199
         dat = [];
         dat(:,1) = data(1,1):samplez(i):data(length(data(:,1)),1);
         dat(:,2) = interp1(data(:,1),data(:,2),dat(:,1),'pchip'); 
+
         f3=f3m(i,:);
         window = windowz(i);
+        % detrending
+        % Fit a first‐order polynomial (linear trend)
+        p = polyfit(dat(:,1), dat(:,2), 1);          % p(1) = slope, p(2) = intercept
+        % If you want to replace the second column in `data` with the detrended series:
+        dat(:,2) = dat(:,2) - polyval(p, dat(:,1));
+        % half-window padding
+        if padwin > 0
+            dat = zeropad2(dat,window,padwin);
+        end
         y_grid_rand=randi([-1*shiftwin1,shiftwin1])*window/2;   % shift y_grid1
         nw = nwz(i);
         [power]=pdan(dat,f3,window,nw,ftmin,ftmax,step,pad); % power ratio of data series
@@ -534,6 +545,16 @@ if nmc > 199
             dat(:,2) = interp1(data(:,1),data(:,2),dat(:,1),'pchip'); 
             f3=f3m(i,:);
             window = windowz(i);
+            % detrending
+            % Fit a first‐order polynomial (linear trend)
+            p = polyfit(dat(:,1), dat(:,2), 1);          % p(1) = slope, p(2) = intercept
+            % If you want to replace the second column in `data` with the detrended series:
+            dat(:,2) = dat(:,2) - polyval(p, dat(:,1));
+            % half-window padding
+            if padwin > 0
+                dat = zeropad2(dat,window,padwin);
+            end
+
             y_grid_rand=randi([-1*shiftwin1,shiftwin1])*window/2;   % shift y_grid1
             nw = nwz(i);
             [power]=pdan(dat,f3,window,nw,ftmin,ftmax,step,pad); % power ratio of data series
@@ -608,6 +629,15 @@ if nmc > 199
             dat(:,2) = interp1(data(:,1),data(:,2),dat(:,1),'pchip'); 
             f3=f3m(i,:);
             window = windowz(i);
+            % detrending
+            % Fit a first‐order polynomial (linear trend)
+            p = polyfit(dat(:,1), dat(:,2), 1);          % p(1) = slope, p(2) = intercept
+            % If you want to replace the second column in `data` with the detrended series:
+            dat(:,2) = dat(:,2) - polyval(p, dat(:,1));
+            % half-window padding
+            if padwin > 0
+                dat = zeropad2(dat,window,padwin);
+            end
             y_grid_rand=randi([-1*shiftwin1,shiftwin1])*window/2;   % shift y_grid1
             nw = nwz(i);
             [power]=pdan(dat,f3,window,nw,ftmin,ftmax,step,pad); % power ratio of data series
@@ -642,6 +672,16 @@ else
         dat(:,2) = interp1(data(:,1),data(:,2),dat(:,1),'pchip'); 
         f3=f3m(i,:);
         window = windowz(i);
+        % detrending
+        % Fit a first‐order polynomial (linear trend)
+        p = polyfit(dat(:,1), dat(:,2), 1);          % p(1) = slope, p(2) = intercept
+        % If you want to replace the second column in `data` with the detrended series:
+        dat(:,2) = dat(:,2) - polyval(p, dat(:,1));
+        % half-window padding
+        if padwin > 0
+            dat = zeropad2(dat,window,padwin);
+        end
+        
         y_grid_rand=randi([-1*shiftwin1,shiftwin1])*window/2;   % shift y_grid1
         nw = nwz(i);
         [power]=pdan(dat,f3,window,nw,ftmin,ftmax,step,pad); % power ratio of data series
@@ -862,7 +902,8 @@ if ismember('data',existdata)
     handles.pad = 1000;
     handles.step = 5;
     handles.nout = 1000;
-    handles.shiftwin = 15;
+    handles.shiftwin = 1;
+    handles.padwin = 1;
     handles.fza = 0.9;
     handles.fzb = 1.2;
     handles.ftmin = 0.001;
@@ -891,7 +932,7 @@ if ismember('data',existdata)
     set(handles.edit12, 'String', num2str(handles.ftmax));
     set(handles.edit21, 'String', num2str(handles.step));
     set(handles.edit22, 'String', num2str(handles.nout));
-    set(handles.edit23, 'String', num2str(handles.shiftwin));
+    set(handles.edit23, 'String', num2str(handles.padwin));
     set(handles.edit_sampa, 'String', num2str(samplerange(1)));
     set(handles.edit_sampb, 'String', num2str(samplerange(2)));
     set(handles.edit24, 'String', num2str(handles.nmc));
@@ -1424,8 +1465,8 @@ function edit23_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit23 as text
 %        str2double(get(hObject,'String')) returns contents of edit23 as a double
-shiftwin = str2double(get(hObject,'String'));
-handles.shiftwin = shiftwin;
+padwin = str2double(get(hObject,'String'));
+handles.padwin = padwin;
 guidata(hObject, handles);
 
 % --- Executes during object creation, after setting all properties.

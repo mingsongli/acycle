@@ -1,16 +1,19 @@
 function [dataX] = zeropad2(data,win,padding)
-% zero-padding data, to the beginning and the end of the data
-% data: 2 column, equal spaced sampling data
-% win: window size, must be larger than sampling rate of the data
-% padding: padding type. (1=zero padding,
-%           2=mirror padding, 3=mean padding, 4=random padding)
+% Zero-pad the input data at both ends
 %
+% Inputs:
+%   data    – N×2 matrix of uniformly sampled data (two columns)
+%   win     – Window size (must be larger than the data’s sampling interval)
+%   padding – Padding type:
+%               1 = zero padding
+%               2 = mirror padding
+%               3 = mean-value padding
+%               4 = random-value padding
 %
-% partly based on evofft19.m
-% 2019: update by Nicolas Thibault & Giovanni Rizzi on padding options
-%
-% Mingsong Li, April 2019
-% Penn State
+% Based on evofft19.m
+% April 2019 update by Nicolas Thibault & Giovanni Rizzi: added padding options
+% Modified by Mingsong Li, April 2019 (Penn State)
+
 if nargin < 3; padding = 1; end
 if nargin < 2; win = 0.35 * abs(data(end,1) - data(1,1)); end
 % ensure data is sorted in the ascending order

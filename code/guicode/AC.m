@@ -5280,7 +5280,6 @@ function menu_rho_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 nsim_yes = 0;
 
-
 %language
 lang_id = handles.lang_id;
 if handles.lang_choice > 0
@@ -5396,7 +5395,7 @@ if nsim_yes < 2
 
                     if nsim_yes == 0
 
-                        if .3 * datalength > 400
+                        if 0.3 * datalength > 400
                             window1 = 400;
                         else
                             window1 = .3 * datalength;
@@ -9186,3 +9185,861 @@ function menu_memd_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_memd (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function menu_rhov2_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_rhov2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+nsim_yes = 0;
+
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('main38',lang_id);
+    main38 = handles.lang_var{locb1};  % Monte Carlo
+    [~, locb1] = ismember('main39',lang_id);
+    main39 = handles.lang_var{locb1};  % Monte Carlo
+    [~, locb1] = ismember('main37',lang_id);
+    main37 = handles.lang_var{locb1};  % Cancel
+    [~, locb1] = ismember('a180',lang_id);
+    a180 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a181',lang_id);
+    a181 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a182',lang_id);
+    a182 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a183',lang_id);
+    a183 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a184',lang_id);
+    a184 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a185',lang_id);
+    a185 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a186',lang_id);
+    a186 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a187',lang_id);
+    a187 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a188',lang_id);
+    a188 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a189',lang_id);
+    a189 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a190',lang_id);
+    a190 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a191',lang_id);
+    a191 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a192',lang_id);
+    a192 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a193',lang_id);
+    a193 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a194',lang_id);
+    a194 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a195',lang_id);
+    a195 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a196',lang_id);
+    a196 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a197',lang_id);
+    a197 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a198',lang_id);
+    a198 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a199',lang_id);
+    a199 = handles.lang_var{locb1};
+    
+    [~, locb1] = ismember('main21',lang_id);
+    main21 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main23',lang_id);
+    main23 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main34',lang_id);
+    main34 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main35',lang_id);
+    main35 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main40',lang_id);
+    main40 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main41',lang_id);
+    main41 = handles.lang_var{locb1};
+    [~, locb1] = ismember('menu46',lang_id);
+    menu46 = handles.lang_var{locb1};
+    
+end
+
+if handles.lang_choice == 0
+    choice = questdlg('Single run or Monte Carlo Simulation', ...
+        'Select', 'Single','Monte Carlo','Cancel','Single');
+    case1= 'Single';
+    case2= 'Monte Carlo';
+    case3= 'Cancel';
+else
+    choice = questdlg(a180,main38, a181,main39,main37,a181);
+    case1= a181;
+    case2= main39;
+    case3= main37;
+end
+% Handle response
+switch choice
+    case case1
+        nsim_yes = 0;
+    case case2
+        nsim_yes = 1;
+    case case3
+        nsim_yes = 2;
+end
+if nsim_yes < 2
+    contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+    plot_selected = get(handles.listbox_acmain,'Value');
+    nplot = length(plot_selected);   % length
+    if nplot > 1
+        if handles.lang_choice == 0
+            warndlg('Select 1 data only','Error');
+        else
+            warndlg(a182,main35);
+        end
+    end
+    if nplot == 1
+        data_name = char(contents(plot_selected));
+        data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+        GETac_pwd; data_name = fullfile(ac_pwd,data_name);
+            if isdir(data_name) == 1
+            else
+                [~,dat_name,ext] = fileparts(data_name);
+                if sum(strcmp(ext,handles.filetype)) > 0
+                    data = load(data_name);
+                    samplerate = diff(data(:,1));
+                    ndata = length(data(:,1));
+                    datalength = data(length(data(:,1)),1)-data(1,1);
+                    samp95 = prctile(samplerate,95);  % new version; 1-2 * sample 95% percentile
+                    
+                    % single run
+                    if nsim_yes == 0
+
+                        if 0.3 * datalength > 400
+                            window1 = 400;
+                        else
+                            window1 = 0.3 * datalength;
+                        end
+                        if handles.lang_choice == 0
+                            prompt = {'Window',...
+                            'Sampling rate (Default = 95% percentile)',...
+                            'Padding depth: 0=No, 1=zero, 2=mirror; 3=mean; 4=random'};
+                            dlg_title = 'Evolutionary RHO in AR(1)';
+                        else
+                            prompt = {main41,a183,a224};
+                            dlg_title = a184;
+                        end
+                        num_lines = 1;
+                        defaultans = {num2str(window1),num2str(samp95), '2'};
+                        options.Resize='on';
+                        answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+                        if ~isempty(answer)
+                            window = str2double(answer{1});
+                            interpolate_rate= str2double(answer{2});
+                            padtype= str2double(answer{3});
+
+                            % Fit a first‐order polynomial (linear trend)
+                            p = polyfit(data(:,1), data(:,2), 1);          % p(1) = slope, p(2) = intercept
+                            % If you want to replace the second column in `data` with the detrended series:
+                            data(:,2) = data(:,2) - polyval(p, data(:,1));
+
+                            [data_even] = interpolate(data,interpolate_rate);
+                            if padtype > 0
+                                data_even = zeropad2(data_even,window,padtype);
+                            end
+                            [rhox] = erhoAR1(data_even,window);
+
+                            %figure; plot(data_even(:,1),data_even(:,2),'LineWidth',1)
+                            figure; plot(rhox(:,1),rhox(:,2),'LineWidth',1)
+
+                            if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
+                                if handles.unit_type == 0
+                                    xlabel(['Unit (',handles.unit,')'])
+                                elseif handles.unit_type == 1
+                                    xlabel(['Depth (',handles.unit,')'])
+                                else
+                                    xlabel(['Time (',handles.unit,')'])
+                                end
+                                ylabel('RHO in AR(1)')
+                                title(['Window',' = ',num2str(window),'. ','Sampling rate',' = ',num2str(interpolate_rate)])
+                            else
+                                if handles.unit_type == 0
+                                    xlabel([main34,' (',handles.unit,')'])
+                                elseif handles.unit_type == 1
+                                    xlabel([main23,' (',handles.unit,')'])
+                                else
+                                    xlabel([main21,' (',handles.unit,')'])
+                                end
+                                ylabel(a185)
+                                title([main41,' = ',num2str(window),'. ',menu46,' = ',num2str(interpolate_rate)])
+                            end
+
+                            set(gca,'XMinorTick','on','YMinorTick','on')
+                            name1 = [dat_name,'-rho1.txt'];
+                            CDac_pwd
+                            if exist([pwd,handles.slash_v,name1])
+                                for i = 1:100
+                                    name1 = [dat_name,'-rho1-',num2str(i),'.txt'];
+                                    if exist([pwd,handles.slash_v,name1])
+                                    else
+                                         break
+                                    end
+                                end
+                            end
+                            dlmwrite(name1, rhox, 'delimiter', ' ', 'precision', 9); 
+                            if handles.lang_choice == 0
+                                disp(['>>  Save rho1    : ',name1])   
+                            else
+                                disp([a186,name1])   
+                            end
+
+                            cd(pre_dirML); % return to matlab view folder
+                        end
+                    % monte carlo run
+                    else
+                        if handles.lang_choice == 0
+                            prompt = {'Monte Carlo simulations',...
+                            'Window ranges from',...
+                            'Window ranges to',...
+                            'Sampling rate from',...
+                            'Sampling rate to',...
+                            'Plot: interpolation',...
+                            'Padding depth: 0=No, 1=zero, 2=mirror; 3=mean; 4=random'};
+                            dlg_title = 'Monte Carlo Simulation of eRHO in AR(1)';
+                        else
+                            prompt = {a187,a188,a189,a190,a191,a192,a224};
+                            dlg_title = a194;
+                        end
+                        num_lines = 1;
+                        if ndata > 1000
+                            interpn = 1000;
+                        else
+                            interpn = ndata;
+                        end
+
+                        if .3 * datalength > 400
+                            window1 = 400;
+                            window2 = 500;
+                        else
+                            window1 = .3 * datalength;
+                            window2 = .4 * datalength;
+                        end
+
+                        defaultans = {'1000',num2str(window1),num2str(window2),...
+                            num2str(samp95),num2str(2*samp95),num2str(interpn),'2'};
+                        options.Resize='on';
+                        answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+                        if ~isempty(answer)
+                            nsim = str2double(answer{1});
+                            window1 = str2double(answer{2});
+                            window2 = str2double(answer{3});
+                            samprate1 = str2double(answer{4});
+                            samprate2 = str2double(answer{5});
+                            nout = str2double(answer{6});
+                            shiftwin = 1;
+                            padtype = str2double(answer{7});
+
+                            % Waitbar
+                            if handles.lang_choice == 0
+                                hwaitbar = waitbar(0,'Noise estimation - rho1: Monte Carlo processing ...',...    
+                                   'WindowStyle','modal');
+                            else
+                                hwaitbar = waitbar(0,a195,'WindowStyle','modal');
+                            end
+                            hwaitbar_find = findobj(hwaitbar,'Type','Patch');
+                            set(hwaitbar_find,'EdgeColor',[0 0.9 0],'FaceColor',[0 0.9 0]) % changes the color to blue
+                            steps = 100;
+                            % step estimation for waitbar
+                            nmc_n = round(nsim/steps);
+                            waitbarstep = 1;
+                            waitbar(waitbarstep / steps)
+                            %
+                          if nsim >= 50
+                            samplez = samprate1+(samprate2-samprate1)*rand(1,nsim);
+                            window_sim = window1 + (window2-window1) * rand(1,nsim);
+                            y_grid = linspace(data(1,1),data(length(data(:,1)),1),nout);
+                            y_grid = y_grid';
+                            powy = zeros(nout,nsim);
+
+                            for i=1:nsim
+                                window = window_sim(i);
+                                interpolate_rate= samplez(i);
+
+                                % Fit a first‐order polynomial (linear trend)
+                                p = polyfit(data(:,1), data(:,2), 1);          % p(1) = slope, p(2) = intercept
+                                % If you want to replace the second column in `data` with the detrended series:
+                                data(:,2) = data(:,2) - polyval(p, data(:,1));
+    
+                                [data_even] = interpolate(data,interpolate_rate);
+                                if padtype > 0
+                                    data_even = zeropad2(data_even,window,padtype);
+                                end
+
+                                %[data_even] = interpolate(data,interpolate_rate);
+                                [rhox] = erhoAR1(data_even,window);
+                                % interpolation
+                                powy(:,i)=interp1(rhox(:,1),rhox(:,2),y_grid);
+                                if handles.lang_choice == 0
+                                    disp(['Simulation step = ',num2str(i),' / ',num2str(nsim)]);
+                                else
+                                    disp([a196,num2str(i),' / ',num2str(nsim)]);
+                                end
+                                if rem(i,nmc_n) == 0
+                                    waitbarstep = waitbarstep+1; 
+                                    if waitbarstep > steps; waitbarstep = steps; end
+                                    pause(0.0001);%
+                                    waitbar(waitbarstep / steps)
+                                end
+                            end
+
+                            if ishandle(hwaitbar)
+                                close(hwaitbar);
+                            end
+
+                            percent =[2.5,5,10,15.865,25,50,75,84.135,90,95,97.5];
+                            npercent  = length(percent);
+                            npercent2 = (length(percent)-1)/2;
+                            powyp = prctile(powy, percent,2);
+
+                            for i = 1: npercent
+                                powyadjustp1=powyp(:,i);
+                                powyad_p_nan(:,i) = powyadjustp1(~isnan(powyadjustp1));
+                            end
+                            y_grid_nan = y_grid(~isnan(powyp(:,1)));
+
+                            figure;hold all
+                            colorcode = [221/255,234/255,224/255; ...
+                            201/255,227/255,209/255; ...
+                            176/255,219/255,188/255;...
+                            126/255,201/255,146/255;...
+                            67/255,180/255,100/255];
+                            for i = 1:npercent2
+                                fill([y_grid_nan; (fliplr(y_grid_nan'))'],[powyad_p_nan(:,npercent+1-i);...
+                                (fliplr(powyad_p_nan(:,i)'))'],colorcode(i,:),'LineStyle','none');
+                            end
+                            plot(y_grid,powyp(:,npercent2+1),'Color',[0,120/255,0],'LineWidth',1.5,'LineStyle','--')
+                            hold off
+
+                            set(gca,'XMinorTick','on','YMinorTick','on')
+
+                            if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
+                                if handles.unit_type == 0
+                                    xlabel(['Unit (',handles.unit,')'])
+                                elseif handles.unit_type == 1
+                                    xlabel(['Depth (',handles.unit,')'])
+                                else
+                                    xlabel(['Time (',handles.unit,')'])
+                                end
+                                ylabel('RHO in AR(1)')
+                                legend('2.5% - 97.5%', '5% - 95%', '10% - 90%','15.87% - 84.14%', '25% - 75%', 'Median')
+                                title(['Window',': ',num2str(window1),'_',num2str(window2),...
+                                    '. ','Sampling Rate',': ',num2str(samprate1),'_',num2str(samprate2)], 'Interpreter', 'none')
+                            else
+                                if handles.unit_type == 0
+                                    xlabel([main34,' (',handles.unit,')'])
+                                elseif handles.unit_type == 1
+                                    xlabel([main23,' (',handles.unit,')'])
+                                else
+                                    xlabel([main21,' (',handles.unit,')'])
+                                end
+                                ylabel(a185)
+                                legend('2.5% - 97.5%', '5% - 95%', '10% - 90%','15.87% - 84.14%', '25% - 75%', main40)
+                                title([main41,': ',num2str(window1),'_',num2str(window2),...
+                                    '. ',menu46,': ',num2str(samprate1),'_',num2str(samprate2)], 'Interpreter', 'none')
+                            end
+
+
+                            name1 = [dat_name,'-rho1-median.txt'];
+                            data1 = [y_grid_nan,powyad_p_nan(:,npercent2+1)];
+                            name2 = [dat_name,'-rho1-percentile.txt'];
+                            data2 = [y_grid_nan,powyad_p_nan];
+                            CDac_pwd
+                            if exist([pwd,handles.slash_v,name1]) || exist([pwd,handles.slash_v,name2])
+                                for i = 1:100
+                                    name1 = [dat_name,'-rho1-median-',num2str(i),'.txt'];
+                                    name1 = [dat_name,'-rho1-percentile-',num2str(i),'.txt'];
+                                    if exist([pwd,handles.slash_v,name1]) || exist([pwd,handles.slash_v,name2])
+                                    else
+                                         break
+                                    end
+                                end
+                            end
+                            dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9); 
+                            dlmwrite(name2, data2, 'delimiter', ' ', 'precision', 9); 
+                            if handles.lang_choice == 0
+                                disp(['>>  Save rho1 median    : ',name1])   
+                                disp(['>>  Save rho1 percentile: ',name2])  
+                            else
+                                disp([a197,name1])   
+                                disp([a198,name2])  
+                            end
+                            d = dir; %get files
+                            set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+                            refreshcolor;
+                            cd(pre_dirML);
+                          else
+                              if handles.lang_choice == 0
+                                  errordlg('Number simulations is too few, try 1000','Error');
+                              else
+                                  errordlg(a199,main35);
+                              end
+                          end
+                    end
+                    end
+                end
+            end
+    end
+guidata(hObject, handles);
+end
+
+
+% --------------------------------------------------------------------
+function menu_dynot_v2_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_dynot_v2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+plot_selected = get(handles.listbox_acmain,'Value');
+nplot = length(plot_selected);   % length
+if nplot == 1
+    data_name = char(contents(plot_selected));
+    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    GETac_pwd; data_name = fullfile(ac_pwd,data_name);
+        if isdir(data_name) == 1
+        else
+            [~,dat_name,ext] = fileparts(data_name);
+            if sum(strcmp(ext,handles.filetype)) > 0
+
+                current_data = load(data_name);
+                handles.current_data = current_data;
+                handles.data_name = data_name;
+                handles.dat_name = dat_name;
+                guidata(hObject, handles);
+                DYNOS(handles);
+            end
+        end
+end
+guidata(hObject, handles);
+
+
+% --------------------------------------------------------------------
+function menu_lyapunov_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_lyapunov (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+nsim_yes = 0;
+
+%language
+lang_id = handles.lang_id;
+if handles.lang_choice > 0
+    [~, locb1] = ismember('main38',lang_id);
+    main38 = handles.lang_var{locb1};  % Monte Carlo
+    [~, locb1] = ismember('main39',lang_id);
+    main39 = handles.lang_var{locb1};  % Monte Carlo
+    [~, locb1] = ismember('main37',lang_id);
+    main37 = handles.lang_var{locb1};  % Cancel
+    [~, locb1] = ismember('a180',lang_id);
+    a180 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a181',lang_id);
+    a181 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a182',lang_id);
+    a182 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a183',lang_id);
+    a183 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a184',lang_id);
+    a184 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a185',lang_id);
+    a185 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a186',lang_id);
+    a186 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a187',lang_id);
+    a187 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a188',lang_id);
+    a188 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a189',lang_id);
+    a189 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a190',lang_id);
+    a190 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a191',lang_id);
+    a191 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a192',lang_id);
+    a192 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a193',lang_id);
+    a193 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a194',lang_id);
+    a194 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a195',lang_id);
+    a195 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a196',lang_id);
+    a196 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a197',lang_id);
+    a197 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a198',lang_id);
+    a198 = handles.lang_var{locb1};
+    [~, locb1] = ismember('a199',lang_id);
+    a199 = handles.lang_var{locb1};
+    
+    [~, locb1] = ismember('main21',lang_id);
+    main21 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main23',lang_id);
+    main23 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main34',lang_id);
+    main34 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main35',lang_id);
+    main35 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main40',lang_id);
+    main40 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main41',lang_id);
+    main41 = handles.lang_var{locb1};
+    [~, locb1] = ismember('menu46',lang_id);
+    menu46 = handles.lang_var{locb1};
+    
+end
+
+if handles.lang_choice == 0
+    choice = questdlg('Single run or Monte Carlo Simulation', ...
+        'Select', 'Single','Monte Carlo','Cancel','Single');
+    case1= 'Single';
+    case2= 'Monte Carlo';
+    case3= 'Cancel';
+else
+    choice = questdlg(a180,main38, a181,main39,main37,a181);
+    case1= a181;
+    case2= main39;
+    case3= main37;
+end
+% Handle response
+switch choice
+    case case1
+        nsim_yes = 0;
+    case case2
+        nsim_yes = 1;
+    case case3
+        nsim_yes = 2;
+end
+if nsim_yes < 2
+    contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
+    plot_selected = get(handles.listbox_acmain,'Value');
+    nplot = length(plot_selected);   % length
+    if nplot > 1
+        if handles.lang_choice == 0
+            warndlg('Select 1 data only','Error');
+        else
+            warndlg(a182,main35);
+        end
+    end
+    if nplot == 1
+        data_name = char(contents(plot_selected));
+        data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+        GETac_pwd; data_name = fullfile(ac_pwd,data_name);
+            if isdir(data_name) == 1
+            else
+                [~,dat_name,ext] = fileparts(data_name);
+                if sum(strcmp(ext,handles.filetype)) > 0
+                    data = load(data_name);
+                    t = data(:,1);
+                    samplerate = diff(t);
+                    interpolate_rate = median(samplerate);
+                    ndata = length(t);
+                    datalength = data(length(t),1)-data(1,1);
+                    samp95 = prctile(samplerate,95);  % new version; 1-2 * sample 95% percentile
+                    samp05 = prctile(samplerate,5);
+                    % single run
+                    if nsim_yes == 0
+
+                        if 0.3 * datalength > 400
+                            window1 = 400;
+                        else
+                            window1 = 0.3 * datalength;
+                        end
+                        if handles.lang_choice == 0
+                            prompt = {...
+                            'Tau (embedding delay)',...
+                            'Window',...
+                            'Step size',...
+                            'Number of Monte Carlo surrogates',...
+                            'Padding depth: 0=No, 1=zero, 2=mirror; 3=mean; 4=random'};
+                            dlg_title = 'Evolutionary RHO in AR(1)';
+                        %else
+                        %    prompt = {main41,a183,a224};
+                        %    dlg_title = a184;
+                        end
+                        num_lines = 1;
+                        defaultans = {num2str(samp95),num2str(window1),num2str(samp95), '0', '0'};
+                        options.Resize='on';
+                        answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+                        if ~isempty(answer)
+                            tau  = str2double(answer{1});
+                            window = str2double(answer{2});
+                            step_size = str2double(answer{3});
+                            num_surrogates = str2double(answer{4});
+                            padtype= str2double(answer{5});
+                            do_plot = false;
+                            % Fit a first‐order polynomial (linear trend)
+                            p = polyfit(data(:,1), data(:,2), 1);          % p(1) = slope, p(2) = intercept
+                            % If you want to replace the second column in `data` with the detrended series:
+                            data(:,2) = data(:,2) - polyval(p, data(:,1));
+
+                            [data_even] = interpolate(data,interpolate_rate);
+
+                            if padtype > 0
+                                data_even = zeropad2(data_even,window,padtype);
+                            end
+
+                            output = lyapunov_timeseries(data_even, tau, window, step_size, num_surrogates, do_plot);
+                            
+                            figure;
+                            set(gcf,'Color', 'white')
+                            subplot(2,1,1)
+                            plot(data(:,1),data(:,2),'LineWidth',1)
+                            xlim([min(t), max(t)])
+                            subplot(2,1,2)
+                            plot(output(:,1),output(:,2),'LineWidth',1)
+                            set(gca, 'YDir', 'reverse');
+                            xlim([min(t), max(t)])
+                            if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
+                                if handles.unit_type == 0
+                                    xlabel(['Unit (',handles.unit,')'])
+                                elseif handles.unit_type == 1
+                                    xlabel(['Depth (',handles.unit,')'])
+                                else
+                                    xlabel(['Time (',handles.unit,')'])
+                                end
+                                ylabel('Lyapunov exponent')
+                                title(['Tau = ', num2str(tau),'. Window = ',num2str(window),'. Step size = ',num2str(step_size)])
+                            else
+                                if handles.unit_type == 0
+                                    xlabel([main34,' (',handles.unit,')'])
+                                elseif handles.unit_type == 1
+                                    xlabel([main23,' (',handles.unit,')'])
+                                else
+                                    xlabel([main21,' (',handles.unit,')'])
+                                end
+                                ylabel(a185)
+                                title([main41,' = ',num2str(window),'. ',menu46,' = ',num2str(interpolate_rate)])
+                            end
+
+                            set(gca,'XMinorTick','on','YMinorTick','on')
+                            name1 = [dat_name,'-Lyapunov.txt'];
+                            CDac_pwd
+                            if exist([pwd,handles.slash_v,name1])
+                                for i = 1:100
+                                    name1 = [dat_name,'-Lyapunov-',num2str(i),'.txt'];
+                                    if exist([pwd,handles.slash_v,name1])
+                                    else
+                                         break
+                                    end
+                                end
+                            end
+                            dlmwrite(name1, output, 'delimiter', ' ', 'precision', 9); 
+                            if handles.lang_choice == 0
+                                disp(['>>  Save Lyapunov    : ',name1])   
+                            else
+                                disp([a186,name1])   
+                            end
+
+                            cd(pre_dirML); % return to matlab view folder
+                        end
+                    % monte carlo run
+                    else
+                        %if handles.lang_choice == 0
+                        prompt = {'Monte Carlo simulations',...
+                            'Tau ranges from',...
+                            'Tau ranges to',...
+                            'Window ranges from',...
+                            'Window ranges to',...
+                            'Sampling rate from',...
+                            'Sampling rate to',...
+                            'Plot: interpolation',...
+                            'Padding depth: 0=No, 1=zero, 2=mirror; 3=mean; 4=random'};
+                        dlg_title = 'Monte Carlo Simulation of Lyapunov Exponent';
+                        %else
+                        %    prompt = {a187,a188,a189,a190,a191,a192,a224};
+                        %    dlg_title = a194;
+                        %end
+                        num_lines = 1;
+                        if ndata > 1000
+                            interpn = 1000;
+                            step_size = round(datalength / 1000);
+                        else
+                            interpn = ndata;
+                            step_size = 1;
+                        end
+
+                        if 0.3 * datalength > 400
+                            window1 = 400;
+                            window2 = 500;
+                        else
+                            window1 = .3 * datalength;
+                            window2 = .4 * datalength;
+                        end
+
+                        defaultans = {'1000',num2str(samp05), num2str(samp95), num2str(window1),num2str(window2),...
+                            num2str(samp95),num2str(2*samp95),num2str(interpn),'0'};
+                        options.Resize='on';
+                        answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
+                        if ~isempty(answer)
+                            nsim = str2double(answer{1});
+                            tau1 = min(str2double(answer{2}), str2double(answer{3}));
+                            tau2 = max(str2double(answer{2}), str2double(answer{3}));
+                            window1 = str2double(answer{4});
+                            window2 = str2double(answer{5});
+                            samprate1 = str2double(answer{6});
+                            samprate2 = str2double(answer{7});
+                            nout = str2double(answer{8});
+                            shiftwin = 1;
+                            padtype = str2double(answer{9});
+
+                            % Waitbar
+                            if handles.lang_choice == 0
+                                hwaitbar = waitbar(0,'Noise estimation - Lyapunov: Monte Carlo processing ...',...    
+                                   'WindowStyle','modal');
+                            else
+                                hwaitbar = waitbar(0,a195,'WindowStyle','modal');
+                            end
+                            hwaitbar_find = findobj(hwaitbar,'Type','Patch');
+                            set(hwaitbar_find,'EdgeColor',[0 0.9 0],'FaceColor',[0 0.9 0]) % changes the color to blue
+                            steps = 100;
+                            % step estimation for waitbar
+                            nmc_n = round(nsim/steps);
+                            waitbarstep = 1;
+                            waitbar(waitbarstep / steps)
+                            %
+                            if nsim >= 50
+                                do_plot = false;
+                                tauz = tau1 + (tau2-tau1)*rand(1,nsim);
+                                samplez = samprate1+(samprate2-samprate1)*rand(1,nsim);
+                                window_sim = window1 + (window2-window1) * rand(1,nsim);
+                                y_grid = linspace(data(1,1),data(length(data(:,1)),1),nout);
+                                y_grid = y_grid';
+                                powy = zeros(nout,nsim);
+
+                                for i=1:nsim
+                                    window = window_sim(i);
+                                    tau = tauz(i);
+                                    interpolate_rate= samplez(i);
+                                    
+                                    % Fit a first‐order polynomial (linear trend)
+                                    p = polyfit(data(:,1), data(:,2), 1);          % p(1) = slope, p(2) = intercept
+                                    % If you want to replace the second column in `data` with the detrended series:
+                                    data(:,2) = data(:,2) - polyval(p, data(:,1));
+        
+                                    [data_even] = interpolate(data,interpolate_rate);
+
+                                    if padtype > 0
+                                        data_even = zeropad2(data_even,window,padtype);
+                                    end
+                                    
+                                    output = lyapunov_timeseries(data_even, tau, window, step_size, 0, do_plot);
+                                    % interpolation
+                                    powy(:,i)=interp1(output(:,1),output(:,2),y_grid);
+                                    if handles.lang_choice == 0
+                                        disp(['Simulation step = ',num2str(i),' / ',num2str(nsim)]);
+                                    else
+                                        disp([a196,num2str(i),' / ',num2str(nsim)]);
+                                    end
+                                    if rem(i,nmc_n) == 0
+                                        waitbarstep = waitbarstep+1; 
+                                        if waitbarstep > steps; waitbarstep = steps; end
+                                        pause(0.0001);%
+                                        waitbar(waitbarstep / steps)
+                                    end
+                                end
+    
+                                if ishandle(hwaitbar)
+                                    close(hwaitbar);
+                                end
+    
+                                percent =[2.5,5,10,15.865,25,50,75,84.135,90,95,97.5];
+                                npercent  = length(percent);
+                                npercent2 = (length(percent)-1)/2;
+                                powyp = prctile(powy, percent,2);
+    
+                                for i = 1: npercent
+                                    powyadjustp1=powyp(:,i);
+                                    powyad_p_nan(:,i) = powyadjustp1(~isnan(powyadjustp1));
+                                end
+                                y_grid_nan = y_grid(~isnan(powyp(:,1)));
+    
+                                figure;hold all
+                                set(gcf,'Color', 'white')
+                                colorcode = [221/255,234/255,224/255; ...
+                                201/255,227/255,209/255; ...
+                                176/255,219/255,188/255;...
+                                126/255,201/255,146/255;...
+                                67/255,180/255,100/255];
+                                for i = 1:npercent2
+                                    fill([y_grid_nan; (fliplr(y_grid_nan'))'],[powyad_p_nan(:,npercent+1-i);...
+                                    (fliplr(powyad_p_nan(:,i)'))'],colorcode(i,:),'LineStyle','none');
+                                end
+                                plot(y_grid,powyp(:,npercent2+1),'Color',[0,120/255,0],'LineWidth',1.5,'LineStyle','--')
+                                hold off
+    
+                                set(gca,'XMinorTick','on','YMinorTick','on')
+                                set(gca, 'YDir', 'reverse');
+                                xlim([min(t), max(t)])
+    
+                                if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
+                                    if handles.unit_type == 0
+                                        xlabel(['Unit (',handles.unit,')'])
+                                    elseif handles.unit_type == 1
+                                        xlabel(['Depth (',handles.unit,')'])
+                                    else
+                                        xlabel(['Time (',handles.unit,')'])
+                                    end
+                                    ylabel('Lyapunov Exponent')
+                                    legend('2.5% - 97.5%', '5% - 95%', '10% - 90%','15.87% - 84.14%', '25% - 75%', 'Median')
+                                    title(['Window: ',num2str(window1),'_',num2str(window2),...
+                                        '. ','Sampling Rate',': ',num2str(samprate1),'_',num2str(samprate2)], 'Interpreter', 'none')
+                                else
+                                    if handles.unit_type == 0
+                                        xlabel([main34,' (',handles.unit,')'])
+                                    elseif handles.unit_type == 1
+                                        xlabel([main23,' (',handles.unit,')'])
+                                    else
+                                        xlabel([main21,' (',handles.unit,')'])
+                                    end
+                                    ylabel(a185)
+                                    legend('2.5% - 97.5%', '5% - 95%', '10% - 90%','15.87% - 84.14%', '25% - 75%', main40)
+                                    title([main41,': ',num2str(window1),'_',num2str(window2),...
+                                        '. ',menu46,': ',num2str(samprate1),'_',num2str(samprate2)], 'Interpreter', 'none')
+                                end
+    
+    
+                                name1 = [dat_name,'-Lyapunov-median.txt'];
+                                data1 = [y_grid_nan,powyad_p_nan(:,npercent2+1)];
+                                name2 = [dat_name,'-Lyapunov-percentile.txt'];
+                                data2 = [y_grid_nan,powyad_p_nan];
+                                CDac_pwd
+                                if exist([pwd,handles.slash_v,name1]) || exist([pwd,handles.slash_v,name2])
+                                    for i = 1:100
+                                        name1 = [dat_name,'-Lyapunov-median-',num2str(i),'.txt'];
+                                        name1 = [dat_name,'-Lyapunov-percentile-',num2str(i),'.txt'];
+                                        if exist([pwd,handles.slash_v,name1]) || exist([pwd,handles.slash_v,name2])
+                                        else
+                                             break
+                                        end
+                                    end
+                                end
+                                dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9); 
+                                dlmwrite(name2, data2, 'delimiter', ' ', 'precision', 9); 
+                                if handles.lang_choice == 0
+                                    disp(['>>  Save Lyapunov median    : ',name1])   
+                                    disp(['>>  Save Lyapunov percentile: ',name2])  
+                                else
+                                    disp([a197,name1])   
+                                    disp([a198,name2])  
+                                end
+                                d = dir; %get files
+                                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
+                                refreshcolor;
+                                cd(pre_dirML);
+                          else
+                              if handles.lang_choice == 0
+                                  errordlg('Number simulations is too few, try 1000','Error');
+                              else
+                                  errordlg(a199,main35);
+                              end
+                          end
+                    end
+                    end
+                end
+            end
+    end
+guidata(hObject, handles);
+end
