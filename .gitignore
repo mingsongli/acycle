@@ -1,3 +1,6 @@
 .DS_Store
 .idea
 code/test
+code/package/timeOpt
+code/package/lyapunov
+
