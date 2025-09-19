@@ -9035,6 +9035,10 @@ if ~isempty(answer)
     file_name = [plotseries,'-emd',ext];
     current_data = [t,imfs,residual];
     [nrow, ncol] = size(imfs);
+    %series_var = var(time_series, 0, 1);
+    imfs_var = var(imfs, 0, 1);
+    resid_var = var(residual, 0, 1);
+    total_var = sum(imfs_var) + resid_var;
     file_id = fopen(file_name, 'wt'); % Open the file for writing text
     fprintf(file_id, '%% Empirical Mode Decompostion (EMD)\n');
     fprintf(file_id, '%% \n');
@@ -9043,6 +9047,15 @@ if ~isempty(answer)
     fprintf(file_id, '%% Number of Intrinsic Mode Functions:                %d\n', goal);
     fprintf(file_id, '%% Maximum number of extrema in the residual signal:  %d\n', extrema);
     fprintf(file_id, '%% Interpolation method for envelope construction:    %s\n', intp);
+    fprintf(file_id, '%% \n');
+    fprintf(file_id, '%% Total Variance: %7.9f    100.00%\n', total_var);
+    fprintf(file_id, '%% \n');
+    fprintf(file_id, '%% IMFs variance and ratio (%%) \n');
+    % save variance
+    for kcol = 1:ncol
+        fprintf(file_id, '%%   IMF%d:     %7.9f     %2.2f\n', kcol, imfs_var(kcol), 100*imfs_var(kcol)/total_var);
+    end    
+    fprintf(file_id,     '%%   Residual: %7.9f     %2.2f\n', resid_var, 100*resid_var/total_var);
     fprintf(file_id, '%% \n');
     % Dynamically create the header based on the number of columns
     header = ['% Time'];
@@ -9149,6 +9162,8 @@ if ~isempty(answer)
     file_name = [plotseries,'-eemd',ext];
     current_data = [t,imfs];
     [nrow, ncol] = size(imfs);
+    imfs_var = var(imfs, 0, 1);
+    total_var = sum(imfs_var);
     file_id = fopen(file_name, 'wt'); % Open the file for writing text
     fprintf(file_id, '%% Acycle: Ensemble Empirical Mode Decompostion (EEMD)\n');
     fprintf(file_id, '%% \n');
@@ -9156,6 +9171,15 @@ if ~isempty(answer)
     fprintf(file_id, '%% goal (Number of Intrinsic Mode Functions - IMFs): %d\n', goal);
     fprintf(file_id, '%% ens  (Number of Ensemble Members):                %d\n', ens);
     fprintf(file_id, '%% nos  (Amplitude of Added Noise):                  %f\n', nos);
+    fprintf(file_id, '%% \n');
+    fprintf(file_id, '%% Total Variance: %7.9f    100.00%\n', total_var);
+    fprintf(file_id, '%% \n');
+    fprintf(file_id, '%% IMFs variance and ratio (%%) \n');       
+    % save variance
+    for kcol = 1:ncol-1
+        fprintf(file_id, '%%   IMF%d:     %7.9f     %2.2f\n', kcol, imfs_var(kcol), 100*imfs_var(kcol)/total_var);
+    end    
+    fprintf(file_id, '%%   Residual: %7.9f     %2.2f\n', imfs_var(end), 100*imfs_var(end)/total_var);
     fprintf(file_id, '%% \n');
     % Dynamically create the header based on the number of columns
     header = ['% Time'];
@@ -9175,9 +9199,6 @@ if ~isempty(answer)
     %%
     refreshcolor;
     cd(pre_dirML); % return view dir
-%     try close(h1)
-%     catch
-%     end
 end
 
 % --------------------------------------------------------------------
