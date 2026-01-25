@@ -98,6 +98,147 @@ set(handles.edit6,'position',[0.83,0.35,0.11,0.18])
 set(handles.text9,'position',[0.4,0.7,0.13,0.12],'String',handles.unit)
 set(handles.text10,'position',[0.4,0.4,0.13,0.12],'String',handles.unit)
 
+%% ===== 2026-01-24 add: shift existing 6 controls up, add dimension/delay =====
+% We will have 8 controls in the sliding-window panel:
+%   w, ws, theiler_window, lmin, method, normFlag, dimension(m), delay(tau)
+
+% ---- shift existing rows up to make room for 2 new rows at bottom ----
+dy = 0.14;  % upward shift (tune if needed)
+
+% labels + edits that already exist in panel
+move_up = @(h) set(h,'Position', get(h,'Position') + [0 dy 0 0]);
+
+move_up(handles.text4);  move_up(handles.edit3);   % w
+move_up(handles.text5);  move_up(handles.edit4);   % ws
+move_up(handles.text6);  move_up(handles.edit5);   % theiler
+move_up(handles.text7);  move_up(handles.edit6);   % lmin
+move_up(handles.text9);  % unit label for w
+move_up(handles.text10); % unit label for ws
+
+% ---- create a NEW bottom row for dimension / delay (edit boxes) ----
+fs = 11.5;
+
+% use the *current* positions (after move) as reference widths
+pos_text_ws = get(handles.text5,'Position');   % left label reference
+pos_edit_ws = get(handles.edit4,'Position');   % left edit reference
+pos_text_lm = get(handles.text7,'Position');   % right label reference
+pos_edit_lm = get(handles.edit6,'Position');   % right edit reference
+
+hLabel = pos_text_ws(4);
+hCtrl  = pos_edit_ws(4);
+
+xL_label = pos_text_ws(1);   wL_label = pos_text_ws(3);
+xL_ctrl  = pos_edit_ws(1);   wL_ctrl  = pos_edit_ws(3);
+
+xR_label = pos_text_lm(1);   wR_label = pos_text_lm(3);
+xR_ctrl  = pos_edit_lm(1);   wR_ctrl  = pos_edit_lm(3);
+
+% put this new row at the very bottom of panel
+yCtrl_dim  = 0.02;
+yLabel_dim = yCtrl_dim + (hCtrl - hLabel);
+
+handles.text_dim = uicontrol('Parent',handles.uipanel1,'Style','text','Units','normalized', ...
+    'Position',[xL_label, yLabel_dim, wL_label, hLabel], ...
+    'String','dimension', ...
+    'HorizontalAlignment', get(handles.text5,'HorizontalAlignment'), ...
+    'FontUnits','points','FontSize',fs);
+
+handles.edit_dim = uicontrol('Parent',handles.uipanel1,'Style','edit','Units','normalized', ...
+    'Position',[xL_ctrl, yCtrl_dim, wL_ctrl, hCtrl], ...
+    'String','1', ...
+    'BackgroundColor','white', ...
+    'Callback',@edit_dim_Callback, ...
+    'FontUnits','points','FontSize',fs);
+
+handles.text_tau = uicontrol('Parent',handles.uipanel1,'Style','text','Units','normalized', ...
+    'Position',[xR_label, yLabel_dim, wR_label, hLabel], ...
+    'String','delay', ...
+    'HorizontalAlignment', get(handles.text7,'HorizontalAlignment'), ...
+    'FontUnits','points','FontSize',fs);
+
+handles.edit_tau = uicontrol('Parent',handles.uipanel1,'Style','edit','Units','normalized', ...
+    'Position',[xR_ctrl, yCtrl_dim, wR_ctrl, hCtrl], ...
+    'String','1', ...
+    'BackgroundColor','white', ...
+    'Callback',@edit_tau_Callback, ...
+    'FontUnits','points','FontSize',fs);
+
+set(handles.edit_dim,'Enable','off');
+set(handles.edit_tau,'Enable','off');
+
+% store defaults into handles for passing downstream
+handles.embed_m   = 1;
+handles.embed_tau = 1;
+
+%% --- Added in 2026-01: method + normFlag controls (for DET / sliding-window) ---
+handles.method_display = {'maxnorm','euclidean','minnorm','nrmnorm','fixed recurrence rate','fan','inter','omatrix','opattern'};
+handles.method_code    = {'max','eu','min','nr','rr','fa','in','om','op'};
+handles.norm_display   = {'nonorm','narow'};
+
+% defaults (match crp_pdist defaults)
+handles.method_use = 'rr';
+handles.normFlag   = 'nonorm';
+
+% ---- match font with existing controls ----
+fs = 11.5;
+
+% ---- read reference positions from existing panel controls ----
+pos_text_ws = get(handles.text5,'Position');   % "sliding step" label (ws)
+pos_edit_ws = get(handles.edit4,'Position');   % ws edit box
+pos_text_lm = get(handles.text7,'Position');   % "lmin" label
+pos_edit_lm = get(handles.edit6,'Position');   % lmin edit box
+
+% ---- make a new bottom row (below ws/lmin row) ----
+hLabel = pos_text_ws(4);         
+hCtrl  = pos_edit_ws(4);         
+
+xL_label = pos_text_ws(1);
+wL_label = pos_text_ws(3);
+xL_ctrl  = pos_edit_ws(1);
+
+xR_label = pos_text_lm(1);
+wR_label = pos_text_lm(3);
+xR_ctrl  = pos_edit_lm(1);
+
+% ---- make method/norm row above dimension/delay row ----
+yCtrl  = 0.24;              % row for method/norm
+yLabel = yCtrl + (hCtrl - hLabel);
+
+
+wPopupMethod = max(pos_edit_ws(3), 0.18);   
+wPopupNorm   = max(pos_edit_lm(3), 0.12);   
+
+ha_ws = get(handles.text5,'HorizontalAlignment');
+ha_lm = get(handles.text7,'HorizontalAlignment');
+
+% ===== method =====
+handles.text_method = uicontrol('Parent',handles.uipanel1,'Style','text','Units','normalized', ...
+    'Position',[xL_label, yLabel, wL_label, hLabel], ...
+    'String','method','HorizontalAlignment',ha_ws, ...
+    'FontUnits','points','FontSize',fs);
+
+handles.popup_method = uicontrol('Parent',handles.uipanel1,'Style','popupmenu','Units','normalized', ...
+    'Position',[xL_ctrl, yCtrl, wPopupMethod, hCtrl], ...
+    'String',handles.method_display, ...
+    'Value',find(strcmp(handles.method_code,handles.method_use),1,'first'), ...
+    'Callback',@popup_method_Callback, ...
+    'BackgroundColor','white', ...
+    'FontUnits','points','FontSize',fs);
+
+% ===== normFlag =====
+handles.text_norm = uicontrol('Parent',handles.uipanel1,'Style','text','Units','normalized', ...
+    'Position',[xR_label, yLabel, wR_label, hLabel], ...
+    'String','normFlag','HorizontalAlignment',ha_lm, ...
+    'FontUnits','points','FontSize',fs);
+
+handles.popup_norm = uicontrol('Parent',handles.uipanel1,'Style','popupmenu','Units','normalized', ...
+    'Position',[xR_ctrl, yCtrl, wPopupNorm, hCtrl], ...
+    'String',handles.norm_display, ...
+    'Value',find(strcmp(handles.norm_display,handles.normFlag),1,'first'), ...
+    'Callback',@popup_norm_Callback, ...
+    'BackgroundColor','white', ...
+    'FontUnits','points','FontSize',fs);
+
 set(handles.pushbutton1,'position',[0.87,0.1,0.12,0.12])
 % Choose default command line output for RecPlotGUI
 handles.output = hObject;
@@ -501,3 +642,79 @@ update_recplot
 
 % Update handles structure
 guidata(hObject, handles);
+
+
+% --- Added callbacks for new popup menus (method_use + normFlag) ---
+function popup_method_Callback(hObject, eventdata)
+% hObject: popup menu for method selection
+handles = guidata(hObject);
+try
+    idx = get(hObject,'Value');
+    if isfield(handles,'method_code') && idx>=1 && idx<=numel(handles.method_code)
+        handles.method_use = handles.method_code{idx}; % pass to downstream code as char
+    end
+    guidata(hObject, handles);
+    % refresh plot if possible
+    try update_recplot; catch, end
+catch
+end
+
+function popup_norm_Callback(hObject, eventdata)
+% hObject: popup menu for normFlag selection
+handles = guidata(hObject);
+try
+    idx = get(hObject,'Value');
+    if isfield(handles,'norm_display') && idx>=1 && idx<=numel(handles.norm_display)
+        handles.normFlag = handles.norm_display{idx}; % 'nonorm' or 'narow'
+    end
+    guidata(hObject, handles);
+    % refresh plot if possible
+    try update_recplot; catch, end
+catch
+end
+
+% --- NEW: dimension edit callback ---
+function edit_dim_Callback(hObject, eventdata)
+handles = guidata(hObject);
+
+v = str2double(get(hObject,'String'));
+if ~isfinite(v)
+    v = 1;
+end
+v = round(v);
+if v < 1
+    v = 1;
+end
+
+handles.embed_m = v;
+set(hObject,'String',num2str(v));
+
+guidata(hObject, handles);
+try
+    update_recplot;
+catch
+end
+
+
+% --- NEW: delay edit callback ---
+function edit_tau_Callback(hObject, eventdata)
+handles = guidata(hObject);
+
+v = str2double(get(hObject,'String'));
+if ~isfinite(v)
+    v = 1;
+end
+v = round(v);
+if v < 1
+    v = 1;
+end
+
+handles.embed_tau = v;
+set(hObject,'String',num2str(v));
+
+guidata(hObject, handles);
+try
+    update_recplot;
+catch
+end
+
