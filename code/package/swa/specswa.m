@@ -337,7 +337,10 @@ while true
     rmset = sqrt(se / nout);
     mbe = sum / nout;
     
-    if rmset < rmsel1 * 1.01 && nsmth < 100000
+    %if rmset < rmsel1 * 1.01 && nsmth < 100000
+    % Graham Weedon:
+    % I have found that limiting the smoothing to 500 produces satisfactory results for large/long time series.
+    if rmset < rmsel1 * 1.01 && nsmth < 500
         continue; % Repeat Hanning smoothing
     else
         break;
