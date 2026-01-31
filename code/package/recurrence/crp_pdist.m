@@ -31,9 +31,6 @@ end
 if exist('crp_core','file') ~= 2
     error('crp_pdist:NoCRPCORE', 'crp_core.m not found on path.');
 end
-if exist('crp_big_core','file') ~= 2
-    error('crp_pdist:NoCRPBIGCORE', 'crp_big_core.m not found on path.');
-end
 
 % ---------------- time axis for plotting / window centers ----------------
 [tAxis, xPlot] = local_time_and_signal(x);   % robust even if x is Nx1
