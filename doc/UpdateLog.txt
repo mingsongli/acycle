@@ -18,6 +18,7 @@ By      : Mingsong Li (Peking University)
         The output table header now includes (as comments) each IMF’s 
         variance and its percentage contribution.
         Special thanks to Prof. Zhengtang Guo for valuable suggestions.
+    5. DET: debug by Zhixin Wang, Peking University
 
 _______________________________________
 
