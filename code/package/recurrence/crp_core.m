@@ -1,6 +1,7 @@
 function xout = crp_core(x, y, m, tau, e, method, normFlag)
 %CRP_CORE  Cross/Auto Recurrence Plot.
 %
+%
 % Inputs:
 %   x,y      : Nx1, NxD, or Nx(D+1) with time column
 %   m,tau,e  : embedding dimension, delay, threshold parameter
