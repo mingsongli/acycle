@@ -176,7 +176,7 @@ handles.method_code    = {'max','eu','min','nr','rr','fa','in','om','op'};
 handles.norm_display   = {'nonorm','narow'};
 
 % defaults (match crp_pdist defaults)
-handles.method_use = 'rr';
+handles.method_use = 'max';
 handles.normFlag   = 'nonorm';
 
 % ---- match font with existing controls ----
