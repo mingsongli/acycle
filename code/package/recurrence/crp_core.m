@@ -1,9 +1,6 @@
 function xout = crp_core(x, y, m, tau, e, method, normFlag)
 %CRP_CORE  Cross/Auto Recurrence Plot.
 %
-% This implementation mirrors the method branches of crp.m
-% as closely as possible, but without GUI.
-%
 % Inputs:
 %   x,y      : Nx1, NxD, or Nx(D+1) with time column
 %   m,tau,e  : embedding dimension, delay, threshold parameter
