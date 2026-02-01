@@ -8,8 +8,8 @@ function xout = crp_core(x, y, m, tau, e, method, normFlag)
 %   method   : accepts GUI codes {'max','eu','min','nr','rr','fa','in','om','op'}
 %              and also legacy codes {'ma','eu','mi','nr','rr','fa','in','om','op'}
 %              and full names {'maxnorm','euclidean','minnorm','nrmnorm','fan','inter','omatrix','opattern'}
-%   normFlag : 'normalize' (default) or 'nonorm'/'nonormalize'/'narow' => NO normalization
-%
+%   normFlag : 'norm' (default) => z-score normalization
+%              'nonorm'         => NO normalization
 % Output:
 %   xout : recurrence matrix
 %          - for most methods: uint8(0/1)
@@ -17,7 +17,7 @@ function xout = crp_core(x, y, m, tau, e, method, normFlag)
 %          - method='om': uint8 order-matrix result (NY x NX x m)
 
 % ---------------- defaults ----------------
-if nargin < 7 || isempty(normFlag), normFlag = 'normalize'; end
+if nargin < 7 || isempty(normFlag), normFlag = 'norm'; end
 if nargin < 6 || isempty(method),   method   = 'rr';        end
 if nargin < 5 || isempty(e),        e        = 0.1;        end
 if nargin < 4 || isempty(tau),      tau      = 1;          end
@@ -45,17 +45,35 @@ xdat = remove_nan_rows(xdat);
 ydat = remove_nan_rows(ydat);
 
 % ---------------- normalization ----------------
-%   nonorm==1 -> normalize; nonorm==0 -> do NOT normalize
-% and 'nonorm' in examples corresponds to NON-normalize => nonorm==0.
-% here:
-%   normFlag starts with "non" (or your GUI 'narow') => do NOT normalize
-%   otherwise => normalize (default)
-nf = lower(string(normFlag));
-doNoNorm = startsWith(nf,"non") || startsWith(nf,"nar");  % 'nonorm','nonormalize','narow'
-if ~doNoNorm
+% Unified semantics:
+%   'norm'   -> z-score normalization
+%   'nonorm' -> NO normalization (raw)
+%
+% Backward compatibility mapping:
+%   'normalize'/'normalise'/'zscore' -> 'norm'
+%   'narow'                           -> 'nonorm'
+%   'nonormalize'/'no_norm'/'raw'     -> 'nonorm'
+nf = lower(strtrim(string(normFlag)));
+
+% map legacy spellings -> new canonical flags
+if any(nf == ["normalize","normalise","zscore","zs","z"])
+    nf = "norm";
+elseif any(nf == ["narow","nonormalize","nonormalise","no_norm","no-normalize","raw"])
+    nf = "nonorm";
+end
+
+% also tolerate old heuristic inputs like "nonorm", "non..." etc.
+if startsWith(nf,"non") && nf ~= "norm"
+    nf = "nonorm";
+end
+
+doNorm = (nf == "norm");
+
+if doNorm
     xdat = zscore_cols_infaware(xdat);
     ydat = zscore_cols_infaware(ydat);
 end
+
 
 % ---------------- embedding vectors (delay embedding) ----------------
 x2 = embed_delay(xdat, m, tau);

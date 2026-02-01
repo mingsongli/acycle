@@ -11,7 +11,7 @@ function [Y, testi] = crp_pdist(x, w, ws, theiler_window, lmin, plotn, threshold
 % ---------------- defaults ----------------
 if nargin < 11 || isempty(tau), tau = 1; end
 if nargin < 10 || isempty(m),   m   = 1; end
-if nargin < 9 || isempty(normFlag),        normFlag = 'nonorm'; end
+if nargin < 9 || isempty(normFlag),        normFlag = 'norm'; end
 if nargin < 8 || isempty(method_use),      method_use = 'rr'; end
 if nargin < 7 || isempty(threshold),       threshold = 0.10; end
 if nargin < 6 || isempty(plotn),           plotn = 0; end
