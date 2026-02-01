@@ -173,11 +173,11 @@ handles.embed_tau = 1;
 %% --- Added in 2026-01: method + normFlag controls (for DET / sliding-window) ---
 handles.method_display = {'maxnorm','euclidean','minnorm','nrmnorm','fixed recurrence rate','fan','inter','omatrix','opattern'};
 handles.method_code    = {'max','eu','min','nr','rr','fa','in','om','op'};
-handles.norm_display   = {'nonorm','narow'};
+handles.norm_display   = {'norm','nonorm'};
 
 % defaults (match crp_pdist defaults)
 handles.method_use = 'max';
-handles.normFlag   = 'nonorm';
+handles.normFlag   = 'norm';
 
 % ---- match font with existing controls ----
 fs = 11.5;
@@ -204,19 +204,44 @@ xR_ctrl  = pos_edit_lm(1);
 yCtrl  = 0.24;              % row for method/norm
 yLabel = yCtrl + (hCtrl - hLabel);
 
-
-wPopupMethod = max(pos_edit_ws(3), 0.18);   
-wPopupNorm   = max(pos_edit_lm(3), 0.12);   
-
 ha_ws = get(handles.text5,'HorizontalAlignment');
 ha_lm = get(handles.text7,'HorizontalAlignment');
 
-% ===== method =====
+% ==== STRICT LAYOUT: compute widths from panel geometry (avoid clipping) ====
+panelPos = get(handles.uipanel1,'Position'); %#ok<NASGU>  % normalized in parent fig
+
+% left column geometry
+xL_label = pos_text_ws(1);
+wL_label = pos_text_ws(3);
+
+xL_ctrl  = pos_edit_ws(1);
+
+% right column geometry
+xR_label = pos_text_lm(1);
+wR_label = pos_text_lm(3);
+
+xR_ctrl  = pos_edit_lm(1);
+
+% column right boundaries (normalized units inside panel)
+% For left popup: use space from xL_ctrl to (xR_label - gap)
+gap = 0.02;
+rightBoundLeft  = xR_label - gap;
+rightBoundRight = 1 - 0.02;     % keep a small right margin in panel
+
+wPopupMethod = max(0.18, rightBoundLeft  - xL_ctrl);
+wPopupNorm   = max(0.12, rightBoundRight - xR_ctrl);
+
+% safety clamp (avoid negative/too huge)
+wPopupMethod = max(0.10, min(wPopupMethod, 0.60));
+wPopupNorm   = max(0.08, min(wPopupNorm,   0.30));
+
+% ===== method label =====
 handles.text_method = uicontrol('Parent',handles.uipanel1,'Style','text','Units','normalized', ...
     'Position',[xL_label, yLabel, wL_label, hLabel], ...
     'String','method','HorizontalAlignment',ha_ws, ...
     'FontUnits','points','FontSize',fs);
 
+% ===== method popup (fills available left space) =====
 handles.popup_method = uicontrol('Parent',handles.uipanel1,'Style','popupmenu','Units','normalized', ...
     'Position',[xL_ctrl, yCtrl, wPopupMethod, hCtrl], ...
     'String',handles.method_display, ...
@@ -225,12 +250,13 @@ handles.popup_method = uicontrol('Parent',handles.uipanel1,'Style','popupmenu','
     'BackgroundColor','white', ...
     'FontUnits','points','FontSize',fs);
 
-% ===== normFlag =====
+% ===== normFlag label =====
 handles.text_norm = uicontrol('Parent',handles.uipanel1,'Style','text','Units','normalized', ...
     'Position',[xR_label, yLabel, wR_label, hLabel], ...
     'String','normFlag','HorizontalAlignment',ha_lm, ...
     'FontUnits','points','FontSize',fs);
 
+% ===== normFlag popup (fills available right space) =====
 handles.popup_norm = uicontrol('Parent',handles.uipanel1,'Style','popupmenu','Units','normalized', ...
     'Position',[xR_ctrl, yCtrl, wPopupNorm, hCtrl], ...
     'String',handles.norm_display, ...
@@ -238,6 +264,7 @@ handles.popup_norm = uicontrol('Parent',handles.uipanel1,'Style','popupmenu','Un
     'Callback',@popup_norm_Callback, ...
     'BackgroundColor','white', ...
     'FontUnits','points','FontSize',fs);
+
 
 set(handles.pushbutton1,'position',[0.87,0.1,0.12,0.12])
 % Choose default command line output for RecPlotGUI
@@ -334,12 +361,16 @@ else
         w = wmax;
     end
 end
-for i = 1:N
-    S(:,i) = abs( repmat( x(i), N, 1 ) - x(:) );
-end
 
-threshold = median(S(:)) - 0.5* std(S(:));
-S = recplot(x,threshold,t,0);
+% ---- build distance matrix + default threshold (based on normFlag) ----
+[x_forS, S, threshold] = local_build_S_and_threshold(x, handles.normFlag);
+
+handles.S = S;
+handles.threshold = threshold;
+
+% set GUI default threshold box
+set(handles.edit2,'String',num2str(threshold));
+
 
 handles.S = S;
 handles.threshold = threshold;
@@ -660,18 +691,41 @@ catch
 end
 
 function popup_norm_Callback(hObject, eventdata)
-% hObject: popup menu for normFlag selection
 handles = guidata(hObject);
+
 try
     idx = get(hObject,'Value');
     if isfield(handles,'norm_display') && idx>=1 && idx<=numel(handles.norm_display)
-        handles.normFlag = handles.norm_display{idx}; % 'nonorm' or 'narow'
+        handles.normFlag = handles.norm_display{idx}; % 'norm' or 'nonorm'
     end
+
+    % ==== REBUILD distance matrix S AND suggest a new threshold ====
+    data_s = handles.current_data;
+    [N, ncol] = size(data_s);
+    if ncol == 1
+        x = data_s;
+    else
+        x = data_s(:,2);
+    end
+
+    % use your helper (or inline) to rebuild S + threshold based on normFlag
+    [~, Snew, thr_new] = local_build_S_and_threshold(x, handles.normFlag);
+
+    handles.S = Snew;
+    handles.threshold = thr_new;
+
+    % update GUI threshold box
+    set(handles.edit2,'String',num2str(thr_new));
+
     guidata(hObject, handles);
-    % refresh plot if possible
-    try update_recplot; catch, end
+
+    % refresh plot (RP uses S < eps_plot so it will change now)
+    update_recplot;
+
 catch
 end
+
+
 
 % --- NEW: dimension edit callback ---
 function edit_dim_Callback(hObject, eventdata)
@@ -717,4 +771,46 @@ try
     update_recplot;
 catch
 end
+
+function [x_use, S, threshold] = local_build_S_and_threshold(x, normFlag)
+% Build distance matrix S and a reasonable default threshold
+% normFlag: 'norm' => zscore; 'nonorm' => raw
+
+x_use = double(x(:));
+
+if nargin < 2 || isempty(normFlag), normFlag = 'nonorm'; end
+nf = lower(strtrim(string(normFlag)));
+
+% legacy compatibility
+if nf == "narow", nf = "nonorm"; end
+if nf == "normalize" || nf == "zscore", nf = "norm"; end
+
+if nf == "norm"
+    mu  = mean(x_use,'omitnan');
+    sig = std(x_use,'omitnan');
+    if isfinite(sig) && sig > 0
+        x_use = (x_use - mu) ./ sig;
+    end
+end
+
+N = numel(x_use);
+S = zeros(N, N);
+for i = 1:N
+    S(:,i) = abs(x_use(i) - x_use);
+end
+
+% Default threshold heuristic (same formula as your original, but omit NaNs)
+d = S(:);
+d = d(isfinite(d));
+
+if isempty(d)
+    threshold = 0.1;
+else
+    threshold = median(d) - 0.5 * std(d);
+end
+
+% safety: threshold must be finite and within [min,max] of distances
+dmin = min(d); dmax = max(d);
+if ~isfinite(threshold), threshold = 0.1; end
+threshold = max(dmin, min(dmax, threshold));
 
