@@ -12,7 +12,7 @@ else
 end
 
 %% ---- normalization ----
-if isfield(handles,'normFlag') && strcmpi(handles.normFlag,'nonorm')
+if isfield(handles,'normFlag') && strcmpi(handles.normFlag,'norm')
     x0 = x(:);
     mu = mean(x0,'omitnan');
     sig = std(x0,'omitnan');
@@ -224,6 +224,7 @@ if showseries == 1
         subplot('position',[0.15 0.75 0.7 0.11]);
         plot(DETx,DETy,'k','LineWidth',2)
         xlim([min(t), max(t)])
+        ylim([0.9*min(DETy),1.1*max(DETy)])
         ylabel('DET')
         set(gca,'xticklabel',{[]})
         set(gca,'XMinorTick','on','YMinorTick','on','TickDir','out');
@@ -424,7 +425,7 @@ else
     % EPS mode: threshold is a distance (even if <=1)
     rr_plot = NaN;
     eps_plot = double(threshold);
-
+ 
     % clamp eps to distance range
     if eps_plot > dmax
         eps_plot = dmax;
