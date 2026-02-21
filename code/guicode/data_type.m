@@ -1,82 +1,73 @@
-function varargout = data_type(varargin)
-% DATA_TYPE MATLAB code for data_type.fig
-%      DATA_TYPE, by itself, creates a new DATA_TYPE or raises the existing
-%      singleton*.
-%
-%      H = DATA_TYPE returns the handle to a new DATA_TYPE or the handle to
-%      the existing singleton*.
-%
-%      DATA_TYPE('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in DATA_TYPE.M with the given input arguments.
-%
-%      DATA_TYPE('Property','Value',...) creates a new DATA_TYPE or raises the
-%      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before data_type_OpeningFcn gets called.  An
-%      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to data_type_OpeningFcn via varargin.
-%
-%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
-%      instance to run (singleton)".
-%
-% See also: GUIDE, GUIDATA, GUIHANDLES
+classdef data_type < matlab.apps.AppBase
+    % App Designer style replacement for legacy GUIDE data_type dialog.
 
-% Edit the above text to modify the response to help data_type
+    properties (Access = public)
+        UIFigure      matlab.ui.Figure
+        MainGrid      matlab.ui.container.GridLayout
+        TitleLabel    matlab.ui.control.Label
+        BodyTextArea  matlab.ui.control.TextArea
+    end
 
-% Last Modified by GUIDE v2.5 01-May-2017 21:30:01
+    methods (Access = private)
+        function createComponents(app)
+            app.UIFigure = uifigure( ...
+                'Name', 'data_type', ...
+                'Position', [180 180 700 420], ...
+                'Color', [1 1 1]);
 
-% Begin initialization code - DO NOT EDIT
-gui_Singleton = 1;
-gui_State = struct('gui_Name',       mfilename, ...
-                   'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @data_type_OpeningFcn, ...
-                   'gui_OutputFcn',  @data_type_OutputFcn, ...
-                   'gui_LayoutFcn',  [] , ...
-                   'gui_Callback',   []);
-if nargin && ischar(varargin{1})
-    gui_State.gui_Callback = str2func(varargin{1});
+            app.MainGrid = uigridlayout(app.UIFigure, [2 1]);
+            app.MainGrid.RowHeight = {'fit', '1x'};
+            app.MainGrid.ColumnWidth = {'1x'};
+            app.MainGrid.Padding = [26 20 26 20];
+            app.MainGrid.RowSpacing = 10;
+
+            app.TitleLabel = uilabel(app.MainGrid, ...
+                'Text', 'Warning: no data exist!', ...
+                'FontSize', 14, ...
+                'FontWeight', 'bold', ...
+                'HorizontalAlignment', 'left');
+            app.TitleLabel.Layout.Row = 1;
+
+            bodyLines = {
+                'Load a 2-column data in MatLab Workspace';
+                'Input data format';
+                'Name:    data';
+                'Length:  m x 2     % must be a 2-column dataset';
+                'Column 1:  time;     unit must be in ka;';
+                'Column 2:  value';
+                'Notes:';
+                '#1: Proxy data is assumed to be sensitive to water-depth related noise.';
+                '#2: There is no requirement for interpolation, normalization, or';
+                '      pre-Whitening of the dataset.';
+                '#3: Extreme values should be removed.';
+                '#4: Both increasing-upward and decreasing-upward time series are';
+                '      okay for the model.'
+                };
+
+            app.BodyTextArea = uitextarea(app.MainGrid, ...
+                'Value', bodyLines, ...
+                'Editable', 'off', ...
+                'FontSize', 12, ...
+                'BackgroundColor', [1 1 1]);
+            app.BodyTextArea.Layout.Row = 2;
+        end
+    end
+
+    methods (Access = public)
+        function app = data_type(varargin)
+            %#ok<INUSD> Keep compatibility with legacy call signatures.
+            app.createComponents();
+            registerApp(app, app.UIFigure);
+
+            if nargout == 0
+                clear app
+            end
+        end
+
+        function delete(app)
+            if ~isempty(app.UIFigure) && isvalid(app.UIFigure)
+                delete(app.UIFigure);
+            end
+        end
+    end
 end
-
-if nargout
-    [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
-else
-    gui_mainfcn(gui_State, varargin{:});
-end
-% End initialization code - DO NOT EDIT
-
-
-% --- Executes just before data_type is made visible.
-function data_type_OpeningFcn(hObject, eventdata, handles, varargin)
-% This function has no output args, see OutputFcn.
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to data_type (see VARARGIN)
-set(0,'Units','normalized') % set units as normalized
-set(gcf,'units','norm') % set location
-h=get(gcf,'Children');  % get all content
-h1=findobj(h,'FontUnits','norm');  % find all font units as points
-set(h1,'FontUnits','points','FontSize',12);  % set as norm
-h2=findobj(h,'FontUnits','points');  % find all font units as points
-set(h2,'FontUnits','points','FontSize',12);  % set as norm
-set(handles.text2,'position',[0.06,0.878, 0.33,0.075]) % set position
-set(handles.text3,'position',[0.06,0.146, 0.857,0.707]) % set position
-
-% Choose default command line output for data_type
-handles.output = hObject;
-
-% Update handles structure
-guidata(hObject, handles);
-
-% UIWAIT makes data_type wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
-
-
-% --- Outputs from this function are returned to the command line.
-function varargout = data_type_OutputFcn(hObject, eventdata, handles) 
-% varargout  cell array for returning output args (see VARARGOUT);
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Get default command line output from handles structure
-varargout{1} = handles.output;

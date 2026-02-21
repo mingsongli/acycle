@@ -1,816 +1,786 @@
-function varargout = RecPlotGUI(varargin)
-% RECPLOTGUI MATLAB code for RecPlotGUI.fig
-%      RECPLOTGUI, by itself, creates a new RECPLOTGUI or raises the existing
-%      singleton*.
-%
-%      H = RECPLOTGUI returns the handle to a new RECPLOTGUI or the handle to
-%      the existing singleton*.
-%
-%      RECPLOTGUI('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in RECPLOTGUI.M with the given input arguments.
-%
-%      RECPLOTGUI('Property','Value',...) creates a new RECPLOTGUI or raises the
-%      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before RecPlotGUI_OpeningFcn gets called.  An
-%      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to RecPlotGUI_OpeningFcn via varargin.
-%
-%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
-%      instance to run (singleton)".
-%
-% See also: GUIDE, GUIDATA, GUIHANDLES
+classdef RecPlotGUI < matlab.apps.AppBase
+    % App Designer style replacement for legacy GUIDE RecPlotGUI.
 
-% Edit the above text to modify the response to help RecPlotGUI
+    properties (Access = public)
+        UIFigure matlab.ui.Figure
 
-% Last Modified by GUIDE v2.5 12-Dec-2022 13:56:35
+        LabelSeries matlab.ui.control.Label
+        EditSeries matlab.ui.control.EditField
+        EditYLabel matlab.ui.control.EditField
 
-% Begin initialization code - DO NOT EDIT
-gui_Singleton = 1;
-gui_State = struct('gui_Name',       mfilename, ...
-                   'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @RecPlotGUI_OpeningFcn, ...
-                   'gui_OutputFcn',  @RecPlotGUI_OutputFcn, ...
-                   'gui_LayoutFcn',  [] , ...
-                   'gui_Callback',   []);
-if nargin && ischar(varargin{1})
-    gui_State.gui_Callback = str2func(varargin{1});
-end
+        LabelThreshold matlab.ui.control.Label
+        EditThreshold matlab.ui.control.EditField
 
-if nargout
-    [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
-else
-    gui_mainfcn(gui_State, varargin{:});
-end
-% End initialization code - DO NOT EDIT
+        CheckShowSeries matlab.ui.control.CheckBox
+        CheckShowDET matlab.ui.control.CheckBox
+        CheckFlipTime matlab.ui.control.CheckBox
+        CheckFlipY matlab.ui.control.CheckBox
 
+        PanelSliding matlab.ui.container.Panel
+        LabelWindowSize matlab.ui.control.Label
+        EditWindowSize matlab.ui.control.EditField
+        LabelWindowUnit matlab.ui.control.Label
+        LabelSlidingStep matlab.ui.control.Label
+        EditSlidingStep matlab.ui.control.EditField
+        LabelStepUnit matlab.ui.control.Label
+        LabelTheiler matlab.ui.control.Label
+        EditTheiler matlab.ui.control.EditField
+        LabelDiagMin matlab.ui.control.Label
+        EditDiagMin matlab.ui.control.EditField
 
-% --- Executes just before RecPlotGUI is made visible.
-function RecPlotGUI_OpeningFcn(hObject, eventdata, handles, varargin)
-% This function has no output args, see OutputFcn.
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to RecPlotGUI (see VARARGIN)
-
-set(0,'Units','normalized') % set units as normalized
-set(gcf,'units','norm') % set location
-h=get(gcf,'Children');  % get all content
-h1=findobj(h,'FontUnits','norm');  % find all font units as points
-set(h1,'FontUnits','points','FontSize',11.5);  % set as norm
-h2=findobj(h,'FontUnits','points');  % find all font units as points
-set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
-handles.MonZoom = varargin{1}.MonZoom;
-handles.sortdata = varargin{1}.sortdata;
-handles.val1 = varargin{1}.val1;
-
-data_s = varargin{1}.current_data;
-handles.unit = varargin{1}.unit;
-handles.unit_type = varargin{1}.unit_type;
-handles.current_data = data_s;
-handles.data_name = varargin{1}.data_name;
-handles.path_temp = varargin{1}.path_temp;
-handles.listbox_acmain = varargin{1}.listbox_acmain; % save path
-handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
-[dat_dir,handles.filename,exten] = fileparts(handles.data_name);
-
-set(gcf,'position',[0.35,0.4,0.45,0.35]* handles.MonZoom) % set position
-
-set(handles.text2,'position',[0.05,0.82,0.09,0.064])
-set(handles.edit1,'position',[0.145,0.8,0.5,0.1])
-set(handles.edit7,'position',[0.67,0.8,0.13,0.1])
-
-set(handles.text3,'position',[0.05,0.6,0.09,0.064])
-set(handles.edit2,'position',[0.145,0.58,0.13,0.1])
-set(handles.checkbox1,'position',[0.105,0.4,0.15,0.15],'Value',1)
-set(handles.checkbox2,'position',[0.105,0.25,0.15,0.15],'Value',0)
-set(handles.checkbox3,'position',[0.105,0.1,0.11,0.15],'Value',0)
-set(handles.checkbox4,'position',[0.22,0.1,0.11,0.15],'Value',0)
-
-set(handles.uipanel1,'position',[0.36,0.1,0.5,0.5])
-set(handles.text4,'position',[0.03,0.7,0.24,0.12])
-set(handles.edit3,'position',[0.27,0.65,0.1,0.18])
-set(handles.text5,'position',[0.03,0.4,0.24,0.12])
-set(handles.edit4,'position',[0.27,0.35,0.1,0.18])
-set(handles.text6,'position',[0.55,0.7,0.27,0.12])
-set(handles.edit5,'position',[0.83,0.65,0.11,0.18])
-set(handles.text7,'position',[0.55,0.4,0.27,0.12])
-set(handles.edit6,'position',[0.83,0.35,0.11,0.18])
-set(handles.text9,'position',[0.4,0.7,0.13,0.12],'String',handles.unit)
-set(handles.text10,'position',[0.4,0.4,0.13,0.12],'String',handles.unit)
-
-%% ===== 2026-01-24 add: shift existing 6 controls up, add dimension/delay =====
-% We will have 8 controls in the sliding-window panel:
-%   w, ws, theiler_window, lmin, method, normFlag, dimension(m), delay(tau)
-
-% ---- shift existing rows up to make room for 2 new rows at bottom ----
-dy = 0.14;  % upward shift (tune if needed)
-
-% labels + edits that already exist in panel
-move_up = @(h) set(h,'Position', get(h,'Position') + [0 dy 0 0]);
-
-move_up(handles.text4);  move_up(handles.edit3);   % w
-move_up(handles.text5);  move_up(handles.edit4);   % ws
-move_up(handles.text6);  move_up(handles.edit5);   % theiler
-move_up(handles.text7);  move_up(handles.edit6);   % lmin
-move_up(handles.text9);  % unit label for w
-move_up(handles.text10); % unit label for ws
-
-% ---- create a NEW bottom row for dimension / delay (edit boxes) ----
-fs = 11.5;
-
-% use the *current* positions (after move) as reference widths
-pos_text_ws = get(handles.text5,'Position');   % left label reference
-pos_edit_ws = get(handles.edit4,'Position');   % left edit reference
-pos_text_lm = get(handles.text7,'Position');   % right label reference
-pos_edit_lm = get(handles.edit6,'Position');   % right edit reference
-
-hLabel = pos_text_ws(4);
-hCtrl  = pos_edit_ws(4);
-
-xL_label = pos_text_ws(1);   wL_label = pos_text_ws(3);
-xL_ctrl  = pos_edit_ws(1);   wL_ctrl  = pos_edit_ws(3);
-
-xR_label = pos_text_lm(1);   wR_label = pos_text_lm(3);
-xR_ctrl  = pos_edit_lm(1);   wR_ctrl  = pos_edit_lm(3);
-
-% put this new row at the very bottom of panel
-yCtrl_dim  = 0.02;
-yLabel_dim = yCtrl_dim + (hCtrl - hLabel);
-
-handles.text_dim = uicontrol('Parent',handles.uipanel1,'Style','text','Units','normalized', ...
-    'Position',[xL_label, yLabel_dim, wL_label, hLabel], ...
-    'String','dimension', ...
-    'HorizontalAlignment', get(handles.text5,'HorizontalAlignment'), ...
-    'FontUnits','points','FontSize',fs);
-
-handles.edit_dim = uicontrol('Parent',handles.uipanel1,'Style','edit','Units','normalized', ...
-    'Position',[xL_ctrl, yCtrl_dim, wL_ctrl, hCtrl], ...
-    'String','1', ...
-    'BackgroundColor','white', ...
-    'Callback',@edit_dim_Callback, ...
-    'FontUnits','points','FontSize',fs);
-
-handles.text_tau = uicontrol('Parent',handles.uipanel1,'Style','text','Units','normalized', ...
-    'Position',[xR_label, yLabel_dim, wR_label, hLabel], ...
-    'String','delay', ...
-    'HorizontalAlignment', get(handles.text7,'HorizontalAlignment'), ...
-    'FontUnits','points','FontSize',fs);
-
-handles.edit_tau = uicontrol('Parent',handles.uipanel1,'Style','edit','Units','normalized', ...
-    'Position',[xR_ctrl, yCtrl_dim, wR_ctrl, hCtrl], ...
-    'String','1', ...
-    'BackgroundColor','white', ...
-    'Callback',@edit_tau_Callback, ...
-    'FontUnits','points','FontSize',fs);
-
-set(handles.edit_dim,'Enable','off');
-set(handles.edit_tau,'Enable','off');
-
-% store defaults into handles for passing downstream
-handles.embed_m   = 1;
-handles.embed_tau = 1;
-
-%% --- Added in 2026-01: method + normFlag controls (for DET / sliding-window) ---
-handles.method_display = {'maxnorm','euclidean','minnorm','nrmnorm','fixed recurrence rate','fan','inter','omatrix','opattern'};
-handles.method_code    = {'max','eu','min','nr','rr','fa','in','om','op'};
-handles.norm_display   = {'norm','nonorm'};
-
-% defaults (match crp_pdist defaults)
-handles.method_use = 'max';
-handles.normFlag   = 'norm';
-
-% ---- match font with existing controls ----
-fs = 11.5;
-
-% ---- read reference positions from existing panel controls ----
-pos_text_ws = get(handles.text5,'Position');   % "sliding step" label (ws)
-pos_edit_ws = get(handles.edit4,'Position');   % ws edit box
-pos_text_lm = get(handles.text7,'Position');   % "lmin" label
-pos_edit_lm = get(handles.edit6,'Position');   % lmin edit box
-
-% ---- make a new bottom row (below ws/lmin row) ----
-hLabel = pos_text_ws(4);         
-hCtrl  = pos_edit_ws(4);         
-
-xL_label = pos_text_ws(1);
-wL_label = pos_text_ws(3);
-xL_ctrl  = pos_edit_ws(1);
-
-xR_label = pos_text_lm(1);
-wR_label = pos_text_lm(3);
-xR_ctrl  = pos_edit_lm(1);
-
-% ---- make method/norm row above dimension/delay row ----
-yCtrl  = 0.24;              % row for method/norm
-yLabel = yCtrl + (hCtrl - hLabel);
-
-ha_ws = get(handles.text5,'HorizontalAlignment');
-ha_lm = get(handles.text7,'HorizontalAlignment');
-
-% ==== STRICT LAYOUT: compute widths from panel geometry (avoid clipping) ====
-panelPos = get(handles.uipanel1,'Position'); %#ok<NASGU>  % normalized in parent fig
-
-% left column geometry
-xL_label = pos_text_ws(1);
-wL_label = pos_text_ws(3);
-
-xL_ctrl  = pos_edit_ws(1);
-
-% right column geometry
-xR_label = pos_text_lm(1);
-wR_label = pos_text_lm(3);
-
-xR_ctrl  = pos_edit_lm(1);
-
-% column right boundaries (normalized units inside panel)
-% For left popup: use space from xL_ctrl to (xR_label - gap)
-gap = 0.02;
-rightBoundLeft  = xR_label - gap;
-rightBoundRight = 1 - 0.02;     % keep a small right margin in panel
-
-wPopupMethod = max(0.18, rightBoundLeft  - xL_ctrl);
-wPopupNorm   = max(0.12, rightBoundRight - xR_ctrl);
-
-% safety clamp (avoid negative/too huge)
-wPopupMethod = max(0.10, min(wPopupMethod, 0.60));
-wPopupNorm   = max(0.08, min(wPopupNorm,   0.30));
-
-% ===== method label =====
-handles.text_method = uicontrol('Parent',handles.uipanel1,'Style','text','Units','normalized', ...
-    'Position',[xL_label, yLabel, wL_label, hLabel], ...
-    'String','method','HorizontalAlignment',ha_ws, ...
-    'FontUnits','points','FontSize',fs);
-
-% ===== method popup (fills available left space) =====
-handles.popup_method = uicontrol('Parent',handles.uipanel1,'Style','popupmenu','Units','normalized', ...
-    'Position',[xL_ctrl, yCtrl, wPopupMethod, hCtrl], ...
-    'String',handles.method_display, ...
-    'Value',find(strcmp(handles.method_code,handles.method_use),1,'first'), ...
-    'Callback',@popup_method_Callback, ...
-    'BackgroundColor','white', ...
-    'FontUnits','points','FontSize',fs);
-
-% ===== normFlag label =====
-handles.text_norm = uicontrol('Parent',handles.uipanel1,'Style','text','Units','normalized', ...
-    'Position',[xR_label, yLabel, wR_label, hLabel], ...
-    'String','normFlag','HorizontalAlignment',ha_lm, ...
-    'FontUnits','points','FontSize',fs);
-
-% ===== normFlag popup (fills available right space) =====
-handles.popup_norm = uicontrol('Parent',handles.uipanel1,'Style','popupmenu','Units','normalized', ...
-    'Position',[xR_ctrl, yCtrl, wPopupNorm, hCtrl], ...
-    'String',handles.norm_display, ...
-    'Value',find(strcmp(handles.norm_display,handles.normFlag),1,'first'), ...
-    'Callback',@popup_norm_Callback, ...
-    'BackgroundColor','white', ...
-    'FontUnits','points','FontSize',fs);
-
-
-set(handles.pushbutton1,'position',[0.87,0.1,0.12,0.12])
-% Choose default command line output for RecPlotGUI
-handles.output = hObject;
-handles.RecPlotGUI = gcf;
-
-% language
-lang_choice = varargin{1}.lang_choice;
-handles.lang_choice = lang_choice;
-lang_id = varargin{1}.lang_id;
-lang_var = varargin{1}.lang_var;
-handles.lang_id = lang_id;
-handles.lang_var = lang_var;
-handles.main_unit_selection = varargin{1}.main_unit_selection;
-if handles.lang_choice == 0
-    set(gcf,'Name','Acycle: Recurrence Plot')
-else
-    [~, menu128] = ismember('menu128',lang_id);
-    set(gcf,'Name',['Acycle: ',lang_var{menu128}])
-end
-
-% language
-if handles.lang_choice > 0
-    [~, main12] = ismember('main12',handles.lang_id);
-    [~, main24] = ismember('main24',handles.lang_id);
-    [~, main53] = ismember('main53',handles.lang_id);
-    [~, main54] = ismember('main54',handles.lang_id);
-    [~, recPlot03] = ismember('recPlot03',handles.lang_id);
-    [~, main10] = ismember('main10',handles.lang_id);
-    [~, main07] = ismember('main07',handles.lang_id);
-    
-    [~, recPlot01] = ismember('recPlot01',handles.lang_id);
-    [~, recPlot02] = ismember('recPlot02',handles.lang_id);
-    [~, c39] = ismember('c39',handles.lang_id);
-    [~, main55] = ismember('main55',handles.lang_id);
-    [~, main32] = ismember('main32',handles.lang_id);
-    [~, main41] = ismember('main41',handles.lang_id);
-    [~, main01] = ismember('main01',handles.lang_id);
-    
-    set(handles.text2,'String',lang_var{main12})
-    set(handles.edit7,'String',lang_var{main24})
-    set(handles.text3,'String',lang_var{main53})
-    set(handles.checkbox1,'String',[lang_var{main54},lang_var{main12}])
-    set(handles.checkbox3,'String',lang_var{recPlot03})
-    set(handles.checkbox2,'String',[lang_var{main54},'DET'])
-    set(handles.checkbox4,'String',lang_var{main10})
-    set(handles.uipanel1,'Title',lang_var{main07})
-    
-    set(handles.text4,'String',lang_var{c39})
-    set(handles.text6,'String',[lang_var{recPlot01},lang_var{main41}])
-    set(handles.text5,'String',[lang_var{main55},' ',lang_var{main32}])
-    set(handles.text7,'String',lang_var{recPlot02})
-    set(handles.pushbutton1,'String',lang_var{main01})
-end
-
-% size of data
-[N, ncol] = size(data_s);
-S = zeros(N, N);
-
-% sliding window size
-win_ratio = 0.3; 
-theiler_window = 1;
-lmin = 2; 
-
-if ncol == 1
-    x = data_s;
-    t = 1:N;
-    w = round(win_ratio * N);
-    ws = 1;
-    if w/ws > 500
-        ws = round(w/300);
+        ButtonSave matlab.ui.control.Button
     end
-else
-    diffx = diff(data_s(:,1));
-    if max(diffx) - min(diffx) > 10*eps('single')
-        % language
-        if handles.lang_choice ==  0
-            hwarn = warndlg('Not equally spaced data. Interpolated using mean sampling rate!');
-        else
-            [~, dd37] = ismember('dd37',handles.lang_id);
-            hwarn = warndlg(lang_var{dd37});
+
+    properties (Access = private)
+        Context struct = struct()
+        MonZoom double = 1
+
+        lang_choice double = 0
+        lang_id = {}
+        lang_var = {}
+
+        unit = ''
+        unit_type double = 0
+        current_data
+        data_name = ''
+        path_temp = ''
+        listbox_acmain
+        edit_acfigmain_dir
+        val1 double = 1
+
+        filename = ''
+        fileext = ''
+
+        S
+        threshold double = 0
+        w double = 30
+        ws double = 1
+        theiler_window double = 1
+        lmin double = 2
+        St
+        DET
+
+        method_use char = 'rr'
+        normFlag char = 'nonorm'
+        embed_m double = 1
+        embed_tau double = 1
+
+        hrp = []
+
+        UIFontSize double = 11.5
+        UIBgColor double = [0.94 0.94 0.94]
+        EditEnabledColor double = [1 1 1]
+        EditDisabledColor double = [0.90 0.90 0.90]
+    end
+
+    methods (Access = private)
+        function screenSize = getScreenSizePixels(~)
+            oldUnits = get(groot, 'Units');
+            set(groot, 'Units', 'pixels');
+            screenSize = get(groot, 'ScreenSize');
+            set(groot, 'Units', oldUnits);
         end
-        interpolate_rate = mean(diffx);
-        handles.current_data = interpolate(data_s,interpolate_rate);
-        figure(hwarn);
+
+        function pos = normalizedToPixelPosition(app, normPos)
+            screenSize = app.getScreenSizePixels();
+            zoom = app.MonZoom;
+            if isnumeric(zoom)
+                if isscalar(zoom)
+                    normPos = normPos * zoom;
+                elseif numel(zoom) >= 4
+                    normPos = normPos .* zoom(1:4);
+                end
+            end
+            w = max(760, normPos(3) * screenSize(3));
+            h = max(520, normPos(4) * screenSize(4));
+            x = screenSize(1) + normPos(1) * screenSize(3);
+            y = screenSize(2) + normPos(2) * screenSize(4);
+            x = min(max(x, screenSize(1)), screenSize(1) + screenSize(3) - w);
+            y = min(max(y, screenSize(2)), screenSize(2) + screenSize(4) - h);
+            pos = round([x, y, w, h]);
+        end
+
+        function p = childPos(~, parentPos, rel)
+            p = round([ ...
+                rel(1) * parentPos(3), ...
+                rel(2) * parentPos(4), ...
+                rel(3) * parentPos(3), ...
+                rel(4) * parentPos(4)]);
+        end
+
+        function txt = getLang(app, key, defaultText)
+            txt = defaultText;
+            if isempty(app.lang_id) || isempty(app.lang_var)
+                return
+            end
+            [~, idx] = ismember(key, app.lang_id);
+            if idx > 0 && idx <= numel(app.lang_var)
+                txt = app.lang_var{idx};
+            end
+        end
+
+        function applyLayout(app)
+            fw = app.UIFigure.Position(3);
+            fh = app.UIFigure.Position(4);
+            figRect = [0, 0, fw, fh];
+
+            app.LabelSeries.Position = app.childPos(figRect, [0.06,0.79,0.08,0.07]);
+            app.EditSeries.Position = app.childPos(figRect, [0.145,0.77,0.50,0.095]);
+            app.EditYLabel.Position = app.childPos(figRect, [0.67,0.77,0.13,0.095]);
+
+            app.LabelThreshold.Position = app.childPos(figRect, [0.05,0.58,0.10,0.07]);
+            app.EditThreshold.Position = app.childPos(figRect, [0.145,0.56,0.13,0.095]);
+
+            app.CheckShowSeries.Position = app.childPos(figRect, [0.105,0.40,0.17,0.12]);
+            app.CheckShowDET.Position = app.childPos(figRect, [0.105,0.25,0.15,0.12]);
+            app.CheckFlipTime.Position = app.childPos(figRect, [0.105,0.10,0.11,0.12]);
+            app.CheckFlipY.Position = app.childPos(figRect, [0.22,0.10,0.11,0.12]);
+
+            app.PanelSliding.Position = app.childPos(figRect, [0.36,0.10,0.50,0.50]);
+            app.LabelWindowSize.Position = app.childPos(app.PanelSliding.Position, [0.07,0.70,0.23,0.13]);
+            app.EditWindowSize.Position = app.childPos(app.PanelSliding.Position, [0.27,0.65,0.10,0.18]);
+            app.LabelWindowUnit.Position = app.childPos(app.PanelSliding.Position, [0.40,0.70,0.13,0.12]);
+
+            app.LabelSlidingStep.Position = app.childPos(app.PanelSliding.Position, [0.07,0.40,0.23,0.13]);
+            app.EditSlidingStep.Position = app.childPos(app.PanelSliding.Position, [0.27,0.35,0.10,0.18]);
+            app.LabelStepUnit.Position = app.childPos(app.PanelSliding.Position, [0.40,0.40,0.13,0.12]);
+
+            app.LabelTheiler.Position = app.childPos(app.PanelSliding.Position, [0.55,0.70,0.27,0.13]);
+            app.EditTheiler.Position = app.childPos(app.PanelSliding.Position, [0.83,0.65,0.11,0.18]);
+            app.LabelDiagMin.Position = app.childPos(app.PanelSliding.Position, [0.55,0.40,0.27,0.13]);
+            app.EditDiagMin.Position = app.childPos(app.PanelSliding.Position, [0.83,0.35,0.11,0.18]);
+
+            app.ButtonSave.Position = app.childPos(figRect, [0.87,0.10,0.12,0.12]);
+        end
+
+        function createComponents(app)
+            app.UIFigure = uifigure('Name', 'Acycle: Recurrence Plot', ...
+                'Color', app.UIBgColor, ...
+                'Resize', 'on', ...
+                'Position', app.normalizedToPixelPosition([0.35,0.4,0.45,0.35]));
+            app.UIFigure.AutoResizeChildren = 'off';
+            app.UIFigure.SizeChangedFcn = @(~,~)app.applyLayout();
+
+            app.LabelSeries = uilabel(app.UIFigure, 'Text', 'Series', ...
+                'FontSize', app.UIFontSize, 'BackgroundColor', app.UIBgColor);
+            app.EditSeries = uieditfield(app.UIFigure, 'text', 'Editable', 'off', ...
+                'FontSize', app.UIFontSize, 'BackgroundColor', app.EditDisabledColor);
+            app.EditYLabel = uieditfield(app.UIFigure, 'text', ...
+                'FontSize', app.UIFontSize, 'BackgroundColor', app.EditEnabledColor, ...
+                'ValueChangedFcn', @(~,~)app.updateRecplot());
+
+            app.LabelThreshold = uilabel(app.UIFigure, 'Text', 'Threshold', ...
+                'FontSize', app.UIFontSize, 'BackgroundColor', app.UIBgColor);
+            app.EditThreshold = uieditfield(app.UIFigure, 'text', ...
+                'FontSize', app.UIFontSize, 'HorizontalAlignment', 'center', ...
+                'BackgroundColor', app.EditEnabledColor, ...
+                'ValueChangedFcn', @(~,~)app.updateRecplot());
+
+            app.CheckShowSeries = uicheckbox(app.UIFigure, 'Text', 'Show series', 'Value', true, ...
+                'FontSize', app.UIFontSize, ...
+                'ValueChangedFcn', @(~,~)app.updateRecplot());
+            app.CheckShowDET = uicheckbox(app.UIFigure, 'Text', 'Show DET', 'Value', false, ...
+                'FontSize', app.UIFontSize, ...
+                'ValueChangedFcn', @(~,~)app.updateRecplot());
+            app.CheckFlipTime = uicheckbox(app.UIFigure, 'Text', 'Flip time', 'Value', false, ...
+                'FontSize', app.UIFontSize, ...
+                'ValueChangedFcn', @(~,~)app.updateRecplot());
+            app.CheckFlipY = uicheckbox(app.UIFigure, 'Text', 'Flip Y axis', 'Value', false, ...
+                'FontSize', app.UIFontSize, ...
+                'ValueChangedFcn', @(~,~)app.updateRecplot());
+
+            app.PanelSliding = uipanel(app.UIFigure, 'Title', 'Sliding window', ...
+                'FontSize', app.UIFontSize, 'BackgroundColor', app.UIBgColor);
+            app.LabelWindowSize = uilabel(app.PanelSliding, 'Text', 'Window size', ...
+                'FontSize', app.UIFontSize, 'BackgroundColor', app.UIBgColor);
+            app.EditWindowSize = uieditfield(app.PanelSliding, 'text', ...
+                'FontSize', app.UIFontSize, 'HorizontalAlignment', 'center', 'BackgroundColor', app.EditDisabledColor, ...
+                'ValueChangedFcn', @(~,~)app.updateRecplot());
+            app.LabelWindowUnit = uilabel(app.PanelSliding, 'Text', 'unit', ...
+                'FontSize', app.UIFontSize, 'BackgroundColor', app.UIBgColor);
+
+            app.LabelSlidingStep = uilabel(app.PanelSliding, 'Text', 'Sliding step', ...
+                'FontSize', app.UIFontSize, 'BackgroundColor', app.UIBgColor);
+            app.EditSlidingStep = uieditfield(app.PanelSliding, 'text', ...
+                'FontSize', app.UIFontSize, 'HorizontalAlignment', 'center', 'BackgroundColor', app.EditDisabledColor, ...
+                'ValueChangedFcn', @(~,~)app.updateRecplot());
+            app.LabelStepUnit = uilabel(app.PanelSliding, 'Text', 'unit', ...
+                'FontSize', app.UIFontSize, 'BackgroundColor', app.UIBgColor);
+
+            app.LabelTheiler = uilabel(app.PanelSliding, 'Text', 'Theiler window', ...
+                'FontSize', app.UIFontSize, 'BackgroundColor', app.UIBgColor);
+            app.EditTheiler = uieditfield(app.PanelSliding, 'text', ...
+                'FontSize', app.UIFontSize, 'HorizontalAlignment', 'center', 'BackgroundColor', app.EditDisabledColor, ...
+                'ValueChangedFcn', @(~,~)app.updateRecplot());
+
+            app.LabelDiagMin = uilabel(app.PanelSliding, 'Text', 'diagonal line min', ...
+                'FontSize', app.UIFontSize, 'BackgroundColor', app.UIBgColor);
+            app.EditDiagMin = uieditfield(app.PanelSliding, 'text', ...
+                'FontSize', app.UIFontSize, 'HorizontalAlignment', 'center', 'BackgroundColor', app.EditDisabledColor, ...
+                'ValueChangedFcn', @(~,~)app.updateRecplot());
+
+            app.ButtonSave = uibutton(app.UIFigure, 'push', 'Text', 'Save data', ...
+                'FontSize', app.UIFontSize, 'ButtonPushedFcn', @(~,~)app.onSaveData());
+
+            app.applyLayout();
+        end
+
+        function initializeState(app)
+            if isfield(app.Context, 'MonZoom'), app.MonZoom = app.Context.MonZoom; end
+            if isfield(app.Context, 'lang_choice'), app.lang_choice = app.Context.lang_choice; end
+            if isfield(app.Context, 'lang_id'), app.lang_id = app.Context.lang_id; end
+            if isfield(app.Context, 'lang_var'), app.lang_var = app.Context.lang_var; end
+            if isfield(app.Context, 'unit'), app.unit = app.Context.unit; end
+            if isfield(app.Context, 'unit_type'), app.unit_type = app.Context.unit_type; end
+            if isfield(app.Context, 'current_data'), app.current_data = app.Context.current_data; end
+            if isfield(app.Context, 'data_name'), app.data_name = app.Context.data_name; end
+            if isfield(app.Context, 'path_temp'), app.path_temp = app.Context.path_temp; end
+            if isfield(app.Context, 'listbox_acmain'), app.listbox_acmain = app.Context.listbox_acmain; end
+            if isfield(app.Context, 'edit_acfigmain_dir'), app.edit_acfigmain_dir = app.Context.edit_acfigmain_dir; end
+            if isfield(app.Context, 'val1'), app.val1 = app.Context.val1; end
+
+            [~, app.filename, app.fileext] = fileparts(app.data_name);
+
+            if app.lang_choice == 0
+                app.UIFigure.Name = 'Acycle: Recurrence Plot';
+            else
+                app.UIFigure.Name = ['Acycle: ', app.getLang('menu128', 'Recurrence Plot')];
+            end
+
+            if app.lang_choice > 0
+                app.LabelSeries.Text = app.getLang('main12', 'Series');
+                app.EditYLabel.Value = app.unit;
+                app.LabelThreshold.Text = app.getLang('main53', 'Threshold');
+                app.CheckShowSeries.Text = [app.getLang('main54', 'Show '), app.getLang('main12', 'Series')];
+                app.CheckShowDET.Text = [app.getLang('main54', 'Show '), 'DET'];
+                app.CheckFlipTime.Text = app.getLang('recPlot03', 'Flip time');
+                app.CheckFlipY.Text = app.getLang('main10', 'Flip Y axis');
+                app.PanelSliding.Title = app.getLang('main07', 'Sliding window');
+                app.LabelWindowSize.Text = app.getLang('c39', 'Window size');
+                app.LabelTheiler.Text = [app.getLang('recPlot01', 'Theiler '), app.getLang('main41', 'window')];
+                app.LabelSlidingStep.Text = [app.getLang('main55', 'Sliding'), ' ', app.getLang('main32', 'step')];
+                app.LabelDiagMin.Text = app.getLang('recPlot02', 'diagonal line min');
+                app.ButtonSave.Text = app.getLang('main01', 'Save data');
+            else
+                app.EditYLabel.Value = app.unit;
+            end
+
+            data_s = app.current_data;
+            [N, ncol] = size(data_s);
+
+            if ncol == 1
+                x = data_s;
+                ws = 1;
+                w = round(0.3 * N);
+                if w/ws > 500
+                    ws = round(w/300);
+                end
+            else
+                diffx = diff(data_s(:,1));
+                if max(diffx) - min(diffx) > 10*eps('single')
+                    if app.lang_choice == 0
+                        hwarn = warndlg('Not equally spaced data. Interpolated using mean sampling rate!');
+                    else
+                        hwarn = warndlg(app.getLang('dd37', 'Not equally spaced data. Interpolated using mean sampling rate!'));
+                    end
+                    interpolate_rate = mean(diffx);
+                    app.current_data = interpolate(data_s, interpolate_rate);
+                    data_s = app.current_data;
+                    try figure(hwarn); catch, end
+                    diffx = diff(data_s(:,1));
+                end
+                x = data_s(:,2);
+                ws = median(diffx);
+                wmax = abs(max(data_s(:,1)) - min(data_s(:,1)));
+                w = ws * 30;
+                if w > wmax, w = wmax; end
+            end
+
+            [~, app.S, app.threshold] = app.localBuildSAndThreshold(x, app.normFlag);
+
+            app.w = w;
+            app.ws = ws;
+            app.theiler_window = 1;
+            app.lmin = 2;
+
+            app.EditSeries.Value = [app.filename, app.fileext];
+            app.EditThreshold.Value = num2str(app.threshold);
+            app.EditWindowSize.Value = num2str(app.w);
+            app.EditSlidingStep.Value = num2str(app.ws);
+            app.EditTheiler.Value = num2str(app.theiler_window);
+            app.EditDiagMin.Value = num2str(app.lmin);
+            app.LabelWindowUnit.Text = app.unit;
+            app.LabelStepUnit.Text = app.unit;
+
+            app.CheckShowSeries.Value = true;
+            app.CheckShowDET.Value = false;
+            app.CheckFlipTime.Value = false;
+            app.CheckFlipY.Value = false;
+
+            app.UIFigure.Position = app.normalizedToPixelPosition([0.35,0.4,0.45,0.35]);
+            app.applyLayout();
+
+            app.updateRecplot();
+            try
+                if isgraphics(app.hrp)
+                    set(app.hrp, 'Units', 'normalized', 'Position', [0.05,0.05,0.3,0.6]);
+                end
+            catch
+            end
+        end
+
+        function onSaveData(app)
+            CDac_pwd;
+            add_list1 = [app.filename, '-RP.txt'];
+            add_list2 = [app.filename, '-RP-DET.txt'];
+            try
+                if ~isempty(app.St)
+                    dlmwrite(add_list1, app.St, 'delimiter', ' ', 'precision', 9);
+                end
+                if ~isempty(app.DET)
+                    dlmwrite(add_list2, app.DET, 'delimiter', ' ', 'precision', 9);
+                end
+            catch
+            end
+
+            app.refreshMainListbox();
+            cd(pre_dirML);
+
+            try figure(app.hrp); catch, end
+            try figure(app.UIFigure); catch, end
+        end
+
+        function refreshMainListbox(app)
+            pre = '<HTML><FONT color="blue">';
+            post = '</FONT></HTML>';
+            d = dir;
+            if numel(d) >= 2
+                d(1:2) = [];
+            end
+            address = pwd;
+
+            if ~isempty(app.edit_acfigmain_dir) && isgraphics(app.edit_acfigmain_dir)
+                set(app.edit_acfigmain_dir, 'String', address);
+            end
+
+            ac_pwd_str = which('ac_pwd.txt');
+            if ~isempty(ac_pwd_str)
+                [ac_pwd_dir,~,~] = fileparts(ac_pwd_str);
+                fileID = fopen(fullfile(ac_pwd_dir, 'ac_pwd.txt'), 'w');
+                if fileID ~= -1
+                    fprintf(fileID, '%s', address);
+                    fclose(fileID);
+                end
+            end
+
+            if isempty(d) || isempty(app.listbox_acmain) || ~isgraphics(app.listbox_acmain)
+                return
+            end
+
+            T = struct2table(d);
+            switch app.val1
+                case 1
+                    sortedT = sortrows(T, 'name', 'ascend');
+                case 2
+                    sortedT = sortrows(T, 'name', 'descend');
+                case 3
+                    sortedT = sortrows(T, 'date', 'ascend');
+                case 4
+                    sortedT = sortrows(T, 'date', 'descend');
+                case 5
+                    sortedT = sortrows(T, 'bytes', 'ascend');
+                case 6
+                    sortedT = sortrows(T, 'bytes', 'descend');
+                otherwise
+                    sortedT = sortrows(T, 'name', 'ascend');
+            end
+            sd = table2struct(sortedT);
+            listboxStr = cell(numel(sd),1);
+            for i = 1:numel(sd)
+                if isdir(sd(i).name)
+                    listboxStr{i} = [pre, sd(i).name, post];
+                else
+                    listboxStr{i} = sd(i).name;
+                end
+            end
+            set(app.listbox_acmain, 'String', listboxStr, 'Value', []);
+        end
+
+        function updateRecplot(app)
+            data_s = app.current_data;
+            [N, ncol] = size(data_s);
+            S = app.S;
+
+            if ncol == 1
+                x = data_s;
+                t = (1:N)';
+            else
+                x = data_s(:,2);
+                t = data_s(:,1);
+            end
+
+            if strcmpi(app.normFlag, 'norm')
+                x0 = x(:);
+                mu = mean(x0, 'omitnan');
+                sig = std(x0, 'omitnan');
+                if sig > 0
+                    x = (x - mu) ./ sig;
+                end
+            end
+
+            showseries = app.CheckShowSeries.Value;
+            showdet = app.CheckShowDET.Value;
+            fliptime = app.CheckFlipTime.Value;
+            flipseries = app.CheckFlipY.Value;
+            ylabeli = app.EditYLabel.Value;
+
+            if showdet
+                app.EditWindowSize.Enable = 'on';
+                app.EditSlidingStep.Enable = 'on';
+                app.EditTheiler.Enable = 'on';
+                app.EditDiagMin.Enable = 'on';
+                app.EditWindowSize.BackgroundColor = app.EditEnabledColor;
+                app.EditSlidingStep.BackgroundColor = app.EditEnabledColor;
+                app.EditTheiler.BackgroundColor = app.EditEnabledColor;
+                app.EditDiagMin.BackgroundColor = app.EditEnabledColor;
+            else
+                app.EditWindowSize.Enable = 'off';
+                app.EditSlidingStep.Enable = 'off';
+                app.EditTheiler.Enable = 'off';
+                app.EditDiagMin.Enable = 'off';
+                app.EditWindowSize.BackgroundColor = app.EditDisabledColor;
+                app.EditSlidingStep.BackgroundColor = app.EditDisabledColor;
+                app.EditTheiler.BackgroundColor = app.EditDisabledColor;
+                app.EditDiagMin.BackgroundColor = app.EditDisabledColor;
+            end
+
+            threshold = str2double(app.EditThreshold.Value);
+            if isnan(threshold)
+                errordlg('Threshold should be a number');
+                return
+            end
+
+            [eps_plot, ~, threshold_plot_used] = app.localThresholdToEpsForPlot(threshold, app.method_use, S);
+            if threshold_plot_used ~= threshold
+                app.EditThreshold.Value = num2str(threshold_plot_used);
+            end
+
+            if showdet
+                if ncol == 1
+                    winN = N;
+                    wsN = 1;
+                else
+                    winN = max(data_s(:,1)) - min(data_s(:,1));
+                    wsN = median(diff(data_s(:,1)));
+                end
+
+                w = str2double(app.EditWindowSize.Value);
+                if isnan(w)
+                    errordlg('Window size should be a number');
+                    return
+                end
+                if w > winN
+                    w = winN;
+                    app.EditWindowSize.Value = num2str(w);
+                elseif w <= 0
+                    w = winN;
+                    app.EditWindowSize.Value = num2str(w);
+                end
+                if ncol > 1
+                    w = round(N * w / winN);
+                end
+
+                ws = str2double(app.EditSlidingStep.Value);
+                if isnan(ws)
+                    errordlg('Sliding step should be a number');
+                    return
+                end
+                if ws > w
+                    ws = w;
+                    app.EditSlidingStep.Value = num2str(ws);
+                elseif ws < wsN
+                    ws = wsN;
+                    app.EditSlidingStep.Value = num2str(ws);
+                end
+                if ncol > 1
+                    ws = round(N * ws / winN);
+                end
+
+                theiler_window = str2double(app.EditTheiler.Value);
+                lmin = str2double(app.EditDiagMin.Value);
+                if isnan(theiler_window)
+                    errordlg('Theiler window should be a number');
+                    return
+                end
+                if isnan(lmin)
+                    errordlg('Minimal length of diagonal line structure should be a number');
+                    return
+                end
+
+                if N > 300
+                    hwarn = warndlg('Warning: long time series. Please wait. Up to several minutes', 'DET calculation');
+                else
+                    hwarn = [];
+                end
+
+                [DETy, testi] = crp_pdist(x, w, ws, theiler_window, lmin, 0, threshold, app.method_use, app.normFlag, app.embed_m, app.embed_tau);
+                DETx = round(t(testi) + 1/2 * winN * w / N);
+            else
+                hwarn = [];
+            end
+
+            try
+                if isempty(app.hrp) || ~isgraphics(app.hrp)
+                    error('new');
+                end
+                figure(app.hrp);
+            catch
+                app.hrp = figure;
+                figure(app.hrp);
+            end
+
+            clf(app.hrp, 'reset');
+            set(app.hrp, 'Color', 'w', 'Name', 'Recurrence Plot');
+            axis square;
+
+            if showseries
+                if showdet
+                    subplot('position', [0.15 0.86 0.7 0.11]);
+                    plot(t, x, 'k', 'LineWidth', 1);
+                    set(gca, 'XMinorTick', 'on', 'YMinorTick', 'on', 'TickDir', 'out');
+                    xlim([min(t), max(t)]);
+                    ylabel(ylabeli);
+                    set(gca, 'xticklabel', {[]});
+                    set(gca, 'xdir', app.ternary(fliptime, 'reverse', 'normal'));
+                    set(gca, 'ydir', app.ternary(flipseries, 'reverse', 'normal'));
+
+                    subplot('position', [0.15 0.75 0.7 0.11]);
+                    plot(DETx, DETy, 'k', 'LineWidth', 2);
+                    xlim([min(t), max(t)]);
+                    ylim([0.9*min(DETy), 1.1*max(DETy)]);
+                    ylabel('DET');
+                    set(gca, 'xticklabel', {[]});
+                    set(gca, 'XMinorTick', 'on', 'YMinorTick', 'on', 'TickDir', 'out');
+                    set(gca, 'xdir', app.ternary(fliptime, 'reverse', 'normal'));
+
+                    subplot('position', [0.15 0.05 0.7 0.7]);
+                    imagesc(t, t, S < eps_plot);
+                    axis square;
+                    set(gca, 'XMinorTick', 'on', 'YMinorTick', 'on', 'TickDir', 'out');
+                    colormap([1 1 1; 0 0 0]);
+                    app.setAxisLabels();
+                    if fliptime
+                        set(gca, 'xdir', 'reverse', 'ydir', 'reverse');
+                    else
+                        set(gca, 'xdir', 'normal', 'ydir', 'normal');
+                    end
+                else
+                    subplot('position', [0.15 0.75 0.7 0.2]);
+                    plot(t, x, 'k', 'LineWidth', 1);
+                    xlim([min(t), max(t)]);
+                    set(gca, 'XMinorTick', 'on', 'YMinorTick', 'on', 'TickDir', 'out');
+                    ylabel(ylabeli);
+                    set(gca, 'xticklabel', {[]});
+                    set(gca, 'xdir', app.ternary(fliptime, 'reverse', 'normal'));
+                    set(gca, 'ydir', app.ternary(flipseries, 'reverse', 'normal'));
+
+                    subplot('position', [0.15 0.05 0.7 0.7]);
+                    imagesc(t, t, S < eps_plot);
+                    axis square;
+                    set(gca, 'XMinorTick', 'on', 'YMinorTick', 'on', 'TickDir', 'out');
+                    colormap([1 1 1; 0 0 0]);
+                    app.setAxisLabels();
+                    if fliptime
+                        set(gca, 'xdir', 'reverse', 'ydir', 'reverse');
+                    else
+                        set(gca, 'xdir', 'normal', 'ydir', 'normal');
+                    end
+                end
+            else
+                if showdet
+                    subplot('position', [0.15 0.75 0.7 0.2]);
+                    plot(DETx, DETy, 'k', 'LineWidth', 2);
+                    xlim([min(t), max(t)]);
+                    set(gca, 'XMinorTick', 'on', 'YMinorTick', 'on', 'TickDir', 'out');
+                    ylabel('DET');
+                    set(gca, 'xticklabel', {[]});
+                    set(gca, 'xdir', app.ternary(fliptime, 'reverse', 'normal'));
+
+                    subplot('position', [0.15 0.05 0.7 0.7]);
+                    imagesc(t, t, S < eps_plot);
+                    axis square;
+                    set(gca, 'XMinorTick', 'on', 'YMinorTick', 'on', 'TickDir', 'out');
+                    colormap([1 1 1; 0 0 0]);
+                    app.setAxisLabels();
+                    if fliptime
+                        set(gca, 'xdir', 'reverse', 'ydir', 'reverse');
+                    else
+                        set(gca, 'xdir', 'normal', 'ydir', 'normal');
+                    end
+                else
+                    imagesc(t, t, S < eps_plot);
+                    axis square;
+                    colormap([1 1 1; 0 0 0]);
+                    set(gca, 'XMinorTick', 'on', 'YMinorTick', 'on', 'TickDir', 'out');
+                    app.setAxisLabels();
+                    if fliptime
+                        set(gca, 'xdir', 'reverse', 'ydir', 'reverse');
+                    else
+                        set(gca, 'xdir', 'normal', 'ydir', 'normal');
+                    end
+                end
+            end
+
+            try
+                if ~isempty(hwarn), close(hwarn); end
+            catch
+            end
+
+            if showdet
+                app.DET = [DETx, DETy];
+            else
+                app.DET = [];
+            end
+
+            St = S;
+            St(St >= eps_plot) = nan;
+            app.St = St;
+        end
+
+        function setAxisLabels(app)
+            if app.unit_type == 0
+                xlabel(''); ylabel('');
+            elseif app.unit_type == 1
+                xlabel(['Depth (', app.unit, ')']);
+                ylabel(['Depth (', app.unit, ')']);
+            else
+                xlabel(['Time (', app.unit, ')']);
+                ylabel(['Time (', app.unit, ')']);
+            end
+        end
+
+        function out = ternary(~, cond, a, b)
+            if cond
+                out = a;
+            else
+                out = b;
+            end
+        end
+
+        function [x_use, S, threshold] = localBuildSAndThreshold(~, x, normFlag)
+            x_use = double(x(:));
+            if nargin < 3 || isempty(normFlag), normFlag = 'nonorm'; end
+            nf = lower(strtrim(string(normFlag)));
+            if nf == "narow", nf = "nonorm"; end
+            if nf == "normalize" || nf == "zscore", nf = "norm"; end
+            if nf == "norm"
+                mu = mean(x_use,'omitnan');
+                sig = std(x_use,'omitnan');
+                if isfinite(sig) && sig > 0
+                    x_use = (x_use - mu) ./ sig;
+                end
+            end
+            N = numel(x_use);
+            S = zeros(N,N);
+            for i = 1:N
+                S(:,i) = abs(x_use(i) - x_use);
+            end
+            d = S(:);
+            d = d(isfinite(d));
+            if isempty(d)
+                threshold = 0.1;
+            else
+                threshold = median(d) - 0.5 * std(d);
+            end
+            dmin = min(d); dmax = max(d);
+            if ~isfinite(threshold), threshold = 0.1; end
+            threshold = max(dmin, min(dmax, threshold));
+        end
+
+        function [eps_plot, rr_plot, thr_used] = localThresholdToEpsForPlot(app, threshold, method_use, S)
+            thr_used = threshold;
+            if nargin < 3 || isempty(method_use), method_use = 'rr'; end
+            if nargin < 2 || isempty(threshold) || ~isfinite(threshold)
+                threshold = 0.10; thr_used = threshold;
+            end
+            method_use = lower(string(method_use));
+            rr_methods = ["rr","fa","in"];
+            d = app.localOffdiagDistvec(S);
+            if isempty(d)
+                eps_plot = 0; rr_plot = NaN; return
+            end
+            dmin = min(d); dmax = max(d);
+
+            if any(method_use == rr_methods)
+                if threshold <= 0
+                    rr = 0.10; thr_used = rr;
+                elseif threshold <= 1
+                    rr = threshold;
+                elseif threshold <= 100
+                    rr = threshold/100;
+                else
+                    rr = 1.0; thr_used = 100;
+                end
+                rr = max(0,min(1,rr));
+                rr_plot = rr;
+                eps_plot = app.localEpsFromRrForPlot(S, rr_plot);
+                eps_plot = max(dmin, min(dmax, eps_plot));
+            else
+                rr_plot = NaN;
+                eps_plot = double(threshold);
+                if eps_plot > dmax
+                    eps_plot = dmax; thr_used = eps_plot;
+                elseif eps_plot < dmin
+                    eps_plot = dmin; thr_used = eps_plot;
+                end
+            end
+        end
+
+        function d = localOffdiagDistvec(~, D)
+            n = size(D,1);
+            mask = triu(true(n), 1);
+            d = D(mask);
+            d = d(isfinite(d));
+            d = double(d(:));
+        end
+
+        function epsk = localEpsFromRrForPlot(app, D, rr)
+            d = app.localOffdiagDistvec(D);
+            if isempty(d)
+                epsk = 0;
+                return
+            end
+            rr = max(0,min(1,rr));
+            d = sort(d);
+            K = max(1, min(numel(d), round(rr * numel(d))));
+            epsk = d(K);
+        end
     end
-    data_s = handles.current_data;
-    x = data_s(:,2);
-    t = data_s(:,1);
-    ws = median(diffx);
-    wmax = abs((max(t) - min(t)));  % 30%
-    w = ws * 30;
-    if w > wmax
-        w = wmax;
+
+    methods (Access = public)
+        function app = RecPlotGUI(varargin)
+            if nargin > 0 && isstruct(varargin{1})
+                app.Context = varargin{1};
+                if isfield(app.Context, 'MonZoom')
+                    app.MonZoom = app.Context.MonZoom;
+                end
+            else
+                error('RecPlotGUI requires a handles/context struct input.');
+            end
+
+            app.createComponents();
+            app.initializeState();
+            registerApp(app, app.UIFigure);
+
+            if nargout == 0
+                clear app
+            end
+        end
+
+        function delete(app)
+            if ~isempty(app.UIFigure) && isvalid(app.UIFigure)
+                delete(app.UIFigure);
+            end
+        end
     end
 end
-
-% ---- build distance matrix + default threshold (based on normFlag) ----
-[x_forS, S, threshold] = local_build_S_and_threshold(x, handles.normFlag);
-
-handles.S = S;
-handles.threshold = threshold;
-
-% set GUI default threshold box
-set(handles.edit2,'String',num2str(threshold));
-
-
-handles.S = S;
-handles.threshold = threshold;
-handles.w = w;
-handles.ws = ws;
-handles.theiler_window = theiler_window;
-handles.lmin = lmin;
-
-%%
-set(handles.edit1,'String',[handles.filename,exten])
-set(handles.edit2,'String',num2str(threshold))
-set(handles.edit3,'String',num2str(w))
-set(handles.edit4,'String',num2str(ws))
-set(handles.edit5,'String',num2str(theiler_window))
-set(handles.edit6,'String',num2str(lmin))
-
-update_recplot
-figure(handles.hrp)
-set(gcf,'units','norm') % set location
-set(gcf,'position',[0.05,0.05,0.3,0.6])
-
-% Update handles structure
-guidata(hObject, handles);
-
-% UIWAIT makes RecPlotGUI wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
-
-
-% --- Outputs from this function are returned to the command line.
-function varargout = RecPlotGUI_OutputFcn(hObject, eventdata, handles) 
-% varargout  cell array for returning output args (see VARARGOUT);
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Get default command line output from handles structure
-varargout{1} = handles.output;
-
-
-% --- Executes on button press in pushbutton1.
-function pushbutton1_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-%
-CDac_pwd; % cd working dir
-
-add_list1 = [handles.filename,'-RP.txt'];
-add_list2 = [handles.filename,'-RP-DET.txt'];
-try
-    dlmwrite(add_list1, handles.St,  'delimiter', ' ', 'precision', 9);
-    dlmwrite(add_list2, handles.DET, 'delimiter', ' ', 'precision', 9);
-catch
-    
-end
-d = dir; %get files
-set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-refreshcolor;
-cd(pre_dirML); % return view dir
-%%
-figure(handles.hrp)
-figure(handles.RecPlotGUI)
-
-% Update handles structure
-guidata(hObject, handles);
-
-
-
-function edit1_Callback(hObject, eventdata, handles)
-% hObject    handle to edit1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit1 as text
-%        str2double(get(hObject,'String')) returns contents of edit1 as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function edit1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit2_Callback(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit2 as text
-%        str2double(get(hObject,'String')) returns contents of edit2 as a double
-
-update_recplot
-
-% Update handles structure
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit2_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in checkbox1.
-function checkbox1_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox1
-
-update_recplot
-
-% Update handles structure
-guidata(hObject, handles);
-
-% --- Executes on button press in checkbox2.
-function checkbox2_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox2
-update_recplot
-
-% Update handles structure
-guidata(hObject, handles);
-
-function edit3_Callback(hObject, eventdata, handles)
-% hObject    handle to edit3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit3 as text
-%        str2double(get(hObject,'String')) returns contents of edit3 as a double
-
-update_recplot
-
-% Update handles structure
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit3_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit4_Callback(hObject, eventdata, handles)
-% hObject    handle to edit4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit4 as text
-%        str2double(get(hObject,'String')) returns contents of edit4 as a double
-
-update_recplot
-
-% Update handles structure
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit4_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-function edit5_Callback(hObject, eventdata, handles)
-% hObject    handle to edit5 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit5 as text
-%        str2double(get(hObject,'String')) returns contents of edit5 as a double
-
-update_recplot
-
-% Update handles structure
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit5_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit5 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit6_Callback(hObject, eventdata, handles)
-% hObject    handle to edit6 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit6 as text
-%        str2double(get(hObject,'String')) returns contents of edit6 as a double
-
-update_recplot
-
-% Update handles structure
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit6_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit6 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in checkbox3.
-function checkbox3_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox3
-
-update_recplot
-
-% Update handles structure
-guidata(hObject, handles);
-
-
-
-function edit7_Callback(hObject, eventdata, handles)
-% hObject    handle to edit7 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit7 as text
-%        str2double(get(hObject,'String')) returns contents of edit7 as a double
-
-update_recplot
-
-% Update handles structure
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit7_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit7 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in checkbox4.
-function checkbox4_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox4
-
-update_recplot
-
-% Update handles structure
-guidata(hObject, handles);
-
-
-% --- Added callbacks for new popup menus (method_use + normFlag) ---
-function popup_method_Callback(hObject, eventdata)
-% hObject: popup menu for method selection
-handles = guidata(hObject);
-try
-    idx = get(hObject,'Value');
-    if isfield(handles,'method_code') && idx>=1 && idx<=numel(handles.method_code)
-        handles.method_use = handles.method_code{idx}; % pass to downstream code as char
-    end
-    guidata(hObject, handles);
-    % refresh plot if possible
-    try update_recplot; catch, end
-catch
-end
-
-function popup_norm_Callback(hObject, eventdata)
-handles = guidata(hObject);
-
-try
-    idx = get(hObject,'Value');
-    if isfield(handles,'norm_display') && idx>=1 && idx<=numel(handles.norm_display)
-        handles.normFlag = handles.norm_display{idx}; % 'norm' or 'nonorm'
-    end
-
-    % ==== REBUILD distance matrix S AND suggest a new threshold ====
-    data_s = handles.current_data;
-    [N, ncol] = size(data_s);
-    if ncol == 1
-        x = data_s;
-    else
-        x = data_s(:,2);
-    end
-
-    % use your helper (or inline) to rebuild S + threshold based on normFlag
-    [~, Snew, thr_new] = local_build_S_and_threshold(x, handles.normFlag);
-
-    handles.S = Snew;
-    handles.threshold = thr_new;
-
-    % update GUI threshold box
-    set(handles.edit2,'String',num2str(thr_new));
-
-    guidata(hObject, handles);
-
-    % refresh plot (RP uses S < eps_plot so it will change now)
-    update_recplot;
-
-catch
-end
-
-
-
-% --- NEW: dimension edit callback ---
-function edit_dim_Callback(hObject, eventdata)
-handles = guidata(hObject);
-
-v = str2double(get(hObject,'String'));
-if ~isfinite(v)
-    v = 1;
-end
-v = round(v);
-if v < 1
-    v = 1;
-end
-
-handles.embed_m = v;
-set(hObject,'String',num2str(v));
-
-guidata(hObject, handles);
-try
-    update_recplot;
-catch
-end
-
-
-% --- NEW: delay edit callback ---
-function edit_tau_Callback(hObject, eventdata)
-handles = guidata(hObject);
-
-v = str2double(get(hObject,'String'));
-if ~isfinite(v)
-    v = 1;
-end
-v = round(v);
-if v < 1
-    v = 1;
-end
-
-handles.embed_tau = v;
-set(hObject,'String',num2str(v));
-
-guidata(hObject, handles);
-try
-    update_recplot;
-catch
-end
-
-function [x_use, S, threshold] = local_build_S_and_threshold(x, normFlag)
-% Build distance matrix S and a reasonable default threshold
-% normFlag: 'norm' => zscore; 'nonorm' => raw
-
-x_use = double(x(:));
-
-if nargin < 2 || isempty(normFlag), normFlag = 'nonorm'; end
-nf = lower(strtrim(string(normFlag)));
-
-% legacy compatibility
-if nf == "narow", nf = "nonorm"; end
-if nf == "normalize" || nf == "zscore", nf = "norm"; end
-
-if nf == "norm"
-    mu  = mean(x_use,'omitnan');
-    sig = std(x_use,'omitnan');
-    if isfinite(sig) && sig > 0
-        x_use = (x_use - mu) ./ sig;
-    end
-end
-
-N = numel(x_use);
-S = zeros(N, N);
-for i = 1:N
-    S(:,i) = abs(x_use(i) - x_use);
-end
-
-% Default threshold heuristic (same formula as your original, but omit NaNs)
-d = S(:);
-d = d(isfinite(d));
-
-if isempty(d)
-    threshold = 0.1;
-else
-    threshold = median(d) - 0.5 * std(d);
-end
-
-% safety: threshold must be finite and within [min,max] of distances
-dmin = min(d); dmax = max(d);
-if ~isfinite(threshold), threshold = 0.1; end
-threshold = max(dmin, min(dmax, threshold));
-

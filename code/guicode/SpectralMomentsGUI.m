@@ -1,547 +1,560 @@
-function varargout = SpectralMomentsGUI(varargin)
-% SPECTRALMOMENTSGUI MATLAB code for SpectralMomentsGUI.fig
-%      SPECTRALMOMENTSGUI, by itself, creates a new SPECTRALMOMENTSGUI or raises the existing
-%      singleton*.
-%
-%      H = SPECTRALMOMENTSGUI returns the handle to a new SPECTRALMOMENTSGUI or the handle to
-%      the existing singleton*.
-%
-%      SPECTRALMOMENTSGUI('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in SPECTRALMOMENTSGUI.M with the given input arguments.
-%
-%      SPECTRALMOMENTSGUI('Property','Value',...) creates a new SPECTRALMOMENTSGUI or raises the
-%      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before SpectralMomentsGUI_OpeningFcn gets called.  An
-%      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to SpectralMomentsGUI_OpeningFcn via varargin.
-%
-%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
-%      instance to run (singleton)".
-%
-% See also: GUIDE, GUIDATA, GUIHANDLES
-
-% Edit the above text to modify the response to help SpectralMomentsGUI
-
-% Last Modified by GUIDE v2.5 28-Aug-2019 15:30:30
-
-% Begin initialization code - DO NOT EDIT
-gui_Singleton = 1;
-gui_State = struct('gui_Name',       mfilename, ...
-                   'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @SpectralMomentsGUI_OpeningFcn, ...
-                   'gui_OutputFcn',  @SpectralMomentsGUI_OutputFcn, ...
-                   'gui_LayoutFcn',  [] , ...
-                   'gui_Callback',   []);
-if nargin && ischar(varargin{1})
-    gui_State.gui_Callback = str2func(varargin{1});
-end
-
-if nargout
-    [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
-else
-    gui_mainfcn(gui_State, varargin{:});
-end
-% End initialization code - DO NOT EDIT
-
-
-% --- Executes just before SpectralMomentsGUI is made visible.
-function SpectralMomentsGUI_OpeningFcn(hObject, eventdata, handles, varargin)
-% This function has no output args, see OutputFcn.
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to SpectralMomentsGUI (see VARARGIN)
-
-% Choose default command line output for SpectralMomentsGUI
-handles.output = hObject;
-handles.MonZoom = varargin{1}.MonZoom;
-handles.sortdata = varargin{1}.sortdata;
-handles.val1 = varargin{1}.val1;
-
-%
-set(0,'Units','normalized') % set units as normalized
-set(gcf,'units','norm') % set location
-h=get(gcf,'Children');  % get all content
-if ismac
-    fontsizeall = 12;
-elseif ispc
-    fontsizeall = 8.0;
-end
-
-h1=findobj(h,'FontUnits','norm');  % find all font units as points
-set(h1,'FontUnits','points','FontSize',fontsizeall);  % set as norm
-h2=findobj(h,'FontUnits','points');  % find all font units as points
-set(h2,'FontUnits','points','FontSize',fontsizeall);  % set as norm
-
-set(handles.uipanel1,'position',[0.04,0.664,0.918,0.327]) % data
-set(handles.text2,'position',[0.04,0.614,0.94,0.246]) % ref
-set(handles.checkbox1,'position',[0.04,0.105,0.332,0.456]) % ref
-set(handles.popupmenu1,'position',[0.4,0.123,0.284,0.456]) % ref
-
-set(handles.uipanel2,'position',[0.396,0.227,0.4,0.382]) % sed. rate
-set(handles.text3,'position',[0.127,0.716,0.424,0.159]) % ref
-set(handles.text6,'position',[0.127,0.432,0.424,0.159]) % ref
-set(handles.text7,'position',[0.127,0.136,0.424,0.159]) % ref
-set(handles.edit2,'position',[0.627,0.7,0.323,0.25]) % ref
-set(handles.edit3,'position',[0.627,0.4,0.323,0.25]) % ref
-set(handles.edit4,'position',[0.627,0.1,0.323,0.25]) % ref
-
-set(handles.checkbox2,'position',[0.4,0.55,0.34,0.105]) % ref
-
-set(handles.uipanel3,'position',[0.04,0.227,0.322,0.459]) % settings window
-set(handles.text8,'position',[0.01,0.69,0.513,0.197]) % ref
-set(handles.text9,'position',[0.01,0.24,0.513,0.197]) % ref
-set(handles.edit5,'position',[0.538,0.676,0.26,0.31]) % ref
-set(handles.popupmenu2,'position',[0.533,0.239,0.452,0.282]) % ref
-set(handles.text11,'position',[0.802,0.746,0.178,0.197]) % ref
-
-set(handles.pushbutton2,'position',[0.819,0.273,0.129,0.25]) % OK
-
-set(handles.text10,'position',[0.04,0.01,0.94,0.191]) % ref
-% language
-lang_choice = varargin{1}.lang_choice;
-handles.lang_choice = lang_choice;
-lang_id = varargin{1}.lang_id;
-lang_var = varargin{1}.lang_var;
-handles.lang_id = lang_id;
-handles.lang_var = lang_var;
-handles.main_unit_selection = varargin{1}.main_unit_selection;
-set(gcf,'Name','Acycle: Spectral Moments')
-
-[~, a178] = ismember('a178',lang_id); % in ascend
-[~, ec25] = ismember('ec25',lang_id); % 
-[~, main02] = ismember('main02',lang_id); % data
-[~, specm04] = ismember('specm04',lang_id); % Zero padding edge
-
-set(handles.uipanel1,'Title',lang_var{main02})
-set(handles.checkbox1,'String',lang_var{specm04})
-
-[~, specm05] = ismember('specm05',lang_id); % Settings
-set(handles.uipanel3,'Title',lang_var{specm05})
-
-[~, main41] = ismember('main41',lang_id); % Window
-set(handles.text3,'String',lang_var{main41})
-
-[~, main32] = ismember('main32',lang_id); % step
-set(handles.text6,'String',lang_var{main32})
-
-[~, dynot06] = ismember('dynot06',lang_id); % 0-padding
-set(handles.text7,'String',lang_var{dynot06})
-
-[~, specm01] = ismember('specm01',lang_id); % 0-padding
-set(handles.checkbox2,'String',lang_var{specm01})
-
-[~, specm02] = ismember('specm02',lang_id); % Mean sed. rate
-set(handles.text8,'String',lang_var{specm02})
-
-[~, specm03] = ismember('specm03',lang_id); % 0-padding
-set(handles.text9,'String',lang_var{specm03})
-
-[~, main00] = ismember('main00',lang_id); % 0-padding
-set(handles.pushbutton2,'String',lang_var{main00})
-
-set(gcf,'position',[0.5,0.5,0.4,0.28]* handles.MonZoom) % set position
-dat = varargin{1}.current_data;  % data
-diffx = diff(dat(:,1));
-% check data
-if sum(diffx <= 0) > 0
-    disp(lang_var{a178})
-    dat = sortrows(dat);
-end
-% check data
-if abs((max(diffx)-min(diffx))/2) > 10*eps('single')
-    hwarn1 = warndlg(lang_var{ec25});
-end
-%
-handles.unit = varargin{1}.unit; % unit
-handles.unit_type = varargin{1}.unit_type; % unit type
-handles.slash_v = varargin{1}.slash_v;
-handles.acfigmain = varargin{1}.acfigmain;
-
-handles.filename = varargin{1}.data_name; % save dataname
-handles.dat_name = varargin{1}.dat_name; % save dataname
-handles.path_temp = varargin{1}.path_temp; % save path
-handles.listbox_acmain = varargin{1}.listbox_acmain; % save path
-handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
-
-datx = dat(:,1);  % unit should be cm
-daty = dat(:,2);
-npts = length(datx);
-dt = median(diff(dat(:,1)));
-
-handles.spectralmomentsFig = figure;
-    set(0,'Units','normalized') % set units as normalized
-    set(gcf,'units','norm') % set location
-    set(gcf,'color','w');
-    set(handles.spectralmomentsFig,'position',[0.2,0.4,0.2,0.4]* handles.MonZoom) % set position
-    plot(datx,daty)
-    xlabel(handles.unit);ylabel('Value');title(handles.dat_name, 'Interpreter', 'none')
-    xlim([min(datx) max(datx)])
-
-% set zeropadding
-
-handles.window = 0.25 * abs(datx(end) - datx(1));
-handles.step = dt;
-handles.pad = npts;
-% if npts > 1000
-%     handles.step = dt * ceil(npts/1000);  % keep sliding steps ~1000, if too much data is analyzed
-% end
-
-%data,window,step,pad,srmean,smoothmodel,padedge
-%
-handles.dat = dat; % save data
-handles.datbackup = dat;
-handles.sedrate = 0; % 0 = no test; 1 = input sed. rate
-handles.srmean = 5;
-handles.smoothmodel = 1;
-handles.padedge = 0;
-handles.padtype = 1;
-
-set(handles.text2,'String', handles.dat_name)
-set(handles.checkbox1,'Value',0)
-set(handles.popupmenu1,'Value',1)
-set(handles.popupmenu1,'Enable','off')
-set(handles.edit2,'String',num2str(handles.window))
-set(handles.edit3,'String',num2str(handles.step))
-set(handles.edit4,'String',num2str(handles.pad))
-
-set(handles.checkbox1,'Value',0)
-set(handles.edit5,'String',num2str(handles.srmean))
-set(handles.edit5,'Enable','off')
-set(handles.popupmenu2,'Value',1)
-set(handles.popupmenu2,'Enable','off')
-
-% Update handles structure
-guidata(hObject, handles);
-
-% UIWAIT makes SpectralMomentsGUI wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
-
-
-% --- Outputs from this function are returned to the command line.
-function varargout = SpectralMomentsGUI_OutputFcn(hObject, eventdata, handles) 
-% varargout  cell array for returning output args (see VARARGOUT);
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Get default command line output from handles structure
-varargout{1} = handles.output;
-
-
-% --- Executes on button press in pushbutton2.
-function pushbutton2_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-data = handles.dat;
-window = handles.window;
-step = handles.step;
-pad = handles.pad;
-srmean = handles.srmean;
-if handles.smoothmodel == 1
-    smoothmodel = 'poly';
-elseif handles.smoothmodel == 2
-    smoothmodel = 'lowess';
-elseif handles.smoothmodel == 3
-    smoothmodel = 'rlowess';
-elseif handles.smoothmodel == 4
-    smoothmodel = 'loess';
-elseif handles.smoothmodel == 5
-    smoothmodel = 'rloess';
-end
-
-hwarn = warndlg('Please wait, this may take a couple of minutes ...','Warning: Spectral Moments: slow process');
-
-if handles.sedrate == 0
-    % model without input sed. rate
-    [depth,uf,Bw] = spectralmoments(data,window,step,pad);
-    figure; 
-    set(gcf,'color','w');
-    plot(depth,uf,'r-',depth,Bw,'b-.');
-    xlabel(handles.unit); ylabel('Frequency (cycles/m)'); legend('\mu_f','B')
-    
-    name1 = [handles.dat_name,'-SpecMoments-depth-uf-bw-win',num2str(window),'.txt'];
-    CDac_pwd; % cd ac_pwd dir
-    dlmwrite(name1, [depth,uf,Bw], 'delimiter', ' ', 'precision', 9);
-    d = dir; %get files
-    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-    refreshcolor;
-    cd(pre_dirML); % return to matlab view folder
-else
-    % model with input sed. rate
-    [depth,uf,Bw,Bwtrend,sr] = spectralmoments(data,window,step,pad,srmean,smoothmodel,0);
-    figure; 
-    set(gcf,'color','w');
-    plot(depth,uf,'r-',depth,Bw,'b-.',depth,Bwtrend,'g');
-    xlabel(handles.unit); ylabel('Frequency (cycles/m)'); legend('\mu_f','B','B trend')
-    figure; 
-    set(gcf,'color','w');
-    plot(depth, sr); xlabel('Depth (m)'); ylabel('Sed. rate (cm/kyr)');
-    
-    name1 = [handles.dat_name,'-SpecMoments-depth-uf-Bw-Btrend-win',num2str(window),'.txt'];
-    name2 = [handles.dat_name,'-SpecMoments-sedrate-win',num2str(window),smoothmodel,'-SR',num2str(srmean),'.txt'];
-    CDac_pwd; % cd ac_pwd dir
-    dlmwrite(name1, [depth,uf,Bw,Bwtrend], 'delimiter', ' ', 'precision', 9);
-    dlmwrite(name2, [depth,sr], 'delimiter', ' ', 'precision', 9);
-    d = dir; %get files
-    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-    refreshcolor;
-    cd(pre_dirML); % return to matlab view folder
-end
-try close(hwarn)
-catch
-end
-% Update handles structure
-guidata(hObject, handles);
-
-
-
-function edit2_Callback(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit2 as text
-%        str2double(get(hObject,'String')) returns contents of edit2 as a double
-handles.window = str2double(get(hObject,'String'));
-
-% Update handles structure
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit2_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit3_Callback(hObject, eventdata, handles)
-% hObject    handle to edit3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit3 as text
-%        str2double(get(hObject,'String')) returns contents of edit3 as a double
-handles.step = str2double(get(hObject,'String'));
-
-% Update handles structure
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit3_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit4_Callback(hObject, eventdata, handles)
-% hObject    handle to edit4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit4 as text
-%        str2double(get(hObject,'String')) returns contents of edit4 as a double
-handles.pad = str2double(get(hObject,'String'));
-
-% Update handles structure
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit4_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in checkbox2.
-function checkbox2_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox2
-
-handles.sedrate = get(hObject,'Value') ; % 0 = no test; 1 = input sed. rate
-if get(hObject,'Value')
-    set(handles.edit5,'String',num2str(handles.srmean))
-    set(handles.edit5,'Enable','on')
-    set(handles.popupmenu2,'Value',1)
-    set(handles.popupmenu2,'Enable','on')
-else
-     set(handles.edit5,'String',num2str(handles.srmean))
-    set(handles.edit5,'Enable','off')
-    set(handles.popupmenu2,'Value',1)
-    set(handles.popupmenu2,'Enable','off')
-end
-% Update handles structure
-guidata(hObject, handles);
-
-% --- Executes on button press in checkbox1.
-function checkbox1_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox1
-dat = handles.datbackup;
-handles.dat = dat;
-
-if get(hObject,'Value')
-    % paddin edge
-    set(handles.popupmenu1,'Enable','on')
-    dat = zeropad2(handles.datbackup,handles.window,handles.padtype);
-    handles.pad = length(dat(:,1));
-    set(handles.edit4,'String',num2str(handles.pad))
-    handles.dat = dat;
-    try figure( handles.spectralmomentsFig)
-        plot(dat(:,1),dat(:,2))
-        xlabel(handles.unit);ylabel('Value');title(handles.dat_name, 'Interpreter', 'none')
-        xlim([min(dat(:,1)) max(dat(:,1))])
-    catch
-        handles.spectralmomentsFig = figure;
-        set(0,'Units','normalized') % set units as normalized
-        set(gcf,'units','norm') % set location
-        set(gcf,'color','w');
-        set(handles.spectralmomentsFig,'position',[0.2,0.4,0.2,0.4]) % set position
-        plot(dat(:,1),dat(:,2))
-        xlabel(handles.unit);ylabel('Value');title(handles.dat_name, 'Interpreter', 'none')
-        xlim([min(dat(:,1)) max(dat(:,1))])
+classdef SpectralMomentsGUI < matlab.apps.AppBase
+    % App Designer style replacement for legacy GUIDE SpectralMomentsGUI.
+
+    properties (Access = public)
+        UIFigure matlab.ui.Figure
+        PanelData matlab.ui.container.Panel
+        LabelDataTitle matlab.ui.control.Label
+        LabelDataName matlab.ui.control.Label
+        CheckPadEdge matlab.ui.control.CheckBox
+        DropPadType matlab.ui.control.DropDown
+
+        PanelWindow matlab.ui.container.Panel
+        LabelWindow matlab.ui.control.Label
+        LabelStep matlab.ui.control.Label
+        LabelPad matlab.ui.control.Label
+        EditWindow matlab.ui.control.EditField
+        EditStep matlab.ui.control.EditField
+        EditPad matlab.ui.control.EditField
+
+        CheckSedRate matlab.ui.control.CheckBox
+
+        PanelSettings matlab.ui.container.Panel
+        LabelSettingsTitle matlab.ui.control.Label
+        LabelSrMean matlab.ui.control.Label
+        LabelSmooth matlab.ui.control.Label
+        EditSrMean matlab.ui.control.EditField
+        DropSmooth matlab.ui.control.DropDown
+        LabelSrUnit matlab.ui.control.Label
+
+        RunButton matlab.ui.control.Button
+        RefTextArea matlab.ui.control.TextArea
     end
-else
-    set(handles.popupmenu1,'Enable','off')
-    handles.pad = length(dat(:,1));
-    set(handles.edit4,'String',num2str(handles.pad))
-    try figure( handles.spectralmomentsFig)
-        plot(dat(:,1),dat(:,2))
-        xlabel(handles.unit);ylabel('Value');title(handles.dat_name, 'Interpreter', 'none')
-        xlim([min(dat(:,1)) max(dat(:,1))])
-    catch
-        handles.spectralmomentsFig = figure;
-        set(0,'Units','normalized') % set units as normalized
-        set(gcf,'units','norm') % set location
-        set(gcf,'color','w');
-        set(handles.spectralmomentsFig,'position',[0.2,0.4,0.2,0.4]) % set position
-        plot(dat(:,1),dat(:,2))
-        xlabel(handles.unit);ylabel('Value');title(handles.dat_name, 'Interpreter', 'none')
-        xlim([min(dat(:,1)) max(dat(:,1))])
+
+    properties (Access = private)
+        Context struct = struct()
+        MonZoom double = 1
+
+        lang_choice double = 0
+        lang_id = {}
+        lang_var = {}
+
+        unit = ''
+        unit_type
+        slash_v
+        acfigmain
+
+        filename = ''
+        dat_name = ''
+        path_temp = ''
+        listbox_acmain
+        edit_acfigmain_dir
+        val1 double = 1
+
+        dat
+        datbackup
+        window double = 0
+        step double = 0
+        pad double = 0
+        sedrate double = 0
+        srmean double = 5
+        smoothmodel double = 1
+        padedge double = 0
+        padtype double = 1
+
+        spectralmomentsFig = []
+        UIFontSize double = 12
+        UIBgColor double = [0.94 0.94 0.94]
     end
-end
-% Update handles structure
-guidata(hObject, handles);
 
-% --- Executes on selection change in popupmenu1.
-function popupmenu1_Callback(hObject, eventdata, handles)
-% hObject    handle to popupmenu1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+    methods (Access = private)
+        function screenSize = getScreenSizePixels(~)
+            oldUnits = get(groot, 'Units');
+            set(groot, 'Units', 'pixels');
+            screenSize = get(groot, 'ScreenSize');
+            set(groot, 'Units', oldUnits);
+        end
 
-% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu1 contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from popupmenu1
-handles.padtype = get(hObject,'Value');
-dat = zeropad2(handles.datbackup,handles.window,handles.padtype);
-handles.dat = dat;
+        function pos = normalizedToPixelPosition(app, normPos)
+            screenSize = app.getScreenSizePixels();
+            zoom = app.MonZoom;
+            if isnumeric(zoom)
+                if isscalar(zoom)
+                    normPos = normPos * zoom;
+                elseif numel(zoom) >= 4
+                    normPos = normPos .* zoom(1:4);
+                end
+            end
 
-try figure( handles.spectralmomentsFig)
-    plot(dat(:,1),dat(:,2))
-    xlabel(handles.unit);ylabel('Value');title(handles.dat_name, 'Interpreter', 'none')
-    xlim([min(dat(:,1)) max(dat(:,1))])
-catch
-    handles.spectralmomentsFig = figure;
-    set(0,'Units','normalized') % set units as normalized
-    set(gcf,'units','norm') % set location
-    set(gcf,'color','w');
-    set(handles.spectralmomentsFig,'position',[0.2,0.4,0.2,0.4]) % set position
-    plot(dat(:,1),dat(:,2))
-    xlabel(handles.unit);ylabel('Value');title(handles.dat_name, 'Interpreter', 'none')
-    xlim([min(dat(:,1)) max(dat(:,1))])
-end
-% Update handles structure
-guidata(hObject, handles);
+            w = max(420, normPos(3) * screenSize(3));
+            h = max(280, normPos(4) * screenSize(4));
+            x = screenSize(1) + normPos(1) * screenSize(3);
+            y = screenSize(2) + normPos(2) * screenSize(4);
+            x = min(max(x, screenSize(1)), screenSize(1) + screenSize(3) - w);
+            y = min(max(y, screenSize(2)), screenSize(2) + screenSize(4) - h);
+            pos = round([x, y, w, h]);
+        end
 
-% --- Executes during object creation, after setting all properties.
-function popupmenu1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to popupmenu1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
+        function txt = getLang(app, key, defaultText)
+            txt = defaultText;
+            if isempty(app.lang_id) || isempty(app.lang_var)
+                return
+            end
+            [~, idx] = ismember(key, app.lang_id);
+            if idx > 0 && idx <= numel(app.lang_var)
+                txt = app.lang_var{idx};
+            end
+        end
 
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+        function applyLayout(app)
+            fw = app.UIFigure.Position(3);
+            fh = app.UIFigure.Position(4);
+            figRect = [0, 0, fw, fh];
 
+            % Calibrated to match the user-provided reference screenshot.
+            app.PanelData.Position = app.childPos(figRect, [0.04,0.6,0.92,0.328]);
+            app.LabelDataTitle.Position = app.childPos(figRect, [0.045,0.85,0.1,0.15]);
+            app.LabelDataName.Position = app.childPos(app.PanelData.Position, [0.04,0.55,0.90,0.28]);
+            app.CheckPadEdge.Position = app.childPos(app.PanelData.Position, [0.04,0.30,0.34,0.24]);
+            app.DropPadType.Position = app.childPos(app.PanelData.Position, [0.41,0.31,0.27,0.20]);
 
+            app.PanelSettings.Position = app.childPos(figRect, [0.04,0.205,0.322,0.365]);
+            app.LabelSettingsTitle.Position = app.childPos(figRect, [0.045,0.57,0.18,0.04]);
+            app.LabelWindow.Position = app.childPos(app.PanelSettings.Position, [0.16,0.74,0.35,0.14]);
+            app.LabelStep.Position = app.childPos(app.PanelSettings.Position, [0.16,0.46,0.35,0.14]);
+            app.LabelPad.Position = app.childPos(app.PanelSettings.Position, [0.11,0.18,0.40,0.14]);
+            app.EditWindow.Position = app.childPos(app.PanelSettings.Position, [0.62,0.68,0.32,0.22]);
+            app.EditStep.Position = app.childPos(app.PanelSettings.Position, [0.62,0.39,0.32,0.22]);
+            app.EditPad.Position = app.childPos(app.PanelSettings.Position, [0.62,0.11,0.32,0.22]);
 
-function edit5_Callback(hObject, eventdata, handles)
-% hObject    handle to edit5 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+            app.PanelWindow.Position = app.childPos(figRect, [0.396,0.205,0.40,0.30]);
+            app.CheckSedRate.Position = app.childPos(figRect, [0.405,0.535,0.34,0.075]);
+            app.LabelSrMean.Position = app.childPos(app.PanelWindow.Position, [0.13,0.66,0.40,0.16]);
+            app.EditSrMean.Position = app.childPos(app.PanelWindow.Position, [0.54,0.64,0.25,0.28]);
+            app.LabelSrUnit.Position = app.childPos(app.PanelWindow.Position, [0.82,0.70,0.16,0.14]);
+            app.LabelSmooth.Position = app.childPos(app.PanelWindow.Position, [0.13,0.24,0.40,0.16]);
+            app.DropSmooth.Position = app.childPos(app.PanelWindow.Position, [0.55,0.30,0.40,0.20]);
 
-% Hints: get(hObject,'String') returns contents of edit5 as text
-%        str2double(get(hObject,'String')) returns contents of edit5 as a double
-handles.srmean = str2double(get(hObject,'String'));
+            app.RunButton.Position = app.childPos(figRect, [0.825,0.255,0.13,0.225]);
+            app.RefTextArea.Position = app.childPos(figRect, [0.04,0.04,0.92,0.13]);
+        end
 
-% Update handles structure
-guidata(hObject, handles);
+        function p = childPos(~, parentPos, rel)
+            % Child controls in MATLAB are positioned in the parent's local
+            % coordinate system, not in figure-global coordinates.
+            p = [ ...
+                rel(1) * parentPos(3), ...
+                rel(2) * parentPos(4), ...
+                rel(3) * parentPos(3), ...
+                rel(4) * parentPos(4) ...
+                ];
+            p = round(p);
+        end
 
+        function updatePreviewPlot(app)
+            dat = app.dat;
+            if isempty(dat)
+                return
+            end
 
-% --- Executes during object creation, after setting all properties.
-function edit5_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit5 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
+            try
+                if isempty(app.spectralmomentsFig) || ~isgraphics(app.spectralmomentsFig)
+                    error('Missing figure');
+                end
+                figure(app.spectralmomentsFig);
+            catch
+                app.spectralmomentsFig = figure('Color', 'w');
+                set(app.spectralmomentsFig, 'Position', app.normalizedToPixelPosition([0.2,0.4,0.2,0.4]));
+            end
 
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+            plot(dat(:,1), dat(:,2));
+            xlabel(app.unit);
+            ylabel('Value');
+            title(app.dat_name, 'Interpreter', 'none');
+            xlim([min(dat(:,1)), max(dat(:,1))]);
+        end
 
+        function onWindowChanged(app, ~, ~)
+            app.window = str2double(app.EditWindow.Value);
+        end
 
-% --- Executes on selection change in popupmenu2.
-function popupmenu2_Callback(hObject, eventdata, handles)
-% hObject    handle to popupmenu2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+        function onStepChanged(app, ~, ~)
+            app.step = str2double(app.EditStep.Value);
+        end
 
-% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu2 contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from popupmenu2
+        function onPadChanged(app, ~, ~)
+            app.pad = str2double(app.EditPad.Value);
+        end
 
-handles.smoothmodel = get(hObject,'Value');
-% Update handles structure
-guidata(hObject, handles);
+        function onSrMeanChanged(app, ~, ~)
+            app.srmean = str2double(app.EditSrMean.Value);
+        end
 
+        function onSedRateChanged(app, ~, ~)
+            app.sedrate = double(app.CheckSedRate.Value);
+            if app.CheckSedRate.Value
+                app.EditSrMean.Enable = 'on';
+                app.DropSmooth.Enable = 'on';
+            else
+                app.EditSrMean.Enable = 'off';
+                app.DropSmooth.Enable = 'off';
+                app.DropSmooth.Value = 1;
+            end
+            app.EditSrMean.Value = num2str(app.srmean);
+        end
 
-% --- Executes during object creation, after setting all properties.
-function popupmenu2_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to popupmenu2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
+        function onPadEdgeChanged(app, ~, ~)
+            app.dat = app.datbackup;
+            if app.CheckPadEdge.Value
+                app.DropPadType.Enable = 'on';
+                dat = zeropad2(app.datbackup, app.window, app.padtype);
+                app.pad = length(dat(:,1));
+                app.EditPad.Value = num2str(app.pad);
+                app.dat = dat;
+            else
+                app.DropPadType.Enable = 'off';
+                app.pad = length(app.datbackup(:,1));
+                app.EditPad.Value = num2str(app.pad);
+            end
+            app.updatePreviewPlot();
+        end
 
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
+        function onPadTypeChanged(app, ~, ~)
+            app.padtype = app.DropPadType.Value;
+            app.dat = zeropad2(app.datbackup, app.window, app.padtype);
+            app.updatePreviewPlot();
+        end
+
+        function onSmoothChanged(app, ~, ~)
+            app.smoothmodel = app.DropSmooth.Value;
+        end
+
+        function onRun(app, ~, ~)
+            app.window = str2double(app.EditWindow.Value);
+            app.step = str2double(app.EditStep.Value);
+            app.pad = str2double(app.EditPad.Value);
+            app.srmean = str2double(app.EditSrMean.Value);
+
+            data = app.dat;
+            window = app.window;
+            step = app.step;
+            pad = app.pad;
+            srmean = app.srmean;
+
+            switch app.smoothmodel
+                case 1
+                    smoothmodel = 'poly';
+                case 2
+                    smoothmodel = 'lowess';
+                case 3
+                    smoothmodel = 'rlowess';
+                case 4
+                    smoothmodel = 'loess';
+                otherwise
+                    smoothmodel = 'rloess';
+            end
+
+            hwarn = warndlg('Please wait, this may take a couple of minutes ...','Warning: Spectral Moments: slow process');
+
+            if app.sedrate == 0
+                [depth, uf, Bw] = spectralmoments(data, window, step, pad);
+                figure;
+                set(gcf, 'color', 'w');
+                plot(depth, uf, 'r-', depth, Bw, 'b-.');
+                xlabel(app.unit); ylabel('Frequency (cycles/m)'); legend('\mu_f', 'B');
+
+                name1 = [app.dat_name, '-SpecMoments-depth-uf-bw-win', num2str(window), '.txt'];
+                CDac_pwd;
+                dlmwrite(name1, [depth, uf, Bw], 'delimiter', ' ', 'precision', 9);
+                d = dir;
+                set(app.listbox_acmain, 'String', {d.name}, 'Value', 1);
+                app.refreshMainListbox();
+                cd(pre_dirML);
+            else
+                [depth, uf, Bw, Bwtrend, sr] = spectralmoments(data, window, step, pad, srmean, smoothmodel, 0);
+                figure;
+                set(gcf, 'color', 'w');
+                plot(depth, uf, 'r-', depth, Bw, 'b-.', depth, Bwtrend, 'g');
+                xlabel(app.unit); ylabel('Frequency (cycles/m)'); legend('\mu_f', 'B', 'B trend');
+                figure;
+                set(gcf, 'color', 'w');
+                plot(depth, sr); xlabel('Depth (m)'); ylabel('Sed. rate (cm/kyr)');
+
+                name1 = [app.dat_name, '-SpecMoments-depth-uf-Bw-Btrend-win', num2str(window), '.txt'];
+                name2 = [app.dat_name, '-SpecMoments-sedrate-win', num2str(window), smoothmodel, '-SR', num2str(srmean), '.txt'];
+                CDac_pwd;
+                dlmwrite(name1, [depth, uf, Bw, Bwtrend], 'delimiter', ' ', 'precision', 9);
+                dlmwrite(name2, [depth, sr], 'delimiter', ' ', 'precision', 9);
+                d = dir;
+                set(app.listbox_acmain, 'String', {d.name}, 'Value', 1);
+                app.refreshMainListbox();
+                cd(pre_dirML);
+            end
+            try
+                close(hwarn);
+            catch
+            end
+        end
+
+        function refreshMainListbox(app)
+            pre = '<HTML><FONT color="blue">';
+            post = '</FONT></HTML>';
+            d = dir;
+            if numel(d) >= 2
+                d(1:2) = [];
+            end
+
+            address = pwd;
+            if ~isempty(app.edit_acfigmain_dir) && isgraphics(app.edit_acfigmain_dir)
+                set(app.edit_acfigmain_dir, 'String', address);
+            end
+
+            ac_pwd_str = which('ac_pwd.txt');
+            if ~isempty(ac_pwd_str)
+                [ac_pwd_dir, ~, ~] = fileparts(ac_pwd_str);
+                fileID = fopen(fullfile(ac_pwd_dir, 'ac_pwd.txt'), 'w');
+                if fileID ~= -1
+                    fprintf(fileID, '%s', address);
+                    fclose(fileID);
+                end
+            end
+
+            if isempty(d)
+                if ~isempty(app.listbox_acmain) && isgraphics(app.listbox_acmain)
+                    set(app.listbox_acmain, 'String', {}, 'Value', []);
+                end
+                return
+            end
+
+            T = struct2table(d);
+            switch app.val1
+                case 1
+                    sortedT = sortrows(T, 'name', 'ascend');
+                case 2
+                    sortedT = sortrows(T, 'name', 'descend');
+                case 3
+                    sortedT = sortrows(T, 'date', 'ascend');
+                case 4
+                    sortedT = sortrows(T, 'date', 'descend');
+                case 5
+                    sortedT = sortrows(T, 'bytes', 'ascend');
+                case 6
+                    sortedT = sortrows(T, 'bytes', 'descend');
+                otherwise
+                    sortedT = sortrows(T, 'name', 'ascend');
+            end
+            sd = table2struct(sortedT);
+
+            listboxStr = cell(numel(sd), 1);
+            for i = 1:numel(sd)
+                if isdir(sd(i).name)
+                    listboxStr{i} = [pre, sd(i).name, post];
+                else
+                    listboxStr{i} = sd(i).name;
+                end
+            end
+
+            if ~isempty(app.listbox_acmain) && isgraphics(app.listbox_acmain)
+                set(app.listbox_acmain, 'String', listboxStr, 'Value', []);
+            end
+        end
+
+        function createComponents(app)
+            app.UIFigure = uifigure('Name', 'Acycle: Spectral Moments', ...
+                'Color', app.UIBgColor, ...
+                'Resize', 'on', ...
+                'Position', app.normalizedToPixelPosition([0.5,0.5,0.4,0.28]));
+            app.UIFigure.AutoResizeChildren = 'off';
+            app.UIFigure.SizeChangedFcn = @(~,~)app.applyLayout();
+
+            if ismac
+                app.UIFontSize = 12;
+            elseif ispc
+                app.UIFontSize = 8.0;
+            else
+                app.UIFontSize = 11;
+            end
+
+            app.PanelData = uipanel(app.UIFigure, 'Title', '', 'FontSize', app.UIFontSize, ...
+                'BackgroundColor', app.UIBgColor);
+            app.LabelDataTitle = uilabel(app.UIFigure, 'Text', 'Data', 'FontSize', app.UIFontSize + 1, ...
+                'BackgroundColor', app.UIBgColor);
+            app.LabelDataName = uilabel(app.PanelData, 'Text', 'data', 'FontSize', app.UIFontSize, ...
+                'BackgroundColor', app.UIBgColor);
+            app.CheckPadEdge = uicheckbox(app.PanelData, 'Text', 'Zero padding edge', 'FontSize', app.UIFontSize, ...
+                'ValueChangedFcn', @(s,e)app.onPadEdgeChanged(s,e));
+            app.DropPadType = uidropdown(app.PanelData, ...
+                'Items', {'zero', 'mirror', 'mean', 'random'}, ...
+                'ItemsData', [1 2 3 4], ...
+                'Value', 1, ...
+                'Enable', 'off', ...
+                'FontSize', app.UIFontSize, ...
+                'ValueChangedFcn', @(s,e)app.onPadTypeChanged(s,e));
+
+            app.PanelSettings = uipanel(app.UIFigure, 'Title', '', 'FontSize', app.UIFontSize, ...
+                'BackgroundColor', app.UIBgColor);
+            app.LabelSettingsTitle = uilabel(app.UIFigure, 'Text', 'Settings', 'FontSize', app.UIFontSize + 1, ...
+                'BackgroundColor', app.UIBgColor);
+            app.LabelWindow = uilabel(app.PanelSettings, 'Text', 'Window', 'FontSize', app.UIFontSize, ...
+                'BackgroundColor', app.UIBgColor);
+            app.LabelStep = uilabel(app.PanelSettings, 'Text', 'step', 'FontSize', app.UIFontSize, ...
+                'BackgroundColor', app.UIBgColor);
+            app.LabelPad = uilabel(app.PanelSettings, 'Text', 'Zero padding', 'FontSize', app.UIFontSize, ...
+                'BackgroundColor', app.UIBgColor);
+            app.LabelWindow.HorizontalAlignment = 'center';
+            app.LabelStep.HorizontalAlignment = 'center';
+            app.LabelPad.HorizontalAlignment = 'center';
+
+            app.EditWindow = uieditfield(app.PanelSettings, 'text', 'Value', '0', 'FontSize', app.UIFontSize, ...
+                'ValueChangedFcn', @(s,e)app.onWindowChanged(s,e));
+            app.EditStep = uieditfield(app.PanelSettings, 'text', 'Value', '0', 'FontSize', app.UIFontSize, ...
+                'ValueChangedFcn', @(s,e)app.onStepChanged(s,e));
+            app.EditPad = uieditfield(app.PanelSettings, 'text', 'Value', '0', 'FontSize', app.UIFontSize, ...
+                'ValueChangedFcn', @(s,e)app.onPadChanged(s,e));
+            app.EditWindow.HorizontalAlignment = 'center';
+            app.EditStep.HorizontalAlignment = 'center';
+            app.EditPad.HorizontalAlignment = 'center';
+
+            app.CheckSedRate = uicheckbox(app.UIFigure, 'Text', 'Absolute Sedimentation Rate', ...
+                'FontSize', app.UIFontSize, 'Value', false, ...
+                'ValueChangedFcn', @(s,e)app.onSedRateChanged(s,e));
+
+            app.PanelWindow = uipanel(app.UIFigure, 'Title', '', 'FontSize', app.UIFontSize, ...
+                'BackgroundColor', app.UIBgColor);
+            app.LabelSrMean = uilabel(app.PanelWindow, 'Text', 'Mean sed. rate', 'FontSize', app.UIFontSize, ...
+                'BackgroundColor', app.UIBgColor);
+            app.LabelSmooth = uilabel(app.PanelWindow, 'Text', 'Smooth model', 'FontSize', app.UIFontSize, ...
+                'BackgroundColor', app.UIBgColor);
+            app.EditSrMean = uieditfield(app.PanelWindow, 'text', 'Value', num2str(app.srmean), 'Enable', 'off', ...
+                'FontSize', app.UIFontSize, 'ValueChangedFcn', @(s,e)app.onSrMeanChanged(s,e));
+            app.DropSmooth = uidropdown(app.PanelWindow, ...
+                'Items', {'Polynomial', 'LOWESS', 'rLOWESS', 'LOESS', 'rLOESS'}, ...
+                'ItemsData', [1 2 3 4 5], ...
+                'Value', 1, 'Enable', 'off', 'FontSize', app.UIFontSize, ...
+                'ValueChangedFcn', @(s,e)app.onSmoothChanged(s,e));
+            app.LabelSrUnit = uilabel(app.PanelWindow, 'Text', 'cm/kyr', 'FontSize', app.UIFontSize, ...
+                'BackgroundColor', app.UIBgColor);
+
+            app.RunButton = uibutton(app.UIFigure, 'push', 'Text', 'OK', 'FontSize', app.UIFontSize, ...
+                'ButtonPushedFcn', @(s,e)app.onRun(s,e));
+
+            app.RefTextArea = uitextarea(app.UIFigure, ...
+                'Value', { ...
+                'Ref: Sinnesael, M., Zivanovic, M., De Vleeschouwer, D., & Claeys, P. (2018). Spectral moments in cyclostratigraphy:'; ...
+                'Advantages and disadvantages compared to more classic approaches. Paleoceanography and Paleoclimatology, 33, 493-510.'; ...
+                'doi: 10.1029/2017PA003293' ...
+                }, ...
+                'Editable', 'off', ...
+                'FontSize', app.UIFontSize, ...
+                'BackgroundColor', app.UIBgColor);
+
+            app.applyLayout();
+        end
+
+        function initializeState(app)
+            if isfield(app.Context, 'MonZoom')
+                app.MonZoom = app.Context.MonZoom;
+            end
+            app.lang_choice = app.Context.lang_choice;
+            app.lang_id = app.Context.lang_id;
+            app.lang_var = app.Context.lang_var;
+
+            app.unit = app.Context.unit;
+            app.unit_type = app.Context.unit_type;
+            app.slash_v = app.Context.slash_v;
+            app.acfigmain = app.Context.acfigmain;
+
+            app.filename = app.Context.data_name;
+            app.dat_name = app.Context.dat_name;
+            app.path_temp = app.Context.path_temp;
+            app.listbox_acmain = app.Context.listbox_acmain;
+            app.edit_acfigmain_dir = app.Context.edit_acfigmain_dir;
+            if isfield(app.Context, 'val1')
+                app.val1 = app.Context.val1;
+            end
+
+            dat = app.Context.current_data;
+            diffx = diff(dat(:,1));
+            if sum(diffx <= 0) > 0
+                disp(app.getLang('a178', 'Input data not in ascending order; sorted automatically.'));
+                dat = sortrows(dat);
+            end
+            if abs((max(diffx)-min(diffx))/2) > 10*eps('single')
+                warndlg(app.getLang('ec25', 'Input data should be equally spaced.'));
+            end
+
+            datx = dat(:,1);
+            npts = length(datx);
+            dt = median(diff(dat(:,1)));
+
+            app.window = 0.25 * abs(datx(end) - datx(1));
+            app.step = dt;
+            app.pad = npts;
+
+            app.dat = dat;
+            app.datbackup = dat;
+            app.sedrate = 0;
+            app.srmean = 5;
+            app.smoothmodel = 1;
+            app.padedge = 0;
+            app.padtype = 1;
+
+            app.LabelDataName.Text = app.dat_name;
+            app.CheckPadEdge.Value = false;
+            app.DropPadType.Value = 1;
+            app.DropPadType.Enable = 'off';
+
+            app.EditWindow.Value = num2str(app.window);
+            app.EditStep.Value = num2str(app.step);
+            app.EditPad.Value = num2str(app.pad);
+
+            app.EditSrMean.Value = num2str(app.srmean);
+            app.EditSrMean.Enable = 'off';
+            app.DropSmooth.Value = 1;
+            app.DropSmooth.Enable = 'off';
+
+            app.UIFigure.Name = 'Acycle: Spectral Moments';
+            app.LabelDataTitle.Text = app.getLang('main02', 'Data');
+            app.CheckPadEdge.Text = app.getLang('specm04', 'Zero padding edge');
+            app.LabelSettingsTitle.Text = app.getLang('specm05', 'Settings');
+            app.LabelWindow.Text = app.getLang('main41', 'Window');
+            app.LabelStep.Text = app.getLang('main32', 'step');
+            app.LabelPad.Text = app.getLang('dynot06', 'Zero padding');
+            app.CheckSedRate.Text = app.getLang('specm01', 'Absolute Sedimentation Rate');
+            app.LabelSrMean.Text = app.getLang('specm02', 'Mean sed. rate');
+            app.LabelSmooth.Text = app.getLang('specm03', 'Smooth model');
+            app.RunButton.Text = app.getLang('main00', 'OK');
+
+            app.UIFigure.Position = app.normalizedToPixelPosition([0.5,0.5,0.4,0.28]);
+            app.applyLayout();
+            app.updatePreviewPlot();
+        end
+    end
+
+    methods (Access = public)
+        function app = SpectralMomentsGUI(varargin)
+            if nargin > 0 && isstruct(varargin{1})
+                app.Context = varargin{1};
+                if isfield(app.Context, 'MonZoom')
+                    app.MonZoom = app.Context.MonZoom;
+                end
+            else
+                error('SpectralMomentsGUI requires a handles/context struct input.');
+            end
+
+            app.createComponents();
+            app.initializeState();
+            registerApp(app, app.UIFigure);
+
+            if nargout == 0
+                clear app
+            end
+        end
+
+        function delete(app)
+            if ~isempty(app.UIFigure) && isvalid(app.UIFigure)
+                delete(app.UIFigure);
+            end
+        end
+    end
 end
