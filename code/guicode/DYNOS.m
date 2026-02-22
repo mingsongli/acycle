@@ -1,1980 +1,785 @@
 function varargout = DYNOS(varargin)
-% DYNOS MATLAB code for DYNOS.fig
-%      DYNOS, by itself, creates a new DYNOS or raises the existing
-%      singleton*.
-%
-%      H = DYNOS returns the handle to a new DYNOS or the handle to
-%      the existing singleton*.
-%
-%      DYNOS('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in DYNOS.M with the given input arguments.
-%
-%      DYNOS('Property','Value',...) creates a new DYNOS or raises the
-%      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before DYNOS_OpeningFcn gets called.  An
-%      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to DYNOS_OpeningFcn via varargin.
-%
-%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
-%      instance to run (singleton)".
-%
-% See also: GUIDE, GUIDATA, GUIHANDLES
+% DYNOS App Designer-style single-file GUI (no GUIDE .fig dependency)
 
-% Edit the above text to modify the response to help DYNOS
-
-% Last Modified by GUIDE v2.5 04-May-2017 22:34:18
-
-% The original script is by Mingsong Li, Jan 2015, China Univ. Geoscience; George Mason Univ
-% The GUI is by Mingsong Li, Dec 2016, China Univ. Geoscience; George Mason Univ
-% The GUI is updated by Mingsong Li, May 2017, Penn State Univ
-
-% Begin initialization code - DO NOT EDIT
-gui_Singleton = 1;
-gui_State = struct('gui_Name',       mfilename, ...
-                   'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @DYNOS_OpeningFcn, ...
-                   'gui_OutputFcn',  @DYNOS_OutputFcn, ...
-                   'gui_LayoutFcn',  [] , ...
-                   'gui_Callback',   []);
-if nargin && ischar(varargin{1})
-    gui_State.gui_Callback = str2func(varargin{1});
+ctx = struct();
+if nargin > 0 && isstruct(varargin{1})
+    ctx = varargin{1};
 end
 
-if nargout
-    [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
-else
-    gui_mainfcn(gui_State, varargin{:});
-end
-% End initialization code - DO NOT EDIT
+S = initState(ctx);
+S = createUI(S);
+S = loadDataReady(S, true);
+setappdata(S.UIFigure,'DYNOS_STATE',S);
 
-
-% --- Executes just before DYNOS is made visible.
-function DYNOS_OpeningFcn(hObject, eventdata, handles, varargin)
-% This function has no output args, see OutputFcn.
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to DYNOS (see VARARGIN)
-handles.MonZoom = varargin{1}.MonZoom;
-handles.sortdata = varargin{1}.sortdata;
-handles.val1 = varargin{1}.val1;
-
-set(0,'Units','normalized') % set units as normalized
-set(gcf,'units','norm') % set location
-h=get(gcf,'Children');  % get all content
-h1=findobj(h,'FontUnits','norm');  % find all font units as points
-if ismac
-    fontsize = 12;
-elseif ispc
-    fontsize = 11;
-end
-set(h1,'FontUnits','points','FontSize',fontsize);  % set as norm
-h2=findobj(h,'FontUnits','points');  % find all font units as points
-set(h2,'FontUnits','points','FontSize',fontsize);  % set as norm
-
-% language
-lang_choice = varargin{1}.lang_choice;
-handles.lang_choice = lang_choice;
-lang_id = varargin{1}.lang_id;
-lang_var = varargin{1}.lang_var;
-handles.lang_id = lang_id;
-handles.lang_var = lang_var;
-handles.main_unit_selection = varargin{1}.main_unit_selection;
-
-if handles.lang_choice == 0
-    set(gcf,'Name','Acycle: Sedimentary Noise Model - DYNOT')
-else
-    [~, dynot24] = ismember('dynot24',lang_id);
-    set(gcf,'Name',['Acycle: ',lang_var{dynot24}])
+if nargout > 0
+    varargout{1} = S.UIFigure;
 end
 
-% Choose default command line output for DYNOS
-set(gcf,'position',[0.05,0.05,0.85,0.85] * handles.MonZoom) % set position
-
-% language
-if handles.lang_choice > 0
-    [~, dynot01] = ismember('dynot01',handles.lang_id);
-    [~, dynot02] = ismember('dynot02',handles.lang_id);
-    [~, dynot03] = ismember('dynot03',handles.lang_id);
-    [~, dynot04] = ismember('dynot04',handles.lang_id);
-    [~, dynot05] = ismember('dynot05',handles.lang_id);
-    [~, dynot06] = ismember('dynot06',handles.lang_id);
-    [~, dynot07] = ismember('dynot07',handles.lang_id);
-    [~, dynot08] = ismember('dynot08',handles.lang_id);
-    [~, dynot09] = ismember('dynot09',handles.lang_id);
-    [~, dynot10] = ismember('dynot10',handles.lang_id);
-    [~, dynot11] = ismember('dynot11',handles.lang_id);
-    [~, dynot12] = ismember('dynot12',handles.lang_id);
-    [~, dynot13] = ismember('dynot13',handles.lang_id);
-    [~, dynot14] = ismember('dynot14',handles.lang_id);
-    [~, dynot15] = ismember('dynot15',handles.lang_id);
-    [~, dynot16] = ismember('dynot16',handles.lang_id);
-    [~, dynot17] = ismember('dynot17',handles.lang_id);
-    [~, dynot18] = ismember('dynot18',handles.lang_id);
-    [~, dynot19] = ismember('dynot19',handles.lang_id);
-    [~, dynot20] = ismember('dynot20',handles.lang_id);
-    [~, dynot21] = ismember('dynot21',handles.lang_id);
-    [~, dynot22] = ismember('dynot22',handles.lang_id);
-    [~, dynot23] = ismember('dynot23',handles.lang_id);
-    [~, main02] = ismember('main02',handles.lang_id);
-    [~, menu71] = ismember('menu71',handles.lang_id);
-    [~, menu03] = ismember('menu03',handles.lang_id);
-    [~, dynot25] = ismember('dynot25',handles.lang_id); % from
-    [~, dynot26] = ismember('dynot26',handles.lang_id); % to
-    [~, main41] = ismember('main41',handles.lang_id); % window
-    [~, MainUnit13] = ismember('MainUnit13',handles.lang_id); % ka
-    [~, a218] = ismember('a218',handles.lang_id); % nw
-    [~, main32] = ismember('main32',handles.lang_id); % step
-    [~, main14] = ismember('main14',handles.lang_id); % freq
-    [~, ec20] = ismember('ec20',handles.lang_id); % middle age of the data
-    [~, main40] = ismember('main40',handles.lang_id); % median
-    set(handles.uipanel6,'Title',lang_var{main02})  % data
-    set(handles.uipanel2,'Title',lang_var{main02})  % data
-    set(handles.uipanel8,'Title',lang_var{menu71})
-    set(handles.uipanel9,'Title',lang_var{dynot05})
-    set(handles.uipanel10,'Title',lang_var{main14})
-    set(handles.uipanel11,'Title',lang_var{menu03})
-    set(handles.uipanel12,'Title',lang_var{dynot16})
-    set(handles.pushbutton4,'String',[lang_var{main02},lang_var{dynot01}])
-    set(handles.pushbutton5,'String',lang_var{dynot02})
-    
-    set(handles.text45,'String',[lang_var{dynot03},lang_var{main02}])
-    set(handles.text44,'String',lang_var{dynot26}) % to
-    set(handles.text10,'String',lang_var{dynot26}) % to
-    set(handles.text13,'String',lang_var{dynot26})
-    set(handles.text17,'String',lang_var{dynot26})
-    set(handles.text25,'String',lang_var{dynot26})
-    set(handles.text28,'String',lang_var{dynot26})
-    set(handles.pushbutton_cut,'String',lang_var{dynot03}) % cut
-    set(handles.text8,'String',lang_var{dynot04})
-    set(handles.text18,'String',lang_var{dynot06})
-    set(handles.text40,'String',lang_var{dynot07}) % Number of Monte Carlo Simulations
-    set(handles.radiobutton2,'String',lang_var{dynot08})
-    set(handles.text23,'String',lang_var{dynot09})
-    set(handles.text26,'String',lang_var{dynot10})
-    set(handles.text27,'String',lang_var{dynot11})
-    set(handles.text47,'String',lang_var{dynot12})
-    set(handles.text30,'String',lang_var{dynot13})
-    set(handles.text29,'String',lang_var{dynot14})
-    set(handles.text36,'String',lang_var{dynot42})
-    set(handles.text48,'String',lang_var{dynot17})
-    set(handles.text37,'String',lang_var{dynot18})
-    set(handles.text50,'String',lang_var{dynot19})
-    set(handles.text41,'String',lang_var{dynot20})
-    %set(handles.text42,'String',lang_var{dynot21})
-    set(handles.text2,'String',lang_var{dynot22})
-
-    set(handles.text46,'String',lang_var{MainUnit13})
-    set(handles.text14,'String',lang_var{MainUnit13})
-    set(handles.text43,'String',lang_var{MainUnit13})
-    set(handles.text11,'String',[lang_var{main41},' ',lang_var{dynot25}])
-    set(handles.text15,'String',lang_var{a218})
-    set(handles.text16,'String',lang_var{main32})
-    
-    set(handles.radiobutton1,'String',lang_var{ec20})
-    set(handles.text16,'String',lang_var{main32})
-    set(handles.checkbox1median,'String',lang_var{main40})
-    
-    % menu
-    [~, menu01] = ismember('menu01',handles.lang_id); % File
-    set(handles.menu_file,'Text',lang_var{menu01}) % File
-    set(handles.file_import,'Text',lang_var{dynot23})
-    [~, dynot40] = ismember('dynot40',handles.lang_id);
-    [~, menu07] = ismember('menu07',handles.lang_id);
-    [~, dynot41] = ismember('dynot41',handles.lang_id);
-    set(handles.menu_help,'Text',lang_var{menu07})
-    set(handles.menu_about,'Text',lang_var{dynot40})
-    set(handles.menu_website,'Text',lang_var{dynot41})
-end
-% uipanels
-set(handles.uipanel6,'position', [0.015,0.9,0.124,0.076])
-set(handles.uipanel7,'position', [0.14,0.9,0.167,0.076])
-set(handles.uipanel8,'position', [0.015,0.776,0.291,0.12])
-set(handles.uipanel9,'position', [0.015,0.592,0.291,0.18])
-set(handles.uipanel10,'position', [0.015,0.344,0.291,0.245])
-set(handles.uipanel11,'position', [0.015,0.179,0.291,0.145])
-set(handles.uipanel12,'position', [0.014,0.005,0.291,0.175])
-% plot area
-set(handles.text2,'position', [0.36,0.914,0.588,0.052],'FontSize',16)
-set(handles.edit30,'position', [0.36,0.902,0.588,0.025],'FontSize',12)
-set(handles.uipanel2,'position', [0.321,0.47,0.669,0.43])
-set(handles.uipanel3,'position', [0.321,0.012,0.669,0.43])
-set(handles.axes1,'position', [0.1,0.159,0.94,0.8])
-set(handles.axes2,'position', [0.1,0.159,0.94,0.8])
-% data/dynot
-set(handles.pushbutton4,'position', [0.2,0.15,0.65,0.7])
-set(handles.pushbutton5,'position', [0.15,0.15,0.7,0.7])
-% interpolation
-set(handles.text45,'position', [0.035,0.627,0.249,0.237])
-set(handles.text8,'position', [0.035,0.22,0.249,0.237])
-set(handles.text44,'position', [0.455,0.627,0.078,0.237])
-set(handles.text10,'position', [0.455,0.22,0.078,0.237])
-set(handles.text46,'position', [0.716,0.22,0.08,0.237])
-set(handles.edit26,'position', [0.28,0.559,0.156,0.288])
-set(handles.edit25,'position', [0.529,0.559,0.156,0.288])
-set(handles.edit_sampa,'position', [0.28,0.153,0.156,0.288])
-set(handles.edit_sampb,'position', [0.529,0.153,0.156,0.288])
-set(handles.pushbutton_cut,'position', [0.712,0.559,0.233,0.288])
-% MC
-set(handles.text11,'position', [0.035,0.747,0.265,0.179])
-set(handles.edit6,'position', [0.366,0.747,0.163,0.179])
-set(handles.text13,'position', [0.545,0.747,0.062,0.179])
-set(handles.edit7,'position', [0.615,0.747,0.2,0.179])
-set(handles.text14,'position', [0.852,0.747,0.09,0.179])
-
-set(handles.text15,'position', [0.035,0.526,0.521,0.179])
-set(handles.edit8,'position', [0.568,0.526,0.117,0.179])
-set(handles.text17,'position', [0.7,0.526,0.062,0.179])
-set(handles.edit9,'position', [0.774,0.526,0.117,0.179])
-
-set(handles.text18,'position', [0.035,0.3,0.253,0.179])
-set(handles.edit10,'position', [0.323,0.3,0.163,0.179])
-set(handles.text16,'position', [0.615,0.3,0.148,0.179])
-set(handles.edit21,'position', [0.735,0.3,0.117,0.179])
-set(handles.text43,'position', [0.868,0.3,0.09,0.179])
-set(handles.text40,'position', [0.035,0.08,0.665,0.179])
-set(handles.edit24,'position', [0.712,0.08,0.253,0.179])
-% frequency
-set(handles.radiobutton1,'position', [0.03,0.774,0.541,0.14])
-set(handles.edit29,'position', [0.584,0.774,0.187,0.14])
-set(handles.text49,'position', [0.848,0.774,0.089,0.14])
-
-set(handles.radiobutton2,'position', [0.03,0.594,0.934,0.128])
-set(handles.edit11,'position', [0.1,0.444,0.85,0.128])
-set(handles.text23,'position', [0.03,0.241,0.436,0.128])
-set(handles.edit13,'position', [0.45,0.241,0.109,0.128])
-set(handles.text25,'position', [0.584,0.241,0.062,0.128])
-set(handles.edit14,'position', [0.642,0.241,0.109,0.128])
-set(handles.text27,'position', [0.76,0.241,0.226,0.128])
-
-set(handles.text26,'position', [0.03,0.07,0.374,0.128])
-set(handles.edit15,'position', [0.393,0.07,0.14,0.128])
-set(handles.text28,'position', [0.549,0.07,0.062,0.128])
-set(handles.edit12,'position', [0.619,0.07,0.14,0.128])
-set(handles.text47,'position', [0.755,0.07,0.226,0.128])
-%Plot
-set(handles.text30,'position', [0.03,0.77,0.43,0.176])
-set(handles.checkbox1median,'position', [0.521,0.73,0.268,0.25])
-set(handles.checkbox50,'position', [0.755,0.73,0.214,0.25])
-set(handles.checkbox68,'position', [0.07,0.473,0.214,0.25])
-set(handles.checkbox80,'position', [0.296,0.473,0.214,0.25])
-set(handles.checkbox90,'position', [0.521,0.473,0.214,0.25])
-set(handles.checkbox95,'position', [0.755,0.473,0.214,0.25])
-set(handles.text29,'position', [0.03,0.12,0.42,0.25])
-set(handles.edit22,'position', [0.428,0.12,0.163,0.25])
-set(handles.text36,'position', [0.607,0.12,0.268,0.25])
-set(handles.edit23,'position', [0.875,0.12,0.11,0.25])
-% process
-set(handles.text48,'position', [0.03,0.75,0.659,0.185])
-set(handles.edit27,'position', [0.717,0.75,0.163,0.185])
-set(handles.text37,'position', [0.03,0.511,0.953,0.185])
-set(handles.edit28,'position', [0.202,0.511,0.128,0.185])
-set(handles.text50,'position', [0.337,0.511,0.636,0.185])
-set(handles.text41,'position', [0.03,0.03,0.926,0.446],'FontSize',fontsize-1)
-
-handles.output = hObject;
-% contact with acycle main window
-handles.acfigmain = varargin{1}.acfigmain;
-handles.listbox_acmain = varargin{1}.listbox_acmain;
-handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
-%
-data_s = varargin{1}.current_data;
-handles.data = data_s;
-assignin('base','data',data_s)
-
-handles.filename = varargin{1}.data_name;
-handles.dat_name = varargin{1}.dat_name;
-handles.unit = varargin{1}.unit;
-handles.path_temp = varargin{1}.path_temp;
-handles.slash_v = varargin{1}.slash_v;
-% Update handles structure
-guidata(hObject, handles);
-
-% UIWAIT makes DYNOS wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
-
-
-% --- Outputs from this function are returned to the command line.
-function varargout = DYNOS_OutputFcn(hObject, eventdata, handles) 
-% varargout  cell array for returning output args (see VARARGOUT);
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Get default command line output from handles structure
-varargout{1} = handles.output;
-
-
-% --- Executes on button press in pushbutton1.
-function pushbutton1_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-
-function edit2_Callback(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit2 as text
-%        str2double(get(hObject,'String')) returns contents of edit2 as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function edit2_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
 end
 
+function S = initState(ctx)
+S = struct();
+S.ctx = ctx;
+S.bg = [0.94 0.94 0.94];
+S.blue = [0.08 0.02 0.95];
+S.monzoom = getfielddef(ctx,'MonZoom',1);
+S.val1 = getfielddef(ctx,'val1',1);
+S.unit = char(getfielddef(ctx,'unit','ka'));
+S.data = [];
+S.dat_name = char(getfielddef(ctx,'dat_name','data'));
+S.data_name = char(getfielddef(ctx,'data_name','data'));
+S.listbox_acmain = getfielddef(ctx,'listbox_acmain',[]);
+S.edit_acfigmain_dir = getfielddef(ctx,'edit_acfigmain_dir',[]);
 
+S.use_middle_age = true;
+S.age = 0;
+S.cycles = [405 125 95 40.9 23.6 22.3 19.1];
+S.f = 1./S.cycles;
 
-function edit3_Callback(hObject, eventdata, handles)
-% hObject    handle to edit3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+S.window1 = 300;
+S.window2 = 500;
+S.nw1 = 2;
+S.nw2 = 2;
+S.pad = 1000;
+S.step = 5;
+S.nout = 1000;
+S.shiftwin = 1;
+S.padwin = 1;
+S.fza = 0.9;
+S.fzb = 1.2;
+S.ftmin = 0.001;
+S.ftmax = 1;
+S.nmc = 1000;
+S.numcore = feature('numCores');
+S.itinerary = 50;
 
-% Hints: get(hObject,'String') returns contents of edit3 as text
-%        str2double(get(hObject,'String')) returns contents of edit3 as a double
+S.percent_on = [true true true true true true];
+S.cut1 = NaN;
+S.cut2 = NaN;
+S.sampa = NaN;
+S.sampb = NaN;
+S.parmhat = [1 1];
 
-
-% --- Executes during object creation, after setting all properties.
-function edit3_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
+S.run = struct('y_grid',[],'powyad_p_nan',[],'npercent',0,'npercent2',0,'colorcode',[],'powyadjust',[],'f3m',[],'nwz',[],'windowz',[],'samplez',[]);
 end
 
+function S = createUI(S)
+sc = get(groot,'ScreenSize');
+pos = [round(0.02*sc(3)) round(0.03*sc(4)) round(0.96*sc(3)) round(0.92*sc(4))];
 
-% --- Executes on button press in pushbutton5.
-function pushbutton5_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton5 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-numcore = handles.numcore;
+S.UIFigure = uifigure('Name','Acycle: Sedimentary Noise Model - DYNOT', ...
+    'Color',S.bg,'Position',pos,'AutoResizeChildren','off');
+S.UIFigure.SizeChangedFcn = @(~,~)onResize(S.UIFigure);
 
-% language
-lang_var = handles.lang_var;
-lang_choice = handles.lang_choice;
-lang_id = handles.lang_id;
-%
-numcorereal = feature('numCores');
-numcore(numcore>numcorereal) = numcorereal;
-useparpool = handles.useparpool;
-itinerary = handles.itinerary;
-data = handles.data;
-sampa = handles.sampa;
-sampb = handles.sampb;
-parmhat = handles.parmhat;
-unit = handles.unit;
-window1 = handles.window1;
-window2 = handles.window2;
-nw1 = handles.nw1;
-nw2 = handles.nw2;
-pad = handles.pad;
-step = handles.step;
-nout = handles.nout;
-shiftwin = handles.shiftwin;
-padwin = handles.padwin;
-f = handles.f;
-fza = handles.fza;
-fzb = handles.fzb;
-ftmin = handles.ftmin;
-ftmax = handles.ftmax;
-nmc = handles.nmc;
-checkbox1median= handles.checkbox1median_v;
-checkbox50 = handles.checkbox50_v;
-checkbox68 = handles.checkbox68_v;
-checkbox80 = handles.checkbox80_v;
-checkbox90 = handles.checkbox90_v;
-checkbox95 = handles.checkbox95_v;
-percent = [checkbox1median, checkbox50, checkbox68, ...
-    checkbox80,checkbox90, checkbox95];
-% npercentage
-percent = sort(unique(percent));
-percent = percent(percent~=0);
-if isempty(percent)
-    percent = 50;
+% restore quick toolbar actions: save + print/export
+tb = uitoolbar(S.UIFigure);
+iconSave = fullfile(matlabroot,'toolbox','matlab','icons','file_save.png');
+iconPrint = fullfile(matlabroot,'toolbox','matlab','icons','tool_print.png');
+if ~isfile(iconPrint)
+    iconPrint = iconSave;
 end
-%
-%% Set random parameters
+uipushtool(tb,'Icon',iconSave,'Tooltip','Save DYNOT figure/data', ...
+    'ClickedCallback',@(src,evt)onSaveFigure(src));
+uipushtool(tb,'Icon',iconPrint,'Tooltip','Print/Export DYNOT figure', ...
+    'ClickedCallback',@(src,evt)onPrintFigure(src));
 
-if nw2==nw1
-    randnw = 0*rand(nmc,1);
-else
-    randnw = randi(2*(nw2-nw1),[nmc 1]);
-end
-%
-samplez = wblrnd(parmhat(1),parmhat(2),[nmc 1]);
-samplez(samplez<sampa) = sampa+(sampb-sampa)*rand(1);
-samplez(samplez>sampb) = sampa+(sampb-sampa)*rand(1);
-randwindow=rand(nmc,1);
-windowz = window1+(window2-window1)*randwindow; % windowz range from window1 to window2
-nwz = nw1 + randnw/2;                       % nw range from nw1 to nw2
-bw = nwz./windowz;
-ncol = length(f);
-f3m =[];
-for i=1:ncol
-    fz = fza+(fzb-fza)*rand(nmc,1);
-    f3m(:,2*i-1) = f(i)-fz.*bw;
-    fz = fza+(fzb-fza)*rand(nmc,1);
-    f3m(:,2*i)   = f(i)+fz.*bw;
-end
-f3m(f3m < ftmin) = ftmin;
-f3m(f3m > ftmax) = ftmax;
-%% Set plot y axis grid and a empty powy 
-y_grid = linspace(data(1,1),data(length(data(:,1)),1),nout);
-y_grid = y_grid';
-powy = zeros(nout,nmc);  % for interpolated series
-powmean = zeros(1,nmc);
-%% Main function. Very heavy loads
-tic;
-dispstat('','init'); % One time only initialization
-if lang_choice == 0
-    dispstat(sprintf(' Begin the process ...'),'keepthis','timestamp');
-    hwaitbarText = 'canceling';
-else
-    [~, dynot28] = ismember('dynot28',lang_id);
-    dispstat(sprintf([lang_var{dynot28},' ...']),'keepthis','timestamp');
-    [~, dynot31] = ismember('dynot31',lang_id);
-    hwaitbarText = lang_var{dynot31};
-end
-%%
-if shiftwin == 1
-    shiftwin1 = 0;
-else
-    shiftwin1 = shiftwin;
+% top labels
+S.LTitle = uilabel(S.UIFigure,'Text','DYnamic Noise after Orbital Tuning (DYNOT) sea-level model v2.0', ...
+    'FontSize',28/2,'FontWeight','bold','HorizontalAlignment','center','BackgroundColor',S.bg);
+S.LRef = uieditfield(S.UIFigure,'text','Editable','off', ...
+    'Value','(Li et al., 2018 Nature Communications, 9: doi: 10.1038/s41467-018-03454-y)');
+
+% left column panels
+S.PDataB = uipanel(S.UIFigure,'Title','','BackgroundColor',S.bg);
+S.BRun = uibutton(S.PDataB,'push','Text','Let''s go','BackgroundColor',S.blue,'FontColor','white','FontWeight','bold', ...
+    'ButtonPushedFcn',@(src,evt)onRun(src));
+
+S.PInterp = uipanel(S.UIFigure,'Title','Interpolation','BackgroundColor',S.bg);
+S.TCut = uilabel(S.PInterp,'Text','Cut data','BackgroundColor',S.bg);
+S.ECut1 = uieditfield(S.PInterp,'text','Value','7000');
+S.TTo1 = uilabel(S.PInterp,'Text','to','BackgroundColor',S.bg);
+S.ECut2 = uieditfield(S.PInterp,'text','Value','8000');
+S.BCut = uibutton(S.PInterp,'push','Text','Cut','ButtonPushedFcn',@(src,evt)onCut(src));
+S.TSamp = uilabel(S.PInterp,'Text','Sample rate','FontColor',[0.8 0 0],'BackgroundColor',S.bg);
+S.ESampA = uieditfield(S.PInterp,'text','Value','1');
+S.TTo2 = uilabel(S.PInterp,'Text','to','FontColor',[0.8 0 0],'BackgroundColor',S.bg);
+S.ESampB = uieditfield(S.PInterp,'text','Value','1');
+S.TKa1 = uilabel(S.PInterp,'Text','ka','FontColor',[0.8 0 0],'BackgroundColor',S.bg);
+
+S.PMC = uipanel(S.UIFigure,'Title','Monte Carlo Simulation Settings','BackgroundColor',S.bg);
+S.TWinFrom = uilabel(S.PMC,'Text','Windows from','FontColor',[0.8 0 0],'BackgroundColor',S.bg);
+S.EWin1 = uieditfield(S.PMC,'text','Value',num2str(S.window1));
+S.TTo3 = uilabel(S.PMC,'Text','to','FontColor',[0.8 0 0],'BackgroundColor',S.bg);
+S.EWin2 = uieditfield(S.PMC,'text','Value',num2str(S.window2));
+S.TKa2 = uilabel(S.PMC,'Text','ka','FontColor',[0.8 0 0],'BackgroundColor',S.bg);
+S.TNW = uilabel(S.PMC,'Text','Time-halfbandwidth product:','BackgroundColor',S.bg);
+S.ENW1 = uieditfield(S.PMC,'text','Value',num2str(S.nw1));
+S.TTo4 = uilabel(S.PMC,'Text','to','BackgroundColor',S.bg);
+S.ENW2 = uieditfield(S.PMC,'text','Value',num2str(S.nw2));
+S.TPad = uilabel(S.PMC,'Text','Zero-padding','BackgroundColor',S.bg);
+S.EPad = uieditfield(S.PMC,'text','Value',num2str(S.pad));
+S.TStep = uilabel(S.PMC,'Text','Step','BackgroundColor',S.bg);
+S.EStep = uieditfield(S.PMC,'text','Value',num2str(S.step));
+S.TKa3 = uilabel(S.PMC,'Text','ka','BackgroundColor',S.bg);
+S.TNMC = uilabel(S.PMC,'Text','Number of Monte Carlo Simulations','FontColor',[0.8 0 0],'BackgroundColor',S.bg);
+S.ENMC = uieditfield(S.PMC,'text','Value',num2str(S.nmc));
+
+S.PFreq = uipanel(S.UIFigure,'Title','Frequency','BackgroundColor',S.bg);
+S.BGFreq = uibuttongroup(S.PFreq,'BorderType','none','BackgroundColor',S.bg, ...
+    'SelectionChangedFcn',@(bg,evt)onFreqMode(bg));
+S.RMiddle = uiradiobutton(S.BGFreq,'Text','Middle age of data','Value',true,'FontWeight','bold','FontColor',[0.8 0 0]);
+S.EAge = uieditfield(S.BGFreq,'text','Value',num2str(S.age),'FontColor',[0.8 0 0]);
+S.TMa = uilabel(S.BGFreq,'Text','Ma','FontColor',[0.8 0 0],'BackgroundColor',S.bg);
+S.RCycles = uiradiobutton(S.BGFreq,'Text','Type target orbital cycles (space delimited, ka)','Value',false);
+S.ECycles = uieditfield(S.BGFreq,'text','Value',num2str(S.cycles,'%1.1f '),'Enable','off');
+S.TRange = uilabel(S.BGFreq,'Text','Frequency ranges: +/-','BackgroundColor',S.bg);
+S.EFza = uieditfield(S.BGFreq,'text','Value',num2str(S.fza));
+S.TTo5 = uilabel(S.BGFreq,'Text','to','BackgroundColor',S.bg);
+S.EFzb = uieditfield(S.BGFreq,'text','Value',num2str(S.fzb));
+S.TXBW = uilabel(S.BGFreq,'Text','x bandwidth','BackgroundColor',S.bg);
+S.TCutoff = uilabel(S.BGFreq,'Text','Cutoff frequencies:','BackgroundColor',S.bg);
+S.EFtmin = uieditfield(S.BGFreq,'text','Value',num2str(S.ftmin));
+S.TTo6 = uilabel(S.BGFreq,'Text','to','BackgroundColor',S.bg);
+S.EFtmax = uieditfield(S.BGFreq,'text','Value',num2str(S.ftmax));
+S.TUnitF = uilabel(S.BGFreq,'Text','cycles/kyr','BackgroundColor',S.bg);
+
+S.PPlot = uipanel(S.UIFigure,'Title','Plot','BackgroundColor',S.bg);
+S.TCI = uilabel(S.PPlot,'Text','Confidence Intervals','BackgroundColor',S.bg);
+S.CMedian = uicheckbox(S.PPlot,'Text','Median','Value',true);
+S.C50 = uicheckbox(S.PPlot,'Text','50%','Value',true);
+S.C68 = uicheckbox(S.PPlot,'Text','68%','Value',true);
+S.C80 = uicheckbox(S.PPlot,'Text','80%','Value',true);
+S.C90 = uicheckbox(S.PPlot,'Text','90%','Value',true);
+S.C95 = uicheckbox(S.PPlot,'Text','95%','Value',true);
+S.TNout = uilabel(S.PPlot,'Text','Interpolation number','BackgroundColor',S.bg);
+S.ENout = uieditfield(S.PPlot,'text','Value',num2str(S.nout));
+S.TPadWin = uilabel(S.PPlot,'Text','Half-window padding','BackgroundColor',S.bg);
+S.EPadWin = uieditfield(S.PPlot,'text','Value',num2str(S.padwin));
+
+S.PProc = uipanel(S.UIFigure,'Title','Process','BackgroundColor',S.bg);
+S.TCore = uilabel(S.PProc,'Text','Numer of physical core will be used','BackgroundColor',S.bg);
+S.ECore = uieditfield(S.PProc,'text','Value',num2str(S.numcore));
+S.TIt = uilabel(S.PProc,'Text','The first','BackgroundColor',S.bg);
+S.EIt = uieditfield(S.PProc,'text','Value',num2str(S.itinerary));
+S.TIt2 = uilabel(S.PProc,'Text','iterations to estimate process time','BackgroundColor',S.bg);
+S.TTips = uitextarea(S.PProc,'Editable','off','BackgroundColor',S.bg,'FontSize',11, ...
+    'Value',{'Press "CTRL" + "X" to cease the process;', ...
+             'May type the following script to quit the parallel computing:', ...
+             'delete(gcp(''nocreate''))'});
+
+% right plot panels
+S.PDataPlot = uipanel(S.UIFigure,'Title','Data','BackgroundColor',S.bg);
+S.AxData = uiaxes(S.PDataPlot);
+S.PDynot = uipanel(S.UIFigure,'Title','DYNOT','BackgroundColor',S.bg);
+S.AxDynot = uiaxes(S.PDynot);
+
+setappdata(S.UIFigure,'DYNOS_STATE',S);
+onResize(S.UIFigure);
 end
 
-% Waitbar
-if handles.lang_choice == 0
-    hwaitbar = waitbar(0,'Very heavy loads, may take several hours ...',...    
-       'WindowStyle','modal');
-else
-    [~, dynot27] = ismember('dynot27',lang_id);
-    hwaitbar = waitbar(0,lang_var{dynot27},...    
-       'WindowStyle','modal');
+function onResize(fig)
+S = getappdata(fig,'DYNOS_STATE');
+if isempty(S), return; end
+w = max(1200, fig.Position(3));
+h = max(760, fig.Position(4));
+if fig.Position(3) < w || fig.Position(4) < h
+    fig.Position(3:4) = [w h];
 end
-   hwaitbar_find = findobj(hwaitbar,'Type','Patch');
-set(hwaitbar_find,'EdgeColor',[0 0.9 0],'FaceColor',[0 0.9 0]) % changes the color to blue
 
-if handles.lang_choice == 0
-    setappdata(hwaitbar,'canceling',0)
-else
-    setappdata(hwaitbar,'canceling',0)
+leftW = max(540, round(0.355*w));
+rightX = leftW + round(0.01*w);
+rightW = max(500, w - rightX - round(0.01*w));
+
+topX = round(0.01*w);
+topY = round(0.90*h);
+topH = max(48,round(0.06*h));
+topW2 = max(220, round(0.42*leftW));
+S.PDataB.Position = [topX topY topW2 topH];
+S.BRun.Position = [10 8 max(20,S.PDataB.Position(3)-20) max(20,S.PDataB.Position(4)-16)];
+
+S.PInterp.Position = [round(0.01*w) round(0.775*h) leftW max(96,round(0.12*h))];
+S.PMC.Position = [round(0.01*w) round(0.595*h) leftW max(126,round(0.175*h))];
+S.PFreq.Position = [round(0.01*w) round(0.365*h) leftW max(150,round(0.22*h))];
+S.PPlot.Position = [round(0.01*w) round(0.205*h) leftW max(128,round(0.16*h))];
+S.PProc.Position = [round(0.01*w) round(0.01*h) leftW max(178,round(0.21*h))];
+
+S.LTitle.Position = [rightX round(0.93*h) rightW 30];
+S.LRef.Position = [rightX+round(0.03*rightW) round(0.895*h) round(0.90*rightW) 24];
+S.PDataPlot.Position = [rightX round(0.48*h) rightW max(290,round(0.41*h))];
+S.PDynot.Position = [rightX round(0.01*h) rightW max(280,round(0.40*h))];
+S.AxData.Position = [30 40 max(120,S.PDataPlot.Position(3)-40) max(120,S.PDataPlot.Position(4)-60)];
+S.AxDynot.Position = [30 40 max(120,S.PDynot.Position(3)-40) max(120,S.PDynot.Position(4)-60)];
+
+layoutInterp(S); layoutMC(S); layoutFreq(S); layoutPlot(S); layoutProc(S);
+setappdata(fig,'DYNOS_STATE',S);
 end
-steps = 100;
-% step estimation for waitbar
-nmc_n = round(nmc/steps);
-waitbarstep = 1;
-waitbar(waitbarstep / steps)
-    
-if nmc > 199
-    % Check for clicked Cancel button
-    
-  if numcore == 1  % can not use parpool or matlabpool
-    for i=1:nmc
 
-        if getappdata(hwaitbar,'canceling')
-            break
+function layoutInterp(S)
+pw = S.PInterp.Position(3); ph = S.PInterp.Position(4);
+S.TCut.Position = [12 round(0.66*ph) 100 24];
+S.ECut1.Position = [130 round(0.62*ph) 100 28];
+S.TTo1.Position = [238 round(0.66*ph) 24 24];
+S.ECut2.Position = [270 round(0.62*ph) 100 28];
+S.BCut.Position = [380 round(0.62*ph) 90 28];
+S.TSamp.Position = [12 round(0.27*ph) 100 24];
+S.ESampA.Position = [130 round(0.23*ph) 100 28];
+S.TTo2.Position = [238 round(0.27*ph) 24 24];
+S.ESampB.Position = [270 round(0.23*ph) 100 28];
+S.TKa1.Position = [380 round(0.27*ph) 30 24];
+end
+
+function layoutMC(S)
+pw = S.PMC.Position(3); ph = S.PMC.Position(4);
+S.TWinFrom.Position = [12 round(0.72*ph) 110 22];
+S.EWin1.Position = [135 round(0.70*ph) 70 26];
+S.TTo3.Position = [210 round(0.72*ph) 24 22];
+S.EWin2.Position = [235 round(0.70*ph) 70 26];
+S.TKa2.Position = [310 round(0.72*ph) 24 22];
+S.TNW.Position = [12 round(0.52*ph) 160 22];
+S.ENW1.Position = [205 round(0.50*ph) 50 26];
+S.TTo4.Position = [260 round(0.52*ph) 24 22];
+S.ENW2.Position = [280 round(0.50*ph) 50 26];
+S.TPad.Position = [12 round(0.32*ph) 80 22];
+S.EPad.Position = [120 round(0.30*ph) 60 26];
+S.TStep.Position = [225 round(0.32*ph) 35 22];
+S.EStep.Position = [260 round(0.30*ph) 50 26];
+S.TKa3.Position = [315 round(0.32*ph) 24 22];
+S.TNMC.Position = [12 round(0.08*ph) 180 22];
+S.ENMC.Position = [205 round(0.06*ph) 90 26];
+end
+
+function layoutFreq(S)
+pw = S.PFreq.Position(3); ph = S.PFreq.Position(4);
+S.BGFreq.Position = [2 2 pw-4 ph-4];
+S.RMiddle.Position = [12 round(0.78*ph) 140 22];
+S.EAge.Position = [160 round(0.75*ph) 70 26];
+S.TMa.Position = [238 round(0.78*ph) 30 22];
+S.RCycles.Position = [12 round(0.58*ph) 280 22];
+S.ECycles.Position = [12 round(0.41*ph) pw-24 26];
+S.TRange.Position = [12 round(0.22*ph) 120 22];
+S.EFza.Position = [145 round(0.20*ph) 55 26];
+S.TTo5.Position = [207 round(0.22*ph) 24 22];
+S.EFzb.Position = [232 round(0.20*ph) 55 26];
+S.TXBW.Position = [294 round(0.22*ph) 75 22];
+S.TCutoff.Position = [12 round(0.05*ph) 120 22];
+S.EFtmin.Position = [145 round(0.03*ph) 55 26];
+S.TTo6.Position = [207 round(0.05*ph) 24 22];
+S.EFtmax.Position = [232 round(0.03*ph) 55 26];
+S.TUnitF.Position = [294 round(0.05*ph) 80 22];
+end
+
+function layoutPlot(S)
+pw = S.PPlot.Position(3); ph = S.PPlot.Position(4);
+S.TCI.Position = [12 round(0.64*ph) 150 22];
+S.CMedian.Position = [250 round(0.62*ph) 90 22];
+S.C50.Position = [360 round(0.62*ph) 80 22];
+S.C68.Position = [52 round(0.40*ph) 70 22];
+S.C80.Position = [158 round(0.40*ph) 70 22];
+S.C90.Position = [264 round(0.40*ph) 70 22];
+S.C95.Position = [370 round(0.40*ph) 70 22];
+S.TNout.Position = [12 round(0.12*ph) 160 22];
+S.ENout.Position = [190 round(0.10*ph) 84 26];
+S.TPadWin.Position = [286 round(0.12*ph) 130 22];
+S.EPadWin.Position = [425 round(0.10*ph) 62 26];
+end
+
+function layoutProc(S)
+pw = S.PProc.Position(3); ph = S.PProc.Position(4);
+S.TCore.Position = [12 round(0.80*ph) 250 22];
+S.ECore.Position = [280 round(0.78*ph) 95 28];
+S.TIt.Position = [12 round(0.57*ph) 70 22];
+S.EIt.Position = [95 round(0.55*ph) 70 28];
+S.TIt2.Position = [175 round(0.57*ph) 250 22];
+S.TTips.Position = [12 10 pw-22 round(0.36*ph)];
+end
+
+function onDataReady(src)
+S = getState(src);
+S = loadDataReady(S, false);
+setState(src,S);
+end
+
+function S = loadDataReady(S, initCall)
+try
+    data = getfielddef(S.ctx,'current_data',[]);
+    if isempty(data)
+        if ~initCall
+            data_type;
         end
-        dat = [];
-        dat(:,1) = data(1,1):samplez(i):data(length(data(:,1)),1);
-        dat(:,2) = interp1(data(:,1),data(:,2),dat(:,1),'pchip'); 
-
-        f3=f3m(i,:);
-        window = windowz(i);
-        % detrending
-        % Fit a first‐order polynomial (linear trend)
-        p = polyfit(dat(:,1), dat(:,2), 1);          % p(1) = slope, p(2) = intercept
-        % If you want to replace the second column in `data` with the detrended series:
-        dat(:,2) = dat(:,2) - polyval(p, dat(:,1));
-        % half-window padding
-        if padwin > 0
-            dat = zeropad2(dat,window,padwin);
-        end
-        y_grid_rand=randi([-1*shiftwin1,shiftwin1])*window/2;   % shift y_grid1
-        nw = nwz(i);
-        [power]=pdan(dat,f3,window,nw,ftmin,ftmax,step,pad); % power ratio of data series
-        powy(:,i)=interp1((power(:,1)+y_grid_rand/shiftwin),power(:,2),y_grid);
-        power2=power(:,2); %
-        powmean(1,i)=mean(power2(~isnan(power2))); % mean power of each calculation
-
-        time = toc; t_rem = (time*nmc/i)-time;
-        hh = fix(t_rem/3600); mm = fix((t_rem-hh*3600)/60); sec = t_rem-hh*3600-mm*60;
-        if handles.lang_choice == 0
-            dispstat(sprintf(' Progress %.1f%%. Remain %d:%d:%.0f',100*i/nmc,hh,mm,sec),'timestamp')
-        else
-            [~, dynot29] = ismember('dynot29',lang_id);
-            [~, dynot30] = ismember('dynot30',lang_id);
-            dispstat(lang_var{dynot29},sprintf(' %.1f%%. ',100*i/nmc),lang_var{dynot30},sprintf(' %d:%d:%.0f',hh,mm,sec),'timestamp')
-        end
-        % waitbar
-        if rem(i,nmc_n) == 0
-            waitbarstep = waitbarstep+1; 
-            if waitbarstep > steps; waitbarstep = steps; end
-            pause(0.001);%
-            waitbar(waitbarstep / steps)
-        end
+        return
     end
-    if ishandle(hwaitbar); 
-        close(hwaitbar);
+    data = sanitizeData(data);
+    if size(data,1) < 10
+        return
     end
-    
-  else  % ready to use parpool or matlabpool
-      % run first 50 times to estimate total computation time
-    
-        for i=1:itinerary
-            if getappdata(hwaitbar,'canceling')
-                break
-            end
-            dat = [];
-            dat(:,1) = data(1,1):samplez(i):data(length(data(:,1)),1);
-            dat(:,2) = interp1(data(:,1),data(:,2),dat(:,1),'pchip'); 
-            f3=f3m(i,:);
-            window = windowz(i);
-            % detrending
-            % Fit a first‐order polynomial (linear trend)
-            p = polyfit(dat(:,1), dat(:,2), 1);          % p(1) = slope, p(2) = intercept
-            % If you want to replace the second column in `data` with the detrended series:
-            dat(:,2) = dat(:,2) - polyval(p, dat(:,1));
-            % half-window padding
-            if padwin > 0
-                dat = zeropad2(dat,window,padwin);
-            end
+    S.data = data;
+    assignin('base','data',data);
 
-            y_grid_rand=randi([-1*shiftwin1,shiftwin1])*window/2;   % shift y_grid1
-            nw = nwz(i);
-            [power]=pdan(dat,f3,window,nw,ftmin,ftmax,step,pad); % power ratio of data series
-            powy(:,i)=interp1((power(:,1)+y_grid_rand/shiftwin),power(:,2),y_grid);
-            power2=power(:,2); %
-            powmean(1,i)=mean(power2(~isnan(power2))); % mean power of each calculation
-
-            time = toc; t_rem = (time*nmc/i)-time;
-            hh = fix(t_rem/3600); mm = fix((t_rem-hh*3600)/60); sec = t_rem-hh*3600-mm*60;
-            if handles.lang_choice == 0
-                dispstat(sprintf(' Progress %.2f%%. Remain %d:%d:%.0f',100*i/nmc,hh,mm,sec),'timestamp')
-            else
-                [~, dynot29] = ismember('dynot29',lang_id);
-                [~, dynot30] = ismember('dynot30',lang_id);
-                dispstat([lang_var{dynot29},sprintf(' %.2f%%. ',100*i/nmc),lang_var{dynot30},sprintf(' %d:%d:%.0f',hh,mm,sec)],'timestamp')
-            end
-            
-            % waitbar
-            if rem(i,nmc_n) == 0
-                waitbarstep = waitbarstep+1; 
-                if waitbarstep > steps; waitbarstep = steps; end
-                pause(0.001);%
-                waitbar(waitbarstep / steps)
-            end
-        end
-            t_rem = t_rem/numcore;
-            hh = fix(t_rem/3600); 
-            mm = fix((t_rem-hh*3600)/60); 
-            sec = round(t_rem-hh*3600-mm*60);
-            if handles.lang_choice == 0
-                dispstat(sprintf(' First %d iterations suggest: remain >= %dh:%dm:%dsec',itinerary,hh,mm,sec),'timestamp')
-            else
-                [~, dynot18] = ismember('dynot18',lang_id);
-                [~, dynot32] = ismember('dynot32',lang_id);
-                dispstat([lang_var{dynot18},sprintf(' %d ',itinerary),lang_var{dynot32},':',lang_var{dynot30},sprintf(' >= %dh:%dm:%ds',hh,mm,sec)],'timestamp')
-            end
-  %end   
-            if ishandle(hwaitbar)
-                close(hwaitbar);
-            end
-            if handles.lang_choice == 0
-                msgbox_v = {'Remaining time is likely:';...
-                    [num2str(hh),' hr ',num2str(mm),' min ', num2str(sec), ' sec'];...
-                    ['Come back at ~ ',datestr(now + t_rem/86400,'dd-mm-yyyy HH:MM:SS FFF')]};
-                msgbox1 = msgbox(msgbox_v,'Wait ...');
-            else
-                [~, dynot33] = ismember('dynot33',lang_id);
-                [~, dynot34] = ismember('dynot34',lang_id);
-                [~, dynot35] = ismember('dynot35',lang_id);
-                [~, dynot36] = ismember('dynot36',lang_id);
-                [~, dynot37] = ismember('dynot37',lang_id);
-                [~, dynot38] = ismember('dynot38',lang_id);
-                msgbox_v = {lang_var{dynot33};...
-                    [num2str(hh),lang_var{dynot34},num2str(mm),lang_var{dynot35}, num2str(sec), lang_var{dynot36}];...
-                    [lang_var{dynot37},datestr(now + t_rem/86400,'dd-mm-yyyy HH:MM:SS FFF')]};
-                msgbox1 = msgbox(msgbox_v,lang_var{dynot38});
-            end
-%           use parpool when version of matlab is higher than 8.2, else use matlabpool
-        if useparpool
-            poolobj = parpool('local',numcore);
-        else
-             if matlabpool('size')<=0
-                 matlabpool('open','local',numcore); 
-             else
-             end
-        end
-        % Parallel computing
-        parfor i = itinerary+1:nmc
-            tic;
-            dat = [];
-            dat(:,1) = data(1,1):samplez(i):data(length(data(:,1)),1);
-            dat(:,2) = interp1(data(:,1),data(:,2),dat(:,1),'pchip'); 
-            f3=f3m(i,:);
-            window = windowz(i);
-            % detrending
-            % Fit a first‐order polynomial (linear trend)
-            p = polyfit(dat(:,1), dat(:,2), 1);          % p(1) = slope, p(2) = intercept
-            % If you want to replace the second column in `data` with the detrended series:
-            dat(:,2) = dat(:,2) - polyval(p, dat(:,1));
-            % half-window padding
-            if padwin > 0
-                dat = zeropad2(dat,window,padwin);
-            end
-            y_grid_rand=randi([-1*shiftwin1,shiftwin1])*window/2;   % shift y_grid1
-            nw = nwz(i);
-            [power]=pdan(dat,f3,window,nw,ftmin,ftmax,step,pad); % power ratio of data series
-            powy(:,i)=interp1((power(:,1)+y_grid_rand/shiftwin),power(:,2),y_grid);
-            power2=power(:,2); %
-            powmean(1,i)=mean(power2(~isnan(power2))); % mean power of each calculation
-            if lang_choice == 0
-                dispstat(sprintf(' Current iteration takes %.2f seconds',toc),'timestamp')
-            else
-                [~, dynot39] = ismember('dynot39',lang_id);
-                dispstat(sprintf(lang_var{dynot39},toc),'timestamp')
-            end
-            %
-
-        end
-        if useparpool
-              delete(poolobj);
-        else
-              matlabpool close
-        end
-        if ishandle(hwaitbar); close(hwaitbar);end
-        if ishandle(msgbox1); close(msgbox1);end
-  end
-else
-    %figdat = msgbox('Heavy loads, please wait','Wait ...');
-    for i=1:nmc
-        if getappdata(hwaitbar,hwaitbarText)
-            break
-        end
-        dat = [];
-        dat(:,1) = data(1,1):samplez(i):data(length(data(:,1)),1);
-        dat(:,2) = interp1(data(:,1),data(:,2),dat(:,1),'pchip'); 
-        f3=f3m(i,:);
-        window = windowz(i);
-        % detrending
-        % Fit a first‐order polynomial (linear trend)
-        p = polyfit(dat(:,1), dat(:,2), 1);          % p(1) = slope, p(2) = intercept
-        % If you want to replace the second column in `data` with the detrended series:
-        dat(:,2) = dat(:,2) - polyval(p, dat(:,1));
-        % half-window padding
-        if padwin > 0
-            dat = zeropad2(dat,window,padwin);
-        end
-        
-        y_grid_rand=randi([-1*shiftwin1,shiftwin1])*window/2;   % shift y_grid1
-        nw = nwz(i);
-        [power]=pdan(dat,f3,window,nw,ftmin,ftmax,step,pad); % power ratio of data series
-        powy(:,i)=interp1((power(:,1)+y_grid_rand/shiftwin),power(:,2),y_grid);
-        power2=power(:,2); %
-        powmean(1,i)=mean(power2(~isnan(power2))); % mean power of each calculation
-
-        time = toc; t_rem = (time*nmc/i)-time;
-        hh = fix(t_rem/3600); mm = fix((t_rem-hh*3600)/60); sec = t_rem-hh*3600-mm*60;
-           %dispstat(sprintf(' Progress %.1f%%. Remain %d:%d:%.0f',100*i/nmc,hh,mm,sec),'timestamp')
-        
-        if handles.lang_choice == 0
-            dispstat(sprintf(' Progress %.1f%%. Remain %d:%d:%.0f',100*i/nmc,hh,mm,sec),'timestamp')
-        else
-            [~, dynot29] = ismember('dynot29',lang_id);
-            [~, dynot30] = ismember('dynot30',lang_id);
-            dispstat([lang_var{dynot29},sprintf(' %.1f%%. ',100*i/nmc),lang_var{dynot30},sprintf(' %d:%d:%.0f',hh,mm,sec)],'timestamp')
-        end
-        
-        %
-        %
-        if rem(i,nmc_n) == 0
-            waitbarstep = waitbarstep+1; 
-            if waitbarstep > steps; waitbarstep = steps; end
-            pause(0.001);%
-            waitbar(waitbarstep / steps)
-        end
-    end
-    if ishandle(hwaitbar); close(hwaitbar);end
-end
-
-%% Adjust each power ratio to a unique ratio
-powmean_mean = mean(powmean);  % mean power ratio of each calculation
-powmeanadjust = [];  % Make sure each running of this script don't be affected by previous running
-powmeanadjust = powmean_mean./powmean;
-powmeanadjust = repmat(powmeanadjust,nout,1);
-powyadjust = powmeanadjust.*powy;
-% Dec 10, 2016 Add by Mingsong Li. To avoid a problem that total power > 1
-maxp = max(max(powyadjust));
-if maxp > 1
-    powyadjust=powyadjust/maxp;
-end
-% No adjust??
-%powyadjust= powy;
-%
-if handles.lang_choice == 0
-    dispstat('>>  Done.','keepprev');  % done
-else
-    [~, main45] = ismember('main45',lang_id);
-    dispstat(['>>  ',lang_var{main45},'.'],'keepprev');  % done
-end
-%%
-npercent  = length(percent);
-npercent2 = (length(percent)-1)/2;
-powyp = prctile(powy, percent,2);
-powyadjustp=prctile(powyadjust, percent,2);
-powyad_p_nan =[];
-y_grid_nan=[];
-% Remove NaN within powyadjustp
-for i = 1: npercent
-    powyadjustp1=powyadjustp(:,i);
-    powyad_p_nan(:,i) = powyadjustp1(~isnan(powyadjustp1));
-end
-y_grid_nan = y_grid(~isnan(powyadjustp(:,1)));
-powyad_p_nan = 1 - powyad_p_nan;
-powyadjust = 1- powyadjust;
-powyadjustp = 1 - powyadjustp;
-%% Plot DYNOS
-axes(handles.axes2)
-cla reset
-hold all
-% for i = 1: nmc
-%     plot(y_grid,powyadjust(:,i),'color',[0,0,0]+0.8);
-% end
-%
-colorcode = [221/255,234/255,224/255; ...
-    201/255,227/255,209/255; ...
-    176/255,219/255,188/255;...
-    126/255,201/255,146/255;...
-    67/255,180/255,100/255];
-for i = 1:npercent2
-    fill([y_grid_nan; (fliplr(y_grid_nan'))'],[powyad_p_nan(:,npercent+1-i);...
-        (fliplr(powyad_p_nan(:,i)'))'],colorcode(i,:),'LineStyle','none');
-end
-plot(y_grid_nan,powyad_p_nan(:,npercent2+1),'Color',[0,120/255,0],'LineWidth',1.5,'LineStyle','--')
-axis([data(1,1) data(length(data(:,1)),1) min(powyad_p_nan(:,npercent)) max(powyad_p_nan(:,1))]) 
-set(handles.axes2,'Ydir','reverse')
-set(gca,'XMinorTick','on','YMinorTick','on')
-hold off
-
-set(handles.uipushtool4, 'Enable', 'On');
-set(handles.uipushtool5, 'Enable', 'On');
-set(handles.uipushtool6, 'Enable', 'On');
-set(handles.uipushtool7, 'Enable', 'On');
-%% save data in workspace
-
-assignin('base','freqz',f3m)
-assignin('base','nwz',nwz)
-assignin('base','windowz',windowz)
-assignin('base','samplez',samplez)
-
-assignin('base','powy_grid',y_grid)
-assignin('base','powy',powyadjust)
-assignin('base','powyp',powyadjustp)
-
-assignin('base','powyad_p_grid',y_grid_nan)
-assignin('base','powyad_p',powyad_p_nan)
-
-handles.f3m = f3m;
-handles.nwz = nwz;
-handles.windowz = windowz;
-handles.samplez = samplez;
-handles.npercent = npercent;
-handles.npercent2 = npercent2;
-handles.y_grid = y_grid;
-handles.powyadjust = powyadjust;
-handles.powyadjustp = powyadjustp;
-handles.y_grid_nan = y_grid_nan;
-handles.powyad_p_nan = powyad_p_nan;
-handles.colorcode = colorcode;
-% save data
-data1 = [y_grid_nan,powyad_p_nan(:,npercent2+1)];
-name1 = [handles.dat_name,'-DYNOT-median.txt'];
-data2 = [y_grid_nan,powyad_p_nan];
-name2 = [handles.dat_name,'-DYNOT-prctile.txt'];
-CDac_pwd
-
-if exist([pwd,handles.slash_v,name1]) || exist([pwd,handles.slash_v,name2])
-    for i = 1:100
-        name1 = [handles.dat_name,'-DYNOT-median-',num2str(i),'.txt'];
-        name2 = [handles.dat_name,'-DYNOT-prctile-',num2str(i),'.txt'];
-        if exist([pwd,handles.slash_v,name1]) || exist([pwd,handles.slash_v,name2])
-        else
-            break
-        end
-    end
-end
-if handles.lang_choice == 0
-
-    disp(['>>  Save DYNOT median    : ',name1])
-    disp(['>>  Save DYNOT percentile: ',name2])
-else
-    [~, main52] = ismember('main52',lang_id); % save
-    [~, main40] = ismember('main40',lang_id); % median
-    [~, main56] = ismember('main56',lang_id); % percentile
-    disp(['>>  ',lang_var{main52},' DYNOT ',lang_var{main40},' : ',name1])
-    disp(['>>  ',lang_var{main52},' DYNOT ',lang_var{main56},' : ',name2])
-end
-dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9); 
-dlmwrite(name2, data2, 'delimiter', ' ', 'precision', 9); 
-cd(pre_dirML); % return to matlab view folder
-%
-% refresh AC main window
-figure(handles.acfigmain);
-CDac_pwd; % cd working dir
-refreshcolor;
-cd(pre_dirML); % return view dir
-
-guidata(hObject, handles);
-
-
-% --- Executes on button press in pushbutton4.
-function pushbutton4_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-% plot data in axis 1
-% estimate matlab version to decide use matlabpool or parpool script
-        % use parpool when matlab version is higher than 8.2,else use
-        % matlabpool
-matlabversion = version;
-matversion = str2num(matlabversion(1:3));
-if matversion >= 8.2
-    useparpool = 1;
-    delete(gcp('nocreate')); % clear pool
-else
-    useparpool = 0;
-end
-
-handles.useparpool = useparpool;
-existdata = evalin('base','who');
-if ismember('data',existdata)
-    handles.data = evalin('base','data');
-
-    data = handles.data;
-    if data(2,1)<= data(1,1)
+    if data(2,1) <= data(1,1)
         data = flipud(data);
     end
-    xmin = min(data(:,1));
-    xmax = max(data(:,1));
-    ymin = min(data(:,2));
-    ymax = max(data(:,2));
     samplerate = diff(data(:,1));
-    parmhat = wblfit(samplerate); % estimate weibull a and b
-    % plot
-    plot(handles.axes1,data(:,1),data(:,2));
-    axis(handles.axes1,[xmin xmax ymin ymax])
-    set(gca,'XMinorTick','on','YMinorTick','on')
-    % plot
-    axes(handles.axes2)
-    histfit(samplerate,40,'kernel');
-    title(handles.axes2,'Sample rates');
-    % set default parameters cover 90% sample ranges
-    samplerange = prctile(samplerate, [5 95]);
-    %
-    numcore = feature('numCores');
-    % set handles
-    handles.numcore = numcore;
-    handles.itinerary = 50;
-    handles.sampa = samplerange(1);
-    handles.sampb = samplerange(2);
-    handles.parmhat = parmhat;
-    handles.unit = 'ka';
-    handles.window1 = 300;
-    handles.window2 = 500;
-    handles.nw1 = 2;
-    handles.nw2 = 2;
-    handles.pad = 1000;
-    handles.step = 5;
-    handles.nout = 1000;
-    handles.shiftwin = 1;
-    handles.padwin = 1;
-    handles.fza = 0.9;
-    handles.fzb = 1.2;
-    handles.ftmin = 0.001;
-    handles.ftmax = 1;
-    handles.nmc = 1000;
-    handles.age = 0;
-    handles.cut1 = data(1,1);
-    handles.cut2 = data(length(data(:,1)),1);
-    handles.checkbox1median_v = 50;
-    handles.checkbox50_v = [25 75];
-    handles.checkbox68_v = [15.865 84.135];
-    handles.checkbox80_v = [10 90];
-    handles.checkbox90_v = [5 95];
-    handles.checkbox95_v = [2.5 97.5];
-    % set settings in the app
-    set(handles.edit6, 'String', num2str(handles.window1));
-    set(handles.edit7, 'String', num2str(handles.window2));
-    set(handles.edit8, 'String', num2str(handles.nw1));
-    set(handles.edit9, 'String', num2str(handles.nw2));
-    set(handles.edit10, 'String', num2str(handles.pad));
-    c = [405 125 95 40.9 23.6 22.3 19.1];
-    set(handles.edit11, 'String', num2str(c,'%1.1f '));
-    set(handles.edit13, 'String', num2str(handles.fza));
-    set(handles.edit14, 'String', num2str(handles.fzb));
-    set(handles.edit15, 'String', num2str(handles.ftmin));
-    set(handles.edit12, 'String', num2str(handles.ftmax));
-    set(handles.edit21, 'String', num2str(handles.step));
-    set(handles.edit22, 'String', num2str(handles.nout));
-    set(handles.edit23, 'String', num2str(handles.padwin));
-    set(handles.edit_sampa, 'String', num2str(samplerange(1)));
-    set(handles.edit_sampb, 'String', num2str(samplerange(2)));
-    set(handles.edit24, 'String', num2str(handles.nmc));
-    set(handles.edit26, 'String', num2str(data(1,1)));
-    set(handles.edit25, 'String', num2str(data(length(data(:,1)),1)));
-    set(handles.edit27, 'Enable', 'On');
-    set(handles.edit27, 'String', num2str(numcore));
-    set(handles.edit28, 'String', num2str(handles.itinerary));
-    set(handles.pushbutton_cut, 'Enable', 'On');
-    set(handles.pushbutton5, 'Enable', 'On');
-    set(handles.edit29, 'Enable', 'On');
-    set(handles.edit11, 'Enable', 'Off');
-    set(handles.radiobutton1, 'Value', 1);
-    set(handles.radiobutton2, 'Value', 0);
-    guidata(hObject, handles);
+    S.parmhat = wblfit(samplerate);
+    samplerange = prctile(samplerate,[5 95]);
+
+    S.sampa = samplerange(1);
+    S.sampb = samplerange(2);
+    S.cut1 = data(1,1);
+    S.cut2 = data(end,1);
+
+    S.ECut1.Value = num2str(S.cut1);
+    S.ECut2.Value = num2str(S.cut2);
+    S.ESampA.Value = num2str(S.sampa);
+    S.ESampB.Value = num2str(S.sampb);
+    S.EPad.Value = num2str(S.pad);
+    S.EWin1.Value = num2str(S.window1);
+    S.EWin2.Value = num2str(S.window2);
+    S.ENW1.Value = num2str(S.nw1);
+    S.ENW2.Value = num2str(S.nw2);
+    S.EStep.Value = num2str(S.step);
+    S.ENMC.Value = num2str(S.nmc);
+    S.ECore.Value = num2str(S.numcore);
+    S.EIt.Value = num2str(S.itinerary);
+    S.ECycles.Value = num2str(S.cycles,'%1.1f ');
+
+    cla(S.AxData);
+    plot(S.AxData,data(:,1),data(:,2),'Color',[0.2 0.6 1]);
+    xlim(S.AxData,[data(1,1) data(end,1)]);
+    set(S.AxData,'XMinorTick','on','YMinorTick','on');
+
+    cla(S.AxDynot);
+    histogram(S.AxDynot,samplerate,40,'FaceColor',[0 0.4470 0.7410],'EdgeColor','none');
+    title(S.AxDynot,'Sample rates');
+    set(S.AxDynot,'XMinorTick','on','YMinorTick','on');
+catch ME
+    uialert(S.UIFigure,ME.message,'DYNOS');
+end
+end
+
+function onCut(src)
+S = getState(src);
+if isempty(S.data), return; end
+cut1 = str2double(S.ECut1.Value);
+cut2 = str2double(S.ECut2.Value);
+if ~isfinite(cut1) || ~isfinite(cut2), return; end
+if cut1 > cut2
+    t = cut1; cut1 = cut2; cut2 = t;
+end
+idx = S.data(:,1)>=cut1 & S.data(:,1)<=cut2;
+if nnz(idx) < 10, return; end
+S.data = S.data(idx,1:2);
+
+samplerate = diff(S.data(:,1));
+S.parmhat = wblfit(samplerate);
+sr = prctile(samplerate,[5 95]);
+S.sampa = sr(1); S.sampb = sr(2);
+S.ESampA.Value = num2str(S.sampa);
+S.ESampB.Value = num2str(S.sampb);
+
+cla(S.AxData);
+plot(S.AxData,S.data(:,1),S.data(:,2),'Color',[0.2 0.6 1]);
+set(S.AxData,'XMinorTick','on','YMinorTick','on');
+cla(S.AxDynot);
+histogram(S.AxDynot,samplerate,40,'FaceColor',[0 0.4470 0.7410],'EdgeColor','none');
+title(S.AxDynot,'Sample rates');
+set(S.AxDynot,'XMinorTick','on','YMinorTick','on');
+
+setState(src,S);
+end
+
+function onFreqMode(bg)
+S = getState(bg);
+S.use_middle_age = (bg.SelectedObject == S.RMiddle);
+if S.use_middle_age
+    S.EAge.Enable = 'on';
+    S.ECycles.Enable = 'off';
 else
-%    cd doc
-    data_type
-%    cd ..
+    S.EAge.Enable = 'off';
+    S.ECycles.Enable = 'on';
+end
+setState(bg,S);
 end
 
-function edit6_Callback(hObject, eventdata, handles)
-% hObject    handle to edit6 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit6 as text
-%        str2double(get(hObject,'String')) returns contents of edit6 as a double
-window1 = str2double(get(hObject,'String'));
-handles.window1 = window1;
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit6_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit6 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
+function onRun(src)
+S = getState(src);
+if isempty(S.data)
+    S = loadDataReady(S,false);
+    if isempty(S.data)
+        uialert(S.UIFigure,'Data not ready.','DYNOT');
+        setState(src,S);
+        return;
+    end
 end
 
-
-
-function edit7_Callback(hObject, eventdata, handles)
-% hObject    handle to edit7 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit7 as text
-%        str2double(get(hObject,'String')) returns contents of edit7 as a double
-window2 = str2double(get(hObject,'String'));
-handles.window2 = window2;
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit7_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit7 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
+try
+    S = readInputs(S);
+    setState(src,S);
+    S = runDynot(S);
+    setState(src,S);
+catch ME
+    uialert(S.UIFigure,ME.message,'DYNOT Error');
+end
 end
 
-
-
-function edit_sampa_Callback(hObject, eventdata, handles)
-% hObject    handle to edit_sampa (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit_sampa as text
-%        str2double(get(hObject,'String')) returns contents of edit_sampa as a double
-sampa = str2double(get(hObject,'String'));
-handles.sampa = sampa;
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit_sampa_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit_sampa (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit_sampb_Callback(hObject, eventdata, handles)
-% hObject    handle to edit_sampb (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit_sampb as text
-%        str2double(get(hObject,'String')) returns contents of edit_sampb as a double
-sampb = str2double(get(hObject,'String'));
-handles.sampb = sampb;
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit_sampb_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit_sampb (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit8_Callback(hObject, eventdata, handles)
-% hObject    handle to edit8 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit8 as text
-%        str2double(get(hObject,'String')) returns contents of edit8 as a double
-nw1 = str2double(get(hObject,'String'));
-handles.nw1 = nw1;
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit8_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit8 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit9_Callback(hObject, eventdata, handles)
-% hObject    handle to edit9 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit9 as text
-%        str2double(get(hObject,'String')) returns contents of edit9 as a double
-nw2 = str2double(get(hObject,'String'));
-handles.nw2 = nw2;
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit9_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit9 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit10_Callback(hObject, eventdata, handles)
-% hObject    handle to edit10 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit10 as text
-%        str2double(get(hObject,'String')) returns contents of edit10 as a double
-pad = str2double(get(hObject,'String'));
-handles.pad = pad;
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit10_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit10 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-function edit11_Callback(hObject, eventdata, handles)
-% hObject    handle to edit11 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit11 as text
-%        str2double(get(hObject,'String')) returns contents of edit11 as a double
-c = strread(get(hObject,'String'));
-f = 1./c;
-handles.f = f;
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit11_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit11 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-c = strread(get(hObject,'String'));
-f = 1./c;
-handles.f = f;
-guidata(hObject, handles);
-
-
-function edit12_Callback(hObject, eventdata, handles)
-% hObject    handle to edit12 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit12 as text
-%        str2double(get(hObject,'String')) returns contents of edit12 as a double
-ftmax = str2double(get(hObject,'String'));
-handles.ftmax = ftmax;
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit12_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit12 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit13_Callback(hObject, eventdata, handles)
-% hObject    handle to edit13 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit13 as text
-%        str2double(get(hObject,'String')) returns contents of edit13 as a double
-fza = str2double(get(hObject,'String'));
-handles.fza = fza;
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit13_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit13 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit14_Callback(hObject, eventdata, handles)
-% hObject    handle to edit14 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit14 as text
-%        str2double(get(hObject,'String')) returns contents of edit14 as a double
-fzb = str2double(get(hObject,'String'));
-handles.fzb = fzb;
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit14_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit14 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit15_Callback(hObject, eventdata, handles)
-% hObject    handle to edit15 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit15 as text
-%        str2double(get(hObject,'String')) returns contents of edit15 as a double
-ftmin = str2double(get(hObject,'String'));
-handles.ftmin = ftmin;
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit15_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit15 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit16_Callback(hObject, eventdata, handles)
-% hObject    handle to edit16 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit16 as text
-%        str2double(get(hObject,'String')) returns contents of edit16 as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function edit16_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit16 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit17_Callback(hObject, eventdata, handles)
-% hObject    handle to edit17 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit17 as text
-%        str2double(get(hObject,'String')) returns contents of edit17 as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function edit17_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit17 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit18_Callback(hObject, eventdata, handles)
-% hObject    handle to edit18 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit18 as text
-%        str2double(get(hObject,'String')) returns contents of edit18 as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function edit18_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit18 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit19_Callback(hObject, eventdata, handles)
-% hObject    handle to edit19 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit19 as text
-%        str2double(get(hObject,'String')) returns contents of edit19 as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function edit19_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit19 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit20_Callback(hObject, eventdata, handles)
-% hObject    handle to edit20 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit20 as text
-%        str2double(get(hObject,'String')) returns contents of edit20 as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function edit20_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit20 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit21_Callback(hObject, eventdata, handles)
-% hObject    handle to edit21 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit21 as text
-%        str2double(get(hObject,'String')) returns contents of edit21 as a double
-step = str2double(get(hObject,'String'));
-handles.step = step;
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit21_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit21 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on selection change in popupmenu2.
-function popupmenu2_Callback(hObject, eventdata, handles)
-% hObject    handle to popupmenu2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu2 contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from popupmenu2
-% Determine the selected data set.
-str = get(hObject, 'String');
-val = get(hObject,'Value');
-% Set current data to the selected data set.
-switch str{val};
-case 'ka' % User selects unit.
-   handles.unit = 'ka';
-case 'ma' % User selects m.
-   handles.unit = 'ma';
-case 'a' % User selects dm.
-   handles.unit = 'a';
-end
-% Save the handles structure.
-guidata(hObject,handles)
-
-% --- Executes during object creation, after setting all properties.
-function popupmenu2_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to popupmenu2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit22_Callback(hObject, eventdata, handles)
-% hObject    handle to edit22 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit22 as text
-%        str2double(get(hObject,'String')) returns contents of edit22 as a double
-nout = str2double(get(hObject,'String'));
-handles.nout = nout;
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit22_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit22 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit23_Callback(hObject, eventdata, handles)
-% hObject    handle to edit23 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit23 as text
-%        str2double(get(hObject,'String')) returns contents of edit23 as a double
-padwin = str2double(get(hObject,'String'));
-handles.padwin = padwin;
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit23_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit23 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in checkbox1median.
-function checkbox1median_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox1median (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox1median
-% checkbox1median_v = get(handles.checkbox1median,'string');
-% handles.checkbox1median_v = checkbox1median_v;
-
-checkbox1median = get(handles.checkbox1median,'Value');
-if checkbox1median == 1
-    handles.checkbox1median_v = 50;
+function S = readInputs(S)
+S.window1 = str2double(S.EWin1.Value);
+S.window2 = str2double(S.EWin2.Value);
+S.nw1 = str2double(S.ENW1.Value);
+S.nw2 = str2double(S.ENW2.Value);
+S.pad = str2double(S.EPad.Value);
+S.step = str2double(S.EStep.Value);
+S.nmc = max(10,round(str2double(S.ENMC.Value)));
+S.nout = max(100,round(str2double(S.ENout.Value)));
+S.padwin = max(0,round(str2double(S.EPadWin.Value)));
+S.fza = str2double(S.EFza.Value);
+S.fzb = str2double(S.EFzb.Value);
+S.ftmin = str2double(S.EFtmin.Value);
+S.ftmax = str2double(S.EFtmax.Value);
+S.sampa = str2double(S.ESampA.Value);
+S.sampb = str2double(S.ESampB.Value);
+S.numcore = max(1,round(str2double(S.ECore.Value)));
+S.itinerary = max(1,round(str2double(S.EIt.Value)));
+
+S.percent_on = [S.CMedian.Value S.C50.Value S.C68.Value S.C80.Value S.C90.Value S.C95.Value];
+if ~any(S.percent_on), S.percent_on(1) = true; end
+
+if S.use_middle_age
+    S.age = str2double(S.EAge.Value);
+    age_obl = 41 - 0.0332*S.age;
+    age_p1 = 22.43 - 0.0108*S.age;
+    age_p2 = 23.75 - 0.0121*S.age;
+    age_p3 = 19.18 - 0.0079*S.age;
+    c = [405 125 95 age_obl age_p2 age_p1 age_p3];
+    S.cycles = c;
+    S.ECycles.Value = num2str(c,'%1.1f ');
 else
-    handles.checkbox1median_v = 0;
+    c = str2num(S.ECycles.Value); %#ok<ST2NM>
+    if isempty(c), c = [405 125 95 40.9 23.6 22.3 19.1]; end
+    S.cycles = c(:)';
+end
+S.f = 1./S.cycles;
+
+if S.sampa <= 0 || S.sampb <= 0 || S.sampb < S.sampa
+    error('Sample rate range is invalid.');
+end
 end
 
-guidata(hObject, handles);
+function S = runDynot(S)
+data = S.data;
+nmc = S.nmc;
+nout = S.nout;
 
-% --- Executes on button press in checkbox50.
-function checkbox50_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox50 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox50
-checkbox50 = get(handles.checkbox50,'Value');
-
-if checkbox50 == 1
-    handles.checkbox50_v = [25 75];
+if S.nw2 == S.nw1
+    randnw = zeros(nmc,1);
 else
-    handles.checkbox50_v = [0 0];
+    randnw = randi(2*(S.nw2-S.nw1),[nmc 1]);
+end
+samplez = wblrnd(S.parmhat(1),S.parmhat(2),[nmc 1]);
+samplez(samplez<S.sampa) = S.sampa + (S.sampb-S.sampa).*rand(sum(samplez<S.sampa),1);
+samplez(samplez>S.sampb) = S.sampa + (S.sampb-S.sampa).*rand(sum(samplez>S.sampb),1);
+windowz = S.window1 + (S.window2-S.window1).*rand(nmc,1);
+nwz = S.nw1 + randnw/2;
+bw = nwz./windowz;
+
+f3m = zeros(nmc,2*numel(S.f));
+for i = 1:numel(S.f)
+    fz = S.fza + (S.fzb-S.fza).*rand(nmc,1);
+    f3m(:,2*i-1) = S.f(i) - fz.*bw;
+    fz = S.fza + (S.fzb-S.fza).*rand(nmc,1);
+    f3m(:,2*i) = S.f(i) + fz.*bw;
+end
+f3m(f3m<S.ftmin)=S.ftmin; f3m(f3m>S.ftmax)=S.ftmax;
+
+y_grid = linspace(data(1,1),data(end,1),nout)';
+powy = nan(nout,nmc);
+powmean = nan(1,nmc);
+
+hwb = waitbar(0,'Running DYNOT ...','WindowStyle','modal');
+cleanupWb = onCleanup(@()safeClose(hwb));
+for i = 1:nmc
+    dat = [];
+    dat(:,1) = data(1,1):samplez(i):data(end,1);
+    dat(:,2) = interp1(data(:,1),data(:,2),dat(:,1),'pchip');
+    p = polyfit(dat(:,1),dat(:,2),1);
+    dat(:,2) = dat(:,2) - polyval(p,dat(:,1));
+    if S.padwin > 0
+        dat = zeropad2(dat,windowz(i),S.padwin);
+    end
+    nw = nwz(i);
+    power = pdan(dat,f3m(i,:),windowz(i),nw,S.ftmin,S.ftmax,S.step,S.pad);
+    powy(:,i) = interp1(power(:,1),power(:,2),y_grid);
+    p2 = power(:,2);
+    powmean(i) = mean(p2(~isnan(p2)));
+
+    if rem(i,max(1,round(nmc/100))) == 0 || i==nmc
+        waitbar(i/nmc,hwb,sprintf('Progress %.1f%%',100*i/nmc));
+    end
+end
+clear cleanupWb;
+
+pm = mean(powmean,'omitnan');
+adj = pm./powmean;
+powyadjust = repmat(adj,nout,1).*powy;
+maxp = max(powyadjust,[],'all','omitnan');
+if isfinite(maxp) && maxp > 1
+    powyadjust = powyadjust/maxp;
 end
 
-guidata(hObject, handles);
+percentBank = {50,[25 75],[15.865 84.135],[10 90],[5 95],[2.5 97.5]};
+pp = [];
+for k=1:numel(percentBank)
+    if S.percent_on(k)
+        pp = [pp percentBank{k}]; %#ok<AGROW>
+    end
+end
+pp = sort(unique(pp));
+if isempty(pp), pp = 50; end
+powyadjustp = prctile(powyadjust,pp,2);
+mask = ~isnan(powyadjustp(:,1));
+y_grid_nan = y_grid(mask);
+powyad_p_nan = 1 - powyadjustp(mask,:);
 
-% --- Executes on button press in checkbox68.
-function checkbox68_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox68 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+colorcode = [221 234 224;201 227 209;176 219 188;126 201 146;67 180 100]/255;
+cla(S.AxDynot); hold(S.AxDynot,'on');
+npercent = numel(pp);
+npercent2 = floor((npercent-1)/2);
+for i = 1:min(npercent2,size(colorcode,1))
+    x = [y_grid_nan; flipud(y_grid_nan)];
+    y = [powyad_p_nan(:,npercent+1-i); flipud(powyad_p_nan(:,i))];
+    fill(S.AxDynot,x,y,colorcode(i,:),'LineStyle','none');
+end
+mid = npercent2+1;
+if mid>=1 && mid<=size(powyad_p_nan,2)
+    plot(S.AxDynot,y_grid_nan,powyad_p_nan(:,mid),'Color',[0 120/255 0],'LineWidth',1.5,'LineStyle','--');
+end
+axis(S.AxDynot,[data(1,1) data(end,1) min(powyad_p_nan,[],'all') max(powyad_p_nan,[],'all')]);
+set(S.AxDynot,'YDir','reverse');
+set(S.AxDynot,'XMinorTick','on','YMinorTick','on');
+hold(S.AxDynot,'off');
 
-% Hint: get(hObject,'Value') returns toggle state of checkbox68
-checkbox68 = get(handles.checkbox68,'Value');
-if checkbox68 == 1
-%     set(handles.checkbox68,'Enable','on')
-    handles.checkbox68_v = [15.865 84.135];
+assignin('base','freqz',f3m);
+assignin('base','nwz',nwz);
+assignin('base','windowz',windowz);
+assignin('base','samplez',samplez);
+assignin('base','powy_grid',y_grid);
+assignin('base','powy',1-powyadjust);
+assignin('base','powyp',1-powyadjustp);
+
+S.run.y_grid = y_grid;
+S.run.powyadjust = 1-powyadjust;
+S.run.y_grid_nan = y_grid_nan;
+S.run.powyad_p_nan = powyad_p_nan;
+S.run.npercent = npercent;
+S.run.npercent2 = npercent2;
+S.run.colorcode = colorcode;
+S.run.f3m = f3m;
+S.run.nwz = nwz;
+S.run.windowz = windowz;
+S.run.samplez = samplez;
+
+saveDynotFiles(S, y_grid_nan, powyad_p_nan, npercent2);
+end
+
+function saveDynotFiles(S, y_grid_nan, powyad_p_nan, npercent2)
+pre_dir = pwd;
+try
+    CDac_pwd;
+catch
+end
+
+name1 = [S.dat_name,'-DYNOT-median.txt'];
+name2 = [S.dat_name,'-DYNOT-prctile.txt'];
+if exist(name1,'file') || exist(name2,'file')
+    for i = 1:200
+        n1 = [S.dat_name,'-DYNOT-median-',num2str(i),'.txt'];
+        n2 = [S.dat_name,'-DYNOT-prctile-',num2str(i),'.txt'];
+        if ~exist(n1,'file') && ~exist(n2,'file')
+            name1 = n1; name2 = n2; break
+        end
+    end
+end
+
+mid = max(1,min(size(powyad_p_nan,2),npercent2+1));
+dlmwrite(name1,[y_grid_nan,powyad_p_nan(:,mid)],'delimiter',' ','precision',9);
+dlmwrite(name2,[y_grid_nan,powyad_p_nan],'delimiter',' ','precision',9);
+
+refreshMainListbox(S);
+cd(pre_dir);
+end
+
+function refreshMainListbox(S)
+if isempty(S.listbox_acmain) || ~isgraphics(S.listbox_acmain)
+    return
+end
+pre  = '<HTML><FONT color="blue">';
+post = '</FONT></HTML>';
+d = dir;
+if numel(d)>=2, d(1:2)=[]; end
+address = pwd;
+if ~isempty(S.edit_acfigmain_dir) && isgraphics(S.edit_acfigmain_dir)
+    set(S.edit_acfigmain_dir,'String',address);
+end
+ac_pwd_str = which('ac_pwd.txt');
+if ~isempty(ac_pwd_str)
+    [ac_pwd_dir,~,~] = fileparts(ac_pwd_str);
+    fid = fopen(fullfile(ac_pwd_dir,'ac_pwd.txt'),'w');
+    if fid~=-1
+        fprintf(fid,'%s',address);
+        fclose(fid);
+    end
+end
+if isempty(d)
+    set(S.listbox_acmain,'String',{},'Value',[]);
+    return
+end
+T = struct2table(d);
+switch S.val1
+    case 1, sortedT = sortrows(T,'name','ascend');
+    case 2, sortedT = sortrows(T,'name','descend');
+    case 3, sortedT = sortrows(T,'date','ascend');
+    case 4, sortedT = sortrows(T,'date','descend');
+    case 5, sortedT = sortrows(T,'bytes','ascend');
+    case 6, sortedT = sortrows(T,'bytes','descend');
+    otherwise, sortedT = sortrows(T,'name','ascend');
+end
+sd = table2struct(sortedT);
+out = cell(numel(sd),1);
+for i=1:numel(sd)
+    if isdir(sd(i).name)
+        out{i} = [pre sd(i).name post];
+    else
+        out{i} = sd(i).name;
+    end
+end
+set(S.listbox_acmain,'String',out,'Value',[]);
+end
+
+function onSaveFigure(src)
+S = getState(src);
+try
+    fig = buildDynotFigure(S,'DYNOT');
+    out = nextOutputFile('plots_','.fig');
+    savefig(fig,out);
+    close(fig);
+    uialert(S.UIFigure,['Saved: ',out],'Save');
+catch ME
+    uialert(S.UIFigure,ME.message,'Save Figure Error');
+end
+end
+
+function onPrintFigure(src)
+S = getState(src);
+try
+    fig = buildDynotFigure(S,'DYNOT print');
+    out = nextOutputFile('plots_','.pdf');
+    exportgraphics(fig,out,'ContentType','vector');
+    close(fig);
+    uialert(S.UIFigure,['Printed: ',out],'Print');
+catch ME
+    uialert(S.UIFigure,ME.message,'Print Error');
+end
+end
+
+function fig = buildDynotFigure(S, figName)
+fig = figure('Color','white','Name',figName);
+if isempty(S.data)
+    ax = axes(fig);
+    text(ax,0.5,0.5,'No data','HorizontalAlignment','center');
+    axis(ax,'off');
+    return
+end
+
+if isempty(S.run.y_grid_nan)
+    ax = axes(fig);
+    plot(ax,S.data(:,1),S.data(:,2),'Color',[0.2 0.6 1]);
+    title(ax,'Data');
+    grid(ax,'on');
+    set(ax,'XMinorTick','on','YMinorTick','on');
+    return
+end
+
+tiledlayout(fig,2,1,'Padding','compact','TileSpacing','compact');
+nexttile;
+plot(S.data(:,1),S.data(:,2),'Color',[0.2 0.6 1]);
+title('Data');
+grid on;
+set(gca,'XMinorTick','on','YMinorTick','on');
+
+nexttile;
+ax = gca;
+hold(ax,'on');
+npercent = S.run.npercent;
+npercent2 = S.run.npercent2;
+y_grid_nan = S.run.y_grid_nan;
+powyad_p_nan = S.run.powyad_p_nan;
+colorcode = S.run.colorcode;
+for i = 1:min(npercent2,size(colorcode,1))
+    x = [y_grid_nan; flipud(y_grid_nan)];
+    y = [powyad_p_nan(:,npercent+1-i); flipud(powyad_p_nan(:,i))];
+    fill(ax,x,y,colorcode(i,:),'LineStyle','none');
+end
+mid = npercent2 + 1;
+plot(ax,y_grid_nan,powyad_p_nan(:,mid),'Color',[0 120/255 0],'LineWidth',1.5,'LineStyle','--');
+set(ax,'YDir','reverse');
+title(ax,'DYNOT');
+grid(ax,'on');
+set(ax,'XMinorTick','on','YMinorTick','on');
+hold(ax,'off');
+end
+
+function out = nextOutputFile(stem, ext)
+if nargin < 2 || isempty(ext)
+    ext = '.fig';
+end
+if ~startsWith(ext,'.')
+    ext = ['.', ext];
+end
+out = [stem, ext];
+if exist(out,'file')
+    for i = 1:999
+        outi = sprintf('%s%d%s',stem,i,ext);
+        if ~exist(outi,'file')
+            out = outi;
+            break
+        end
+    end
+end
+end
+
+function data = sanitizeData(data)
+if size(data,2) > 2
+    data = data(:,1:2);
+end
+data = sortrows(data,1);
+if exist('findduplicate','file') == 2
+    data = findduplicate(data);
 else
-    handles.checkbox68_v = [0 0];
+    [~,ia] = unique(data(:,1),'stable');
+    data = data(ia,:);
+end
+data(any(~isfinite(data),2),:) = [];
 end
 
-guidata(hObject, handles);
+function safeClose(h)
+if ~isempty(h) && isgraphics(h)
+    close(h);
+end
+end
 
-% --- Executes on button press in checkbox80.
-function checkbox80_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox80 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+function setState(h,S)
+fig = ancestor(h,'figure');
+setappdata(fig,'DYNOS_STATE',S);
+end
 
-% Hint: get(hObject,'Value') returns toggle state of checkbox80
-checkbox80 = get(handles.checkbox80,'Value');
-if checkbox80 == 1
-%     set(handles.checkbox80,'Enable','on')
-    handles.checkbox80_v = [10 90];
+function S = getState(h)
+fig = ancestor(h,'figure');
+S = getappdata(fig,'DYNOS_STATE');
+end
+
+function v = getfielddef(s, name, def)
+if isstruct(s) && isfield(s,name) && ~isempty(s.(name))
+    v = s.(name);
 else
-%     set(handles.checkbox80,'Enable','on')
-    handles.checkbox80_v = [0 0];
+    v = def;
 end
-
-guidata(hObject, handles);
-
-% --- Executes on button press in checkbox90.
-function checkbox90_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox90 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox90
-checkbox90 = get(handles.checkbox90,'Value');
-if checkbox90 == 1
-%     set(handles.checkbox90,'Enable','on')
-    handles.checkbox90_v = [5 95];
-else
-%     set(handles.checkbox90,'Enable','on')
-    handles.checkbox90_v = [0 0];
 end
-
-guidata(hObject, handles);
-
-% --- Executes on button press in checkbox95.
-function checkbox95_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox95 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox95
-checkbox95 = get(handles.checkbox95,'Value');
-if checkbox95 == 1
-%     set(handles.checkbox95,'Enable','on')
-    handles.checkbox95_v = [2.5 97.5];
-else
-%     set(handles.checkbox95,'Enable','on')
-    handles.checkbox95_v = [0 0];
-end
-
-guidata(hObject, handles);
-
-
-
-function edit24_Callback(hObject, eventdata, handles)
-% hObject    handle to edit24 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit24 as text
-%        str2double(get(hObject,'String')) returns contents of edit24 as a double
-nmc = str2double(get(hObject,'String'));
-handles.nmc = nmc;
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit24_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit24 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --------------------------------------------------------------------
-function uipushtool1_ClickedCallback(hObject, eventdata, handles)
-% hObject    handle to uipushtool1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-h_old = gcf;
-close(h_old)
-run DYNOS
-
-
-
-function edit25_Callback(hObject, eventdata, handles)
-% hObject    handle to edit25 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit25 as text
-%        str2double(get(hObject,'String')) returns contents of edit25 as a double
-cut2 = str2double(get(hObject,'String'));
-handles.cut2 = cut2;
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit25_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit25 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit26_Callback(hObject, eventdata, handles)
-% hObject    handle to edit26 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit26 as text
-%        str2double(get(hObject,'String')) returns contents of edit26 as a double
-cut1 = str2double(get(hObject,'String'));
-handles.cut1 = cut1;
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit26_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit26 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in pushbutton_cut.
-function pushbutton_cut_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton_cut (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-cut1 = handles.cut1;
-cut2 = handles.cut2;
-cut1 = min(cut1, cut2);
-cut2 = max(cut1, cut2);
-data = handles.data;
-datx = find(data(:,1) >= cut1 & data(:,1)<= cut2);
-data = data(datx,1:2);
-samplerate = diff(data(:,1));
-%
-parmhat = wblfit(samplerate); % estimate weibull a and b
-% plot
-axes(handles.axes1)
-cla reset
-plot(data(:,1),data(:,2));
-axis([data(1,1) data(length(data(:,1)),1) min(data(:,2)) max(data(:,2))])
-% plot
-axes(handles.axes2)
-cla reset
-histfit(samplerate,40,'kernel');
-title(handles.axes2,'Sample rates');
-% set default parameters cover 90% sample ranges
-samplerange = prctile(samplerate, [5 95]);
-% set handles
-handles.sampa = samplerange(1);
-handles.sampb = samplerange(2);
-handles.parmhat = parmhat;
-%
-handles.data = data;
-set(handles.edit_sampa, 'String', num2str(samplerange(1)));
-set(handles.edit_sampb, 'String', num2str(samplerange(2)));
-guidata(hObject, handles);
-
-
-% --------------------------------------------------------------------
-function uipushtool4_ClickedCallback(hObject, eventdata, handles)
-% hObject    handle to uipushtool4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-figurename=['plots_','.fig'];
-saveas(gcf,figurename)
-
-
-% --------------------------------------------------------------------
-function uipushtool5_ClickedCallback(hObject, eventdata, handles)
-% hObject    handle to uipushtool5 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-data = handles.data;
-nmc = handles.nmc;
-y_grid = handles.y_grid;
-powyadjust = handles.powyadjust;
-y_grid_nan = handles.y_grid_nan;
-powyad_p_nan = handles.powyad_p_nan;
-npercent = handles.npercent;
-npercent2 = handles.npercent2;
-powyadjustp = handles.powyadjustp;
-colorcode = handles.colorcode;
-figure;
-hold all
-
-for i = 1:npercent2
-    fill([y_grid_nan; (fliplr(y_grid_nan'))'],[powyad_p_nan(:,i);...
-       (fliplr(powyad_p_nan(:,npercent+1-i)'))'],colorcode(i,:),'LineStyle','none');
-end
-plot(y_grid_nan,powyad_p_nan(:,npercent2+1),'Color',[0,120/255,0],'LineWidth',1.5,'LineStyle','--')
-axis([data(1,1) data(length(data(:,1)),1) min(powyad_p_nan(:,npercent)) max(powyad_p_nan(:,1))]) 
-set(gca,'Ydir','reverse')
-hold off
-
-
-% --------------------------------------------------------------------
-function uipushtool6_ClickedCallback(hObject, eventdata, handles)
-% hObject    handle to uipushtool6 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-figurename=['plots_','.pdf'];
-saveas(gcf,figurename)
-
-
-% --------------------------------------------------------------------
-function uipushtool7_ClickedCallback(hObject, eventdata, handles)
-% hObject    handle to uipushtool7 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-% use the following script to save workspace
-% save ('result_workspace.mat')
-save result_handles.mat
-
-
-
-function edit27_Callback(hObject, eventdata, handles)
-% hObject    handle to edit27 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit27 as text
-%        str2double(get(hObject,'String')) returns contents of edit27 as a double
-numcore = str2double(get(hObject,'String'));
-handles.numcore = numcore;
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit27_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit27 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit28_Callback(hObject, eventdata, handles)
-% hObject    handle to edit28 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit28 as text
-%        str2double(get(hObject,'String')) returns contents of edit28 as a double
-itinerary = str2double(get(hObject,'String'));
-handles.itinerary = itinerary;
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit28_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit28 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes when uipanel2 is resized.
-function uipanel2_SizeChangedFcn(hObject, eventdata, handles)
-% hObject    handle to uipanel2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --------------------------------------------------------------------
-function menu_file_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_file (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --------------------------------------------------------------------
-function menu_help_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_help (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --------------------------------------------------------------------
-function menu_about_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_about (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-% cd doc
-About
-% cd ..
-
-% --------------------------------------------------------------------
-function menu_tour_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_tour (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-% cd doc
-open('Tour.pdf')
-% cd ..
-
-% --------------------------------------------------------------------
-function menu_website_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_website (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-url = 'https://mingsongli.wixsite.com/home';
-web(url,'-browser')
-
-
-% --- Executes on button press in radiobutton1.
-function radiobutton1_Callback(hObject, eventdata, handles)
-% hObject    handle to radiobutton1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of radiobutton1
-set(handles.edit11, 'Enable', 'Off');
-set(handles.radiobutton2, 'Value', 0);
-set(handles.edit29, 'Enable', 'On');
-
-function edit29_Callback(hObject, eventdata, handles)
-% hObject    handle to edit29 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit29 as text
-%        str2double(get(hObject,'String')) returns contents of edit29 as a double
-age = str2double(get(hObject,'String'));
-handles.age = age;
-age_obl = 41 - 0.0332*age;
-age_p1 = 22.43 - 0.0108*age;
-age_p2 = 23.75 - 0.0121*age;
-age_p3 = 19.18 - 0.0079*age;
-c = [405 125 95 age_obl age_p2 age_p1 age_p3];
-f = 1./c;
-handles.f = f;
-set(handles.edit11, 'String',num2str(c,'%1.1f '));
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit29_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit29 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in radiobutton2.
-function radiobutton2_Callback(hObject, eventdata, handles)
-% hObject    handle to radiobutton2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of radiobutton2
-set(handles.edit29, 'Enable', 'Off');
-set(handles.radiobutton1, 'Value', 0);
-set(handles.edit11, 'Enable', 'On');
-
-
-% --- If Enable == 'on', executes on mouse press in 5 pixel border.
-% --- Otherwise, executes on mouse press in 5 pixel border or over radiobutton2.
-function radiobutton2_ButtonDownFcn(hObject, eventdata, handles)
-% hObject    handle to radiobutton2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-set(handles.edit29, 'Enable', 'Off');
-set(handles.radiobutton1, 'Value', 0);
-set(handles.edit11, 'Enable', 'On');
-
-
-% --- If Enable == 'on', executes on mouse press in 5 pixel border.
-% --- Otherwise, executes on mouse press in 5 pixel border or over radiobutton1.
-function radiobutton1_ButtonDownFcn(hObject, eventdata, handles)
-% hObject    handle to radiobutton1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-set(handles.edit11, 'Enable', 'Off');
-set(handles.radiobutton2, 'Value', 0);
-set(handles.edit29, 'Enable', 'On');
-
-
-% --------------------------------------------------------------------
-function file_loadmat_Callback(hObject, eventdata, handles)
-% hObject    handle to file_loadmat (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-[filename, ~] = uigetfile({'*.mat','MatLab MAT-file (*.mat)'},'Load data (*.mat)');
-if filename == 0
-else
-    data=load(filename);
-    assignin('base','data',data)
-end
-
-% --------------------------------------------------------------------
-function file_import_Callback(hObject, eventdata, handles)
-% hObject    handle to file_import (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-[filename, pathname] = uigetfile({'*.txt;*.csv','Files (*.txt;*.csv)'},...
-    'Import data (*.csv,*.txt)');
-if filename == 0
-else
-   aaa = [pathname,filename];
-data = load(aaa);
-assignin('base','data',data)
-% guidata(hObject, handles);
-end
-
-
-% --- Executes when figure1 is resized.
-function figure1_SizeChangedFcn(hObject, eventdata, handles)
-% hObject    handle to figure1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)

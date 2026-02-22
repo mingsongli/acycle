@@ -119,16 +119,16 @@ classdef SpectralMomentsGUI < matlab.apps.AppBase
             app.DropPadType.Position = app.childPos(app.PanelData.Position, [0.41,0.31,0.27,0.20]);
 
             app.PanelSettings.Position = app.childPos(figRect, [0.04,0.205,0.322,0.365]);
-            app.LabelSettingsTitle.Position = app.childPos(figRect, [0.045,0.57,0.18,0.04]);
-            app.LabelWindow.Position = app.childPos(app.PanelSettings.Position, [0.16,0.74,0.35,0.14]);
-            app.LabelStep.Position = app.childPos(app.PanelSettings.Position, [0.16,0.46,0.35,0.14]);
-            app.LabelPad.Position = app.childPos(app.PanelSettings.Position, [0.11,0.18,0.40,0.14]);
-            app.EditWindow.Position = app.childPos(app.PanelSettings.Position, [0.62,0.68,0.32,0.22]);
-            app.EditStep.Position = app.childPos(app.PanelSettings.Position, [0.62,0.39,0.32,0.22]);
-            app.EditPad.Position = app.childPos(app.PanelSettings.Position, [0.62,0.11,0.32,0.22]);
+            app.LabelSettingsTitle.Position = app.childPos(figRect, [0.045,0.555,0.18,0.04]);
+            app.LabelWindow.Position = app.childPos(app.PanelSettings.Position, [0.16,0.66,0.35,0.14]);
+            app.LabelStep.Position = app.childPos(app.PanelSettings.Position, [0.16,0.39,0.35,0.14]);
+            app.LabelPad.Position = app.childPos(app.PanelSettings.Position, [0.11,0.12,0.40,0.14]);
+            app.EditWindow.Position = app.childPos(app.PanelSettings.Position, [0.62,0.60,0.32,0.22]);
+            app.EditStep.Position = app.childPos(app.PanelSettings.Position, [0.62,0.33,0.32,0.22]);
+            app.EditPad.Position = app.childPos(app.PanelSettings.Position, [0.62,0.06,0.32,0.22]);
 
             app.PanelWindow.Position = app.childPos(figRect, [0.396,0.205,0.40,0.30]);
-            app.CheckSedRate.Position = app.childPos(figRect, [0.405,0.535,0.34,0.075]);
+            app.CheckSedRate.Position = app.childPos(figRect, [0.405,0.515,0.34,0.075]);
             app.LabelSrMean.Position = app.childPos(app.PanelWindow.Position, [0.13,0.66,0.40,0.16]);
             app.EditSrMean.Position = app.childPos(app.PanelWindow.Position, [0.54,0.64,0.25,0.28]);
             app.LabelSrUnit.Position = app.childPos(app.PanelWindow.Position, [0.82,0.70,0.16,0.14]);
@@ -391,7 +391,7 @@ classdef SpectralMomentsGUI < matlab.apps.AppBase
                 'FontSize', app.UIFontSize, ...
                 'ValueChangedFcn', @(s,e)app.onPadTypeChanged(s,e));
 
-            app.PanelSettings = uipanel(app.UIFigure, 'Title', '', 'FontSize', app.UIFontSize, ...
+            app.PanelSettings = uipanel(app.UIFigure, 'Title', 'Settings', 'FontSize', app.UIFontSize + 1, ...
                 'BackgroundColor', app.UIBgColor);
             app.LabelSettingsTitle = uilabel(app.UIFigure, 'Text', 'Settings', 'FontSize', app.UIFontSize + 1, ...
                 'BackgroundColor', app.UIBgColor);
@@ -435,7 +435,11 @@ classdef SpectralMomentsGUI < matlab.apps.AppBase
             app.LabelSrUnit = uilabel(app.PanelWindow, 'Text', 'cm/kyr', 'FontSize', app.UIFontSize, ...
                 'BackgroundColor', app.UIBgColor);
 
-            app.RunButton = uibutton(app.UIFigure, 'push', 'Text', 'OK', 'FontSize', app.UIFontSize, ...
+            app.RunButton = uibutton(app.UIFigure, 'push', 'Text', 'OK', ...
+                'FontSize', app.UIFontSize, ...
+                'FontWeight', 'bold', ...
+                'BackgroundColor', [0.08 0.02 0.95], ...
+                'FontColor', [1 1 1], ...
                 'ButtonPushedFcn', @(s,e)app.onRun(s,e));
 
             app.RefTextArea = uitextarea(app.UIFigure, ...
@@ -516,7 +520,8 @@ classdef SpectralMomentsGUI < matlab.apps.AppBase
             app.UIFigure.Name = 'Acycle: Spectral Moments';
             app.LabelDataTitle.Text = app.getLang('main02', 'Data');
             app.CheckPadEdge.Text = app.getLang('specm04', 'Zero padding edge');
-            app.LabelSettingsTitle.Text = app.getLang('specm05', 'Settings');
+            app.PanelSettings.Title = app.getLang('specm05', 'Settings');
+            app.LabelSettingsTitle.Visible = 'off';
             app.LabelWindow.Text = app.getLang('main41', 'Window');
             app.LabelStep.Text = app.getLang('main32', 'step');
             app.LabelPad.Text = app.getLang('dynot06', 'Zero padding');

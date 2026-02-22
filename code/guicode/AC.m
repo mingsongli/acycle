@@ -8220,7 +8220,7 @@ if nplot == 1
                 try
                     handles.figname = data_name;
                     guidata(hObject, handles);
-                    DataExtractML(handles);
+                    plotdigitizer(handles);
                 catch
                     if handles.lang_choice == 0
                         warndlg('Image color space not supported. Convert to RGB or Grayscale')
