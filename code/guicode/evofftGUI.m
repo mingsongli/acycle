@@ -144,6 +144,11 @@ classdef evofftGUI < matlab.apps.AppBase
                 'Position',app.normalizedToPixelPosition([0.45,0.4,0.3,0.2625]));
             app.UIFigure.AutoResizeChildren = 'off';
             app.UIFigure.SizeChangedFcn = @(~,~)app.applyLayout();
+            app.UIFigure.KeyPressFcn = @(src,evt)app.onKeyPress(src,evt);
+            try
+                app.UIFigure.WindowKeyPressFcn = @(src,evt)app.onKeyPress(src,evt);
+            catch
+            end
 
             app.LabelMethod = uilabel(app.UIFigure,'Text','Select method', ...
                 'BackgroundColor',app.UIBg,'FontSize',app.UIFontSize+1);
@@ -384,6 +389,23 @@ classdef evofftGUI < matlab.apps.AppBase
 
         function onMethodChanged(app)
             app.method = app.DropMethod.Value;
+        end
+
+        function onKeyPress(app,src,evt)
+            try
+                key = lower(string(evt.Key));
+                mods = lower(string(evt.Modifier));
+                isMacClose = key == "w" && any(mods == "command");
+                isOtherClose = key == "w" && any(mods == "control");
+                if isMacClose || isOtherClose
+                    if ~isempty(app) && ~isempty(app.UIFigure) && isvalid(app.UIFigure)
+                        delete(app.UIFigure);
+                    else
+                        delete(src);
+                    end
+                end
+            catch
+            end
         end
 
         function onNormalizeChanged(app)

@@ -21,6 +21,8 @@ end
         app.unit = getUnit(ctx);
         app.method = "Multi-taper method";
         app.nyquist = estimateNyquist(app.data);
+        dtx = diff(app.data(:,1));
+        app.isUneven = ~isempty(dtx) && (max(dtx)-min(dtx) > 10*eps('single'));
 
         app.UIFigure = uifigure('Name','Acycle: Spectral Analysis','Color',bg, ...
             'Position',[80 80 808 397],'AutoResizeChildren','off');
@@ -28,9 +30,14 @@ end
         bindCloseShortcut();
 
         app.LMethod = uilabel(app.UIFigure,'Text','Select method','FontSize',39/3,'BackgroundColor',bg);
+        defaultMethod = 'Multi-taper method';
+        if app.isUneven
+            defaultMethod = 'Lomb-Scargle spectrum';
+            app.method = "Lomb-Scargle spectrum";
+        end
         app.DropMethod = uidropdown(app.UIFigure, ...
             'Items',{'Multi-taper method','Periodogram','Lomb-Scargle spectrum'}, ...
-            'Value','Multi-taper method', ...
+            'Value',defaultMethod, ...
             'ValueChangedFcn',@(~,~)onMethodChanged());
 
         app.PanelMethod = uipanel(app.UIFigure,'Title','Method','BackgroundColor',bg);
@@ -59,10 +66,14 @@ end
 
         app.BGFmax.SelectionChangedFcn = @(~,~)onFmaxModeChanged();
 
-        app.CkLinearY = uicheckbox(app.PanelPlot,'Text','Linear Y','Value',false);
-        app.CkLogY = uicheckbox(app.PanelPlot,'Text','Log Y','Value',true);
-        app.CkLogF = uicheckbox(app.PanelPlot,'Text','log(freq.)','Value',false);
-        app.CkXPeriod = uicheckbox(app.PanelPlot,'Text','X in period','Value',false);
+        app.CkLinearY = uicheckbox(app.PanelPlot,'Text','Linear Y','Value',false, ...
+            'ValueChangedFcn',@(~,~)onYScaleChanged('linear'));
+        app.CkLogY = uicheckbox(app.PanelPlot,'Text','Log Y','Value',true, ...
+            'ValueChangedFcn',@(~,~)onYScaleChanged('log'));
+        app.CkLogF = uicheckbox(app.PanelPlot,'Text','log(freq.)','Value',false, ...
+            'ValueChangedFcn',@(~,~)onLogFreqChanged());
+        app.CkXPeriod = uicheckbox(app.PanelPlot,'Text','X in period','Value',false, ...
+            'ValueChangedFcn',@(~,~)onXPeriodChanged());
 
         app.PanelRed = uipanel(app.UIFigure,'Title','Red noise','BackgroundColor',bg);
         app.CkRobust = uicheckbox(app.PanelRed,'Text','Robust AR(1)','Value',true,'FontWeight','bold');
@@ -88,8 +99,8 @@ end
         function doLayout()
             p = app.UIFigure.Position;
             w = p(3); h = p(4);
-            app.LMethod.Position = [round(0.12*w) round(0.84*h) round(0.18*w) 38];
-            app.DropMethod.Position = [round(0.31*w) round(0.835*h) round(0.60*w) 40];
+            app.LMethod.Position = [round(0.05*w) round(0.84*h) round(0.18*w) 38];
+            app.DropMethod.Position = [round(0.25*w) round(0.835*h) round(0.70*w) 40];
 
             app.PanelMethod.Position = [round(0.05*w) round(0.39*h) round(0.44*w) round(0.42*h)];
             app.PanelPlot.Position   = [round(0.50*w) round(0.24*h) round(0.45*w) round(0.57*h)];
@@ -101,30 +112,32 @@ end
             % Method panel
             pw = app.PanelMethod.Position(3); ph = app.PanelMethod.Position(4);
             app.BGPad.Position   = [round(0.05*pw) round(0.10*ph) round(0.53*pw) round(0.56*ph)];
-            app.LabelNW.Position = [round(0.15*pw) round(0.79*ph) round(0.43*pw) 34];
-            app.DropNW.Position  = [round(0.62*pw) round(0.79*ph) round(0.33*pw) 40];
-            app.LblZero.Position = [round(0.17*pw) round(0.56*ph) round(0.27*pw) 36];
+            app.LabelNW.Position = [round(0.05*pw) round(0.6*ph) round(0.43*pw) 34];
+            app.DropNW.Position  = [round(0.66*pw) round(0.6*ph) round(0.33*pw) 30];
 
             gpw = app.BGPad.Position(3); gph = app.BGPad.Position(4);
-            app.RBPadPow.Position = [round(0.86*gpw) round(0.84*gph) 26 26];
-            app.EditPadPow.Position = [round(0.66*pw) round(0.53*ph) round(0.30*pw) 44];
-            app.RBPadN.Position = [round(0.05*gpw) round(0.12*gph) 26 26];
-            app.EditPadNLeft.Position = [round(0.19*pw) round(0.15*ph) round(0.15*pw) 44];
-            app.LblMul.Position = [round(0.38*pw) round(0.18*ph) 22 35];
-            app.RBPadExact.Position = [round(0.86*gpw) round(0.18*gph) 26 26];
-            app.EditPadExact.Position = [round(0.66*pw) round(0.15*ph) round(0.30*pw) 44];
-
+            app.LblZero.Position = [round(0.05*pw) round(0.3*ph) round(0.27*pw) 36];
+            app.RBPadPow.Position = [round(0.86*gpw) round(0.53*gph) 26 26];
+            app.EditPadPow.Position = [round(0.66*pw) round(0.4*ph) round(0.30*pw) 30];
+            
+            app.RBPadN.Position = [round(0.05*gpw) round(0.05*gph) 26 26];
+            app.EditPadNLeft.Position = [round(0.19*pw) round(0.1*ph) round(0.15*pw) 30];
+            app.LblMul.Position = [round(0.38*pw) round(0.08*ph) 22 35];
+            app.RBPadExact.Position = [round(0.86*gpw) round(0.05*gph) 26 26];
+            app.EditPadExact.Position = [round(0.66*pw) round(0.08*ph) round(0.30*pw) 30];
+            
             % Plot panel
             pw = app.PanelPlot.Position(3); ph = app.PanelPlot.Position(4);
-            app.BGFmax.Position = [round(0.08*pw) round(0.43*ph) round(0.40*pw) round(0.29*ph)];
-            app.LblFmin.Position = [round(0.18*pw) round(0.83*ph) round(0.22*pw) 34];
-            app.EditFmin.Position = [round(0.54*pw) round(0.79*ph) round(0.30*pw) 29];
-            fpw = app.BGFmax.Position(3); fph = app.BGFmax.Position(4);
-            app.RBFmaxNyq.Position = [round(0.02*fpw) round(0.58*fph) round(0.95*fpw) 36];
-            app.LblNyq.Position = [round(0.56*pw) round(0.67*ph) round(0.30*pw) 28];
-            app.RBFmaxInput.Position = [round(0.02*fpw) round(0.12*fph) round(0.95*fpw) 36];
-            app.EditFmax.Position = [round(0.54*pw) round(0.43*ph) round(0.30*pw) 29];
+            app.BGFmax.Position = [round(0.10*pw) round(0.43*ph) round(0.40*pw) round(0.29*ph)];
+            app.LblFmin.Position = [round(0.1*pw) round(0.74*ph) round(0.22*pw) 34];
+            app.EditFmin.Position = [round(0.54*pw) round(0.74*ph) round(0.30*pw) 29];
 
+            fpw = app.BGFmax.Position(3); fph = app.BGFmax.Position(4);
+            app.RBFmaxNyq.Position = [round(0.02*fpw) round(0.5*fph) round(0.95*fpw) 36];
+            app.LblNyq.Position = [round(0.56*pw) round(0.6*ph) round(0.30*pw) 28];
+            app.RBFmaxInput.Position = [round(0.02*fpw) round(0.05*fph) round(0.95*fpw) 36];
+            app.EditFmax.Position = [round(0.54*pw) round(0.46*ph) round(0.30*pw) 29];
+            
             app.CkLinearY.Position = [round(0.10*pw) round(0.25*ph) round(0.30*pw) 30];
             app.CkLogY.Position = [round(0.50*pw) round(0.25*ph) round(0.30*pw) 30];
             app.CkLogF.Position = [round(0.10*pw) round(0.10*ph) round(0.30*pw) 30];
@@ -161,14 +174,55 @@ end
         function onMethodChanged()
             app.method = string(app.DropMethod.Value);
             isMtm = contains(lower(app.method),'multi');
-            app.DropNW.Enable = ternary(isMtm,'on','off');
-            app.CkFtest.Enable = ternary(isMtm,'on','off');
-            app.CkSWA.Enable = ternary(isMtm,'on','off');
-            app.CkRobust.Value = true;
-            app.CkClassic.Value = false;
-            if ~isMtm
-                app.CkFtest.Value = false;
-                app.CkSWA.Value = false;
+            isPeriodogram = contains(lower(app.method),'periodogram');
+            isLomb = contains(lower(app.method),'lomb');
+
+            if isMtm
+                app.DropNW.Enable = 'on';
+                app.CkRobust.Enable = 'on';
+                app.CkClassic.Enable = 'on';
+                app.CkClassic.Text = 'Classic AR(1)';
+                app.CkFtest.Visible = 'on';
+                app.CkSWA.Visible = 'on';
+            elseif isPeriodogram
+                if app.isUneven
+                    warning('spectrum:unevenData','Sampling may be uneven: Periodogram may be unreliable.');
+                end
+                app.DropNW.Enable = 'off';
+                app.CkRobust.Enable = 'off';
+                app.CkClassic.Enable = 'on';
+                app.CkClassic.Text = 'Classic AR(1)';
+                app.CkFtest.Visible = 'off';
+                app.CkSWA.Visible = 'off';
+            elseif isLomb
+                app.DropNW.Enable = 'off';
+                app.CkRobust.Enable = 'on';
+                app.CkRobust.Value = true;
+                app.CkClassic.Enable = 'on';
+                app.CkClassic.Value = false;
+                app.CkClassic.Text = 'White noise';
+                app.CkFtest.Visible = 'off';
+                app.CkSWA.Visible = 'off';
+            end
+        end
+
+        function onYScaleChanged(mode)
+            if strcmp(mode,'linear')
+                app.CkLogY.Value = ~app.CkLinearY.Value;
+            else
+                app.CkLinearY.Value = ~app.CkLogY.Value;
+            end
+        end
+
+        function onXPeriodChanged()
+            if app.CkXPeriod.Value
+                app.CkLogF.Value = true;
+            end
+        end
+
+        function onLogFreqChanged()
+            if ~app.CkLogF.Value && app.CkXPeriod.Value
+                app.CkLogF.Value = true;
             end
         end
 
@@ -210,39 +264,170 @@ end
                 nw = str2double(app.DropNW.Value);
                 if ~isfinite(nw), nw = 2; end
                 nfft = chooseNfft(numel(y));
-
-                if contains(lower(app.method),'multi')
-                    [p,f] = pmtm(y,nw,nfft,1/dt);
-                elseif contains(lower(app.method),'periodogram')
-                    [p,f] = periodogram(y,[],nfft,1/dt);
-                else
-                    [p,f] = plomb(y,x,fmax);
-                end
-                p = real(p(:));
-                f = f(:);
-                keep = f >= fmin & f <= fmax;
+                method = char(app.method);
+                [f,p] = computeSpectrum(method,y,x,dt,nw,nfft,fmax);
+                keep = isfinite(f) & isfinite(p) & (f >= fmin) & (f <= fmax);
                 f = f(keep); p = p(keep);
 
                 fig = figure('Color','white','Name','Acycle: Spectral Analysis');
                 ax = axes(fig); hold(ax,'on');
-                plot(ax,f,p,'k-','LineWidth',1.3);
+                plot(ax,f,p,'k-','LineWidth',1.2,'DisplayName','Power');
+                plotCount = 1;
 
-                if contains(lower(app.method),'multi')
-                    if app.CkRobust.Value
-                        [rhoM,s0M,redAR1,red96] = redconfML(y,dt,nw,nfft,2,0.25,fmax,0);
-                        rr = red96(:,1) >= fmin & red96(:,1) <= fmax;
-                        plot(ax,red96(rr,1),red96(rr,3),'m-.','LineWidth',1.2);
-                        plot(ax,red96(rr,1),red96(rr,5),'r--','LineWidth',1.6);
-                        plot(ax,red96(rr,1),red96(rr,6),'b-.','LineWidth',1.2);
-                        title(ax,sprintf('MTM robust AR(1): rho=%.3f, S0=%.3f',rhoM,s0M)); %#ok<NASGU>
+                if contains(lower(method),'multi') && app.CkRobust.Value
+                    try
+                        [rhoM,s0M,redconfAR1,redconfML96] = redconfML(y,dt,nw,nfft,2,0.2,fmax,0); %#ok<ASGLU>
+                        rr0 = redconfAR1(:,1) >= fmin & redconfAR1(:,1) <= fmax;
+                        rr = redconfML96(:,1) >= fmin & redconfML96(:,1) <= fmax;
+                        plot(ax,redconfAR1(rr0,1),redconfAR1(rr0,3),'m-.','LineWidth',1.0,'DisplayName','Median smooth');
+                        plot(ax,redconfML96(rr,1),redconfML96(rr,3),'k-','LineWidth',1.8,'DisplayName','Robust AR(1)');
+                        plot(ax,redconfML96(rr,1),redconfML96(rr,4),'r-','LineWidth',0.9,'DisplayName','Robust 90%');
+                        plot(ax,redconfML96(rr,1),redconfML96(rr,5),'r--','LineWidth',1.4,'DisplayName','Robust 95%');
+                        plot(ax,redconfML96(rr,1),redconfML96(rr,6),'b-.','LineWidth',1.0,'DisplayName','Robust 99%');
+                        plotCount = plotCount + 5;
+                    catch MEi
+                        warning('spectrum:robustMTM','Robust AR(1) (MTM) failed: %s',MEi.message);
                     end
-                    if app.CkClassic.Value
-                        [fc,pc,theo,c90,c95,c99,~] = redconfchi2(y,nw,dt,nfft,2);
-                        cc = fc >= fmin & fc <= fmax;
-                        plot(ax,fc(cc),theo(cc),'k-','LineWidth',1.8);
-                        plot(ax,fc(cc),c90(cc),'r-','LineWidth',1.1);
-                        plot(ax,fc(cc),c95(cc),'r--','LineWidth',1.6);
-                        plot(ax,fc(cc),c99(cc),'b-.','LineWidth',1.1);
+                elseif contains(lower(method),'lomb') && app.CkRobust.Value
+                    try
+                        [~,fR,pth] = plomb_robustar1(y,x+abs(min(x)),fmax,0.2,0);
+                        rr = fR >= fmin & fR <= fmax;
+                        plot(ax,fR(rr),pth(2,rr),'k-','LineWidth',1.8,'DisplayName','Robust AR(1)');
+                        plot(ax,fR(rr),pth(3,rr),'r-','LineWidth',0.9,'DisplayName','Robust 90%');
+                        plot(ax,fR(rr),pth(4,rr),'r--','LineWidth',1.4,'DisplayName','Robust 95%');
+                        plot(ax,fR(rr),pth(5,rr),'b-.','LineWidth',1.0,'DisplayName','Robust 99%');
+                        plot(ax,fR(rr),pth(1,rr),'m-.','LineWidth',1.0,'DisplayName','Median smooth');
+                        plotCount = plotCount + 5;
+                    catch MEi
+                        warning('spectrum:robustLS','Robust AR(1) (Lomb-Scargle) failed: %s',MEi.message);
+                    end
+                end
+
+                if app.CkClassic.Value
+                    if contains(lower(method),'multi')
+                        try
+                            [fc,~,theo,c90,c95,c99,c999] = redconfchi2(y,nw,dt,nfft,2);
+                            cc = fc >= fmin & fc <= fmax;
+                            plot(ax,fc(cc),theo(cc),'k-','LineWidth',1.8,'DisplayName','Classic AR(1)');
+                            plot(ax,fc(cc),c90(cc),'r-','LineWidth',0.9,'DisplayName','Classic 90%');
+                            plot(ax,fc(cc),c95(cc),'r--','LineWidth',1.4,'DisplayName','Classic 95%');
+                            plot(ax,fc(cc),c99(cc),'b-.','LineWidth',1.0,'DisplayName','Classic 99%');
+                            plot(ax,fc(cc),c999(cc),'g--','LineWidth',1.0,'DisplayName','Classic 99.9%');
+                            plotCount = plotCount + 5;
+                        catch MEi
+                            warning('spectrum:classicMTM','Classic AR(1) (MTM) failed: %s',MEi.message);
+                        end
+                    elseif contains(lower(method),'periodogram')
+                        try
+                            [fc,~,theo,c90,c95,c99,c999] = redconfchi2(y,1,dt,nfft,1);
+                            cc = fc >= fmin & fc <= fmax;
+                            plot(ax,fc(cc),theo(cc),'k-','LineWidth',1.8,'DisplayName','Classic AR(1)');
+                            plot(ax,fc(cc),c90(cc),'r-','LineWidth',0.9,'DisplayName','Classic 90%');
+                            plot(ax,fc(cc),c95(cc),'r--','LineWidth',1.4,'DisplayName','Classic 95%');
+                            plot(ax,fc(cc),c99(cc),'b-.','LineWidth',1.0,'DisplayName','Classic 99%');
+                            plot(ax,fc(cc),c999(cc),'g--','LineWidth',1.0,'DisplayName','Classic 99.9%');
+                            plotCount = plotCount + 5;
+                        catch MEi
+                            warning('spectrum:classicPer','Classic AR(1) (Periodogram) failed: %s',MEi.message);
+                        end
+                    elseif contains(lower(method),'lomb')
+                        try
+                            pfa = [0.50 0.10 0.01 0.0001];
+                            pd = 1 - pfa;
+                            [~,fLS,pth] = plomb(y,x+abs(min(x)),fmax,'Pd',pd);
+                            rr = fLS >= fmin & fLS <= fmax;
+                            if any(rr)
+                                fr = fLS(rr);
+                                plot(ax,fr,pth(1)+0*fr,'r-','LineWidth',0.9,'DisplayName','White noise 50%');
+                                plot(ax,fr,pth(2)+0*fr,'r--','LineWidth',1.2,'DisplayName','White noise 90%');
+                                plot(ax,fr,pth(3)+0*fr,'b-.','LineWidth',1.0,'DisplayName','White noise 99%');
+                                plot(ax,fr,pth(4)+0*fr,'g--','LineWidth',1.0,'DisplayName','White noise 99.99%');
+                                plotCount = plotCount + 4;
+                            end
+                        catch MEi
+                            warning('spectrum:classicLS','White-noise significance (Lomb) failed: %s',MEi.message);
+                        end
+                    end
+                end
+
+                if app.CkPL.Value
+                    try
+                        dof = ternary(contains(lower(method),'multi'),2*(2*nw-1),2);
+                        [pl,~,loc95,~,~,g95,~] = powerLawLevels(f,p,dof);
+                        plot(ax,f,pl,'k-','LineWidth',1.6,'DisplayName','Power law');
+                        plot(ax,f,loc95,'b--','LineWidth',1.0,'DisplayName','Local 95%');
+                        plot(ax,f,g95,'r--','LineWidth',1.4,'DisplayName','Global 95%');
+                        plotCount = plotCount + 3;
+                    catch MEi
+                        warning('spectrum:pl','Power-law test failed: %s',MEi.message);
+                    end
+                end
+
+                if app.CkBPL.Value
+                    try
+                        dof = ternary(contains(lower(method),'multi'),2*(2*nw-1),2);
+                        [bpl,~,loc95,~,~,g95,~] = bendingPowerLawLevels(f,p,dof);
+                        plot(ax,f,bpl,'k-','LineWidth',1.6,'DisplayName','Bending power law');
+                        plot(ax,f,loc95,'b--','LineWidth',1.0,'DisplayName','Local 95%');
+                        plot(ax,f,g95,'r--','LineWidth',1.4,'DisplayName','Global 95%');
+                        plotCount = plotCount + 3;
+                    catch MEi
+                        warning('spectrum:bpl','Bending-power-law test failed: %s',MEi.message);
+                    end
+                end
+
+                if contains(lower(method),'multi') && app.CkFtest.Value
+                    try
+                        padtimes = max(1,round(nfft/numel(y)));
+                        [freq,ftest,fsig,~,~,~,~,dof,~] = ftestmtmML([x y],nw,padtimes,1); %#ok<ASGLU>
+                        fig2 = figure('Color','white','Name','Acycle: F-test');
+                        subplot(2,1,1,'Parent',fig2); plot(freq,dof,'k-','LineWidth',1); xlim([fmin fmax]); title('Adaptive weighted degrees of freedom');
+                        subplot(2,1,2,'Parent',fig2); plot(freq,ftest,'k-'); hold on; plot(freq,fsig,'r--'); xlim([fmin fmax]); title('F-test and significance');
+                    catch MEi
+                        warning('spectrum:ftest','F-test failed: %s',MEi.message);
+                    end
+                end
+
+                if contains(lower(method),'multi') && app.CkSWA.Value
+                    try
+                        padtimes = max(1,round(nfft/numel(y)));
+                        outSWA = spectralswafdr([x y],'mtm',nw,padtimes,0);
+                        fx = outSWA(:,1);
+                        rr = fx >= fmin & fx <= fmax;
+                        if any(rr)
+                            swaOpts = getSwaOptions();
+                            if ~isempty(swaOpts)
+                                if swaOpts.mode == "overlay" || swaOpts.mode == "both"
+                                    plotSwaLines(ax, fx(rr), outSWA(rr,:), swaOpts);
+                                end
+                                if swaOpts.mode == "separate" || swaOpts.mode == "both"
+                                    figSwa = figure('Color','white','Name','Acycle: SWA confidence');
+                                    axSwa = axes(figSwa); hold(axSwa,'on');
+                                    plotSwaLines(axSwa, fx(rr), outSWA(rr,:), swaOpts);
+                                    xlabel(axSwa,['Frequency (cycles/',app.unit,')']);
+                                    ylabel(axSwa,'Power');
+                                    set(axSwa,'YScale','log');
+                                    set(axSwa,'XMinorTick','on','YMinorTick','on');
+                                    xlim(axSwa,[fmin fmax]);
+                                    if app.CkXPeriod.Value
+                                        set(axSwa,'XDir','reverse');
+                                        xlabel(axSwa,['Period (',app.unit,')']);
+                                        xt = get(axSwa,'XTick');
+                                        xt = xt(xt>0);
+                                        if ~isempty(xt)
+                                            set(axSwa,'XTick',xt,'XTickLabel',compose('%.3g',1./xt));
+                                        end
+                                    end
+                                    set(axSwa,'XScale',ternary(app.CkLogF.Value,'log','linear'));
+                                    legend(axSwa,'show','Location','best');
+                                end
+                                if swaOpts.mode ~= "separate"
+                                    plotCount = plotCount + 1;
+                                end
+                            end
+                        end
+                    catch MEi
+                        warning('spectrum:swa','SWA failed: %s',MEi.message);
                     end
                 end
 
@@ -260,50 +445,284 @@ end
                 ylabel(ax,'Power');
                 xlim(ax,[fmin fmax]);
                 set(ax,'XMinorTick','on','YMinorTick','on');
-                set(ax,'YScale',ternary(app.CkLogY.Value,'log','linear'));
-                if app.CkLogF.Value
-                    set(ax,'XScale','log');
-                end
                 if app.CkLinearY.Value
                     set(ax,'YScale','linear');
+                else
+                    set(ax,'YScale','log');
+                end
+                set(ax,'XScale',ternary(app.CkLogF.Value,'log','linear'));
+                if plotCount > 1
+                    legend(ax,'show','Location','best');
                 end
 
                 if saveResult
                     out = [f p];
                     [~,name,~] = fileparts(getDataName(ctx));
                     outname = [name,'-spectrum.txt'];
-                    writematrix(out,outname,'Delimiter','tab');
+                    outdir = getAcWorkDir();
+                    if ~isfolder(outdir)
+                        outdir = pwd;
+                    end
+                    writematrix(out,fullfile(outdir,outname),'Delimiter','tab');
+
+                    swaFdr = 'SWA-Spectrum-background-FDR.dat';
+                    swaChi = 'SWA-Spectrum-Chi2CL.dat';
+                    if isfile(swaFdr)
+                        try
+                            movefile(swaFdr, fullfile(outdir,swaFdr));
+                        catch
+                        end
+                    end
+                    if isfile(swaChi)
+                        try
+                            movefile(swaChi, fullfile(outdir,swaChi));
+                        catch
+                        end
+                    end
+
+                    refreshAcMainList(outdir);
                 end
             catch ME
                 uialert(app.UIFigure,ME.message,'Spectrum Error');
             end
         end
 
-        function bindCloseShortcut()
-            % Support Ctrl+W (Win/Linux) and Command+W (macOS) to close.
+        function swaOpts = getSwaOptions()
+            swaOpts = [];
+            labels = {'SWA background','10% FDR','5% FDR','1% FDR','0.1% FDR','0.01% FDR','Chi2 90%','Chi2 95%','Chi2 99%','Chi2 99.9%','Chi2 99.99%'};
+            [idx, ok] = listdlg('PromptString','SWA confidence lines:', ...
+                'SelectionMode','multiple', ...
+                'ListString',labels, ...
+                'InitialValue',[1 3 8], ...
+                'Name','SWA options');
+            if ~ok || isempty(idx)
+                return;
+            end
+
+            mode = questdlg('SWA plot mode:', 'SWA options', ...
+                'Overlay on main plot', 'Separate SWA figure', 'Both', 'Overlay on main plot');
+            if isempty(mode)
+                return;
+            end
+
+            swaOpts.selected = idx;
+            if strcmp(mode,'Overlay on main plot')
+                swaOpts.mode = "overlay";
+            elseif strcmp(mode,'Separate SWA figure')
+                swaOpts.mode = "separate";
+            else
+                swaOpts.mode = "both";
+            end
+        end
+
+        function plotSwaLines(axh, xPlot, outRows, swaOpts)
+            hold(axh,'on');
+            pxx = outRows(:,2);
+            swa = outRows(:,3);
+            chi90 = outRows(:,4);
+            chi95 = outRows(:,5);
+            chi99 = outRows(:,6);
+            chi999 = outRows(:,7);
+            chi9999 = outRows(:,8);
+            clfdr = outRows(:,9:13);
+
+            for k = swaOpts.selected(:)'
+                switch k
+                    case 1
+                        plot(axh,xPlot,swa,'k-','LineWidth',1.6,'DisplayName','SWA background');
+                    case 2
+                        if ~isnan(clfdr(1,1))
+                            plot(axh,xPlot,clfdr(:,1),'m--','LineWidth',0.6,'DisplayName','10% FDR');
+                        end
+                    case 3
+                        if ~isnan(clfdr(1,2))
+                            plot(axh,xPlot,clfdr(:,2),'r--','LineWidth',1.3,'DisplayName','5% FDR');
+                        end
+                    case 4
+                        if ~isnan(clfdr(1,3))
+                            plot(axh,xPlot,clfdr(:,3),'b--','LineWidth',0.8,'DisplayName','1% FDR');
+                        end
+                    case 5
+                        if ~isnan(clfdr(1,4))
+                            plot(axh,xPlot,clfdr(:,4),'g-.','LineWidth',0.8,'DisplayName','0.1% FDR');
+                        end
+                    case 6
+                        if ~isnan(clfdr(1,5))
+                            plot(axh,xPlot,clfdr(:,5),'k-.','LineWidth',0.8,'DisplayName','0.01% FDR');
+                        end
+                    case 7
+                        plot(axh,xPlot,chi90,'k--','LineWidth',0.8,'DisplayName','Chi2 90%');
+                    case 8
+                        plot(axh,xPlot,chi95,'r-','LineWidth',1.2,'DisplayName','Chi2 95%');
+                    case 9
+                        plot(axh,xPlot,chi99,'b-','LineWidth',0.8,'DisplayName','Chi2 99%');
+                    case 10
+                        plot(axh,xPlot,chi999,'m-','LineWidth',0.8,'DisplayName','Chi2 99.9%');
+                    case 11
+                        plot(axh,xPlot,chi9999,'g:','LineWidth',0.8,'DisplayName','Chi2 99.99%');
+                end
+            end
+
+            plot(axh,xPlot,pxx,'k-','LineWidth',0.7,'DisplayName','Power');
+        end
+
+        function outdir = getAcWorkDir()
+            outdir = '';
             try
-                app.UIFigure.WindowKeyPressFcn = @onWindowKeyPress;
+                acPwdPath = which('ac_pwd.txt');
+                if ~isempty(acPwdPath) && isfile(acPwdPath)
+                    outdir = strtrim(fileread(acPwdPath));
+                end
             catch
+            end
+            if isempty(outdir)
                 try
-                    app.UIFigure.KeyPressFcn = @onWindowKeyPress;
+                    outdir = strtrim(get(app.ctx.edit_acfigmain_dir,'String'));
                 catch
+                    outdir = pwd;
                 end
             end
         end
 
-        function onWindowKeyPress(src,evt)
+        function refreshAcMainList(workDir)
             try
-                if isempty(evt) || ~isfield(evt,'Key')
+                if ~isfolder(workDir)
                     return;
                 end
-                isW = strcmpi(evt.Key,'w');
-                mods = {};
-                if isfield(evt,'Modifier') && ~isempty(evt.Modifier)
-                    mods = evt.Modifier;
+                d = dir(workDir);
+                d = d(~ismember({d.name},{'.','..'}));
+                if isempty(d)
+                    return;
                 end
-                hasCtrl = any(strcmpi(mods,'control'));
-                hasCmd = any(strcmpi(mods,'command'));
-                if isW && (hasCtrl || hasCmd)
+
+                T = struct2table(d);
+                val1 = 1;
+                try
+                    val1 = app.ctx.val1;
+                catch
+                end
+                switch val1
+                    case 1
+                        T = sortrows(T,'name','ascend');
+                    case 2
+                        T = sortrows(T,'name','descend');
+                    case 3
+                        T = sortrows(T,'date','ascend');
+                    case 4
+                        T = sortrows(T,'date','descend');
+                    case 5
+                        T = sortrows(T,'bytes','ascend');
+                    case 6
+                        T = sortrows(T,'bytes','descend');
+                end
+                d = table2struct(T);
+
+                pre = '<HTML><FONT color="blue">';
+                post = '</FONT></HTML>';
+                listboxStr = cell(numel(d),1);
+                for i = 1:numel(d)
+                    if d(i).isdir
+                        listboxStr{i} = [pre d(i).name post];
+                    else
+                        listboxStr{i} = d(i).name;
+                    end
+                end
+
+                try
+                    set(app.ctx.edit_acfigmain_dir,'String',workDir);
+                catch
+                end
+                try
+                    set(app.ctx.listbox_acmain,'String',listboxStr,'Value',[]);
+                catch
+                end
+
+                try
+                    acPwdPath = which('ac_pwd.txt');
+                    if ~isempty(acPwdPath)
+                        fid = fopen(acPwdPath,'w');
+                        fprintf(fid,'%s',workDir);
+                        fclose(fid);
+                    end
+                catch
+                end
+            catch
+            end
+        end
+
+        function [f,p] = computeSpectrum(method,y,x,dt,nw,nfft,fmax)
+            if contains(lower(method),'multi')
+                if nw == 1
+                    [p,w] = pmtm(y,nw,nfft,'DropLastTaper',false);
+                else
+                    [p,w] = pmtm(y,nw,nfft);
+                end
+                f = w/(2*pi*dt);
+            elseif contains(lower(method),'periodogram')
+                [p,f] = periodogram(y,[],nfft,1/dt);
+            else
+                [p,f] = plomb(y,x+abs(min(x)),fmax);
+            end
+            f = real(f(:));
+            p = real(p(:));
+        end
+
+        function [pl,loc90,loc95,loc99,g90,g95,g99] = powerLawLevels(f,p,dof)
+            ff = f(:); pp = p(:);
+            good = ff > 0 & isfinite(ff) & isfinite(pp) & pp > 0;
+            ff = ff(good); pp = pp(good);
+            Nf = max(2,numel(ff));
+            pf = polyfit(log(ff),log(pp),1);
+            a = pf(1); k = exp(pf(2));
+            fEval = max(f,min(ff));
+            pl = k * fEval.^a;
+            loc90 = pl * chi2inv(0.90,dof)/dof;
+            loc95 = pl * chi2inv(0.95,dof)/dof;
+            loc99 = pl * chi2inv(0.99,dof)/dof;
+            g90 = pl * chi2inv(1-0.10/Nf,dof)/dof;
+            g95 = pl * chi2inv(1-0.05/Nf,dof)/dof;
+            g99 = pl * chi2inv(1-0.01/Nf,dof)/dof;
+        end
+
+        function [bpl,loc90,loc95,loc99,g90,g95,g99] = bendingPowerLawLevels(f,p,dof)
+            ff = f(:); pp = p(:);
+            good = ff > 0 & isfinite(ff) & isfinite(pp) & pp > 0;
+            ff = ff(good); pp = pp(good);
+            Nf = max(2,numel(ff));
+            pol = log(pp);
+            fun = @(v,fx)(v(1) * fx.^(-1*v(2)))./(1 + (fx/v(4)).^(v(3)-v(2)));
+            v0 = [100,0.5,3,0.5*ff(end)];
+            v = lsqcurvefit(fun,v0,ff,pol);
+            fEval = max(f,min(ff));
+            bpl = real(exp(fun(v,fEval)));
+            bpl = bpl(:);
+            loc90 = bpl * chi2inv(0.90,dof)/dof;
+            loc95 = bpl * chi2inv(0.95,dof)/dof;
+            loc99 = bpl * chi2inv(0.99,dof)/dof;
+            g90 = bpl * chi2inv(1-0.10/Nf,dof)/dof;
+            g95 = bpl * chi2inv(1-0.05/Nf,dof)/dof;
+            g99 = bpl * chi2inv(1-0.01/Nf,dof)/dof;
+        end
+
+        function bindCloseShortcut()
+            % Follow Insolation.m behavior.
+            try
+                app.UIFigure.KeyPressFcn = @onKeyPress;
+            catch
+            end
+            try
+                app.UIFigure.WindowKeyPressFcn = @onKeyPress;
+            catch
+            end
+        end
+
+        function onKeyPress(src,evt)
+            try
+                key = lower(string(evt.Key));
+                mods = lower(string(evt.Modifier));
+                isMacClose = key == "w" && any(mods == "command");
+                isOtherClose = key == "w" && any(mods == "control");
+                if isMacClose || isOtherClose
                     delete(src);
                 end
             catch

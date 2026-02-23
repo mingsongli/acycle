@@ -26,7 +26,14 @@ if plot_series ==1
         set(gcf,'Name',['Acycle: ',lang_var{menu129}])
         set(gcf,'units','norm') % set location
         set(gcf, 'color','white')
-        set(gcf,'position',[0.1,0.65,0.4,0.4]* handles.MonZoom)
+        set(gcf,'Renderer','opengl')
+        set(gcf,'position',[0.54,0.54,0.42,0.40])
+    end
+    try
+        set(handles.figwave,'position',[0.54,0.54,0.42,0.40]);
+        set(handles.figwave,'KeyPressFcn',@closeOnCtrlW);
+        set(handles.figwave,'WindowKeyPressFcn',@closeOnCtrlW);
+    catch
     end
     
     % update panel A: time series  
@@ -151,7 +158,14 @@ elseif plot_series == 0
         set(gcf,'Name',['Acycle: ',lang_var{menu129}])
         set(gcf,'units','norm') % set location
         set(gcf, 'color','white')
-        set(gcf,'position',[0.1,0.65,0.4,0.4]* handles.MonZoom)
+        set(gcf,'Renderer','opengl')
+        set(gcf,'position',[0.54,0.54,0.42,0.40])
+    end
+    try
+        set(handles.figwave,'position',[0.54,0.54,0.42,0.40]);
+        set(handles.figwave,'KeyPressFcn',@closeOnCtrlW);
+        set(handles.figwave,'WindowKeyPressFcn',@closeOnCtrlW);
+    catch
     end
     
     %--- Contour plot wavelet power spectrum

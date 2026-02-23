@@ -44,7 +44,13 @@ catch
     set(gcf,'Name',['Acycle: ',lang_var{wave28}])
     set(gcf,'units','norm') % set location
     set(gcf, 'color','white')
-    set(gcf,'position',[0.1,0.1,0.4,0.3]* handles.MonZoom)
+    set(gcf,'position',[0.54,0.08,0.42,0.40])
+end
+try
+    set(handles.figxwt,'position',[0.54,0.08,0.42,0.40]);
+    set(handles.figxwt,'KeyPressFcn',@closeOnCtrlW);
+    set(handles.figxwt,'WindowKeyPressFcn',@closeOnCtrlW);
+catch
 end
     
 subplot('position',[0.1 0.1 0.852 0.8]);
@@ -82,7 +88,7 @@ if plot_coi
     hold on
     tt=[t([1 1])-dt*.5;t;t([end end])+dt*.5];
     hcoi=fill(tt,log2([period([end 1]) coi period([1 end])]),'w');
-    set(hcoi,'alphadatamapping','direct','facealpha',.5)
+    set(hcoi,'FaceAlpha',0.35,'EdgeColor','none')
     hold off
 end
 

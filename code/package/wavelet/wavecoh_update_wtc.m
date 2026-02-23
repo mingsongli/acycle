@@ -131,7 +131,7 @@ if plot_coi
     hold on
     tt=[t([1 1])-dt*.5;t;t([end end])+dt*.5];
     hcoi=fill(tt,log2([period([end 1]) coi period([1 end])]),'w');
-    set(hcoi,'alphadatamapping','direct','facealpha',.4)
+    set(hcoi,'FaceAlpha',0.35,'EdgeColor','none')
     hold off
 end
 
