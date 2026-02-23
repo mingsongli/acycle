@@ -3496,7 +3496,7 @@ if nplot == 1
                 handles.current_data = current_data;
                 handles.data_name = data_name;
                 guidata(hObject, handles);
-                prewhiten(handles);
+                detrending(handles);
             end
         end
 end

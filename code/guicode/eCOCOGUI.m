@@ -69,7 +69,8 @@ end
             app.LDataName = uilabel(app.PData,'Text',app.meta.dat_name,'BackgroundColor',app.bg);
             app.C0Pad = uicheckbox(app.PData,'Text','0 padding','Value',true,'ValueChangedFcn',@(s,e)onPadToggle());
             app.EPad = uieditfield(app.PData,'text','Value',num2str(app.pad),'ValueChangedFcn',@(s,e)onEditNum(app.EPad,app.pad));
-            app.CPadEdge = uicheckbox(app.PData,'Text','0 padding edge','Value',true);
+            app.CPadEdge = uicheckbox(app.PData,'Text','0 padding edge','Value',true, ...
+                'ValueChangedFcn',@(s,e)onPadEdgeToggle());
             app.DPadEdge = uidropdown(app.PData,'Items',{'zero','mirror','mean','random'},'Value','zero');
             app.CFlipY = uicheckbox(app.PData,'Text','Flip Depth (y axis)','Value',true);
 
@@ -139,14 +140,14 @@ end
             app = getappdata(app.UIFigure,'ECOCO_APP');
             if isempty(app), return; end
             w = app.UIFigure.Position(3); h = app.UIFigure.Position(4);
-            if w < 1280 || h < 1220
-                app.UIFigure.Position(3:4) = [max(w,1280), max(h,1220)];
+            if w < 1024 || h < 976
+                app.UIFigure.Position(3:4) = [max(w,1024), max(h,976)];
                 w = app.UIFigure.Position(3); h = app.UIFigure.Position(4);
             end
             m = 18;
             gap = 12;
 
-            hMethod = 92;
+            hMethod = 78;
             hData = 112;
             hPeriod = 114;
             hSed = 156;
@@ -229,8 +230,8 @@ end
             y = y + hData + gap;
             app.PMethod.Position = [m y 0.46*w hMethod];
             app.BGMethod.Position = [8 4 app.PMethod.Position(3)-16 app.PMethod.Position(4)-28];
-            app.RCOCO.Position = [40 8 180 28];
-            app.RECOCO.Position = [220 8 180 28];
+            app.RCOCO.Position = [40 4 180 24];
+            app.RECOCO.Position = [220 4 180 24];
 
             setappdata(app.UIFigure,'ECOCO_APP',app);
         end
@@ -239,11 +240,17 @@ end
             app.EOrbitUser.Value = orbitString(app.orbit7);
             app.LOrbit1.Text = orbitString(app.orbit7);
             app.LOrbit2.Text = orbitString(app.orbit7);
+            onPadEdgeToggle();
         end
 
         function onPadToggle()
             tf = app.C0Pad.Value;
             app.EPad.Enable = onoff(tf);
+        end
+
+        function onPadEdgeToggle()
+            isEco = app.mode == 2;
+            app.DPadEdge.Enable = onoff(isEco && app.CPadEdge.Value);
         end
 
         function onRedToggle()
@@ -264,6 +271,7 @@ end
             app.BPlotE.Visible = onoff(isEco);
             app.BTrack.Visible = onoff(isEco);
             app.ESlices.Enable = onoff(~isEco);
+            onPadEdgeToggle();
             setappdata(app.UIFigure,'ECOCO_APP',app);
             onResize();
         end
@@ -646,8 +654,9 @@ monzoom = getfielddef(ctx,'MonZoom',1);
 sc = get(groot,'ScreenSize');
 p = [0.38*sc(3), 0.08*sc(4), 0.46*sc(3), 0.84*sc(4)] .* monzoom;
 p = round(p);
-if p(3) < 1280, p(3) = 1280; end
-if p(4) < 1220, p(4) = 1220; end
+% Reduce overall GUI size by ~20% compared with the previous enlarged layout.
+if p(3) < 1024, p(3) = 1024; end
+if p(4) < 976, p(4) = 976; end
 end
 
 function refreshMainListbox(ctx)

@@ -1,750 +1,439 @@
 function varargout = LODGUI(varargin)
-% LODGUI MATLAB code for LODGUI.fig
-%      LODGUI, by itself, creates a new LODGUI or raises the existing
-%      singleton*.
-%
-%      H = LODGUI returns the handle to a new LODGUI or the handle to
-%      the existing singleton*.
-%
-%      LODGUI('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in LODGUI.M with the given input arguments.
-%
-%      LODGUI('Property','Value',...) creates a new LODGUI or raises the
-%      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before LODGUI_OpeningFcn gets called.  An
-%      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to LODGUI_OpeningFcn via varargin.
-%
-%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
-%      instance to run (singleton)".
-%
-% See also: GUIDE, GUIDATA, GUIHANDLES
+% LODGUI - App-style single-file Milankovitch calculator (no GUIDE .fig).
 
-% Edit the above text to modify the response to help LODGUI
-
-% Last Modified by GUIDE v2.5 11-Mar-2020 14:07:06
-
-% Begin initialization code - DO NOT EDIT
-gui_Singleton = 1;
-gui_State = struct('gui_Name',       mfilename, ...
-                   'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @LODGUI_OpeningFcn, ...
-                   'gui_OutputFcn',  @LODGUI_OutputFcn, ...
-                   'gui_LayoutFcn',  [] , ...
-                   'gui_Callback',   []);
-if nargin && ischar(varargin{1})
-    gui_State.gui_Callback = str2func(varargin{1});
+ctx = struct();
+if nargin > 0 && isstruct(varargin{1})
+    ctx = varargin{1};
 end
 
-if nargout
-    [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
-else
-    gui_mainfcn(gui_State, varargin{:});
+app = struct();
+app.ctx = ctx;
+app.bg = [0.94 0.94 0.94];
+app.blue = [0.08 0.02 0.95];
+app.listbox_acmain = getFieldDefault(ctx,'listbox_acmain',[]);
+app.edit_acfigmain_dir = getFieldDefault(ctx,'edit_acfigmain_dir',[]);
+app.lang_choice = getFieldDefault(ctx,'lang_choice',0);
+app.lang_id = getFieldDefault(ctx,'lang_id',{});
+app.lang_var = getFieldDefault(ctx,'lang_var',{});
+
+monzoom = getFieldDefault(ctx,'MonZoom',1);
+sc = get(groot,'ScreenSize');
+pos = round([0.40*sc(3), 0.55*sc(4), 0.313*sc(3), 0.289*sc(4)] * monzoom);
+pos(3) = max(pos(3), 1080);
+pos(4) = max(pos(4), 660);
+
+titleTxt = ['Acycle: ',langText(app,'menu52','Milankovitch Calculator')];
+app.UIFigure = uifigure('Name',titleTxt,'Color',app.bg,'Position',pos,'AutoResizeChildren','off');
+app.UIFigure.SizeChangedFcn = @(~,~)layoutUI();
+app.UIFigure.WindowKeyPressFcn = @onFigureKeyPress;
+app.UIFigure.WindowKeyReleaseFcn = @onFigureKeyPress;
+
+app.PSeries = uipanel(app.UIFigure,'Title',langText(app,'mical01','Time Series'),'BackgroundColor',app.bg,'FontWeight','bold');
+app.BGSeries = uibuttongroup(app.PSeries,'BackgroundColor',app.bg,'SelectionChangedFcn',@(~,~)onSeriesModeChanged());
+app.RSingle = uiradiobutton(app.BGSeries,'Text',langText(app,'mical02','Single Time'));
+app.RSeries = uiradiobutton(app.BGSeries,'Text',langText(app,'mical01','Time Series'));
+
+app.PModel = uipanel(app.UIFigure,'Title',langText(app,'mical03','Model'),'BackgroundColor',app.bg,'FontWeight','bold');
+app.DModel = uidropdown(app.PModel,'Items',{'Waltham2015','Laskar et al. 2004'},'Value','Waltham2015');
+
+app.BOK = uibutton(app.UIFigure,'push','Text',langText(app,'main00','OK'), ...
+    'BackgroundColor',app.blue,'FontColor','white','FontWeight','bold','ButtonPushedFcn',@(~,~)onRun());
+
+app.PSet = uipanel(app.UIFigure,'Title',langText(app,'mical04','Set time'),'BackgroundColor',app.bg,'FontWeight','bold');
+app.LFrom = uilabel(app.PSet,'Text',langText(app,'main16','From'),'BackgroundColor',app.bg);
+app.EFrom = uieditfield(app.PSet,'text','Value','10','BackgroundColor','white','ValueChangedFcn',@(~,~)updateHint());
+app.LTo = uilabel(app.PSet,'Text',langText(app,'main17','To'),'BackgroundColor',app.bg);
+app.ETo = uieditfield(app.PSet,'text','Value','250','BackgroundColor','white','ValueChangedFcn',@(~,~)updateHint());
+app.LStep = uilabel(app.PSet,'Text',langText(app,'main32','Step'),'BackgroundColor',app.bg);
+app.EStep = uieditfield(app.PSet,'text','Value','10','BackgroundColor','white','ValueChangedFcn',@(~,~)updateHint());
+app.LU1 = uilabel(app.PSet,'Text','Ma','BackgroundColor',app.bg);
+app.LU2 = uilabel(app.PSet,'Text','Ma','BackgroundColor',app.bg);
+app.LU3 = uilabel(app.PSet,'Text','Ma','BackgroundColor',app.bg);
+app.LHint = uilabel(app.PSet,'Text','','BackgroundColor',app.bg,'FontColor',app.blue);
+
+app.PRef = uipanel(app.UIFigure,'Title',langText(app,'mical05','Reference'),'BackgroundColor',app.bg,'FontWeight','bold');
+app.TRef = uitextarea(app.PRef,'Editable','off','BackgroundColor','white');
+
+app.BGSeries.SelectedObject = app.RSeries;
+updateReferenceText();
+layoutUI();
+onSeriesModeChanged();
+updateHint();
+
+if nargout > 0
+    varargout{1} = app.UIFigure;
 end
-% End initialization code - DO NOT EDIT
 
+    function layoutUI()
+        w = app.UIFigure.Position(3);
+        h = app.UIFigure.Position(4);
+        m = round(0.05*w);
 
-% --- Executes just before LODGUI is made visible.
-function LODGUI_OpeningFcn(hObject, eventdata, handles, varargin)
-% This function has no output args, see OutputFcn.
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to LODGUI (see VARARGIN)
-handles.MonZoom = varargin{1}.MonZoom;
-handles.sortdata = varargin{1}.sortdata;
-handles.val1 = varargin{1}.val1;
+        app.PSeries.Position = [m round(0.66*h) round(0.27*w) round(0.27*h)];
+        app.BGSeries.Position = [6 6 app.PSeries.Position(3)-12 app.PSeries.Position(4)-30];
+        app.RSingle.Position = [24 round(0.58*app.BGSeries.Position(4)) 200 30];
+        app.RSeries.Position = [24 round(0.18*app.BGSeries.Position(4)) 200 30];
 
-% language
-lang_choice = varargin{1}.lang_choice;
-handles.lang_choice = lang_choice;
-lang_id = varargin{1}.lang_id;
-lang_var = varargin{1}.lang_var;
-handles.lang_id = lang_id;
-handles.lang_var = lang_var;
-handles.main_unit_selection = varargin{1}.main_unit_selection;
-if handles.lang_choice == 0
-    set(gcf,'Name','Acycle: Milankovitch Calculator')
-else
-    [~, menu52] = ismember('menu52',lang_id);
-    set(gcf,'Name',['Acycle: ',lang_var{menu52}])
-end
+        app.PModel.Position = [round(0.33*w) round(0.66*h) round(0.33*w) round(0.27*h)];
+        app.DModel.Position = [round(0.09*app.PModel.Position(3)) round(0.53*app.PModel.Position(4)) round(0.80*app.PModel.Position(3)) 40];
 
-[~, mical01] = ismember('mical01',lang_id);
-[~, mical02] = ismember('mical02',lang_id);
-[~, mical03] = ismember('mical03',lang_id);
-[~, mical04] = ismember('mical04',lang_id);
-[~, mical05] = ismember('mical05',lang_id);
-[~, mical06] = ismember('mical06',lang_id);
+        app.BOK.Position = [round(0.71*w) round(0.71*h) round(0.22*w) round(0.19*h)];
 
-[~, main00] = ismember('main00',lang_id); % ok
-[~, main16] = ismember('main16',lang_id); % from
-[~, main17] = ismember('main17',lang_id); % to 
-[~, main32] = ismember('main32',lang_id); % step
-%[~, mical23] = ismember('mical23',lang_id);
-set(handles.uibuttongroup1,'Title',lang_var{mical01})
-set(handles.uipanel1,'Title',lang_var{mical03})
-set(handles.uipanel2,'Title',lang_var{mical04})
-set(handles.uipanel3,'Title',lang_var{mical05})
+        app.PSet.Position = [m round(0.28*h) round(0.88*w) round(0.34*h)];
+        pw = app.PSet.Position(3);
+        ph = app.PSet.Position(4);
+        app.LFrom.Position = [round(0.045*pw) round(0.63*ph) round(0.08*pw) 30];
+        app.EFrom.Position = [round(0.13*pw) round(0.60*ph) round(0.17*pw) 42];
+        app.LU1.Position = [round(0.31*pw) round(0.63*ph) round(0.05*pw) 30];
+        app.LTo.Position = [round(0.42*pw) round(0.63*ph) round(0.06*pw) 30];
+        app.ETo.Position = [round(0.47*pw) round(0.60*ph) round(0.17*pw) 42];
+        app.LU2.Position = [round(0.65*pw) round(0.63*ph) round(0.05*pw) 30];
+        app.LStep.Position = [round(0.74*pw) round(0.63*ph) round(0.06*pw) 30];
+        app.EStep.Position = [round(0.81*pw) round(0.60*ph) round(0.11*pw) 42];
+        app.LU3.Position = [round(0.93*pw) round(0.63*ph) round(0.05*pw) 30];
+        app.LHint.Position = [round(0.03*pw) round(0.18*ph) round(0.94*pw) 36];
 
-set(handles.radiobutton1,'String',lang_var{mical02})
-set(handles.radiobutton2,'String',lang_var{mical01})
-set(handles.pushbutton1,'String',lang_var{main00})
-set(handles.text2,'String',lang_var{main16})
-set(handles.text3,'String',lang_var{main17})
-set(handles.text4,'String',lang_var{main32})
+        app.PRef.Position = [m round(0.05*h) round(0.88*w) round(0.18*h)];
+        app.TRef.Position = [round(0.035*app.PRef.Position(3)) round(0.22*app.PRef.Position(4)) ...
+            round(0.93*app.PRef.Position(3)) round(0.52*app.PRef.Position(4))];
+    end
 
-set(gcf,'position',[0.4,0.55,0.313,0.289]* handles.MonZoom) % set position
-set(0,'Units','normalized') % set units as normalized
-set(gcf,'units','norm') % set location
-h=get(gcf,'Children');  % get all content
-h1=findobj(h,'FontUnits','norm');  % find all font units as points
-set(h1,'FontUnits','points','FontSize',11);  % set as norm
-h2=findobj(h,'FontUnits','points');  % find all font units as points
-set(h2,'FontUnits','points','FontSize',11);  % set as norm
+    function onSeriesModeChanged()
+        isSingle = app.BGSeries.SelectedObject == app.RSingle;
+        if isSingle
+            app.LFrom.Text = langText(app,'main22','Age');
+            app.ETo.Visible = 'off';
+            app.EStep.Visible = 'off';
+            app.LTo.Visible = 'off';
+            app.LStep.Visible = 'off';
+            app.LU2.Visible = 'off';
+            app.LU3.Visible = 'off';
+        else
+            app.LFrom.Text = langText(app,'main16','From');
+            app.ETo.Visible = 'on';
+            app.EStep.Visible = 'on';
+            app.LTo.Visible = 'on';
+            app.LStep.Visible = 'on';
+            app.LU2.Visible = 'on';
+            app.LU3.Visible = 'on';
+        end
+        updateHint();
+    end
 
-set(handles.uibuttongroup1, 'Position',[0.05, 0.65, 0.26, 0.3])
-set(handles.uipanel1, 'Position',[0.33, 0.65, 0.33, 0.3])
-set(handles.uipanel2, 'Position',[0.05, 0.22, 0.9, 0.39])
-set(handles.uipanel3, 'Position',[0.05, 0.03, 0.9, 0.19])
+    function updateHint()
+        msgDefault = langText(app,'mical10','Please provide valid age range.');
+        msg = msgDefault;
+        isSingle = app.BGSeries.SelectedObject == app.RSingle;
 
-set(handles.radiobutton1, 'Position',[0.1, 0.55, 0.9, 0.35])
-set(handles.radiobutton1, 'value',0)
-set(handles.radiobutton2, 'Position',[0.1, 0.1, 0.9, 0.35])
-set(handles.radiobutton2, 'value',1)
-set(handles.popupmenu1, 'Position',[0.05, 0.3, 0.9, 0.41])
-set(handles.text2, 'Position',[0.01, 0.6, 0.12, 0.2])
-set(handles.text3, 'Position',[0.4, 0.6, 0.07, 0.2])
-set(handles.text4, 'Position',[0.7, 0.6, 0.13, 0.2])
-set(handles.text5, 'Position',[0.3, 0.6, 0.055, 0.2])
-set(handles.text6, 'Position',[0.64, 0.6, 0.055, 0.2])
-set(handles.text7, 'Position',[0.93, 0.6, 0.055, 0.2])
-set(handles.edit1, 'Position',[0.13, 0.56, 0.17, 0.25])
-set(handles.edit1, 'String','10')
-set(handles.edit2, 'Position',[0.47, 0.56, 0.17, 0.25])
-set(handles.edit2, 'String','250')  
-set(handles.edit3, 'Position',[0.806, 0.56, 0.11, 0.25])
-set(handles.edit3, 'String','10')
-set(handles.text8, 'Position',[0.03, 0.2, 0.94, 0.2])
-set(handles.text8, 'String',[lang_var{mical06},' 10, ... , 250 Ma'])
-set(handles.edit4, 'Position',[0.03, 0.25, 0.94, 0.6])
-set(handles.pushbutton1, 'Position',[0.71, 0.7, 0.2, 0.2])
-
-set(handles.text2, 'String','From')
-set(handles.edit2, 'Visible','on')
-set(handles.edit3, 'Visible','on')
-set(handles.text3, 'Visible','on')
-set(handles.text4, 'Visible','on')
-set(handles.text6, 'Visible','on')
-set(handles.text7, 'Visible','on')
-
-handles.listbox_acmain = varargin{1}.listbox_acmain; % save path
-handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
-
-% Choose default command line output for LODGUI
-handles.output = hObject;
-
-% Update handles structure
-guidata(hObject, handles);
-
-% UIWAIT makes LODGUI wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
-
-
-% --- Outputs from this function are returned to the command line.
-function varargout = LODGUI_OutputFcn(hObject, eventdata, handles) 
-% varargout  cell array for returning output args (see VARARGOUT);
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Get default command line output from handles structure
-varargout{1} = handles.output;
-
-% --- Executes on button press in pushbutton1.
-function pushbutton1_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-single0 = get(handles.radiobutton1,'Value');
-single1 = get(handles.radiobutton2,'Value');
-model = get(handles.popupmenu1,'Value');
-% language
-lang_id = handles.lang_id;
-lang_var = handles.lang_var;
-[~, mical08] = ismember('mical08',lang_id);
-[~, mical09] = ismember('mical09',lang_id);
-[~, mical10] = ismember('mical10',lang_id);
-[~, mical11] = ismember('mical11',lang_id);
-[~, mical12] = ismember('mical12',lang_id);
-[~, mical13] = ismember('mical13',lang_id);
-[~, mical14] = ismember('mical14',lang_id);
-[~, mical15] = ismember('mical15',lang_id);
-[~, mical16] = ismember('mical16',lang_id);
-[~, mical17] = ismember('mical17',lang_id);
-[~, mical18] = ismember('mical18',lang_id);
-[~, mical19] = ismember('mical19',lang_id);
-[~, mical21] = ismember('mical21',lang_id);
-[~, mical22] = ismember('mical22',lang_id);
-[~, MainUnit9] = ismember('MainUnit9',lang_id);
-[~, menu52] = ismember('menu52',lang_id);
-[~, menu03] = ismember('menu03',lang_id);
-[~, main22] = ismember('main22',lang_id); % age
-
-if model == 1
-    if single0 == 1
-        % single time
-        T1 = str2double(get(handles.edit1,'string'));
-        if T1 >=4500 || T1<=-4500
-            if T1 >=4500
-                errordlg(lang_var{mical08})
-            else
-                errordlg(lang_var{mical09})
-            end
-        else            
-            [daymin, daymax,amin, amax, kmin, kmax, obmin,...
-                obmax, o1min, o1max, p1min, p1max, p2min, p2max, ...
-                p3min, p3max, p4min, p4max] = MilankovitchCal(T1);
-            
-            % write out distance range
-            distance = 0.5*( amax + amin );
-            distsigma = 0.5*( amax - amin);
-            %accuracy = decimalPlaces(distsigma);
-            %disp(['Earth-Moon Distance : ', num2str(distance), ' +/- ', num2str(distsigma),' km'])
-
-            % write out day-length range
-            day = 0.5*( daymax + daymin );
-            daysigma = 0.5*( daymax - daymin );
-            %accuracy = decimalPlaces(daysigma);
-            %disp(['Earth Day : ', num2str(day), ' +/- ', num2str(daysigma),' hours'])
-
-            % write out obliquity range
-            obliq = 0.5*( obmax + obmin );
-            obsigma = 0.5*( obmax - obmin);
-            %accuracy = decimalPlaces(obsigma);
-            %disp(['Earth Axis Mean Obliquity : ', num2str(obliq), ' +/- ', num2str(obsigma),' degrees'])
-
-            % write out precession range
-            kkymin = 360.0*3.6/kmax;
-            kkymax = 360.0*3.6/kmin;
-            prec = 0.5*( kkymax + kkymin );
-            precsigma = 0.5*( kkymax - kkymin);
-            %accuracy = decimalPlaces(precsigma);
-            %disp(['Earth Axis Precession Period : ', num2str(prec), ' +/- ', num2str(precsigma),' kyr'])
-
-            % write out obliquity cycle periods
-            o1 = 0.5*( o1max + o1min );
-            o1sigma = 0.5*( o1max - o1min );
-            %accuracy = decimalPlaces(p1sigma);
-            %disp('Main Obliquity Period : (kyr)')
-            %disp([num2str(o1), ' +/- ', num2str(o1sigma)])
-
-            % write out climatic precession periods
-            p1 = 0.5*( p1max + p1min );
-            p1sigma = 0.5*( p1max - p1min );
-            %accuracy = decimalPlaces(p1sigma);
-            %disp('Climatic Precession Periods : (kyr)')
-            %disp([num2str(p1), ' +/- ', num2str(p1sigma)])
-
-            p2 = 0.5*( p2max + p2min );
-            p2sigma = 0.5*( p2max - p2min );
-            %accuracy = decimalPlaces(p2sigma);
-            %disp([num2str(p2), ' +/- ', num2str(p2sigma)])
-
-            p3 = 0.5*( p3max + p3min );
-            p3sigma = 0.5*( p3max - p3min );
-            %accuracy = decimalPlaces(p3sigma);
-            %disp([num2str(p3), ' +/- ', num2str(p3sigma)])
-
-            p4 = 0.5*( p4max + p4min );
-            p4sigma = 0.5*( p4max - p4min );
-            %accuracy = decimalPlaces(p4sigma);
-            %disp([num2str(p4), ' +/- ', num2str(p4sigma)])
-            
-            prompt = {...
-                lang_var{mical11}; ...
-                lang_var{mical12};...
-                lang_var{mical13}; ...
-                lang_var{mical14};...
-                lang_var{mical15};...
-                [lang_var{mical16},' #1 (',lang_var{MainUnit9},')'];...
-                [lang_var{mical16},' #2 (',lang_var{MainUnit9},')'];...
-                [lang_var{mical16},' #3 (',lang_var{MainUnit9},')'];...
-                [lang_var{mical16},' #4 (',lang_var{MainUnit9},')'];...
-                [lang_var{mical17},' Waltham, D., 2015. JSR. doi: 10.2110/jsr.2015.66']};
-%             prompt = {...
-%                 'Earth-Moon Distance (x1000 km)'; ...
-%                 'Earth Day (hours)';...
-%                 'Earth Axis Mean Obliquity (degrees)'; ...
-%                 'Earth Axis Precession Period (kyr)';...
-%                 'Main Obliquity Period (kyr)';...
-%                 'Climatic Precession Periods #1 (kyr)';...
-%                 'Climatic Precession Periods #2 (kyr)';...
-%                 'Climatic Precession Periods #3 (kyr)';...
-%                 'Climatic Precession Periods #4 (kyr)';...
-%                 'Details in: Waltham, D., 2015. JSR. doi: 10.2110/jsr.2015.66'};
-            dlg_title = lang_var{menu52};
-            num_lines = 1;
-            defaultans = {...
-                [num2str(distance), ' +/- ', num2str(distsigma)],...
-                [num2str(day), ' +/- ', num2str(daysigma)],...
-                [num2str(obliq), ' +/- ', num2str(obsigma)],...
-                [num2str(prec), ' +/- ', num2str(precsigma)],...
-                [num2str(o1), ' +/- ', num2str(o1sigma)],...
-                [num2str(p1), ' +/- ', num2str(p1sigma)],...
-                [num2str(p2), ' +/- ', num2str(p2sigma)],...
-                [num2str(p3), ' +/- ', num2str(p3sigma)],...
-                [num2str(p4), ' +/- ', num2str(p4sigma)],...
-                'https://davidwaltham.com/wp-content/uploads/2014/01/Milankovitch.html'};
-            options.Resize='on';
-            answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-                if ~isempty(answer)
+        if isSingle
+            t = str2double(app.EFrom.Value);
+            if isfinite(t)
+                if t >= 4500
+                    msg = langText(app,'mical08','Age must be < 4500 Ma.');
+                elseif t <= -4500
+                    msg = langText(app,'mical09','Age must be > -4500 Ma.');
+                else
+                    msg = [langText(app,'mical07','will calculate length of day and days in a year: '),num2str(t),' Ma'];
                 end
-        end
-    elseif single1 == 1
-        % time series
-        age1 = str2double(get(handles.edit1,'string'));
-        age2 = str2double(get(handles.edit2,'string'));
-        step = str2double(get(handles.edit3,'string'));
-        T1 = age1:step:age2;
-        T1 = T1';
-        T1n = length(T1);
-        if isempty(T1) == 0
-            for ti = 1:T1n
-                age = T1(ti);
-                [daymin, daymax,amin, amax, kmin, kmax, obmin,obmax, o1min, o1max, ...
-                    p1min, p1max, p2min, p2max, p3min, p3max, p4min, p4max] = MilankovitchCal(age);
-                calmi(ti,:) = [daymin, daymax, amin, amax, kmin, kmax, obmin, obmax, o1min, o1max, ...
-                    p1min, p1max, p2min, p2max, p3min, p3max, p4min, p4max];
-            end
-            
-            figure;
-            set(gcf,'Name',['Acycle: ',lang_var{menu52},' | ',lang_var{menu03}])
-            set(gcf,'color','white')
-            subplot(3,2,1); hold on;
-            plot(T1,calmi(:,3),'k--')
-            plot(T1,calmi(:,4),'k--')
-            plot(T1,(calmi(:,3) + calmi(:,4))/2,'r-','LineWidth',1)
-            ylabel(lang_var{mical11})
-            xlim([age1, age2])
-            
-            subplot(3,2,2); hold on;
-            plot(T1,calmi(:,1),'k--')
-            plot(T1,calmi(:,2),'k--')
-            plot(T1,(calmi(:,1) + calmi(:,2))/2,'r-','LineWidth',1)
-            ylabel(lang_var{mical12})
-            xlim([age1, age2])
-                      
-            subplot(3,2,4); hold on;
-            plot(T1,360.0*3.6./calmi(:,5),'k--')
-            plot(T1,360.0*3.6./calmi(:,6),'k--')
-            plot(T1,0.5*( 360.0*3.6./calmi(:,5) + 360.0*3.6./calmi(:,6)),'r-','LineWidth',1)
-            ylabel(lang_var{mical14})
-            xlim([age1, age2])
-            
-            subplot(3,2,3); hold on;
-            plot(T1,calmi(:,7),'k--')
-            plot(T1,calmi(:,8),'k--')
-            plot(T1,(calmi(:,7) + calmi(:,8))/2,'r-','LineWidth',1)
-            ylabel(lang_var{mical13})
-            xlim([age1, age2])
-            
-            subplot(3,2,5); hold on;
-            plot(T1,calmi(:,9),'k--')
-            plot(T1,calmi(:,10),'k--')
-            plot(T1,(calmi(:,9) + calmi(:,10))/2,'r-','LineWidth',1)
-            ylabel(lang_var{mical15})
-            xlabel([lang_var{main22}, ' (Ma)'])
-            xlim([age1, age2])
-            
-            subplot(3,2,6); hold on;
-            plot(T1,calmi(:,11),'k--')
-            plot(T1,calmi(:,12),'k--')
-            plot(T1,(calmi(:,11) + calmi(:,12))/2,'k-','LineWidth',1)
-            
-            plot(T1,calmi(:,13),'g--')
-            plot(T1,calmi(:,14),'g--')
-            plot(T1,(calmi(:,13) + calmi(:,14))/2,'g-','LineWidth',1)
-            
-            plot(T1,calmi(:,15),'b--')
-            plot(T1,calmi(:,16),'b--')
-            plot(T1,(calmi(:,15) + calmi(:,16))/2,'b-','LineWidth',1)
-            
-            plot(T1,calmi(:,17),'r--')
-            plot(T1,calmi(:,18),'r--')
-            plot(T1,(calmi(:,17) + calmi(:,18))/2,'r-','LineWidth',1)
-            xlabel([lang_var{main22}, ' (Ma)'])
-            ylabel([lang_var{mical16},' (kyr)'],'LineWidth',1)
-            xlim([age1, age2])
-            
-            % reorder
-            CalMiR = [...
-                calmi(:,3),calmi(:,4),calmi(:,1),calmi(:,2),calmi(:,7),calmi(:,8)...
-                360.0*3.6./calmi(:,5),360.0*3.6./calmi(:,6),...
-                calmi(:,9:end)];
-            name1 = ['CalMi_',num2str(age1),'_',num2str(age2),'-Ma-step_',num2str(step),'.txt'];
-            CDac_pwd
-            disp([lang_var{mical18}, name1])
-            disp(['  ',lang_var{mical19},' #1, #2, #3, ... , #19'])
-            disp('  age, amin, amax, daymin, daymax, obmin, obmax, kmin, kmax, o1min, o1max, p1min, p1max, p2min, p2max, p3min, p3max, p4min, p4max')
-            dlmwrite(name1, [T1,CalMiR], 'delimiter', ' ', 'precision', 9);
-            d = dir; %get files
-            set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-            refreshcolor;
-            cd(pre_dirML); % return to matlab view folder
-        else
-            errordlg(lang_var{mical10})
-        end
-    end
-elseif model == 2
-    if single0 == 1
-        % single time
-        T1 = str2double(get(handles.edit1,'string'));
-        if T1 >=4500 || T1<=-4500
-            if T1 >=4500
-                errordlg(lang_var{mical08})
-            else
-                errordlg(lang_var{mical09})
             end
         else
-
-            [lod, doy] = lodla04(T1/-1000);
-
-            name1 = ['LOD_',num2str(T1),'Ma.txt'];
-            name2 = ['LOD_DOY_',num2str(T1),'Ma.txt'];
-            CDac_pwd
-            dlmwrite(name1, [T1,lod], 'delimiter', ' ', 'precision', 9);
-            dlmwrite(name2, [T1,doy], 'delimiter', ' ', 'precision', 9);
-            d = dir; %get files
-            set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-            refreshcolor;
-            cd(pre_dirML); % return to matlab view folder
-
-            figure;
-            set(gcf,'Name',lang_var{mical21})
-            set(gcf,'color','w');
-            subplot(2,1,1)
-            plot(T1,lod,'-ko')
-            ylabel(lang_var{mical12})
-            subplot(2,1,2)
-            plot(T1,doy,'-ko')
-            xlabel([lang_var{main22}, ' (Ma)'])
-            ylabel(lang_var{mical22})
+            a1 = str2double(app.EFrom.Value);
+            a2 = str2double(app.ETo.Value);
+            st = str2double(app.EStep.Value);
+            if isfinite(a1) && isfinite(a2) && isfinite(st) && st > 0
+                T = a1:st:a2;
+                if ~isempty(T)
+                    if max(T) >= 4500 || min(T) <= -4500
+                        msg = msgDefault;
+                    elseif numel(T) > 3
+                        msg = [langText(app,'mical07','will calculate length of day and days in a year: '), ...
+                            num2str(T(1)),', ',num2str(T(2)),', ... , ',num2str(T(end)),' Ma'];
+                    else
+                        msg = [langText(app,'mical07','will calculate length of day and days in a year: '), ...
+                            num2str(T(1)),' - ',num2str(T(end)),' Ma'];
+                    end
+                end
+            end
         end
-    elseif single1 == 1
-        % time series
-        age1 = str2double(get(handles.edit1,'string'));
-        age2 = str2double(get(handles.edit2,'string'));
-        step = str2double(get(handles.edit3,'string'));
-        T1 = age1:step:age2;
-        T1 = T1';
-        if isempty(T1) == 0
-            [lod, doy] = lodla04(T1/-1000);
+        app.LHint.Text = msg;
+    end
 
-            name1 = ['LOD-',num2str(age1),'_',num2str(age2),'_Ma-step_',num2str(step),'.txt'];
-            CDac_pwd
-            dlmwrite(name1, [T1,lod,doy], 'delimiter', ' ', 'precision', 9);
-            d = dir; %get files
-            set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-            refreshcolor;
-            cd(pre_dirML); % return to matlab view folder
+    function updateReferenceText()
+        txt = 'Waltham, D., 2015. JSR. doi: 10.2110/jsr.2015.66; Laskar, J., et al., 2004, Astronomy & Astrophysics 428, 261-285.';
+        if app.lang_choice ~= 0
+            txt = langText(app,'mical17',txt);
+        end
+        app.TRef.Value = txt;
+    end
 
-            figure;
-            set(gcf,'Name',lang_var{mical21})
-            set(gcf,'color','w');
-            subplot(2,1,1)
-            plot(T1,lod,'-ko')
-            ylabel(lang_var{mical12})
-            subplot(2,1,2)
-            plot(T1,doy,'-ko')
-            xlabel([lang_var{main22}, ' (Ma)'])
-            ylabel(lang_var{mical22})
+    function onRun()
+        isSingle = app.BGSeries.SelectedObject == app.RSingle;
+        modelIdx = find(strcmp(app.DModel.Items,app.DModel.Value),1,'first');
+        if isempty(modelIdx), modelIdx = 1; end
+
+        if modelIdx == 1
+            runWaltham(isSingle);
         else
-            errordlg(lang_var{mical10})
+            runLaskar(isSingle);
+        end
+    end
+
+    function runWaltham(isSingle)
+        if isSingle
+            T1 = str2double(app.EFrom.Value);
+            if ~isfinite(T1) || T1 >= 4500 || T1 <= -4500
+                uialert(app.UIFigure,langText(app,'mical10','Invalid age.'),'Acycle: Milankovitch');
+                return
+            end
+            [daymin, daymax,amin, amax, kmin, kmax, obmin,obmax, o1min, o1max, ...
+                p1min, p1max, p2min, p2max, p3min, p3max, p4min, p4max] = MilankovitchCal(T1);
+
+            distance = 0.5*(amax + amin); distsigma = 0.5*(amax - amin);
+            day = 0.5*(daymax + daymin);   daysigma = 0.5*(daymax - daymin);
+            obliq = 0.5*(obmax + obmin);   obsigma = 0.5*(obmax - obmin);
+            kkymin = 360.0*3.6/kmax;       kkymax = 360.0*3.6/kmin;
+            prec = 0.5*(kkymax + kkymin);  precsigma = 0.5*(kkymax - kkymin);
+            o1 = 0.5*(o1max + o1min);      o1sigma = 0.5*(o1max - o1min);
+            p1 = 0.5*(p1max + p1min);      p1sigma = 0.5*(p1max - p1min);
+            p2 = 0.5*(p2max + p2min);      p2sigma = 0.5*(p2max - p2min);
+            p3 = 0.5*(p3max + p3min);      p3sigma = 0.5*(p3max - p3min);
+            p4 = 0.5*(p4max + p4min);      p4sigma = 0.5*(p4max - p4min);
+
+            prompt = {...
+                langText(app,'mical11','Earth-Moon Distance (x1000 km)'); ...
+                langText(app,'mical12','Earth Day (hours)'); ...
+                langText(app,'mical13','Earth Axis Mean Obliquity (degrees)'); ...
+                langText(app,'mical14','Earth Axis Precession Period (kyr)'); ...
+                langText(app,'mical15','Main Obliquity Period (kyr)'); ...
+                [langText(app,'mical16','Climatic Precession Periods'),' #1 (kyr)']; ...
+                [langText(app,'mical16','Climatic Precession Periods'),' #2 (kyr)']; ...
+                [langText(app,'mical16','Climatic Precession Periods'),' #3 (kyr)']; ...
+                [langText(app,'mical16','Climatic Precession Periods'),' #4 (kyr)']; ...
+                [langText(app,'mical17','Reference: '),' Waltham, D., 2015. JSR. doi: 10.2110/jsr.2015.66']};
+            defaults = {...
+                [num2str(distance),' +/- ',num2str(distsigma)],...
+                [num2str(day),' +/- ',num2str(daysigma)],...
+                [num2str(obliq),' +/- ',num2str(obsigma)],...
+                [num2str(prec),' +/- ',num2str(precsigma)],...
+                [num2str(o1),' +/- ',num2str(o1sigma)],...
+                [num2str(p1),' +/- ',num2str(p1sigma)],...
+                [num2str(p2),' +/- ',num2str(p2sigma)],...
+                [num2str(p3),' +/- ',num2str(p3sigma)],...
+                [num2str(p4),' +/- ',num2str(p4sigma)],...
+                'https://davidwaltham.com/wp-content/uploads/2014/01/Milankovitch.html'};
+            inputdlg(prompt,langText(app,'menu52','Milankovitch Calculator'),1,defaults,struct('Resize','on')); %#ok<INPDLG>
+            return
+        end
+
+        age1 = str2double(app.EFrom.Value);
+        age2 = str2double(app.ETo.Value);
+        step = str2double(app.EStep.Value);
+        if ~isfinite(age1) || ~isfinite(age2) || ~isfinite(step) || step <= 0
+            uialert(app.UIFigure,langText(app,'mical10','Invalid age range.'),'Acycle: Milankovitch');
+            return
+        end
+        T1 = (age1:step:age2)';
+        if isempty(T1)
+            uialert(app.UIFigure,langText(app,'mical10','Invalid age range.'),'Acycle: Milankovitch');
+            return
+        end
+
+        calmi = nan(numel(T1),18);
+        for ti = 1:numel(T1)
+            age = T1(ti);
+            [daymin, daymax,amin, amax, kmin, kmax, obmin,obmax, o1min, o1max, ...
+                p1min, p1max, p2min, p2max, p3min, p3max, p4min, p4max] = MilankovitchCal(age);
+            calmi(ti,:) = [daymin, daymax, amin, amax, kmin, kmax, obmin, obmax, o1min, o1max, ...
+                p1min, p1max, p2min, p2max, p3min, p3max, p4min, p4max];
+        end
+
+        figure('Color','w','Name',['Acycle: ',langText(app,'menu52','Milankovitch Calculator'),' | ',langText(app,'menu03','Plot')]);
+        subplot(3,2,1); hold on; plot(T1,calmi(:,3),'k--'); plot(T1,calmi(:,4),'k--'); plot(T1,mean(calmi(:,3:4),2),'r-','LineWidth',1); ylabel(langText(app,'mical11','Distance')); xlim([age1 age2]);
+        subplot(3,2,2); hold on; plot(T1,calmi(:,1),'k--'); plot(T1,calmi(:,2),'k--'); plot(T1,mean(calmi(:,1:2),2),'r-','LineWidth',1); ylabel(langText(app,'mical12','Earth Day')); xlim([age1 age2]);
+        subplot(3,2,3); hold on; plot(T1,calmi(:,7),'k--'); plot(T1,calmi(:,8),'k--'); plot(T1,mean(calmi(:,7:8),2),'r-','LineWidth',1); ylabel(langText(app,'mical13','Obliquity')); xlim([age1 age2]);
+        subplot(3,2,4); hold on; plot(T1,360.0*3.6./calmi(:,5),'k--'); plot(T1,360.0*3.6./calmi(:,6),'k--'); plot(T1,0.5*(360.0*3.6./calmi(:,5)+360.0*3.6./calmi(:,6)),'r-','LineWidth',1); ylabel(langText(app,'mical14','Precession')); xlim([age1 age2]);
+        subplot(3,2,5); hold on; plot(T1,calmi(:,9),'k--'); plot(T1,calmi(:,10),'k--'); plot(T1,mean(calmi(:,9:10),2),'r-','LineWidth',1); ylabel(langText(app,'mical15','Main Obliquity')); xlabel([langText(app,'main22','Age'),' (Ma)']); xlim([age1 age2]);
+        subplot(3,2,6); hold on;
+        plot(T1,calmi(:,11),'k--'); plot(T1,calmi(:,12),'k--'); plot(T1,mean(calmi(:,11:12),2),'k-','LineWidth',1);
+        plot(T1,calmi(:,13),'g--'); plot(T1,calmi(:,14),'g--'); plot(T1,mean(calmi(:,13:14),2),'g-','LineWidth',1);
+        plot(T1,calmi(:,15),'b--'); plot(T1,calmi(:,16),'b--'); plot(T1,mean(calmi(:,15:16),2),'b-','LineWidth',1);
+        plot(T1,calmi(:,17),'r--'); plot(T1,calmi(:,18),'r--'); plot(T1,mean(calmi(:,17:18),2),'r-','LineWidth',1);
+        xlabel([langText(app,'main22','Age'),' (Ma)']); ylabel([langText(app,'mical16','Precession'),' (kyr)']); xlim([age1 age2]);
+
+        CalMiR = [calmi(:,3),calmi(:,4),calmi(:,1),calmi(:,2),calmi(:,7),calmi(:,8), ...
+            360.0*3.6./calmi(:,5),360.0*3.6./calmi(:,6),calmi(:,9:end)];
+        fname = ['CalMi_',num2str(age1),'_',num2str(age2),'-Ma-step_',num2str(step),'.txt'];
+        saveInAcPwd(fname,[T1,CalMiR]);
+    end
+
+    function runLaskar(isSingle)
+        if isSingle
+            T1 = str2double(app.EFrom.Value);
+            if ~isfinite(T1) || T1 >= 4500 || T1 <= -4500
+                uialert(app.UIFigure,langText(app,'mical10','Invalid age.'),'Acycle: LOD');
+                return
+            end
+            [lod,doy] = lodla04(T1/-1000);
+            saveInAcPwd(['LOD_',num2str(T1),'Ma.txt'],[T1,lod]);
+            saveInAcPwd(['LOD_DOY_',num2str(T1),'Ma.txt'],[T1,doy]);
+            figure('Color','w','Name',langText(app,'mical21','Length of Day'));
+            subplot(2,1,1); plot(T1,lod,'-ko'); ylabel(langText(app,'mical12','Earth Day'));
+            subplot(2,1,2); plot(T1,doy,'-ko'); xlabel([langText(app,'main22','Age'),' (Ma)']); ylabel(langText(app,'mical22','Days in a Year'));
+            return
+        end
+
+        age1 = str2double(app.EFrom.Value);
+        age2 = str2double(app.ETo.Value);
+        step = str2double(app.EStep.Value);
+        if ~isfinite(age1) || ~isfinite(age2) || ~isfinite(step) || step <= 0
+            uialert(app.UIFigure,langText(app,'mical10','Invalid age range.'),'Acycle: LOD');
+            return
+        end
+        T1 = (age1:step:age2)';
+        if isempty(T1)
+            uialert(app.UIFigure,langText(app,'mical10','Invalid age range.'),'Acycle: LOD');
+            return
+        end
+        [lod,doy] = lodla04(T1/-1000);
+        saveInAcPwd(['LOD-',num2str(age1),'_',num2str(age2),'_Ma-step_',num2str(step),'.txt'],[T1,lod,doy]);
+        figure('Color','w','Name',langText(app,'mical21','Length of Day'));
+        subplot(2,1,1); plot(T1,lod,'-ko'); ylabel(langText(app,'mical12','Earth Day'));
+        subplot(2,1,2); plot(T1,doy,'-ko'); xlabel([langText(app,'main22','Age'),' (Ma)']); ylabel(langText(app,'mical22','Days in a Year'));
+    end
+
+    function saveInAcPwd(fname, data)
+        pre = pwd;
+        c = onCleanup(@()safeCd(pre)); %#ok<NASGU>
+        safeCd(getAcPwdFromContext());
+        dlmwrite(fname,data,'delimiter',' ','precision',9);
+        refreshMainListbox();
+    end
+
+    function p0 = getAcPwdFromContext()
+        p0 = pwd;
+        try
+            h = app.edit_acfigmain_dir;
+            if ~isempty(h) && isgraphics(h)
+                try
+                    v = get(h,'String');
+                catch
+                    v = get(h,'Value');
+                end
+                if iscell(v), v = v{1}; end
+                if isstring(v), v = char(v); end
+                if ischar(v)
+                    v = strtrim(v);
+                    if ~isempty(v) && exist(v,'dir') == 7
+                        p0 = v;
+                    end
+                end
+            end
+        catch
+        end
+    end
+
+    function refreshMainListbox()
+        if ~isempty(app.listbox_acmain) && isgraphics(app.listbox_acmain)
+            d = dir;
+            names = {d.name};
+            keep = ~strcmp(names,'.') & ~strcmp(names,'..');
+            names = names(keep);
+            try
+                if isempty(names)
+                    set(app.listbox_acmain,'String',{},'Value',[]);
+                else
+                    set(app.listbox_acmain,'String',names,'Value',1);
+                end
+            catch
+            end
+        end
+    end
+
+    function onFigureKeyPress(~,event)
+        keyVal = getEventProp(event,'Key','');
+        charVal = getEventProp(event,'Character','');
+        keyIsW = strcmpi(string(keyVal),'w');
+        chIsCtrlW = isequal(char(charVal),char(23));
+        if ~(keyIsW || chIsCtrlW)
+            return
+        end
+
+        mods = normalizeModifiers(event);
+        hasCloseMod = any(mods == "control") || any(mods == "command") || any(mods == "meta");
+        if hasCloseMod || chIsCtrlW
+            try
+                if isvalid(app.UIFigure)
+                    close(app.UIFigure);
+                end
+            catch
+            end
         end
     end
 end
 
-
-function edit4_Callback(hObject, eventdata, handles)
-% hObject    handle to edit4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit4 as text
-%        str2double(get(hObject,'String')) returns contents of edit4 as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function edit4_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
+function safeCd(target)
+if nargin < 1 || isempty(target), return; end
+try
+    cd(target);
+catch
+end
 end
 
-
-function edit1_Callback(hObject, eventdata, handles)
-% hObject    handle to edit1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit1 as text
-%        str2double(get(hObject,'String')) returns contents of edit1 as a double
-% language
-lang_id = handles.lang_id;
-lang_var = handles.lang_var;
-[~, mical07] = ismember('mical07',lang_id);
-[~, mical08] = ismember('mical08',lang_id);
-[~, mical09] = ismember('mical09',lang_id);
-[~, mical10] = ismember('mical10',lang_id);
-
-single0 = get(handles.radiobutton1,'Value');
-
-if single0 == 1
-    T = str2double(get(handles.edit1,'string'));
-    if T >=4500 || T<=-4500
-        if T >=4500
-            set(handles.text8, 'String',lang_var{mical08})
-        else
-            set(handles.text8, 'String',lang_var{mical09})
-        end
-    else
-        string0 = [lang_var{mical07},num2str(T),' Ma'];
-        set(handles.text8, 'String',string0)
+function txt = langText(app,key,fallback)
+txt = fallback;
+if ~isstruct(app) || ~isfield(app,'lang_choice') || app.lang_choice == 0
+    return
+end
+if ~isfield(app,'lang_id') || ~isfield(app,'lang_var')
+    return
+end
+if isempty(app.lang_id) || isempty(app.lang_var)
+    return
+end
+[tf,idx] = ismember(key, app.lang_id);
+if tf && idx > 0 && idx <= numel(app.lang_var)
+    val = app.lang_var{idx};
+    if ischar(val) || isstring(val)
+        txt = char(val);
     end
+end
+end
+
+function v = getFieldDefault(s,name,default)
+if isstruct(s) && isfield(s,name) && ~isempty(s.(name))
+    v = s.(name);
 else
-    age1 = str2double(get(handles.edit1,'string'));
-    age2 = str2double(get(handles.edit2,'string'));
-    step = str2double(get(handles.edit3,'string'));
-    T = age1:step:age2;
-    if isempty(T) == 0
-        if max(T) >=4500 || min(T)<=-4500
-            set(handles.text8, 'String',lang_var{mical10})
-        end
-        if length(T)>3
-            string0 = [lang_var{mical07},num2str(T(1)),', ',...
-                num2str(T(2)),', ... , ', num2str(T(end)),' Ma'];
-        else
-            string0 = [lang_var{mical07},...
-                num2str(T(1)),' - ', num2str(T(end)),' Ma'];
-        end
-        set(handles.text8, 'String',string0)
-    else
-        set(handles.text8, 'String',lang_var{mical10})
-    end
+    v = default;
+end
 end
 
-% --- Executes during object creation, after setting all properties.
-function edit1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
+function mods = normalizeModifiers(event)
+mods = strings(0,1);
+raw = getEventProp(event,'Modifier',[]);
+if isempty(raw)
+    return
+end
+if isstring(raw)
+    mods = lower(raw(:));
+elseif ischar(raw)
+    mods = string(lower(raw));
+elseif iscell(raw)
+    mods = lower(string(raw(:)));
+end
 end
 
-
-
-function edit2_Callback(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit2 as text
-%        str2double(get(hObject,'String')) returns contents of edit2 as a double
-% language
-lang_id = handles.lang_id;
-lang_var = handles.lang_var;
-[~, mical07] = ismember('mical07',lang_id);
-[~, mical10] = ismember('mical10',lang_id);
-
-age1 = str2double(get(handles.edit1,'string'));
-age2 = str2double(get(handles.edit2,'string'));
-step = str2double(get(handles.edit3,'string'));
-T = age1:step:age2;
-if isempty(T) == 0
-    if max(T) >=4500 || min(T)<=-4500
-        set(handles.text8, 'String',lang_var{mical10})
-    end
-    if length(T)>3
-        string0 = [lang_var{mical07},num2str(T(1)),', ',...
-            num2str(T(2)),', ... , ', num2str(T(end)),' Ma'];
-    else
-        string0 = [lang_var{mical07},...
-            num2str(T(1)),' - ', num2str(T(end)),' Ma'];
-    end
-    set(handles.text8, 'String',string0)
-else
-    set(handles.text8, 'String',lang_var{mical10})
-end
-
-
-% --- Executes during object creation, after setting all properties.
-function edit2_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit3_Callback(hObject, eventdata, handles)
-% hObject    handle to edit3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit3 as text
-%        str2double(get(hObject,'String')) returns contents of edit3 as a double
-% language
-lang_id = handles.lang_id;
-lang_var = handles.lang_var;
-[~, mical07] = ismember('mical07',lang_id);
-[~, mical10] = ismember('mical10',lang_id);
-
-age1 = str2double(get(handles.edit1,'string'));
-age2 = str2double(get(handles.edit2,'string'));
-step = str2double(get(handles.edit3,'string'));
-T = age1:step:age2;
-if isempty(T) == 0
-    if max(T) >=4500 || min(T)<=-4500
-        set(handles.text8, 'String',lang_var{mical10})
-    end
-    if length(T)>3
-        string0 = [lang_var{mical07},num2str(T(1)),', ',...
-            num2str(T(2)),', ... , ', num2str(T(end)),' Ma'];
-    else
-        string0 = [lang_var{mical07},...
-            num2str(T(1)),' - ', num2str(T(end)),' Ma'];
-    end
-    set(handles.text8, 'String',string0)
-else
-    set(handles.text8, 'String',lang_var{mical10})
-end
-
-% --- Executes during object creation, after setting all properties.
-function edit3_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on selection change in popupmenu1.
-function popupmenu1_Callback(hObject, eventdata, handles)
-% hObject    handle to popupmenu1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu1 contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from popupmenu1
-
-
-% --- Executes during object creation, after setting all properties.
-function popupmenu1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to popupmenu1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in radiobutton2.
-function radiobutton2_Callback(hObject, eventdata, handles)
-% hObject    handle to radiobutton2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-% language
-lang_id = handles.lang_id;
-lang_var = handles.lang_var;
-[~, mical07] = ismember('mical07',lang_id);
-[~, mical10] = ismember('mical10',lang_id);
-[~, main16] = ismember('main16',lang_id);
-% Hint: get(hObject,'Value') returns toggle state of radiobutton2
-if get(hObject,'Value')
-    set(handles.text2, 'String',lang_var{main16})
-    set(handles.edit2, 'Visible','on')
-    set(handles.edit3, 'Visible','on')
-    set(handles.text3, 'Visible','on')
-    set(handles.text4, 'Visible','on')
-    set(handles.text6, 'Visible','on')
-    set(handles.text7, 'Visible','on')
-    
-    age1 = str2double(get(handles.edit1,'string'));
-    age2 = str2double(get(handles.edit2,'string'));
-    step = str2double(get(handles.edit3,'string'));
-    T = age1:step:age2;
-    if isempty(T) == 0
-        if max(T) >=4500 || min(T)<=-4500
-            set(handles.text8, 'String',lang_var{mical10})
-        end
-        if length(T)>3
-            string0 = [lang_var{mical07},num2str(T(1)),', ',...
-                num2str(T(2)),', ... , ', num2str(T(end)),' Ma'];
-        else
-            string0 = [lang_var{mical07},...
-                num2str(T(1)),' - ', num2str(T(end)),' Ma'];
-        end
-        set(handles.text8, 'String',string0)
-    else
-        set(handles.text8, 'String',lang_var{mical10})
-    end
-end
-
-% --- Executes on button press in radiobutton1.
-function radiobutton1_Callback(hObject, eventdata, handles)
-% hObject    handle to radiobutton1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-% language
-lang_id = handles.lang_id;
-lang_var = handles.lang_var;
-[~, mical07] = ismember('mical07',lang_id);
-[~, mical08] = ismember('mical08',lang_id);
-[~, mical09] = ismember('mical09',lang_id);
-[~, main22] = ismember('main22',lang_id);
-% Hint: get(hObject,'Value') returns toggle state of radiobutton1
-single = get(hObject,'Value');
-if single == 1
-    set(handles.text2, 'String',lang_var{main22})
-    set(handles.edit2, 'Visible','off')
-    set(handles.edit3, 'Visible','off')
-    set(handles.text3, 'Visible','off')
-    set(handles.text4, 'Visible','off')
-    set(handles.text6, 'Visible','off')
-    set(handles.text7, 'Visible','off')
-    
-    T = str2double(get(handles.edit1,'string'));
-    if T >=4500 || T<=-4500
-        if T >=4500
-            set(handles.text8, 'String',lang_var{mical08})
-        else
-            set(handles.text8, 'String',lang_var{mical09})
+function v = getEventProp(event,name,default)
+v = default;
+try
+    if isstruct(event)
+        if isfield(event,name)
+            v = event.(name);
         end
     else
-        string0 = [lang_var{mical07},num2str(T),' Ma'];
-        set(handles.text8, 'String',string0)
+        if isprop(event,name)
+            v = event.(name);
+        end
     end
-
+catch
+end
 end

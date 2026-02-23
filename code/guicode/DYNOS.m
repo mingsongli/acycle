@@ -73,15 +73,22 @@ S.UIFigure.SizeChangedFcn = @(~,~)onResize(S.UIFigure);
 
 % restore quick toolbar actions: save + print/export
 tb = uitoolbar(S.UIFigure);
-iconSave = fullfile(matlabroot,'toolbox','matlab','icons','file_save.png');
-iconPrint = fullfile(matlabroot,'toolbox','matlab','icons','tool_print.png');
-if ~isfile(iconPrint)
-    iconPrint = iconSave;
+iconSave = pickMatlabIcon({'file_save.png','tool_file_save.png','file_save_24.png'});
+iconPrint = pickMatlabIcon({'tool_print.png','file_print.png','tool_export.png','tool_zoomin.png'});
+if ~isempty(iconSave)
+    uipushtool(tb,'Icon',iconSave,'Tooltip','Save DYNOT figure/data', ...
+        'ClickedCallback',@(src,evt)onSaveFigure(src));
+else
+    uipushtool(tb,'Tooltip','Save DYNOT figure/data', ...
+        'ClickedCallback',@(src,evt)onSaveFigure(src));
 end
-uipushtool(tb,'Icon',iconSave,'Tooltip','Save DYNOT figure/data', ...
-    'ClickedCallback',@(src,evt)onSaveFigure(src));
-uipushtool(tb,'Icon',iconPrint,'Tooltip','Print/Export DYNOT figure', ...
-    'ClickedCallback',@(src,evt)onPrintFigure(src));
+if ~isempty(iconPrint)
+    uipushtool(tb,'Icon',iconPrint,'Tooltip','Print/Export DYNOT figure', ...
+        'ClickedCallback',@(src,evt)onPrintFigure(src));
+else
+    uipushtool(tb,'Tooltip','Print/Export DYNOT figure', ...
+        'ClickedCallback',@(src,evt)onPrintFigure(src));
+end
 
 % top labels
 S.LTitle = uilabel(S.UIFigure,'Text','DYnamic Noise after Orbital Tuning (DYNOT) sea-level model v2.0', ...
@@ -191,22 +198,24 @@ rightX = leftW + round(0.01*w);
 rightW = max(500, w - rightX - round(0.01*w));
 
 topX = round(0.01*w);
-topY = round(0.90*h);
+topY = round(0.91*h);
 topH = max(48,round(0.06*h));
 topW2 = max(220, round(0.42*leftW));
+
 S.PDataB.Position = [topX topY topW2 topH];
+
 S.BRun.Position = [10 8 max(20,S.PDataB.Position(3)-20) max(20,S.PDataB.Position(4)-16)];
 
 S.PInterp.Position = [round(0.01*w) round(0.775*h) leftW max(96,round(0.12*h))];
 S.PMC.Position = [round(0.01*w) round(0.595*h) leftW max(126,round(0.175*h))];
 S.PFreq.Position = [round(0.01*w) round(0.365*h) leftW max(150,round(0.22*h))];
-S.PPlot.Position = [round(0.01*w) round(0.205*h) leftW max(128,round(0.16*h))];
-S.PProc.Position = [round(0.01*w) round(0.01*h) leftW max(178,round(0.21*h))];
+S.PPlot.Position = [round(0.01*w) round(0.20*h) leftW max(120,round(0.16*h))];
+S.PProc.Position = [round(0.01*w) round(0.01*h) leftW max(135,round(0.18*h))];
 
 S.LTitle.Position = [rightX round(0.93*h) rightW 30];
 S.LRef.Position = [rightX+round(0.03*rightW) round(0.895*h) round(0.90*rightW) 24];
-S.PDataPlot.Position = [rightX round(0.48*h) rightW max(290,round(0.41*h))];
-S.PDynot.Position = [rightX round(0.01*h) rightW max(280,round(0.40*h))];
+S.PDataPlot.Position = [rightX*1.01 round(0.48*h) rightW max(290,round(0.41*h))];
+S.PDynot.Position = [rightX*1.01 round(0.01*h) rightW max(280,round(0.40*h))];
 S.AxData.Position = [30 40 max(120,S.PDataPlot.Position(3)-40) max(120,S.PDataPlot.Position(4)-60)];
 S.AxDynot.Position = [30 40 max(120,S.PDynot.Position(3)-40) max(120,S.PDynot.Position(4)-60)];
 
@@ -215,37 +224,42 @@ setappdata(fig,'DYNOS_STATE',S);
 end
 
 function layoutInterp(S)
-pw = S.PInterp.Position(3); ph = S.PInterp.Position(4);
+pw = S.PInterp.Position(3); ph = S.PInterp.Position(4) *.7; ph2=ph*.7;
 S.TCut.Position = [12 round(0.66*ph) 100 24];
 S.ECut1.Position = [130 round(0.62*ph) 100 28];
 S.TTo1.Position = [238 round(0.66*ph) 24 24];
 S.ECut2.Position = [270 round(0.62*ph) 100 28];
 S.BCut.Position = [380 round(0.62*ph) 90 28];
-S.TSamp.Position = [12 round(0.27*ph) 100 24];
-S.ESampA.Position = [130 round(0.23*ph) 100 28];
-S.TTo2.Position = [238 round(0.27*ph) 24 24];
-S.ESampB.Position = [270 round(0.23*ph) 100 28];
-S.TKa1.Position = [380 round(0.27*ph) 30 24];
+
+S.TSamp.Position = [12 round(0.27*ph2) 100 24];
+S.ESampA.Position = [130 round(0.23*ph2) 100 28];
+S.TTo2.Position = [238 round(0.27*ph2) 24 24];
+S.ESampB.Position = [270 round(0.23*ph2) 100 28];
+S.TKa1.Position = [380 round(0.27*ph2) 30 24];
 end
 
 function layoutMC(S)
-pw = S.PMC.Position(3); ph = S.PMC.Position(4);
+pw = S.PMC.Position(3); ph = S.PMC.Position(4)*.9;
+
 S.TWinFrom.Position = [12 round(0.72*ph) 110 22];
 S.EWin1.Position = [135 round(0.70*ph) 70 26];
 S.TTo3.Position = [210 round(0.72*ph) 24 22];
 S.EWin2.Position = [235 round(0.70*ph) 70 26];
 S.TKa2.Position = [310 round(0.72*ph) 24 22];
-S.TNW.Position = [12 round(0.52*ph) 160 22];
-S.ENW1.Position = [205 round(0.50*ph) 50 26];
-S.TTo4.Position = [260 round(0.52*ph) 24 22];
-S.ENW2.Position = [280 round(0.50*ph) 50 26];
-S.TPad.Position = [12 round(0.32*ph) 80 22];
-S.EPad.Position = [120 round(0.30*ph) 60 26];
-S.TStep.Position = [225 round(0.32*ph) 35 22];
-S.EStep.Position = [260 round(0.30*ph) 50 26];
-S.TKa3.Position = [315 round(0.32*ph) 24 22];
-S.TNMC.Position = [12 round(0.08*ph) 180 22];
-S.ENMC.Position = [205 round(0.06*ph) 90 26];
+
+S.TNW.Position = [12 round(0.49*ph) 160 22];
+S.ENW1.Position = [205 round(0.47*ph) 50 26];
+S.TTo4.Position = [260 round(0.49*ph) 24 22];
+S.ENW2.Position = [280 round(0.47*ph) 50 26];
+
+S.TPad.Position = [12 round(0.26*ph) 80 22];
+S.EPad.Position = [120 round(0.24*ph) 60 26];
+S.TStep.Position = [225 round(0.26*ph) 35 22];
+S.EStep.Position = [260 round(0.24*ph) 50 26];
+S.TKa3.Position = [315 round(0.26*ph) 24 22];
+
+S.TNMC.Position = [12 round(0.04*ph) 220 22];
+S.ENMC.Position = [250 round(0.02*ph) 90 26];
 end
 
 function layoutFreq(S)
@@ -271,8 +285,8 @@ end
 function layoutPlot(S)
 pw = S.PPlot.Position(3); ph = S.PPlot.Position(4);
 S.TCI.Position = [12 round(0.64*ph) 150 22];
-S.CMedian.Position = [250 round(0.62*ph) 90 22];
-S.C50.Position = [360 round(0.62*ph) 80 22];
+S.CMedian.Position = [264 round(0.62*ph) 90 22];
+S.C50.Position = [370 round(0.62*ph) 80 22];
 S.C68.Position = [52 round(0.40*ph) 70 22];
 S.C80.Position = [158 round(0.40*ph) 70 22];
 S.C90.Position = [264 round(0.40*ph) 70 22];
@@ -285,11 +299,14 @@ end
 
 function layoutProc(S)
 pw = S.PProc.Position(3); ph = S.PProc.Position(4);
-S.TCore.Position = [12 round(0.80*ph) 250 22];
-S.ECore.Position = [280 round(0.78*ph) 95 28];
-S.TIt.Position = [12 round(0.57*ph) 70 22];
-S.EIt.Position = [95 round(0.55*ph) 70 28];
-S.TIt2.Position = [175 round(0.57*ph) 250 22];
+
+S.TCore.Position = [12 round(0.64*ph) 250 22];
+S.ECore.Position = [280 round(0.63*ph) 95 26];
+
+S.TIt.Position = [12 round(0.47*ph) 70 22];
+S.EIt.Position = [95 round(0.45*ph) 70 28];
+S.TIt2.Position = [175 round(0.47*ph) 250 22];
+
 S.TTips.Position = [12 10 pw-22 round(0.36*ph)];
 end
 
@@ -781,5 +798,17 @@ if isstruct(s) && isfield(s,name) && ~isempty(s.(name))
     v = s.(name);
 else
     v = def;
+end
+end
+
+function iconPath = pickMatlabIcon(candidates)
+iconPath = '';
+iconDir = fullfile(matlabroot,'toolbox','matlab','icons');
+for i = 1:numel(candidates)
+    p = fullfile(iconDir,candidates{i});
+    if isfile(p)
+        iconPath = p;
+        return
+    end
 end
 end
