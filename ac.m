@@ -21,6 +21,15 @@ function ac
 %   Analysis Software for Paleoclimate Projects and Education," 
 %   Computers & Geosciences. Available at: https://doi.org/10.1016/j.cageo.2019.02.011
 %
+% * Mingsong Li, 2026. "Acycle: Enhanced time-series analysis software for 
+%   geoscience research and education,"  Science China Earth Sciences. 
+%   https://doi.org/10.1007/s11430-025-1848-7
+%
+% * This paper presents standardized recommendations for reporting data and parameters; 
+%   following these recommendations will improve the reproducibility and reliability of 
+%   research results. The supplementary materials include a demonstration case study and
+%   an Excel file for parameter documentation.
+%
 % Additionally, if your work involves specific techniques like correlation 
 % coefficient, sedimentary noise model, power decomposition analysis, 
 % evolutionary fast Fourier transform, wavelet transform, Bayesian changepoint,
@@ -45,7 +54,7 @@ function ac
 %   Websites: http://acycle.org
 %             https://github.com/mingsongli/acycle
 %
-% Copyright (C) 2017-2023 by Mingsong Li
+% Copyright (C) 2017-2026 by Mingsong Li
 %
 % License Information:
 %

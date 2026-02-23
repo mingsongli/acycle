@@ -74,125 +74,24 @@ function varargout = AC(varargin)
 
 % Edit the above text to modify the response to help AC
 
-% Code-only launcher (GUIDE-free): create UI by code and reuse existing callbacks.
-if nargin > 0 && ischar(varargin{1})
-    [varargout{1:nargout}] = feval(varargin{:});
-    return;
+% Begin initialization code - DO NOT EDIT
+gui_Singleton = 1;
+gui_State = struct('gui_Name',       mfilename, ...
+                   'gui_Singleton',  gui_Singleton, ...
+                   'gui_OpeningFcn', @AC_OpeningFcn, ...
+                   'gui_OutputFcn',  @AC_OutputFcn, ...
+                   'gui_LayoutFcn',  [] , ...
+                   'gui_Callback',   []);
+if nargin && ischar(varargin{1})
+    gui_State.gui_Callback = str2func(varargin{1});
 end
 
-[hFig, handles] = AC_buildCodeUI();
-guidata(hFig, handles);
-AC_OpeningFcn(hFig, [], handles, varargin{:});
-handles = guidata(hFig);
-
-if nargout > 0
-    varargout{1} = handles.output;
-end
-
-
-function [hFig, handles] = AC_buildCodeUI()
-bg = get(0,'DefaultUicontrolBackgroundColor');
-hFig = figure('Name','Acycle v3.0', ...
-    'NumberTitle','off', ...
-    'Color',bg, ...
-    'MenuBar','none', ...
-    'Toolbar','none', ...
-    'Units','normalized', ...
-    'Position',[0.25,0.08,0.58,0.84], ...
-    'Tag','acfigmain');
-
-handles = struct();
-handles.acfigmain = hFig;
-
-% Top-level menus (same order as original main window)
-handles.menu_file = uimenu(hFig,'Label','File','Tag','menu_file');
-handles.menu_edit = uimenu(hFig,'Label','Edit','Tag','menu_edit');
-handles.menu_plotall = uimenu(hFig,'Label','Plot','Tag','menu_plotall');
-handles.menu_basic = uimenu(hFig,'Label','Basic Series','Tag','menu_basic');
-handles.menu_math = uimenu(hFig,'Label','Math','Tag','menu_math');
-handles.menu_univariate = uimenu(hFig,'Label','Univariate','Tag','menu_univariate');
-handles.menu_bivariate = uimenu(hFig,'Label','Bivariate','Tag','menu_bivariate');
-handles.menu_multivariate1 = uimenu(hFig,'Label','Multivariate','Tag','menu_multivariate1');
-handles.menuac = uimenu(hFig,'Label','Timeseries','Tag','menuac');
-handles.menu_help = uimenu(hFig,'Label','Help','Tag','menu_help');
-
-% Main controls
-handles.popupmenu2 = uicontrol(hFig,'Style','popupmenu','Units','normalized', ...
-    'Position',[0.60,0.92,0.22,0.06], ...
-    'String',{'name ascend','name descend','date ascend','date descend','bytes ascend','bytes descend'}, ...
-    'Value',4, ...
-    'Tag','popupmenu2', ...
-    'Callback',@(h,e)AC_dispatch('popupmenu2_Callback',h,e));
-handles.popupmenu1 = uicontrol(hFig,'Style','popupmenu','Units','normalized', ...
-    'Position',[0.83,0.92,0.13,0.06], ...
-    'String',{'unit'}, ...
-    'Value',1, ...
-    'Tag','popupmenu1', ...
-    'Callback',@(h,e)AC_dispatch('popupmenu1_Callback',h,e));
-handles.main_unit_en = uicontrol(hFig,'Style','checkbox','Units','normalized', ...
-    'Position',[0.89,0.955,0.07,0.025], ...
-    'String','', ...
-    'Tag','main_unit_en', ...
-    'Callback',@(h,e)AC_dispatch('main_unit_en_Callback',h,e));
-handles.edit_acfigmain_dir = uicontrol(hFig,'Style','edit','Units','normalized', ...
-    'Position',[0.081,0.90,0.90,0.04], ...
-    'HorizontalAlignment','left', ...
-    'BackgroundColor','w', ...
-    'Tag','edit_acfigmain_dir', ...
-    'Callback',@(h,e)AC_dispatch('edit_acfigmain_dir_Callback',h,e));
-handles.listbox_acmain = uicontrol(hFig,'Style','listbox','Units','normalized', ...
-    'Position',[0.02,0.008,0.96,0.884], ...
-    'BackgroundColor','w', ...
-    'Max',2,'Min',0, ...
-    'Tag','listbox_acmain', ...
-    'Callback',@(h,e)AC_dispatch('listbox_acmain_Callback',h,e), ...
-    'ButtonDownFcn',@(h,e)AC_dispatch('listbox_acmain_ButtonDownFcn',h,e));
-
-% Create all menu handles referenced by OpeningFcn (kept as hidden submenu entries).
-src = fileread([mfilename('fullpath'),'.m']);
-tok = regexp(src,'handles\.(menu_[A-Za-z0-9_]+|linegenerator|menuac)','tokens');
-if ~isempty(tok)
-    names = unique([tok{:}]);
+if nargout
+    [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
 else
-    names = {};
+    gui_mainfcn(gui_State, varargin{:});
 end
-hiddenParent = uimenu(hFig,'Label','__hidden__','Visible','off','Tag','menu_hidden');
-for i = 1:numel(names)
-    key = names{i};
-    if isfield(handles,key)
-        continue;
-    end
-    cbName = [key,'_Callback'];
-    handles.(key) = uimenu(hiddenParent,'Label',key,'Tag',key, ...
-        'Callback',@(h,e)AC_dispatch(cbName,h,e));
-end
-
-% Keep top menus clickable.
-set(handles.menu_file,'Callback',@(h,e)AC_dispatch('menu_file_Callback',h,e));
-set(handles.menu_edit,'Callback',@(h,e)AC_dispatch('menu_edit_Callback',h,e));
-set(handles.menu_plotall,'Callback',@(h,e)AC_dispatch('menu_plotall_Callback',h,e));
-set(handles.menu_basic,'Callback',@(h,e)AC_dispatch('menu_basic_Callback',h,e));
-set(handles.menu_math,'Callback',@(h,e)AC_dispatch('menu_math_Callback',h,e));
-set(handles.menu_univariate,'Callback',@(h,e)AC_dispatch('menu_univariate_Callback',h,e));
-set(handles.menu_bivariate,'Callback',@(h,e)AC_dispatch('menu_bivariate_Callback',h,e));
-set(handles.menu_multivariate1,'Callback',@(h,e)AC_dispatch('menu_multivariate1_Callback',h,e));
-set(handles.menuac,'Callback',@(h,e)AC_dispatch('menuac_Callback',h,e));
-set(handles.menu_help,'Callback',@(h,e)AC_dispatch('menu_help_Callback',h,e));
-
-
-function AC_dispatch(callbackName, hObject, eventdata)
-try
-    fig = ancestor(hObject,'figure');
-    handles = guidata(fig);
-catch
-    handles = guidata(hObject);
-end
-try
-    feval(callbackName, hObject, eventdata, handles);
-catch ME
-    warning('%s failed: %s', callbackName, ME.message);
-    rethrow(ME);
-end
+% End initialization code - DO NOT EDIT
 
 
 % --- Executes just before AC is made visible.
