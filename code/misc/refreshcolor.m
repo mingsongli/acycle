@@ -1,8 +1,6 @@
 % refresh add color in the list box
 
 %
-pre  = '<HTML><FONT color="blue">';
-post = '</FONT></HTML>';
 d = dir; %get files
 d(1)=[];d(1)=[];
 address = pwd;
@@ -35,11 +33,7 @@ end
 sd = table2struct(sortedT); % change it back to struct array
 %
 for i = 1:numel(d)
-    if isdir(sd(i).name)
-        str = [pre sd(i).name post];
-        listboxStr{i} = str;
-    else
-        listboxStr{i} = sd(i).name;
-    end
+    % New MATLAB versions may not render HTML in listbox items. Keep plain text.
+    listboxStr{i} = sd(i).name;
 end
 set(handles.listbox_acmain,'String',listboxStr,'Value',[]) %set string

@@ -1,4 +1,5 @@
 %**************************************************************************
+%
 % Acycle:
 % Time-series analysis software for paleoclimate research and education
 %
@@ -6,17 +7,32 @@
 % results based in part on use of the program and cite the following
 % article in which the program was described:
 %
-%   Mingsong Li, Linda Hinnov, Lee Kump. 2019. Acycle: Time-series  
+%
+% 1 Mingsong Li, Linda Hinnov, Lee Kump. 2019. Acycle: Time-series  
 %   analysis software for paleoclimate projects and education,
 %   Computers & Geosciences. 127, 12-22. doi: 10.1016/j.cageo.2019.02.011
+%
+%
+% 2*Mingsong Li, 2026. "Acycle: Enhanced time-series analysis software for 
+%   geoscience research and education,"  Science China Earth Sciences. 
+%   https://doi.org/10.1007/s11430-025-1848-7
+%
+%  *This paper presents standardized recommendations for reporting data and
+%   parameters; following these recommendations will improve the 
+%   reproducibility and reliability of research results. The supplementary 
+%   materials include a demonstration case study and an Excel file for 
+%   parameter documentation.
+%
 %
 % If you publish results using techniques such as correlation coefficient,
 % sedimentary noise model, power decomposition analysis, evolutionary fast
 % Fourier transform, wavelet transform, Bayesian change point, (e)TimeOpt,
 % Spectral Moments or other approaches, please also cite original 
 % publications, as detailed in Acycle website and the Users Guide at
+%
 %   https://acycle.org
 %   https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf
+%
 %**************************************************************************
 % Program Manager:
 %   Mingsong Li (Peking University)
@@ -40,11 +56,11 @@
 %   Bryan C. Lougheed, Stephen P. Obrochta (Undatable)
 %
 % Acknowledgment:
-%   Feng Cheng, Anne-Christine Da Silva, 
+%   Feng Cheng, Anne-Christine Da Silva, Mengyao Du,
 %   Jaume Dinarès-Turell, Hewei Duan, 
 %   Zheng Gong, Zhengtang Guo, Yanan Fang, Marco Franceschi, 
 %   Daniel R. Franco, Frits Hilgen, Xiaoni Hu, 
-%   Dorothée Husson, Arsenio Muñoz Jiménez, 
+%   Dorothée Husson, David A. Hodell, Arsenio Muñoz Jiménez, 
 %   Ilja Kocken, Lee R. Kump, Dongyang Liu, Lucas Lourens, 
 %   Kunyuan Ma, Mathieu Martinez, James Ogg, Paul Olsen, 
 %   Jeffrey Park, J. Fred Read, Michael Schulz, Chen Shen, Nicolas Thibault,
