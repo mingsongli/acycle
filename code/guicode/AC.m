@@ -513,7 +513,9 @@ else
 end
 
 set(0,'Units','normalized') % set units as normalized
-set(gcf,'position',[0.5,0.1,0.45,0.8] * handles.MonZoom) % set position
+ac_pos = [0.5,0.1,0.45,0.8] * handles.MonZoom; % legacy base size
+ac_pos(3:4) = ac_pos(3:4) * 0.75; % shrink to 3/4 as requested
+set(gcf,'position',ac_pos) % set position
 
 set(gcf,'DockControls', 'off')
 set(gcf,'Color', 'white')

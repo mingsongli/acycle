@@ -33,7 +33,11 @@ end
 sd = table2struct(sortedT); % change it back to struct array
 %
 for i = 1:numel(d)
-    % New MATLAB versions may not render HTML in listbox items. Keep plain text.
-    listboxStr{i} = sd(i).name;
+    if sd(i).isdir
+        % Use lowercase HTML tags for better renderer compatibility.
+        listboxStr{i} = ['<html><font color="blue">', sd(i).name, '</font></html>'];
+    else
+        listboxStr{i} = sd(i).name;
+    end
 end
 set(handles.listbox_acmain,'String',listboxStr,'Value',[]) %set string
