@@ -93,7 +93,7 @@ lang_choice = load('ac_lang.txt');
 langdict = readtable('langdict.xlsx');
 lang_id = langdict.ID;
 lang_var = table2cell(langdict(:, 2 + lang_choice));
-handles.main_unit_selection = evalin('base','main_unit_selection');
+handles.main_unit_selection = get_main_unit_selection();
 [~, ec79] = ismember('ec79',lang_id);
 [~, ec87] = ismember('ec87',lang_id);
 %% Slice
@@ -299,4 +299,11 @@ function datanew = data_slices(dat, slices)
     for i = 1: slices
         data_int = select_interval(dat,slice(i),slice(i+1));
         datanew(:,(2*i-1):(2*i)) = data_int;
+    end
+
+function main_unit_selection = get_main_unit_selection()
+    main_unit_selection = 0;
+    try
+        main_unit_selection = evalin('base','main_unit_selection');
+    catch
     end

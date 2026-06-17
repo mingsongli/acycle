@@ -28,7 +28,7 @@ lang_choice = load('ac_lang.txt');
 langdict = readtable('langdict.xlsx');
 lang_id = langdict.ID;
 lang_var = table2cell(langdict(:, 2 + lang_choice));
-handles.main_unit_selection = evalin('base','main_unit_selection');
+handles.main_unit_selection = get_main_unit_selection();
 [~, main23] = ismember('main23',lang_id);
 
 [~, ec80] = ismember('ec80',lang_id);
@@ -170,7 +170,6 @@ title(figurename)
 if plotn < 0
     set(gca,'Ydir','reverse')
 end
-
 %% ecocob
 if abs(plotn) == 1
     figure_ecocob = figure;
@@ -218,4 +217,11 @@ end
 title(figurename)
 if plotn < 0
     set(gca,'Ydir','reverse')
+end
+
+function main_unit_selection = get_main_unit_selection()
+main_unit_selection = 0;
+try
+    main_unit_selection = evalin('base','main_unit_selection');
+catch
 end

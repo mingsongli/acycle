@@ -19,4 +19,5 @@ function yred=redmark(alfa,n)
 % https://www.mathworks.com/matlabcentral/newsreader/view_thread/37106
 %%
 randn('state',sum(100*clock)) % set a new seed
+
 yred=filter(1,[1;-alfa],randn(n,1));

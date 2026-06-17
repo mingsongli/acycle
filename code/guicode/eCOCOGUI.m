@@ -17,6 +17,8 @@ end
         app.blue = [0.08 0.02 0.95];
 
         [app.dataRaw, app.data, app.meta] = prepData(ctx);
+        app.fmaxdata = app.meta.fmax_data;
+        app.main_unit_selection = getfielddef(ctx,'main_unit_selection',0);
 
         app.mode = 2; % 1=COCO, 2=eCOCO
         app.corrmethod = 1; % 1 Pearson, 2 Spearman
@@ -40,7 +42,7 @@ end
 
         app.pad = defaultPad(size(app.data,1));
         [app.sedmin, app.sedmax, app.sedstep, app.fh] = defaultSedRange(app);
-
+        
         app.run = struct('ready',false,'target',[],'prt_sr',[],'out_depth',[], ...
             'out_ecc',[],'out_ep',[],'out_eci',[],'out_ecoco',[],'out_ecocorb',[], ...
             'out_norbit',[],'corrCI',[],'corr_h0',[],'cocoFigure',[]);
@@ -56,6 +58,7 @@ end
 
         setappdata(app.UIFigure,'ECOCO_APP',app);
         onResize();
+        
 
         function createComponents()
             app.PMethod = uipanel(app.UIFigure,'Title','Select Method','BackgroundColor',app.bg);
@@ -362,6 +365,7 @@ end
                 app.age = toNum(app.EAge.Value, app.age);
                 app.orbit7 = parseOrbit();
                 app.red = redCode();
+                assignin('base','main_unit_selection',app.main_unit_selection);
 
                 srm = mean(diff(dat(:,1)));
                 npts = size(dat,1);
@@ -374,7 +378,7 @@ end
                 if app.mode == 1
                     method = iff(app.corrmethod==1,'Pearson','Spearman');
                     h = uiprogressdlg(app.UIFigure,'Title','COCO','Message','Running ...','Indeterminate','on');
-                    [corrCI,corr_h0,~] = corrcoefslices_rank(dat,target,app.orbit7,srm,app.pad,sr1,sr2,srstep,adjust,red,nsim,plotn,app.slices,method);
+                    [corrCI,corr_h0,~] = corrcoefslices_rank(dat,target,app.orbit7,srm,app.pad,sr1,sr2,srstep,adjust,red,nsim,plotn,app.slices,method,app.fmaxdata,app.main_unit_selection);
                     close(h);
                     app.run.corrCI = corrCI;
                     app.run.corr_h0 = corr_h0;
@@ -415,7 +419,7 @@ end
                     saveECOCOOutputs(prt_sr,out_depth,out_ecc,out_eci,out_norbit,out_ecoco);
                 end
 
-                refreshMainListbox(ctx);
+                refreshMainListbox(ctx,resolveSaveDir(ctx));
                 setappdata(app.UIFigure,'ECOCO_APP',app);
             catch ME
                 uialert(app.UIFigure,ME.message,'eCOCO error');
@@ -467,12 +471,12 @@ end
 
             srn_map(:,2) = (sr1 + app.sedstep*(srn_best(1,:)-1))';
             srn_map(:,1) = app.run.out_depth;
-            CDac_pwd;
+            saveDir = resolveSaveDir(ctx);
             [~,dn,~] = fileparts(app.meta.filename);
-            out = [dn,'-SR.txt'];
+            out = uniqueName(fullfile(saveDir,[dn,'-SR.txt']));
             dlmwrite(out,srn_map,'delimiter',' ','precision',9);
             uialert(app.UIFigure,['Saved: ',out],'Track');
-            refreshMainListbox(ctx);
+            refreshMainListbox(ctx,saveDir);
         end
 
         function onWaltham()
@@ -482,16 +486,16 @@ end
 
         function saveCOCOOutputs(corrCI,corr_h0)
             [~,dn,~] = fileparts(app.meta.filename);
-            CDac_pwd;
+            saveDir = resolveSaveDir(ctx);
             data_COCOCI = [corrCI(:,1:2),corr_h0(:,1:2)];
-            nm = uniqueName([dn,'-COCO-data.txt']);
+            nm = uniqueName(fullfile(saveDir,[dn,'-COCO-data.txt']));
             dlmwrite(nm,data_COCOCI,'delimiter',',','precision',9);
         end
 
         function saveECOCOOutputs(prt_sr,out_depth,out_ecc,out_eci,out_norbit,out_ecoco)
             [~,dn,~] = fileparts(app.meta.filename);
-            CDac_pwd;
-            nm = uniqueName([dn,'-ECOCO.data.xlsx']);
+            saveDir = resolveSaveDir(ctx);
+            nm = uniqueName(fullfile(saveDir,[dn,'-ECOCO.data.xlsx']));
             writematrix(prt_sr,nm,'Sheet','Sed.Rate');
             writematrix(out_depth,nm,'Sheet','Depth');
             writematrix(out_ecc,nm,'Sheet','COCO');
@@ -659,21 +663,57 @@ if p(3) < 1024, p(3) = 1024; end
 if p(4) < 976, p(4) = 976; end
 end
 
-function refreshMainListbox(ctx)
-listbox = getfielddef(ctx,'listbox_acmain',[]);
+function refreshMainListbox(ctx,dirpath)
+    listbox = getfielddef(ctx,'listbox_acmain',[]);
+    editdir = getfielddef(ctx,'edit_acfigmain_dir',[]);
+    if isempty(listbox) || ~isgraphics(listbox)
+        return
+    end
+    if nargin < 2 || isempty(dirpath) || ~isfolder(dirpath)
+        dirpath = pwd;
+    end
+    try
+        d = dir(dirpath);
+        if numel(d) >= 2
+            d = d(~ismember({d.name},{'.','..'}));
+        end
+        n = {d.name};
+        if isempty(n)
+            n = {''};
+        end
+        set(listbox,'String',n,'Value',1);
+        if ~isempty(editdir) && isgraphics(editdir)
+            set(editdir,'String',dirpath);
+        end
+    catch
+    end
+end
+
+function saveDir = resolveSaveDir(ctx)
+saveDir = pwd;
 editdir = getfielddef(ctx,'edit_acfigmain_dir',[]);
-if isempty(listbox) || ~isgraphics(listbox)
-    return
+if ~isempty(editdir) && isgraphics(editdir)
+    try
+        p = get(editdir,'String');
+        if iscell(p), p = p{1}; end
+        if isstring(p), p = char(p); end
+        if ischar(p)
+            p = strtrim(p);
+            if ~isempty(p) && isfolder(p)
+                saveDir = p;
+                return
+            end
+        end
+    catch
+    end
 end
 try
-    d = dir;
-    n = {d.name};
-    set(listbox,'String',n,'Value',1);
-    if ~isempty(editdir) && isgraphics(editdir)
-        set(editdir,'String',pwd);
-    end
-    if exist('refreshcolor','file') == 2
-        refreshcolor;
+    acPwdFile = which('ac_pwd.txt');
+    if ~isempty(acPwdFile)
+        p = strtrim(fileread(acPwdFile));
+        if ~isempty(p) && isfolder(p)
+            saveDir = p;
+        end
     end
 catch
 end

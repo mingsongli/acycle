@@ -1,4 +1,4 @@
-function [corrCI,corr_h0,corry] = corrcoefslices_rank(dat,target,orbit7,dt,pad,sr1,sr2,srstep,adjust,red,nsim,plotn,slices,method)
+function [corrCI,corr_h0,corry] = corrcoefslices_rank(dat,target,orbit7,dt,pad,sr1,sr2,srstep,adjust,red,nsim,plotn,slices,method,fmaxdata,main_unit_selection)
 % Modify from corrcoefsig.m, but replace display with a function of slices
 % INPUT
 %   dat: 2 column time series of depth and value. Unit of depth must be m
@@ -42,7 +42,7 @@ function [corrCI,corr_h0,corry] = corrcoefslices_rank(dat,target,orbit7,dt,pad,s
 %   Mingsong Li, June 2017 @ Penn State
 %   update Jan 18, 2023 for language plot
 %%
-if nargin > 14
+if nargin > 16
     error('Too many input arguments')
     return;
 end
@@ -89,7 +89,8 @@ display = 1;  % show simulation steps
 %% Slice
 if isreal(slices) && slices > 0 && ~mod(slices,1)
    if slices > 1
-       dat_slice = data_slices(dat,slices);  % remove mean value; cut into slices
+       %dat_slice = data_slices(dat,slices);  % remove mean value; cut into slices
+       [dat_slice, datanewMean] = data_slices(dat, slices);    % cut into slices; calculate the mean of them
        dat_demean = [dat(:,1),detrend(dat(:,2),0)];
    else
        time = dat(:,1);
@@ -97,6 +98,7 @@ if isreal(slices) && slices > 0 && ~mod(slices,1)
        value = dat(:,2);
        dat_slice = [time,detrend(value,0)];  % subtract mean value
        dat_demean = dat_slice;
+       datanewMean = dat_slice;
    end
 
 else
@@ -109,7 +111,7 @@ lang_choice = load('ac_lang.txt');
 langdict = readtable('langdict.xlsx');
 lang_id = langdict.ID;
 lang_var = table2cell(langdict(:, 2 + lang_choice));
-handles.main_unit_selection = evalin('base','main_unit_selection');
+
 [~, ec79] = ismember('ec79',lang_id);
 
 [~, ec80] = ismember('ec80',lang_id);
@@ -159,11 +161,11 @@ end
         if slices > 1
             plot(ax2,f,datap,'LineWidth',.3);
         end
-        fmaxdata = evalin('base','fmaxdata');
+        
         xlim(ax2,[0, fmaxdata])
         
         set(ax2,'XMinorTick','on','YMinorTick','on')
-        if or(lang_choice == 0, handles.main_unit_selection == 0)
+        if or(lang_choice == 0, main_unit_selection == 0)
             xlabel(ax2,'Frequency (cycle/m)');
             ylabel(ax2,'Power');
             title(ax2,'Data power spectrum');
@@ -228,12 +230,28 @@ if nsim > 0
     waitbarstep = 1;
     waitbar(waitbarstep / steps)
     %% Monte Carlo simulation
+    % use all data, calculate rho of robust AR1
+    
+    rhoM = calculateRhoM(dat);
+
+    % use the first slice to generate many periodogram power spetra; remove red noise
+    % using user-defined methods
+    [f, pMC] = redNoisePeriodogramMC( ...
+        datanewMean, rhoM, nsim, red, pad, ...
+        'BatchSize', 1000, ...
+        'UseParallel', false);
+    
     corry = zeros(mpts,nsim);
     for i = 1: nsim
-        randspectrum = randspec_sin(f,npks,dat_ray);
-        sim_spectum = [f,randspectrum];
+        % simplified MC
+        %randspectrum = randspec_sin(f,npks,dat_ray);
+        %sim_spectum = [f,randspectrum];
+        % robust rho
         %[prand,frand] = randpermperiodogram(dat_demean,dt,pad); % Mingsong Li, 20180417
         %sim_spectum = [frand,prand]; % Mingsong Li, 20180417
+        
+        sim_spectum = [f, pMC(:,i)];
+        
         corryi = cyclecorrsig(sim_spectum,targetf,targetp,target_real,orbit7,dat_ray,sr1,sr2,srstep,sr0,adjust,method);
         if display == 1
             if rem(i,20) == 0
@@ -269,20 +287,7 @@ if nsim > 0
         corry_per(i) = (100 - invprctile(corry_sim_sort1, corry_r1))/100;
     end
     
-%     for i = 1: corrlength
-%         corry_r1 = corry_rch(i);
-%         corry_sim_sort1 = corry_sim_sort(i,:);
-%         corry_sim_sort2 = corry_sim_sort1(corry_sim_sort1<corry_r1); % number of corr-value that is less than real data
-%         totallength = length(corry_sim_sort1(~isnan(corry_sim_sort1))); % number of not-null value
-%         %corry_per(i) = (totallength-length(corry_sim_sort2))/nsim;
-%         corry_per(i) = (totallength-length(corry_sim_sort2)+1)/(totallength+1); % Dec. 29, 2017 revised by M. Li
-%         if corry_per(i) == 0
-%             corry_per(i) = 1/(totallength+1);
-%         end
-%     end
-    
-%     assignin('base','corry_per',corry_per)
-%     assignin('base','corrxch',corrxch)
+
     %% confidence interval estimation for correlation coefficient
     
     corr_h0 = corry_per;  % percentile of the value
@@ -297,7 +302,7 @@ if nsim > 0
         
         ax1 = subplot(3,1,1);
         plot(ax1,corrxch,corry_rch,'r','LineWidth',1);
-        if or(lang_choice == 0, handles.main_unit_selection == 0)
+        if or(lang_choice == 0, main_unit_selection == 0)
             xlabel(ax1,'Sedimentation rate (cm/kyr)')
             title(ax1,'Correlation coefficient')
         else
@@ -307,32 +312,12 @@ if nsim > 0
         ylabel(ax1,'\rho')
         set(ax1,'XMinorTick','on','YMinorTick','on')
         
-%         % plot H0 test of Monte carlo simulation
-%         ax2 = subplot(3,1,2);
-%         semilogy(ax2,corrxch,corry_per,'r','LineWidth',1); 
-%         if or(lang_choice == 0, handles.main_unit_selection == 0)
-%             xlabel(ax2,'Sedimentation rate (cm/kyr)')
-%             ylabel(ax2,'H_0 significance level')
-%             title(ax2,'Null hypothesis')
-%         else
-%             xlabel(ax2,lang_var{ec80})
-%             ylabel(ax2,lang_var{ec82})
-%             title(ax2,lang_var{ec83})
-%         end        
-%         ylim(ax2,[0.5*min(corry_per) 1])
-%         line([sr1, sr2],[.10, .10],'LineStyle',':','Color','k')
-%         line([sr1, sr2],[.05, .05],'LineStyle',':','Color','k')
-%         line([sr1, sr2],[.01, .01],'LineStyle','--','Color','k')
-%         line([sr1, sr2],[.001, .001],'LineStyle',':','Color','k')
-%         set(ax2,'Ydir','reverse')
-%         set(ax2,'XMinorTick','on','YMinorTick','on')
-        
         % plot H0 test of Monte carlo simulation
         ax2 = subplot(3,1,2);
         corry_per1 = corry_per;
         corry_per1(corry_per1 > 0.15) = 0.15;
         plot(ax2,corrxch,corry_per1,'r','LineWidth',1); 
-        if or(lang_choice == 0, handles.main_unit_selection == 0)
+        if or(lang_choice == 0, main_unit_selection == 0)
             xlabel(ax2,'Sedimentation rate (cm/kyr)')
             ylabel(ax2,'p-value')
             title(ax2,'Null hypothesis')
@@ -353,7 +338,7 @@ if nsim > 0
         ax3 = subplot(3,1,3);
         plot(ax3,corrxch,corr_h0(:,2),'b','LineWidth',1);
         
-        if or(lang_choice == 0, handles.main_unit_selection == 0)
+        if or(lang_choice == 0, main_unit_selection == 0)
             xlabel(ax3,'Sedimentation rate (cm/kyr)')
             title(ax3,'Number of contributing astronomical parameters')
         else
@@ -370,31 +355,170 @@ else
 end
 
 %%
-function datanew = data_slices(dat, slices)
-% INPUT: data input
-datanew = [];
-if slices <= 1
-    return
-end
-x = dat(:,1);
-data_size = size(x);
-data_length = data_size(1,1);
-t1 = dat(1,1);
-tn = dat(data_length,1);
-slice = linspace(t1, tn, slices+1);
+function [datanew, datanewMean] = data_slices(dat, slices)
+% data_slices Divide a time series into equal-duration slices.
+%
+%   [datanew, datanewMean] = data_slices(dat, slices)
+%
+% INPUT:
+%   dat    - Two-column time series:
+%            dat(:,1): time
+%            dat(:,2): data values
+%
+%   slices - Number of equal-duration slices.
+%
+% OUTPUT:
+%   datanew - Matrix containing all processed slices.
+%             Each slice occupies two columns:
+%
+%             datanew(:,2*i-1): original time of slice i
+%             datanew(:,2*i)  : standardized and demeaned values
+%
+%             Shorter slices are padded with NaN.
+%
+%   datanewMean - Two-column mean series:
+%
+%             datanewMean(:,1): mean relative time within the slices
+%             datanewMean(:,2): row-wise mean of all processed slices
+%
+%   The averaging is performed according to sample position within each
+%   slice. It therefore assumes that all slices have approximately the
+%   same sampling interval.
 
-for i = 1: slices
-    data_int = select_interval(dat,slice(i),slice(i+1));
-    time = data_int(:,1);
-    value = (data_int(:,2)-mean(data_int(:,2)))/std(data_int(:,2));
-    data_int = [time,detrend(value,0)];
-    time_len(i) = length(time);
-    if max(time_len) > time_len(i)
-        datanew(1:time_len(i),(2*i-1):(2*i)) = data_int;
-    elseif max(time_len) < time_len(i)
-        datanew((time_len(i-1)+1):time_len(i),(2*i-3):(2*i-2)) = 0;
-        datanew(:,(2*i-1):(2*i)) = data_int;
-    else
-        datanew(:,(2*i-1):(2*i)) = data_int;
+    %% Validate inputs
+
+    validateattributes(dat, {'numeric'}, ...
+        {'2d', 'ncols', 2, 'nonempty', 'real'}, ...
+        mfilename, 'dat', 1);
+
+    validateattributes(slices, {'numeric'}, ...
+        {'scalar', 'integer', 'positive', 'finite'}, ...
+        mfilename, 'slices', 2);
+
+    %% Remove invalid rows and sort data by time
+
+    validRows = all(isfinite(dat), 2);
+    dat = dat(validRows, :);
+
+    if isempty(dat)
+        error('data_slices:NoValidData', ...
+            'The input data do not contain valid finite values.');
     end
-end
+
+    dat = sortrows(dat, 1);
+
+    timeAll = dat(:,1);
+
+    if timeAll(end) <= timeAll(1)
+        error('data_slices:InvalidTime', ...
+            'The time range must be greater than zero.');
+    end
+
+    %% Define slice boundaries
+
+    sliceBoundary = linspace( ...
+        timeAll(1), timeAll(end), slices + 1);
+
+    sliceData = cell(slices, 1);
+    relativeTime = cell(slices, 1);
+    sliceLength = zeros(slices, 1);
+
+    %% Extract and process each slice
+
+    for i = 1:slices
+
+        % Use half-open intervals for all slices except the last one.
+        % This prevents a boundary point from appearing in two slices.
+        if i < slices
+            index = timeAll >= sliceBoundary(i) & ...
+                    timeAll <  sliceBoundary(i + 1);
+        else
+            index = timeAll >= sliceBoundary(i) & ...
+                    timeAll <= sliceBoundary(i + 1);
+        end
+
+        dataInterval = dat(index, :);
+
+        if isempty(dataInterval)
+            sliceData{i} = zeros(0, 2);
+            relativeTime{i} = zeros(0, 1);
+            continue
+        end
+
+        time = dataInterval(:,1);
+        value = dataInterval(:,2);
+
+        %% Standardize the values within the current slice
+
+        valueStd = std(value);
+
+        if numel(value) > 1 && valueStd > 0
+            value = (value - mean(value)) ./ valueStd;
+        else
+            % A single-point or constant slice has no variability
+            value = zeros(size(value));
+        end
+
+        % Remove any residual constant offset
+        value = detrend(value, 0);
+
+        %% Store the processed slice
+
+        sliceData{i} = [time, value];
+
+        % Relative time is required for aligning different slices
+        relativeTime{i} = time - time(1);
+
+        sliceLength(i) = length(time);
+
+    end
+
+    %% Combine all slices into one matrix
+
+    maximumLength = max(sliceLength);
+
+    if maximumLength == 0
+        datanew = [];
+        datanewMean = [];
+        return
+    end
+
+    % NaN padding prevents missing values from influencing the mean
+    datanew = nan(maximumLength, 2 * slices);
+    relativeTimeMatrix = nan(maximumLength, slices);
+
+    for i = 1:slices
+
+        currentLength = sliceLength(i);
+
+        if currentLength == 0
+            continue
+        end
+
+        datanew(1:currentLength, 2*i-1:2*i) = ...
+            sliceData{i};
+
+        relativeTimeMatrix(1:currentLength, i) = ...
+            relativeTime{i};
+
+    end
+
+    %% Calculate the mean series
+
+    % Extract the processed value column from every slice
+    valueMatrix = datanew(:, 2:2:end);
+
+    % Calculate the mean value at each relative sample position
+    meanValue = mean(valueMatrix, 2, 'omitnan');
+
+    % Calculate a representative relative time coordinate
+    meanRelativeTime = mean(relativeTimeMatrix, 2, 'omitnan');
+
+    % Remove rows for which no slice contains data
+    validMeanRows = any(isfinite(valueMatrix), 2);
+
+    datanewMean = [ ...
+        meanRelativeTime(validMeanRows), ...
+        meanValue(validMeanRows)];
+
+%end
