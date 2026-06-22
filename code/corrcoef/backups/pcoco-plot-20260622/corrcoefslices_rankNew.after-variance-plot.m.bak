@@ -548,51 +548,52 @@ dataFreqTime = data(:,1) * bestSr / 100;  % cycles/kyr
 dataPower = data(:,2);
 
 targetFreqTime = target_real(:,1);        % cycles/kyr
-targetPower = freq2targetNew(dat, pad, data, orbit9, targetFreqTime, bestSr);
+targetFreqSpatial = targetFreqTime * 100 / bestSr;
+targetPower = freq2targetNew(dat, pad, data, orbit9, targetFreqSpatial, bestSr);
+
+orbitFreq = 1 ./ orbit9(:);               % cycles/kyr
+orbitPower = cocoGetPowerNew(data, orbit9, bestSr, dat);
 
 figure;
 set(gcf, 'color', 'w');
 ax = axes;
+plot(ax, dataFreqTime, dataPower, 'k-', 'LineWidth', 1);
+hold(ax, 'on');
+plot(ax, targetFreqTime, targetPower, 'r-', 'LineWidth', 1);
+plot(ax, orbitFreq, orbitPower, 'ro', ...
+    'MarkerSize', 5, ...
+    'MarkerFaceColor', 'r');
 
-if isfinite(fmaxdata) && fmaxdata > 0
-    xLimits = [0, fmaxdata * bestSr / 100];
-else
-    xLimits = [0, max(dataFreqTime)];
+for ii = 1:numel(orbitFreq)
+    if isfinite(orbitFreq(ii)) && isfinite(orbitPower(ii))
+        text(ax, orbitFreq(ii), orbitPower(ii), ...
+            sprintf(' %.4g', orbitPower(ii)), ...
+            'Color', 'r', ...
+            'FontSize', 8, ...
+            'VerticalAlignment', 'bottom');
+    end
 end
 
-dataPlotPower = normalizeVisiblePower(dataFreqTime, dataPower, xLimits);
-targetPlotPower = normalizeVisiblePower(targetFreqTime, targetPower, xLimits);
-
-plot(ax, dataFreqTime, dataPlotPower, 'k-', 'LineWidth', 1);
-hold(ax, 'on');
-plot(ax, targetFreqTime, targetPlotPower, 'r-', 'LineWidth', 1);
-xlim(ax, xLimits);
-ylim(ax, [0, 1.05]);
+if isfinite(fmaxdata) && fmaxdata > 0
+    xlim(ax, [0, fmaxdata * bestSr / 100]);
+else
+    xlim(ax, [0, max(dataFreqTime)]);
+end
 
 if or(lang_choice == 0, main_unit_selection == 0)
     xlabel(ax, 'Frequency (cycle/kyr)');
-    ylabel(ax, 'Normalized power');
+    ylabel(ax, 'Power');
 else
     [~, main14] = ismember('main14', lang_id);
+    [~, main46] = ismember('main46', lang_id);
     xlabel(ax, [lang_var{main14}, ' (1/kyr)']);
-    ylabel(ax, 'Normalized power');
+    ylabel(ax, lang_var{main46});
 end
 title(ax, sprintf('Best pCOCO spectrum at %.4g cm/kyr', bestSr));
-legend(ax, {'Data spectrum', 'Target spectrum'}, 'Location', 'best');
+legend(ax, {'Data spectrum', 'Target spectrum', 'Orbit frequency variance'}, ...
+    'Location', 'best');
 set(ax, 'XMinorTick', 'on', 'YMinorTick', 'on');
 box(ax, 'on');
-end
-
-function yNorm = normalizeVisiblePower(x, y, xLimits)
-ok = isfinite(x) & isfinite(y) & x >= xLimits(1) & x <= xLimits(2);
-scale = max(y(ok));
-if isempty(scale) || ~isfinite(scale) || scale <= 0
-    scale = max(y(isfinite(y)));
-end
-if isempty(scale) || ~isfinite(scale) || scale <= 0
-    scale = 1;
-end
-yNorm = y ./ scale;
 end
 
 %%

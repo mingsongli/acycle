@@ -23,7 +23,7 @@ end
         app.meta.dt = dt;
         app.mode = 2; % 1=COCO, 2=eCOCO
         app.ecocoCalcMode = 1; % 1=Fast, 2=Accurate
-        app.corrmethod = 2; % 1 Pearson, 2 Spearman
+        app.corrmethod = 1; % 1 Pearson, 2 Spearman
         app.red = 0; % 0 no
         app.time_0pad = 1;
         app.padtype = 1;
@@ -47,7 +47,7 @@ end
         
         app.run = struct('ready',false,'target',[],'prt_sr',[],'out_depth',[], ...
             'out_ecc',[],'out_ep',[],'out_eci',[],'out_ecoco',[],'out_ecocorb',[], ...
-            'out_norbit',[],'corrCI',[],'corr_h0',[],'cocoFigure',[]);
+            'out_norbit',[],'sr_p',[],'corrCI',[],'corr_h0',[],'cocoFigure',[]);
 
         app.UIFigure = uifigure('Name','Acycle: (Evolutionary) Correlation Coefficient / (e)COCO', ...
             'Color',app.bg,'Position',figurePos(ctx),'AutoResizeChildren','off');
@@ -120,8 +120,8 @@ end
 
             app.PCorr = uipanel(app.UIFigure,'Title','Correlation method','BackgroundColor',app.bg);
             app.BGCorr = uibuttongroup(app.PCorr,'BackgroundColor',app.bg,'BorderType','none','SelectionChangedFcn',@(s,e)onCorrChanged());
-            app.RSpearman = uiradiobutton(app.BGCorr,'Text','Spearman','FontWeight','bold','Value',true);
-            app.RPearson = uiradiobutton(app.BGCorr,'Text','Pearson','Value',false);
+            app.RSpearman = uiradiobutton(app.BGCorr,'Text','Spearman','Value',false);
+            app.RPearson = uiradiobutton(app.BGCorr,'Text','Pearson','FontWeight','bold','Value',true);
 
             app.PMC = uipanel(app.UIFigure,'Title','Monte Carlo','BackgroundColor',app.bg);
             app.ENsim = uieditfield(app.PMC,'text','Value',num2str(app.nsim));
@@ -399,7 +399,7 @@ end
                     end
                     h = uiprogressdlg(app.UIFigure,'Title','eCOCO','Message','Running ...','Indeterminate','on');
                     ecocoMode = iff(app.ecocoCalcMode == 1,'fast','accurate');
-                    [prt_sr,out_depth,out_ecc,out_ep,out_eci,out_ecoco,out_ecocorb,out_norbit,~] = ...
+                    [prt_sr,out_depth,out_ecc,out_ep,out_eci,out_ecoco,out_ecocorb,out_norbit,sr_p] = ...
                         ecoco(dat2,[],app.orbit9,app.window,srm,stepN,0,red,app.pad,sr1,sr2,srstep,nsim,adjust,1,plotn,method,app.fmaxdata,app.main_unit_selection,ecocoMode);
                     close(h);
                     
@@ -411,6 +411,7 @@ end
                     app.run.out_ecoco = out_ecoco;
                     app.run.out_ecocorb = out_ecocorb;
                     app.run.out_norbit = out_norbit;
+                    app.run.sr_p = sr_p;
                     app.run.ready = true;
 
                     app.BPlotE.Enable = 'on';
@@ -424,7 +425,8 @@ end
                     assignin('base','out_ecoco',out_ecoco);
                     assignin('base','out_ecocorb',out_ecocorb);
                     assignin('base','out_norbit',out_norbit);
-                    saveECOCOOutputs(prt_sr,out_depth,out_ecc,out_eci,out_norbit,out_ecoco);
+                    assignin('base','sr_p_tracked',sr_p);
+                    saveECOCOOutputs(prt_sr,out_depth,out_ecc,out_eci,out_norbit,out_ecoco,sr_p,dat);
                 end
 
                 refreshMainListbox(ctx,resolveSaveDir(ctx));
@@ -500,7 +502,7 @@ end
             dlmwrite(nm,data_COCOCI,'delimiter',',','precision',9);
         end
 
-        function saveECOCOOutputs(prt_sr,out_depth,out_ecc,out_eci,out_norbit,out_ecoco)
+        function saveECOCOOutputs(prt_sr,out_depth,out_ecc,out_eci,out_norbit,out_ecoco,sr_p,rawData)
             [~,dn,~] = fileparts(app.meta.filename);
             saveDir = resolveSaveDir(ctx);
             nm = uniqueName(fullfile(saveDir,[dn,'-ECOCO.data.xlsx']));
@@ -510,6 +512,102 @@ end
             writematrix(out_eci,nm,'Sheet','Conf.Int.');
             writematrix(out_norbit,nm,'Sheet','#Orbits');
             writematrix(out_ecoco,nm,'Sheet','pCOCO');
+            if nargin >= 8 && ~isempty(sr_p)
+                trackedHeader = {'Depth_m','SedRate_cm_per_kyr','Correlation','P_value','N_orbits','pCOCOxOrbits','SedRate_low_cm_per_kyr','SedRate_high_cm_per_kyr'};
+                writecell(trackedHeader,nm,'Sheet','TrackedSR','Range','A1');
+                writematrix(sr_p,nm,'Sheet','TrackedSR','Range','A2');
+
+                [ageModel,timeDomainData] = buildAgeModelFromTrackedSR(rawData,sr_p);
+                ageHeader = {'Depth_m','Age_kyr','Age_min_kyr','Age_max_kyr','SedRate_cm_per_kyr','SedRate_low_cm_per_kyr','SedRate_high_cm_per_kyr'};
+                writecell(ageHeader,nm,'Sheet','AgeModel','Range','A1');
+                writematrix(ageModel,nm,'Sheet','AgeModel','Range','A2');
+
+                timeHeader = {'Age_kyr','Age_min_kyr','Age_max_kyr','Value','Depth_m'};
+                writecell(timeHeader,nm,'Sheet','TimeDomainData','Range','A1');
+                writematrix(timeDomainData,nm,'Sheet','TimeDomainData','Range','A2');
+            end
+        end
+
+        function [ageModel,timeDomainData] = buildAgeModelFromTrackedSR(rawData,sr_p)
+            rawData = rawData(:,1:min(2,size(rawData,2)));
+            rawData = rawData(all(isfinite(rawData),2),:);
+            rawData = sortrows(rawData,1);
+
+            srTrack = sr_p(:,[1,2,7,8]);
+            srTrack = srTrack(isfinite(srTrack(:,1)) & isfinite(srTrack(:,2)) & srTrack(:,2) > 0,:);
+            srTrack = sortrows(srTrack,1);
+            [trackDepth,ia] = unique(srTrack(:,1),'stable');
+            trackSr = srTrack(ia,2);
+            trackSrLow = srTrack(ia,3);
+            trackSrHigh = srTrack(ia,4);
+
+            depth = rawData(:,1);
+            values = rawData(:,2);
+            if isempty(depth)
+                ageModel = [];
+                timeDomainData = [];
+                return
+            end
+
+            if numel(trackDepth) == 0
+                srAtDepth = nan(size(depth));
+                srLowAtDepth = nan(size(depth));
+                srHighAtDepth = nan(size(depth));
+            elseif isscalar(trackDepth)
+                srAtDepth = repmat(trackSr, size(depth));
+                srLowAtDepth = repmat(trackSrLow, size(depth));
+                srHighAtDepth = repmat(trackSrHigh, size(depth));
+            else
+                srAtDepth = interpolateTrackedRate(trackDepth,trackSr,depth);
+                srLowAtDepth = interpolateTrackedRate(trackDepth,trackSrLow,depth);
+                srHighAtDepth = interpolateTrackedRate(trackDepth,trackSrHigh,depth);
+            end
+
+            srAtDepth(~isfinite(srAtDepth) | srAtDepth <= 0) = NaN;
+            srLowAtDepth(~isfinite(srLowAtDepth) | srLowAtDepth <= 0) = NaN;
+            srHighAtDepth(~isfinite(srHighAtDepth) | srHighAtDepth <= 0) = NaN;
+            srBoundLow = min(srLowAtDepth,srHighAtDepth);
+            srBoundHigh = max(srLowAtDepth,srHighAtDepth);
+
+            age = cumulativeAge(depth,srAtDepth);
+            ageMax = cumulativeAge(depth,srBoundLow);
+            ageMin = cumulativeAge(depth,srBoundHigh);
+
+            ageModel = [depth, age, ageMin, ageMax, srAtDepth, srBoundLow, srBoundHigh];
+            timeDomainData = [age, ageMin, ageMax, values, depth];
+        end
+
+        function srAtDepth = interpolateTrackedRate(trackDepth,trackSr,depth)
+            ok = isfinite(trackDepth) & isfinite(trackSr) & trackSr > 0;
+            trackDepth = trackDepth(ok);
+            trackSr = trackSr(ok);
+            if isempty(trackDepth)
+                srAtDepth = nan(size(depth));
+            elseif isscalar(trackDepth)
+                srAtDepth = repmat(trackSr, size(depth));
+            else
+                srAtDepth = interp1(trackDepth,trackSr,depth,'linear','extrap');
+                before = depth < trackDepth(1);
+                after = depth > trackDepth(end);
+                srAtDepth(before) = trackSr(1);
+                srAtDepth(after) = trackSr(end);
+            end
+        end
+
+        function age = cumulativeAge(depth,srAtDepth)
+            age = nan(size(depth));
+            if isempty(depth)
+                return
+            end
+            age(1) = 0;
+            for ii = 2:numel(depth)
+                srMid = mean(srAtDepth(ii-1:ii),'omitnan');
+                if ~isfinite(srMid) || srMid <= 0
+                    age(ii) = NaN;
+                else
+                    age(ii) = age(ii-1) + 100 * (depth(ii) - depth(ii-1)) / srMid;
+                end
+            end
         end
 
         function s = uniqueName(nm)

@@ -1,12 +1,13 @@
-function la = freq2targetNew(dat,~,data_pow,orbit9,lax,sr_i)
+function la = freq2targetNew(dat,~,theoredML96_pow,orbit9,lax,sr_i)
 %
 % Generate target power spectrum using given orbital periods and the power 
-% estimated from data power near each orbital frequency.
+% ratio of ML96 background noise model.
 %
 % INPUT
 % dat: depth series, unit = m; 2 columns
-% data_pow: data power spectrum, column 1 = spatial frequency (cycles/m),
-%           column 2 = power
+% theoredML96_pow: theoretical background AR1 noise from ML96 model,
+%                  column 1 = spatial frequency (cycles/m),
+%                  column 2 = power
 % orbit9: 9 orbital periods, in kyr
 % sr1, sr2, srstep: test sedimentation rates
 %
@@ -14,7 +15,7 @@ function la = freq2targetNew(dat,~,data_pow,orbit9,lax,sr_i)
 %   la: target power interpolated on lax, where lax is in cycles/kyr
 %
 % calls for 
-%   cocoGetPowerNew
+%   cocoGetPower
 
 depth = dat(:,1);
 nData = numel(depth);
@@ -24,7 +25,7 @@ if isempty(dz_all)
     error('Depth values must contain at least two distinct samples.');
 end
 
-targetp = cocoGetPowerNew(data_pow, orbit9, sr_i, dat); % get variance for each orbital period (in kyr)
+targetp = cocoGetPower(theoredML96_pow, orbit9, sr_i); % get variance for each orbital periods (in kyr)
 
 dz = median(dz_all);
 fsDepth = 1 / dz;

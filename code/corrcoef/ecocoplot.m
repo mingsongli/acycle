@@ -25,7 +25,7 @@ end
 % lang_choice = 0;  %
 % handles.main_unit_selection = 0;
 lang_choice = load('ac_lang.txt');
-langdict = readtable('langdict.xlsx');
+langdict = readtable('langdict.xlsx','VariableNamingRule','preserve');
 lang_id = langdict.ID;
 lang_var = table2cell(langdict(:, 2 + lang_choice));
 handles.main_unit_selection = get_main_unit_selection();
@@ -138,8 +138,18 @@ end
 if abs(plotn) == 2
     figure;
 end
+orbitValues = out_norbit(isfinite(out_norbit));
+if isempty(orbitValues)
+    orbitn = 1;
+else
+    orbitn = max(orbitValues(:));
+end
+if ~isfinite(orbitn) || orbitn < 1
+    orbitn = 1;
+end
+orbitn = ceil(orbitn);
 if or((abs(plotn) == 1), (abs(plotn) == 2))
-    zlevs = 0:1:7;
+    zlevs = 0:1:orbitn;
     [C,h]=contour(prt_sr,out_depth,out_norbit',zlevs);
     h.Fill = 'on';
 else
@@ -151,6 +161,7 @@ end
 colormap('parula')
 shading interp
 hcolorbar = colorbar('southoutside');
+hcolorbar.Ticks = 0:1:orbitn;
 set(gca,'XMinorTick','on','YMinorTick','on')
 set(gca,'TickDir','out');  
 

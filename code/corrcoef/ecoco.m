@@ -27,7 +27,7 @@ if ~ismember(calcMode,{'fast','accurate'})
 end
 
 lang_choice = load('ac_lang.txt');
-langdict = readtable('langdict.xlsx');
+langdict = readtable('langdict.xlsx','VariableNamingRule','preserve');
 lang_id = langdict.ID;
 lang_var = table2cell(langdict(:, 2 + lang_choice));
 [~, ec79] = ismember('ec79',lang_id);
@@ -71,7 +71,7 @@ out_eci = nan(nofsr,m3);
 out_ecoco = nan(nofsr,m3);
 out_ecocorb = nan(nofsr,m3);
 out_norbit = nan(nofsr,m3);
-sr_p = nan(m3,6);
+sr_p = nan(m3,8);
 
 if lang_choice == 0
     hwaitbar = waitbar(0,'eCOCO processing ... [CTRL + C to quit]', ...
@@ -80,7 +80,7 @@ else
     hwaitbar = waitbar(0,['eCOCO ',lang_var{ec79}], ...
        'WindowStyle','modal');
 end
-cleanupObj = onCleanup(@()safeClose(hwaitbar)); %#ok<NASGU>
+cleanupObj = onCleanup(@()safeClose(hwaitbar));
 hwaitbar_find = findobj(hwaitbar,'Type','Patch');
 set(hwaitbar_find,'EdgeColor',[0 0.9 0],'FaceColor',[0 0.9 0])
 setappdata(hwaitbar,'canceling',0)
@@ -105,7 +105,7 @@ if strcmp(calcMode,'fast') && nsim > 0
     end
     [fastFirstCorrCI,~,fastNull] = corrcoefslices_rankNew( ...
         datWin0,orbit9,dt,pad,sr1,sr2,srstep,adjust,red,nsim,0,1, ...
-        method,fmaxdata,main_unit_selection,false);
+        method,fmaxdata,main_unit_selection,true);
 end
 
 for i = 1:m3
@@ -183,6 +183,9 @@ for i = 1:m3
     end
 end
 
+sr_p = trackEcocoRidge(out_ecocorb,prt_sr,out_depth,out_ecc,out_eci,out_norbit,out_ecoco,orbitn,sr_p);
+printTrackedEcocoResults(sr_p,orbitn);
+
 if abs(plotn) > 0
     if lang_choice == 0
         hwarn = warndlg('Wait, eCOCO plot ...');
@@ -240,6 +243,138 @@ if isempty(valid)
 end
 [~,loc] = max(values(valid));
 idx = valid(loc);
+
+function printTrackedEcocoResults(sr_p,orbitn)
+disp('>> Tracked eCOCO sedimentation-rate path:')
+for ii = 1:size(sr_p,1)
+    if ~isfinite(sr_p(ii,2))
+        continue
+    end
+    disp(['-----> Location : ',num2str(sr_p(ii,1)), ...
+        ' m. Tracked sed. rate = [ ',num2str(sr_p(ii,2)), ...
+        ' ] cm/kyr. Local range = [ ',num2str(sr_p(ii,7)), ...
+        ', ',num2str(sr_p(ii,8)), ...
+        ' ] cm/kyr. # of orbital cycles involved : ', ...
+        num2str(sr_p(ii,5)),' of ',num2str(orbitn)]);
+    disp(['    Correlation coefficient ',num2str(sr_p(ii,3)), ...
+        '. p-value ',num2str(sr_p(ii,4)), ...
+        '. pCOCOxOrbits ',num2str(sr_p(ii,6))])
+end
+
+function sr_p = trackEcocoRidge(score,prt_sr,out_depth,out_ecc,out_eci,out_norbit,out_ecoco,orbitn,sr_p_fallback)
+sr_p = sr_p_fallback;
+[nSr,nWin] = size(score);
+if nSr == 0 || nWin == 0 || numel(prt_sr) ~= nSr
+    return
+end
+
+scoreNorm = nan(size(score));
+for col = 1:nWin
+    colScore = score(:,col);
+    ok = isfinite(colScore);
+    if ~any(ok)
+        continue
+    end
+    minScore = min(colScore(ok));
+    maxScore = max(colScore(ok));
+    if maxScore > minScore
+        scoreNorm(ok,col) = (colScore(ok) - minScore) ./ (maxScore - minScore);
+    else
+        scoreNorm(ok,col) = 1;
+    end
+end
+
+if ~any(isfinite(scoreNorm(:)))
+    return
+end
+
+srStep = median(abs(diff(prt_sr)));
+if ~isfinite(srStep) || srStep <= 0
+    srStep = 1;
+end
+jumpScale = max(2,4*srStep);
+jumpPenalty = 0.35;
+
+dp = -inf(nSr,nWin);
+back = nan(nSr,nWin);
+validFirst = isfinite(scoreNorm(:,1));
+dp(validFirst,1) = scoreNorm(validFirst,1);
+
+for col = 2:nWin
+    validNow = find(isfinite(scoreNorm(:,col)));
+    if isempty(validNow)
+        continue
+    end
+    validPrev = find(isfinite(dp(:,col-1)));
+    if isempty(validPrev)
+        dp(validNow,col) = scoreNorm(validNow,col);
+        continue
+    end
+
+    for row = validNow(:)'
+        jumps = abs(prt_sr(row) - prt_sr(validPrev)) ./ jumpScale;
+        transitionScore = dp(validPrev,col-1) - jumpPenalty .* (jumps .^ 2);
+        [bestPrevScore,bestLoc] = max(transitionScore);
+        dp(row,col) = scoreNorm(row,col) + bestPrevScore;
+        back(row,col) = validPrev(bestLoc);
+    end
+end
+
+lastCol = find(any(isfinite(dp),1),1,'last');
+if isempty(lastCol)
+    return
+end
+[~,row] = max(dp(:,lastCol));
+path = nan(1,nWin);
+path(lastCol) = row;
+for col = lastCol:-1:2
+    prev = back(path(col),col);
+    if isnan(prev)
+        break
+    end
+    path(col-1) = prev;
+end
+
+for col = 1:nWin
+    row = path(col);
+    if ~isfinite(row)
+        continue
+    end
+    row = round(row);
+    sr_p(col,1) = out_depth(col);
+    sr_p(col,2) = prt_sr(row);
+    sr_p(col,3) = out_ecc(row,col);
+    sr_p(col,4) = out_eci(row,col);
+    sr_p(col,5) = out_norbit(row,col);
+    sr_p(col,6) = out_norbit(row,col) ./ orbitn .* out_ecoco(row,col);
+    [sr_p(col,7),sr_p(col,8)] = localSrRange(score(:,col),prt_sr,row,0.9);
+end
+
+function [srLow,srHigh] = localSrRange(scoreCol,prt_sr,row,relativeThreshold)
+srLow = NaN;
+srHigh = NaN;
+if row < 1 || row > numel(scoreCol) || ~isfinite(scoreCol(row))
+    return
+end
+
+threshold = relativeThreshold .* scoreCol(row);
+ok = isfinite(scoreCol) & scoreCol >= threshold;
+if ~ok(row)
+    ok(row) = true;
+end
+
+lo = row;
+while lo > 1 && ok(lo-1)
+    lo = lo - 1;
+end
+
+hi = row;
+while hi < numel(ok) && ok(hi+1)
+    hi = hi + 1;
+end
+
+srLow = min(prt_sr([lo,hi]));
+srHigh = max(prt_sr([lo,hi]));
 
 function main_unit_selection = get_main_unit_selection()
 main_unit_selection = 0;

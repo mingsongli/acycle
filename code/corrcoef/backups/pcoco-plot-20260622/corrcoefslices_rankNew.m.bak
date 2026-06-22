@@ -109,7 +109,7 @@ end
 %% For acycle language version (2.6 and after)
 % language
 lang_choice = load('ac_lang.txt');
-langdict = readtable('langdict.xlsx','VariableNamingRule','preserve');
+langdict = readtable('langdict.xlsx');
 lang_id = langdict.ID;
 lang_var = table2cell(langdict(:, 2 + lang_choice));
 
@@ -484,115 +484,10 @@ if nsim > 0
         xlim([sr1, sr2])
         xlabel('Sedimentation rate (cm/kyr)')
         ylabel('pCOCO')
-
-        [bestSr, bestPcoco] = getBestPcoco(corrxch, productValues);
-        if isfinite(bestSr)
-            annotateBestPcoco(gca, bestSr, bestPcoco);
-            plotBestPcocoSpectra(data, dat, pad, orbit9, target_real, ...
-                bestSr, fmaxdata, main_unit_selection, lang_choice, lang_var, lang_id);
-        end
     end
 else
     corr_h0 = zeros(mpts,1);
     corry = [];
-end
-end
-
-%%
-function [bestSr, bestPcoco] = getBestPcoco(corrx, productValues)
-bestSr = NaN;
-bestPcoco = NaN;
-corrx = corrx(:);
-productValues = productValues(:);
-ok = isfinite(corrx) & isfinite(productValues);
-if ~any(ok)
-    return
-end
-validSr = corrx(ok);
-validPcoco = productValues(ok);
-[bestPcoco, idx] = max(validPcoco);
-bestSr = validSr(idx);
-end
-
-function annotateBestPcoco(ax, bestSr, bestPcoco)
-axes(ax);
-hold(ax, 'on');
-yl = ylim(ax);
-plot(ax, [bestSr bestSr], yl, 'r--', 'LineWidth', 0.75);
-
-xLimits = xlim(ax);
-yLabel = yl(1) + 0.9 * diff(yl);
-if bestSr > mean(xLimits)
-    hAlign = 'right';
-    labelText = sprintf('%.4g cm/kyr ', bestSr);
-else
-    hAlign = 'left';
-    labelText = sprintf(' %.4g cm/kyr', bestSr);
-end
-
-text(ax, bestSr, yLabel, labelText, ...
-    'Color', 'r', ...
-    'FontSize', 10, ...
-    'HorizontalAlignment', hAlign, ...
-    'VerticalAlignment', 'top');
-
-plot(ax, bestSr, bestPcoco, 'ro', ...
-    'MarkerSize', 4, ...
-    'MarkerFaceColor', 'r');
-end
-
-function plotBestPcocoSpectra(data, dat, pad, orbit9, target_real, ...
-    bestSr, fmaxdata, main_unit_selection, lang_choice, lang_var, lang_id)
-
-dataFreqTime = data(:,1) * bestSr / 100;  % cycles/kyr
-dataPower = data(:,2);
-
-targetFreqTime = target_real(:,1);        % cycles/kyr
-targetPower = freq2targetNew(dat, pad, data, orbit9, targetFreqTime, bestSr);
-
-figure;
-set(gcf, 'color', 'w');
-ax = axes;
-
-if isfinite(fmaxdata) && fmaxdata > 0
-    xLimits = [0, fmaxdata * bestSr / 100];
-else
-    xLimits = [0, max(dataFreqTime)];
-end
-
-dataPlotPower = normalizeVisiblePower(dataFreqTime, dataPower, xLimits);
-targetPlotPower = normalizeVisiblePower(targetFreqTime, targetPower, xLimits);
-
-plot(ax, dataFreqTime, dataPlotPower, 'k-', 'LineWidth', 1);
-hold(ax, 'on');
-plot(ax, targetFreqTime, targetPlotPower, 'r-', 'LineWidth', 1);
-xlim(ax, xLimits);
-ylim(ax, [0, 1.05]);
-
-if or(lang_choice == 0, main_unit_selection == 0)
-    xlabel(ax, 'Frequency (cycle/kyr)');
-    ylabel(ax, 'Normalized power');
-else
-    [~, main14] = ismember('main14', lang_id);
-    xlabel(ax, [lang_var{main14}, ' (1/kyr)']);
-    ylabel(ax, 'Normalized power');
-end
-title(ax, sprintf('Best pCOCO spectrum at %.4g cm/kyr', bestSr));
-legend(ax, {'Data spectrum', 'Target spectrum'}, 'Location', 'best');
-set(ax, 'XMinorTick', 'on', 'YMinorTick', 'on');
-box(ax, 'on');
-end
-
-function yNorm = normalizeVisiblePower(x, y, xLimits)
-ok = isfinite(x) & isfinite(y) & x >= xLimits(1) & x <= xLimits(2);
-scale = max(y(ok));
-if isempty(scale) || ~isfinite(scale) || scale <= 0
-    scale = max(y(isfinite(y)));
-end
-if isempty(scale) || ~isfinite(scale) || scale <= 0
-    scale = 1;
-end
-yNorm = y ./ scale;
 end
 
 %%
@@ -762,4 +657,4 @@ function [datanew, datanewMean] = data_slices(dat, slices)
         meanRelativeTime(validMeanRows), ...
         meanValue(validMeanRows)];
 
-end
+%end
