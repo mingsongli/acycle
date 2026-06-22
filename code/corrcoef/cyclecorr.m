@@ -88,6 +88,7 @@ if (sr1 < sr0) && (sr2 > sr0)
         nmi(j) = nm;
         j=j+1;
     end
+
 % If all tested sed. rate is larger than the sr0
 elseif sr1 >= sr0
     for i = sr1:srstep:sr2
@@ -111,6 +112,7 @@ elseif sr1 >= sr0
         nmi(j) = nm;
         j=j+1;
     end
+
 % If all tested sed. rate is smaller than the sr0
 else
     for i = sr1:srstep:sr2
@@ -133,5 +135,6 @@ else
         j=j+1;
     end
 end
+
 corrx = linspace(sr1,sr2,j-1);
 corrx = corrx';

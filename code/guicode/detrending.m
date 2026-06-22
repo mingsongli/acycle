@@ -466,9 +466,9 @@ end
         else
             return;
         end
-
+        
         pre = pwd;
-        c = onCleanup(@()safeCd(pre)); %#ok<NASGU>
+        c = onCleanup(@()safeCd(pre)); 
         safeCd(getAcPwdFromContext());
         dlmwrite(name1,new_data,'delimiter',' ','precision',9);
         dlmwrite(name2,current_trend,'delimiter',' ','precision',9);

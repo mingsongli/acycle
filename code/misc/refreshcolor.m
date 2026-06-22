@@ -4,7 +4,6 @@ d = dir; %get files
 d(1)=[];d(1)=[];
 address = pwd;
 set(handles.edit_acfigmain_dir,'String',address);
-listboxStr = cell(numel(d),1);
 % Save pwd into a text file
 ac_pwd_str = which('ac_pwd.txt');
 [ac_pwd_dir,ac_pwd_name,ext] = fileparts(ac_pwd_str);
@@ -30,13 +29,6 @@ switch handles.val1
 end
 
 sd = table2struct(sortedT); % change it back to struct array
-%
-for i = 1:numel(d)
-    if sd(i).isdir
-        % Use lowercase HTML tags for better renderer compatibility.
-        listboxStr{i} = ['<html><font color="blue">', sd(i).name, '</font></html>'];
-    else
-        listboxStr{i} = sd(i).name;
-    end
-end
-set(handles.listbox_acmain,'String',listboxStr,'Value',[]) %set string
+names = {sd.name};
+isDir = [sd.isdir];
+ac_update_listbox_acmain(handles.listbox_acmain,names,isDir);

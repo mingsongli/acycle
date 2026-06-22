@@ -201,18 +201,14 @@ set(gca,'TickDir','out');
 if or(lang_choice == 0, handles.main_unit_selection == 0)
     xlabel('Sedimentation rate (cm/kyr)')
     ylabel('Depth (m)')
-    %zlabel('CHO')
-    hcolorbar.Label.String = 'CHO';
-    figurename ='COCO * p-value';
+    hcolorbar.Label.String = 'pCOCO';
+    figurename ='pCOCO';
 else
     xlabel(lang_var{ec80})
     ylabel([lang_var{main23},' (m)'])
-    %zlabel('CHO')
-    figurename =[lang_var{ec81},' * ',lang_var{ec82}];
-    hcolorbar.Label.String = 'CHO';
+    figurename = 'pCOCO';
+    hcolorbar.Label.String = 'pCOCO';
 end
-
-%figurename ='\rho * H_0 SL * # orbital parameters';
 
 title(figurename)
 if plotn < 0

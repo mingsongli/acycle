@@ -18,7 +18,7 @@ function varargout = AC(varargin)
 %
 % If you publish results using techniques such as correlation coefficient,
 % sedimentary noise model, power decomposition analysis, evolutionary fast
-% Fourier transform, wavelet transform, Bayesian changepoint, (e)TimeOpt,
+% Fourier transform, wavelet transform, Bayesian changepoint,
 % or other approaches, please also cite original publications,
 % as detailed in "AC_Users_Guide.pdf" file at
 % 
@@ -345,10 +345,6 @@ handles.menu_rho = uimenu(handles.menu_sednoise,'Label','Lag-1 autocorrelation c
     'Callback',@(h,e)AC_dispatch('menu_rho_Callback',h,e));
 handles.menu_ecoco = uimenu(handles.menuac,'Label','Correlation Coefficient (COCO/eCOCO)','Tag','menu_ecoco', ...
     'Callback',@(h,e)AC_dispatch('menu_ecoco_Callback',h,e));
-handles.menu_timeOpt = uimenu(handles.menuac,'Label','TimeOpt','Tag','menu_timeOpt', ...
-    'Callback',@(h,e)AC_dispatch('menu_timeOpt_Callback',h,e));
-handles.menu_eTimeOpt = uimenu(handles.menuac,'Label','eTimeOpt','Tag','menu_eTimeOpt', ...
-    'Callback',@(h,e)AC_dispatch('menu_eTimeOpt_Callback',h,e));
 handles.menu_specmoments = uimenu(handles.menuac,'Label','Spectral Moments','Tag','menu_specmoments', ...
     'Callback',@(h,e)AC_dispatch('menu_specmoments_Callback',h,e));
 
@@ -436,7 +432,7 @@ timeItems = {'menu_prewhiten','menu_smooth1','menu_bootstrap','menu_smooth_optio
     'menu_movmedian_option','menu_whiten','menu_power','menu_period','menu_waveletGUI','menu_CSA', ...
     'menu_recplot','menu_coh','menu_leadlag','menu_filter','menu_dynfilter','menu_AM','menu_agebuild', ...
     'menu_sr2age','menu_age','menu_correlation','menu_pda','menu_sednoise','menu_dynos','menu_rho', ...
-    'menu_ecoco','menu_timeOpt','menu_eTimeOpt','menu_specmoments','menu_swa'};
+    'menu_ecoco','menu_specmoments','menu_swa'};
 uniItems = {'menu_statsummary','menu_ttest'};
 bivItems = {'menu_uni2SamTest','menu_anova','menu_normaltest','menu_chi2gof','menu_corr','menu_covariance','menu_linearReg'};
 mulItems = {'menu_NewDataTable'};
@@ -525,7 +521,7 @@ set(gcf,'units','norm') % set location
 %% language
 
 lang_choice = load('ac_lang.txt');
-langdict = readtable('langdict.xlsx');
+langdict = readtable('langdict.xlsx','VariableNamingRule','preserve');
 lang_id = langdict.ID;
 lang_var = table2cell(langdict(:, 2 + lang_choice));
 
@@ -734,10 +730,6 @@ if lang_choice > 0
     set(handles.menu_rho,'text',lang_var{locb})
     [~, locb] = ismember('menu124',lang_id);
     set(handles.menu_ecoco,'text',lang_var{locb})
-    [~, locb] = ismember('menu125',lang_id);
-    set(handles.menu_timeOpt,'text',lang_var{locb})
-    [~, locb] = ismember('menu126',lang_id);
-    set(handles.menu_eTimeOpt,'text',lang_var{locb})
     [~, locb] = ismember('menu127',lang_id);
     set(handles.menu_specmoments,'text',lang_var{locb})
     %
@@ -1529,28 +1521,48 @@ if handles.lang_choice > 0
 end
 
 
-persistent chk
-if isempty(chk)
-      chk = 1;
-      pause(0.35); %Add a delay to distinguish single click from a double click
-      if chk == 1
-          chk = [];
-          handles.doubleclick = 0;
-      end
+forceDoubleClick = false;
+try
+    if isappdata(hObject,'ACForceDoubleClick')
+        forceDoubleClick = getappdata(hObject,'ACForceDoubleClick');
+        rmappdata(hObject,'ACForceDoubleClick');
+    end
+catch
+end
+
+if forceDoubleClick
+    handles.doubleclick = 1;
 else
-      chk = [];
-      handles.doubleclick = 1;
+    persistent chk
+    if isempty(chk)
+          chk = 1;
+          pause(0.35); %Add a delay to distinguish single click from a double click
+          if chk == 1
+              chk = [];
+              handles.doubleclick = 0;
+          end
+    else
+          chk = [];
+          handles.doubleclick = 1;
+    end
 end
 
         
 if handles.doubleclick
     index_selected = get(hObject,'Value');
+    index_selected = index_selected(1);
     file_list = get(hObject,'String');
-    filename = file_list{index_selected};
+    userdata = get(hObject,'UserData');
+    if isstruct(userdata) && isfield(userdata,'names') && numel(userdata.names) >= index_selected
+        filename1 = userdata.names{index_selected};
+    else
+        filename1 = file_list{index_selected};
+        filename1 = strrep2(filename1, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    end
+    filename = filename1;
     try
         % if selected item is a folder, try to open the folder.
         CDac_pwd; % cd working dir
-        filename1 = strrep2(filename, '<HTML><FONT color="blue">', '</FONT></HTML>');
         filename = fullfile(ac_pwd,filename1);
         cd(filename)
         refreshcolor;
@@ -2036,7 +2048,7 @@ if check == 1
             
             try
 
-                T = readtable(plot_filter_s); % Adjust the 'HeaderLines' if more than one header line
+                T = readtable(plot_filter_s,'VariableNamingRule','preserve'); % Adjust the 'HeaderLines' if more than one header line
                 data_filterout = table2array(T);
                 data_header = T.Properties.VariableNames;
                 disp('Load data with header ...')
@@ -3373,18 +3385,21 @@ if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
-        if isdir(data_name) == 1
-        else
-            [~,dat_name,ext] = fileparts(data_name);
-            if sum(strcmp(ext,handles.filetype)) > 0
-                current_data = load(data_name);
-                handles.current_data = current_data;
-                handles.data_name = data_name;
-                handles.dat_name = dat_name;
-                guidata(hObject, handles);
-                eCOCOGUI(handles);
-            end
+    if isdir(data_name) == 1
+    else
+        [~,dat_name,ext] = fileparts(data_name);
+        if sum(strcmp(ext,handles.filetype)) > 0
+            current_data = load(data_name);
+            handles.current_data = current_data;
+            handles.data_name = data_name;
+            handles.dat_name = dat_name;
+            guidata(hObject, handles);
+            % eCOCOGUI is non-modal and refreshes the main file list after
+            % output files are written.
+            eCOCOGUI(handles);
         end
+    end
+
 end
 guidata(hObject, handles);
 
@@ -5231,7 +5246,7 @@ for nploti = 1:nplot
 
                             try
                                 
-                                T = readtable(data_name); % Adjust the 'HeaderLines' if more than one header line
+                                T = readtable(data_name,'VariableNamingRule','preserve'); % Adjust the 'HeaderLines' if more than one header line
                                 % If T contains different data types per column, this step might not be straightforward
                                 if all(varfun(@isnumeric, T, 'OutputFormat', 'uniform'))
                                     data = table2array(T);
@@ -7444,117 +7459,6 @@ function menu_sednoise_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_utilities (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-
-% --------------------------------------------------------------------
-function menu_timeOpt_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_timeOpt (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
-nplot = length(plot_selected);   % length
-
-if nplot == 1
-    
-    %language
-    lang_id = handles.lang_id;
-    if handles.lang_choice > 0
-
-        [~, locb1] = ismember('a274',lang_id);
-        a274 = handles.lang_var{locb1};
-
-        [~, locb1] = ismember('a275',lang_id);
-        a275 = handles.lang_var{locb1};
-        [~, locb1] = ismember('a276',lang_id);
-        a276 = handles.lang_var{locb1};
-    else
-        a274 = '(e)TimeOpt may have advanced version in astrochron. ';
-        a275 = 'Visit';
-        a276 = ' for more infomation';
-    end
-
-    data_name = char(contents(plot_selected));
-    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
-    GETac_pwd; data_name = fullfile(ac_pwd,data_name);
-        if isdir(data_name) == 1
-        else
-            [~,dat_name,ext] = fileparts(data_name);
-            if sum(strcmp(ext,handles.filetype)) > 0
-                current_data = load(data_name);
-                handles.current_data = current_data;
-                handles.data_name = data_name;
-                handles.dat_name = dat_name;
-                guidata(hObject, handles);
-                timeOptGUI(handles);
-%                 if handles.lang_choice > 0
-% 
-%                     h=warndlg(['(e)TimeOpt may have advanced version in astrochron. ',...
-%                     'Visit',' https://cran.r-project.org/package=astrochron',' for more infomation'],...
-%                     '(e)TimeOpt');
-%                 else
-%                     
-%                     h=warndlg([a274,a275,' https://cran.r-project.org/package=astrochron',a276],...
-%                     '(e)TimeOpt');
-%                 end
-            end
-        end
-end
-guidata(hObject, handles);
-
-
-% --------------------------------------------------------------------
-function menu_eTimeOpt_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_eTimeOpt (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
-nplot = length(plot_selected);   % length
-if nplot == 1
-    %language
-    lang_id = handles.lang_id;
-    if handles.lang_choice > 0
-
-        [~, locb1] = ismember('a274',lang_id);
-        a274 = handles.lang_var{locb1};
-
-        [~, locb1] = ismember('a275',lang_id);
-        a275 = handles.lang_var{locb1};
-        [~, locb1] = ismember('a276',lang_id);
-        a276 = handles.lang_var{locb1};
-    else
-        a274 = '(e)TimeOpt may have advanced version in astrochron. ';
-        a275 = 'Visit';
-        a276 = ' for more infomation';
-    end
-
-    data_name = char(contents(plot_selected));
-    data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
-    GETac_pwd; data_name = fullfile(ac_pwd,data_name);
-        if isdir(data_name) == 1
-        else
-            [~,dat_name,ext] = fileparts(data_name);
-            if sum(strcmp(ext,handles.filetype)) > 0
-                current_data = load(data_name);
-                handles.current_data = current_data;
-                handles.data_name = data_name;
-                handles.dat_name = dat_name;
-                guidata(hObject, handles);
-                eTimeOptGUI(handles);
-%                 if handles.lang_choice
-%                     h=warndlg(['(e)TimeOpt may have advanced version in astrochron. ',...
-%                     'Visit',' https://cran.r-project.org/package=astrochron',' for more infomation'],...
-%                     '(e)TimeOpt');
-%                 else
-%                     h=warndlg([a274,a275,' https://cran.r-project.org/package=astrochron',a276],...
-%                     '(e)TimeOpt');
-%                 end
-            end
-        end
-end
-guidata(hObject, handles);
-
 
 
 % --------------------------------------------------------------------

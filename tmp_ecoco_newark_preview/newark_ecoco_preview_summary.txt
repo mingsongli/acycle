@@ -1,0 +1,15 @@
+dataFile=/Users/msli/Dropbox/Research/_通用方法火山构造波动/202606COCO/Example-LateTriassicNewarkDepthRank_0_800-300-LOWESS.txt
+npts=938
+dt=0.85344
+window=199.91832
+stepDepth=3.41376
+stepN=4
+pad=5000
+sedmin=11.09472
+sedmax=197.3241537
+sedstep=0.6207647791
+nsim=2
+windows=177
+sr_count=301
+finite_out_ecoco=53277
+figure_count=2

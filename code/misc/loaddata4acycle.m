@@ -33,7 +33,7 @@ if check == 1
             data_filterout = load(plot_filter_s); % load data directly
         catch  % if failed
             try
-                T = readtable(plot_filter_s); % Adjust the 'HeaderLines' if more than one header line
+                T = readtable(plot_filter_s,'VariableNamingRule','preserve'); % Adjust the 'HeaderLines' if more than one header line
                 if all(varfun(@isnumeric, T, 'OutputFormat', 'uniform'))
                     data_filterout = table2array(T);
                     disp('Load data with header ...')

@@ -606,7 +606,7 @@ try
     dat = load(p);
 catch
     try
-        T = readtable(p);
+        T = readtable(p,'VariableNamingRule','preserve');
         dat = table2array(T);
     catch
         try

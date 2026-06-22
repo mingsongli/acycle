@@ -11,7 +11,7 @@
 
 function [xdata_filtered,time,freqboundlow,freqboundhigh]=dynamic_filter_lang(data,window,step,fmin,fmax,unit,norm,padding)
     lang_choice = load('ac_lang.txt');
-    langdict = readtable('langdict.xlsx');
+    langdict = readtable('langdict.xlsx','VariableNamingRule','preserve');
     lang_id = langdict.ID;
     if lang_choice == 0
         % English

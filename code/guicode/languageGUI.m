@@ -220,7 +220,7 @@ classdef languageGUI < matlab.apps.AppBase
             end
 
             langdictPath = locateResource(app, 'langdict.xlsx');
-            langdict = readtable(langdictPath);
+            langdict = readtable(langdictPath,'VariableNamingRule','preserve');
             langVar2 = table2cell(langdict(:, 2 + langChoice));
 
             [~, msg1] = ismember('msg1', app.LangID);

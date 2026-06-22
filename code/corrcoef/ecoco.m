@@ -1,224 +1,257 @@
 function [prt_sr,out_depth,out_ecc,out_ep,out_eci,out_ecoco,out_ecocorb,out_norbit,sr_p] = ...
-   ecoco(data,target,orbit7,window,dt,step,delinear,red,pad,sr1,sr2,srstep,nsim,adjust,slices,plotn)
-% Evolutionary correlation coefficient
-% INPUT
-%   data: 2 column time series: depth-variances; depth must be a evenly
-%           spaced, increasing-downward series.
-%   target: 2 column target ETP solution (e.g., a 2-myr long laskar solution)
-%           time-ETP;  ETP is a normalized eccentricity-tilt-precession series.
-%   orbit7: seven main orbit cycles, 405, 125, 95, Obl. P1, P2, and P3
-%   window: sliding window
-%   dt: sample rates of data
-%   step: runing step
-%   delinear: 1 = yes. Remove linear trend of data
-%   method 1 = periodogram; 2 = 2pi-MTM
-%   red: red = 0; no adjust power; 1 = AR(1); else red% Confidence interval
-%   pad: zero-padding number
-%   sr1: tested sed. rate: start
-%   sr2: tested sed. rate: end
-%   srstep: tested sed. rate: step
-%   nsim: number of simulation
-%   adjust 1: adjust the power of the target to the power of the real data
-%   slices: divide series within each sliding window into several slices
-%   plotn: plot result
+   ecoco(data,~,orbit9,window,dt,step,delinear,red,pad,sr1,sr2,srstep,nsim,adjust,~,plotn,method,fmaxdata,main_unit_selection,calcMode)
+% Evolutionary COCO using sliding-window 1-slice COCO.
 %
-% OUTPUT
-%   prt_sr:  sedimentation rate evaluated
-%   out_depth: 
-%   out_ecc  % evolutionary correlation coefficient
-%   out_ep  % evolutionary correlation coefficient p-value (Matlab version)
-%   out_eci  % evolutionary correlation coefficient H0 significance level
-%   out_ecoco  % evolutionary corrcoef and H0 sig.level
-%   out_ecocorb: evolutionary corrcoef, orbit cycles involved and H0 sig.level
-%   out_norbit: number of orbit cycles involved
-%
-% Calls for 
-%   theoredar1
-%   noiseDH
-%   ecocoplot
-%   numorbit
-%
-% By Mingsong Li, June 2017
-%   updated by Mingsong Li, Dec 25, 2017
-%   updated by Mingsong Li, May 29, 2021
-%
-%% For acycle language version (2.6 and after)
-% language
-% lang_choice = 0;  %
-% handles.main_unit_selection = 0;
+% Each window is evaluated by corrcoefslices_rankNew, so eCOCO uses the
+% same target construction, Monte Carlo p-value, and pCOCO definition as
+% the upgraded COCO workflow.
+
+if nargin < 20 || isempty(calcMode)
+    calcMode = 'accurate';
+end
+if nargin < 19 || isempty(main_unit_selection)
+    main_unit_selection = get_main_unit_selection();
+end
+if nargin < 18 || isempty(fmaxdata)
+    fmaxdata = 1/(2*dt);
+end
+if nargin < 17 || isempty(method)
+    method = 'Spearman';
+end
+if nargin < 16 || isempty(plotn)
+    plotn = 1;
+end
+calcMode = lower(char(calcMode));
+if ~ismember(calcMode,{'fast','accurate'})
+    error('calcMode must be either ''fast'' or ''accurate''.');
+end
+
 lang_choice = load('ac_lang.txt');
 langdict = readtable('langdict.xlsx');
 lang_id = langdict.ID;
 lang_var = table2cell(langdict(:, 2 + lang_choice));
 [~, ec79] = ismember('ec79',lang_id);
 [~, ec85] = ismember('ec85',lang_id);
-%%
-%f_nyq_target = target(length(target(:,1)),1);  % to estimate sr0 (turnpoint sed.rate)
-% nyquist = 1/(2*dt);             % Nyquist frequency of real data
-nrow = length(data(:,1));       % number of the row of data
-time = data(:,1);               % depth or data
-datay = data(:,2);              % value of data
-npts = fix(window/dt);            % number of time series within 1 window
-            
-if step >= nrow/2
-   errordlg('Error: sliding step is too large!');
+
+data = data(all(isfinite(data(:,1:2)),2),1:2);
+data = sortrows(data,1);
+nrow = size(data,1);
+if nrow < 3
+    error('eCOCO requires at least three valid data points.');
 end
 
-m=fix((nrow-npts)/step)+1;     % number of FFT calculations, n_row of FFT matrix results
-x=[];
-timex=[];
-
-%% prepare data based on running window and steps
-disp('>> Step 1: prepare data');
-for m1=1:step:(step*m-1)
-    m2=npts+m1-1;
-    m3 = (m1-1)/step+1;               % number of FFT calculations related with step
-    if m2 > nrow                      % break in case of reach moving window boundary
-        break
-    end
-    x(:,m3) = datay(m1:m2,1);
-    timex(:,m3) = time(m1:m2,1);
+time = data(:,1);
+datay = data(:,2);
+npts = fix(window/dt);
+if npts < 3
+    error('eCOCO window is too small for the data sampling interval.');
 end
-    if delinear == 1
-        x = detrend(x,0);                   % remove mean trend of x
-    end
-%% Prepare varables
+if npts > nrow
+    error('eCOCO window is longer than the data series.');
+end
+if step < 1 || step >= nrow/2
+   error('Error: sliding step is too large!');
+end
+
+starts = 1:step:(nrow-npts+1);
+m3 = numel(starts);
+if m3 < 1
+    error('No valid eCOCO sliding windows.');
+end
+
 sr_range = sr1:srstep:sr2;
-nofsr = length(sr_range); % number of sedimentation rates to be tested
-out_ecc = zeros(nofsr,m3);
-out_ep = zeros(nofsr,m3);
-out_eci = zeros(nofsr,m3);
-out_ecoco = zeros(nofsr,m3);
-out_ecocorb = zeros(nofsr,m3);
-out_norbit = zeros(nofsr,m3);
+nofsr = numel(sr_range);
+orbitn = numel(orbit9);
 
-%% Simulation for the first sliding window
-i = 1;
-%[corrCI,~,corry] = corrcoefsig([timex(:,i),x(:,i)],target,orbit7,dt,pad,sr1,sr2,srstep,adjust,red,nsim,0,1);
-[~,~,corry] = corrcoefslices([timex(:,i),x(:,i)],target,orbit7,dt,pad,sr1,sr2,srstep,adjust,red,nsim,0,slices);
-%%
-corrCI =[];
-sr_p = zeros(m3,6);
+prt_sr = sr_range(:);
+out_depth = nan(m3,1);
+out_ecc = nan(nofsr,m3);
+out_ep = nan(nofsr,m3);
+out_eci = nan(nofsr,m3);
+out_ecoco = nan(nofsr,m3);
+out_ecocorb = nan(nofsr,m3);
+out_norbit = nan(nofsr,m3);
+sr_p = nan(m3,6);
 
-% Waitbar
 if lang_choice == 0
-    hwaitbar = waitbar(0,'eCOCO processing ... [CTRL + C to quit]',...    
+    hwaitbar = waitbar(0,'eCOCO processing ... [CTRL + C to quit]', ...
        'WindowStyle','modal');
 else
-    hwaitbar = waitbar(0,['eCOCO ',lang_var{ec79}],...    
+    hwaitbar = waitbar(0,['eCOCO ',lang_var{ec79}], ...
        'WindowStyle','modal');
 end
+cleanupObj = onCleanup(@()safeClose(hwaitbar)); %#ok<NASGU>
 hwaitbar_find = findobj(hwaitbar,'Type','Patch');
-set(hwaitbar_find,'EdgeColor',[0 0.9 0],'FaceColor',[0 0.9 0]) % changes the color to blue
+set(hwaitbar_find,'EdgeColor',[0 0.9 0],'FaceColor',[0 0.9 0])
 setappdata(hwaitbar,'canceling',0)
+
 steps = 50;
-% step estimation for waitbar
-nmc_n = ceil(m3/steps);
+nmc_n = max(1,ceil(m3/steps));
 waitbarstep = 0;
 waitbar(waitbarstep / steps)
-orbitn = length(orbit7);
- for i = 1:m3
-     [corrCI,~,~] = corrcoefslices_rank([timex(:,i),x(:,i)],target,orbit7,dt,pad,sr1,sr2,srstep,adjust,red,0,0,slices);
-     out_ecc(:,i) = corrCI(:,2);  % evolutionary ecorrcoef value
-     out_ep(:,i) = corrCI(:,3);  % evolutionary ecorrcoef p-value
-     norbit1 = orbitn - corrCI(:,end);
-     out_norbit(:,i) = norbit1;
-     for j = 1 : nofsr
-         %percent_value = findperct(corrCI(j,2),corry(j,:));
-         %if percent_value == 0
-         %    percent_value = 1/(nsim+1);
-         %end
-         %out_ecoco(j,i) = (- log10(out_eci(j,i))) * out_ecc(j,i);
-         %out_ecocorb(j,i) = out_norbit(j,i) / orbitn * out_ecoco(j,i);
-         % M. Li; Oct. 2023
-         prctile_value = (100-invprctile(corry(j,:), corrCI(j,2)))/100; 
-         if prctile_value == 0
-            prctile_value = 1/(nsim+1);
-         end
-         out_eci(j,i) = prctile_value;
-         out_ecoco(j,i) = (- log10(prctile_value)) * out_ecc(j,i);
-         out_ecocorb(j,i) = out_norbit(j,i) / orbitn * out_ecoco(j,i);
-     end
-     
-     if rem(i,nmc_n) == 0
-        waitbarstep = waitbarstep+1; 
-        if waitbarstep > steps; waitbarstep = steps; end
-        pause(0.001);%
+
+if strcmp(calcMode,'fast')
+    disp('>> Step 1: prepare sliding windows and run Fast eCOCO');
+else
+    disp('>> Step 1: prepare sliding windows and run Accurate eCOCO');
+end
+
+fastNull = [];
+fastFirstCorrCI = [];
+if strcmp(calcMode,'fast') && nsim > 0
+    datWin0 = [time(starts(1):starts(1)+npts-1), datay(starts(1):starts(1)+npts-1)];
+    if delinear == 1
+        datWin0(:,2) = detrend(datWin0(:,2),0);
+    end
+    [fastFirstCorrCI,~,fastNull] = corrcoefslices_rankNew( ...
+        datWin0,orbit9,dt,pad,sr1,sr2,srstep,adjust,red,nsim,0,1, ...
+        method,fmaxdata,main_unit_selection,false);
+end
+
+for i = 1:m3
+    m1 = starts(i);
+    m2 = m1+npts-1;
+    datWin = [time(m1:m2), datay(m1:m2)];
+    if delinear == 1
+        datWin(:,2) = detrend(datWin(:,2),0);
+    end
+    out_depth(i) = (datWin(1,1) + datWin(end,1))/2;
+
+    if strcmp(calcMode,'fast')
+        if i == 1 && ~isempty(fastFirstCorrCI)
+            corrCI = fastFirstCorrCI;
+        else
+            [corrCI,~] = corrcoefslices_rankNew( ...
+                datWin,orbit9,dt,pad,sr1,sr2,srstep,adjust,red,0,0,1, ...
+                method,fmaxdata,main_unit_selection,false);
+        end
+        corr_h0 = [];
+    else
+        [corrCI,corr_h0] = corrcoefslices_rankNew( ...
+            datWin,orbit9,dt,pad,sr1,sr2,srstep,adjust,red,nsim,0,1, ...
+            method,fmaxdata,main_unit_selection,false);
+    end
+
+    if i == 1
+        prt_sr = corrCI(:,1);
+    end
+
+    out_ecc(:,i) = corrCI(:,2);
+    out_ep(:,i) = corrCI(:,3);
+    if strcmp(calcMode,'fast') && ~isempty(fastNull)
+        out_eci(:,i) = pValuesFromNull(corrCI(:,2),fastNull,nofsr);
+    else
+        out_eci(:,i) = getPValues(corr_h0,nofsr);
+    end
+    out_norbit(:,i) = getOrbitCounts(corr_h0,corrCI,orbitn,nofsr);
+    out_ecoco(:,i) = pcocoValue(out_ecc(:,i),out_eci(:,i));
+    out_ecocorb(:,i) = out_norbit(:,i) ./ orbitn .* out_ecoco(:,i);
+
+    bestIdx = bestFiniteIndex(out_ecocorb(:,i));
+    if ~isempty(bestIdx)
+        sr_p(i,1) = out_depth(i);
+        sr_p(i,2) = prt_sr(bestIdx);
+        sr_p(i,3) = out_ecc(bestIdx,i);
+        sr_p(i,4) = out_eci(bestIdx,i);
+        sr_p(i,5) = out_norbit(bestIdx,i);
+        sr_p(i,6) = out_ecocorb(bestIdx,i);
+
+        disp(['-----> Location : ',num2str(out_depth(i)),' m. Iteration : ',num2str(m3),' -> ',num2str(i)])
+        disp(['>>  Sedimentation rate = [ ',num2str(sr_p(i,2)), ...
+            ' ] cm/kyr. # of orbital cycles involved : ', ...
+            num2str(sr_p(i,5)),' of ',num2str(orbitn)]);
+        disp(['    Correlation coefficient ',num2str(sr_p(i,3)), ...
+            '. p-value ',num2str(sr_p(i,4)), ...
+            '. pCOCO ',num2str(out_ecoco(bestIdx,i)), ...
+            '. pCOCOxOrbits ',num2str(sr_p(i,6))])
+    else
+        disp(['-----> Location : ',num2str(out_depth(i)), ...
+            ' m. Iteration : ',num2str(m3),' -> ',num2str(i), ...
+            '. No finite pCOCO solution.'])
+    end
+
+    if rem(i,nmc_n) == 0
+        waitbarstep = waitbarstep+1;
+        if waitbarstep > steps
+            waitbarstep = steps;
+        end
+        pause(0.001);
         waitbar(waitbarstep / steps)
     end
     if getappdata(hwaitbar,'canceling')
         break
     end
-     
-     if nsim > 1
-         prt_sr = corrCI(:,1);
-         prt_ecc = corrCI(:,2);
-         prt_eci = out_eci(:,i);
-         prints_ecocorb = max(out_ecocorb(:,i)); % max ecc value
-         prints_sr = prt_sr(out_ecocorb(:,i) == prints_ecocorb);
-         prints_eci = prt_eci(out_ecocorb(:,i) == prints_ecocorb);
-         prints_ecc = prt_ecc(out_ecocorb(:,i) == prints_ecocorb);
-         prints_ecoco = prt_ecc(out_ecocorb(:,i) == prints_ecocorb);
-         prints_norbit = out_norbit(out_ecocorb(:,i) == prints_ecocorb);
-         
-         if length(prints_sr) > 1
-             disp('Warning: multiple sedimentary rate options are :')
-             disp(prints_sr)
-         end
-         
-         loci = ((i-1) * dt * step + data(1,1) + window/2);
-
-         disp(['-----> Location : ',num2str(loci),' m. Iteration : ',num2str(m3),' -> ',num2str(i)])
-         try
-             disp(['>>  Sedimentation rate = [ ',num2str(prints_sr(1)),...
-                 ' ] cm/kyr. # of orbital cycles invloved : ',...
-                 num2str(prints_norbit(1)),' of ',num2str(length(orbit7))]);
-         catch
-             disp('>>  Error: no solution. May not adjust the periodogram of astronomical solutions to the data periodogram')
-             break
-         end
-             disp(['    Correlation coeffcient ',num2str(prints_ecc(1)),...
-                 '. H0 significance level ',num2str(prints_eci(1))]);
-             disp(['    COCOxH0-SL value ',num2str(prints_ecoco(1)), ' COCOxH0-SLxOrbits ',num2str(prints_ecocorb(1)) ])
-             sr_p(i,1) = loci;
-             sr_p(i,2) = prints_sr(1);
-             sr_p(i,3) = prints_ecc(1);
-             sr_p(i,4) = prints_eci(1);
-             sr_p(i,5) = prints_norbit(1);
-             sr_p(i,6) = prints_ecocorb(1);
-     else
-         out_ecocorb(:,i) = out_norbit.*out_ecc(:,i);
-     end
- end
- if ishandle(hwaitbar)
-    close(hwaitbar);
 end
-%    assignin('base','sr_disp',sr_p)
-    out_depth = (linspace(data(1,1)+window/2,data(nrow,1)-window/2,m3))';
-    
+
 if abs(plotn) > 0
     if lang_choice == 0
         hwarn = warndlg('Wait, eCOCO plot ...');
     else
         hwarn = warndlg(lang_var{ec85});
     end
-    if nsim > 1
-        [prt_sr] =  ecocoplot(corrCI(:,1),out_depth,out_ecc,out_ep,out_eci,out_ecoco,out_ecocorb,out_norbit,plotn);
-    else
-        [prt_sr] = ecocoplots(corrCI(:,1),out_depth,out_ecc,out_ep,out_eci,out_ecoco,out_ecocorb,plotn);
-    end
+    ecocoplot(prt_sr,out_depth,out_ecc,out_ep,out_eci,out_ecoco,out_ecocorb,out_norbit,plotn);
     try
         close(hwarn)
     catch
     end
+
+    hold on
+    plot(sr_p(:,2), sr_p(:,1), 'r-o')
 end
 
-% plot sed. rate
-%figure(figure_eCOCO);
-%subplot(1,3,1)
-hold on
-plot(sr_p(:,2), sr_p(:,1), 'r-o')
+function pValues = getPValues(corr_h0,nofsr)
+pValues = nan(nofsr,1);
+if ~isempty(corr_h0)
+    pValues(1:min(nofsr,size(corr_h0,1))) = corr_h0(1:min(nofsr,size(corr_h0,1)),1);
+end
 
-%subplot(1,3,2)
-%hold on
-%plot(sr_p(:,2), sr_p(:,1), 'w-o')
+function pValues = pValuesFromNull(observed,nullCorr,nofsr)
+pValues = nan(nofsr,1);
+n = min([nofsr,numel(observed),size(nullCorr,1)]);
+for ii = 1:n
+    sim = nullCorr(ii,:);
+    sim = sim(isfinite(sim));
+    obs = observed(ii);
+    if isempty(sim) || ~isfinite(obs)
+        continue
+    end
+    pValues(ii) = (sum(sim >= obs) + 1) / (numel(sim) + 1);
+end
+
+function norbit = getOrbitCounts(corr_h0,corrCI,orbitn,nofsr)
+norbit = nan(nofsr,1);
+if size(corr_h0,2) >= 2
+    norbit(1:min(nofsr,size(corr_h0,1))) = corr_h0(1:min(nofsr,size(corr_h0,1)),2);
+else
+    norbit(1:min(nofsr,size(corrCI,1))) = orbitn - corrCI(1:min(nofsr,size(corrCI,1)),end);
+end
+
+function value = pcocoValue(rho,pValue)
+pSafe = pValue;
+pSafe(~isfinite(pSafe) | pSafe <= 0) = NaN;
+pSafe(pSafe > 1) = 1;
+value = rho .* abs(log10(pSafe));
+
+function idx = bestFiniteIndex(values)
+idx = [];
+valid = find(isfinite(values));
+if isempty(valid)
+    return
+end
+[~,loc] = max(values(valid));
+idx = valid(loc);
+
+function main_unit_selection = get_main_unit_selection()
+main_unit_selection = 0;
+try
+    main_unit_selection = evalin('base','main_unit_selection');
+catch
+end
+
+function safeClose(h)
+try
+    if ishandle(h)
+        close(h);
+    end
+catch
+end

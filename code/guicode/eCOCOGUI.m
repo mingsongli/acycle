@@ -19,14 +19,16 @@ end
         [app.dataRaw, app.data, app.meta] = prepData(ctx);
         app.fmaxdata = app.meta.fmax_data;
         app.main_unit_selection = getfielddef(ctx,'main_unit_selection',0);
-
+        dt = mean(diff(app.data(:,1)));
+        app.meta.dt = dt;
         app.mode = 2; % 1=COCO, 2=eCOCO
-        app.corrmethod = 1; % 1 Pearson, 2 Spearman
+        app.ecocoCalcMode = 1; % 1=Fast, 2=Accurate
+        app.corrmethod = 2; % 1 Pearson, 2 Spearman
         app.red = 0; % 0 no
         app.time_0pad = 1;
         app.padtype = 1;
-
-        app.orbit7 = [405 125 95 41 22.43 23.75 19.18];
+        
+        app.orbit9 = [405.6912, 130.6979, 123.8532, 98.8517, 94.8856, 40.9897, 23.6820, 22.3758, 18.9519];
         app.age = 0;
         app.f1 = 0;
         app.f2 = 0.06;
@@ -66,6 +68,10 @@ end
                 'SelectionChangedFcn',@(s,e)onModeChanged());
             app.RCOCO = uiradiobutton(app.BGMethod,'Text','COCO','FontWeight','bold','FontColor',app.blue,'Value',false);
             app.RECOCO = uiradiobutton(app.BGMethod,'Text','eCOCO','FontWeight','bold','FontColor',app.blue,'Value',true);
+            app.BGEcoCalc = uibuttongroup(app.PMethod,'BackgroundColor',app.bg,'BorderType','none', ...
+                'SelectionChangedFcn',@(s,e)onEcoCalcChanged());
+            app.RFast = uiradiobutton(app.BGEcoCalc,'Text','Fast','Value',true);
+            app.RAccurate = uiradiobutton(app.BGEcoCalc,'Text','Accurate','Value',false);
 
             app.PData = uipanel(app.UIFigure,'Title','Data','BackgroundColor',app.bg);
             app.LData = uilabel(app.PData,'Text','Data','BackgroundColor',app.bg);
@@ -85,7 +91,7 @@ end
             app.ESlices = uieditfield(app.PPeriod,'text','Value','1');
             app.CRed = uicheckbox(app.PPeriod,'Text','Remove red noise model','FontColor',app.blue, ...
                 'ValueChangedFcn',@(s,e)onRedToggle());
-            app.DRed = uidropdown(app.PPeriod,'Items',{'classic AR1 (f-fred)','classic AR1 (f/fred-1)','robust AR1 (f-fred)'}, ...
+            app.DRed = uidropdown(app.PPeriod,'Items',{'Classic AR1','Robust AR1','Smoothed Window'}, ...
                 'Enable','off');
 
             app.PSed = uipanel(app.UIFigure,'Title','Test sedimentation rate','BackgroundColor',app.bg);
@@ -106,18 +112,16 @@ end
             app.EF2 = uieditfield(app.PTarget,'text','Value','0.06');
             app.LUnitFreq = uilabel(app.PTarget,'Text','1/kyr','BackgroundColor',app.bg);
             app.BGOrbit = uibuttongroup(app.PTarget,'BackgroundColor',app.bg,'BorderType','none','SelectionChangedFcn',@(s,e)onOrbitChanged());
-            app.RBerger = uiradiobutton(app.BGOrbit,'Text','Berger89 solution');
-            app.RLaskar = uiradiobutton(app.BGOrbit,'Text','Laskar04 Solution','Value',true);
+            app.RLaskar = uiradiobutton(app.BGOrbit,'Text','Farhat+2022','Value',true);
             app.RUser = uiradiobutton(app.BGOrbit,'Text','User-defined period');
-            app.LOrbit1 = uilabel(app.BGOrbit,'Text',orbitString(app.orbit7),'BackgroundColor',app.bg);
-            app.LOrbit2 = uilabel(app.BGOrbit,'Text',orbitString(app.orbit7),'BackgroundColor',app.bg);
-            app.EOrbitUser = uieditfield(app.BGOrbit,'text','Value',orbitString(app.orbit7),'Enable','off');
+            app.LOrbit2 = uilabel(app.BGOrbit,'Text',orbitString(app.orbit9),'BackgroundColor',app.bg);
+            app.EOrbitUser = uieditfield(app.BGOrbit,'text','Value',orbitString(app.orbit9),'Enable','off');
             app.BWaltham = uibutton(app.BGOrbit,'push','Text','?Waltham15','ButtonPushedFcn',@(s,e)onWaltham());
 
             app.PCorr = uipanel(app.UIFigure,'Title','Correlation method','BackgroundColor',app.bg);
             app.BGCorr = uibuttongroup(app.PCorr,'BackgroundColor',app.bg,'BorderType','none','SelectionChangedFcn',@(s,e)onCorrChanged());
-            app.RSpearman = uiradiobutton(app.BGCorr,'Text','Spearman');
-            app.RPearson = uiradiobutton(app.BGCorr,'Text','Pearson','FontWeight','bold','Value',true);
+            app.RSpearman = uiradiobutton(app.BGCorr,'Text','Spearman','FontWeight','bold','Value',true);
+            app.RPearson = uiradiobutton(app.BGCorr,'Text','Pearson','Value',false);
 
             app.PMC = uipanel(app.UIFigure,'Title','Monte Carlo','BackgroundColor',app.bg);
             app.ENsim = uieditfield(app.PMC,'text','Value',num2str(app.nsim));
@@ -191,11 +195,9 @@ end
             app.EF2.Position = [700 162 110 30];
             app.LUnitFreq.Position = [820 160 60 28];
             app.BGOrbit.Position = [12 10 app.PTarget.Position(3)-24 150];
-            app.RBerger.Position = [10 96 180 28];
             app.RLaskar.Position = [10 62 180 28];
             app.RUser.Position = [10 24 200 28];
-            app.LOrbit1.Position = [300 96 360 28];
-            app.LOrbit2.Position = [300 62 360 28];
+            app.LOrbit2.Position = [300 62 460 28];
             app.EOrbitUser.Position = [300 24 460 30];
             app.BWaltham.Position = [780 24 130 30];
 
@@ -232,17 +234,19 @@ end
 
             y = y + hData + gap;
             app.PMethod.Position = [m y 0.46*w hMethod];
-            app.BGMethod.Position = [8 4 app.PMethod.Position(3)-16 app.PMethod.Position(4)-28];
-            app.RCOCO.Position = [40 4 180 24];
-            app.RECOCO.Position = [220 4 180 24];
+            app.BGMethod.Position = [8 26 app.PMethod.Position(3)-16 26];
+            app.RCOCO.Position = [40 1 180 24];
+            app.RECOCO.Position = [220 1 180 24];
+            app.BGEcoCalc.Position = [208 2 260 26];
+            app.RFast.Position = [12 1 90 24];
+            app.RAccurate.Position = [116 1 120 24];
 
             setappdata(app.UIFigure,'ECOCO_APP',app);
         end
 
         function loadDefaultsToUI()
-            app.EOrbitUser.Value = orbitString(app.orbit7);
-            app.LOrbit1.Text = orbitString(app.orbit7);
-            app.LOrbit2.Text = orbitString(app.orbit7);
+            app.EOrbitUser.Value = orbitString(app.orbit9);
+            app.LOrbit2.Text = orbitString(app.orbit9);
             onPadEdgeToggle();
         end
 
@@ -274,9 +278,19 @@ end
             app.BPlotE.Visible = onoff(isEco);
             app.BTrack.Visible = onoff(isEco);
             app.ESlices.Enable = onoff(~isEco);
+            app.RFast.Enable = onoff(isEco);
+            app.RAccurate.Enable = onoff(isEco);
             onPadEdgeToggle();
             setappdata(app.UIFigure,'ECOCO_APP',app);
             onResize();
+        end
+
+        function onEcoCalcChanged()
+            app.ecocoCalcMode = 1;
+            if app.RAccurate.Value
+                app.ecocoCalcMode = 2;
+            end
+            setappdata(app.UIFigure,'ECOCO_APP',app);
         end
 
         function onCorrChanged()
@@ -288,35 +302,28 @@ end
         end
 
         function onOrbitChanged()
+
             app.EOrbitUser.Enable = 'off';
+
             if app.RUser.Value
                 app.EOrbitUser.Enable = 'on';
-                app.orbit7 = str2num(app.EOrbitUser.Value); %#ok<ST2NM>
-                if isempty(app.orbit7)
-                    app.orbit7 = [405 125 95 41 22.43 23.75 19.18];
+                app.orbit9 = str2num(app.EOrbitUser.Value); %#ok<ST2NM>
+                if isempty(app.orbit9)
+                    app.orbit9 = [405.6912, 130.6979, 123.8532, 98.8517, 94.8856, 40.9897, 23.6820, 22.3758, 18.9519];
                 end
-            elseif app.RBerger.Value
+            else                
                 age = str2double(app.EAge.Value);
                 if ~isfinite(age), age = 0; end
-                if age > 0
-                    app.orbit7 = getBerger89Period(age);
-                else
-                    app.orbit7 = [405 125 95 41 22.43 23.75 19.18];
-                end
-            else
-                age = str2double(app.EAge.Value);
-                if ~isfinite(age), age = 0; end
-                obl = 41 - 0.0332 * age;
-                p1 = 22.43 - 0.0108 * age;
-                p2 = 23.75 - 0.0121 * age;
-                p3 = 19.18 - 0.0079 * age;
-                app.orbit7 = [405 125 95 obl p2 p1 p3];
+                orbit9 = calculate_orbit9(age);
+                app.orbit9  = orbit9(:,2)/1000;
             end
-            app.LOrbit1.Text = orbitString(app.orbit7);
-            app.LOrbit2.Text = orbitString(app.orbit7);
+            
+            app.LOrbit2.Text = orbitString(app.orbit9);
+
             if app.RUser.Value
-                app.EOrbitUser.Value = orbitString(app.orbit7);
+                app.EOrbitUser.Value = orbitString(app.orbit9);
             end
+
             setappdata(app.UIFigure,'ECOCO_APP',app);
         end
 
@@ -337,7 +344,7 @@ end
 
         function refreshSedInfo()
             sr = app.sedmin:app.sedstep:app.sedmax;
-            if numel(sr) < 3
+            if numel(sr) < 2
                 app.LSedInfo.Text = 'No valid test sed. rates.';
                 return;
             end
@@ -363,22 +370,22 @@ end
                 app.sedmax = toNum(app.ESedMax.Value, app.sedmax);
                 app.sedstep = max(eps,toNum(app.ESedStep.Value, app.sedstep));
                 app.age = toNum(app.EAge.Value, app.age);
-                app.orbit7 = parseOrbit();
+
+                app.orbit9 = parseOrbit();
+
                 app.red = redCode();
                 assignin('base','main_unit_selection',app.main_unit_selection);
 
                 srm = mean(diff(dat(:,1)));
-                npts = size(dat,1);
-                t1 = 1000 * app.age;
-                target = buildTarget(app.orbit7,t1,app.f1,app.f2,app.pad);
-
-                sr1 = app.sedmin; sr2 = app.sedmax; srstep = app.sedstep;
+                sr1 = app.sedmin; 
+                sr2 = app.sedmax; 
+                srstep = app.sedstep;
                 adjust = app.adjust; nsim = app.nsim; red = app.red; plotn = 1;
+                method = iff(app.corrmethod==1,'Pearson','Spearman');
 
                 if app.mode == 1
-                    method = iff(app.corrmethod==1,'Pearson','Spearman');
                     h = uiprogressdlg(app.UIFigure,'Title','COCO','Message','Running ...','Indeterminate','on');
-                    [corrCI,corr_h0,~] = corrcoefslices_rank(dat,target,app.orbit7,srm,app.pad,sr1,sr2,srstep,adjust,red,nsim,plotn,app.slices,method,app.fmaxdata,app.main_unit_selection);
+                    [corrCI,corr_h0,~] = corrcoefslices_rankNew(dat,app.orbit9,srm,app.pad,sr1,sr2,srstep,adjust,red,nsim,plotn,app.slices,method,app.fmaxdata,app.main_unit_selection);
                     close(h);
                     app.run.corrCI = corrCI;
                     app.run.corr_h0 = corr_h0;
@@ -391,10 +398,11 @@ end
                         dat2 = zeropad2(dat2,app.window,app.padtype);
                     end
                     h = uiprogressdlg(app.UIFigure,'Title','eCOCO','Message','Running ...','Indeterminate','on');
+                    ecocoMode = iff(app.ecocoCalcMode == 1,'fast','accurate');
                     [prt_sr,out_depth,out_ecc,out_ep,out_eci,out_ecoco,out_ecocorb,out_norbit,~] = ...
-                        ecoco(dat2,target,app.orbit7,app.window,srm,stepN,0,red,app.pad,sr1,sr2,srstep,nsim,adjust,1,plotn);
+                        ecoco(dat2,[],app.orbit9,app.window,srm,stepN,0,red,app.pad,sr1,sr2,srstep,nsim,adjust,1,plotn,method,app.fmaxdata,app.main_unit_selection,ecocoMode);
                     close(h);
-
+                    
                     app.run.prt_sr = prt_sr;
                     app.run.out_depth = out_depth;
                     app.run.out_ecc = out_ecc;
@@ -501,7 +509,7 @@ end
             writematrix(out_ecc,nm,'Sheet','COCO');
             writematrix(out_eci,nm,'Sheet','Conf.Int.');
             writematrix(out_norbit,nm,'Sheet','#Orbits');
-            writematrix(out_ecoco,nm,'Sheet','COCOxH0');
+            writematrix(out_ecoco,nm,'Sheet','pCOCO');
         end
 
         function s = uniqueName(nm)
@@ -513,18 +521,17 @@ end
                 if ~exist(s,'file'), return; end
             end
         end
-
+        
         function out = parseOrbit()
             if app.RUser.Value
                 out = str2num(app.EOrbitUser.Value); %#ok<ST2NM>
                 if isempty(out)
-                    out = [405 125 95 41 22.43 23.75 19.18];
+                    out = [405.6912, 130.6979, 123.8532, 98.8517, 94.8856, 40.9897, 23.6820, 22.3758, 18.9519];
                 end
-            elseif app.RBerger.Value
-                out = getBerger89Period(app.age);
             else
                 age = app.age;
-                out = [405 125 95, 41 - 0.0332*age, 23.75 - 0.0121*age, 22.43 - 0.0108*age, 19.18 - 0.0079*age];
+                orbit9 = calculate_orbit9(age);
+                out = orbit9(:,2)/1000;
             end
             out = out(:)';
         end
@@ -535,9 +542,9 @@ end
                 return
             end
             switch app.DRed.Value
-                case 'classic AR1 (f-fred)'
+                case 'Classic AR1'
                     r = 1;
-                case 'classic AR1 (f/fred-1)'
+                case 'Robust AR1'
                     r = 2;
                 otherwise
                     r = 3;
@@ -561,88 +568,75 @@ end
 end
 
 function [raw, dat, meta] = prepData(ctx)
-raw = getfielddef(ctx,'current_data',[]);
-if isempty(raw)
-    raw = [0 0; 1 1; 2 0.5; 3 1.5];
-end
-raw = raw(:,1:min(2,size(raw,2)));
-raw = raw(all(isfinite(raw),2),:);
-raw = sortrows(raw,1);
-if exist('findduplicate','file') == 2
-    raw = findduplicate(raw);
-else
-    [~,ia] = unique(raw(:,1),'stable');
-    raw = raw(ia,:);
-end
-
-dat = raw;
-meta = struct();
-meta.unit = char(getfielddef(ctx,'unit','m'));
-meta.unit_type = getfielddef(ctx,'unit_type',0);
-meta.filename = char(getfielddef(ctx,'data_name','data.txt'));
-meta.dat_name = char(getfielddef(ctx,'dat_name',meta.filename));
-
-if size(dat,1) < 3
-    dat = [0 0;1 1;2 0.5;3 1.5];
-end
-
-dt = median(diff(dat(:,1)));
-if ~isfinite(dt) || dt <= 0
-    dt = 1;
-end
-meta.dt = dt;
-meta.fmax_data = 1/(2*dt);
+    raw = getfielddef(ctx,'current_data',[]);
+    if isempty(raw)
+        raw = [0 0; 1 1; 2 0.5; 3 1.5];
+    end
+    raw = raw(:,1:min(2,size(raw,2)));
+    raw = raw(all(isfinite(raw),2),:);
+    raw = sortrows(raw,1);
+    if exist('findduplicate','file') == 2
+        raw = findduplicate(raw);
+    else
+        [~,ia] = unique(raw(:,1),'stable');
+        raw = raw(ia,:);
+    end
+    
+    dat = raw;
+    meta = struct();
+    meta.unit = char(getfielddef(ctx,'unit','m'));
+    meta.unit_type = getfielddef(ctx,'unit_type',0);
+    meta.filename = char(getfielddef(ctx,'data_name','data.txt'));
+    meta.dat_name = char(getfielddef(ctx,'dat_name',meta.filename));
+    
+    if size(dat,1) < 3
+        dat = [0 0;1 1;2 0.5;3 1.5];
+    end
+    
+    dt = median(diff(dat(:,1)));
+    if ~isfinite(dt) || dt <= 0
+        dt = 1;
+    end
+    meta.dt = dt;
+    meta.fmax_data = 1/(2*dt);
 end
 
 function pad = defaultPad(npts)
-if npts <= 2500
-    pad = 5000;
-elseif npts <= 5000
-    pad = 10000;
-else
-    pad = fix(npts/5000) * 5000 + 5000;
-end
+    if npts <= 2500
+        pad = 5000;
+    elseif npts <= 5000
+        pad = 10000;
+    else
+        pad = fix(npts/5000) * 5000 + 5000;
+    end
 end
 
 function [sedmin, sedmax, sedstep, fh] = defaultSedRange(app)
-sedmin = 0;
-sedmax = 100;
-sedstep = 0.1;
-fh = 0.065;
-dtr = app.meta.dt;
-npts = size(app.data,1);
-fnyq = sedmin/(2*dtr);
-if fh > fnyq
-    sedmin = 2*dtr*fh;
-end
-fray = sedmax/(npts*dtr);
-flow = 1/max(app.orbit7);
-if fray > flow
-    sedmax = npts*dtr*flow;
-end
-if (sedmax-sedmin)/sedstep > 300
-    sedstep = (sedmax-sedmin)/300;
-end
-end
+    sedmin = 0;
+    sedmax = 100;
+    sedstep = 0.1;
+    fh = 0.065;
+    dtr = app.meta.dt;
+    npts = size(app.data,1);
+    fnyq = sedmin/(2*dtr);
 
-function target = buildTarget(orbit7,t1,f1,f2,pad)
-p1 = 1; p2 = .6; p3 = .5;
-target = period2spectrum(orbit7,t1-1000,t1+1000,1,f1,f2,1,pad);
-if t1 > 249000
-    target = period2spectrum(orbit7,t1-1000,t1+1000,1,f1,f2,1,pad);
-else
-    if t1 <= 248000 && t1 > 1000
-        target = gentarget(4,t1-1000,t1+1000,f1,f2,p1,p2,p3,pad,1);
-    elseif t1 > 248000
-        target = gentarget(4,247000,249000,f1,f2,p1,p2,p3,pad,1);
-    else
-        target = gentarget(4,1,2000,f1,f2,p1,p2,p3,pad,1);
+    if fh > fnyq
+        sedmin = 2*dtr*fh * 100;
     end
-end
+
+    fray = sedmax/(npts*dtr);
+    flow = 1/max(app.orbit9);
+    if fray > flow
+        sedmax = npts*dtr*flow * 100;
+    end
+
+    if (sedmax-sedmin)/sedstep > 300
+        sedstep = (sedmax-sedmin)/300;
+    end
 end
 
 function s = orbitString(v)
-s = strtrim(sprintf('%g ',v));
+    s = strtrim(sprintf('%g ',v));
 end
 
 function s = onoff(tf)
@@ -677,16 +671,73 @@ function refreshMainListbox(ctx,dirpath)
         if numel(d) >= 2
             d = d(~ismember({d.name},{'.','..'}));
         end
-        n = {d.name};
-        if isempty(n)
-            n = {''};
+        names = {};
+        isDir = false(0,1);
+        if ~isempty(d)
+            T = struct2table(d);
+            val1 = getSortMode(ctx,listbox);
+            switch val1
+                case 1
+                    sortedT = sortrows(T,'name','ascend');
+                case 2
+                    sortedT = sortrows(T,'name','descend');
+                case 3
+                    sortedT = sortrows(T,'date','ascend');
+                case 4
+                    sortedT = sortrows(T,'date','descend');
+                case 5
+                    sortedT = sortrows(T,'bytes','ascend');
+                case 6
+                    sortedT = sortrows(T,'bytes','descend');
+                otherwise
+                    sortedT = sortrows(T,'date','descend');
+            end
+            sd = table2struct(sortedT);
+            names = {sd.name};
+            isDir = [sd.isdir];
         end
-        set(listbox,'String',n,'Value',1);
         if ~isempty(editdir) && isgraphics(editdir)
             set(editdir,'String',dirpath);
         end
+        syncAcPwd(dirpath);
+        if exist('ac_update_listbox_acmain','file') == 2
+            ac_update_listbox_acmain(listbox,names,isDir);
+        elseif isempty(names)
+            set(listbox,'String',{},'Value',[]);
+        else
+            set(listbox,'String',names,'Value',1);
+        end
+        drawnow limitrate;
     catch
     end
+end
+
+function val1 = getSortMode(ctx,listbox)
+val1 = getfielddef(ctx,'val1',4);
+try
+    mainFig = ancestor(listbox,'figure');
+    mainHandles = guidata(mainFig);
+    if isstruct(mainHandles) && isfield(mainHandles,'val1') && ~isempty(mainHandles.val1)
+        val1 = mainHandles.val1;
+    end
+catch
+end
+end
+
+function syncAcPwd(dirpath)
+try
+    acPwdFile = which('ac_pwd.txt');
+    if isempty(acPwdFile)
+        return
+    end
+    fid = fopen(acPwdFile,'w');
+    if fid == -1
+        return
+    end
+    fprintf(fid,'%s',dirpath);
+    fclose(fid);
+catch
+end
 end
 
 function saveDir = resolveSaveDir(ctx)

@@ -125,8 +125,8 @@ function [f, pMC] = redNoisePeriodogramMC( ...
     % Sampling frequency
     samplingFrequency = 1 / dt;
 
-    % Standard deviation of the demeaned observed series
-    values = values - mean(values);
+    % Standard deviation of the detrended observed series
+    values = detrend(values, 1);
     dataStd = std(values);
 
     if ~isfinite(dataStd) || dataStd <= 0
@@ -239,12 +239,12 @@ function p = processOneSpectrum(redSeries, p, f, dt, red)
 
             theored = theored(:);
 
-            p = p - theored;
+            p = p ./ theored;
+            p = p - 1;
 
         case red == 2
             % Normalize by the theoretical AR(1) spectrum and subtract 1
-            theored = theoredar1ML( ...
-                redSeries, f, mean(p), dt);
+            theored = redconf_any(f,p,dt,0.25,2);
 
             theored = theored(:);
             theored = max(theored, realmin('double'));
@@ -253,28 +253,9 @@ function p = processOneSpectrum(redSeries, p, f, dt, red)
             p = p - 1;
 
         case red == 3
-            % Robust red-noise background estimation
-            theored = redconf_any( ...
-                f, p, dt, 0.25, 2);
-
-            theored = theored(:);
-
-            p = p - theored;
-
-        case red >= 50 && red < 100
-            % Normalize by the selected AR(1) confidence level
-            theored = theoredar1ML( ...
-                redSeries, f, mean(p), dt);
-
-            theored = theored(:);
-
-            facchired = ...
-                2 * gammaincinv(red / 100, 2) / (2 * 2);
-
-            tabtchired = theored .* facchired;
-            tabtchired = max(tabtchired, realmin('double'));
-
-            p = p ./ tabtchired;
+            xlogp = log10(p);
+            [swa, ~] = specswa(f, xlogp, length(redSeries));
+            p = p ./ swa;
             p = p - 1;
 
     end
@@ -284,3 +265,4 @@ function p = processOneSpectrum(redSeries, p, f, dt, red)
     p(p < 0) = 0;
 
 end
+
