@@ -114,7 +114,7 @@ handles.menu_math = uimenu(hFig,'Label','Math','Tag','menu_math');
 % Legacy statistical top-level menus (restored)
 handles.menu_univariate = uimenu(hFig,'Label','Univariate','Tag','menu_univariate');
 handles.menu_bivariate = uimenu(hFig,'Label','Bivariate','Tag','menu_bivariate');
-handles.menu_multivariate1 = uimenu(hFig,'Label','Multivariate','Tag','menu_multivariate1');
+handles.menu_multivariate1 = uimenu(hFig,'Label','Multivariate','Tag','menu_multivariate1','Visible','off');
 handles.menuac = uimenu(hFig,'Label','Timeseries','Tag','menuac');
 handles.menu_help = uimenu(hFig,'Label','Help','Tag','menu_help');
 
@@ -140,15 +140,13 @@ handles.menu_covariance = uimenu(handles.menu_bivariate,'Label','Covariance','Ta
 handles.menu_linearReg = uimenu(handles.menu_bivariate,'Label','Linear Regression','Tag','menu_linearReg', ...
     'Callback',@(h,e)AC_dispatch('menu_linearReg_Callback',h,e));
 
-% Multivariate
-handles.menu_NewDataTable = uimenu(handles.menu_multivariate1,'Label','New Data Table','Tag','menu_NewDataTable', ...
-    'Callback',@(h,e)AC_dispatch('menu_NewDataTable_Callback',h,e));
-
 % File
 handles.menu_folder = uimenu(handles.menu_file,'Label','New Folder','Tag','menu_folder','Accelerator','o', ...
     'Callback',@(h,e)AC_dispatch('menu_folder_Callback',h,e));
 handles.menu_newtxt = uimenu(handles.menu_file,'Label','New Text File','Tag','menu_newtxt','Accelerator','n', ...
     'Callback',@(h,e)AC_dispatch('menu_newtxt_Callback',h,e));
+handles.menu_NewDataTable = uimenu(handles.menu_file,'Label','Create Data Table','Tag','menu_NewDataTable', ...
+    'Callback',@(h,e)AC_dispatch('menu_NewDataTable_Callback',h,e));
 handles.menu_savefig = uimenu(handles.menu_file,'Label','Save *.AC.fig','Tag','menu_savefig','Separator','on', ...
     'Callback',@(h,e)AC_dispatch('menu_savefig_Callback',h,e));
 handles.menu_open = uimenu(handles.menu_file,'Label','Open Working Directory','Tag','menu_open', ...
@@ -417,7 +415,7 @@ end
 % Top-level menus should expand submenus; keep callbacks on child items only.
 
 function parentMenu = AC_menuParent(handles, key)
-fileItems = {'menu_folder','menu_newtxt','menu_savefig','menu_open','menu_opendir','menu_extract'};
+fileItems = {'menu_folder','menu_newtxt','menu_NewDataTable','menu_savefig','menu_open','menu_opendir','menu_extract'};
 editItems = {'menu_refreshlist','menu_rename','menu_cut','menu_copy','menu_paste','menu_delete'};
 plotItems = {'menu_plot','menu_plotpro_2d','menu_plotn','menu_plotn2','menu_samplerate','menu_datadistri','menu_sound','menu_plotadv'};
 basicItems = {'menu_insol','menu_laskar','menu_LOD','linegenerator','menu_LR04','menu_examples', ...
@@ -435,7 +433,7 @@ timeItems = {'menu_prewhiten','menu_smooth1','menu_bootstrap','menu_smooth_optio
     'menu_ecoco','menu_specmoments','menu_swa'};
 uniItems = {'menu_statsummary','menu_ttest'};
 bivItems = {'menu_uni2SamTest','menu_anova','menu_normaltest','menu_chi2gof','menu_corr','menu_covariance','menu_linearReg'};
-mulItems = {'menu_NewDataTable'};
+mulItems = {};
 helpItems = {'menu_read','menu_manuals','menu_findupdates','menu_lang','menu_contact','menu_email'};
 
 if any(strcmp(key,fileItems))
@@ -9134,7 +9132,12 @@ function menu_statsummary_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-UniStatisticSum;
+selectedData = getSelectedUnivariateData(handles);
+if isempty(selectedData)
+    UniStatisticSum;
+else
+    UniStatisticSum(selectedData);
+end
 
 
 % --------------------------------------------------------------------
@@ -9142,7 +9145,232 @@ function menu_ttest_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_ttest (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-Unittest;
+selectedData = getSelectedUnivariateData(handles);
+if isempty(selectedData)
+    Unittest;
+else
+    Unittest(selectedData);
+end
+
+function selectedData = getSelectedUnivariateData(handles)
+selectedData = getDataTableSelection();
+if ~isempty(selectedData)
+    selectedData = selectedData(:);
+    selectedData = selectedData(isfinite(selectedData));
+    return
+end
+selectedData = getSelectedStatisticsData(handles,'univariate');
+
+function tf = prepareDataTableForStats(hObject,handles,mode)
+tf = true;
+if ~isempty(getDataTableSelection())
+    return
+end
+selectedData = getSelectedStatisticsData(handles,mode);
+if isempty(selectedData)
+    tf = false;
+    return
+end
+[handles,hasSelection] = addSelectedFilesToDataTableHandles(handles);
+if hasSelection
+    guidata(hObject,handles);
+    AcycleDataTableGUI(handles);
+else
+    AcycleDataTableGUI;
+end
+uiFig1 = findobj(allchild(groot), 'flat', 'Name', 'Acycle: Data Table');
+if ~isempty(uiFig1)
+    uiFig1.UserData = selectedData;
+end
+
+function selectedData = getDataTableSelection()
+selectedData = [];
+try
+    uiFig1 = findobj(allchild(groot), 'flat', 'Name', 'Acycle: Data Table');
+    if ~isempty(uiFig1) && isnumeric(uiFig1.UserData)
+        selectedData = uiFig1.UserData;
+        if isempty(selectedData) || ~any(isfinite(selectedData(:)))
+            selectedData = [];
+        end
+    end
+catch
+    selectedData = [];
+end
+
+function selectedData = getSelectedStatisticsData(handles,mode)
+selectedData = [];
+try
+    plotPaths = getSelectedDataPaths(handles);
+    if isempty(plotPaths)
+        return
+    end
+    dataList = {};
+    for i = 1:numel(plotPaths)
+        data = loadNumericData(plotPaths{i});
+        if ~isempty(data)
+            dataList{end+1} = data; %#ok<AGROW>
+        end
+    end
+    if isempty(dataList)
+        return
+    end
+    switch mode
+        case 'univariate'
+            for i = 1:numel(dataList)
+                data = dataList{i};
+                if size(data,2) >= 2
+                    y = data(:,2:end);
+                else
+                    y = data(:,1);
+                end
+                selectedData = [selectedData; y(:)]; %#ok<AGROW>
+            end
+            selectedData = selectedData(isfinite(selectedData));
+        case 'twoColumn'
+            selectedData = buildTwoColumnData(dataList);
+        otherwise
+            selectedData = buildMultiColumnData(dataList);
+    end
+catch
+    selectedData = [];
+end
+
+function selectedData = buildTwoColumnData(dataList)
+selectedData = [];
+if numel(dataList) == 1
+    data = dataList{1};
+    if size(data,2) >= 3
+        selectedData = data(:,2:3);
+    elseif size(data,2) >= 2
+        selectedData = data(:,1:2);
+    end
+else
+    cols = cell(1,numel(dataList));
+    n = inf;
+    for i = 1:numel(dataList)
+        data = dataList{i};
+        if size(data,2) >= 2
+            col = data(:,2);
+        else
+            col = data(:,1);
+        end
+        cols{i} = col;
+        n = min(n,numel(col));
+    end
+    if isfinite(n) && n > 0
+        matrix = zeros(n,numel(cols));
+        for i = 1:numel(cols)
+            matrix(:,i) = cols{i}(1:n);
+        end
+        selectedData = matrix(:,1:min(2,size(matrix,2)));
+    end
+end
+selectedData = cleanRows(selectedData);
+if size(selectedData,2) ~= 2
+    selectedData = [];
+end
+
+function selectedData = buildMultiColumnData(dataList)
+if numel(dataList) == 1
+    data = dataList{1};
+    if size(data,2) >= 2
+        selectedData = data(:,2:end);
+    else
+        selectedData = data(:,1);
+    end
+else
+    cols = cell(1,numel(dataList));
+    n = inf;
+    for i = 1:numel(dataList)
+        data = dataList{i};
+        if size(data,2) >= 2
+            col = data(:,2);
+        else
+            col = data(:,1);
+        end
+        cols{i} = col;
+        n = min(n,numel(col));
+    end
+    selectedData = zeros(n,numel(cols));
+    for i = 1:numel(cols)
+        selectedData(:,i) = cols{i}(1:n);
+    end
+end
+selectedData = cleanRows(selectedData);
+
+function data = cleanRows(data)
+if isempty(data), return; end
+data(~isfinite(data)) = NaN;
+data = data(~all(isnan(data),2),:);
+if size(data,2) > 1
+    data = data(all(isfinite(data),2),:);
+else
+    data = data(isfinite(data));
+end
+
+function data = loadNumericData(dataPath)
+data = [];
+try
+    data = load(dataPath);
+catch
+    try
+        T = readtable(dataPath);
+        if all(varfun(@isnumeric,T,'OutputFormat','uniform'))
+            data = table2array(T);
+        end
+    catch
+    end
+end
+if ~isnumeric(data)
+    data = [];
+end
+
+function plotPaths = getSelectedDataPaths(handles)
+plotPaths = {};
+try
+    contents = cellstr(get(handles.listbox_acmain,'String'));
+    userdata = get(handles.listbox_acmain,'UserData');
+    if isstruct(userdata) && isfield(userdata,'names') && ~isempty(userdata.names)
+        contents = userdata.names;
+    end
+    plot_selected = get(handles.listbox_acmain,'Value');
+    if isempty(plot_selected) && isfield(handles,'index_selected')
+        plot_selected = handles.index_selected;
+    end
+    if isempty(plot_selected)
+        return
+    end
+    GETac_pwd;
+    for i = 1:numel(plot_selected)
+        plot_no = plot_selected(i);
+        if plot_no < 1 || plot_no > numel(contents)
+            continue
+        end
+        data_name = char(contents(plot_no));
+        data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
+        data_path = fullfile(ac_pwd,data_name);
+        if isdir(data_path)
+            continue
+        end
+        [~,~,ext] = fileparts(data_path);
+        if isfield(handles,'filetype') && ~isempty(handles.filetype) && ~any(strcmp(ext,handles.filetype))
+            continue
+        end
+        plotPaths{end+1} = data_path; %#ok<AGROW>
+    end
+catch
+    plotPaths = {};
+end
+
+function [handles,hasSelection] = addSelectedFilesToDataTableHandles(handles)
+hasSelection = false;
+plotPaths = getSelectedDataPaths(handles);
+if isempty(plotPaths)
+    return
+end
+handles.nplot = numel(plotPaths);
+handles.plot_s = plotPaths;
+hasSelection = true;
 
 % --------------------------------------------------------------------
 function menu_NewDataTable_Callback(hObject, eventdata, handles)
@@ -9150,39 +9378,12 @@ function menu_NewDataTable_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
-nplot = length(plot_selected);   % length
-if nplot == 0
-    AcycleDataTableGUI;
-end
-check = 0;
-% check
-for i = 1:nplot
-    plot_no = plot_selected(i);
-    plot_filter_s = char(contents(plot_no));
-    plot_filter_s = strrep2(plot_filter_s, '<HTML><FONT color="blue">', '</FONT></HTML>');
-    GETac_pwd; plot_filter_s = fullfile(ac_pwd,plot_filter_s);
-    if isdir(plot_filter_s)
-        AcycleDataTableGUI;
-        return
-    else
-        [~,dat_name,ext] = fileparts(plot_filter_s);
-        if sum(strcmp(ext,handles.filetype)) > 0
-            check = 1; % selection can be executed 
-        end
-    end
-end
-
-if check == 1
-    GETac_pwd; 
-    for i = 1: nplot
-        plot_no = plot_selected(i);
-        handles.plot_s{i} = fullfile(ac_pwd,char(contents(plot_no)));
-    end
-    handles.nplot = nplot;
+[handles,hasSelection] = addSelectedFilesToDataTableHandles(handles);
+if hasSelection
     guidata(hObject, handles);
     AcycleDataTableGUI(handles);
+else
+    AcycleDataTableGUI;
 end
 
 
@@ -9191,6 +9392,7 @@ function menu_uni2SamTest_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_uni2SamTest (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+prepareDataTableForStats(hObject,handles,'twoColumn');
 UniTwoSampleTestsUI;
 
 
@@ -9199,6 +9401,7 @@ function menu_anova_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_anova (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+prepareDataTableForStats(hObject,handles,'multiColumn');
 ANOVAUI;
 
 
@@ -9207,6 +9410,7 @@ function menu_normaltest_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_normaltest (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+prepareDataTableForStats(hObject,handles,'univariate');
 UniNormalityUI;
 
 
@@ -9215,6 +9419,7 @@ function menu_chi2gof_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_chi2gof (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+prepareDataTableForStats(hObject,handles,'univariate');
 UniChi2GOFUI;
 
 
@@ -9223,6 +9428,7 @@ function menu_corr_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_corr (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+prepareDataTableForStats(hObject,handles,'twoColumn');
 BivCorrUI;
 
 
@@ -9231,6 +9437,7 @@ function menu_covariance_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_covariance (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+prepareDataTableForStats(hObject,handles,'twoColumn');
 BivCovUI;
 
 
@@ -9239,6 +9446,7 @@ function menu_linearReg_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_linearReg (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+prepareDataTableForStats(hObject,handles,'twoColumn');
 BivLinearRegUI;
 
 

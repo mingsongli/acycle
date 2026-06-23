@@ -1,12 +1,17 @@
 function UniStatisticSum(varargin)
 
-    % Retrieve the instance of the first figure by its name
-    uiFig1 = findobj(allchild(groot), 'flat', 'Name', 'Acycle: Data Table');
-    
-    if ~isempty(uiFig1)
-        
-        % Retrieve the data stored in the first figure
-        selectedData = uiFig1.UserData;
+    selectedData = [];
+    if nargin > 0 && isnumeric(varargin{1})
+        selectedData = varargin{1};
+    else
+        % Retrieve the instance of the first figure by its name
+        uiFig1 = findobj(allchild(groot), 'flat', 'Name', 'Acycle: Data Table');
+        if ~isempty(uiFig1)
+            selectedData = uiFig1.UserData;
+        end
+    end
+
+    if ~isempty(selectedData)
         stats = calculateStatistics(selectedData);
         
         % Look for an existing figure with the name 'sf'
@@ -29,17 +34,23 @@ function UniStatisticSum(varargin)
                      'ColumnWidth', {130,120});
         else
             figure(sf)
-            uit.Data = stats;
-            
+            uit = findobj(sf,'Type','uitable');
+            if ~isempty(uit)
+                uit(1).Data = stats;
+            end
         end
     else
-        warning('The original figure does not exist or has not been created yet.');
+        warning('No data is selected. Select a series in AC or select cells in Acycle: Data Table.');
     end
 
     % Function to calculate statistics
     function stats = calculateStatistics(data)
         data = data(:);  % force
-        data = data(~isnan(data)); % remove empty cell
+        data = data(isfinite(data)); % remove empty cell
+        if isempty(data)
+            stats = {'Number (N)', '0'};
+            return
+        end
         stats = { 'Number (N)', sprintf('%10.0d', length(data)) ;
                   'Min', sprintf('%10.6f', min(data));
                   'Max', sprintf('%10.6f', max(data));

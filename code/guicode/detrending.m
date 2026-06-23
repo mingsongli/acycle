@@ -467,12 +467,13 @@ end
             return;
         end
         
+        saveDir = getAcPwdFromContext();
         pre = pwd;
         c = onCleanup(@()safeCd(pre)); 
-        safeCd(getAcPwdFromContext());
+        safeCd(saveDir);
         dlmwrite(name1,new_data,'delimiter',' ','precision',9);
         dlmwrite(name2,current_trend,'delimiter',' ','precision',9);
-        refreshMainListbox();
+        refreshMainListbox(saveDir);
         disp('>>  AC main window: see trend and detrended data');
     end
 
@@ -499,22 +500,83 @@ end
         end
     end
 
-    function refreshMainListbox()
-        if ~isempty(app.listbox_acmain) && isgraphics(app.listbox_acmain)
-            d = dir;
-            names = {d.name};
-            keep = ~strcmp(names,'.') & ~strcmp(names,'..');
-            names = names(keep);
-            try
-                set(app.listbox_acmain,'String',names,'Value',1);
-            catch
-            end
+    function refreshMainListbox(dirpath)
+        if isempty(app.listbox_acmain) || ~isgraphics(app.listbox_acmain)
+            return
         end
-        if ~isempty(app.edit_acfigmain_dir) && isgraphics(app.edit_acfigmain_dir)
-            try
-                set(app.edit_acfigmain_dir,'String',pwd);
-            catch
+        if nargin < 1 || isempty(dirpath) || exist(dirpath,'dir') ~= 7
+            dirpath = pwd;
+        end
+        try
+            d = dir(dirpath);
+            if numel(d) >= 2
+                d = d(~ismember({d.name},{'.','..'}));
             end
+            names = {};
+            isDir = false(0,1);
+            if ~isempty(d)
+                T = struct2table(d);
+                switch getSortMode()
+                    case 1
+                        sortedT = sortrows(T,'name','ascend');
+                    case 2
+                        sortedT = sortrows(T,'name','descend');
+                    case 3
+                        sortedT = sortrows(T,'date','ascend');
+                    case 4
+                        sortedT = sortrows(T,'date','descend');
+                    case 5
+                        sortedT = sortrows(T,'bytes','ascend');
+                    case 6
+                        sortedT = sortrows(T,'bytes','descend');
+                    otherwise
+                        sortedT = sortrows(T,'date','descend');
+                end
+                sd = table2struct(sortedT);
+                names = {sd.name};
+                isDir = [sd.isdir];
+            end
+            if ~isempty(app.edit_acfigmain_dir) && isgraphics(app.edit_acfigmain_dir)
+                set(app.edit_acfigmain_dir,'String',dirpath);
+            end
+            syncAcPwd(dirpath);
+            if exist('ac_update_listbox_acmain','file') == 2
+                ac_update_listbox_acmain(app.listbox_acmain,names,isDir);
+            elseif isempty(names)
+                set(app.listbox_acmain,'String',{},'Value',[]);
+            else
+                set(app.listbox_acmain,'String',names,'Value',1);
+            end
+            drawnow limitrate;
+        catch
+        end
+    end
+
+    function val1 = getSortMode()
+        val1 = app.val1;
+        try
+            mainFig = ancestor(app.listbox_acmain,'figure');
+            mainHandles = guidata(mainFig);
+            if isstruct(mainHandles) && isfield(mainHandles,'val1') && ~isempty(mainHandles.val1)
+                val1 = mainHandles.val1;
+            end
+        catch
+        end
+    end
+
+    function syncAcPwd(dirpath)
+        try
+            acPwdFile = which('ac_pwd.txt');
+            if isempty(acPwdFile)
+                return
+            end
+            fid = fopen(acPwdFile,'w');
+            if fid == -1
+                return
+            end
+            fprintf(fid,'%s',dirpath);
+            fclose(fid);
+        catch
         end
     end
 

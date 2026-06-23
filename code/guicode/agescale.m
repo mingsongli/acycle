@@ -326,6 +326,7 @@ classdef agescale < matlab.apps.AppBase
             end
             pre_dirML = pwd;
             CDac_pwd;
+            saveDir = pwd;
             agemodel = load(fullfile(app.workingDir, app.agemodelname));
 
             figagescale = app.UIFigure;
@@ -364,7 +365,7 @@ classdef agescale < matlab.apps.AppBase
                 dlmwrite(add_list,tunedseries,'delimiter',' ','precision',9);
             end
 
-            app.refreshMainListbox();
+            app.refreshMainListbox(saveDir);
             cd(pre_dirML);
             figure(figagescale);
             figure(figdata);
@@ -598,58 +599,84 @@ classdef agescale < matlab.apps.AppBase
             cd(pre_dirML);
         end
 
-        function refreshMainListbox(app)
-            pre = '<HTML><FONT color="blue">';
-            post = '</FONT></HTML>';
-            d = dir;
-            if numel(d) >= 2, d(1:2) = []; end
-            address = pwd;
-
-            if ~isempty(app.edit_acfigmain_dir) && isgraphics(app.edit_acfigmain_dir)
-                set(app.edit_acfigmain_dir, 'String', address);
-            end
-
-            ac_pwd_str = which('ac_pwd.txt');
-            if ~isempty(ac_pwd_str)
-                [ac_pwd_dir,~,~] = fileparts(ac_pwd_str);
-                fileID = fopen(fullfile(ac_pwd_dir,'ac_pwd.txt'),'w');
-                if fileID ~= -1
-                    fprintf(fileID,'%s',address);
-                    fclose(fileID);
-                end
-            end
-
-            if isempty(d) || isempty(app.listbox_acmain) || ~isgraphics(app.listbox_acmain)
+        function refreshMainListbox(app,dirpath)
+            if isempty(app.listbox_acmain) || ~isgraphics(app.listbox_acmain)
                 return
             end
-
-            T = struct2table(d);
-            switch app.val1
-                case 1
-                    sortedT = sortrows(T,'name','ascend');
-                case 2
-                    sortedT = sortrows(T,'name','descend');
-                case 3
-                    sortedT = sortrows(T,'date','ascend');
-                case 4
-                    sortedT = sortrows(T,'date','descend');
-                case 5
-                    sortedT = sortrows(T,'bytes','ascend');
-                case 6
-                    sortedT = sortrows(T,'bytes','descend');
-                otherwise
-                    sortedT = sortrows(T,'name','ascend');
+            if nargin < 2 || isempty(dirpath) || exist(dirpath,'dir') ~= 7
+                dirpath = pwd;
             end
-            sd = table2struct(sortedT);
-            listboxStr = cell(numel(sd),1);
-            for i = 1:numel(sd)
-                if isdir(sd(i).name)
-                    listboxStr{i} = [pre, sd(i).name, post];
-                else
-                    listboxStr{i} = sd(i).name;
+            try
+                d = dir(dirpath);
+                if numel(d) >= 2
+                    d = d(~ismember({d.name},{'.','..'}));
                 end
+                names = {};
+                isDir = false(0,1);
+                if ~isempty(d)
+                    T = struct2table(d);
+                    switch app.getSortMode()
+                        case 1
+                            sortedT = sortrows(T,'name','ascend');
+                        case 2
+                            sortedT = sortrows(T,'name','descend');
+                        case 3
+                            sortedT = sortrows(T,'date','ascend');
+                        case 4
+                            sortedT = sortrows(T,'date','descend');
+                        case 5
+                            sortedT = sortrows(T,'bytes','ascend');
+                        case 6
+                            sortedT = sortrows(T,'bytes','descend');
+                        otherwise
+                            sortedT = sortrows(T,'date','descend');
+                    end
+                    sd = table2struct(sortedT);
+                    names = {sd.name};
+                    isDir = [sd.isdir];
+                end
+                if ~isempty(app.edit_acfigmain_dir) && isgraphics(app.edit_acfigmain_dir)
+                    set(app.edit_acfigmain_dir,'String',dirpath);
+                end
+                app.syncAcPwd(dirpath);
+                if exist('ac_update_listbox_acmain','file') == 2
+                    ac_update_listbox_acmain(app.listbox_acmain,names,isDir);
+                elseif isempty(names)
+                    set(app.listbox_acmain,'String',{},'Value',[]);
+                else
+                    set(app.listbox_acmain,'String',names,'Value',1);
+                end
+                drawnow limitrate;
+            catch
             end
-            set(app.listbox_acmain,'String',listboxStr,'Value',[]);
+        end
+
+        function val1 = getSortMode(app)
+            val1 = app.val1;
+            try
+                mainFig = ancestor(app.listbox_acmain,'figure');
+                mainHandles = guidata(mainFig);
+                if isstruct(mainHandles) && isfield(mainHandles,'val1') && ~isempty(mainHandles.val1)
+                    val1 = mainHandles.val1;
+                end
+            catch
+            end
+        end
+
+        function syncAcPwd(~,dirpath)
+            try
+                acPwdFile = which('ac_pwd.txt');
+                if isempty(acPwdFile)
+                    return
+                end
+                fid = fopen(acPwdFile,'w');
+                if fid == -1
+                    return
+                end
+                fprintf(fid,'%s',dirpath);
+                fclose(fid);
+            catch
+            end
         end
     end
 

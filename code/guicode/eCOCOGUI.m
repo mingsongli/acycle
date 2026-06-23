@@ -314,11 +314,13 @@ end
             else                
                 age = str2double(app.EAge.Value);
                 if ~isfinite(age), age = 0; end
+                app.age = age;
                 orbit9 = calculate_orbit9(age);
                 app.orbit9  = orbit9(:,2)/1000;
             end
             
             app.LOrbit2.Text = orbitString(app.orbit9);
+            updateF2FromOrbit();
 
             if app.RUser.Value
                 app.EOrbitUser.Value = orbitString(app.orbit9);
@@ -328,7 +330,17 @@ end
         end
 
         function onAgeEdited()
+            app.age = toNum(app.EAge.Value, app.age);
             onOrbitChanged();
+        end
+
+        function updateF2FromOrbit()
+            orbit = app.orbit9(isfinite(app.orbit9));
+            if isempty(orbit)
+                return;
+            end
+            app.f2 = 1.2 / min(orbit);
+            app.EF2.Value = num2str(app.f2,'%.6g');
         end
 
         function onSedEdited()
@@ -383,6 +395,8 @@ end
                 adjust = app.adjust; nsim = app.nsim; red = app.red; plotn = 1;
                 method = iff(app.corrmethod==1,'Pearson','Spearman');
 
+                outputFile = '';
+                modeName = '';
                 if app.mode == 1
                     h = uiprogressdlg(app.UIFigure,'Title','COCO','Message','Running ...','Indeterminate','on');
                     [corrCI,corr_h0,~] = corrcoefslices_rankNew(dat,app.orbit9,srm,app.pad,sr1,sr2,srstep,adjust,red,nsim,plotn,app.slices,method,app.fmaxdata,app.main_unit_selection);
@@ -390,7 +404,8 @@ end
                     app.run.corrCI = corrCI;
                     app.run.corr_h0 = corr_h0;
                     app.run.ready = true;
-                    saveCOCOOutputs(corrCI,corr_h0);
+                    outputFile = saveCOCOOutputs(corrCI,corr_h0);
+                    modeName = 'COCO';
                 else
                     stepN = max(1,round(app.step/srm));
                     dat2 = dat;
@@ -426,9 +441,11 @@ end
                     assignin('base','out_ecocorb',out_ecocorb);
                     assignin('base','out_norbit',out_norbit);
                     assignin('base','sr_p_tracked',sr_p);
-                    saveECOCOOutputs(prt_sr,out_depth,out_ecc,out_eci,out_norbit,out_ecoco,sr_p,dat);
+                    outputFile = saveECOCOOutputs(prt_sr,out_depth,out_ecc,out_eci,out_norbit,out_ecoco,sr_p,dat);
+                    modeName = 'ECOCO';
                 end
 
+                saveRunParameterTable(modeName,outputFile);
                 refreshMainListbox(ctx,resolveSaveDir(ctx));
                 setappdata(app.UIFigure,'ECOCO_APP',app);
             catch ME
@@ -494,7 +511,7 @@ end
             uialert(app.UIFigure,msg,'Reference');
         end
 
-        function saveCOCOOutputs(corrCI,corr_h0)
+        function nm = saveCOCOOutputs(corrCI,corr_h0)
             [~,dn,~] = fileparts(app.meta.filename);
             saveDir = resolveSaveDir(ctx);
             data_COCOCI = [corrCI(:,1:2),corr_h0(:,1:2)];
@@ -502,7 +519,7 @@ end
             dlmwrite(nm,data_COCOCI,'delimiter',',','precision',9);
         end
 
-        function saveECOCOOutputs(prt_sr,out_depth,out_ecc,out_eci,out_norbit,out_ecoco,sr_p,rawData)
+        function nm = saveECOCOOutputs(prt_sr,out_depth,out_ecc,out_eci,out_norbit,out_ecoco,sr_p,rawData)
             [~,dn,~] = fileparts(app.meta.filename);
             saveDir = resolveSaveDir(ctx);
             nm = uniqueName(fullfile(saveDir,[dn,'-ECOCO.data.xlsx']));
@@ -525,6 +542,110 @@ end
                 timeHeader = {'Age_kyr','Age_min_kyr','Age_max_kyr','Value','Depth_m'};
                 writecell(timeHeader,nm,'Sheet','TimeDomainData','Range','A1');
                 writematrix(timeDomainData,nm,'Sheet','TimeDomainData','Range','A2');
+            end
+        end
+
+        function nm = saveRunParameterTable(modeName,outputFile)
+            [~,dn,~] = fileparts(app.meta.filename);
+            saveDir = resolveSaveDir(ctx);
+            nm = indexedParameterName(saveDir,dn,modeName);
+            params = buildRunParameterTable(modeName,outputFile);
+            writecell(params,nm,'Sheet','COCO');
+        end
+
+        function params = buildRunParameterTable(modeName,outputFile)
+            [~,outBase,outExt] = fileparts(outputFile);
+            outputName = [outBase,outExt];
+            params = repmat({''},25,6);
+            params(1,2) = {'Detailed Parameters Used in Data Processing by Acycle'};
+            params(2,2:6) = {'Version','Designed by','Institute','E-mail','Date'};
+            params(3,2:6) = {'v1.1','Mingsong Li','Peking University','msli@pku.edu.cn',datestr(now,'yyyy-mm-dd HH:MM:SS')};
+            params(5,2:5) = {'Tools','Items','Parameters','Explanations'};
+
+            params(7,:) = {'', 'COCO/eCOCO','Input file name',app.meta.filename,'',''};
+            params(8,:) = {'', '', 'Zero padding',app.pad,'',''};
+            params(9,:) = {'', '', 'Number of slices',app.slices,'',''};
+            params(10,:) = {'', '', 'Remove red noise model',yesno(app.CRed.Value),'Select Yes or No',''};
+            params(11,:) = {'', '', 'Red noise removal method',redMethodName(),'',''};
+            params(12,:) = {'', '', 'Test sedimentation rate: minimum',app.sedmin,'',''};
+            params(13,:) = {'', '', 'Test sedimentation rate: maximum',app.sedmax,'',''};
+            params(14,:) = {'', '', 'Test sedimentation rate: step',app.sedstep,'',''};
+            params(15,:) = {'', '', 'Median age of data',app.age,'',''};
+            params(16,:) = {'', '', 'Maximum frequency',app.f2,'',''};
+            params(17,:) = {'', '', 'Astronomical solution',astronomicalSolutionName(),'Farhat+2022 vs. User-defined period',''};
+            params(18,:) = {'', '', 'User-defined period',userPeriodValue(),'',''};
+            params(19,:) = {'', '', 'Correlation method',iff(app.corrmethod==1,'Pearson','Spearman'),'',''};
+            params(20,:) = {'', '', 'Monte Carlo iterations',app.nsim,'',''};
+            params(21,:) = {'', 'eCOCO','Fast or Accurate',ecoCalcModeName(modeName),'eCOCO model',''};
+            params(22,:) = {'', 'eCOCO','Zero padding edge',ecoPadEdgeValue(modeName),'For eCOCO only',''};
+            params(23,:) = {'', 'eCOCO','Sliding window size',ecoValue(modeName,app.window),'For eCOCO only',''};
+            params(24,:) = {'', 'eCOCO','Sliding window step',ecoValue(modeName,app.step),'For eCOCO only',''};
+            params(25,:) = {'', '', 'Output file name',outputName,'',''};
+        end
+
+        function nm = indexedParameterName(saveDir,dn,modeName)
+            for k = 1:9999
+                nm = fullfile(saveDir,sprintf('%s-%s-parameters-%d.xls',dn,modeName,k));
+                if ~exist(nm,'file')
+                    return;
+                end
+            end
+            nm = uniqueName(fullfile(saveDir,sprintf('%s-%s-parameters.xls',dn,modeName)));
+        end
+
+        function s = yesno(tf)
+            if tf, s = 'Yes'; else, s = 'No'; end
+        end
+
+        function s = redMethodName()
+            if app.CRed.Value
+                s = app.DRed.Value;
+            else
+                s = 'NA';
+            end
+        end
+
+        function s = astronomicalSolutionName()
+            if app.RUser.Value
+                s = 'User-defined period';
+            else
+                s = 'Farhat+2022';
+            end
+        end
+
+        function v = userPeriodValue()
+            if app.RUser.Value
+                v = orbitString(app.orbit9);
+            else
+                v = 'NA';
+            end
+        end
+
+        function v = ecoCalcModeName(modeName)
+            if strcmp(modeName,'ECOCO')
+                v = iff(app.ecocoCalcMode==1,'Fast','Accurate');
+            else
+                v = 'NA';
+            end
+        end
+
+        function v = ecoPadEdgeValue(modeName)
+            if strcmp(modeName,'ECOCO')
+                if app.CPadEdge.Value
+                    v = app.DPadEdge.Value;
+                else
+                    v = 'No';
+                end
+            else
+                v = 'NA';
+            end
+        end
+
+        function v = ecoValue(modeName,value)
+            if strcmp(modeName,'ECOCO')
+                v = value;
+            else
+                v = 'NA';
             end
         end
 

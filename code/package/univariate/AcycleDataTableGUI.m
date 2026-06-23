@@ -53,6 +53,7 @@ function AcycleDataTableGUI(varargin)
     end
     % Look for an existing figure with the name 'sf'
     f = findobj(allchild(groot), 'flat', 'Name', 'Acycle: Data Table');
+    lastSelectedCell = [];
     % If no such figure exists, create a new one
     if isempty(f)
         % Create a figure
@@ -79,14 +80,25 @@ function AcycleDataTableGUI(varargin)
         t.ColumnEditable = false(1, ncol); % Assuming there are ncol columns
         % Set the CellSelectionCallback for the table
         t.CellSelectionCallback = @cellSelectionCallback;
-        % Variable to keep track of the last selected cell
-        lastSelectedCell = [];
-        
         % Set the key press function for the figure
         f.WindowKeyPressFcn = @keyPressCallback;
+        f.UserData = [];
     
     else
         figure(f)
+        t = findobj(f,'Type','uitable');
+        if ~isempty(t)
+            t = t(1);
+            t.Data = data;
+            try
+                t.ColumnEditable = false(1, size(data,2));
+                t.CellSelectionCallback = @cellSelectionCallback;
+                t.CellEditCallback = @cellEditCallback;
+                f.WindowKeyPressFcn = @keyPressCallback;
+            catch
+            end
+        end
+        f.UserData = [];
     end
     
     % Variable to store selected data
