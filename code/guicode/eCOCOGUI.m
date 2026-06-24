@@ -49,7 +49,7 @@ end
             'out_ecc',[],'out_ep',[],'out_eci',[],'out_ecoco',[],'out_ecocorb',[], ...
             'out_norbit',[],'sr_p',[],'corrCI',[],'corr_h0',[],'cocoFigure',[]);
 
-        app.UIFigure = uifigure('Name','Acycle: (Evolutionary) Correlation Coefficient / (e)COCO', ...
+        app.UIFigure = uifigure('Name','Acycle: (Evolutionary) Correlation Coefficient version 2 / (e)COCO v2', ...
             'Color',app.bg,'Position',figurePos(ctx),'AutoResizeChildren','off');
         app.UIFigure.SizeChangedFcn = @(~,~)onResize();
 
@@ -157,8 +157,8 @@ end
             hMethod = 78;
             hData = 112;
             hPeriod = 114;
-            hSed = 156;
-            hTarget = 214;
+            hSed = 126;
+            hTarget = 184;
             hCorr = 84;
             hBottom = 138;
 
@@ -169,12 +169,12 @@ end
             app.LTimes.Position = [90 32 70 26];
 
             app.PSlide.Position = [230 y 320 hBottom];
-            app.LSize.Position = [16 86 70 28];
-            app.ESize.Position = [90 88 120 30];
-            app.LSizeUnit.Position = [214 86 90 28];
-            app.LStep.Position = [16 42 70 28];
-            app.EStep.Position = [90 44 120 30];
-            app.LStepUnit.Position = [214 42 90 28];
+            app.LSize.Position = [16 66 70 28];
+            app.ESize.Position = [90 68 120 30];
+            app.LSizeUnit.Position = [214 66 90 28];
+            app.LStep.Position = [16 22 70 28];
+            app.EStep.Position = [90 24 120 30];
+            app.LStepUnit.Position = [214 22 90 28];
 
             app.BPlotE.Position = [570 y+76 220 52];
             app.BTrack.Position = [570 y+16 220 52];
@@ -183,63 +183,67 @@ end
             y = y + hBottom + gap;
             app.PCorr.Position = [m y w-2*m hCorr];
             app.BGCorr.Position = [10 4 app.PCorr.Position(3)-20 56];
-            app.RSpearman.Position = [20 6 140 28];
-            app.RPearson.Position = [260 6 140 28];
+            app.RSpearman.Position = [20 16 140 28];
+            app.RPearson.Position = [260 16 140 28];
 
             y = y + hCorr + gap;
             app.PTarget.Position = [m y w-2*m hTarget];
-            app.LAge.Position = [20 160 180 28];
-            app.EAge.Position = [300 162 100 30];
-            app.LMa.Position = [410 160 40 28];
-            app.LMaxFreq.Position = [560 160 120 28];
-            app.EF2.Position = [700 162 110 30];
-            app.LUnitFreq.Position = [820 160 60 28];
-            app.BGOrbit.Position = [12 10 app.PTarget.Position(3)-24 150];
-            app.RLaskar.Position = [10 62 180 28];
-            app.RUser.Position = [10 24 200 28];
+            app.LAge.Position =     [20 120 180 28];
+            app.EAge.Position =     [300 122 100 30];
+            app.LMa.Position =      [410 120 40 28];
+            app.LMaxFreq.Position = [560 120 120 28];
+            app.EF2.Position =      [700 122 110 30];
+            app.LUnitFreq.Position =[820 120 60 28];
+            
+            app.BGOrbit.Position = [12 10 app.PTarget.Position(3)-24 90];
+            app.RLaskar.Position = [10  62 180 28];
             app.LOrbit2.Position = [300 62 460 28];
-            app.EOrbitUser.Position = [300 24 460 30];
-            app.BWaltham.Position = [780 24 130 30];
+            app.RUser.Position =      [10 14 200 28];
+            app.EOrbitUser.Position = [300 14 460 30];
+            app.BWaltham.Position =   [780 14 130 30];
 
             y = y + hTarget + gap;
             app.PSed.Position = [m y w-2*m hSed];
-            app.LSedMin.Position = [40 92 110 28];
-            app.ESedMin.Position = [170 94 100 30];
-            app.LSedMax.Position = [310 92 110 28];
-            app.ESedMax.Position = [440 94 100 30];
-            app.LSedStep.Position = [580 92 80 28];
-            app.ESedStep.Position = [650 94 80 30];
-            app.LSedUnit.Position = [760 92 100 28];
-            app.LSedInfo.Position = [110 36 w-300 30];
+            app.LSedMin.Position = [40 52 110 28];
+            app.ESedMin.Position = [170 54 100 30];
+            app.LSedMax.Position = [310 52 110 28];
+            app.ESedMax.Position = [440 54 100 30];
+            app.LSedStep.Position = [580 52 80 28];
+            app.ESedStep.Position = [650 54 80 30];
+            app.LSedUnit.Position = [760 52 100 28];
+            app.LSedInfo.Position = [110 16 w-300 30];
 
             y = y + hSed + gap;
             app.PPeriod.Position = [m y w-2*m hPeriod];
-            app.CShowPeriod.Position = [20 48 130 28];
-            app.LMaxF.Position = [210 38 120 48];
-            app.EMaxF.Position = [360 46 90 30];
-            app.LSlices.Position = [480 38 120 48];
-            app.ESlices.Position = [620 46 70 30];
-            app.CRed.Position = [700 72 260 28];
+            app.CShowPeriod.Position = [20 38 130 28];
+            app.LMaxF.Position = [210 28 120 48];
+            app.EMaxF.Position = [360 36 90 30];
+            app.LSlices.Position = [480 28 120 48];
+            app.ESlices.Position = [620 36 70 30];
+            
+            app.CRed.Position = [700 52 260 28];
             app.DRed.Position = [700 16 280 30];
 
             y = y + hPeriod + gap;
             app.PData.Position = [m y w-2*m hData];
             app.LData.Position = [20 56 80 28];
             app.LDataName.Position = [120 56 520 28];
-            app.C0Pad.Position = [20 22 110 28];
-            app.EPad.Position = [200 24 100 30];
-            app.CPadEdge.Position = [330 22 160 28];
-            app.DPadEdge.Position = [500 24 180 30];
-            app.CFlipY.Position = [700 22 170 28];
+            app.C0Pad.Position = [20 12 110 28];
+            app.EPad.Position = [200 14 100 30];
+            app.CPadEdge.Position = [330 12 160 28];
+            app.DPadEdge.Position = [500 14 180 30];
+            app.CFlipY.Position = [700 12 170 28];
 
             y = y + hData + gap;
-            app.PMethod.Position = [m y 0.46*w hMethod];
-            app.BGMethod.Position = [8 26 app.PMethod.Position(3)-16 26];
-            app.RCOCO.Position = [40 1 180 24];
-            app.RECOCO.Position = [220 1 180 24];
-            app.BGEcoCalc.Position = [208 2 260 26];
-            app.RFast.Position = [12 1 90 24];
-            app.RAccurate.Position = [116 1 120 24];
+            app.PMethod.Position = [m y 0.56*w hMethod];
+
+            app.BGMethod.Position = [8 15 app.PMethod.Position(3)-16 26];
+            app.RCOCO.Position =    [40 1 180 24];
+            app.RECOCO.Position =   [280 1 180 24];
+
+            app.BGEcoCalc.Position = [358 2 260 50];
+            app.RFast.Position = [32 25 120 24];
+            app.RAccurate.Position = [32 1 120 24];
 
             setappdata(app.UIFigure,'ECOCO_APP',app);
         end
@@ -396,6 +400,7 @@ end
                 method = iff(app.corrmethod==1,'Pearson','Spearman');
 
                 outputFile = '';
+                outputIndex = [];
                 modeName = '';
                 if app.mode == 1
                     h = uiprogressdlg(app.UIFigure,'Title','COCO','Message','Running ...','Indeterminate','on');
@@ -404,7 +409,7 @@ end
                     app.run.corrCI = corrCI;
                     app.run.corr_h0 = corr_h0;
                     app.run.ready = true;
-                    outputFile = saveCOCOOutputs(corrCI,corr_h0);
+                    [outputFile,outputIndex] = saveCOCOOutputs(corrCI,corr_h0);
                     modeName = 'COCO';
                 else
                     stepN = max(1,round(app.step/srm));
@@ -441,11 +446,11 @@ end
                     assignin('base','out_ecocorb',out_ecocorb);
                     assignin('base','out_norbit',out_norbit);
                     assignin('base','sr_p_tracked',sr_p);
-                    outputFile = saveECOCOOutputs(prt_sr,out_depth,out_ecc,out_eci,out_norbit,out_ecoco,sr_p,dat);
+                    [outputFile,outputIndex] = saveECOCOOutputs(prt_sr,out_depth,out_ecc,out_eci,out_norbit,out_ecoco,sr_p,dat);
                     modeName = 'ECOCO';
                 end
 
-                saveRunParameterTable(modeName,outputFile);
+                saveRunParameterTable(modeName,outputFile,outputIndex);
                 refreshMainListbox(ctx,resolveSaveDir(ctx));
                 setappdata(app.UIFigure,'ECOCO_APP',app);
             catch ME
@@ -511,18 +516,18 @@ end
             uialert(app.UIFigure,msg,'Reference');
         end
 
-        function nm = saveCOCOOutputs(corrCI,corr_h0)
+        function [nm,runIndex] = saveCOCOOutputs(corrCI,corr_h0)
             [~,dn,~] = fileparts(app.meta.filename);
             saveDir = resolveSaveDir(ctx);
             data_COCOCI = [corrCI(:,1:2),corr_h0(:,1:2)];
-            nm = uniqueName(fullfile(saveDir,[dn,'-COCO-data.txt']));
+            [nm,runIndex] = indexedRunName(saveDir,[dn,'-COCO-data'],'.txt',dn,'COCO');
             dlmwrite(nm,data_COCOCI,'delimiter',',','precision',9);
         end
 
-        function nm = saveECOCOOutputs(prt_sr,out_depth,out_ecc,out_eci,out_norbit,out_ecoco,sr_p,rawData)
+        function [nm,runIndex] = saveECOCOOutputs(prt_sr,out_depth,out_ecc,out_eci,out_norbit,out_ecoco,sr_p,rawData)
             [~,dn,~] = fileparts(app.meta.filename);
             saveDir = resolveSaveDir(ctx);
-            nm = uniqueName(fullfile(saveDir,[dn,'-ECOCO.data.xlsx']));
+            [nm,runIndex] = indexedRunName(saveDir,[dn,'-ECOCO.data'],'.xlsx',dn,'ECOCO');
             writematrix(prt_sr,nm,'Sheet','Sed.Rate');
             writematrix(out_depth,nm,'Sheet','Depth');
             writematrix(out_ecc,nm,'Sheet','COCO');
@@ -545,10 +550,10 @@ end
             end
         end
 
-        function nm = saveRunParameterTable(modeName,outputFile)
+        function nm = saveRunParameterTable(modeName,outputFile,runIndex)
             [~,dn,~] = fileparts(app.meta.filename);
             saveDir = resolveSaveDir(ctx);
-            nm = indexedParameterName(saveDir,dn,modeName);
+            nm = indexedParameterName(saveDir,dn,modeName,runIndex);
             params = buildRunParameterTable(modeName,outputFile);
             writecell(params,nm,'Sheet','COCO');
         end
@@ -583,7 +588,14 @@ end
             params(25,:) = {'', '', 'Output file name',outputName,'',''};
         end
 
-        function nm = indexedParameterName(saveDir,dn,modeName)
+        function nm = indexedParameterName(saveDir,dn,modeName,runIndex)
+            if nargin >= 4 && ~isempty(runIndex) && isfinite(runIndex)
+                nm = fullfile(saveDir,sprintf('%s-%s-parameters-%d.xls',dn,modeName,runIndex));
+                if ~exist(nm,'file')
+                    return
+                end
+            end
+
             for k = 1:9999
                 nm = fullfile(saveDir,sprintf('%s-%s-parameters-%d.xls',dn,modeName,k));
                 if ~exist(nm,'file')
@@ -739,6 +751,22 @@ end
                 s = fullfile(p,sprintf('%s-%d%s',n,k,e));
                 if ~exist(s,'file'), return; end
             end
+        end
+
+        function [nm,runIndex] = indexedRunName(saveDir,baseName,ext,dn,modeName)
+            for runIndex = 1:9999
+                nm = fullfile(saveDir,sprintf('%s-%d%s',baseName,runIndex,ext));
+                paramName = '';
+                if nargin >= 5
+                    paramName = fullfile(saveDir,sprintf('%s-%s-parameters-%d.xls',dn,modeName,runIndex));
+                end
+                if ~exist(nm,'file') && (isempty(paramName) || ~exist(paramName,'file'))
+                    return
+                end
+            end
+
+            nm = uniqueName(fullfile(saveDir,[baseName,ext]));
+            runIndex = NaN;
         end
         
         function out = parseOrbit()

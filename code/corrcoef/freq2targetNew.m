@@ -37,17 +37,13 @@ if nargin < 2 || isempty(pad) || ~isfinite(pad) || pad <= 0
     pad = 5000;
 end
 
-% Keep the historical 1 kyr target sampling, but extend duration when a
-% longer orbital period is supplied.
-timen = max(2000, ceil(5 * max(orbit9)));
-x = (1:timen)';
-nfft = max(ceil(pad), timen);
+[targetTime, targetFs, nfft] = targetSamplingFromData(dat, pad, orbit9, sr_i);
 
-amp = orbitAmplitudeFromPower(orbit9, targetp, x, nfft);
-y0 = zeros(timen, 1);
+amp = orbitAmplitudeFromPower(orbit9, targetp, targetTime, nfft, targetFs);
+y0 = zeros(size(targetTime));
 for ii = 1:numel(orbit9)
     if amp(ii) > 0
-        y0 = y0 + amp(ii) .* sin(2 * pi / orbit9(ii) .* x);
+        y0 = y0 + amp(ii) .* sin(2 * pi / orbit9(ii) .* targetTime);
     end
 end
 
@@ -56,7 +52,7 @@ if std(y0) == 0
 end
 
 y0 = detrend(y0, 1);
-[targetPower, targetFreq] = periodogram(y0, [], nfft, 1);
+[targetPower, targetFreq] = periodogram(y0, [], nfft, targetFs);
 
 okFreq = isfinite(targetFreq) & isfinite(targetPower);
 targetFreq = targetFreq(okFreq);
@@ -71,33 +67,60 @@ la = interp1(targetFreq, targetPower, lax, 'linear', 0);
 la(~isfinite(la)) = 0;
 end
 
-function amp = orbitAmplitudeFromPower(orbit9, targetp, x, nfft)
+function [targetTime, targetFs, nfft] = targetSamplingFromData(dat, pad, orbit9, sr_i)
+targetFs = 1;
+nSamples = max(2, ceil(5 * max(orbit9)));
+
+if ~isempty(dat) && size(dat,2) >= 1 && isfinite(sr_i) && sr_i > 0
+    depth = dat(:,1);
+    depth = depth(isfinite(depth));
+    if numel(depth) >= 2
+        depth = sort(depth(:));
+        dz = diff(depth);
+        dz = dz(isfinite(dz) & dz > 0);
+        if ~isempty(dz)
+            nSamples = numel(depth);
+            targetFs = sr_i / (100 * median(dz));
+        end
+    end
+end
+
+if ~isfinite(targetFs) || targetFs <= 0
+    targetFs = 1;
+end
+
+nSamples = max(2, nSamples);
+nfft = max(ceil(pad), nSamples);
+targetTime = (0:nSamples-1)' ./ targetFs;
+end
+
+function amp = orbitAmplitudeFromPower(orbit9, targetp, targetTime, nfft, targetFs)
 amp = zeros(size(targetp));
-unitPeakPower = unitPeakPowerForOrbits(orbit9, x, nfft);
+unitPeakPower = unitPeakPowerForOrbits(orbit9, targetTime, nfft, targetFs);
 ok = isfinite(unitPeakPower) & unitPeakPower > 0;
 amp(ok) = sqrt(targetp(ok) ./ unitPeakPower(ok));
 end
 
-function unitPeakPower = unitPeakPowerForOrbits(orbit9, x, nfft)
-persistent cachedOrbit cachedTimen cachedNfft cachedPower
+function unitPeakPower = unitPeakPowerForOrbits(orbit9, targetTime, nfft, targetFs)
+persistent cachedOrbit cachedTimen cachedNfft cachedFs cachedPower
 
-if ~isempty(cachedPower) && cachedTimen == numel(x) && ...
-        cachedNfft == nfft && isequal(cachedOrbit, orbit9)
+if ~isempty(cachedPower) && cachedTimen == numel(targetTime) && ...
+        cachedNfft == nfft && cachedFs == targetFs && isequal(cachedOrbit, orbit9)
     unitPeakPower = cachedPower;
     return
 end
 
 unitPeakPower = zeros(size(orbit9));
 targetFreq = 1 ./ orbit9;
-targetRBW = enbw(rectwin(numel(x)), 1); % cycles/kyr for 1 kyr sampling
+targetRBW = enbw(rectwin(numel(targetTime)), targetFs); % cycles/kyr
 
 for ii = 1:numel(orbit9)
-    y = detrend(sin(2 * pi / orbit9(ii) .* x), 1);
+    y = detrend(sin(2 * pi / orbit9(ii) .* targetTime), 1);
     if std(y) == 0
         continue
     end
 
-    [unitPower, unitFreq] = periodogram(y, [], nfft, 1);
+    [unitPower, unitFreq] = periodogram(y, [], nfft, targetFs);
     inBand = abs(unitFreq - targetFreq(ii)) <= targetRBW;
     if any(inBand)
         unitPeakPower(ii) = max(unitPower(inBand));
@@ -108,7 +131,8 @@ for ii = 1:numel(orbit9)
 end
 
 cachedOrbit = orbit9;
-cachedTimen = numel(x);
+cachedTimen = numel(targetTime);
 cachedNfft = nfft;
+cachedFs = targetFs;
 cachedPower = unitPeakPower;
 end

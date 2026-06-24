@@ -362,21 +362,21 @@ handles.menu_email = uimenu(handles.menu_help,'Label','Contact','Tag','menu_emai
 
 % Main controls
 handles.popupmenu2 = uicontrol(hFig,'Style','popupmenu','Units','normalized', ...
-    'Position',[0.60,0.92,0.22,0.06], ...
+    'Position',[0.55,0.92,0.18,0.06], ...
     'String',{'name a-z','name z-a','date ascend','date descend','bytes ascend','bytes descend'}, ...
     'Value',4, ...
     'Tag','popupmenu2', ...
     'Callback',@(h,e)AC_dispatch('popupmenu2_Callback',h,e));
 handles.popupmenu1 = uicontrol(hFig,'Style','popupmenu','Units','normalized', ...
-    'Position',[0.83,0.92,0.13,0.06], ...
+    'Position',[0.73,0.92,0.18,0.06], ...
     'String',{'unit','m','dm','cm','mm','ft','km','=====','Kyr','Myr','Gyr','a','Ka','Ma','Ga','=====','second', 'minute', 'hour','day','month','year'}, ...
     'Value',1, ...
     'Tag','popupmenu1', ...
     'Callback',@(h,e)AC_dispatch('popupmenu1_Callback',h,e));
 handles.main_unit_en = uicontrol(hFig,'Style','checkbox','Units','normalized', ...
-    'Position',[0.89,0.955,0.07,0.025], ...
-    'String','', ...
-    'Value',0, ...
+    'Position',[0.91,0.955,0.07,0.025], ...
+    'String','En/文', ...
+    'Value',1, ...
     'Tag','main_unit_en', ...
     'Callback',@(h,e)AC_dispatch('main_unit_en_Callback',h,e));
 handles.edit_acfigmain_dir = uicontrol(hFig,'Style','edit','Units','normalized', ...
@@ -755,7 +755,7 @@ if lang_choice > 0
     end
     set(handles.popupmenu2,'String',sortorder)
 else
-    set(handles.main_unit_en,'Visible','off','Value',0)
+    set(handles.main_unit_en,'Visible','on','Value',0)
 end
 %% push_up
 h_push_up = uicontrol('Style','pushbutton','Tag','push_up');%,'BackgroundColor','white','ForegroundColor','white');  % set style, Tag
@@ -881,10 +881,10 @@ else
 end
 if lang_choice > 0
     set(handles.popupmenu2,'position', [0.6,0.92,0.15,0.06],'tooltip',tooltip)
-    set(handles.popupmenu1,'position', [0.76,0.92,0.13,0.06],'tooltip',tooltip)
+    set(handles.popupmenu1,'position', [0.76,0.92,0.12,0.06],'tooltip',tooltip)
 else
-    set(handles.popupmenu2,'position', [0.6,0.92,0.22,0.06],'tooltip',tooltip)
-    set(handles.popupmenu1,'position', [0.83,0.92,0.13,0.06],'tooltip',tooltip)
+    set(handles.popupmenu2,'position', [0.6,0.92,0.21,0.06],'tooltip',tooltip)
+    set(handles.popupmenu1,'position', [0.82,0.92,0.06,0.06],'tooltip',tooltip)
 end
 % unit
 [lia, locb] = ismember('menu14',lang_id);
@@ -901,7 +901,7 @@ if lia
 else
     tooltip = '<html>Unit in English';  % tooltip
 end
-set(handles.main_unit_en,'position', [0.89,0.955,0.07,0.025],'tooltip',tooltip,'Value',0)
+set(handles.main_unit_en,'position', [0.89,0.955,0.09,0.025],'tooltip',tooltip,'Value',0,'Visible','on')
 
 % working directory
 [lia, locb] = ismember('menu16',lang_id);
@@ -8757,10 +8757,11 @@ str1 = get(handles.popupmenu2,'string');
 val1 = get(handles.popupmenu2,'value');
 handles.val1 = val1;
 handles.sortdata = str1{val1};
-CDac_pwd; % cd working dir
-refreshcolor;
-cd(pre_dirML);
 guidata(hObject, handles);
+pre_dirML = pwd;
+CDac_pwd; % cd working dir
+cleanupObj = onCleanup(@()cd(pre_dirML)); %#ok<NASGU>
+refreshcolor;
 
 % --- Executes during object creation, after setting all properties.
 function popupmenu2_CreateFcn(hObject, eventdata, handles)

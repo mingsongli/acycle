@@ -19,7 +19,7 @@ validateattributes(orbit9, {'numeric'}, ...
 validateattributes(sr, {'numeric'}, ...
     {'scalar', 'real', 'finite', 'positive'}, mfilename, 'sr');
 validateattributes(dat, {'numeric'}, ...
-    {'2d', 'real', 'finite', 'nonempty'}, mfilename, 'dat');
+    {'2d', 'real', 'nonempty'}, mfilename, 'dat');
 
 if size(data_pow, 2) < 2
     error('data_pow must contain at least two columns.');
@@ -28,11 +28,15 @@ if size(dat, 2) < 1
     error('dat must contain at least one depth column.');
 end
 
+targetFreq = 1 ./ orbit9(:);       % cycles/kyr
+targetp = zeros(size(targetFreq));
+
 depth = dat(:,1);
+depth = depth(isfinite(depth));
 dz_all = abs(diff(depth));
 dz_all = dz_all(isfinite(dz_all) & dz_all > 0);
 if isempty(dz_all)
-    error('Depth values must contain at least two distinct samples.');
+    return
 end
 
 dz = median(dz_all);
@@ -46,10 +50,11 @@ powerValue = data_pow(:,2);
 ok = isfinite(spatialFreq) & isfinite(powerValue);
 spatialFreq = spatialFreq(ok);
 powerValue = powerValue(ok);
+if isempty(spatialFreq)
+    return
+end
 
 timeFreq = spatialFreq * sr / 100; % cycles/kyr
-targetFreq = 1 ./ orbit9(:);       % cycles/kyr
-targetp = nan(size(targetFreq));
 
 for ii = 1:numel(targetFreq)
     fi = targetFreq(ii);
@@ -59,7 +64,7 @@ for ii = 1:numel(targetFreq)
         targetp(ii) = max(powerValue(inBand));
     else
         [~, nearestIdx] = min(abs(timeFreq - fi));
-        if ~isempty(nearestIdx)
+        if ~isempty(nearestIdx) && isfinite(powerValue(nearestIdx))
             targetp(ii) = powerValue(nearestIdx);
         end
     end

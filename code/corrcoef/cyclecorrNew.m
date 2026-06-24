@@ -52,7 +52,7 @@ lax_pad5 = lax_pad5';
 
 xx = data(:,1);  % frequency of data
 yy = data(:,2);  % power of data
-yy = zscore(yy);
+yy = safeZscore(yy);
 leng_x = sr1:srstep:sr2;  % tested sed. rate series
 mpts = length(leng_x);  % tested sed. rates number
 
@@ -69,7 +69,7 @@ if (sr1 < sr0) && (sr2 > sr0)
         y = i.*xx/100;
 
         la = freq2targetNew(dat,pad,data,orbit9,lax_pad5,i); % new
-        la = zscore(la);
+        la = safeZscore(la);
 
         nm = norbits([lax_pad5,la],xx,yy,orbit9,rayleigh,i);
         if adjust == 1
@@ -87,9 +87,9 @@ if (sr1 < sr0) && (sr2 > sr0)
 
         y=i.*xx/100;
         yi = interp1(y,data(:,2),lax); % decrease number of freq. of data
-        yi = zscore(yi);
+        yi = safeZscore(yi);
         la = freq2targetNew(dat,pad,data,orbit9,lax,i); % new
-        la = zscore(la);
+        la = safeZscore(la);
         nm = norbits([lax,la],xx,yy,orbit9,rayleigh,i);
         %figure; plot(lax_pad5,la,'k'); hold on; plot(xx,yi,'r-'); title(['black: target; red: data @ ',num2str(i),' cm/kyr']); 
         if adjust == 1
@@ -109,10 +109,10 @@ elseif sr1 >= sr0
     for i = sr1:srstep:sr2
         y=i.*xx/100;
         yi = interp1(y,data(:,2),lax);
-        yi = zscore(yi);
+        yi = safeZscore(yi);
 
         la = freq2targetNew(dat,pad,data,orbit9,lax,i); % new
-        la = zscore(la);
+        la = safeZscore(la);
 
         %figure; plot(lax_pad5,la,'k'); hold on; plot(xx,yi,'r-'); title(['black: target; red: data @ ',num2str(i),' cm/kyr']); 
         nm = norbits([lax,la],xx,yy,orbit9,rayleigh,i);
@@ -130,7 +130,7 @@ else
     for i = sr1:srstep:sr2
         y=i.*xx/100;
         la = freq2targetNew(dat,pad,data,orbit9,lax_pad5,i); % new
-        la = zscore(la);
+        la = safeZscore(la);
         
         nm = norbits([lax_pad5,la],xx,yy,orbit9,rayleigh,i);
         if adjust == 1
@@ -172,3 +172,17 @@ if strcmp(method,'Pearson')
 else
     [rho,pval] = corr(x,y,'type','Spearman');
 end
+
+function y = safeZscore(x)
+x = x(:);
+y = zeros(size(x));
+ok = isfinite(x);
+if nnz(ok) < 2
+    return
+end
+sigma = std(x(ok));
+if ~isfinite(sigma) || sigma == 0
+    return
+end
+mu = mean(x(ok));
+y(ok) = (x(ok) - mu) ./ sigma;

@@ -91,16 +91,16 @@ display = double(showProgress);  % show simulation steps
 
 %% Slice selection
 if isreal(slices) && slices > 0 && ~mod(slices,1)
-   if slices > 1
-       %dat_slice = data_slices(dat,slices);  % remove mean value; cut into slices
-       [dat_slice, datanewMean] = data_slices(dat, slices);    % cut into slices; calculate the mean of them
-   else
-       time = dat(:,1);
-       value = dat(:,2);
-       dat_slice = [time,detrend(value,1)];  % subtract linear trend
-       datanewMean = dat_slice;
-   end
-
+    if slices > 1
+        %dat_slice = data_slices(dat,slices);  % remove mean value; cut into slices
+        [dat_slice, datanewMean] = data_slices(dat, slices);    % cut into slices; calculate the mean of them
+    else
+        time = dat(:,1);
+        value = dat(:,2);
+        dat_slice = [time,detrend(value,1)];  % subtract linear trend
+        datanewMean = dat_slice;
+    end
+    datForTarget = targetBandwidthData(dat_slice, datanewMean, dat, slices);
 else
     disp('Error: Number of split slices must be a real, positive AND integer number.')
     return;
@@ -127,11 +127,16 @@ lang_var = table2cell(langdict(:, 2 + lang_choice));
 %
 dataf =[];
 datap =[];
-ndata = length(dat_slice(:,1));
+ndata = max(2, size(datForTarget, 1));
+dat_nyq = 1/(2*dt);   % Nyquist
+dat_ray = 1/(ndata * dt);  % rayleigh, matched to the effective slice length
 for j = 1: slices
-    dat_nyq = 1/(2*dt);   % Nyquist
-    dat_ray = 1/(ndata * dt);  % rayleigh
-    [p,f] = periodogram(dat_slice(:,2*j),[],pad,1/dt);  % power of dat
+    sliceValue = dat_slice(:,2*j);
+    sliceValue = sliceValue(isfinite(sliceValue));
+    if numel(sliceValue) < 2 || all(sliceValue == sliceValue(1))
+        sliceValue = zeros(ndata,1);
+    end
+    [p,f] = periodogram(sliceValue,[],pad,1/dt);  % power of dat
 
     % remove AR1 noise
     % 1 = classical red removed
@@ -139,7 +144,12 @@ for j = 1: slices
     % 3 = smoothed window average removed
 
     if red == 1
-        [theored]=theoredar1ML(dat(:,2),f,mean(p),dt);
+        if std(sliceValue) > 0
+            [theored]=theoredar1ML(sliceValue,f,mean(p),dt);
+        else
+            theored = ones(size(f));
+        end
+        theored(~isfinite(theored) | theored <= 0) = 1;
         p = p ./ theored;
         p = p - 1;
         p(p<0) = 0;   % power removing classic AR(1) noise
@@ -147,13 +157,15 @@ for j = 1: slices
     elseif red == 2
         % robust
         theored = redconf_any(f,p,dt,0.25,2);
+        theored(~isfinite(theored) | theored <= 0) = 1;
         p = p ./ theored;
         p = p - 1;
         p(p<0) = 0;   % power removing robust AR(1) noise
 
     elseif red == 3   % smoothed window average
-        xlogp = log10(p);
+        xlogp = log10(max(p, realmin));
         [swa, ~] = specswa(f, xlogp, ndata);
+        swa(~isfinite(swa) | swa <= 0) = 1;
         p = p ./ swa;
         p = p - 1;
         p(p<0) = 0;   % power removing swa (noise)
@@ -183,9 +195,9 @@ theoredML96_pow = [f,theoredML96];
         if slices > 1
             plot(ax2,f,datap,'LineWidth',.3);
         end
-        if red == 0
-            plot(ax2,f,theoredML96,'k--','LineWidth',2); 
-        end
+        %if red == 0
+        %    plot(ax2,f,theoredML96,'k--','LineWidth',2); 
+        %end
         xlim(ax2,[0, fmaxdata])
         
         set(ax2,'XMinorTick','on','YMinorTick','on')
@@ -274,7 +286,7 @@ assignin('base','sr0',sr0)
 %% correlation coefficient and its 95% significant level
 
 [corrxch,corry_rch,corrpych,nmi] = ...
-    cyclecorrNew(data,dat,pad,theoredML96_pow,target,orbit9,dat_ray,sr1,sr2,srstep,sr0,adjust,method);
+    cyclecorrNew(data,datForTarget,pad,theoredML96_pow,target,orbit9,dat_ray,sr1,sr2,srstep,sr0,adjust,method);
 
 corrCI = [corrxch,corry_rch,corrpych,nmi];
 
@@ -322,7 +334,7 @@ if nsim > 0
 
         sim_spectum = [f, pMC(:,i)];
         
-        corryi = cyclecorrsigNew(sim_spectum,dat,pad,theoredML96_pow,target_real,orbit9,dat_ray,sr1,sr2,srstep,sr0,adjust,method);
+        corryi = cyclecorrsigNew(sim_spectum,datForTarget,pad,theoredML96_pow,target_real,orbit9,dat_ray,sr1,sr2,srstep,sr0,adjust,method);
         
         if display == 1
             if rem(i,20) == 0
@@ -440,6 +452,7 @@ if nsim > 0
         else
             yTop = max([validScore; -log10(pFloor)]);
         end
+        yTop = max(yTop, yBottom + 0.5);
         
         % Add margins, similar to the original ylim([-0.01, 0.1])
         yRange = max(yTop - yBottom, 0.5);
@@ -488,13 +501,57 @@ if nsim > 0
         [bestSr, bestPcoco] = getBestPcoco(corrxch, productValues);
         if isfinite(bestSr)
             annotateBestPcoco(gca, bestSr, bestPcoco);
-            plotBestPcocoSpectra(data, dat, pad, orbit9, target_real, ...
+            plotBestPcocoSpectra(data, datForTarget, pad, orbit9, target_real, ...
                 bestSr, fmaxdata, main_unit_selection, lang_choice, lang_var, lang_id);
         end
     end
 else
     corr_h0 = zeros(mpts,1);
     corry = [];
+end
+end
+
+%%
+function datForTarget = targetBandwidthData(dat_slice, datanewMean, dat, slices)
+% Use the same effective record length as the spectrum being correlated.
+% With slices > 1, the data spectrum is an average of slice spectra, so the
+% target-bandwidth estimate must use a representative slice-length series.
+datForTarget = [];
+
+if slices > 1
+    datForTarget = cleanTwoColumnData(datanewMean);
+    if ~hasUsableDepth(datForTarget)
+        bestLength = 0;
+        for ii = 1:slices
+            candidate = cleanTwoColumnData(dat_slice(:,2*ii-1:2*ii));
+            if hasUsableDepth(candidate) && size(candidate,1) > bestLength
+                datForTarget = candidate;
+                bestLength = size(candidate,1);
+            end
+        end
+    end
+else
+    datForTarget = cleanTwoColumnData(dat_slice(:,1:2));
+end
+
+if ~hasUsableDepth(datForTarget)
+    datForTarget = cleanTwoColumnData(dat);
+end
+end
+
+function tf = hasUsableDepth(x)
+tf = size(x,1) >= 2 && numel(unique(x(:,1))) >= 2;
+end
+
+function x = cleanTwoColumnData(x)
+if isempty(x) || size(x,2) < 2
+    x = zeros(0,2);
+    return
+end
+x = x(:,1:2);
+x = x(all(isfinite(x),2),:);
+if ~isempty(x)
+    x = sortrows(x,1);
 end
 end
 
