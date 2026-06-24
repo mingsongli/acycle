@@ -65,16 +65,7 @@ function tabChangedCallback(src, event)
     fig = findobj(allchild(groot), 'flat', 'Name', 'Acycle: Two Sample Tests');
     
     multilineText = {''};
-    
-    % Create a textarea to display the text
-    txt = uitextarea(fig,...
-        'Position', [20, 20, 760, 345],... % Position and size of the text area
-        'Value', multilineText,...         % Set the multiline text
-        'FontSize', 14,...                 % Set font size
-        'Editable', 'off',...              % Make it read-only; text can be selected but not changed
-        'HorizontalAlignment', 'Left',...  % Optional: Set horizontal alignment
-        'BackgroundColor', 'w');  
-    txt.Value = {''};
+    txt = resetResultTextArea(fig,multilineText);
     drawnow;
     try
         % Get the selected tab
@@ -353,4 +344,22 @@ function tabChangedCallback(src, event)
         txt.FontName = 'Courier'; 
     catch
     end
+end
+
+function txt = resetResultTextArea(fig,multilineText)
+    oldTxt = findobj(fig,'Type','uitextarea');
+    if ~isempty(oldTxt)
+        delete(oldTxt);
+    end
+
+    % Create a fresh textarea so previous tab results cannot remain visible.
+    txt = uitextarea(fig,...
+        'Tag','TwoSampleTestsResultText',...
+        'Position', [20, 20, 760, 345],... % Position and size of the text area
+        'Value', multilineText,...         % Set the multiline text
+        'FontSize', 14,...                 % Set font size
+        'Editable', 'off',...              % Make it read-only; text can be selected but not changed
+        'HorizontalAlignment', 'Left',...  % Optional: Set horizontal alignment
+        'BackgroundColor', 'w');
+    txt.Value = {''};
 end

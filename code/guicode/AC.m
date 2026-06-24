@@ -362,13 +362,13 @@ handles.menu_email = uimenu(handles.menu_help,'Label','Contact','Tag','menu_emai
 
 % Main controls
 handles.popupmenu2 = uicontrol(hFig,'Style','popupmenu','Units','normalized', ...
-    'Position',[0.55,0.92,0.18,0.06], ...
+    'Position',[0.6,0.92,0.18,0.06], ...
     'String',{'name a-z','name z-a','date ascend','date descend','bytes ascend','bytes descend'}, ...
     'Value',4, ...
     'Tag','popupmenu2', ...
     'Callback',@(h,e)AC_dispatch('popupmenu2_Callback',h,e));
 handles.popupmenu1 = uicontrol(hFig,'Style','popupmenu','Units','normalized', ...
-    'Position',[0.73,0.92,0.18,0.06], ...
+    'Position',[0.8,0.92,0.1,0.06], ...
     'String',{'unit','m','dm','cm','mm','ft','km','=====','Kyr','Myr','Gyr','a','Ka','Ma','Ga','=====','second', 'minute', 'hour','day','month','year'}, ...
     'Value',1, ...
     'Tag','popupmenu1', ...
@@ -879,13 +879,7 @@ if lia
 else
     tooltip = '<html>Sort<br>dataset';  % tooltip
 end
-if lang_choice > 0
-    set(handles.popupmenu2,'position', [0.6,0.92,0.15,0.06],'tooltip',tooltip)
-    set(handles.popupmenu1,'position', [0.76,0.92,0.12,0.06],'tooltip',tooltip)
-else
-    set(handles.popupmenu2,'position', [0.6,0.92,0.21,0.06],'tooltip',tooltip)
-    set(handles.popupmenu1,'position', [0.82,0.92,0.06,0.06],'tooltip',tooltip)
-end
+set(handles.popupmenu2,'tooltip',tooltip)
 % unit
 [lia, locb] = ismember('menu14',lang_id);
 if lia
@@ -893,6 +887,7 @@ if lia
 else
     tooltip = '<html>Select unit<br>for dataset';  % tooltip
 end
+set(handles.popupmenu1,'tooltip',tooltip)
 
 % unit language
 [lia, locb] = ismember('menu26',lang_id);
@@ -901,7 +896,7 @@ if lia
 else
     tooltip = '<html>Unit in English';  % tooltip
 end
-set(handles.main_unit_en,'position', [0.89,0.955,0.09,0.025],'tooltip',tooltip,'Value',0,'Visible','on')
+set(handles.main_unit_en,'tooltip',tooltip,'Value',0,'Visible','on')
 
 % working directory
 [lia, locb] = ismember('menu16',lang_id);
