@@ -849,6 +849,7 @@ classdef evofftGUI < matlab.apps.AppBase
                 dlmwrite(name1, s, 'delimiter', ' ', 'precision', 9);
                 dlmwrite(name2, x_grid', 'delimiter', ' ', 'precision', 9);
                 dlmwrite(name3, y_grid', 'delimiter', ' ', 'precision', 9);
+                app.saveEvofftParameterTable(fmin,fmax,window,step);
                 if ~isempty(app.listbox_acmain) && isgraphics(app.listbox_acmain)
                     d = dir;
                     set(app.listbox_acmain,'String',{d.name},'Value',1);
@@ -859,6 +860,64 @@ classdef evofftGUI < matlab.apps.AppBase
                     catch
                     end
                 end
+            end
+        end
+
+        function saveEvofftParameterTable(app, fmin, fmax, window, step)
+            paramFile = app.nextIndexedFile([app.filename,'-eFFT-parameters'],'.xls');
+            params = repmat({''},18,6);
+            params(1,2) = {'Detailed Parameters Used in Data Processing by Acycle'};
+            params(2,2:6) = {'Version','Designed by','Institute','E-mail','Date'};
+            params(3,2:6) = {'v1.1','Mingsong Li','Peking University','msli@pku.edu.cn',datestr(now,'yyyy-mm-dd HH:MM:SS')};
+            params(5,2:5) = {'Tools','Items','Parameters','Explanations'};
+
+            [~,inputBase,inputExt] = fileparts(app.data_name);
+            params(7,:) = {'','Evolutionary FFT','Input file name',[inputBase,inputExt],'',''};
+            params(8,:) = {'','','Method',app.method,'',''};
+            params(9,:) = {'','','Frequency minimum',fmin,'',''};
+            params(10,:) = {'','','Frequency maximum',fmax,'',''};
+            params(11,:) = {'','','Sliding window size',window,'',''};
+            params(12,:) = {'','','Sliding window step',step,'',''};
+            params(13,:) = {'','','Normalize each window',app.yesNo(app.CheckNormalize.Value),'Select Yes or No',''};
+            params(14,:) = {'','','Log(frequency)',app.yesNo(app.CheckLogFreq.Value),'Select Yes or No',''};
+            params(15,:) = {'','','Log(power)',app.yesNo(app.CheckLogPower.Value),'Select Yes or No',''};
+            params(16,:) = {'','','Padding edge method',app.padMethodName(),'Select zero/mirror/mean/random',''};
+            params(17,:) = {'','','Colormap',app.DropCmap.Value,'',''};
+            params(18,:) = {'','','Grid number',app.naIfEmpty(app.EditGrid.Value),'',''};
+
+            writecell(params,paramFile,'Sheet','COCO');
+        end
+
+        function filename = nextIndexedFile(~, baseName, ext)
+            for ii = 1:9999
+                filename = sprintf('%s-%d%s',baseName,ii,ext);
+                if ~exist(filename,'file')
+                    return
+                end
+            end
+            filename = sprintf('%s-%s%s',baseName,datestr(now,'yyyymmddTHHMMSS'),ext);
+        end
+
+        function s = padMethodName(app)
+            if app.CheckXPadding.Value
+                s = app.DropPadType.Value;
+            else
+                s = 'No';
+            end
+        end
+
+        function s = yesNo(~, tf)
+            if tf
+                s = 'Yes';
+            else
+                s = 'No';
+            end
+        end
+
+        function s = naIfEmpty(~, v)
+            s = strtrim(char(v));
+            if isempty(s)
+                s = 'NA';
             end
         end
     end

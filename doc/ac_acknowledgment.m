@@ -48,7 +48,6 @@
 %   Eric Ruggieri (Bayesian Change Point)
 %   Jonathan Levine, Peter Huybers (Insolation)
 %   Matthias Sinnesael (Spectral Moments)
-%   Stephen Meyers (TimeOpt/eTimeOpt)
 %   Christopher Torrence, Gilbert Compo (Wavelet)
 %   Aslak Grinsted (Wavelet coherence, wavelet cross spectrum)
 %   Yonggang Liu (Rectified Wavelet Power Spectrum)

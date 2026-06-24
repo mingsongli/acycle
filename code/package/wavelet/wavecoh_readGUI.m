@@ -165,6 +165,7 @@ if handles.wavehastorerun
             wcs_mat   = wcs';
             dlmwrite(name4, wcs_mat, 'delimiter', ',', 'precision', 9);
             dlmwrite(name5, wcoh_mat, 'delimiter', ',', 'precision', 9);
+            ac_save_wave_parameter_table(handles,[dn1,'-',dn2],{get(handles.edit1,'String'),get(handles.edit2,'String')});
             d = dir; %get files
             set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
             refreshcolor;
@@ -224,6 +225,7 @@ if handles.wavehastorerun
             dlmwrite(name6, wtcsig, 'delimiter', ',', 'precision', 9);
             dlmwrite(name7, sig95, 'delimiter', ',', 'precision', 9);
             dlmwrite(name8, coi, 'delimiter', ',', 'precision', 9);
+            ac_save_wave_parameter_table(handles,[dn1,'-',dn2],{get(handles.edit1,'String'),get(handles.edit2,'String')});
             d = dir; %get files
             set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
             refreshcolor;

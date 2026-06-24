@@ -265,6 +265,13 @@ end
                 if ~isfinite(nw), nw = 2; end
                 nfft = chooseNfft(numel(y));
                 method = char(app.method);
+                outdir = '';
+                if saveResult
+                    outdir = getAcWorkDir();
+                    if ~isfolder(outdir)
+                        outdir = pwd;
+                    end
+                end
                 [f,p] = computeSpectrum(method,y,x,dt,nw,nfft,fmax);
                 keep = isfinite(f) & isfinite(p) & (f >= fmin) & (f <= fmax);
                 f = f(keep); p = p(keep);
@@ -273,6 +280,8 @@ end
                 ax = axes(fig); hold(ax,'on');
                 plot(ax,f,p,'k-','LineWidth',1.2,'DisplayName','Power');
                 plotCount = 1;
+                figFtest = [];
+                figSwa = [];
 
                 if contains(lower(method),'multi') && app.CkRobust.Value
                     try
@@ -380,9 +389,9 @@ end
                     try
                         padtimes = max(1,round(nfft/numel(y)));
                         [freq,ftest,fsig,~,~,~,~,dof,~] = ftestmtmML([x y],nw,padtimes,1); %#ok<ASGLU>
-                        fig2 = figure('Color','white','Name','Acycle: F-test');
-                        subplot(2,1,1,'Parent',fig2); plot(freq,dof,'k-','LineWidth',1); xlim([fmin fmax]); title('Adaptive weighted degrees of freedom');
-                        subplot(2,1,2,'Parent',fig2); plot(freq,ftest,'k-'); hold on; plot(freq,fsig,'r--'); xlim([fmin fmax]); title('F-test and significance');
+                        figFtest = figure('Color','white','Name','Acycle: F-test');
+                        subplot(2,1,1,'Parent',figFtest); plot(freq,dof,'k-','LineWidth',1); xlim([fmin fmax]); title('Adaptive weighted degrees of freedom');
+                        subplot(2,1,2,'Parent',figFtest); plot(freq,ftest,'k-'); hold on; plot(freq,fsig,'r--'); xlim([fmin fmax]); title('F-test and significance');
                     catch MEi
                         warning('spectrum:ftest','F-test failed: %s',MEi.message);
                     end
@@ -391,7 +400,7 @@ end
                 if contains(lower(method),'multi') && app.CkSWA.Value
                     try
                         padtimes = max(1,round(nfft/numel(y)));
-                        outSWA = spectralswafdr([x y],'mtm',nw,padtimes,0);
+                        outSWA = runSpectralSwa([x y],nw,padtimes,saveResult,outdir);
                         fx = outSWA(:,1);
                         rr = fx >= fmin & fx <= fmax;
                         if any(rr)
@@ -458,12 +467,21 @@ end
                 if saveResult
                     out = [f p];
                     [~,name,~] = fileparts(getDataName(ctx));
-                    outname = [name,'-spectrum.txt'];
-                    outdir = getAcWorkDir();
-                    if ~isfolder(outdir)
+                    if isempty(outdir) || ~isfolder(outdir)
                         outdir = pwd;
                     end
-                    writematrix(out,fullfile(outdir,outname),'Delimiter','tab');
+                    hasFtestPdf = ~isempty(figFtest) && isgraphics(figFtest);
+                    hasSwaPdf = ~isempty(figSwa) && isgraphics(figSwa);
+                    [dataFile,pdfFile,ftestPdfFile,swaPdfFile,paramFile,runIndex] = spectrumOutputNames(outdir,name,hasFtestPdf,hasSwaPdf);
+                    writematrix(out,dataFile,'Delimiter','tab');
+                    saveFigurePdf(fig,pdfFile);
+                    if hasFtestPdf
+                        saveFigurePdf(figFtest,ftestPdfFile);
+                    end
+                    if hasSwaPdf
+                        saveFigurePdf(figSwa,swaPdfFile);
+                    end
+                    saveSpectrumParameterTable(paramFile,method,nw,nfft,fmin,fmax);
 
                     swaFdr = 'SWA-Spectrum-background-FDR.dat';
                     swaChi = 'SWA-Spectrum-Chi2CL.dat';
@@ -489,7 +507,7 @@ end
 
         function swaOpts = getSwaOptions()
             swaOpts = [];
-            labels = {'SWA background','10% FDR','5% FDR','1% FDR','0.1% FDR','0.01% FDR','Chi2 90%','Chi2 95%','Chi2 99%','Chi2 99.9%','Chi2 99.99%'};
+            labels = swaLabels();
             [idx, ok] = listdlg('PromptString','SWA confidence lines:', ...
                 'SelectionMode','multiple', ...
                 'ListString',labels, ...
@@ -564,6 +582,165 @@ end
             end
 
             plot(axh,xPlot,pxx,'k-','LineWidth',0.7,'DisplayName','Power');
+        end
+
+        function outputdata = runSpectralSwa(dataForSwa,nw,padtimes,saveResult,outdir)
+            oldDir = pwd;
+            cleanupDir = '';
+            try
+                if saveResult && ~isempty(outdir) && isfolder(outdir)
+                    cd(outdir);
+                elseif ~saveResult
+                    cleanupDir = tempname;
+                    mkdir(cleanupDir);
+                    cd(cleanupDir);
+                end
+                outputdata = spectralswafdr(dataForSwa,'mtm',nw,padtimes,0);
+            catch ME
+                cd(oldDir);
+                if ~isempty(cleanupDir) && isfolder(cleanupDir)
+                    try
+                        rmdir(cleanupDir,'s');
+                    catch
+                    end
+                end
+                rethrow(ME);
+            end
+            cd(oldDir);
+            if ~isempty(cleanupDir) && isfolder(cleanupDir)
+                try
+                    rmdir(cleanupDir,'s');
+                catch
+                end
+            end
+        end
+
+        function labels = swaLabels()
+            labels = {'SWA background','10% FDR','5% FDR','1% FDR','0.1% FDR','0.01% FDR','Chi2 90%','Chi2 95%','Chi2 99%','Chi2 99.9%','Chi2 99.99%'};
+        end
+
+        function [dataFile,pdfFile,ftestPdfFile,swaPdfFile,paramFile,runIndex] = spectrumOutputNames(outdir,name,hasFtestPdf,hasSwaPdf)
+            for runIndex = 1:9999
+                dataFile = fullfile(outdir,sprintf('%s-spectrum-%d.txt',name,runIndex));
+                pdfFile = fullfile(outdir,sprintf('%s-spectrum-%d.pdf',name,runIndex));
+                ftestPdfFile = fullfile(outdir,sprintf('%s-spectrum-Ftest-%d.pdf',name,runIndex));
+                swaPdfFile = fullfile(outdir,sprintf('%s-spectrum-SWA-%d.pdf',name,runIndex));
+                paramFile = fullfile(outdir,sprintf('%s-spectrum-parameters-%d.xls',name,runIndex));
+
+                files = {dataFile,pdfFile,paramFile};
+                if hasFtestPdf
+                    files{end+1} = ftestPdfFile; %#ok<AGROW>
+                end
+                if hasSwaPdf
+                    files{end+1} = swaPdfFile; %#ok<AGROW>
+                end
+                if all(cellfun(@(f)~isfile(f),files))
+                    return
+                end
+            end
+
+            stamp = datestr(now,'yyyymmddTHHMMSS');
+            runIndex = NaN;
+            dataFile = fullfile(outdir,sprintf('%s-spectrum-%s.txt',name,stamp));
+            pdfFile = fullfile(outdir,sprintf('%s-spectrum-%s.pdf',name,stamp));
+            ftestPdfFile = fullfile(outdir,sprintf('%s-spectrum-Ftest-%s.pdf',name,stamp));
+            swaPdfFile = fullfile(outdir,sprintf('%s-spectrum-SWA-%s.pdf',name,stamp));
+            paramFile = fullfile(outdir,sprintf('%s-spectrum-parameters-%s.xls',name,stamp));
+        end
+
+        function saveFigurePdf(figHandle,outFile)
+            if isempty(figHandle) || ~isgraphics(figHandle)
+                return
+            end
+            try
+                exportgraphics(figHandle,outFile,'ContentType','vector');
+            catch
+                try
+                    print(figHandle,outFile,'-dpdf','-bestfit');
+                catch
+                    saveas(figHandle,outFile);
+                end
+            end
+        end
+
+        function saveSpectrumParameterTable(paramFile,method,nw,nfft,fmin,fmax)
+            inputName = getDataName(ctx);
+            params = repmat({''},19,6);
+            params(1,2) = {'Detailed Parameters Used in Data Processing by Acycle'};
+            params(2,2:6) = {'Version','Designed by','Institute','E-mail','Date'};
+            params(3,2:6) = {'v1.1','Mingsong Li','Peking University','msli@pku.edu.cn',datestr(now,'yyyy-mm-dd HH:MM:SS')};
+            params(5,2:5) = {'Tools','Items','Parameters','Explanations'};
+
+            params(7,:) = {'','Spectral analysis','Input file name',inputName,'',''};
+            params(8,:) = {'','','Method',method,'',''};
+            params(9,:) = {'','','Time-bandwidth product',timeBandwidthText(method,nw),'',''};
+            params(10,:) = {'','','Zero padding',nfft,'',''};
+            params(11,:) = {'','','Frequency minimum',fmin,'',''};
+            params(12,:) = {'','','Frequency maximum',fmax,'',''};
+
+            params(14,:) = {'','Noise model','Input file name',inputName,'',''};
+            params(15,:) = {'','','Method',spectrumNoiseModelName(method),'',''};
+            params(16,:) = {'','','Median smoothing window','NA','',''};
+            params(17,:) = {'','','AR(1) best fit model',spectrumAr1ModelName(),'',''};
+            params(18,:) = {'','','Bias correction for ultra-high resolution data','NA','',''};
+            params(19,:) = {'','','Output file name',spectrumNoiseOutputName(method),'',''};
+
+            writecell(params,paramFile,'Sheet','COCO');
+        end
+
+        function s = timeBandwidthText(method,nw)
+            if contains(lower(method),'multi')
+                s = [num2str(nw),char(960)];
+            else
+                s = 'NA';
+            end
+        end
+
+        function s = spectrumNoiseModelName(method)
+            models = {};
+            if contains(lower(method),'multi') && app.CkSWA.Value
+                models{end+1} = 'Smoothed Window Averages'; %#ok<AGROW>
+            end
+            if app.CkRobust.Value
+                models{end+1} = 'Robust AR(1)'; %#ok<AGROW>
+            end
+            if app.CkClassic.Value
+                models{end+1} = char(app.CkClassic.Text); %#ok<AGROW>
+            end
+            if app.CkBPL.Value
+                models{end+1} = 'Bending Power Law'; %#ok<AGROW>
+            end
+            if app.CkPL.Value
+                models{end+1} = 'Power Law'; %#ok<AGROW>
+            end
+            if isempty(models)
+                s = 'NA';
+            else
+                s = strjoin(models,', ');
+            end
+        end
+
+        function s = spectrumAr1ModelName()
+            models = {};
+            if app.CkRobust.Value
+                models{end+1} = 'Robust AR(1)'; %#ok<AGROW>
+            end
+            if app.CkClassic.Value
+                models{end+1} = char(app.CkClassic.Text); %#ok<AGROW>
+            end
+            if isempty(models)
+                s = 'NA';
+            else
+                s = strjoin(models,', ');
+            end
+        end
+
+        function s = spectrumNoiseOutputName(method)
+            if contains(lower(method),'multi') && app.CkSWA.Value
+                s = 'SWA-Spectrum-background-FDR.dat';
+            else
+                s = 'NA';
+            end
         end
 
         function outdir = getAcWorkDir()

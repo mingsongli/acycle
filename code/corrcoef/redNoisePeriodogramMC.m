@@ -239,8 +239,7 @@ function p = processOneSpectrum(redSeries, p, f, dt, red)
 
             theored = theored(:);
 
-            p = p ./ theored;
-            p = p - 1;
+            p = p - theored;
 
         case red == 2
             % Normalize by the theoretical AR(1) spectrum and subtract 1
@@ -249,14 +248,12 @@ function p = processOneSpectrum(redSeries, p, f, dt, red)
             theored = theored(:);
             theored = max(theored, realmin('double'));
 
-            p = p ./ theored;
-            p = p - 1;
+            p = p - theored;
 
         case red == 3
             xlogp = log10(p);
             [swa, ~] = specswa(f, xlogp, length(redSeries));
-            p = p ./ swa;
-            p = p - 1;
+            p = p - swa;
 
     end
 

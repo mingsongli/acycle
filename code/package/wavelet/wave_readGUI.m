@@ -198,6 +198,7 @@ if handles.wavehastorerun
         sig_mat   = [nan,period;datax,sig95'];
         dlmwrite(name4, power_mat, 'delimiter', ',', 'precision', 9);
         dlmwrite(name5, sig_mat, 'delimiter', ',', 'precision', 9);
+        ac_save_wave_parameter_table(handles,dat_name,{get(handles.edit1,'String')});
         d = dir; %get files
         set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
         refreshcolor;

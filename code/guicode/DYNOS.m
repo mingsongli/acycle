@@ -33,7 +33,8 @@ S.edit_acfigmain_dir = getfielddef(ctx,'edit_acfigmain_dir',[]);
 
 S.use_middle_age = true;
 S.age = 0;
-S.cycles = [405 125 95 40.9 23.6 22.3 19.1];
+S.orbit9 = defaultOrbit9();
+S.cycles = S.orbit9;
 S.f = 1./S.cycles;
 
 S.window1 = 300;
@@ -135,10 +136,11 @@ S.PFreq = uipanel(S.UIFigure,'Title','Frequency','BackgroundColor',S.bg);
 S.BGFreq = uibuttongroup(S.PFreq,'BorderType','none','BackgroundColor',S.bg, ...
     'SelectionChangedFcn',@(bg,evt)onFreqMode(bg));
 S.RMiddle = uiradiobutton(S.BGFreq,'Text','Middle age of data','Value',true,'FontWeight','bold','FontColor',[0.8 0 0]);
-S.EAge = uieditfield(S.BGFreq,'text','Value',num2str(S.age),'FontColor',[0.8 0 0]);
+S.EAge = uieditfield(S.BGFreq,'text','Value',num2str(S.age),'FontColor',[0.8 0 0], ...
+    'ValueChangedFcn',@(src,evt)onAgeChanged(src));
 S.TMa = uilabel(S.BGFreq,'Text','Ma','FontColor',[0.8 0 0],'BackgroundColor',S.bg);
 S.RCycles = uiradiobutton(S.BGFreq,'Text','Type target orbital cycles (space delimited, ka)','Value',false);
-S.ECycles = uieditfield(S.BGFreq,'text','Value',num2str(S.cycles,'%1.1f '),'Enable','off');
+S.ECycles = uieditfield(S.BGFreq,'text','Value',formatCycles(S.cycles),'Enable','off');
 S.TRange = uilabel(S.BGFreq,'Text','Frequency ranges: +/-','BackgroundColor',S.bg);
 S.EFza = uieditfield(S.BGFreq,'text','Value',num2str(S.fza));
 S.TTo5 = uilabel(S.BGFreq,'Text','to','BackgroundColor',S.bg);
@@ -357,7 +359,7 @@ try
     S.ENMC.Value = num2str(S.nmc);
     S.ECore.Value = num2str(S.numcore);
     S.EIt.Value = num2str(S.itinerary);
-    S.ECycles.Value = num2str(S.cycles,'%1.1f ');
+    S.ECycles.Value = formatCycles(S.cycles);
 
     cla(S.AxData);
     plot(S.AxData,data(:,1),data(:,2),'Color',[0.2 0.6 1]);
@@ -410,11 +412,22 @@ S.use_middle_age = (bg.SelectedObject == S.RMiddle);
 if S.use_middle_age
     S.EAge.Enable = 'on';
     S.ECycles.Enable = 'off';
+    S = updateOrbit9Display(S);
 else
     S.EAge.Enable = 'off';
     S.ECycles.Enable = 'on';
 end
 setState(bg,S);
+end
+
+function onAgeChanged(src)
+S = getState(src);
+try
+    S = updateOrbit9Display(S);
+    setState(src,S);
+catch ME
+    uialert(S.UIFigure,ME.message,'DYNOS');
+end
 end
 
 function onRun(src)
@@ -461,24 +474,47 @@ S.percent_on = [S.CMedian.Value S.C50.Value S.C68.Value S.C80.Value S.C90.Value 
 if ~any(S.percent_on), S.percent_on(1) = true; end
 
 if S.use_middle_age
-    S.age = str2double(S.EAge.Value);
-    age_obl = 41 - 0.0332*S.age;
-    age_p1 = 22.43 - 0.0108*S.age;
-    age_p2 = 23.75 - 0.0121*S.age;
-    age_p3 = 19.18 - 0.0079*S.age;
-    c = [405 125 95 age_obl age_p2 age_p1 age_p3];
-    S.cycles = c;
-    S.ECycles.Value = num2str(c,'%1.1f ');
+    S = updateOrbit9Display(S);
 else
     c = str2num(S.ECycles.Value); %#ok<ST2NM>
-    if isempty(c), c = [405 125 95 40.9 23.6 22.3 19.1]; end
+    if isempty(c), c = defaultOrbit9(); end
+    if any(~isfinite(c)) || any(c <= 0)
+        error('Target orbital cycles must be finite positive values.');
+    end
     S.cycles = c(:)';
+    S.orbit9 = S.cycles;
 end
 S.f = 1./S.cycles;
 
 if S.sampa <= 0 || S.sampb <= 0 || S.sampb < S.sampa
     error('Sample rate range is invalid.');
 end
+end
+
+function S = updateOrbit9Display(S)
+S.age = str2double(S.EAge.Value);
+S.orbit9 = orbit9FromAge(S.age);
+S.cycles = S.orbit9;
+S.ECycles.Value = formatCycles(S.cycles);
+end
+
+function cycles = defaultOrbit9()
+cycles = [405.6912, 130.6979, 123.8532, 98.8517, 94.8856, 40.9897, 23.6820, 22.3758, 18.9519];
+end
+
+function cycles = orbit9FromAge(age)
+if ~isfinite(age)
+    error('Middle age must be a finite value in Ma.');
+end
+orbit9 = calculate_orbit9(age);
+cycles = orbit9(:,2)'/1000;
+if numel(cycles) ~= 9 || any(~isfinite(cycles)) || any(cycles <= 0)
+    error('calculate_orbit9 did not return nine finite positive orbital periods.');
+end
+end
+
+function s = formatCycles(cycles)
+s = strtrim(sprintf('%.4f ',cycles));
 end
 
 function S = runDynot(S)
@@ -619,9 +655,71 @@ end
 mid = max(1,min(size(powyad_p_nan,2),npercent2+1));
 dlmwrite(name1,[y_grid_nan,powyad_p_nan(:,mid)],'delimiter',' ','precision',9);
 dlmwrite(name2,[y_grid_nan,powyad_p_nan],'delimiter',' ','precision',9);
+saveDynotParameterTable(S);
 
 refreshMainListbox(S);
 cd(pre_dir);
+end
+
+function saveDynotParameterTable(S)
+paramFile = nextIndexedFile([S.dat_name,'-DYNOT-parameters'],'.xls');
+params = repmat({''},26,6);
+params(1,2) = {'Detailed Parameters Used in Data Processing by Acycle'};
+params(2,2:6) = {'Version','Designed by','Institute','E-mail','Date'};
+params(3,2:6) = {'v1.1','Mingsong Li','Peking University','msli@pku.edu.cn',datestr(now,'yyyy-mm-dd HH:MM:SS')};
+params(5,2:5) = {'Tools','Items','Parameters','Explanations'};
+
+params(7,:) = {'','Sedimentary Noise Modeling','Input file name',S.data_name,'',''};
+params(8,:) = {'','DYNOT','Cut data from',S.cut1,S.unit,''};
+params(9,:) = {'','','Cut data to ',S.cut2,S.unit,''};
+params(10,:) = {'','','Sampling rate lower',S.sampa,S.unit,''};
+params(11,:) = {'','','Sampling rate upper',S.sampb,S.unit,''};
+params(12,:) = {'','','Window size from',S.window1,S.unit,''};
+params(13,:) = {'','','Window size to',S.window2,S.unit,''};
+params(14,:) = {'','','Time-bandwidth product from',S.nw1,char(960),''};
+params(15,:) = {'','','Time-bandwidth product to',S.nw2,char(960),''};
+params(16,:) = {'','','Zero padding number',S.pad,'#',''};
+params(17,:) = {'','','Step',S.step,S.unit,''};
+params(18,:) = {'','','Monte Carlo iterations',S.nmc,'#',''};
+params(19,:) = {'','','Middle age of the data',middleAgeValue(S),'Ma',''};
+params(20,:) = {'','','Target orbital cycles',cycleText(S.cycles),'',''};
+params(21,:) = {'','','Frequency bandwidth adjustment',[num2str(S.fza),char(215)],'',''};
+params(22,:) = {'','','Frequency bandwidth adjustment',[num2str(S.fzb),char(215)],'',''};
+params(23,:) = {'','','Cutoff frequencies from',S.ftmin,['cycles/',S.unit],''};
+params(24,:) = {'','','Cutoff frequencies to',S.ftmax,['cycles/',S.unit],''};
+params(25,:) = {'','','Plot interpolation number',S.nout,'',''};
+params(26,:) = {'','','Shift plot grids',S.padwin,'',''};
+
+writecell(params,paramFile,'Sheet','COCO');
+end
+
+function v = middleAgeValue(S)
+if S.use_middle_age
+    v = S.age;
+else
+    v = 'NA';
+end
+end
+
+function s = cycleText(v)
+if isempty(v)
+    s = 'NA';
+else
+    s = formatCycles(v);
+    if isempty(s)
+        s = 'NA';
+    end
+end
+end
+
+function filename = nextIndexedFile(baseName,ext)
+for ii = 1:9999
+    filename = sprintf('%s-%d%s',baseName,ii,ext);
+    if ~exist(filename,'file')
+        return
+    end
+end
+filename = sprintf('%s-%s%s',baseName,datestr(now,'yyyymmddTHHMMSS'),ext);
 end
 
 function refreshMainListbox(S)

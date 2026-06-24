@@ -6597,6 +6597,7 @@ if check == 1
                 name1 = [dat_name,'-win',num2str(window),'-pda',ext];
                 CDac_pwd  % cd ac_pwd dir
                 dlmwrite(name1, pow, 'delimiter', ' ', 'precision', 9);
+                ac_save_pda_parameter_table(dat_name,plot_filter_s,name1,f3,window,nw,ftmin,fterm,step,pad,padtype);
                 disp(name1)
                 if handles.lang_choice == 0
                     disp('col #1      col #2   col #3   col #4')
@@ -6619,7 +6620,6 @@ if check == 1
 end
 %end
 guidata(hObject,handles)
-
 
 % --------------------------------------------------------------------
 function menu_desection_Callback(hObject, eventdata, handles)

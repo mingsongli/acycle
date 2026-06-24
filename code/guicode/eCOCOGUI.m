@@ -241,7 +241,7 @@ end
             app.RCOCO.Position =    [40 1 180 24];
             app.RECOCO.Position =   [280 1 180 24];
 
-            app.BGEcoCalc.Position = [358 2 260 50];
+            app.BGEcoCalc.Position = [358 2 200 50];
             app.RFast.Position = [32 25 120 24];
             app.RAccurate.Position = [32 1 120 24];
 

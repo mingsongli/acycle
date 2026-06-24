@@ -150,24 +150,21 @@ for j = 1: slices
             theored = ones(size(f));
         end
         theored(~isfinite(theored) | theored <= 0) = 1;
-        p = p ./ theored;
-        p = p - 1;
+        p = p - theored;
         p(p<0) = 0;   % power removing classic AR(1) noise
 
     elseif red == 2
         % robust
         theored = redconf_any(f,p,dt,0.25,2);
         theored(~isfinite(theored) | theored <= 0) = 1;
-        p = p ./ theored;
-        p = p - 1;
+        p = p - theored;
         p(p<0) = 0;   % power removing robust AR(1) noise
 
     elseif red == 3   % smoothed window average
         xlogp = log10(max(p, realmin));
         [swa, ~] = specswa(f, xlogp, ndata);
         swa(~isfinite(swa) | swa <= 0) = 1;
-        p = p ./ swa;
-        p = p - 1;
+        p = p - swa;
         p(p<0) = 0;   % power removing swa (noise)
     
     end
