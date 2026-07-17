@@ -34,6 +34,7 @@ end
         app.red = 0; % 0 no
         app.time_0pad = 1;
         app.padtype = 1;
+        app.showPeriodCoco = true;
         
         app.orbit9 = [405.6912, 130.6979, 123.8532, 98.8517, 94.8856, 40.9897, 23.6820, 22.3758, 18.9519];
         app.age = 0;
@@ -107,7 +108,7 @@ end
 
             app.PPeriod = uipanel(app.UIFigure,'Title','Periodogram of Data','BackgroundColor',app.bg);
             app.CShowPeriod = uicheckbox(app.PPeriod,'Text','Show period.','Value',true, ...
-                'ValueChangedFcn',@(s,e)markSettingsChanged());
+                'ValueChangedFcn',@(s,e)onShowPeriodChanged());
             app.LMaxF = uilabel(app.PPeriod,'Text','Maximum Frequency (cycle/m)','BackgroundColor',app.bg);
             app.EMaxF = uieditfield(app.PPeriod,'text','Value',num2str(app.meta.fmax_data,'%.4f'), ...
                 'ValueChangedFcn',@(s,e)markSettingsChanged());
@@ -143,7 +144,7 @@ end
             app.RUser = uiradiobutton(app.BGOrbit,'Text','User-defined period');
             app.LOrbit2 = uilabel(app.BGOrbit,'Text',orbitString(app.orbit9),'BackgroundColor',app.bg);
             app.EOrbitUser = uieditfield(app.BGOrbit,'text','Value',orbitString(app.orbit9),'Enable','off', ...
-                'ValueChangedFcn',@(s,e)markSettingsChanged());
+                'ValueChangedFcn',@(s,e)onUserOrbitEdited());
             app.BWaltham = uibutton(app.BGOrbit,'push','Text','?Waltham15','ButtonPushedFcn',@(s,e)onWaltham());
 
             app.PCorr = uipanel(app.UIFigure,'Title','Correlation method','BackgroundColor',app.bg);
@@ -177,8 +178,6 @@ end
 
             app.BPlotE = uibutton(app.UIFigure,'push','Text','eCOCO plot','Enable','off', ...
                 'ButtonPushedFcn',@(s,e)onECOCOPlot());
-            app.BTrack = uibutton(app.UIFigure,'push','Text','Track sed. rates','Enable','off', ...
-                'ButtonPushedFcn',@(s,e)onTrack());
             app.BRun = uibutton(app.UIFigure,'push','Text','OK','BackgroundColor',app.blue,'FontColor','white','FontWeight','bold', ...
                 'ButtonPushedFcn',@(s,e)onRun());
         end
@@ -219,7 +218,7 @@ end
             app.DTargetUpdate.Position = [130 24 170 30];
 
             app.BPlotE.Position = [570 y+110 220 52];
-            app.BTrack.Position = [570 y+50 220 52];
+            % The ridge is tracked automatically during every eCOCO run.
             app.BRun.Position = [810 y+16 100 146];
 
             y = y + hBottom + gap;
@@ -333,6 +332,7 @@ end
         end
 
         function onModeChanged()
+            previousMode = app.mode;
             isEco = app.RECOCO.Value;
             app.mode = 1 + double(isEco);
             updateCocoTargetMode();
@@ -342,7 +342,15 @@ end
             app.CFlipY.Visible = onoff(isEco);
             app.PSlide.Visible = onoff(isEco);
             app.BPlotE.Visible = onoff(isEco);
-            app.BTrack.Visible = onoff(isEco);
+            if isEco
+                if previousMode == 1
+                    app.showPeriodCoco = app.CShowPeriod.Value;
+                end
+                app.CShowPeriod.Value = false;
+            else
+                app.CShowPeriod.Value = app.showPeriodCoco;
+            end
+            app.CShowPeriod.Enable = onoff(~isEco);
             app.DCOCOMethod.Enable = onoff(~isEco);
             app.ESlices.Enable = onoff(~isEco && ~isCv);
             app.EMaxF.Enable = onoff(isEco || ~isCv);
@@ -353,6 +361,13 @@ end
             onPadEdgeToggle();
             setappdata(app.UIFigure,'ECOCO_APP',app);
             onResize();
+        end
+
+        function onShowPeriodChanged()
+            if app.mode == 1
+                app.showPeriodCoco = app.CShowPeriod.Value;
+            end
+            markSettingsChanged();
         end
 
         function onCocoMethodChanged()
@@ -445,6 +460,19 @@ end
         function onAgeEdited()
             app.age = toNum(app.EAge.Value, app.age);
             onOrbitChanged();
+        end
+
+        function onUserOrbitEdited()
+            candidateOrbit = parseNumericList(app.EOrbitUser.Value);
+            if ~isempty(candidateOrbit) && all(isfinite(candidateOrbit)) && ...
+                    all(candidateOrbit > 0)
+                app.orbit9 = candidateOrbit(:)';
+                app.LOrbit2.Text = orbitString(app.orbit9);
+                updateF2FromOrbit();
+            end
+            % Leave invalid text visible so ONRUN can report one consistent,
+            % actionable validation error instead of silently restoring it.
+            markSettingsChanged();
         end
 
         function updateF2FromOrbit()
@@ -892,7 +920,6 @@ end
                     app.run.ready = true;
 
                     app.BPlotE.Enable = 'on';
-                    app.BTrack.Enable = 'on';
 
                     assignin('base','prt_sr',prt_sr);
                     assignin('base','out_depth',out_depth);
@@ -956,9 +983,6 @@ end
             end
             if isfield(app,'BPlotE') && isgraphics(app.BPlotE)
                 app.BPlotE.Enable = 'off';
-            end
-            if isfield(app,'BTrack') && isgraphics(app.BTrack)
-                app.BTrack.Enable = 'off';
             end
         end
 
@@ -1028,48 +1052,6 @@ end
             ecocoplot(app.run.prt_sr,app.run.out_depth,app.run.out_ecc,app.run.out_ep, ...
                 app.run.out_eci,app.run.out_ecoco,app.run.out_ecocorb, ...
                 app.run.out_norbit,plotn,ecoPlotDetails);
-        end
-
-        function onTrack()
-            if ~app.run.ready || isempty(app.run.out_ecc)
-                return
-            end
-            prm = {'How many peaks each window?','Threshold H0 significant level', ...
-                'Threshold correlation coefficient','Threshold number of orbital parameters', ...
-                'Threshold sed. rate searching radius','How many intervals to cut the series?', ...
-                'Plot? 1=Yes, 0=No','Optional: sed.rate from','Optional: sed.rate to'};
-            answ = inputdlg(prm,'Track optimal sedimentation rates',1, ...
-                {'3','0.05','0.3','4','2','3','1', ...
-                num2str(app.sedmin),num2str(app.sedmax)});
-            if isempty(answ), return; end
-
-            n = str2double(answ{1});
-            ci = str2double(answ{2});
-            corrcf = str2double(answ{3});
-            sh_norb = str2double(answ{4});
-            srsh = str2double(answ{5});
-            srslice = str2double(answ{6});
-            plotn = str2double(answ{7});
-            sr1 = str2double(answ{8});
-            sr2 = str2double(answ{9});
-
-            ecc = app.run.out_ecc;
-            eci = app.run.out_eci;
-            norbit = app.run.out_norbit;
-            ec = app.run.out_ecoco;
-            [Y] = ebrief(ecc,2,-2);
-            [~,locatcc] = eccpeaks(Y,ecc,eci,norbit,corrcf,ci,sh_norb,n,1,NaN);
-            [~,~,srn_best,~] = ecocotrack(locatcc,ecc,eci,ec,norbit,app.run.out_depth,sr1,sr2,app.sedstep, ...
-                srsh,srslice,corrcf,ci,plotn,sh_norb);
-
-            srn_map(:,2) = (sr1 + app.sedstep*(srn_best(1,:)-1))';
-            srn_map(:,1) = app.run.out_depth;
-            saveDir = resolveSaveDir(ctx);
-            [~,dn,~] = fileparts(app.meta.filename);
-            out = uniqueName(fullfile(saveDir,[dn,'-SR.txt']));
-            writematrix(srn_map,out,'Delimiter','space');
-            uialert(app.UIFigure,['Saved: ',out],'Track');
-            refreshMainListbox(ctx,saveDir);
         end
 
         function onWaltham()

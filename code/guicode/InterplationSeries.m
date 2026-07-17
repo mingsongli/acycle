@@ -192,6 +192,9 @@ end
         end
 
         function refreshMainListbox()
+            if ac_refresh_main_list(app.listbox_acmain)
+                return
+            end
             if isempty(app.listbox_acmain) || ~ishandle(app.listbox_acmain)
                 return
             end

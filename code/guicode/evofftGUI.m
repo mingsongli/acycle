@@ -27,7 +27,7 @@ classdef evofftGUI < matlab.apps.AppBase
         EditUnit matlab.ui.control.EditField
         LabelUnit matlab.ui.control.Label
 
-        LabelWindow matlab.ui.control.Label
+        EditWindow matlab.ui.control.EditField
         ButtonWinTips matlab.ui.control.Button
 
         CheckPlotSeries matlab.ui.control.CheckBox
@@ -74,7 +74,7 @@ classdef evofftGUI < matlab.apps.AppBase
         plot_log double = 0
         freq_log double = 0
         normal double = 1
-        flipy double = 1
+        flipy double = 0
         color char = 'parula'
         colorgrid = []
 
@@ -83,7 +83,7 @@ classdef evofftGUI < matlab.apps.AppBase
         nyquist double = 0.5
         window double = 1
         rotate double = 0
-        method char = 'Fast Fourier transform (LAH)'
+        method char = 'Evolutionary FFT'
         lenthx double = 1
         time_0pad double = 1
         padtype double = 1
@@ -153,8 +153,8 @@ classdef evofftGUI < matlab.apps.AppBase
             app.LabelMethod = uilabel(app.UIFigure,'Text','Select method', ...
                 'BackgroundColor',app.UIBg,'FontSize',app.UIFontSize+1);
             app.DropMethod = uidropdown(app.UIFigure, ...
-                'Items',{'Fast Fourier transform (LAH)','Fast Fourier transform (MatLab)','Periodogram','Lomb-Scargle periodogram','Multi-taper method'}, ...
-                'Value','Fast Fourier transform (LAH)','FontSize',app.UIFontSize+1, ...
+                'Items',{'Evolutionary FFT','Periodogram','Lomb-Scargle periodogram','Multi-taper method'}, ...
+                'Value','Evolutionary FFT','FontSize',app.UIFontSize+1, ...
                 'ValueChangedFcn',@(~,~)app.onMethodChanged());
 
             app.PanelMain = uipanel(app.UIFigure,'Title','Input for Evolutive FFT', ...
@@ -186,8 +186,9 @@ classdef evofftGUI < matlab.apps.AppBase
             app.LabelUnit = uilabel(app.PanelStep,'Text','Unit','BackgroundColor',app.UIBg,'FontSize',app.UIFontSize+2);
 
             app.PanelWindow = uipanel(app.PanelMain,'Title','Sliding Window','BackgroundColor',app.UIBg,'FontSize',app.UIFontSize+1);
-            app.LabelWindow = uilabel(app.PanelWindow,'Text','0','BackgroundColor',[1 1 1], ...
-                'HorizontalAlignment','center','FontSize',app.UIFontSize+2,'FontWeight','bold','FontColor',app.Blue);
+            app.EditWindow = uieditfield(app.PanelWindow,'text','Value','0','BackgroundColor',[1 1 1], ...
+                'HorizontalAlignment','center','FontSize',app.UIFontSize+2,'FontWeight','bold','FontColor',app.Blue, ...
+                'ValueChangedFcn',@(~,~)app.onWindowChanged());
             app.ButtonWinTips = uibutton(app.PanelWindow,'push','Text','Tips','FontSize',app.UIFontSize+2, ...
                 'ButtonPushedFcn',@(~,~)app.onWindowTips());
 
@@ -195,7 +196,7 @@ classdef evofftGUI < matlab.apps.AppBase
             app.CheckMTMRed = uicheckbox(app.PanelMain,'Text','2pi MTM + red','Value',false,'FontSize',app.UIFontSize+2);
             app.CheckNormalize = uicheckbox(app.PanelMain,'Text','Normalize each window','Value',true,'FontSize',app.UIFontSize+2, ...
                 'ValueChangedFcn',@(~,~)app.onNormalizeChanged());
-            app.CheckFlipY = uicheckbox(app.PanelMain,'Text','Flip Y-axis','Value',true,'FontSize',app.UIFontSize+2, ...
+            app.CheckFlipY = uicheckbox(app.PanelMain,'Text','Flip Y-axis','Value',false,'FontSize',app.UIFontSize+2, ...
                 'ValueChangedFcn',@(~,~)app.onFlipYChanged());
             app.CheckLogFreq = uicheckbox(app.PanelMain,'Text','Log(frequency)','Value',false,'FontSize',app.UIFontSize+2, ...
                 'ValueChangedFcn',@(~,~)app.onLogFreqChanged());
@@ -260,7 +261,7 @@ classdef evofftGUI < matlab.apps.AppBase
             app.LabelUnit.Position = app.childPos(ps,[0.61,0.18,0.28,0.18]);
 
             pw = app.PanelWindow.Position;
-            app.LabelWindow.Position = app.childPos(pw,[0.13,0.47,0.72,0.30]);
+            app.EditWindow.Position = app.childPos(pw,[0.13,0.47,0.72,0.30]);
             app.ButtonWinTips.Position = app.childPos(pw,[0.10,0.10,0.80,0.24]);
 
             app.CheckPlotSeries.Position = app.childPos(pm,[0.029,0.45,0.25,0.08]);
@@ -272,12 +273,12 @@ classdef evofftGUI < matlab.apps.AppBase
             app.CheckXPadding.Position = app.childPos(pm,[0.293,0.045,0.2,0.1]);
             app.DropPadType.Position = app.childPos(pm,[0.425,0.04,0.19,0.07]);
 
-            app.PanelDim.Position = app.childPos(pm,[0.029,0.048,0.251,0.245]);
+            app.PanelDim.Position = app.childPos(pm,[0.029,0.048,0.251,0.28]);
             pd = app.PanelDim.Position;
-            app.GroupDim.Position = app.childPos(pd,[0.04,0.34,0.90,0.50]);
-            app.Radio2D.Position = app.childPos(app.GroupDim.Position,[0.05,0.34,0.44,0.46]);
-            app.Radio3D.Position = app.childPos(app.GroupDim.Position,[0.52,0.34,0.44,0.46]);
-            app.CheckRotation.Position = app.childPos(pd,[0.06,0.10,0.84,0.23]);
+            app.GroupDim.Position = app.childPos(pd,[0.04,0.28,0.90,0.42]);
+            app.Radio2D.Position = app.childPos(app.GroupDim.Position,[0.05,0.12,0.44,0.70]);
+            app.Radio3D.Position = app.childPos(app.GroupDim.Position,[0.52,0.12,0.44,0.70]);
+            app.CheckRotation.Position = app.childPos(pd,[0.06,0.04,0.84,0.20]);
 
             app.PanelCmap.Position = app.childPos(pm,[0.628,0.08,0.245,0.38]);
             pc = app.PanelCmap.Position;
@@ -303,6 +304,19 @@ classdef evofftGUI < matlab.apps.AppBase
             if isfield(c,'data_name'), app.data_name = c.data_name; end
             if isfield(c,'unit'), app.unit = c.unit; end
             if isfield(c,'unit_type'), app.unit_type = c.unit_type; end
+            stepUnitLabel = app.unit;
+            if isfield(c,'popupmenu1') && isgraphics(c.popupmenu1)
+                unitItems = get(c.popupmenu1,'String');
+                unitIndex = get(c.popupmenu1,'Value');
+                if ischar(unitItems)
+                    unitItems = cellstr(unitItems);
+                elseif isstring(unitItems)
+                    unitItems = cellstr(unitItems);
+                end
+                if iscell(unitItems) && unitIndex >= 1 && unitIndex <= numel(unitItems)
+                    stepUnitLabel = char(unitItems{unitIndex});
+                end
+            end
             if isfield(c,'path_temp')
                 % no-op; preserved for compatibility
             end
@@ -317,7 +331,7 @@ classdef evofftGUI < matlab.apps.AppBase
             app.RadioInput.Text = app.getLang('spectral14','Use Input');
             app.PanelStep.Title = app.getLang('main32','Step');
             app.ButtonStepTips.Text = app.getLang('main33','Tips');
-            app.LabelUnit.Text = app.getLang('main34','Unit');
+            app.LabelUnit.Text = stepUnitLabel;
             app.PanelWindow.Title = app.getLang('main07','Sliding Window');
             app.CheckPlotSeries.Text = app.getLang('evofft05','Plot series');
             app.CheckMTMRed.Text = app.getLang('evofft06','2pi MTM + red');
@@ -344,7 +358,7 @@ classdef evofftGUI < matlab.apps.AppBase
             app.step = app.mean_step;
             app.nyquist = 1/(2*app.mean_step);
             app.window = 0.2*(xmax-xmin);
-            app.method = 'Fast Fourier transform (LAH)';
+            app.method = 'Evolutionary FFT';
             app.lenthx = xmax-xmin;
             app.time_0pad = 1;
             app.padtype = 1;
@@ -356,7 +370,7 @@ classdef evofftGUI < matlab.apps.AppBase
 
             app.LabelNyquist.Text = num2str(app.nyquist);
             app.EditFmax.Value = num2str(app.nyquist);
-            app.LabelWindow.Text = num2str(app.window);
+            app.EditWindow.Value = num2str(app.window);
             app.EditFmin.Value = '0';
             app.EditUnit.Value = app.unit;
             app.EditStep.Value = num2str(app.step);
@@ -369,7 +383,8 @@ classdef evofftGUI < matlab.apps.AppBase
             app.Radio3D.Value = false;
             app.CheckRotation.Value = false;
             app.CheckNormalize.Value = true;
-            app.CheckFlipY.Value = true;
+            app.CheckFlipY.Value = false;
+            app.flipy = 0;
             app.CheckLogPower.Value = false;
             app.CheckLogFreq.Value = false;
             app.CheckXPadding.Value = true;
@@ -494,6 +509,20 @@ classdef evofftGUI < matlab.apps.AppBase
             end
         end
 
+        function onWindowChanged(app)
+            newWindow = str2double(app.EditWindow.Value);
+            if isnan(newWindow) || ~isfinite(newWindow) || newWindow <= 0 || newWindow > app.lenthx
+                app.EditWindow.Value = num2str(app.window);
+                errordlg(sprintf('Sliding window must be positive and no larger than %g.',app.lenthx));
+                return
+            end
+            app.window = newWindow;
+            ncal = (app.lenthx - app.window)/app.step;
+            if ncal > 500
+                warndlg('The selected window and step produce more than 500 sliding windows.');
+            end
+        end
+
         function onStepTips(app)
             warndlg(app.getLang('dd45','For long series, use larger step to reduce calculations.'), ...
                 app.getLang('dd46','Tips: step'));
@@ -549,14 +578,17 @@ classdef evofftGUI < matlab.apps.AppBase
                 end
                 axs = findobj(app.evofftfig,'Type','axes');
                 for i = 1:numel(axs)
-                    if app.freq_log == 1
+                    role = get(axs(i),'Tag');
+                    isFrequencyAxis = any(strcmp(role,{'evofft-spectrum','evofft-top'}));
+                    isDepthAxis = any(strcmp(role,{'evofft-spectrum','evofft-series'}));
+                    if isFrequencyAxis && app.freq_log == 1
                         set(axs(i),'XScale','log');
-                    else
+                    elseif isFrequencyAxis
                         set(axs(i),'XScale','linear');
                     end
-                    if app.flipy == 1
+                    if isDepthAxis && app.flipy == 1
                         set(axs(i),'YDir','reverse');
-                    else
+                    elseif isDepthAxis
                         set(axs(i),'YDir','normal');
                     end
                 end
@@ -598,7 +630,13 @@ classdef evofftGUI < matlab.apps.AppBase
         function onOK(app)
             data = app.current_data;
             dataraw = data;
-            window = app.window;
+            window = str2double(app.EditWindow.Value);
+            if isnan(window) || ~isfinite(window) || window <= 0 || window > app.lenthx
+                errordlg(sprintf('Sliding window must be positive and no larger than %g.',app.lenthx));
+                app.EditWindow.Value = num2str(app.window);
+                return
+            end
+            app.window = window;
             step = str2double(app.EditStep.Value);
             if isnan(step) || step <= 0
                 errordlg('Step must be positive.');
@@ -622,8 +660,6 @@ classdef evofftGUI < matlab.apps.AppBase
                 [s,x_grid,y_grid] = evoplomb(data,window,step,fmin,app.nyquist,app.normal);
             elseif strcmp(app.method,'Multi-taper method')
                 [s,x_grid,y_grid] = evopmtm(data,window,step,fmin,app.nyquist,app.normal);
-            elseif strcmp(app.method,'Fast Fourier transform (MatLab)')
-                [s,x_grid,y_grid] = evofftML(data,window,step,fmin,app.nyquist,app.normal);
             else
                 dt = data(2,1)-data(1,1);
                 [s,x_grid,y_grid] = evofft(data,window,step,dt,fmin,app.nyquist,app.normal);
@@ -820,19 +856,21 @@ classdef evofftGUI < matlab.apps.AppBase
                 end
             end
 
+            if isgraphics(axTop,'axes'), set(axTop,'Tag','evofft-top'); end
+            if isgraphics(axSeries,'axes'), set(axSeries,'Tag','evofft-series'); end
+            if isgraphics(axRight,'axes'), set(axRight,'Tag','evofft-spectrum'); end
+            if exist('ax3d','var') && isgraphics(ax3d,'axes')
+                set(ax3d,'Tag','evofft-spectrum');
+            end
+
             if ~isvalid(evofig)
                 return
             end
             figure(evofig);
-            if app.flipy == 1
-                set(gca,'Ydir','reverse');
+            if app.freq_log == 1 && app.fmingrid > 0 && isgraphics(axRight,'axes')
+                xlim(axRight,[app.fmingrid fmax]);
             end
-            if app.freq_log == 1
-                if app.fmingrid > 0
-                    xlim([app.fmingrid fmax]);
-                end
-                set(gca,'XScale','log');
-            end
+            app.applyAxisFlags();
             set(gca,'TickDir','out');
             set(gca,'XMinorTick','on','YMinorTick','on');
 
@@ -850,16 +888,7 @@ classdef evofftGUI < matlab.apps.AppBase
                 dlmwrite(name2, x_grid', 'delimiter', ' ', 'precision', 9);
                 dlmwrite(name3, y_grid', 'delimiter', ' ', 'precision', 9);
                 app.saveEvofftParameterTable(fmin,fmax,window,step);
-                if ~isempty(app.listbox_acmain) && isgraphics(app.listbox_acmain)
-                    d = dir;
-                    set(app.listbox_acmain,'String',{d.name},'Value',1);
-                end
-                if ~isempty(app.edit_acfigmain_dir)
-                    try
-                        refreshcolor;
-                    catch
-                    end
-                end
+                ac_refresh_main_list(app.listbox_acmain,pwd);
             end
         end
 

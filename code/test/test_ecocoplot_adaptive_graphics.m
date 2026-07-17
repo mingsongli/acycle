@@ -92,7 +92,7 @@ for windowIndex = 1:size(expected,1)
 end
 end
 
-function testAdaptiveTrackedRidgeUsesRedHollowCircles(testCase)
+function testAdaptiveTrackedRidgeUsesLocalPSignificanceMarkers(testCase)
 fixture = plotFixture();
 details = struct('method','adaptive','pLocal',fixture.localP, ...
     'trackedSedimentationRate',fixture.trackedRate);
@@ -108,9 +108,9 @@ verifyEqual(testCase,ridge.XData(:),fixture.trackedRate,'AbsTol',0);
 verifyEqual(testCase,ridge.YData(:),fixture.depths,'AbsTol',0);
 verifyTrue(testCase,isRed(ridge.Color));
 verifyEqual(testCase,string(ridge.LineStyle),"-");
-verifyEqual(testCase,string(ridge.Marker),"o");
-verifyEqual(testCase,string(ridge.MarkerFaceColor),"none");
-verifyTrue(testCase,isRed(ridge.MarkerEdgeColor));
+verifyEqual(testCase,ridge.LineWidth,1.0,'AbsTol',0);
+verifyEqual(testCase,string(ridge.Marker),"none");
+verifyRidgeMarkers(testCase,scoreAxis,2,2);
 end
 
 function testCrossfitSixPanelsDynamicPScoreAndFilledPoints(testCase)
@@ -157,9 +157,9 @@ verifyNumElements(testCase,ridge,1);
 verifyEqual(testCase,ridge.XData(:),fixture.trackedRate,'AbsTol',0);
 verifyEqual(testCase,ridge.YData(:),fixture.depths,'AbsTol',0);
 verifyTrue(testCase,isRed(ridge.Color));
-verifyEqual(testCase,string(ridge.Marker),"o");
-verifyTrue(testCase,isRed(ridge.MarkerFaceColor));
-verifyTrue(testCase,isRed(ridge.MarkerEdgeColor));
+verifyEqual(testCase,ridge.LineWidth,1.0,'AbsTol',0);
+verifyEqual(testCase,string(ridge.Marker),"none");
+verifyRidgeMarkers(testCase,scoreAxis,2,2);
 end
 
 function testDynamicPScaleRespectsMonteCarloFloor(testCase)
@@ -287,6 +287,24 @@ for lineIndex = 1:numel(lines)
         "Tracked ridge";
 end
 ridge = lines(matches);
+end
+
+function verifyRidgeMarkers(testCase,ax,nHollow,nFilled)
+markers = findall(ax,'Type','scatter');
+verifyNumElements(testCase,markers,2);
+hollow = markers(arrayfun(@(h)string(h.MarkerFaceColor)=="none",markers));
+filled = setdiff(markers,hollow);
+verifyNumElements(testCase,hollow,1);
+verifyNumElements(testCase,filled,1);
+verifyNumElements(testCase,hollow.XData,nHollow);
+verifyNumElements(testCase,filled.XData,nFilled);
+verifyEqual(testCase,filled.SizeData/hollow.SizeData,1.2^2, ...
+    'RelTol',64*eps);
+verifyEqual(testCase,hollow.LineWidth,0.6,'AbsTol',0);
+verifyEqual(testCase,filled.LineWidth,0.6,'AbsTol',0);
+verifyTrue(testCase,isRed(hollow.MarkerEdgeColor));
+verifyTrue(testCase,isRed(filled.MarkerEdgeColor));
+verifyTrue(testCase,isRed(filled.MarkerFaceColor));
 end
 
 function color = colorbarWithLabel(testCase,fig,labelText)

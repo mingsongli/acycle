@@ -723,6 +723,9 @@ filename = sprintf('%s-%s%s',baseName,datestr(now,'yyyymmddTHHMMSS'),ext);
 end
 
 function refreshMainListbox(S)
+if ac_refresh_main_list(S.listbox_acmain)
+    return
+end
 if isempty(S.listbox_acmain) || ~isgraphics(S.listbox_acmain)
     return
 end

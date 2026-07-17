@@ -152,12 +152,8 @@ if nsim > 0
                 uint32(nullCurve >= rho);
         end
         nCompleted = lastSimulation;
-        windowEquivalent = min(nWindows, ...
-            floor(nWindows*nCompleted/nsim));
         reportProgress(progressFcn,nCompleted/nsim,sprintf( ...
-            ['Adaptive eCOCO overall window work: %d of %d equivalents; ', ...
-             'Monte Carlo %d of %d'], ...
-            windowEquivalent,nWindows,nCompleted,nsim));
+            'Adaptive eCOCO Monte Carlo: %d of %d',nCompleted,nsim));
     end
     clear rngCleanup
     pGlobal = (double(globalExceedance)+1)./(nsim+1);

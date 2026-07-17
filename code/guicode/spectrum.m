@@ -763,6 +763,12 @@ end
 
         function refreshAcMainList(workDir)
             try
+                if ac_refresh_main_list(app.ctx.listbox_acmain,workDir)
+                    return
+                end
+            catch
+            end
+            try
                 if ~isfolder(workDir)
                     return;
                 end

@@ -498,6 +498,9 @@ end
 function refreshMainListbox(ctx,dirpath)
 listbox = getfielddef(ctx,'listbox_acmain',[]);
 editdir = getfielddef(ctx,'edit_acfigmain_dir',[]);
+if ac_refresh_main_list(listbox,dirpath)
+    return
+end
 if isempty(listbox) || ~isgraphics(listbox)
     return
 end

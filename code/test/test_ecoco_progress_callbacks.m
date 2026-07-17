@@ -25,7 +25,7 @@ verifyEqual(testCase,rng,externalState, ...
 
 verifyTrue(testCase,isequaln(withCallback,withoutCallback), ...
     'Installing a progress callback changed an Adaptive eCOCO result.');
-verifyWindowProgress(testCase,fractions,messages);
+verifyStreamlinedProgress(testCase,fractions,messages,'monte carlo');
 end
 
 function testCrossfitCoreProgressIsDeterminateAndObservational(testCase)
@@ -42,7 +42,7 @@ verifyEqual(testCase,rng,externalState, ...
 
 verifyTrue(testCase,isequaln(withCallback,withoutCallback), ...
     'Installing a progress callback changed a Cross-fitted eCOCO result.');
-verifyWindowProgress(testCase,fractions,messages);
+verifyStreamlinedProgress(testCase,fractions,messages,'window work');
 end
 
 function testEcocoWrapperProgressIsDeterminateAndObservational(testCase)
@@ -64,7 +64,7 @@ for outputIndex = 1:numel(withoutCallback)
         sprintf(['Installing a progress callback changed eCOCO output ', ...
         '%d.'],outputIndex));
 end
-verifyWindowProgress(testCase,fractions,messages);
+verifyStreamlinedProgress(testCase,fractions,messages,'monte carlo');
 end
 
 function args = adaptiveArguments()
@@ -149,7 +149,7 @@ outputs = cell(1,10);
     end
 end
 
-function verifyWindowProgress(testCase,fractions,messages)
+function verifyStreamlinedProgress(testCase,fractions,messages,expectedLabel)
 verifyNotEmpty(testCase,fractions);
 verifyEqual(testCase,numel(messages),numel(fractions));
 verifyTrue(testCase,all(isfinite(fractions)));
@@ -159,7 +159,9 @@ verifyGreaterThanOrEqual(testCase,diff(fractions),0);
 verifyEqual(testCase,fractions(1),0,'AbsTol',0);
 verifyEqual(testCase,fractions(end),1,'AbsTol',0);
 verifyGreaterThan(testCase,numel(fractions),2);
-verifyTrue(testCase,all(contains(lower(messages(1:end-1)), ...
-    'window')),['Every nonterminal progress update must identify its ', ...
-    'sliding-window work.']);
+intermediate = lower(messages(2:end-1));
+verifyTrue(testCase,all(contains(intermediate,expectedLabel)), ...
+    'Intermediate progress updates must identify one primary work unit.');
+verifyFalse(testCase,any(contains(intermediate,'equivalent')), ...
+    'Progress text must not expose equivalent-window bookkeeping.');
 end

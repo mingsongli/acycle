@@ -376,8 +376,8 @@ set(runbt,'CData',imread('menu_robot.jpg'))
                 end
             end
             set(listbox_acmain,'String',listboxStr,'Value',1) %set string
-            
-            
+            ac_refresh_main_list(listbox_acmain,pwd);
+
             cd(pre_dirML); % return to matlab view folder
         end
 %% Plot & Interpolation
@@ -497,6 +497,7 @@ set(runbt,'CData',imread('menu_robot.jpg'))
                         end
                     end
                     set(listbox_acmain,'String',listboxStr,'Value',1) %set string
+                    ac_refresh_main_list(listbox_acmain,pwd);
                     cd(pre_dirML); % return to matlab view folder
             
                 end
@@ -582,6 +583,7 @@ set(runbt,'CData',imread('menu_robot.jpg'))
                     end
                 end
                 set(listbox_acmain,'String',listboxStr,'Value',1) %set string
+                ac_refresh_main_list(listbox_acmain,pwd);
                 cd(pre_dirML); % return to matlab view folder
             end
         end
@@ -644,6 +646,7 @@ set(runbt,'CData',imread('menu_robot.jpg'))
                         end
                     end
                     set(listbox_acmain,'String',listboxStr,'Value',1) %set string
+                    ac_refresh_main_list(listbox_acmain,pwd);
                     cd(pre_dirML); % return to matlab view folder
                 end
                 
@@ -700,6 +703,7 @@ set(runbt,'CData',imread('menu_robot.jpg'))
                         end
                     end
                     set(listbox_acmain,'String',listboxStr,'Value',1) %set string
+                    ac_refresh_main_list(listbox_acmain,pwd);
                     cd(pre_dirML); % return to matlab view folder
                 end
             end

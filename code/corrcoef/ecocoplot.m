@@ -73,7 +73,8 @@ isCrossfit = contains(methodName,'cross') || ...
 isAdaptive = contains(methodName,'adaptive') || ...
     isfield(ecoDetails,'pLocal');
 ridgeScoreRaw = [];
-ridgeMarkerStyle = 'none';
+ridgeLocalP = [];
+ridgeLocalPThreshold = 0.01;
 
 if isCrossfit
     forwardRho = directionMap(ecoDetails,'forward','rho', ...
@@ -89,7 +90,7 @@ if isCrossfit
     consensusScore = directionMap(ecoDetails,'consensus','score', ...
         out_ecocorb,nRate,nWindow);
     ridgeScoreRaw = consensusScore;
-    ridgeMarkerStyle = 'filled';
+    ridgeLocalP = consensusLocalP;
     normalizedScore = normalizeScoreByWindow(consensusScore);
     panels = [ ...
         makePanel(forwardRho,'Forward correlation','rho'); ...
@@ -104,7 +105,7 @@ elseif isAdaptive
     localP = detailMap(ecoDetails,{'pLocal','localP'},out_ep, ...
         nRate,nWindow);
     ridgeScoreRaw = out_ecocorb;
-    ridgeMarkerStyle = 'hollow';
+    ridgeLocalP = localP;
     normalizedScore = normalizeScoreByWindow(out_ecocorb);
     panels = [ ...
         makePanel(out_ecc,'Correlation coefficient','rho'); ...
@@ -146,8 +147,8 @@ if plotMode == 1
             reverseDepth,pLogMaximum,pFloor,rhoLimits,panelIndex == 1);
         if panelIndex == numel(panels) && ~isempty(ridgeScoreRaw)
             overlayRidge(ax,ridgeScoreRaw,prt_sr, ...
-                out_depth,ecoDetails,ridgeMarkerStyle,false, ...
-                panels(panelIndex).data);
+                out_depth,ecoDetails,ridgeLocalP,ridgeLocalPThreshold, ...
+                false,panels(panelIndex).data);
         end
     end
 elseif plotMode == 2
@@ -160,8 +161,8 @@ elseif plotMode == 2
             reverseDepth,pLogMaximum,pFloor,rhoLimits,true);
         if panelIndex == numel(panels) && ~isempty(ridgeScoreRaw)
             overlayRidge(ax,ridgeScoreRaw,prt_sr, ...
-                out_depth,ecoDetails,ridgeMarkerStyle,false, ...
-                panels(panelIndex).data);
+                out_depth,ecoDetails,ridgeLocalP,ridgeLocalPThreshold, ...
+                false,panels(panelIndex).data);
         end
     end
 else
@@ -174,8 +175,8 @@ else
             reverseDepth,pLogMaximum,pFloor,rhoLimits,true);
         if panelIndex == numel(panels) && ~isempty(ridgeScoreRaw)
             overlayRidge(ax,ridgeScoreRaw,prt_sr, ...
-                out_depth,ecoDetails,ridgeMarkerStyle,true, ...
-                panels(panelIndex).data);
+                out_depth,ecoDetails,ridgeLocalP,ridgeLocalPThreshold, ...
+                true,panels(panelIndex).data);
         end
     end
 end
@@ -558,8 +559,8 @@ end
 limits = [lower upper];
 end
 
-function overlayRidge(ax,score,rates,depths,details,markerStyle, ...
-        useSurface,displayScore)
+function overlayRidge(ax,score,rates,depths,details,localP, ...
+        localPThreshold,useSurface,displayScore)
 [ridgeRate,ridgeDepth] = suppliedRidge(details,depths);
 if isempty(ridgeRate)
     ridgeRate = nan(numel(depths),1);
@@ -581,21 +582,13 @@ end
 ridgeRate(~valid) = NaN;
 ridgeDepth(~valid) = NaN;
 hold(ax,'on');
-lineArguments = {'LineWidth',1.8,'DisplayName','Tracked ridge'};
-switch lower(string(markerStyle))
-    case "hollow"
-        lineStyle = 'r-o';
-        lineArguments = [lineArguments, ...
-            {'MarkerSize',3.5,'MarkerFaceColor','none', ...
-             'MarkerEdgeColor','r'}];
-    case "filled"
-        lineStyle = 'r-o';
-        lineArguments = [lineArguments, ...
-            {'MarkerSize',3.5,'MarkerFaceColor','r', ...
-             'MarkerEdgeColor','r'}];
-    otherwise
-        lineStyle = 'r-';
-end
+lineArguments = {'Color','r','LineWidth',1.0, ...
+    'DisplayName','Tracked ridge'};
+ridgeP = ridgeValues(localP,rates,ridgeRate);
+significant = valid & isfinite(ridgeP) & ridgeP <= localPThreshold;
+notSignificant = valid & ~significant;
+baseMarkerDiameter = 3.5;
+significantMarkerDiameter = 1.2*baseMarkerDiameter;
 if useSurface
     ridgeZ = ridgeDisplayValues(displayScore,rates,ridgeRate);
     finiteZ = ridgeZ(isfinite(ridgeZ));
@@ -606,10 +599,42 @@ if useSurface
         zRange = max(finiteZ)-min(finiteZ);
         offset = 0.01*max(1,zRange);
     end
-    plot3(ax,ridgeRate,ridgeDepth,ridgeZ+offset,lineStyle, ...
+    ridgeZ = ridgeZ+offset;
+    plot3(ax,ridgeRate,ridgeDepth,ridgeZ,'-', ...
         lineArguments{:});
+    scatter3(ax,ridgeRate(notSignificant),ridgeDepth(notSignificant), ...
+        ridgeZ(notSignificant),baseMarkerDiameter^2,'o', ...
+        'MarkerEdgeColor','r','MarkerFaceColor','none','LineWidth',0.6, ...
+        'HandleVisibility','off');
+    scatter3(ax,ridgeRate(significant),ridgeDepth(significant), ...
+        ridgeZ(significant),significantMarkerDiameter^2,'o', ...
+        'MarkerEdgeColor','r','MarkerFaceColor','r','LineWidth',0.6, ...
+        'HandleVisibility','off');
 else
-    plot(ax,ridgeRate,ridgeDepth,lineStyle,lineArguments{:});
+    plot(ax,ridgeRate,ridgeDepth,'-',lineArguments{:});
+    scatter(ax,ridgeRate(notSignificant),ridgeDepth(notSignificant), ...
+        baseMarkerDiameter^2,'o','MarkerEdgeColor','r', ...
+        'MarkerFaceColor','none','LineWidth',0.6,'HandleVisibility','off');
+    scatter(ax,ridgeRate(significant),ridgeDepth(significant), ...
+        significantMarkerDiameter^2,'o','MarkerEdgeColor','r', ...
+        'MarkerFaceColor','r','LineWidth',0.6,'HandleVisibility','off');
+end
+end
+
+function values = ridgeValues(map,rates,ridgeRate)
+values = nan(size(ridgeRate));
+if isempty(map)
+    return
+end
+for windowIndex = 1:min(numel(ridgeRate),size(map,2))
+    if ~isfinite(ridgeRate(windowIndex))
+        continue
+    end
+    [~,rateIndex] = min(abs(rates-ridgeRate(windowIndex)));
+    value = map(rateIndex,windowIndex);
+    if isfinite(value)
+        values(windowIndex) = value;
+    end
 end
 end
 

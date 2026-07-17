@@ -9,7 +9,11 @@
 % Modified by Mingsong Li, June 2020 for Acycle's "Frequency Stabilization"
 %
 
-function [xdata_filtered,time,freqboundlow,freqboundhigh]=dynamic_filter_lang(data,window,step,fmin,fmax,unit,norm,padding)
+function [xdata_filtered,time,freqboundlow,freqboundhigh,cancelled]=dynamic_filter_lang(data,window,step,fmin,fmax,unit,norm,padding)
+    xdata_filtered = [];
+    freqboundlow = [];
+    freqboundhigh = [];
+    cancelled = false;
     lang_choice = load('ac_lang.txt');
     langdict = readtable('langdict.xlsx','VariableNamingRule','preserve');
     lang_id = langdict.ID;
@@ -92,6 +96,8 @@ function [xdata_filtered,time,freqboundlow,freqboundhigh]=dynamic_filter_lang(da
     title(msg1);
     con = 1;
     i = 1;
+    x_min = [];
+    y_min = [];
     while con == 1   
         [x, y, con] = ginput(1);
         if con == 1
@@ -103,6 +109,13 @@ function [xdata_filtered,time,freqboundlow,freqboundhigh]=dynamic_filter_lang(da
             plot(x,y,'ok','markersize', 8)
             set(gcf,'Pointer','arrow');
         end
+    end
+    if isempty(y_min)
+        cancelled = true;
+        if isgraphics(evofftfig)
+            close(evofftfig);
+        end
+        return
     end
     [y_min,I] = sort(y_min);
     x_min=x_min(I);
@@ -121,6 +134,8 @@ function [xdata_filtered,time,freqboundlow,freqboundhigh]=dynamic_filter_lang(da
     title(msg2);
     con = 1;
     i = 1;
+    x_max = [];
+    y_max = [];
     while con == 1   
         [x, y, con] = ginput(1);
         if con == 1
@@ -132,6 +147,13 @@ function [xdata_filtered,time,freqboundlow,freqboundhigh]=dynamic_filter_lang(da
             plot(x,y,'ok','markersize', 8)
             set(gcf,'Pointer','arrow');
         end
+    end
+    if isempty(y_max)
+        cancelled = true;
+        if isgraphics(evofftfig)
+            close(evofftfig);
+        end
+        return
     end
     [y_max,I] = sort(y_max);
     x_max=x_max(I);

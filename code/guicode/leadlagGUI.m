@@ -217,6 +217,9 @@ end
         end
 
         function refreshMainListbox()
+            if ac_refresh_main_list(app.listbox_acmain)
+                return
+            end
             if ~isempty(app.listbox_acmain) && isgraphics(app.listbox_acmain)
                 d = dir;
                 names = {d.name};

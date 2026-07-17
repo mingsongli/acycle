@@ -912,6 +912,9 @@ classdef plotdigitizer < matlab.apps.AppBase
         end
 
         function refreshMainListbox(app)
+            if ac_refresh_main_list(app.listbox_acmain)
+                return
+            end
             pre = '<HTML><FONT color="blue">';
             post = '</FONT></HTML>';
             d = dir;

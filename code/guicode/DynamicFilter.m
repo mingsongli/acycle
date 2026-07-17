@@ -422,6 +422,9 @@ classdef DynamicFilter < matlab.apps.AppBase
         end
 
         function refreshMainListbox(app)
+            if ac_refresh_main_list(app.listbox_acmain)
+                return
+            end
             pre = '<HTML><FONT color="blue">';
             post = '</FONT></HTML>';
             d = dir;
@@ -510,7 +513,17 @@ classdef DynamicFilter < matlab.apps.AppBase
             set(figdata,'Units','normalized','Position',[0.05,0.02,0.9,0.3]);
             set(figdata,'Name',['Acycle: ',lang_main02]);
 
-            [xdata_filtered,time,freqboundlow,freqboundhigh] = dynamic_filter_lang(data,window,stepv,fmin,fmax,unitv,normv,padding);
+            [xdata_filtered,time,freqboundlow,freqboundhigh,cancelled] = dynamic_filter_lang(data,window,stepv,fmin,fmax,unitv,normv,padding);
+            if cancelled
+                if isgraphics(figdata)
+                    close(figdata);
+                end
+                try
+                    figure(figft);
+                catch
+                end
+                return
+            end
             figdynfilter = gcf;
 
             pre_dirML = pwd;

@@ -81,6 +81,10 @@ setappdata(hListbox,'ACListIsDir',isDir);
 setappdata(hListbox,'ACListTopIndex',1);
 setappdata(hListbox,'ACListSelected',[]);
 setappdata(hListbox,'ACListAnchor',[]);
+setappdata(hListbox,'ACListLastClickIndex',[]);
+setappdata(hListbox,'ACListLastClickTic',[]);
+setappdata(hListbox,'ACListScrollFcn', ...
+    @(rowDelta)ac_scroll_drawn_listbox(hListbox,rowDelta));
 
 ac_sync_drawn_position(hListbox,hPanel);
 ac_render_drawn_listbox(hListbox,hAxes,hSlider);
@@ -235,6 +239,9 @@ for idx = topIndex:lastIndex
         'Position',[0 row-1 1 1], ...
         'FaceColor',rowColor, ...
         'EdgeColor','none', ...
+        'Tag','ACListRowBackground', ...
+        'UserData',idx, ...
+        'PickableParts','all', ...
         'ButtonDownFcn',{@ac_row_click,hListbox,idx});
     text('Parent',hAxes, ...
         'String',names{idx}, ...
@@ -246,7 +253,52 @@ for idx = topIndex:lastIndex
         'Color',color, ...
         'Clipping','on', ...
         'HitTest','on', ...
+        'Tag','ACListRowText', ...
+        'UserData',idx, ...
+        'PickableParts','all', ...
         'ButtonDownFcn',{@ac_row_click,hListbox,idx});
+end
+end
+
+function ac_update_drawn_selection(hListbox)
+% Keep the row graphics alive between the first and second mouse press.
+% Recreating them here breaks double-click delivery in MATLAB R2025b.
+try
+    hAxes = getappdata(hListbox,'ACDrawnListboxAxes');
+    selected = getappdata(hListbox,'ACListSelected');
+    isDir = getappdata(hListbox,'ACListIsDir');
+    if isempty(hAxes) || ~isgraphics(hAxes)
+        return
+    end
+    if isempty(selected)
+        selected = [];
+    end
+
+    rowBackgrounds = findall(hAxes,'Type','rectangle', ...
+        'Tag','ACListRowBackground');
+    for rowIndex = 1:numel(rowBackgrounds)
+        itemIndex = get(rowBackgrounds(rowIndex),'UserData');
+        if any(selected == itemIndex)
+            rowColor = [0.18 0.40 0.90];
+        else
+            rowColor = [1 1 1];
+        end
+        set(rowBackgrounds(rowIndex),'FaceColor',rowColor);
+    end
+
+    rowTexts = findall(hAxes,'Type','text','Tag','ACListRowText');
+    for rowIndex = 1:numel(rowTexts)
+        itemIndex = get(rowTexts(rowIndex),'UserData');
+        if any(selected == itemIndex)
+            textColor = [1 1 1];
+        elseif itemIndex <= numel(isDir) && isDir(itemIndex)
+            textColor = [0 0 1];
+        else
+            textColor = [0 0 0];
+        end
+        set(rowTexts(rowIndex),'Color',textColor);
+    end
+catch
 end
 end
 
@@ -263,6 +315,35 @@ function ac_slider_callback(hListbox)
 try
     hSlider = getappdata(hListbox,'ACDrawnListboxSlider');
     setappdata(hListbox,'ACListTopIndex',round(get(hSlider,'Value')));
+    setappdata(hListbox,'ACListLastClickIndex',[]);
+    setappdata(hListbox,'ACListLastClickTic',[]);
+    ac_render_drawn_listbox(hListbox);
+catch
+end
+end
+
+function ac_scroll_drawn_listbox(hListbox,rowDelta)
+try
+    names = getappdata(hListbox,'ACListNames');
+    if isempty(names) || isempty(rowDelta) || rowDelta == 0
+        return
+    end
+
+    visibleRows = ac_visible_rows(hListbox);
+    maxTop = max(1,numel(names)-visibleRows+1);
+    topIndex = getappdata(hListbox,'ACListTopIndex');
+    if isempty(topIndex)
+        topIndex = 1;
+    end
+    topIndex = min(max(1,round(topIndex + rowDelta)),maxTop);
+    setappdata(hListbox,'ACListTopIndex',topIndex);
+    setappdata(hListbox,'ACListLastClickIndex',[]);
+    setappdata(hListbox,'ACListLastClickTic',[]);
+
+    hSlider = getappdata(hListbox,'ACDrawnListboxSlider');
+    if ~isempty(hSlider) && isgraphics(hSlider)
+        set(hSlider,'Value',topIndex);
+    end
     ac_render_drawn_listbox(hListbox);
 catch
 end
@@ -284,6 +365,7 @@ end
 
 function ac_row_click(src,evt,hListbox,idx)
 fig = ancestor(hListbox,'figure');
+isDoubleClick = ac_is_double_click(fig,hListbox,idx);
 selected = getappdata(hListbox,'ACListSelected');
 anchor = getappdata(hListbox,'ACListAnchor');
 if isempty(selected)
@@ -325,13 +407,8 @@ catch
 end
 setappdata(hListbox,'ACListSelected',selected);
 setappdata(hListbox,'ACListAnchor',anchor);
-ac_render_drawn_listbox(hListbox);
+ac_update_drawn_selection(hListbox);
 
-isDoubleClick = false;
-try
-    isDoubleClick = strcmp(get(fig,'SelectionType'),'open');
-catch
-end
 if isDoubleClick
     try
         setappdata(hListbox,'ACForceDoubleClick',true);
@@ -349,5 +426,39 @@ else
         guidata(hListbox,handles);
     catch
     end
+end
+end
+
+function isDoubleClick = ac_is_double_click(fig,hListbox,idx)
+% SelectionType handles two clicks on the same graphics object.  Also
+% track the logical row so a click on its text followed by one on its
+% background is still treated as a double-click.
+isDoubleClick = false;
+try
+    isDoubleClick = strcmp(get(fig,'SelectionType'),'open');
+catch
+end
+
+lastIndex = [];
+lastClickTic = [];
+try
+    lastIndex = getappdata(hListbox,'ACListLastClickIndex');
+    lastClickTic = getappdata(hListbox,'ACListLastClickTic');
+catch
+end
+
+if ~isDoubleClick && isequal(lastIndex,idx) && ~isempty(lastClickTic)
+    try
+        isDoubleClick = toc(lastClickTic) <= 0.5;
+    catch
+    end
+end
+
+if isDoubleClick
+    setappdata(hListbox,'ACListLastClickIndex',[]);
+    setappdata(hListbox,'ACListLastClickTic',[]);
+else
+    setappdata(hListbox,'ACListLastClickIndex',idx);
+    setappdata(hListbox,'ACListLastClickTic',tic);
 end
 end

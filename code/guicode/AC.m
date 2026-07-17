@@ -384,6 +384,7 @@ handles.edit_acfigmain_dir = uicontrol(hFig,'Style','edit','Units','normalized',
     'HorizontalAlignment','left', ...
     'BackgroundColor','w', ...
     'Tag','edit_acfigmain_dir', ...
+    'KeyPressFcn',@AddressBarKeyPress, ...
     'Callback',@(h,e)AC_dispatch('edit_acfigmain_dir_Callback',h,e));
 handles.listbox_acmain = uicontrol(hFig,'Style','listbox','Units','normalized', ...
     'Position',[0.02,0.008,0.96,0.884], ...
@@ -921,6 +922,9 @@ end
 handles.acfigmain = gcf;  %handles of the ac main window
 figure(handles.acfigmain)
 set(handles.acfigmain, 'WindowKeyPressFcn', @KeyPress)
+set(handles.acfigmain, 'WindowScrollWheelFcn', @MainListScrollWheel)
+drawnow;
+setupMainListJavaScroll(handles.listbox_acmain);
 h=get(gcf,'Children');  % get all content
 h1=findobj(h,'FontUnits','norm');  % find all font units as points
 set(h1,'FontUnits','points','FontSize',12);  % set as norm
@@ -1066,6 +1070,20 @@ varargout{1} = handles.output;
 function KeyPress(hObject, EventData, handles)
 
 handles = guidata(hObject);
+% Preserve standard text-edit shortcuts when the address bar has focus.
+% Otherwise the figure-level Cmd/Ctrl+C handler below steals the keystroke
+% and performs Acycle's file-copy action instead of copying selected text.
+try
+    focusedControl = get(hObject,'CurrentObject');
+    isTextEdit = isequal(focusedControl,handles.edit_acfigmain_dir) && ...
+        strcmp(get(focusedControl,'Style'),'edit');
+    shortcutKey = lower(char(EventData.Key));
+    if isTextEdit && any(strcmp(shortcutKey,{'a','c','v','x'})) && ...
+            (ismember('control',EventData.Modifier) || ismember('command',EventData.Modifier))
+        return
+    end
+catch
+end
 %language
 lang_id = handles.lang_id;
 if handles.lang_choice > 0
@@ -1183,6 +1201,109 @@ if ismember('control', EventData.Modifier) || ismember('command', EventData.Modi
     end
     guidata(hObject,handles)
     end
+end
+
+
+function MainListScrollWheel(hObject, EventData)
+handles = guidata(hObject);
+if isempty(handles) || ~isfield(handles,'listbox_acmain') || ...
+        ~isgraphics(handles.listbox_acmain)
+    return
+end
+
+try
+    scrollMainList(handles.listbox_acmain,EventData.VerticalScrollCount);
+catch
+end
+
+
+function scrollMainList(listboxHandle,scrollCount)
+items = get(listboxHandle,'String');
+if ischar(items)
+    itemCount = size(items,1);
+else
+    itemCount = numel(items);
+end
+if itemCount < 1 || isempty(scrollCount) || scrollCount == 0
+    return
+end
+
+scrollCount = double(scrollCount);
+rowDelta = 3 * sign(scrollCount) * max(1,round(abs(scrollCount)));
+
+% Folder colors are displayed by a drawn list layered over the hidden
+% uicontrol.  Let that list move its own top row so scrolling does not
+% change the current selection.
+try
+    if isappdata(listboxHandle,'ACListScrollFcn')
+        scrollFcn = getappdata(listboxHandle,'ACListScrollFcn');
+        if isa(scrollFcn,'function_handle')
+            scrollFcn(rowDelta);
+            return
+        end
+    end
+catch
+end
+
+try
+    currentTop = get(listboxHandle,'ListboxTop');
+    newTop = min(max(1,currentTop + rowDelta),itemCount);
+    set(listboxHandle,'ListboxTop',newTop);
+catch
+    % Fallback for MATLAB versions without an exposed ListboxTop property.
+    currentValue = get(listboxHandle,'Value');
+    if isempty(currentValue), currentValue = 1; end
+    newValue = min(max(1,currentValue(1) + rowDelta),itemCount);
+    set(listboxHandle,'Value',newValue);
+end
+
+
+function setupMainListJavaScroll(listboxHandle)
+% Classic uicontrol listboxes can consume trackpad/wheel events before the
+% figure callback sees them on macOS. Bind the underlying JScrollPane too.
+try
+    warningState = warning('off','MATLAB:HandleGraphics:ObsoletedProperty:JavaFrame');
+    warningCleanup = onCleanup(@()warning(warningState)); %#ok<NASGU>
+    javaObject = findjobj(listboxHandle,'nomenu');
+    if isempty(javaObject)
+        return
+    end
+    if numel(javaObject) > 1
+        javaObject = javaObject(1);
+    end
+    javaScrollPane = javaObject;
+    for parentLevel = 1:8
+        if isa(javaScrollPane,'javax.swing.JScrollPane')
+            break
+        end
+        javaScrollPane = javaScrollPane.getParent();
+        if isempty(javaScrollPane)
+            return
+        end
+    end
+    if ~isa(javaScrollPane,'javax.swing.JScrollPane')
+        return
+    end
+    callbackObject = handle(javaScrollPane,'CallbackProperties');
+    set(callbackObject,'MouseWheelMovedCallback', ...
+        @(~,eventData)scrollMainList(listboxHandle,eventData.getWheelRotation()));
+    setappdata(listboxHandle,'ACJavaScrollCallback',callbackObject);
+catch
+    % Figure-level WindowScrollWheelFcn remains as the compatibility path.
+end
+
+
+function AddressBarKeyPress(hObject,EventData)
+try
+    hasShortcutModifier = ismember('control',EventData.Modifier) || ...
+        ismember('command',EventData.Modifier);
+    if hasShortcutModifier && strcmpi(EventData.Key,'c')
+        % Classic MATLAB edit controls do not reliably pass Cmd+C to the
+        % native macOS text widget when a figure WindowKeyPressFcn exists.
+        % Copy the displayed address explicitly so it is always available.
+        clipboard('copy',get(hObject,'String'));
+    end
+catch
 end
 
 
@@ -2315,7 +2436,7 @@ val = get(hObject,'Value');
 
 handles.unit = str{val};
 
-if ismember(val, [0, 8, 16])
+if ismember(val, [1, 8, 16])
     handles.unit_type = 0;
 elseif ismember(val, 2:7)
     handles.unit_type = 1;
@@ -5862,6 +5983,7 @@ if nsim_yes < 2
                                 disp([a186,name1])   
                             end
 
+                            ac_refresh_main_list(handles.listbox_acmain,pwd);
                             cd(pre_dirML); % return to matlab view folder
                         end
                     else
@@ -6426,6 +6548,12 @@ if handles.lang_choice > 0
     main02 = handles.lang_var{locb1};
     [~, locb1] = ismember('main32',lang_id);
     main32 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main34',lang_id);
+    main34 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main23',lang_id);
+    main23 = handles.lang_var{locb1};
+    [~, locb1] = ismember('main21',lang_id);
+    main21 = handles.lang_var{locb1};
     
     [~, locb1] = ismember('a215',lang_id);
     a215 = handles.lang_var{locb1};
@@ -6459,8 +6587,6 @@ if handles.lang_choice > 0
     a229 = handles.lang_var{locb1};
     [~, locb1] = ismember('a230',lang_id);
     a230 = handles.lang_var{locb1};
-    [~, locb1] = ismember('a231',lang_id);
-    a231 = handles.lang_var{locb1};
     [~, locb1] = ismember('a232',lang_id);
     a232 = handles.lang_var{locb1};
     [~, locb1] = ismember('a233',lang_id);
@@ -6585,14 +6711,47 @@ if check == 1
             figure;
             plot(pow(:,1),pow(:,2),'k','LineWidth',1);
             set(gca,'XMinorTick','on','YMinorTick','on')
+            unitItems = get(handles.popupmenu1,'String');
+            unitIndex = get(handles.popupmenu1,'Value');
+            if ischar(unitItems)
+                unitItems = cellstr(unitItems);
+            elseif isstring(unitItems)
+                unitItems = cellstr(unitItems);
+            end
+            plotUnit = handles.unit;
+            if iscell(unitItems) && unitIndex >= 1 && unitIndex <= numel(unitItems)
+                plotUnit = char(unitItems{unitIndex});
+            end
+
+            if ismember(unitIndex,2:7)
+                plotUnitType = 1; % depth
+            elseif ismember(unitIndex,[9:15,17:22])
+                plotUnitType = 2; % time
+            else
+                plotUnitType = 0; % generic unit or separator
+            end
+
             if or (handles.lang_choice == 0, get(handles.main_unit_en,'Value') == 0)
-                xlabel('Time (kyr)')
+                if plotUnitType == 1
+                    axisName = 'Depth';
+                elseif plotUnitType == 2
+                    axisName = 'Time';
+                else
+                    axisName = 'Unit';
+                end
                 ylabel('Power ratio')
             else
-                xlabel(a231)
+                if plotUnitType == 1
+                    axisName = main23;
+                elseif plotUnitType == 2
+                    axisName = main21;
+                else
+                    axisName = main34;
+                end
                 ylabel(a232)
             end
-            title(plot_filter_s, 'Interpreter', 'none')
+            xlabel([axisName,' (',plotUnit,')'])
+            title([dat_name,ext], 'Interpreter', 'none')
             if savedata == 1
                 name1 = [dat_name,'-win',num2str(window),'-pda',ext];
                 CDac_pwd  % cd ac_pwd dir
