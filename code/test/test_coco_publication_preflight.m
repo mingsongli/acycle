@@ -838,6 +838,24 @@ clear cleanup
 closeTestFigures(figures);
 end
 
+function testCvGuiPlotUsesOneTabbedFigure(testCase)
+fig = plotcvcoco(testCase.TestData.cv, ...
+    'ShowSpectra',true,'Tabbed',true);
+cleanup = onCleanup(@()closeTestFigures(fig));
+
+verifyNumElements(testCase,fig,1);
+tabGroups = findobj(fig,'Type','uitabgroup');
+verifyNumElements(testCase,tabGroups,1);
+tabs = findobj(tabGroups,'Type','uitab');
+verifyNumElements(testCase,tabs,3);
+titles = sort(string({tabs.Title}));
+verifyEqual(testCase,titles,sort(["Data and spectra", ...
+    "Correlation and significance","Monte Carlo audit"]));
+
+clear cleanup
+closeTestFigures(fig);
+end
+
 function testConclusionReportDirectionAndPartialPeriodInvariants(testCase)
 cv = testCase.TestData.cv;
 report = cocoConclusionReport('confirmatory',cv);

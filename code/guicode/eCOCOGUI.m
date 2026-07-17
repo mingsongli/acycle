@@ -1542,7 +1542,7 @@ end
             end
             try
                 app.run.cocoFigure = plotcvcoco(cv, ...
-                    'ShowSpectra',app.CShowPeriod.Value);
+                    'ShowSpectra',app.CShowPeriod.Value,'Tabbed',true);
             catch MEplot
                 warning('eCOCOGUI:CVCOCOPlotFailed', ...
                     'cvCOCO calculation and output succeeded, but plotting failed: %s',MEplot.message);
@@ -1635,7 +1635,13 @@ end
                 out_ecoco,out_ecocorb,sr_p,rawData,ecoDetails)
             [~,dn,~] = fileparts(app.meta.filename);
             saveDir = resolveSaveDir(ctx);
-            [nm,runIndex] = indexedRunName(saveDir,[dn,'-ECOCO.data'],'.xlsx',dn,'ECOCO');
+            if app.ecocoCalcMode == 1
+                outputStem = [dn,'-Adaptive-eCOCO-data'];
+            else
+                outputStem = [dn,'-Cross-fitted-eCOCO-data'];
+            end
+            [nm,runIndex] = indexedRunName( ...
+                saveDir,outputStem,'.xlsx',dn,'ECOCO');
             writematrix(prt_sr,nm,'Sheet','Sed.Rate');
             writematrix(out_depth,nm,'Sheet','Depth');
             writematrix(out_ecc,nm,'Sheet','COCO');

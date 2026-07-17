@@ -255,6 +255,8 @@ end
 %% Peridogram of the data series
 % For each slices: power spectrum -> remove red noise -> save adjusted spectra
 % calculate the mean of the adjusted spectra
+cocoPlotFigure = gobjects(0);
+cocoPlotTabs = gobjects(0);
 %
 periodogramRows = floor(pad/2)+1;
 dataf = nan(periodogramRows,slices);
@@ -337,8 +339,12 @@ data = [f,mean(datap,2)];
 
 %% plot power spectra
     if plotn == 1 && showPeriodograms
-        figure;
-        ax2 = subplot(2,1,2); 
+        [cocoPlotFigure,cocoPlotTabs] = ensureCocoPlotTabs( ...
+            cocoPlotFigure,cocoPlotTabs);
+        spectrumTab = uitab(cocoPlotTabs,'Title','Input and target spectra');
+        spectrumLayout = tiledlayout(spectrumTab,2,1, ...
+            'TileSpacing','compact','Padding','compact');
+        ax2 = nexttile(spectrumLayout,2);
         plot(ax2,f,data(:,2),'r','LineWidth',1);
         hold on
         if slices > 1
@@ -423,7 +429,7 @@ target_real= target;  % save target frequencies-power series
 
 %% plot target periodogram
 if plotn == 1 && showPeriodograms
-    ax2 = subplot(2,1,1);
+    ax2 = nexttile(spectrumLayout,1);
     plot(ax2,f,p,'r','LineWidth',1);
     xlim([0,maximumFrequency])
     set(ax2,'XMinorTick','on','YMinorTick','on')
@@ -690,9 +696,12 @@ if nsim > 0
     corr_h0(:,3) = p_local;                  % local, uncorrected p-value
 
     if plotn == 1        
-        figure;
-        set(gcf,'color','w');        
-        ax1 = subplot(4,1,1);
+        [cocoPlotFigure,cocoPlotTabs] = ensureCocoPlotTabs( ...
+            cocoPlotFigure,cocoPlotTabs);
+        resultTab = uitab(cocoPlotTabs,'Title','Correlation and significance');
+        resultLayout = tiledlayout(resultTab,4,1, ...
+            'TileSpacing','compact','Padding','compact');
+        ax1 = nexttile(resultLayout,1);
         plot(ax1,corrxch,corry_rch,'r','LineWidth',1);
         if or(lang_choice == 0, main_unit_selection == 0)
             xlabel(ax1,'Sedimentation rate (cm/kyr)')
@@ -708,19 +717,19 @@ if nsim > 0
         nMC = size(corry, 2);
 
         % Local p-value: original per-sedimentation-rate null comparison.
-        ax2 = subplot(4,1,2);
+        ax2 = nexttile(resultLayout,2);
         plotPValuePanel(ax2,corrxch,p_local,nMC,sr1,sr2, ...
             'Local p-value','Local null hypothesis', ...
             lang_choice,main_unit_selection,lang_var,ec80,ec82,ec83,false);
 
         % Global p-value: max-statistic correction across the whole grid.
-        ax3 = subplot(4,1,3);
+        ax3 = nexttile(resultLayout,3);
         plotPValuePanel(ax3,corrxch,p_global,nMC,sr1,sr2, ...
             'Global p-value','Global null hypothesis', ...
             lang_choice,main_unit_selection,lang_var,ec80,ec82,ec83,true);
         
         % Plot number of orbital cycles
-        ax4 = subplot(4,1,4);
+        ax4 = nexttile(resultLayout,4);
         plot(ax4,corrxch,corr_h0(:,2),'b','LineWidth',1);
         
         if or(lang_choice == 0, main_unit_selection == 0)
@@ -735,20 +744,23 @@ if nsim > 0
         xlim(ax4,[sr1, sr2])
         set(ax4,'XMinorTick','on','YMinorTick','on')
 
-        figure;
+        pcocoTab = uitab(cocoPlotTabs,'Title','pCOCO');
+        axPcoco = axes(pcocoTab);
         productValues = corry_rch .* abs(log10(p_global));
-        plot(corrxch,productValues,'r','LineWidth',2);
-        xlim([sr1, sr2])
-        xlabel('Sedimentation rate (cm/kyr)')
-        ylabel('pCOCO')
+        plot(axPcoco,corrxch,productValues,'r','LineWidth',2);
+        xlim(axPcoco,[sr1, sr2])
+        xlabel(axPcoco,'Sedimentation rate (cm/kyr)')
+        ylabel(axPcoco,'pCOCO')
 
         [bestSr, bestPcoco] = getBestPcoco(corrxch, productValues);
         if isfinite(bestSr)
-            annotateBestPcoco(gca, bestSr, bestPcoco);
+            annotateBestPcoco(axPcoco, bestSr, bestPcoco);
             if showPeriodograms
                 [bestCorrelationSr,~] = getBestCorrelationRate( ...
                     corrxch,corry_rch);
-                plotBestCorrelationSpectra(data, datForTarget, pad, orbit9, target_real, ...
+                bestSpectrumTab = uitab(cocoPlotTabs, ...
+                    'Title','Best-rate spectra');
+                plotBestCorrelationSpectra(bestSpectrumTab,data, datForTarget, pad, orbit9, target_real, ...
                     bestCorrelationSr, fmaxdata, main_unit_selection,lang_choice, ...
                     lang_var,lang_id,targetMode,maximumFrequency,method, ...
                     dat_ray,sr0);
@@ -1170,7 +1182,17 @@ plot(ax, bestSr, bestPcoco, 'ro', ...
     'MarkerFaceColor', 'r');
 end
 
-function plotBestCorrelationSpectra(data, dat, pad, orbit9, target_real, ...
+function [fig,tabs] = ensureCocoPlotTabs(fig,tabs)
+if isempty(fig) || ~isgraphics(fig)
+    fig = figure('Color','w','Name','COCO diagnostics', ...
+        'Units','normalized','Position',[0.10 0.05 0.80 0.88]);
+    tabs = uitabgroup(fig);
+elseif isempty(tabs) || ~isgraphics(tabs)
+    tabs = uitabgroup(fig);
+end
+end
+
+function plotBestCorrelationSpectra(parent, data, dat, pad, orbit9, target_real, ...
     bestSr, fmaxdata, main_unit_selection, lang_choice, lang_var, ...
     lang_id, targetMode, maximumFrequency, method, rayleigh, sr0)
 
@@ -1194,9 +1216,7 @@ else
         dat,pad,data,orbit9,targetFreqTime,bestSr,targetMode);
 end
 
-figure;
-set(gcf, 'color', 'w');
-ax = axes;
+ax = axes(parent);
 
 if isfinite(fmaxdata) && fmaxdata > 0
     xLimits = [0,min(fmaxdata*bestSr/100,maximumFrequency)];

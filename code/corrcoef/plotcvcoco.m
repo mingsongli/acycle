@@ -8,16 +8,22 @@ function figs = plotcvcoco(result,varargin)
 % A separate local-p panel shows same-rate, validation-search-uncorrected
 % directional p curves as descriptive diagnostics only.
 %
-% PLOTCVCOCO(RESULT,'ShowSpectra',false) omits the depth/spectrum figure
-% while retaining the correlation/significance and Monte Carlo figures.
+% PLOTCVCOCO(RESULT,'ShowSpectra',false) omits the depth/spectrum diagnostic.
+% PLOTCVCOCO(RESULT,'Tabbed',true) places every requested diagnostic in one
+% figure with one tab per page. The default false preserves standalone
+% publication/export callers that intentionally request separate figures.
 
 parser = inputParser;
 parser.FunctionName = mfilename;
 addParameter(parser,'ShowSpectra',true,@(x) ...
     (islogical(x) || isnumeric(x)) && isscalar(x) && isfinite(x) && ...
     any(x == [0 1]));
+addParameter(parser,'Tabbed',false,@(x) ...
+    (islogical(x) || isnumeric(x)) && isscalar(x) && isfinite(x) && ...
+    any(x == [0 1]));
 parse(parser,varargin{:});
 showSpectra = logical(parser.Results.ShowSpectra);
+useTabs = logical(parser.Results.Tabbed);
 
 required = {'srGrid','trainA','trainB','validateAtoB','validateBtoA', ...
     'dataA','dataB','spectra','orbitPeriods','groupNames', ...
@@ -36,20 +42,31 @@ end
 
 sr = result.srGrid(:);
 frequencyLimit = resultFrequencyLimit(result);
-figs = gobjects(0,1);
 methodName = resultText(result,'name','cvCOCO');
 [~,targetLegend] = targetLabels(result.targetModel);
 if strcmp(result.targetModel,'legacy') && ...
         ~contains(lower(methodName),'legacy')
     methodName = [methodName,' (legacy target)'];
 end
+figs = gobjects(0,1);
+tabs = gobjects(0);
+if useTabs
+    figs = figure('Color','w','Name',[methodName,': diagnostics'], ...
+        'Units','normalized','Position',[0.08 0.04 0.84 0.90]);
+    tabs = uitabgroup(figs);
+end
 
 %% Depth-domain halves and their reciprocal held-out spectral validation
 if showSpectra
-    figs(end+1,1) = figure('Color','w','Name', ...
-        [methodName,': depth series and held-out validation spectra'], ...
-        'Units','normalized','Position',[0.08 0.06 0.84 0.86]);
-    layout = tiledlayout(figs(end),2,2, ...
+    if useTabs
+        plotParent = uitab(tabs,'Title','Data and spectra');
+    else
+        figs(end+1,1) = figure('Color','w','Name', ...
+            [methodName,': depth series and held-out validation spectra'], ...
+            'Units','normalized','Position',[0.08 0.06 0.84 0.86]);
+        plotParent = figs(end);
+    end
+    layout = tiledlayout(plotParent,2,2, ...
         'TileSpacing','compact','Padding','compact');
     depthAxisA = nexttile(layout,1);
     plotSegmentData(depthAxisA,result.dataA,'Segment A');
@@ -71,10 +88,15 @@ if showSpectra
 end
 
 %% Main result: stacked panels parallel to the original COCO result figure
-figs(end+1,1) = figure('Color','w','Name', ...
-    [methodName,': correlation and significance'], ...
-    'Units','normalized','Position',[0.15 0.02 0.70 0.94]);
-layout = tiledlayout(figs(end),4,1, ...
+if useTabs
+    plotParent = uitab(tabs,'Title','Correlation and significance');
+else
+    figs(end+1,1) = figure('Color','w','Name', ...
+        [methodName,': correlation and significance'], ...
+        'Units','normalized','Position',[0.15 0.02 0.70 0.94]);
+    plotParent = figs(end);
+end
+layout = tiledlayout(plotParent,4,1, ...
     'TileSpacing','compact','Padding','compact');
 
 ax1 = nexttile(layout,1);
@@ -111,9 +133,15 @@ xlabel(ax4,'Sedimentation rate (cm/kyr)');
 title(layout,[methodName,' bidirectional held-out result']);
 
 %% Directional and secondary symmetric nulls use the same outer AR(1) runs
-figs(end+1,1) = figure('Color','w','Name',[methodName,': Monte Carlo audit'], ...
-    'Units','normalized','Position',[0.20 0.03 0.60 0.91]);
-layout = tiledlayout(figs(end),3,1, ...
+if useTabs
+    plotParent = uitab(tabs,'Title','Monte Carlo audit');
+else
+    figs(end+1,1) = figure('Color','w', ...
+        'Name',[methodName,': Monte Carlo audit'], ...
+        'Units','normalized','Position',[0.20 0.03 0.60 0.91]);
+    plotParent = figs(end);
+end
+layout = tiledlayout(plotParent,3,1, ...
     'TileSpacing','compact','Padding','compact');
 plotNullDistribution(nexttile(layout,1),result.nullSymmetric, ...
     result.scoreSymmetric,result.pSym, ...

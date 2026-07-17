@@ -110,7 +110,7 @@ verifyTrue(testCase,isRed(ridge.Color));
 verifyEqual(testCase,string(ridge.LineStyle),"-");
 verifyEqual(testCase,ridge.LineWidth,1.0,'AbsTol',0);
 verifyEqual(testCase,string(ridge.Marker),"none");
-verifyRidgeMarkers(testCase,scoreAxis,2,2);
+verifyRidgeMarkers(testCase,scoreAxis,2,1,1);
 end
 
 function testCrossfitSixPanelsDynamicPScoreAndFilledPoints(testCase)
@@ -159,7 +159,7 @@ verifyEqual(testCase,ridge.YData(:),fixture.depths,'AbsTol',0);
 verifyTrue(testCase,isRed(ridge.Color));
 verifyEqual(testCase,ridge.LineWidth,1.0,'AbsTol',0);
 verifyEqual(testCase,string(ridge.Marker),"none");
-verifyRidgeMarkers(testCase,scoreAxis,2,2);
+verifyRidgeMarkers(testCase,scoreAxis,2,1,1);
 end
 
 function testDynamicPScaleRespectsMonteCarloFloor(testCase)
@@ -192,7 +192,7 @@ fixture.localP = [ ...
     0.20 0.030 0.009 0.20];
 fixture.globalP = [ ...
     0.20 0.080 0.040 0.20; ...
-    0.10 0.049 0.035 0.10; ...
+    0.10 0.060 0.035 0.10; ...
     0.06 0.040 0.034 0.06; ...
     0.20 0.090 0.045 0.20];
 % Each window deliberately has a different absolute offset and range.
@@ -289,22 +289,32 @@ end
 ridge = lines(matches);
 end
 
-function verifyRidgeMarkers(testCase,ax,nHollow,nFilled)
+function verifyRidgeMarkers(testCase,ax,nHollow,nLocal,nGlobal)
 markers = findall(ax,'Type','scatter');
-verifyNumElements(testCase,markers,2);
-hollow = markers(arrayfun(@(h)string(h.MarkerFaceColor)=="none",markers));
-filled = setdiff(markers,hollow);
+verifyNumElements(testCase,markers,3);
+isSquare = arrayfun(@(h)string(h.Marker)=="s",markers);
+square = markers(isSquare);
+circles = markers(~isSquare);
+hollow = circles(arrayfun(@(h)string(h.MarkerFaceColor)=="none",circles));
+filled = setdiff(circles,hollow);
 verifyNumElements(testCase,hollow,1);
 verifyNumElements(testCase,filled,1);
+verifyNumElements(testCase,square,1);
 verifyNumElements(testCase,hollow.XData,nHollow);
-verifyNumElements(testCase,filled.XData,nFilled);
+verifyNumElements(testCase,filled.XData,nLocal);
+verifyNumElements(testCase,square.XData,nGlobal);
 verifyEqual(testCase,filled.SizeData/hollow.SizeData,1.2^2, ...
+    'RelTol',64*eps);
+verifyEqual(testCase,square.SizeData/hollow.SizeData,1.2^2, ...
     'RelTol',64*eps);
 verifyEqual(testCase,hollow.LineWidth,0.6,'AbsTol',0);
 verifyEqual(testCase,filled.LineWidth,0.6,'AbsTol',0);
+verifyEqual(testCase,square.LineWidth,0.6,'AbsTol',0);
 verifyTrue(testCase,isRed(hollow.MarkerEdgeColor));
 verifyTrue(testCase,isRed(filled.MarkerEdgeColor));
+verifyTrue(testCase,isRed(square.MarkerEdgeColor));
 verifyTrue(testCase,isRed(filled.MarkerFaceColor));
+verifyTrue(testCase,isRed(square.MarkerFaceColor));
 end
 
 function color = colorbarWithLabel(testCase,fig,labelText)
