@@ -96,7 +96,11 @@ function rhoM = calculateRhoM(data)
 
     %% Estimate rhoM
 
+    % FMAX only selects the reliable portion of the spectrum to fit.  The
+    % AR(1) transfer function itself must retain the physical Nyquist
+    % frequency 1/(2*dt); substituting FMAX changes cos(pi*f/f_N) and biases
+    % rho whenever the high-frequency tail was truncated.
     [rhoM, ~] = minirhos0( ...
-        s0, fmax, frequencyMTM, smoothedPxx, 2);
+        s0, nyquistFrequency, frequencyMTM, smoothedPxx, 2);
 
 end

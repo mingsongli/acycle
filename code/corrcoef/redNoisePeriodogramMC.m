@@ -1,265 +1,244 @@
 function [f, pMC] = redNoisePeriodogramMC( ...
     data, rhoM, mcn, red, pad, varargin)
-% redNoisePeriodogramMC
-% Generate Monte Carlo AR(1) red-noise series, calculate their
-% periodograms, and remove the corresponding red-noise background.
+%REDNOISEPERIODOGRAMMC Generate processed spectra from stationary AR(1) nulls.
 %
-% SYNTAX:
-%   [f, pMC] = redNoisePeriodogramMC(data, rhoM, mcn, red, pad)
+%   [F,PMC] = REDNOISEPERIODOGRAMMC(DATA,RHOM,MCN,RED,PAD) generates MCN
+%   stationary AR(1) realizations on DATA(:,1), applies the same linear
+%   detrending used by Adaptive COCO, and returns one processed periodogram
+%   per realization.
 %
-%   [f, pMC] = redNoisePeriodogramMC(data, rhoM, mcn, red, pad, ...
-%       'BatchSize', 1000, 'UseParallel', true)
+%   [...] = REDNOISEPERIODOGRAMMC(...,'Slices',N) divides every full null
+%   realization into the same equal-duration slices as the observed record.
+%   Each slice is standardized and linearly detrended, its periodogram is
+%   processed independently, and the N processed periodograms are averaged.
+%   This reproduces the observed sliced-spectrum statistic.
 %
-% INPUT:
-%   data        - Two-column time series:
-%                 data(:,1): time
-%                 data(:,2): observed values
+% RED selects the background treatment:
+%   0 - no background removal
+%   1 - subtract the classical AR(1) background (theoredar1ML)
+%   2 - subtract the robust AR(1) background (redconf_any)
+%   3 - subtract the smoothed-window-average background (specswa)
 %
-%   rhoM        - Lag-1 autocorrelation coefficient used to generate
-%                 stationary AR(1) red noise. abs(rhoM) must be < 1.
+% Name-value inputs:
+%   BatchSize   positive integer; default min(1000,MCN)
+%   UseParallel logical scalar; default false
+%   Slices      positive integer; default 1
 %
-%   mcn         - Number of Monte Carlo simulations.
-%
-%   red         - Red-noise treatment:
-%                   0       : no red-noise removal
-%                   1       : p = p - theoretical red-noise spectrum
-%                   2       : p = p/theoretical red-noise spectrum - 1
-%                   3       : robust red-noise removal using redconf_any
-%                   50-<100 : confidence-level normalization
-%
-%   pad         - FFT length used by periodogram.
-%
-% OPTIONAL NAME-VALUE INPUTS:
-%   'BatchSize'   - Number of simulations processed in each batch.
-%                   Default: min(1000, mcn)
-%
-%   'UseParallel' - Use PARFOR when processing individual spectra.
-%                   Default: false
-%
-% OUTPUT:
-%   f           - Frequency vector, in cycles per time unit.
-%
-%   pMC         - Processed power spectra. Each column corresponds to
-%                 one Monte Carlo red-noise realization:
-%
-%                     pMC(:,j) = processed spectrum of simulation j
-%
-% REQUIRED EXTERNAL FUNCTIONS:
-%   theoredar1ML
-%   redconf_any
+% F is in cycles per DATA time unit. PMC has size floor(PAD/2)+1 by MCN.
 
-    %% Parse optional inputs
+validateattributes(data,{'numeric'}, ...
+    {'2d','ncols',2,'nonempty','real','finite'},mfilename,'data',1);
+validateattributes(rhoM,{'numeric'}, ...
+    {'scalar','real','finite','>',-1,'<',1},mfilename,'rhoM',2);
+validateattributes(mcn,{'numeric'}, ...
+    {'scalar','integer','positive','finite'},mfilename,'mcn',3);
+validateattributes(red,{'numeric'}, ...
+    {'scalar','integer','finite'},mfilename,'red',4);
+validateattributes(pad,{'numeric'}, ...
+    {'scalar','integer','positive','finite'},mfilename,'pad',5);
+if ~ismember(red,0:3)
+    error('redNoisePeriodogramMC:InvalidRedOption', ...
+        'RED must be 0, 1, 2, or 3.');
+end
+if red == 3 && floor(pad/2)+1 < 33
+    error('redNoisePeriodogramMC:InsufficientSwaResolution', ...
+        'RED=3 requires PAD >= 64 so the SWA fit has at least three windows.');
+end
+if (floor(pad/2)+1)*mcn > 5e7
+    error('redNoisePeriodogramMC:OutputTooLarge', ...
+        ['The requested output would exceed 50 million spectral ', ...
+         'ordinates. Reduce MCN or PAD, or stream smaller batches.']);
+end
 
-    parser = inputParser;
+parser = inputParser;
+parser.FunctionName = mfilename;
+addParameter(parser,'BatchSize',min(1000,mcn), ...
+    @(x) isnumeric(x) && isscalar(x) && isfinite(x) && ...
+    x >= 1 && x == fix(x));
+addParameter(parser,'UseParallel',false, ...
+    @(x) islogical(x) && isscalar(x));
+addParameter(parser,'Slices',1, ...
+    @(x) isnumeric(x) && isscalar(x) && isfinite(x) && ...
+    x >= 1 && x == fix(x));
+parse(parser,varargin{:});
 
-    addParameter(parser, 'BatchSize', min(1000, mcn), ...
-        @(x) isnumeric(x) && isscalar(x) && ...
-        isfinite(x) && x >= 1 && x == fix(x));
+batchSize = min(parser.Results.BatchSize,mcn);
+useParallel = parser.Results.UseParallel;
+slices = parser.Results.Slices;
 
-    addParameter(parser, 'UseParallel', false, ...
-        @(x) islogical(x) && isscalar(x));
+data = sortrows(data,1);
+time = data(:,1);
+values = data(:,2);
+n = numel(time);
+if n < 4
+    error('redNoisePeriodogramMC:InsufficientData', ...
+        'The input time series must contain at least four points.');
+end
+nFrequency = floor(pad/2)+1;
+temporaryMemoryBudget = 128*1024^2;
+bytesPerSimulation = 16*n+32*nFrequency;
+memoryLimitedBatchSize = max(1,floor( ...
+    temporaryMemoryBudget/max(1,bytesPerSimulation)));
+batchSize = min(batchSize,memoryLimitedBatchSize);
+timeDifference = diff(time);
+if any(timeDifference <= 0)
+    error('redNoisePeriodogramMC:InvalidTime', ...
+        'DATA(:,1) must be strictly increasing.');
+end
+dt = median(timeDifference);
+spacingTolerance = max(1e-10*max(1,abs(dt)),32*eps(max(abs(time))));
+if any(abs(timeDifference-dt) > spacingTolerance)
+    error('redNoisePeriodogramMC:UnevenSampling', ...
+        ['DATA(:,1) must be evenly spaced. Sort, de-duplicate, and ', ...
+         'interpolate the data before Monte Carlo simulation.']);
+end
 
-    parse(parser, varargin{:});
+sliceIndex = equalDurationSliceIndex(time,slices);
+sliceLength = cellfun(@numel,sliceIndex);
+if any(sliceLength < 4)
+    error('redNoisePeriodogramMC:SliceTooShort', ...
+        'Every slice must contain at least four observations.');
+end
+if pad < max(sliceLength)
+    error('redNoisePeriodogramMC:PadTooShort', ...
+        'PAD must be at least the number of observations in the longest slice.');
+end
 
-    batchSize  = min(parser.Results.BatchSize, mcn);
-    useParallel = parser.Results.UseParallel;
+observedDetrended = detrend(values,1);
+[resolvedVariance,dataStd] = cocoResolvedDetrendedVariance( ...
+    values,observedDetrended);
+if ~resolvedVariance
+    error('redNoisePeriodogramMC:InvalidVariance', ...
+        ['The observed values must retain numerically resolved variance ', ...
+         'after linear detrending.']);
+end
 
-    %% Validate main inputs
+samplingFrequency = 1/dt;
+innovationStd = sqrt(1-rhoM^2);
+f = [];
+pMC = [];
 
-    validateattributes(data, {'numeric'}, ...
-        {'2d', 'ncols', 2, 'nonempty', 'real'}, ...
-        mfilename, 'data', 1);
+for firstSimulation = 1:batchSize:mcn
+    lastSimulation = min(firstSimulation+batchSize-1,mcn);
+    numberInBatch = lastSimulation-firstSimulation+1;
 
-    validateattributes(rhoM, {'numeric'}, ...
-        {'scalar', 'real', 'finite', '>', -1, '<', 1}, ...
-        mfilename, 'rhoM', 2);
+    innovations = randn(n,numberInBatch);
+    innovations(2:end,:) = innovationStd.*innovations(2:end,:);
+    redSeries = filter(1,[1,-rhoM],innovations,[],1);
+    redSeries = dataStd.*redSeries;
 
-    validateattributes(mcn, {'numeric'}, ...
-        {'scalar', 'integer', 'positive', 'finite'}, ...
-        mfilename, 'mcn', 3);
-
-    validateattributes(red, {'numeric'}, ...
-        {'scalar', 'real', 'finite'}, ...
-        mfilename, 'red', 4);
-
-    validateattributes(pad, {'numeric'}, ...
-        {'scalar', 'integer', 'positive', 'finite'}, ...
-        mfilename, 'pad', 5);
-
-    validRedOption = ismember(red, [0, 1, 2, 3]) || ...
-        (red >= 50 && red < 100);
-
-    if ~validRedOption
-        error('redNoisePeriodogramMC:InvalidRedOption', ...
-            ['red must be 0, 1, 2, 3, or a confidence level ' ...
-             'between 50 and 100.']);
+    [pProcessed,fBatch] = processedSliceAverage( ...
+        redSeries,sliceIndex,pad,samplingFrequency,dt,red,useParallel);
+    if isempty(f)
+        f = fBatch;
+        pMC = zeros(numel(f),mcn,'like',pProcessed);
+    elseif ~isequal(f,fBatch)
+        error('redNoisePeriodogramMC:FrequencyGridChanged', ...
+            'Monte Carlo frequency grids changed between batches.');
     end
+    pMC(:,firstSimulation:lastSimulation) = pProcessed;
+end
+end
 
-    %% Prepare the input time series
-
-    time = data(:,1);
-    values = data(:,2);
-
-    if any(~isfinite(time)) || any(~isfinite(values))
-        error('redNoisePeriodogramMC:NonfiniteData', ...
-            'The input data must not contain NaN or Inf values.');
+function sliceIndex = equalDurationSliceIndex(time,slices)
+boundaries = linspace(time(1),time(end),slices+1);
+sliceIndex = cell(slices,1);
+for j = 1:slices
+    if j < slices
+        sliceIndex{j} = find(time >= boundaries(j) & ...
+            time < boundaries(j+1));
+    else
+        sliceIndex{j} = find(time >= boundaries(j) & ...
+            time <= boundaries(j+1));
     end
+end
+end
 
-    n = length(time);
+function [pAverage,f] = processedSliceAverage( ...
+        series,sliceIndex,pad,fs,dt,red,useParallel)
+nSimulation = size(series,2);
+nFrequency = floor(pad/2)+1;
+pSum = zeros(nFrequency,nSimulation,'like',series);
+f = [];
 
-    if n < 4
-        error('redNoisePeriodogramMC:InsufficientData', ...
-            'The input time series must contain at least four points.');
-    end
-
-    timeDifference = diff(time);
-
-    if any(timeDifference <= 0)
-        error('redNoisePeriodogramMC:InvalidTime', ...
-            'The time values must be strictly increasing.');
-    end
-
-    % Representative sampling interval
-    dt = median(timeDifference);
-
-    % Sampling frequency
-    samplingFrequency = 1 / dt;
-
-    % Standard deviation of the detrended observed series
-    values = detrend(values, 1);
-    dataStd = std(values);
-
-    if ~isfinite(dataStd) || dataStd <= 0
-        error('redNoisePeriodogramMC:InvalidVariance', ...
-            'data(:,2) must have a finite, nonzero variance.');
-    end
-
-    % Nyquist and Rayleigh frequencies
-    dat_nyq = 1 / (2 * dt); %#ok<NASGU>
-    dat_ray = 1 / (n * dt); %#ok<NASGU>
-
-    %% Initialize outputs
-
-    f = [];
-    pMC = [];
-
-    % Innovation standard deviation required for a stationary AR(1)
-    % process with unit variance
-    innovationStd = sqrt(1 - rhoM^2);
-
-    %% Generate and process the simulations in batches
-
-    for firstSimulation = 1:batchSize:mcn
-
-        lastSimulation = min( ...
-            firstSimulation + batchSize - 1, mcn);
-
-        numberInBatch = ...
-            lastSimulation - firstSimulation + 1;
-
-        %% Generate stationary AR(1) red-noise series
-
-        % Each column is an independent Monte Carlo realization
-        innovations = randn(n, numberInBatch);
-
-        % The first value has unit variance because it is drawn directly
-        % from the stationary distribution. Later innovations have
-        % variance 1-rhoM^2.
-        if n > 1
-            innovations(2:end,:) = ...
-                innovationStd .* innovations(2:end,:);
+for s = 1:numel(sliceIndex)
+    x = series(sliceIndex{s},:);
+    if numel(sliceIndex) > 1
+        sigma = std(x,0,1);
+        if any(~isfinite(sigma) | sigma <= 0)
+            error('redNoisePeriodogramMC:DegenerateNullSlice', ...
+                'A Monte Carlo slice has zero or nonfinite variance.');
         end
+        x = (x-mean(x,1))./sigma;
+    end
+    x = detrend(x,1);
+    [pRaw,fSlice] = periodogram(x,[],pad,fs);
+    if any(~isfinite(pRaw),'all')
+        error('redNoisePeriodogramMC:NonfinitePeriodogram', ...
+            'A null periodogram overflowed or returned nonfinite power.');
+    end
+    if isempty(f)
+        f = fSlice;
+    elseif ~isequal(f,fSlice)
+        error('redNoisePeriodogramMC:SliceFrequencyGridChanged', ...
+            'Slice periodograms do not share an identical frequency grid.');
+    end
 
-        % Apply the AR(1) recursion along the first dimension:
-        %
-        % y(t) = rhoM*y(t-1) + innovation(t)
-        redSeries = filter( ...
-            1, [1, -rhoM], innovations, [], 1);
-
-        % Match the expected standard deviation of the observed data
-        redSeries = dataStd .* redSeries;
-
-        %% Calculate periodograms for the entire batch
-
-        % MATLAB treats each column as an independent time series
-        [pRaw, fBatch] = periodogram( ...
-            redSeries, [], pad, samplingFrequency);
-
-        % Allocate the complete output matrix after the frequency
-        % dimension is known
-        if isempty(f)
-            f = fBatch;
-            pMC = zeros(length(f), mcn, 'like', pRaw);
-        end
-
-        pProcessed = zeros(size(pRaw), 'like', pRaw);
-
-        %% Remove the red-noise background
-
+    if red == 0
+        pProcessed = pRaw;
+    else
+        pProcessed = zeros(size(pRaw),'like',pRaw);
         if useParallel
-
-            parfor j = 1:numberInBatch
+            parfor j = 1:nSimulation
                 pProcessed(:,j) = processOneSpectrum( ...
-                    redSeries(:,j), pRaw(:,j), ...
-                    fBatch, dt, red);
+                    x(:,j),pRaw(:,j),fSlice,dt,red);
             end
-
         else
-
-            for j = 1:numberInBatch
+            for j = 1:nSimulation
                 pProcessed(:,j) = processOneSpectrum( ...
-                    redSeries(:,j), pRaw(:,j), ...
-                    fBatch, dt, red);
+                    x(:,j),pRaw(:,j),fSlice,dt,red);
             end
-
         end
-
-        %% Store the processed spectra
-
-        pMC(:,firstSimulation:lastSimulation) = pProcessed;
-
     end
-
+    pSum = pSum+pProcessed;
+end
+pAverage = pSum./numel(sliceIndex);
 end
 
-
-function p = processOneSpectrum(redSeries, p, f, dt, red)
-% processOneSpectrum Remove the selected red-noise background from one
-% periodogram.
-
-    switch true
-
-        case red == 0
-            % Keep the original periodogram
-
-        case red == 1
-            % Subtract the theoretical AR(1) red-noise spectrum
-            theored = theoredar1ML( ...
-                redSeries, f, mean(p), dt);
-
-            theored = theored(:);
-
-            p = p - theored;
-
-        case red == 2
-            % Normalize by the theoretical AR(1) spectrum and subtract 1
-            theored = redconf_any(f,p,dt,0.25,2);
-
-            theored = theored(:);
-            theored = max(theored, realmin('double'));
-
-            p = p - theored;
-
-        case red == 3
-            xlogp = log10(p);
-            [swa, ~] = specswa(f, xlogp, length(redSeries));
-            p = p - swa;
-
-    end
-
-    % Remove negative and nonfinite residual power
-    p(~isfinite(p)) = 0;
-    p(p < 0) = 0;
-
+function p = processOneSpectrum(series,p,f,dt,red)
+switch red
+    case 0
+        return
+    case 1
+        background = theoredar1ML(series,f,mean(p),dt);
+    case 2
+        % REDCONF_ANY historically accepts normalized angular frequency,
+        % not cycles per time unit. Convert so its internal FT is physical.
+        angularFrequency = 2*pi*f*dt;
+        background = redconf_any(angularFrequency,p,dt,0.25,2);
+    case 3
+        % Use a spectrum-scale floor. An exact detrended DC zero must not
+        % become an artificial log10(realmin) ~= -308 SWA outlier.
+        xlogp = log10(max(p,adaptivePositivePowerFloor(p)));
+        [background,~] = specswa(f,xlogp,numel(series),false);
+end
+background = background(:);
+if numel(background) ~= numel(p) || ...
+        any(~isfinite(background) | background <= 0)
+    error('redNoisePeriodogramMC:InvalidRedNoiseBackground', ...
+        ['The selected red-noise method returned a nonpositive, ', ...
+         'nonfinite, or size-mismatched spectral background.']);
+end
+p = p-background;
+p(~isfinite(p) | p < 0) = 0;
 end
 
+function floorValue = adaptivePositivePowerFloor(p)
+positivePower = p(isfinite(p) & p > 0);
+if isempty(positivePower)
+    scale = 1;
+else
+    scale = max(positivePower);
+end
+floorValue = max(realmin(class(p)),scale*eps(class(p)));
+end

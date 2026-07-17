@@ -20,10 +20,19 @@
 %
 % Mingsong Li, May 2017
 
-function [corry] = cyclecorrsigNew(data,dat,pad,~,target,orbit9,rayleigh,sr1,sr2,srstep,sr0,adjust,method)
+function [corry] = cyclecorrsigNew(data,dat,pad,~,target,orbit9,rayleigh,sr1,sr2,srstep,sr0,adjust,method,targetMode)
 
 % The fourth input position is kept for compatibility with existing callers.
-% Target amplitudes are now estimated from data power.
+% Adaptive target amplitudes are estimated from data power. Fixed-target
+% amplitudes are supplied by cocoFixedTargetWeights.
+
+if nargin < 14 || isempty(targetMode)
+    targetMode = 'adaptive';
+end
+if any(strcmpi(char(targetMode),{'fixed','fixed9'})) && adjust == 1
+    error(['Fixed-target COCO is incompatible with adjust=1 because ', ...
+        'target adjustment estimates power from the data. Use adjust=0.']);
+end
 
 % if nargin > 12
 %     error('Too many input arguments in cyclecorr.m')
@@ -60,7 +69,7 @@ if (sr1 < sr0) && (sr2 > sr0)
     for i = leng_x(leng_x<sr0)
         y=i.*xx/100;
 
-        la = freq2targetNew(dat,pad,data,orbit9,lax_pad5,i); % new
+        la = cocoTargetSpectrum(dat,pad,data,orbit9,lax_pad5,i,targetMode);
         la = safeZscore(la); % new
 
         if adjust == 1
@@ -80,7 +89,7 @@ if (sr1 < sr0) && (sr2 > sr0)
         y=i.*xx/100;
         yi = interp1(y,data(:,2),lax);  % decrease number of freq. of data
         yi = safeZscore(yi);
-        la = freq2targetNew(dat,pad,data,orbit9,lax,i); % new
+        la = cocoTargetSpectrum(dat,pad,data,orbit9,lax,i,targetMode);
         la = safeZscore(la);% new
         if adjust == 1
             [targ] = targetadj_real([lax,la],xx,yy,orbit9,rayleigh,i);
@@ -100,7 +109,7 @@ elseif sr1 >= sr0
         yi = interp1(y,data(:,2),lax);
         yi = safeZscore(yi);
 
-        la = freq2targetNew(dat,pad,data,orbit9,lax,i); % new
+        la = cocoTargetSpectrum(dat,pad,data,orbit9,lax,i,targetMode);
         la = safeZscore(la);
 
         if adjust == 1
@@ -118,7 +127,7 @@ elseif sr1 >= sr0
 else
     for i = sr1:srstep:sr2
         y=i.*xx/100;
-        la = freq2targetNew(dat,pad,data,orbit9,lax_pad5,i); % new
+        la = cocoTargetSpectrum(dat,pad,data,orbit9,lax_pad5,i,targetMode);
         la = safeZscore(la);
 
         if adjust == 1

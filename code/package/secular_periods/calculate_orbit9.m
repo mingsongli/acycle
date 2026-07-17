@@ -45,8 +45,18 @@ function orbit9 = calculate_orbit9(ageMa)
     ageMa = round(ageMa);
     ageGa = ageMa / 1000;
 
-    %% Read AstroGeo22 data
-    astroData = readmatrix('AstroGeo22.txt');
+    %% Read bundled secular-frequency resources relative to this function.
+    % GUI and publication batch runs commonly change the current folder;
+    % bare filenames would then fail even though the resources are installed.
+    resourceDirectory = fileparts(mfilename('fullpath'));
+    astroPath = fullfile(resourceDirectory,'AstroGeo22.txt');
+    gisiPath = fullfile(resourceDirectory,'La04gisi.csv');
+    if exist(astroPath,'file') ~= 2 || exist(gisiPath,'file') ~= 2
+        error('calculate_orbit9:MissingResource', ...
+            ['Cannot locate the bundled AstroGeo22.txt and La04gisi.csv ', ...
+             'resources beside calculate_orbit9.m.']);
+    end
+    astroData = readmatrix(astroPath);
 
     if size(astroData, 2) < 11
         error('AstroGeo22.txt must contain at least 11 columns.');
@@ -69,7 +79,7 @@ function orbit9 = calculate_orbit9(ageMa)
     k = astroData(rowIndex, 11);
 
     %% Read the g and s frequencies
-    gisiData = readmatrix('La04gisi.csv');
+    gisiData = readmatrix(gisiPath);
 
     % Remove rows or columns that are entirely NaN, which may be produced
     % by headers or empty cells in the CSV file.

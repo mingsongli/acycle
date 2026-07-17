@@ -1,13 +1,44 @@
-function [prt_sr,out_depth,out_ecc,out_ep,out_eci,out_ecoco,out_ecocorb,out_norbit,sr_p] = ...
-   ecoco(data,~,orbit9,window,dt,step,delinear,red,pad,sr1,sr2,srstep,nsim,adjust,~,plotn,method,fmaxdata,main_unit_selection,calcMode)
+function [prt_sr,out_depth,out_ecc,out_ep,out_eci,out_ecoco,out_ecocorb,out_norbit,sr_p,ecoDetails] = ...
+   ecoco(data,~,orbit9,window,dt,step,delinear,red,pad,sr1,sr2,srstep,nsim,adjust,~,plotn,method,fmaxdata,main_unit_selection,calcMode,maxFrequency,seed,anchorFraction,varargin)
 % Evolutionary COCO using sliding-window 1-slice COCO.
 %
 % Each window is evaluated by corrcoefslices_rankNew, so eCOCO uses the
 % same target construction, Monte Carlo p-value, and pCOCO definition as
 % the upgraded COCO workflow.
+% Optional trailing name-value input:
+%   ProgressFcn  callback FCN(fraction,message), with a determinate
+%                FRACTION on [0,1].
 
 if nargin < 20 || isempty(calcMode)
-    calcMode = 'accurate';
+    calcMode = 'adaptive';
+end
+if nargin < 21 || isempty(maxFrequency)
+    maxFrequency = 1.2*max(1./orbit9(:));
+end
+if nargin < 22 || isempty(seed)
+    seed = 1;
+end
+if nargin < 23 || isempty(anchorFraction)
+    anchorFraction = 0.5;
+end
+progressParser = inputParser;
+progressParser.FunctionName = mfilename;
+addParameter(progressParser,'ProgressFcn',[],@(x) isempty(x) || ...
+    isa(x,'function_handle'));
+parse(progressParser,varargin{:});
+progressFcn = progressParser.Results.ProgressFcn;
+validateattributes(maxFrequency,{'numeric'}, ...
+    {'scalar','real','finite','positive'},mfilename,'maxFrequency',21);
+validateattributes(seed,{'numeric'}, ...
+    {'scalar','integer','finite','nonnegative','<=',2^32-1}, ...
+    mfilename,'seed',22);
+validateattributes(anchorFraction,{'numeric'}, ...
+    {'scalar','real','finite','positive','<=',2}, ...
+    mfilename,'anchorFraction',23);
+highestOrbitFrequency = max(1./orbit9(:));
+if maxFrequency < highestOrbitFrequency-64*eps(max(1,highestOrbitFrequency))
+    error('ecoco:MaximumFrequencyExcludesOrbit', ...
+        'MAXFREQUENCY must include the highest nominal orbital frequency.');
 end
 if nargin < 19 || isempty(main_unit_selection)
     main_unit_selection = get_main_unit_selection();
@@ -21,15 +52,74 @@ end
 if nargin < 16 || isempty(plotn)
     plotn = 1;
 end
-calcMode = lower(char(calcMode));
-if ~ismember(calcMode,{'fast','accurate'})
-    error('calcMode must be either ''fast'' or ''accurate''.');
+calcMode = lower(strtrim(char(calcMode)));
+if ~ismember(calcMode,{'adaptive','crossfit','fast','accurate'})
+    error(['calcMode must be ''adaptive'' or ''crossfit'' ', ...
+        '(''fast''/''accurate'' remain legacy compatibility modes).']);
 end
 
-lang_choice = load('ac_lang.txt');
-langdict = readtable('langdict.xlsx','VariableNamingRule','preserve');
-lang_id = langdict.ID;
-lang_var = table2cell(langdict(:, 2 + lang_choice));
+ecoDetails = struct;
+
+% New public eCOCO algorithms.  Both retain the complete sedimentation-
+% rate grid.  The old Fast/Accurate implementation remains below as an
+% unadvertised compatibility branch for scripts that still call it.
+if any(strcmp(calcMode,{'adaptive','crossfit'}))
+    if adjust ~= 0
+        error('ecoco:LegacyAdjustmentUnsupported', ...
+            'Adaptive and Cross-fitted eCOCO require ADJUST=0.');
+    end
+    srGrid = (sr1:srstep:sr2)';
+    coreProgressFcn = [];
+    if ~isempty(progressFcn)
+        % Reserve the final two percent for ridge tracking and plotting in
+        % this wrapper so the dialog does not claim completion too early.
+        coreProgressFcn = @(fraction,message) reportEcocoProgress( ...
+            progressFcn,0.98*fraction,message);
+    end
+    if strcmp(calcMode,'adaptive')
+        result = ecocoAdaptiveCore(data,orbit9,window,dt,step,red,pad, ...
+            srGrid,nsim,method,maxFrequency,seed, ...
+            'ProgressFcn',coreProgressFcn);
+    else
+        result = ecocoCrossfitCore(data,orbit9,window,dt,step,red,pad, ...
+            srGrid,nsim,method,maxFrequency,seed,anchorFraction, ...
+            'ComputeLocalP',true, ...
+            'ProgressFcn',coreProgressFcn);
+    end
+    prt_sr = result.srGrid(:);
+    out_depth = result.depth(:);
+    out_ecc = result.rho;
+    % In upgraded Adaptive and Cross-fitted eCOCO, OUT_EP carries the
+    % same-rate Monte Carlo Local p map. The legacy output position is
+    % retained for GUI and script compatibility; analytic correlation
+    % p-values are not valid for a target estimated from the spectra.
+    if isfield(result,'pLocal') && ~isempty(result.pLocal)
+        out_ep = result.pLocal;
+    else
+        out_ep = result.pParametric;
+    end
+    out_eci = result.pGlobal;
+    out_ecoco = result.pCOCO;
+    out_ecocorb = result.score;
+    out_norbit = result.nOrbit;
+    ecoDetails = result;
+    orbitn = numel(orbit9);
+    sr_p_fallback = bestPerWindowSummary( ...
+        prt_sr,out_depth,out_ecc,out_eci,out_norbit,out_ecoco, ...
+        out_ecocorb,orbitn);
+    sr_p = trackEcocoRidge(out_ecocorb,prt_sr,out_depth,out_ecc, ...
+        out_eci,out_norbit,out_ecoco,orbitn,sr_p_fallback);
+    ecoDetails.trackedSedimentationRate = sr_p;
+    printTrackedEcocoResults(sr_p,orbitn);
+    if abs(plotn) > 0
+        ecocoplot(prt_sr,out_depth,out_ecc,out_ep,out_eci,out_ecoco, ...
+            out_ecocorb,out_norbit,plotn,ecoDetails);
+    end
+    reportEcocoProgress(progressFcn,1,sprintf('%s complete.',result.name));
+    return
+end
+
+[lang_choice,lang_id,lang_var] = ecocoLanguageSettings();
 [~, ec79] = ismember('ec79',lang_id);
 [~, ec85] = ismember('ec85',lang_id);
 
@@ -73,22 +163,33 @@ out_ecocorb = nan(nofsr,m3);
 out_norbit = nan(nofsr,m3);
 sr_p = nan(m3,8);
 
-if lang_choice == 0
-    hwaitbar = waitbar(0,'eCOCO processing ... [CTRL + C to quit]', ...
-       'WindowStyle','modal');
+if isempty(progressFcn)
+    waitbarRandomState = rng;
+    restoreWaitbarRandomState = onCleanup(@()rng(waitbarRandomState));
+    if lang_choice == 0
+        hwaitbar = waitbar(0,'eCOCO processing ... [CTRL + C to quit]', ...
+           'WindowStyle','modal');
+    else
+        hwaitbar = waitbar(0,['eCOCO ',lang_var{ec79}], ...
+           'WindowStyle','modal');
+    end
+    clear restoreWaitbarRandomState
 else
-    hwaitbar = waitbar(0,['eCOCO ',lang_var{ec79}], ...
-       'WindowStyle','modal');
+    hwaitbar = [];
+    reportEcocoProgress(progressFcn,0,sprintf( ...
+        'Preparing %d sliding windows.',m3));
 end
 cleanupObj = onCleanup(@()safeClose(hwaitbar));
-hwaitbar_find = findobj(hwaitbar,'Type','Patch');
-set(hwaitbar_find,'EdgeColor',[0 0.9 0],'FaceColor',[0 0.9 0])
-setappdata(hwaitbar,'canceling',0)
+if ~isempty(hwaitbar)
+    hwaitbar_find = findobj(hwaitbar,'Type','Patch');
+    set(hwaitbar_find,'EdgeColor',[0 0.9 0],'FaceColor',[0 0.9 0])
+    setappdata(hwaitbar,'canceling',0)
+end
 
-steps = 50;
-nmc_n = max(1,ceil(m3/steps));
-waitbarstep = 0;
-waitbar(waitbarstep / steps)
+nmc_n = max(1,ceil(m3/100));
+if ~isempty(hwaitbar)
+    updateEcocoWaitbar(hwaitbar,0,'Preparing sliding windows.');
+end
 
 if strcmp(calcMode,'fast')
     disp('>> Step 1: prepare sliding windows and run Fast eCOCO');
@@ -105,7 +206,8 @@ if strcmp(calcMode,'fast') && nsim > 0
     end
     [fastFirstCorrCI,~,fastNull] = corrcoefslices_rankNew( ...
         datWin0,orbit9,dt,pad,sr1,sr2,srstep,adjust,red,nsim,0,1, ...
-        method,fmaxdata,main_unit_selection,true);
+        method,fmaxdata,main_unit_selection,true,'adaptive', ...
+        'MaxFrequency',maxFrequency,'Seed',seed);
 end
 
 for i = 1:m3
@@ -123,13 +225,15 @@ for i = 1:m3
         else
             [corrCI,~] = corrcoefslices_rankNew( ...
                 datWin,orbit9,dt,pad,sr1,sr2,srstep,adjust,red,0,0,1, ...
-                method,fmaxdata,main_unit_selection,false);
+                method,fmaxdata,main_unit_selection,false,'adaptive', ...
+                'MaxFrequency',maxFrequency,'Seed',mod(seed+i-2,2^32));
         end
         corr_h0 = [];
     else
         [corrCI,corr_h0] = corrcoefslices_rankNew( ...
             datWin,orbit9,dt,pad,sr1,sr2,srstep,adjust,red,nsim,0,1, ...
-            method,fmaxdata,main_unit_selection,false);
+            method,fmaxdata,main_unit_selection,false,'adaptive', ...
+            'MaxFrequency',maxFrequency,'Seed',mod(seed+i-2,2^32));
     end
 
     if i == 1
@@ -139,7 +243,7 @@ for i = 1:m3
     out_ecc(:,i) = corrCI(:,2);
     out_ep(:,i) = corrCI(:,3);
     if strcmp(calcMode,'fast') && ~isempty(fastNull)
-        out_eci(:,i) = pValuesFromNull(corrCI(:,2),fastNull,nofsr);
+        out_eci(:,i) = globalPValuesFromNull(corrCI(:,2),fastNull,nofsr);
     else
         out_eci(:,i) = getPValues(corr_h0,nofsr);
     end
@@ -170,18 +274,20 @@ for i = 1:m3
             '. No finite pCOCO solution.'])
     end
 
-    if rem(i,nmc_n) == 0
-        waitbarstep = waitbarstep+1;
-        if waitbarstep > steps
-            waitbarstep = steps;
-        end
-        pause(0.001);
-        waitbar(waitbarstep / steps)
+    if (rem(i,nmc_n) == 0 || i == m3) && ~isempty(hwaitbar)
+        updateEcocoWaitbar(hwaitbar,i/m3,sprintf( ...
+            'eCOCO sliding windows: %d of %d (%.1f%%)', ...
+            i,m3,100*i/m3));
     end
-    if getappdata(hwaitbar,'canceling')
+    reportEcocoProgress(progressFcn,0.98*i/m3,sprintf( ...
+        'Sliding windows completed: %d of %d',i,m3));
+    if ~isempty(hwaitbar) && getappdata(hwaitbar,'canceling')
         break
     end
 end
+
+reportEcocoProgress(progressFcn,0.98,sprintf( ...
+    'Sliding windows completed: %d of %d',m3,m3));
 
 sr_p = trackEcocoRidge(out_ecocorb,prt_sr,out_depth,out_ecc,out_eci,out_norbit,out_ecoco,orbitn,sr_p);
 printTrackedEcocoResults(sr_p,orbitn);
@@ -201,6 +307,7 @@ if abs(plotn) > 0
     hold on
     plot(sr_p(:,2), sr_p(:,1), 'r-o')
 end
+reportEcocoProgress(progressFcn,1,'eCOCO complete.');
 
 function pValues = getPValues(corr_h0,nofsr)
 pValues = nan(nofsr,1);
@@ -208,17 +315,30 @@ if ~isempty(corr_h0)
     pValues(1:min(nofsr,size(corr_h0,1))) = corr_h0(1:min(nofsr,size(corr_h0,1)),1);
 end
 
-function pValues = pValuesFromNull(observed,nullCorr,nofsr)
+function pValues = globalPValuesFromNull(observed,nullCorr,nofsr)
 pValues = nan(nofsr,1);
-n = min([nofsr,numel(observed),size(nullCorr,1)]);
+nullMax = maxFiniteByColumn(nullCorr);
+nullMax = nullMax(isfinite(nullMax));
+if isempty(nullMax)
+    return
+end
+n = min([nofsr,numel(observed)]);
 for ii = 1:n
-    sim = nullCorr(ii,:);
-    sim = sim(isfinite(sim));
     obs = observed(ii);
-    if isempty(sim) || ~isfinite(obs)
+    if ~isfinite(obs)
         continue
     end
-    pValues(ii) = (sum(sim >= obs) + 1) / (numel(sim) + 1);
+    pValues(ii) = (sum(nullMax >= obs) + 1) / (numel(nullMax) + 1);
+end
+
+function colMax = maxFiniteByColumn(x)
+colMax = nan(1,size(x,2));
+for ii = 1:size(x,2)
+    xi = x(:,ii);
+    xi = xi(isfinite(xi));
+    if ~isempty(xi)
+        colMax(ii) = max(xi);
+    end
 end
 
 function norbit = getOrbitCounts(corr_h0,corrCI,orbitn,nofsr)
@@ -243,6 +363,24 @@ if isempty(valid)
 end
 [~,loc] = max(values(valid));
 idx = valid(loc);
+
+function summary = bestPerWindowSummary( ...
+        srGrid,depth,rho,pGlobal,nOrbit,pCOCO,score,orbitCount)
+nWindows = numel(depth);
+summary = nan(nWindows,8);
+for windowIndex = 1:nWindows
+    bestIndex = bestFiniteIndex(score(:,windowIndex));
+    if isempty(bestIndex)
+        continue
+    end
+    summary(windowIndex,1) = depth(windowIndex);
+    summary(windowIndex,2) = srGrid(bestIndex);
+    summary(windowIndex,3) = rho(bestIndex,windowIndex);
+    summary(windowIndex,4) = pGlobal(bestIndex,windowIndex);
+    summary(windowIndex,5) = nOrbit(bestIndex,windowIndex);
+    summary(windowIndex,6) = nOrbit(bestIndex,windowIndex)./orbitCount .* ...
+        pCOCO(bestIndex,windowIndex);
+end
 
 function printTrackedEcocoResults(sr_p,orbitn)
 disp('>> Tracked eCOCO sedimentation-rate path:')
@@ -384,9 +522,66 @@ catch
 end
 
 function safeClose(h)
+randomState = rng;
+restoreRandomState = onCleanup(@()rng(randomState));
 try
     if ishandle(h)
         close(h);
     end
 catch
+end
+clear restoreRandomState
+
+function updateEcocoWaitbar(h,fraction,message)
+if isempty(h) || ~ishandle(h)
+    return
+end
+randomState = rng;
+restoreRandomState = onCleanup(@()rng(randomState));
+waitbar(min(max(double(fraction),0),1),h,message);
+clear restoreRandomState
+
+function reportEcocoProgress(progressFcn,fraction,message)
+if isempty(progressFcn)
+    return
+end
+randomState = rng;
+restoreRandomState = onCleanup(@()rng(randomState));
+progressFcn(min(max(double(fraction),0),1),message);
+clear restoreRandomState
+
+function [langChoice,langId,langVar] = ecocoLanguageSettings()
+langChoice = 0;
+langId = {};
+langVar = {};
+choicePath = ecocoLanguageResource('ac_lang.txt');
+if ~isempty(choicePath)
+    candidate = load(choicePath);
+    if isnumeric(candidate) && isscalar(candidate) && ...
+            isfinite(candidate) && ismember(candidate,[0,1])
+        langChoice = candidate;
+    end
+end
+dictionaryPath = ecocoLanguageResource('langdict.xlsx');
+if isempty(dictionaryPath)
+    langChoice = 0;
+    return
+end
+dictionary = readtable(dictionaryPath,'VariableNamingRule','preserve');
+if width(dictionary) < 2+langChoice
+    langChoice = 0;
+end
+langId = dictionary.ID;
+langVar = table2cell(dictionary(:,2+langChoice));
+
+function resourcePath = ecocoLanguageResource(filename)
+resourcePath = '';
+sourceDirectory = fileparts(mfilename('fullpath'));
+candidates = {fullfile(sourceDirectory,'..','bin',filename), ...
+    which(filename),fullfile(pwd,filename)};
+for index = 1:numel(candidates)
+    if ~isempty(candidates{index}) && exist(candidates{index},'file') == 2
+        resourcePath = candidates{index};
+        return
+    end
 end

@@ -19,39 +19,22 @@ function y = moveMedian(x,w)
 %   Email: limingsonglms@gmail.com
 %
 
-m=length(x);
-y=zeros(m,1);
-
+validateattributes(x,{'numeric'},{'vector','real','nonempty'}, ...
+    mfilename,'x',1);
+validateattributes(w,{'numeric'}, ...
+    {'scalar','integer','positive','finite'},mfilename,'w',2);
+x = x(:);
 halfw = floor(w/2);
-idx1 = halfw + 1;    % starting index of input signal with moving window of size w
-
 if mod(w,2)
-    % odd number
-    %   first section
-    for i = 1: idx1-1
-        y(i) = median(x(1: idx1-1+i));
-    end
-    %   body
-    for i = idx1 : m-idx1+1
-        y(i) = median( x(i-halfw : i+halfw));
-    end
-    %   last section
-    for i = m-idx1+2 : m
-        y(i) = median(x( i-halfw : m));
-    end
-    
+    window = [halfw,halfw];
 else
-    % even number
-    %   first section
-    for i = 1: halfw-1
-        y(i) = median(x(1: halfw+i));
-    end
-    %   body
-    for i = halfw : m-idx1+1
-        y(i) = median( x(i-(halfw-1) : i+halfw));
-    end
-    %   last section
-    for i = m-idx1+2 : m
-         y(i) = median(x(i-(halfw-1) : m));
-    end
+    % Match the historical convention exactly: W/2-1 samples behind the
+    % current position and W/2 samples ahead, with truncated endpoints.
+    window = [max(0,halfw-1),halfw];
 end
+% MOVMEDIAN implements the same shrinking endpoint windows in compiled
+% code.  Replacing thousands of interpreted MEDIAN calls is material for
+% robust-red Monte Carlo runs while leaving the numerical definition
+% unchanged (individual medians can differ only at floating-point
+% roundoff because the compiled reduction order is implementation-defined).
+y = movmedian(x,window,1,'Endpoints','shrink');
