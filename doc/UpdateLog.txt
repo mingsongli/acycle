@@ -1,28 +1,48 @@
 - - - - - -    What's New   - - - - - -
 
+
 _______________________________________
 
 
-Version : Acycle_v2.7.1
-Date    : Oct. 11, 2023 - 
+Version : Acycle_v3.0
+Date    : Oct. 19, 2023 - Jan. 30 2026
+By      : Mingsong Li (Peking University)
+    1. Allow Mac to use shortcut keys Command +C/V/X
+    2. Correct a bug in the COCO/eCOCO "Middle Age" feature. 
+        The earlier version might not function properly when the 
+        "user-defined period" radio button is chosen.
+	3. Univariate menu
+        Summary Statistics
+        t test
+    4. EEMD/EMD: Added variance calculation for each IMF. 
+        The output table header now includes (as comments) each IMF’s 
+        variance and its percentage contribution.
+        Special thanks to Prof. Zhengtang Guo for valuable suggestions.
+    5. DET: debug by Zhixin Wang, Peking University
+
+_______________________________________
+
+
+Version : Acycle_v2.8
+Date    : Oct. 11, 2023 - Oct. 19, 2023 
 By      : Mingsong Li (Peking University)
 
 	1. NEW: Data transformations.
         Specific columns of the dataset can be modified utilizing various
         straightforward functions: Standardize, Normalize, Logarithm, 
         Exponential, Reciprocal; Root, and Angular transformations.
-        Appreciation is extended to Prof. Zhengtang Guo for his invaluable
+        Appreciation is extended to Prof. Zhengtang Guo for valuable
          suggestions.
     2. NEW: Column manipulate. 
         Designated columns from the chosen datasets can be combined using
         a specified weight.
-        Special thanks to Prof. Zhengtang Guo for his invaluable suggestions.
+        Special thanks to Prof. Zhengtang Guo for valuable suggestions.
     3. NEW: Moving Average - Fixed Bandwidth.
         Inspired by STATNARY: Mean and variance evolution of unevenly 
         spaced time series by Prof. Michael Schulz
         https://www.marum.de/en/Prof.-Dr.-michael-schulz/
         Michael-Schulz-Software.html
-        Thanks to Prof. Zhengtang Guo for his suggestions.
+        Thanks to Prof. Zhengtang Guo for valuable suggestions.
     4. Amplitude Modulation:
         Use Hilbert transformation to extract envelope
     5. Gauss filter, Cheby1, Ellip, and Butter fiters

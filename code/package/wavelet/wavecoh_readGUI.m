@@ -10,35 +10,6 @@
 
 % read data and settings
 data_name = handles.data_name;
-%data = handles.current_data;
-s2 = data_name(1,:);
-s2(s2 == ' ') = [];
-dat1 = load(s2);
-dat1 = sortrows(dat1);
-s2 = data_name(2,:);
-s2(s2 == ' ') = [];
-dat2 = load(s2);
-dat2 = sortrows(dat2);
-
-[dat_dir,dn1,exten] = fileparts(data_name(1,:));
-[dat_dir,dn2,exten] = fileparts(data_name(2,:));
-
-xmin = max( min(dat1(:,1), min(dat2(:,1))));
-xmax = min( max(dat1(:,1), max(dat2(:,1))));
-dat1 = select_interval(dat1,xmin,xmax);
-
-% ensure time are equal
-Dti1 = diff(dat1(:,1));
-dt = mean(Dti1);
-if max(Dti1) - min(Dti1) > 10 * eps('single')
-    [dat1]=interpolate(dat1,dt);
-end
-if isequal(dat1(:,1),dat2(:,1))
-else
-    dat2int2 = interp1(dat2(:,1),dat2(:,2),dat1(:,1));
-    dat2  = [dat1(:,1),dat2int2];
-end
-
 data_standardize = get(handles.checkbox11,'value');
 % read settings from GUI
 pt1 = str2double(get(handles.edit3,'string'));
@@ -112,6 +83,32 @@ plot_save = get(handles.checkbox7,'value');
 
 % If has to rerun wavelet
 if handles.wavehastorerun
+    s2 = data_name(1,:);
+    s2(s2 == ' ') = [];
+    dat1 = load(s2);
+    dat1 = sortrows(dat1);
+    s2 = data_name(2,:);
+    s2(s2 == ' ') = [];
+    dat2 = load(s2);
+    dat2 = sortrows(dat2);
+
+    [~,dn1,~] = fileparts(data_name(1,:));
+    [~,dn2,~] = fileparts(data_name(2,:));
+
+    xmin = max( min(dat1(:,1), min(dat2(:,1))));
+    xmax = min( max(dat1(:,1), max(dat2(:,1))));
+    dat1 = select_interval(dat1,xmin,xmax);
+
+    % ensure time are equal
+    Dti1 = diff(dat1(:,1));
+    dt = mean(Dti1);
+    if max(Dti1) - min(Dti1) > 10 * eps('single')
+        [dat1]=interpolate(dat1,dt);
+    end
+    if ~isequal(dat1(:,1),dat2(:,1))
+        dat2int2 = interp1(dat2(:,1),dat2(:,2),dat1(:,1));
+        dat2  = [dat1(:,1),dat2int2];
+    end
     
     datax = dat1(:,1);
     dat1y = dat1(:,2);
@@ -168,6 +165,7 @@ if handles.wavehastorerun
             wcs_mat   = wcs';
             dlmwrite(name4, wcs_mat, 'delimiter', ',', 'precision', 9);
             dlmwrite(name5, wcoh_mat, 'delimiter', ',', 'precision', 9);
+            ac_save_wave_parameter_table(handles,[dn1,'-',dn2],{get(handles.edit1,'String'),get(handles.edit2,'String')});
             d = dir; %get files
             set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
             refreshcolor;
@@ -227,6 +225,7 @@ if handles.wavehastorerun
             dlmwrite(name6, wtcsig, 'delimiter', ',', 'precision', 9);
             dlmwrite(name7, sig95, 'delimiter', ',', 'precision', 9);
             dlmwrite(name8, coi, 'delimiter', ',', 'precision', 9);
+            ac_save_wave_parameter_table(handles,[dn1,'-',dn2],{get(handles.edit1,'String'),get(handles.edit2,'String')});
             d = dir; %get files
             set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
             refreshcolor;

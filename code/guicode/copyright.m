@@ -1,138 +1,238 @@
-function varargout = copyright(varargin)
-% COPYRIGHT MATLAB code for copyright.fig
-%      COPYRIGHT, by itself, creates a new COPYRIGHT or raises the existing
-%      singleton*.
-%
-%      H = COPYRIGHT returns the handle to a new COPYRIGHT or the handle to
-%      the existing singleton*.
-%
-%      COPYRIGHT('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in COPYRIGHT.M with the given input arguments.
-%
-%      COPYRIGHT('Property','Value',...) creates a new COPYRIGHT or raises the
-%      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before copyright_OpeningFcn gets called.  An
-%      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to copyright_OpeningFcn via varargin.
-%
-%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
-%      instance to run (singleton)".
-%
-% See also: GUIDE, GUIDATA, GUIHANDLES
+classdef copyright < matlab.apps.AppBase
+    % App Designer style replacement for legacy GUIDE copyright dialog.
 
-% Edit the above text to modify the response to help copyright
+    properties (Access = public)
+        UIFigure         matlab.ui.Figure
+        MainGrid         matlab.ui.container.GridLayout
+        HeaderGrid       matlab.ui.container.GridLayout
+        LogoAxes         matlab.ui.control.UIAxes
+        HeaderLabel      matlab.ui.control.Label
+        DetailsTextArea  matlab.ui.control.TextArea
+    end
 
-% Last Modified by GUIDE v2.5 27-Feb-2018 20:14:13
+    properties (Access = private)
+        Context struct = struct()
+        LangChoice double = 0
+        LangID = {}
+        LangVar = {}
+    end
 
-% Begin initialization code - DO NOT EDIT
-gui_Singleton = 1;
-gui_State = struct('gui_Name',       mfilename, ...
-                   'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @copyright_OpeningFcn, ...
-                   'gui_OutputFcn',  @copyright_OutputFcn, ...
-                   'gui_LayoutFcn',  [] , ...
-                   'gui_Callback',   []);
-if nargin && ischar(varargin{1})
-    gui_State.gui_Callback = str2func(varargin{1});
-end
+    methods (Access = private)
+        function screenSize = getScreenSizePixels(~)
+            oldUnits = get(groot, 'Units');
+            set(groot, 'Units', 'pixels');
+            screenSize = get(groot, 'ScreenSize');
+            set(groot, 'Units', oldUnits);
+        end
 
-if nargout
-    [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
-else
-    gui_mainfcn(gui_State, varargin{:});
-end
-% End initialization code - DO NOT EDIT
+        function p = locateResource(app, filename)
+            p = which(filename);
+            if ~isempty(p)
+                return
+            end
 
+            guiDir = fileparts(mfilename('fullpath'));
+            candidates = { ...
+                fullfile(guiDir, filename), ...
+                fullfile(guiDir, '..', 'icons', filename), ...
+                fullfile(guiDir, '..', 'bin', filename), ...
+                fullfile(guiDir, '..', '..', filename), ...
+                fullfile(guiDir, '..', '..', 'doc', filename) ...
+                };
 
-% --- Executes just before copyright is made visible.
-function copyright_OpeningFcn(hObject, eventdata, handles, varargin)
-% This function has no output args, see OutputFcn.
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to copyright (see VARARGIN)
-handles.MonZoom = varargin{1}.MonZoom;
-handles.sortdata = varargin{1}.sortdata;
+            p = '';
+            for i = 1:numel(candidates)
+                if exist(candidates{i}, 'file') == 2
+                    p = candidates{i};
+                    return
+                end
+            end
+            p = filename;
+        end
 
-set(0,'Units','normalized') % set units as normalized
-set(gcf,'units','norm') % set location
-h=get(gcf,'Children');  % get all content
-h1=findobj(h,'FontUnits','norm');  % find all font units as points
-set(h1,'FontUnits','points','FontSize',12);  % set as norm
-h2=findobj(h,'FontUnits','points');  % find all font units as points
-set(h2,'FontUnits','points','FontSize',12);  % set as norm
+        function lines = fallbackCopyrightText(~)
+            lines = {
+                'Copyright (C) 2017-2023';
+                'Copyright text file is missing.';
+                'Expected: acycle/doc/copyright_text.txt'
+                };
+        end
 
-set(gcf,'position',[0.5,0.1,0.45,0.5]* handles.MonZoom) % set position
-set(handles.logo_axes1,'position',[0.02,0.78,0.2,0.2]) % set position
-set(handles.text5,'position',[0.25,0.762,0.65,0.23]) % set position
-set(handles.edit1,'position',[0.02,0.02,0.96,0.74]) % set position
+        function lines = loadCopyrightLines(app)
+            lines = {};
+            textPath = app.locateResource('copyright_text.txt');
+            try
+                if exist(textPath, 'file') == 2
+                    fid = fopen(textPath, 'r');
+                    if fid ~= -1
+                        data = textscan(fid, '%s', 'Delimiter', '\n', 'Whitespace', '');
+                        fclose(fid);
+                        if ~isempty(data) && ~isempty(data{1})
+                            lines = data{1};
+                        end
+                    end
+                end
+            catch
+                try
+                    fclose(fid);
+                catch
+                end
+            end
 
-% language
-lang_choice = varargin{1}.lang_choice;
-lang_id = varargin{1}.lang_id;
-lang_var = varargin{1}.lang_var;
-if lang_choice>0
-    [~, locb] = ismember('c60',lang_id);
-    set(gcf,'Name',lang_var{locb})
-else
-    set(gcf,'Name','Acycle: Copyright')
+            if isempty(lines)
+                lines = app.fallbackCopyrightText();
+            end
+        end
 
-end
+        function applyLocalizedTexts(app)
+            if app.LangChoice > 0 && ~isempty(app.LangID) && ~isempty(app.LangVar)
+                [~, locName] = ismember('c60', app.LangID);
+                if locName > 0
+                    app.UIFigure.Name = app.LangVar{locName};
+                else
+                    app.UIFigure.Name = 'Acycle: Copyright';
+                end
 
-[~, locb1] = ismember('c61',lang_id);
-[~, c65] = ismember('c65',lang_id);
-[~, locb2] = ismember('c62',lang_id);
-[~, locb3] = ismember('c63',lang_id);
-[~, locb4] = ismember('c64',lang_id);
+                [~, loc1] = ismember('c61', app.LangID);
+                [~, loc2] = ismember('c65', app.LangID);
+                [~, loc3] = ismember('c62', app.LangID);
+                [~, loc4] = ismember('c63', app.LangID);
+                [~, loc5] = ismember('c64', app.LangID);
 
-set(handles.text5,'string',{'',[lang_var{locb1},' (',lang_var{c65},') '],'',lang_var{locb2},'',...
-    lang_var{locb3},lang_var{locb4},})
+                headerLines = {''; 'Acycle'; ''; 'Time-Series Analysis Software'; ''; 'Copyright'};
+                if loc1 > 0 && loc2 > 0 && loc3 > 0 && loc4 > 0 && loc5 > 0
+                    headerLines = {''; [app.LangVar{loc1}, ' (', app.LangVar{loc2}, ') ']; ''; app.LangVar{loc3}; ''; [app.LangVar{loc4}, app.LangVar{loc5}]};
+                end
+                app.HeaderLabel.Text = strjoin(headerLines, newline);
+            else
+                app.UIFigure.Name = 'Acycle: Copyright';
+            end
+        end
 
-[I,m] = imread('acycle_logo.png');
-imshow(I,m,'parent',handles.logo_axes1);
-% imshow(I,'Colormap',m,'parent',handles.logo_axes1);
+        function createComponents(app)
+            monZoom = 1;
+            if isfield(app.Context, 'MonZoom')
+                monZoom = app.Context.MonZoom;
+            end
 
-%[I,m] = imread('AC-LOGO-S.png');
-%imshow(I,m,'parent',handles.logo_axes2);
-% Choose default command line output for copyright
-handles.output = hObject;
-% Update handles structure
-guidata(hObject, handles);
+            baseNorm = [0.5, 0.1, 0.45, 0.5];
+            if isnumeric(monZoom)
+                if isscalar(monZoom)
+                    normPos = baseNorm * monZoom;
+                elseif numel(monZoom) >= 4
+                    normPos = baseNorm .* monZoom(1:4);
+                else
+                    normPos = baseNorm;
+                end
+            else
+                normPos = baseNorm;
+            end
 
+            screenSize = app.getScreenSizePixels();
+            figW = max(320, normPos(3) * screenSize(3));
+            figH = max(220, normPos(4) * screenSize(4));
+            figX = screenSize(1) + normPos(1) * screenSize(3);
+            figY = screenSize(2) + normPos(2) * screenSize(4);
 
-% UIWAIT makes copyright wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
+            % Keep window fully inside current screen work area.
+            figX = min(max(figX, screenSize(1)), screenSize(1) + screenSize(3) - figW);
+            figY = min(max(figY, screenSize(2)), screenSize(2) + screenSize(4) - figH);
+            figPos = [figX, figY, figW, figH];
 
+            app.UIFigure = uifigure( ...
+                'Name', 'Acycle: Copyright', ...
+                'Position', round(figPos), ...
+                'Color', [1 1 1]);
 
-% --- Outputs from this function are returned to the command line.
-function varargout = copyright_OutputFcn(hObject, eventdata, handles) 
-% varargout  cell array for returning output args (see VARARGOUT);
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+            app.MainGrid = uigridlayout(app.UIFigure, [2 1]);
+            app.MainGrid.RowHeight = {110, '1x'};
+            app.MainGrid.ColumnWidth = {'1x'};
+            app.MainGrid.Padding = [14 12 14 12];
+            app.MainGrid.RowSpacing = 8;
 
-% Get default command line output from handles structure
-varargout{1} = handles.output;
+            app.HeaderGrid = uigridlayout(app.MainGrid, [1 2]);
+            app.HeaderGrid.RowHeight = {'1x'};
+            app.HeaderGrid.ColumnWidth = {120, '1x'};
+            app.HeaderGrid.Padding = [0 0 0 0];
+            app.HeaderGrid.ColumnSpacing = 10;
+            app.HeaderGrid.Layout.Row = 1;
 
+            app.LogoAxes = uiaxes(app.HeaderGrid);
+            app.LogoAxes.Layout.Row = 1;
+            app.LogoAxes.Layout.Column = 1;
+            app.LogoAxes.Visible = 'off';
 
+            app.HeaderLabel = uilabel(app.HeaderGrid, ...
+                'Text', sprintf('%s\n%s\n%s\n%s', ...
+                'Acycle v3.0 (Feb 21, 2026)', ...
+                'Mingsong Li (Peking University) & Linda A. Hinnov (George Mason)', ...
+                'Website: acycle.org', ...
+                'github.com/mingsongli/acycle'), ...
+                'FontSize', 12, ...
+                'HorizontalAlignment', 'left', ...
+                'VerticalAlignment', 'center');
+            app.HeaderLabel.Layout.Row = 1;
+            app.HeaderLabel.Layout.Column = 2;
 
-function edit1_Callback(hObject, eventdata, handles)
-% hObject    handle to edit1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+            detailsValue = app.fallbackCopyrightText();
+            try
+                detailsValue = app.loadCopyrightLines();
+            catch
+            end
 
-% Hints: get(hObject,'String') returns contents of edit1 as text
-%        str2double(get(hObject,'String')) returns contents of edit1 as a double
+            app.DetailsTextArea = uitextarea(app.MainGrid, ...
+                'Editable', 'off', ...
+                'Value', detailsValue, ...
+                'FontSize', 12, ...
+                'BackgroundColor', [1 1 1]);
+            app.DetailsTextArea.Layout.Row = 2;
 
+            logoPath = app.locateResource('acycle_logo.png');
+            if exist(logoPath, 'file') == 2
+                try
+                    [I, map] = imread(logoPath);
+                    if isempty(map)
+                        imshow(I, 'Parent', app.LogoAxes);
+                    else
+                        imshow(I, map, 'Parent', app.LogoAxes);
+                    end
+                    axis(app.LogoAxes, 'off');
+                catch
+                end
+            end
+        end
+    end
 
-% --- Executes during object creation, after setting all properties.
-function edit1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
+    methods (Access = public)
+        function app = copyright(varargin)
+            if nargin > 0 && isstruct(varargin{1})
+                app.Context = varargin{1};
+            end
 
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
+            if isfield(app.Context, 'lang_choice')
+                app.LangChoice = app.Context.lang_choice;
+            end
+            if isfield(app.Context, 'lang_id')
+                app.LangID = app.Context.lang_id;
+            end
+            if isfield(app.Context, 'lang_var')
+                app.LangVar = app.Context.lang_var;
+            end
+
+            app.createComponents();
+            app.applyLocalizedTexts();
+
+            registerApp(app, app.UIFigure);
+
+            if nargout == 0
+                clear app
+            end
+        end
+
+        function delete(app)
+            if ~isempty(app.UIFigure) && isvalid(app.UIFigure)
+                delete(app.UIFigure);
+            end
+        end
+    end
 end

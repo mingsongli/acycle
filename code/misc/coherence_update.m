@@ -4,7 +4,7 @@ targetdir = char(get(handles.edit1,'String'));
 targetname = char(get(handles.edit2,'String'));
 target    = load(fullfile(targetdir,targetname));
 target = datapreproc(target,0);
-sr_target = median(diff(target(:,1)));
+sr_target = median(diff(target(:,1)));  % sampling rate; using median of diff x
 
 % start and end of the 1st column of the target
 tar1 = min(target(:,1));
@@ -18,12 +18,12 @@ timedir = get(handles.popupmenu2,'Value');
 %% read parameters
 methodstr = get(handles.popupmenu1, 'String');
 methodval = get(handles.popupmenu1,'Value');
-
+% threshold
 cohthreshold = str2double(get(handles.edit7,'string'));
 windowsize1 = str2double(get(handles.edit5,'string'));
-windowsize = round(windowsize1/sr_target);
+windowsize = round(windowsize1/sr_target);  % window size
 nooverlap1 = str2double(get(handles.edit6,'string'));
-nooverlap = round(nooverlap1/sr_target);
+nooverlap = round(nooverlap1/sr_target); % number of overlap
 
 if get(handles.radiobutton1,'value') == 1
     forp = 1; % plot freq
@@ -87,24 +87,25 @@ for i = 1:nrow
             set(handles.edit6,'string',num2str(nooverlap1))
         end
     end
+
     % Select the common interval for both target and series
     [series3] = select_interval(data,sel1,sel2);
     [target2] = select_interval(target1,sel1,sel2);
     
-    %series2int = interp1(series3(:,1),series3(:,2),target2(:,1));
-    %series4  = [target2(:,1),series2int]
-    
+    % series selection and normalize
     y = series3(:,2);
     y = (y - mean(y))/std(y);
-    
-    x = (target2(:,2) - mean(target2(:,2)))/std(target2(:,2));
+    % target selection and normalize
+    x = target2(:,2);
+    x = (x - mean(x))/std(x);
     
     if methodval == 1
         % mscohere estimates the magnitude-squared coherence function
         % using Welch’s overlapped averaged periodogram method 
         % https://www.mathworks.com/help/signal/ref/mscohere.html
-        [Cxy,F1,Pxy,F2] = cohac(x,y,sr_target,'hamming',windowsize,nooverlap,cohthreshold,0);
-        Pxy = angle(Pxy);
+        [Cxy,F1, MSC_critical,significant_freqs,significant_Cxy, phase_diff_deg,F2,phase_uncertainty_deg] ...
+            = cohac(x,y,sr_target,'hamming',windowsize,nooverlap,cohthreshold,0);
+
         if save1 == 1
             %assignin('base','Cxy',Cxy)
             %assignin('base','F1',F1)
@@ -114,8 +115,10 @@ for i = 1:nrow
             CDac_pwd; % cd working dir
             add_list = [dat_name,'-COH-',targetname];
             dlmwrite(add_list, [F1,Cxy], 'delimiter', ' ', 'precision', 9);
+            add_list = [dat_name,'-COH-sig-',targetname];
+            dlmwrite(add_list, [significant_freqs,significant_Cxy], 'delimiter', ' ', 'precision', 9);
             add_list2 = [dat_name,'-Phase-',targetname];
-            dlmwrite(add_list2, [F2,Pxy/pi * 180], 'delimiter', ' ', 'precision', 9);
+            dlmwrite(add_list2, [F2,phase_diff_deg,phase_uncertainty_deg], 'delimiter', ' ', 'precision', 9);
             d = dir; %get files
             set(handles.listbox1,'String',{d.name},'Value',1) %set string
             %
@@ -138,8 +141,9 @@ for i = 1:nrow
             end
             set(gcf,'color','w');
             set(gcf,'Name','Acycle: coherence and phase | coherence');
-            
-            subplot(2,1,1)
+
+            %% first plot
+            subplot(3,1,1)
             if forp == 1
                 plot(F1,Cxy,'k-o','LineWidth',2)
                 xlabel('Frequency')
@@ -150,20 +154,40 @@ for i = 1:nrow
             xlim([plotx1, plotx2])
             ylim([0 1])
             hold on
-            plot(xlim, [1 1]*cohthreshold, '-.b')
-            title('Magnitude-Squared Coherence')
+            plot(xlim, [1 1]*MSC_critical, '-.b')
+            title(['Magnitude-Squared Coherence. Critical Coherence = ',num2str(MSC_critical),' @ p-value = ',num2str(cohthreshold)])
             ylabel('Coherence')
             set(gca,'XMinorTick','on','YMinorTick','on')
             hold off
 
-            subplot(2,1,2)
+            %% second plot
+            % for plot only
+            Cxyp = Cxy(Cxy>MSC_critical);
+            F2 = F2(Cxy>MSC_critical);
+            phase_diff_deg = phase_diff_deg(Cxy>MSC_critical);
+            phase_uncertainty_deg = phase_uncertainty_deg(Cxy>MSC_critical);
+
+            subplot(3,1,2)
             if forp == 1
-                plot(F2,Pxy/pi * 180,'r-o','LineWidth',2)
+                h1 = errorbar(F2, phase_diff_deg, phase_uncertainty_deg);
+                %plot(F2,phase_diff_deg,'r-o','LineWidth',2)
                 xlabel('Frequency')
             else
-                plot(1./F2(2:end),Pxy(2:end)/pi * 180,'r','LineWidth',2)
+                %plot(1./F2(2:end),phase_diff_deg(2:end),'r','LineWidth',2)
+                try  
+                    h1 = errorbar(1./F2, 1./phase_diff_deg, 1./phase_uncertainty_deg);  % if F2(1) ~= 0
+                catch
+                    h1 = errorbar(1./F2(2:end), 1./phase_diff_deg(2:end), 1./phase_uncertainty_deg(2:end));
+                end
                 xlabel('Period')
             end
+            h1.LineWidth = 1.5;      % Set the line width
+            h1.Color = 'k'; 
+            h1.CapSize = 6; % Adjust cap size
+            h1.LineStyle = 'none';   % Set the line style
+            h1.Marker = 'o';                % Circle marker
+            h1.MarkerSize = 8;              % Size of the marker
+
             xlim([plotx1, plotx2])
             ylim([-180 180])
             hold on
@@ -172,7 +196,7 @@ for i = 1:nrow
             plot(xlim, [1 1]*0, '-k')
             plot(xlim, [1 1]*-45, ':k')
             plot(xlim, [1 1]*-90, '--k')
-            title('Cross Spectrum Phase')
+            title('Cross Spectrum Phase and 1 standard deviation (in degree)')
             if timedir == 1
                 ylabel(['Series lead (',char(176),')'])
             else
@@ -180,11 +204,40 @@ for i = 1:nrow
             end
             set(gca,'XMinorTick','on','YMinorTick','on')
             hold off
+            
+            % third plot
+            subplot(3,1,3)
+            if F2(1) ~= 0
+                F3 = F2;
+            else
+                F3 = F2(2:end);
+            end
+            h1 = errorbar(F3, phase_diff_deg./F3/360, phase_uncertainty_deg./F3/360);
+            hold on
+            plot(xlim, [1 1]*0, '-k')
+            xlabel('Frequency')
+            if timedir == 1
+                ylabel('Series lead (unit)')
+            else
+                ylabel('Series lag (unit)')
+            end
+            title('Cross Spectrum Phase and 1 standard deviation (in unit)')
+            set(gca,'XMinorTick','on','YMinorTick','on')
+            h1.LineWidth = 1.5;      % Set the line width
+            h1.Color = 'k'; 
+            h1.CapSize = 6; % Adjust cap size
+            h1.LineStyle = 'none';   % Set the line style
+            h1.Marker = 'o';                % Circle marker
+            h1.MarkerSize = 8;              % Size of the marker
+            xlim([plotx1, plotx2])
+            hold off
         else
             try close handles.subfigure
             catch
             end
         end
+%% polarscatter
+
         if qplot2 == 1
             try figure(handles.polarfigure)
                 %clf;
@@ -196,9 +249,9 @@ for i = 1:nrow
             set(gcf,'color','w');
             set(gcf,'Name','Acycle: coherence and phase | phase');
             if forp == 1
-                polarscatter(Pxy,F2,'filled','MarkerFaceAlpha',.5)
+                polarscatter(deg2rad(phase_diff_deg),F2,Cxyp.^2*500,'filled','MarkerFaceAlpha',.5)
             else
-                polarscatter(Pxy(2:end),1./F2(2:end),'filled','MarkerFaceAlpha',.5)
+                polarscatter(deg2rad(phase_diff_deg(2:end)),1./F2(2:end),2.^(Cxyp.^2*100),'filled','MarkerFaceAlpha',.5)
             end
             hold on
             rlim([plotx1, plotx2])

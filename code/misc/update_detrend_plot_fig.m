@@ -24,6 +24,8 @@ lang_var = handles.lang_var;
 [~, Fitting20] = ismember('Fitting20',lang_id);
 [~, Fitting21] = ismember('Fitting21',lang_id);
 [~, Fitting22] = ismember('Fitting22',lang_id);
+[~, Fitting24] = ismember('Fitting24',lang_id);
+[~, Fitting25] = ismember('Fitting25',lang_id);
 % mean
 if get(handles.prewhiten_mean_checkbox, 'Value') == 1
     handles.prewhiten_mean = get(handles.prewhiten_mean_checkbox, 'String');
@@ -41,6 +43,12 @@ if get(handles.checkbox11, 'Value') == 1
     handles.prewhiten_polynomial2 = get(handles.checkbox11, 'String');
 else
     handles.prewhiten_polynomial2 = '';
+end
+% EMD residual
+if get(handles.checkboxEMDres, 'Value') == 1
+    handles.prewhiten_emdres = get(handles.checkboxEMDres, 'String');
+else
+    handles.prewhiten_emdres = '';
 end
 polynomialmore = get(handles.checkbox13,'Value');
 % LOWESS
@@ -137,6 +145,29 @@ if polynomialmore == 1
     prewhiten(prewhiten_list,1) = {lang_var{Fitting18}};
 end
 
+% EMD residual
+
+if strcmp(handles.prewhiten_emdres,lang_var{Fitting24})
+    [imfs,~,~] = emd(datay);
+    [~, ncol] = size(imfs);
+    %h1 = warndlg('EEMD: slow process. See Command Window');
+    % using EEMD, with 
+    % goal =  number of classic IMFs + 1
+    % nens = 50
+    % nos = 20%
+    imfs = eemd(datay',ncol+1,50,0.2);
+    imfs = imfs';
+    dataEMDres = imfs(:,end);
+    figure(fig)
+    plot(datax,dataEMDres,'-r','Linewidth',4)
+    prewhiten_list = prewhiten_list + 1;
+    prewhiten(prewhiten_list,1) = {lang_var{Fitting25}};
+%     try
+%         close(h1)
+%     catch
+%     end
+end
+
 if strcmp(handles.prewhiten_lowess,'LOWESS')
     datalowess=smooth(datax,datay, smooth_win,'lowess');
     plot(datax,datalowess,'-g','Linewidth',2)
@@ -227,6 +258,10 @@ if exist('data2nd')
 else
     data2nd = zeros(npts,1);
 end
+if exist('dataEMDres')
+else
+    dataEMDres = zeros(npts,1);
+end
 if exist('datamore')
 else
     datamore = zeros(npts,1);
@@ -253,6 +288,11 @@ else
 end
 
 handles.prewhiten_data1 = [datax,datay,(datay-datalinear),datalinear,(datay-datamean),datamean];
-handles.prewhiten_data2 = [(datay-datalowess),datalowess,(datay-datarlowess),datarlowess,...
-    (datay-dataloess),dataloess,(datay-datarloess),datarloess,...
-    (datay-data2nd),data2nd,(datay-datamore),datamore];
+handles.prewhiten_data2 = [...
+    (datay-datalowess),datalowess,...
+    (datay-datarlowess),datarlowess,...
+    (datay-dataloess),dataloess,...
+    (datay-datarloess),datarloess,...
+    (datay-data2nd),data2nd,...
+    (datay-datamore),datamore,...
+    (datay-dataEMDres),dataEMDres];

@@ -2,7 +2,7 @@
     <img src="https://github.com/mingsongli/acycleFig/blob/master/default_icon_1024-git.gif" alt="homepage" title="Acycle GitHub homepage">
 </a>
 
-[![](https://img.shields.io/badge/version-v2.7.1-blue.svg)]()
+[![](https://img.shields.io/badge/version-v3.0-blue.svg)]()
 [![](https://img.shields.io/badge/license-GPL-brightgreen.svg)](https://www.gnu.org/licenses/)
 [![](https://img.shields.io/badge/platform-Mac_Win-green.svg)]()
 ![](https://img.shields.io/badge/language-MatLab-red.svg)
@@ -60,7 +60,7 @@
     <img src="https://github.com/mingsongli/acycleFig/blob/master/WechatIMG17.jpeg" alt="http://faculty.pku.edu.cn/li/en" title="Mingsong Li homepage" width="100" height="100">
 </a>
 <br>
-Mingsong Li, Peking University. Oct. 16, 2023 <br>
+Mingsong Li, Peking University. Jan. 31, 2026 <br>
 E-mail: <i> msli {at} pku.edu.cn;  limingsonglms {at} gmail.com </i> <br><br>
 
 Website: https://acycle.org/
@@ -85,8 +85,7 @@ Website: https://acycle.org/
 </a>
 
 <br><br>
-<b> ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) &nbsp;
-`Please give it a " ⭐️ Star" if you like this software 😁 🌹. (top right corner of this page)`
+<b> `Please give it a " ⭐️ Star" if you like this software 😁 🌹. (top right corner of this page)`
 
 <br>
 
@@ -359,5 +358,5 @@ also my students were very enthusiastic about _**Acycle**_ and I now use it now 
 ```
 
 <br><br>
-<b> ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) &nbsp;
+<b> 
 `Please give it a " ⭐️ Star" if you like this software 😁 🌹. (top right corner of this page)`

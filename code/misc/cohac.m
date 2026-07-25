@@ -1,4 +1,5 @@
-function [Cxy,F1,Pxy,F2] = cohac(x,y,sr,window,winsize,nooverlap,threshold,qplot)
+function [Cxy,F1, MSC_critical,significant_freqs,significant_Cxy, phase_diff_deg,F2,phase_uncertainty_deg] ...
+    = cohac(x,y,sr,window,winsize,nooverlap,alpha,qplot)
 % calculate coherence and phase for x and y
 % INPUT
 % x: first data vector
@@ -27,10 +28,11 @@ function [Cxy,F1,Pxy,F2] = cohac(x,y,sr,window,winsize,nooverlap,threshold,qplot
 %
 % Mingsong Li
 % Penn State; March 14, 2019
+% Peking University, Nov. 2, 2023
 % 
 %
 if nargin < 8; qplot = 2; end
-if nargin < 7; threshold = 0; end
+if nargin < 7; alpha = 0.1; end  % 90% confidence level
 if nargin < 6; nooverlap = []; end
 if nargin < 5; winsize = []; end
 if nargin < 4; window = 'hamming'; end
@@ -38,12 +40,35 @@ if nargin < 3; sr = 1; end
 if nargin < 2; return; end
 
 if window == 'hamming'
+    %%
     [Cxy,F1] = mscohere(x,y,hamming(winsize),nooverlap,[],1/sr);
+    % Calculate degrees of freedom
+    windown = hamming(winsize);
+    % Estimate of the number of independent averages
+    N = floor((length(x) - nooverlap) / (length(windown) - nooverlap));
+    v = 2 * N;  % Degrees of freedom
+    % Calculate confidence level
+    % Calculate the test statistic
+    T = (Cxy ./ (1 - Cxy)) * (v - 2);
+    % Critical value from the F-distribution
+    F_critical = finv(1 - alpha, 1, v - 2);
+    MSC_critical = F_critical / (F_critical + (v - 2));
+    % Find frequencies where the coherence is significantly different from zero
+    significant_freqs = F1(T > F_critical);
+    significant_Cxy = Cxy(T > F_critical);
+    
+    %% phase
     [Pxy,F2] = cpsd(x,y,hamming(winsize),nooverlap,[],1/sr);
-end
-
-if threshold > 0
-   Pxy(Cxy < threshold) = nan;
+    % Calculate the phase difference
+    Pangle = angle(Pxy);
+    % Estimate of the number of independent averages
+    N = floor((length(x) - nooverlap) / (length(windown) - nooverlap));
+    % Calculate the phase uncertainty
+    % Note: The uncertainty formula is an approximation and assumes high SNR and Gaussianity.
+    phase_uncertainty = sqrt((1 - abs(Pxy).^2) ./ (2 * N * abs(Pxy).^2));
+    % Convert phase difference and uncertainty to degrees
+    phase_diff_deg = rad2deg(Pangle);
+    phase_uncertainty_deg = rad2deg(phase_uncertainty);
 end
 
 if qplot > 0
@@ -54,13 +79,15 @@ if qplot > 0
     plot(F1,Cxy,'k','LineWidth',2)
     ylim([0 1])
     xlim([min(F1), max(F1)])
-    yline(threshold,'-.b');
+    yline(MSC_critical,'-.b');
     title('Magnitude-Squared Coherence')
     xlabel('Frequency')
     ylabel('Coherence')
-
+    grid on;
+    
     subplot(2,1,2)
-    plot(F2,angle(Pxy)/pi * 180,'r','LineWidth',2)
+    %plot(F2,phase,'r','LineWidth',2)
+    errorbar(F2, phase_diff_deg, phase_uncertainty_deg);
     ylim([-180 180])
     xlim([min(F2), max(F2)])
     yline(90,'--k');
@@ -68,17 +95,17 @@ if qplot > 0
     yline(0,'-k');
     yline(-45,':k');
     yline(-90,'--k');
-    title('Cross Spectrum Phase')
+    title('Cross Spectrum Phase Difference and Uncertainty between Signals')
     xlabel('Frequency')
-    ylabel(['Lag (',char(176),')'])
+    ylabel(['Phase Difference (',char(176),')'])
 end
+
 if qplot > 1
+
     figure; 
     set(gcf,'color','w');
     set(gcf,'Name','Acycle: coherence and phase');
-    polarscatter(angle(Pxy),F2,Cxy.^2*500,'filled','MarkerFaceAlpha',.5)
+    polarscatter(Pangle,F2,Cxy.^2*500,'filled','MarkerFaceAlpha',.5)
     rlim([min(F2) max(F2)])
     title(['Phase lag (0-180',char(176),') and lead (180-360',char(176),')'])
-    %polarscatter(angle(Pxy(2:end)),1./F(2:end),Cxy(2:end).^2*500,'filled','MarkerFaceAlpha',.5)
-    %grid
 end

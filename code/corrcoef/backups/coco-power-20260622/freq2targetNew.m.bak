@@ -1,0 +1,53 @@
+function la = freq2targetNew(dat,~,theoredML96_pow,orbit9,lax,sr_i)
+%
+% Generate target power spectrum using given orbital periods and the power 
+% ratio of ML96 background noise model.
+%
+% INPUT
+% dat: depth series, unit = m; 2 columns
+% theoredML96_pow: theoretical background AR1 noise from ML96 model,
+%                  column 1 = spatial frequency (cycles/m),
+%                  column 2 = power
+% orbit9: 9 orbital periods, in kyr
+% sr1, sr2, srstep: test sedimentation rates
+%
+% OUTPUT
+%   la: target power interpolated on lax, where lax is in cycles/kyr
+%
+% calls for 
+%   cocoGetPower
+
+depth = dat(:,1);
+nData = numel(depth);
+dz_all = abs(diff(depth));
+dz_all = dz_all(isfinite(dz_all) & dz_all > 0);
+if isempty(dz_all)
+    error('Depth values must contain at least two distinct samples.');
+end
+
+targetp = cocoGetPower(theoredML96_pow, orbit9, sr_i); % get variance for each orbital periods (in kyr)
+
+dz = median(dz_all);
+fsDepth = 1 / dz;
+window = rectwin(nData);
+RBW = enbw(window, fsDepth);       % cycles/m
+RBW_time = RBW * sr_i / 100;       % cycles/kyr
+
+lax = lax(:);
+la = zeros(size(lax));
+orbitFreq = 1 ./ orbit9(:);
+targetp = targetp(:);
+
+for ii = 1:numel(orbitFreq)
+    if ~isfinite(orbitFreq(ii)) || ~isfinite(targetp(ii)) || targetp(ii) <= 0
+        continue
+    end
+
+    if RBW_time > 0
+        peakShape = max(0, 1 - abs(lax - orbitFreq(ii)) ./ RBW_time);
+        la = la + targetp(ii) .* peakShape;
+    else
+        [~, idx] = min(abs(lax - orbitFreq(ii)));
+        la(idx) = la(idx) + targetp(ii);
+    end
+end

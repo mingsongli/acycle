@@ -1,310 +1,276 @@
 function varargout = InterplationSeries(varargin)
-% INTERPLATIONSERIES MATLAB code for InterplationSeries.fig
-%      INTERPLATIONSERIES, by itself, creates a new INTERPLATIONSERIES or raises the existing
-%      singleton*.
-%
-%      H = INTERPLATIONSERIES returns the handle to a new INTERPLATIONSERIES or the handle to
-%      the existing singleton*.
-%
-%      INTERPLATIONSERIES('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in INTERPLATIONSERIES.M with the given input arguments.
-%
-%      INTERPLATIONSERIES('Property','Value',...) creates a new INTERPLATIONSERIES or raises the
-%      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before InterplationSeries_OpeningFcn gets called.  An
-%      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to InterplationSeries_OpeningFcn via varargin.
-%
-%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
-%      instance to run (singleton)".
-%
-% See also: GUIDE, GUIDATA, GUIHANDLES
+% App Designer-style migration of InterplationSeries (single-file).
 
-% Edit the above text to modify the response to help InterplationSeries
-
-% Last Modified by GUIDE v2.5 23-Feb-2020 10:20:07
-
-% Begin initialization code - DO NOT EDIT
-gui_Singleton = 1;
-gui_State = struct('gui_Name',       mfilename, ...
-                   'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @InterplationSeries_OpeningFcn, ...
-                   'gui_OutputFcn',  @InterplationSeries_OutputFcn, ...
-                   'gui_LayoutFcn',  [] , ...
-                   'gui_Callback',   []);
-if nargin && ischar(varargin{1})
-    gui_State.gui_Callback = str2func(varargin{1});
+ctx = struct();
+if nargin > 0 && isstruct(varargin{1})
+    ctx = varargin{1};
 end
 
-if nargout
-    [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
+app = buildUI(ctx);
+if nargout > 0
+    varargout{1} = app.UIFigure;
+end
+
+    function app = buildUI(ctx)
+        bg = [0.94 0.94 0.94];
+
+        app = struct();
+        app.ctx = ctx;
+        app.listbox_acmain = getFieldDefault(ctx,'listbox_acmain',[]);
+        app.unit = getFieldDefault(ctx,'unit','');
+        app.lang_choice = getFieldDefault(ctx,'lang_choice',0);
+        app.lang_id = getFieldDefault(ctx,'lang_id',{});
+        app.lang_var = getFieldDefault(ctx,'lang_var',{});
+
+        figName = 'Acycle: Interpolation Series';
+        if app.lang_choice > 0
+            figName = ['Acycle: ',langText(app,'menu72','Interpolation Series')];
+        end
+
+        app.UIFigure = uifigure('Name',figName,'Color',bg, ...
+            'Position',[120 90 2048 740],'AutoResizeChildren','off');
+        app.UIFigure.SizeChangedFcn = @(~,~)doLayout();
+
+        panelTitle = langText(app,'intser01','Select Reference and Target');
+        app.PanelMain = uipanel(app.UIFigure,'Title',panelTitle,'BackgroundColor',bg);
+        app.PanelMain.FontWeight = 'bold';
+
+        app.LRef = uilabel(app.PanelMain,'Text',langText(app,'intser02','Reference'),'BackgroundColor',bg);
+        app.LSeries = uilabel(app.PanelMain,'Text',langText(app,'intser03','Series'),'BackgroundColor',bg);
+
+        openText = langText(app,'intser04','Open');
+        app.BtnOpenRef = uibutton(app.PanelMain,'push','Text',openText, ...
+            'ButtonPushedFcn',@(~,~)pickReference());
+        app.BtnOpenSeries = uibutton(app.PanelMain,'push','Text',openText, ...
+            'ButtonPushedFcn',@(~,~)pickSeries());
+
+        app.ERef = uieditfield(app.PanelMain,'text','Value','','Editable','off');
+        app.ETwitter = uieditfield(app.PanelMain,'text','Value','','Editable','off');
+
+        app.BtnInterp = uibutton(app.UIFigure,'push', ...
+            'Text',langText(app,'intser05','Interpolation'), ...
+            'ButtonPushedFcn',@(~,~)runInterpolation());
+
+        seedInitialPath();
+        doLayout();
+
+        function seedInitialPath()
+            here = pwd;
+            try
+                if exist('GETac_pwd','file') == 2
+                    GETac_pwd;
+                    if exist('ac_pwd','var')
+                        here = ac_pwd;
+                    end
+                end
+            catch
+            end
+            app.ERef.Value = here;
+            app.ETwitter.Value = here;
+        end
+
+        function doLayout()
+            p = app.UIFigure.Position;
+            w = p(3);
+            h = p(4);
+
+            app.PanelMain.Position = [round(0.025*w) round(0.27*h) round(0.95*w) round(0.60*h)];
+
+            pw = app.PanelMain.Position(3);
+            ph = app.PanelMain.Position(4);
+
+            app.LRef.Position = [round(0.015*pw) round(0.82*ph) round(0.20*pw) round(0.10*ph)];
+            app.BtnOpenRef.Position = [round(0.015*pw) round(0.52*ph) round(0.10*pw) round(0.18*ph)];
+            app.ERef.Position = [round(0.125*pw) round(0.51*ph) round(0.855*pw) round(0.19*ph)];
+
+            app.LSeries.Position = [round(0.015*pw) round(0.33*ph) round(0.20*pw) round(0.10*ph)];
+            app.BtnOpenSeries.Position = [round(0.015*pw) round(0.04*ph) round(0.10*pw) round(0.18*ph)];
+            app.ETwitter.Position = [round(0.125*pw) round(0.03*ph) round(0.855*pw) round(0.19*ph)];
+
+            app.BtnInterp.Position = [round(0.50*w) round(0.10*h) round(0.25*w) round(0.12*h)];
+        end
+
+        function pickReference()
+            pre_dirML = pwd;
+            moveToAcPwd();
+
+            filterTxt = langText(app,'intser08','All Files');
+            dlgTitle = langText(app,'intser09','Select Reference');
+            [file,path] = uigetfile({'*.*',filterTxt},dlgTitle);
+            if isequal(file,0)
+                disp(langText(app,'intser11','User canceled file selection.'));
+            else
+                app.ERef.Value = fullfile(path,file);
+            end
+
+            safeCd(pre_dirML);
+        end
+
+        function pickSeries()
+            pre_dirML = pwd;
+            moveToAcPwd();
+
+            filterTxt = langText(app,'intser08','All Files');
+            dlgTitle = langText(app,'intser10','Select Series');
+            [file,path] = uigetfile({'*.*',filterTxt},dlgTitle);
+            if isequal(file,0)
+                disp(langText(app,'intser11','User canceled file selection.'));
+            else
+                app.ETwitter.Value = fullfile(path,file);
+            end
+
+            safeCd(pre_dirML);
+        end
+
+        function runInterpolation()
+            pre_dirML = pwd;
+            try
+                refFile = strtrim(app.ERef.Value);
+                tgtFile = strtrim(app.ETwitter.Value);
+                if isempty(refFile) || isempty(tgtFile)
+                    error('Reference/Series path is empty.');
+                end
+
+                dat1 = localLoad2Col(refFile); % reference
+                dat2 = localLoad2Col(tgtFile); % target
+
+                if size(dat1,2) < 2 || size(dat2,2) < 2
+                    error('Input files must have at least 2 columns.');
+                end
+
+                dat1 = sortrows(dat1,1);
+                dat2 = sortrows(dat2,1);
+
+                xmin = min([dat1(:,1); dat2(:,1)]);
+                xmax = max([dat1(:,1); dat2(:,1)]);
+
+                dat2int2 = interp1(dat2(:,1),dat2(:,2),dat1(:,1),'linear');
+                dat2int = [dat1(:,1),dat2int2];
+
+                plotInterpolation(dat1,dat2,dat2int,xmin,xmax);
+                outName = saveInterpolation(refFile,tgtFile,dat2int);
+                refreshMainListbox();
+
+                safeCd(pre_dirML);
+                disp('Interpolated data:');
+                disp(outName);
+            catch ME
+                safeCd(pre_dirML);
+                uialert(app.UIFigure,ME.message,'Interpolation Error');
+            end
+        end
+
+        function plotInterpolation(dat1,dat2,dat2int,xmin,xmax)
+            figName = [langText(app,'menu72','Interpolation Series'),' ',langText(app,'menu40','Result')];
+            fig = figure('Color','white','Name',['Acycle: ',figName]);
+
+            subplot(3,1,1,'Parent',fig);
+            plot(dat1(:,1),dat1(:,2),'b--o');
+            xlim([xmin,xmax]);
+            title(langText(app,'intser02','Reference'));
+
+            subplot(3,1,2,'Parent',fig);
+            plot(dat2(:,1),dat2(:,2),'r-s');
+            xlim([xmin,xmax]);
+            title(langText(app,'intser06','Series'));
+
+            subplot(3,1,3,'Parent',fig);
+            plot(dat2int(:,1),dat2int(:,2),'r-o');
+            xlim([xmin,xmax]);
+            if ~isempty(app.unit)
+                xlabel(app.unit);
+            end
+            title([langText(app,'intser06','Series'),' ',langText(app,'intser07','Interpolated')]);
+        end
+
+        function outName = saveInterpolation(refFile,tgtFile,dat2int)
+            moveToAcPwd();
+            [~,name1,~] = fileparts(refFile);
+            [~,name2,ext2] = fileparts(tgtFile);
+            outName = [name2,'-IntP-',name1,ext2];
+            dlmwrite(outName, dat2int, 'delimiter', ' ', 'precision', 9);
+        end
+
+        function refreshMainListbox()
+            if ac_refresh_main_list(app.listbox_acmain)
+                return
+            end
+            if isempty(app.listbox_acmain) || ~ishandle(app.listbox_acmain)
+                return
+            end
+            d = dir;
+            try
+                set(app.listbox_acmain,'String',{d.name},'Value',1);
+            catch
+            end
+            if exist('refreshcolor','file') == 2
+                refreshcolor;
+            end
+        end
+
+        function moveToAcPwd()
+            if exist('CDac_pwd','file') == 2
+                CDac_pwd;
+            end
+        end
+
+        function safeCd(target)
+            if nargin < 1 || isempty(target)
+                return
+            end
+            try
+                cd(target);
+            catch
+            end
+        end
+    end
+end
+
+function txt = langText(app,key,fallback)
+txt = fallback;
+if ~isstruct(app) || ~isfield(app,'lang_choice') || app.lang_choice == 0
+    return
+end
+if ~isfield(app,'lang_id') || ~isfield(app,'lang_var')
+    return
+end
+if isempty(app.lang_id) || isempty(app.lang_var)
+    return
+end
+[tf,idx] = ismember(key, app.lang_id);
+if tf && idx > 0 && idx <= numel(app.lang_var)
+    val = app.lang_var{idx};
+    if ischar(val) || isstring(val)
+        txt = char(val);
+    end
+end
+end
+
+function v = getFieldDefault(s,name,default)
+if isstruct(s) && isfield(s,name) && ~isempty(s.(name))
+    v = s.(name);
 else
-    gui_mainfcn(gui_State, varargin{:});
+    v = default;
 end
-% End initialization code - DO NOT EDIT
+end
 
-
-% --- Executes just before InterplationSeries is made visible.
-function InterplationSeries_OpeningFcn(hObject, eventdata, handles, varargin)
-% This function has no output args, see OutputFcn.
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to InterplationSeries (see VARARGIN)
-
-% Choose default command line output for InterplationSeries
-handles.output = hObject;
-handles.listbox_acmain = varargin{1}.listbox_acmain; % save path
-handles.unit = varargin{1}.unit;
-handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
-handles.MonZoom = varargin{1}.MonZoom;
-handles.sortdata = varargin{1}.sortdata;
-handles.val1 = varargin{1}.val1;
-
-%
-handles.hmain = gcf;
-
-% GUI settings
-set(0,'Units','normalized') % set units as normalized
-h=get(gcf,'Children');  % get all content
-h1=findobj(h,'FontUnits','norm');  % find all font units as points
-set(h1,'FontUnits','points','FontSize',11.5);  % set as norm
-h2=findobj(h,'FontUnits','points');  % find all font units as points
-set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
-
-% language
-lang_choice = varargin{1}.lang_choice;
-handles.lang_choice = lang_choice;
-lang_id = varargin{1}.lang_id;
-lang_var = varargin{1}.lang_var;
-handles.lang_id = lang_id;
-handles.lang_var = lang_var;
-handles.main_unit_selection = varargin{1}.main_unit_selection;
-
-[~, menu72] = ismember('menu72',lang_id);
-set(gcf,'Name',['Acycle: ',lang_var{menu72}])
-
-[~, intser01] = ismember('intser01',lang_id);
-[~, intser02] = ismember('intser02',lang_id);
-[~, intser03] = ismember('intser03',lang_id);
-[~, intser04] = ismember('intser04',lang_id);
-[~, intser06] = ismember('intser05',lang_id);
-[~, menu03] = ismember('menu03',lang_id);
-
-set(handles.uipanel1,'Title',lang_var{intser01})
-set(handles.text2,'String',lang_var{intser02})
-set(handles.text3,'String',lang_var{intser03})
-set(handles.pushbutton3,'String',lang_var{intser04})
-set(handles.pushbutton4,'String',lang_var{intser04})
-set(handles.pushbutton1,'String',lang_var{menu03})
-set(handles.pushbutton2,'String',lang_var{intser06})
-
-set(handles.hmain,'position',[0.38,0.2,0.6,0.25]* handles.MonZoom) % set position
-set(handles.uipanel1,'position',[0.025,0.286,0.947,0.649]) % Data
-set(handles.text2,'position',[0.015,0.849,0.24,0.15])
-set(handles.text3,'position',[0.015,0.28,0.24,0.15])
-set(handles.edit1,'position',[0.125,0.547,0.88,0.208])
-set(handles.edit2,'position',[0.125,0.03,0.88,0.208])
-
-set(handles.pushbutton3,'position',[0.015,0.557,0.1,0.208]) % plot
-set(handles.pushbutton4,'position',[0.015,0.03,0.1,0.208]) % plot
-
-set(handles.pushbutton1,'position',[0.1,0.1,0.16,0.168],'Visible','Off') % plot
-set(handles.pushbutton2,'position',[0.5,0.1,0.25,0.168]) % plot
-
-
-% Read list
-GETac_pwd;
-set(handles.edit1,'string',ac_pwd)
-set(handles.edit2,'string',ac_pwd)
-% Default settings
-handles.nplot = 2;  % number of data series
-% Update handles structure
-guidata(hObject, handles);
-
-% UIWAIT makes InterplationSeries wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
-
-
-% --- Outputs from this function are returned to the command line.
-function varargout = InterplationSeries_OutputFcn(hObject, eventdata, handles) 
-% varargout  cell array for returning output args (see VARARGOUT);
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Get default command line output from handles structure
-varargout{1} = handles.output;
-
-
-% --- Executes on button press in pushbutton1.
-function pushbutton1_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+function data = localLoad2Col(filename)
 try
-    handles.plot_s{1} = get(handles.edit1,'string');
-    handles.plot_s{2} = get(handles.edit2,'string');
-    guidata(hObject, handles);
-    PlotPro2DLineGUI(handles);
+    data = load(filename);
 catch
-    errordlg('Selected Series Format NOT Supported or NOT Existed')
+    fid = fopen(filename,'r');
+    if fid < 0
+        error('Cannot open file: %s', filename);
+    end
+    c = onCleanup(@()fclose(fid));
+    data_ft = textscan(fid,'%f%f','EmptyValue',Inf);
+    data = cell2mat(data_ft);
 end
-
-% --- Executes on button press in pushbutton2.
-function pushbutton2_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-pre_dirML = pwd;
-handles.plot_s{1} = get(handles.edit1,'string');
-handles.plot_s{2} = get(handles.edit2,'string');
-lang_id = handles.lang_id;
-lang_var = handles.lang_var;
-[~, menu72] = ismember('menu72',lang_id);
-[~, menu40] = ismember('menu40',lang_id);
-[~, intser02] = ismember('intser02',lang_id);
-[~, intser06] = ismember('intser06',lang_id);
-[~, intser07] = ismember('intser07',lang_id);
-% dat1: reference
-% dat2: target
-try
-    dat1 = load(handles.plot_s{1});
-    dat2 = load(handles.plot_s{2});
-catch
-    fid = fopen(handles.plot_s{1});
-    data_ft = textscan(fid,'%f%f','EmptyValue', Inf);
-    dat1 = cell2mat(data_ft);
-    fclose(fid);
-    fid = fopen(handles.plot_s{2});
-    data_ft = textscan(fid,'%f%f','EmptyValue', Inf);
-    dat2 = cell2mat(data_ft);
-    fclose(fid);
+if isempty(data)
+    error('File is empty or unreadable: %s', filename);
 end
-
-xmin = min( min(dat1(:,1), min(dat2(:,1))));
-xmax = max( max(dat1(:,1), max(dat2(:,1))));
-
-dat2int2 = interp1(dat2(:,1),dat2(:,2),dat1(:,1));
-dat2int  = [dat1(:,1),dat2int2];
-
-
-
-figure;
-set(gcf,'Name', ['Acycle: ',lang_var{menu72},' ',lang_var{menu40}])
-subplot(3,1,1)
-
-plot(dat1(:,1),dat1(:,2),'b--o')
-xlim( [xmin, xmax] )
-title(lang_var{intser02})
-subplot(3,1,2)
-plot(dat2(:,1),dat2(:,2),'r-s')
-xlim( [xmin, xmax] )
-title(lang_var{intser06})
-subplot(3,1,3)
-plot(dat2int(:,1),dat2int(:,2),'r-o')
-xlim( [xmin, xmax] )
-xlabel([handles.unit])
-title([lang_var{intser06},' ',lang_var{intser07}])
-
-CDac_pwd; % cd ac_pwd dir
-[~,name1,~] = fileparts(handles.plot_s{1});
-[~,name2,ext2] = fileparts(handles.plot_s{2});
-name1 = [name2,'-IntP-',name1,ext2];
-dlmwrite(name1, dat2int, 'delimiter', ' ', 'precision', 9);
-d = dir; %get files
-set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-refreshcolor;
-cd(pre_dirML); % return to matlab view folder
-
-% --- Executes on button press in pushbutton3.
-function pushbutton3_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-pre_dirML = pwd;
-CDac_pwd; % cd ac_pwd dir
-lang_id = handles.lang_id;
-lang_var = handles.lang_var;
-[~, intser08] = ismember('intser08',lang_id);
-[~, intser09] = ismember('intser09',lang_id);
-[~, intser11] = ismember('intser11',lang_id);
-[file,path] = uigetfile({'*.*',  lang_var{intser08}},...
-                        lang_var{intser09});
-if isequal(file,0)
-    disp(lang_var{intser11})
-else
-    set(handles.edit1,'string',fullfile(path,file))
+if size(data,2) < 2
+    error('File needs at least 2 columns: %s', filename);
 end
-cd(pre_dirML); 
-% Update handles structure
-guidata(hObject, handles);
-
-% --- Executes on button press in pushbutton4.
-function pushbutton4_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-pre_dirML = pwd;
-CDac_pwd; % cd ac_pwd dir
-
-lang_id = handles.lang_id;
-lang_var = handles.lang_var;
-[~, intser08] = ismember('intser08',lang_id);
-[~, intser10] = ismember('intser10',lang_id);
-[~, intser11] = ismember('intser11',lang_id);
-
-[file,path] = uigetfile({'*.*',  lang_var{intser08}},...
-                        lang_var{intser10});
-if isequal(file,0)
-    disp(lang_var{intser11})
-else
-    set(handles.edit2,'string',fullfile(path,file))
-end
-cd(pre_dirML); 
-% Update handles structure
-guidata(hObject, handles);
-
-function edit1_Callback(hObject, eventdata, handles)
-% hObject    handle to edit1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit1 as text
-%        str2double(get(hObject,'String')) returns contents of edit1 as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function edit1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit2_Callback(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit2 as text
-%        str2double(get(hObject,'String')) returns contents of edit2 as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function edit2_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
+data = data(:,1:2);
 end

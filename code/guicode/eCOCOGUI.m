@@ -1,2569 +1,3317 @@
 function varargout = eCOCOGUI(varargin)
-% ECOCOGUI MATLAB code for eCOCOGUI.fig
-%      ECOCOGUI, by itself, creates a new ECOCOGUI or raises the existing
-%      singleton*.
-%
-%      H = ECOCOGUI returns the handle to a new ECOCOGUI or the handle to
-%      the existing singleton*.
-%
-%      ECOCOGUI('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in ECOCOGUI.M with the given input arguments.
-%
-%      ECOCOGUI('Property','Value',...) creates a new ECOCOGUI or raises the
-%      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before eCOCOGUI_OpeningFcn gets called.  An
-%      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to eCOCOGUI_OpeningFcn via varargin.
-%
-%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
-%      instance to run (singleton)".
-%
-% See also: GUIDE, GUIDATA, GUIHANDLES
-
-% Edit the above text to modify the response to help eCOCOGUI
-
-% Last Modified by GUIDE v2.5 07-Jan-2023 19:56:38
-
-% Begin initialization code - DO NOT EDIT
-gui_Singleton = 1;
-gui_State = struct('gui_Name',       mfilename, ...
-                   'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @eCOCOGUI_OpeningFcn, ...
-                   'gui_OutputFcn',  @eCOCOGUI_OutputFcn, ...
-                   'gui_LayoutFcn',  [] , ...
-                   'gui_Callback',   []);
-if nargin && ischar(varargin{1})
-    gui_State.gui_Callback = str2func(varargin{1});
+% eCOCOGUI - App Designer style single-file GUI (no GUIDE .fig)
+ctx = struct();
+if nargin > 0 && isstruct(varargin{1})
+    ctx = varargin{1};
 end
 
-if nargout
-    [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
-else
-    gui_mainfcn(gui_State, varargin{:});
-end
-% End initialization code - DO NOT EDIT
-
-
-% --- Executes just before eCOCOGUI is made visible.
-function eCOCOGUI_OpeningFcn(hObject, eventdata, handles, varargin)
-% This function has no output args, see OutputFcn.
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to eCOCOGUI (see VARARGIN)
-
-% Choose default command line output for eCOCOGUI
-handles.output = hObject;
-
-%
-handles.hmain = gcf;
-handles.MonZoom = varargin{1}.MonZoom;
-handles.sortdata = varargin{1}.sortdata;
-handles.val1 = varargin{1}.val1;
-
-%
-set(0,'Units','normalized') % set units as normalized
-set(gcf,'units','norm') % set location
-h=get(gcf,'Children');  % get all content
-h1=findobj(h,'FontUnits','norm');  % find all font units as points
-set(h1,'FontUnits','points','FontSize',11.5);  % set as norm
-h2=findobj(h,'FontUnits','points');  % find all font units as points
-set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
-
-set(handles.hmain,'position',[0.38,0.2,0.4,0.75] * handles.MonZoom) % set position
-set(handles.uibuttongroup7,'position',[0.04,0.915,0.45,0.08]) % Power spectrum
-set(handles.radiobutton1,'position',[0.083,0.138,0.388,0.793]) % COCO
-set(handles.radiobutton2,'position',[0.508,0.138,0.388,0.793]) % eCOCO
-
-set(handles.uibuttongroup1,'position',[0.04,0.809,0.923,0.106]) % Data
-set(handles.text2,'position',[0.023,0.5,0.083,0.352])
-set(handles.text3,'position',[0.121,0.5,0.863,0.352])
-set(handles.checkbox6,'position',[0.023,0.042,0.2,0.562])
-set(handles.edit12,'position',[0.206,0.083,0.1,0.45])
-
-set(handles.checkbox1,'position',[0.333,0.042,0.24,0.562])
-set(handles.popupmenu1,'position',[0.53,0.001,0.214,0.5])
-set(handles.checkbox5,'position',[0.738,0.042,0.29,0.562])
-
-set(handles.uibuttongroup2,'position',[0.04,0.692,0.923,0.106]) % Power spectrum
-set(handles.checkbox2,'position',[0.023,0.311,0.242,0.511])
-set(handles.text8,'position',[0.222,0.2,0.13,0.6])
-set(handles.edit4,'position',[0.355,0.311,0.084,0.489])
-set(handles.text18,'position',[0.441,0.2,0.12,0.6])
-set(handles.edit13,'position',[0.552,0.356,0.064,0.489])
-set(handles.checkbox4,'position',[0.618,0.55,0.35,0.45])
-set(handles.popupmenu3,'position',[0.618,0.02,0.35,0.5])
-
-set(handles.uipanel1,'position',[0.04,0.531,0.923,0.153]) % test sed. rate
-set(handles.text4,'position',[0.023,0.526,0.132,0.295])
-set(handles.text5,'position',[0.288,0.526,0.14,0.295])
-set(handles.text6,'position',[0.553,0.526,0.1,0.295])
-set(handles.edit1,'position',[0.165,0.6,0.104,0.28])
-set(handles.edit2,'position',[0.436,0.6,0.104,0.28])
-set(handles.edit3,'position',[0.632,0.6,0.085,0.28])
-set(handles.text19,'position',[0.735,0.529,0.076,0.324])
-set(handles.text7,'position',[0.1,0.132,0.865,0.294])
-
-set(handles.uibuttongroup3,'position',[0.04,0.316,0.923,0.205]) % target cycles
-set(handles.radiobutton6,'position',[0.023,0.486,0.335,0.248])
-set(handles.radiobutton7,'position',[0.023,0.294,0.335,0.248])
-set(handles.radiobutton8,'position',[0.023,0.083,0.335,0.248])
-set(handles.edit5,'position',[0.3,0.734,0.112,0.229])
-set(handles.edit11,'position',[0.3,0.083,0.5,0.229])
-set(handles.edit7,'position',[0.74,0.734,0.112,0.229])
-set(handles.text9,'position',[0.421,0.761,0.083,0.138])
-set(handles.text10,'position',[0.537,0.761,0.195,0.138])
-set(handles.text11,'position',[0.855,0.761,0.08,0.138])
-set(handles.text20,'position',[0.3,0.523,0.653,0.12])
-set(handles.text21,'position',[0.3,0.36,0.653,0.12])
-set(handles.text22,'position',[0.023,0.73,0.24,0.12])
-
-set(handles.uibuttongroup4,'position',[0.04,0.233,0.923,0.07]) % correlation method
-set(handles.radiobutton9,'position',[0.023,0.107,0.229,0.893])
-set(handles.radiobutton10,'position',[0.389,0.143,0.229,0.893])
-
-set(handles.uibuttongroup5,'position',[0.04,0.1,0.17,0.121]) % MC
-set(handles.edit8,'position',[0.1,0.42,0.8,0.38])
-set(handles.text13,'position',[0.1,0.15,0.8,0.22])
-
-set(handles.uibuttongroup6,'position',[0.244,0.1,0.327,0.113]) % Sliding window
-set(handles.text14,'position',[0.023,0.7,0.2,0.25])
-set(handles.text15,'position',[0.023,0.2,0.2,0.35])
-set(handles.text16,'position',[0.54,0.7,0.3,0.25])
-set(handles.text17,'position',[0.54,0.24,0.3,0.25])
-set(handles.edit9,'position',[0.237,0.574,0.3,0.4])
-set(handles.edit10,'position',[0.237,0.14,0.3,0.4])
-set(handles.pushbuttonOK,'position',[0.83,0.118,0.09,0.08]) % Sliding window
-
-set(handles.pushbutton2,'position',[0.58,0.153,0.23,0.058]) % ecoco plot
-set(handles.pushbutton2,'Visible','off','Enable','off') % 
-set(handles.pushbutton3,'position',[0.58,0.1,0.23,0.058]) % track sed. rates
-set(handles.pushbutton3,'Visible','off','Enable','off') %
-set(handles.pushbutton4,'position',[0.82,0.083,0.15,0.229]) %
-
-% language
-lang_choice = varargin{1}.lang_choice;
-handles.lang_choice = lang_choice;
-lang_id = varargin{1}.lang_id;
-lang_var = varargin{1}.lang_var;
-handles.main_unit_selection = varargin{1}.main_unit_selection;
-
-assignin('base','main_unit_selection',handles.main_unit_selection)
-
-if lang_choice>0
-    [~, locb] = ismember('ec00',lang_id);
-    set(gcf,'Name',lang_var{locb})  % GUI title
-    [~, locb] = ismember('ec02',lang_id);
-    set(handles.uibuttongroup7,'title',lang_var{locb})
-    [~, locb] = ismember('ec03',lang_id);
-    set(handles.radiobutton1,'string',lang_var{locb})
-    [~, locb] = ismember('ec04',lang_id);
-    set(handles.radiobutton2,'string',lang_var{locb})
-    [~, locb] = ismember('main02',lang_id);
-    set(handles.uibuttongroup1,'title',lang_var{locb})
-    set(handles.text2,'string',lang_var{locb})
-    set(handles.text3,'string',lang_var{locb})
-    [~, locb] = ismember('ec05',lang_id);
-    set(handles.checkbox1,'string',lang_var{locb})
-    [~, locb1] = ismember('ec06',lang_id);
-    [~, locb2] = ismember('dd39',lang_id);
-    [~, locb3] = ismember('dd40',lang_id);
-    [~, locb4] = ismember('dd41',lang_id);
-    set(handles.popupmenu1,'string',{lang_var{locb1},lang_var{locb2},lang_var{locb3},lang_var{locb4}})
-    [~, locb] = ismember('ec07',lang_id);
-    set(handles.checkbox5,'string',lang_var{locb})
-    [~, locb] = ismember('ec08',lang_id);
-    set(handles.checkbox6,'string',lang_var{locb})
-    %
-    [~, locb] = ismember('ec09',lang_id);
-    set(handles.uibuttongroup2,'title',lang_var{locb})
-    [~, locb] = ismember('ec10',lang_id);
-    set(handles.checkbox2,'string',lang_var{locb})
-    [~, locb] = ismember('main06',lang_id);
-    set(handles.text8,'string',lang_var{locb})
-    [~, locb] = ismember('ec11',lang_id);
-    set(handles.checkbox4,'string',lang_var{locb})
-    [~, locb12] = ismember('ec12',lang_id);
-    [~, locb13] = ismember('ec13',lang_id);
-    [~, locb14] = ismember('ec14',lang_id);
-    set(handles.popupmenu3,'string',{lang_var{locb12};lang_var{locb13};lang_var{locb14}})
-    [~, locb] = ismember('a209',lang_id);
-    set(handles.text18,'string',lang_var{locb})
-    %
-    [~, locb] = ismember('ec01',lang_id);
-    set(handles.uipanel1,'title',lang_var{locb})
-    [~, locb] = ismember('main05',lang_id);
-    set(handles.text4,'string',lang_var{locb})
-    [~, locb] = ismember('main06',lang_id);
-    set(handles.text5,'string',lang_var{locb})
-    [~, locb] = ismember('main32',lang_id);
-    set(handles.text6,'string',lang_var{locb})
-    set(handles.text19,'string',lang_var{locb})
-    %
-    [~, locb] = ismember('ec15',lang_id);
-    set(handles.uibuttongroup3,'title',lang_var{locb})
-    [~, locb] = ismember('ec16',lang_id);
-    set(handles.radiobutton6,'string',lang_var{locb})
-    [~, locb] = ismember('ec17',lang_id);
-    set(handles.radiobutton7,'string',lang_var{locb})
-    [~, locb] = ismember('ec18',lang_id);
-    set(handles.radiobutton8,'string',lang_var{locb})
-    [~, locb] = ismember('ec19',lang_id);
-    set(handles.text10,'string',lang_var{locb})
-    [~, locb] = ismember('ec20',lang_id);
-    set(handles.text22,'string',lang_var{locb})
-    %
-    [~, locb] = ismember('ec21',lang_id);
-    set(handles.uibuttongroup4,'title',lang_var{locb})
-    %
-    [~, locb] = ismember('main39',lang_id);
-    set(handles.uibuttongroup5,'title',lang_var{locb})
-    [~, locb] = ismember('ec22',lang_id);
-    set(handles.text13,'string',lang_var{locb})
-    %
-    [~, locb] = ismember('main07',lang_id);
-    set(handles.uibuttongroup6,'title',lang_var{locb})
-    [~, locb] = ismember('c39',lang_id);
-    set(handles.text14,'string',lang_var{locb})
-    [~, locb] = ismember('main32',lang_id);
-    set(handles.text15,'string',lang_var{locb})
-    [~, locb] = ismember('main34',lang_id);
-    set(handles.text16,'string',lang_var{locb})
-    set(handles.text17,'string',lang_var{locb})
-    [~, locb] = ismember('ec23',lang_id);
-    set(handles.pushbutton2,'string',lang_var{locb})
-    [~, locb] = ismember('ec67',lang_id);
-    set(handles.pushbutton3,'string',lang_var{locb})
-    %
-    [~, locb] = ismember('ec24',lang_id);
-    ec24 = lang_var{locb};
-    [~, locb] = ismember('ec25',lang_id);
-    ec25 = lang_var{locb};
-    [~, locb] = ismember('ec26',lang_id);
-    ec26 = lang_var{locb};
-    [~, locb] = ismember('ec27',lang_id);
-    ec27 = lang_var{locb};
-    [~, locb] = ismember('ec28',lang_id);
-    ec28 = lang_var{locb};
-    [~, locb] = ismember('ec29',lang_id);
-    ec29 = lang_var{locb};
-    [~, locb] = ismember('ec30',lang_id);
-    ec30 = lang_var{locb};
-    [~, locb] = ismember('ec31',lang_id);
-    ec31 = lang_var{locb};
-    [~, locb] = ismember('ec32',lang_id);
-    ec32 = lang_var{locb};
-    [~, locb] = ismember('ec33',lang_id);
-    ec33 = lang_var{locb};
-    [~, locb] = ismember('ec34',lang_id);
-    ec34 = lang_var{locb};
-    [~, locb] = ismember('ec35',lang_id);
-    ec35 = lang_var{locb};
-    [~, locb] = ismember('ec36',lang_id);
-    ec36 = lang_var{locb};
-else
-    set(gcf,'Name','Acycle: (Evolutionary) Correlation Coefficient / (e)COCO')
+app = createApp(ctx);
+if nargout > 0
+    varargout{1} = app.UIFigure;
 end
 
-%
-dat = varargin{1}.current_data;  % data
-%
-diffx = diff(dat(:,1));
-% check data
-if sum(diffx <= 0) > 0
-    if lang_choice == 0
-        disp('>>  Waning: data has to be in ascending order, no duplicated number allowed')
-    else
-        disp(ec24)
-    end
-    dat = sortrows(dat);
-end
+    function app = createApp(ctx)
+        app = struct();
+        app.ctx = ctx;
+        app.bg = [0.94 0.94 0.94];
+        app.blue = [0.08 0.02 0.95];
 
-% check data
-if abs((max(diffx)-min(diffx))/2) > 10*eps('single')
-    if lang_choice == 0
-        hwarn1 = warndlg('Data may not be evenly spaced!');
-    else
-        hwarn1 = warndlg(ec25);
-    end
-    
-end
-%
-datx = dat(:,1);  % unit should be cm
-daty = dat(:,2);
-npts = length(datx);
-dt = median(diff(dat(:,1)));
-dtr = dt;
-
-% set zeropadding
-if npts <= 2500
-    handles.pad = 5000;
-elseif npts <= 5000 && npts > 2500
-    handles.pad = 10000;
-else
-    handles.pad = fix(npts/5000) * 5000 + 5000;
-end
-%
-handles.window = 0.25 * abs(datx(end) - datx(1));
-handles.step = dt;
-if npts > 300
-    handles.step = dt * ceil(npts/300);  % keep sliding steps ~300, if too much data is analyzed
-end
-
-handles.unit = varargin{1}.unit; % unit
-handles.unit_type = varargin{1}.unit_type; % unit type
-handles.slash_v = varargin{1}.slash_v;
-handles.acfigmain = varargin{1}.acfigmain;
-
-handles.filename = varargin{1}.data_name; % save dataname
-handles.dat_name = varargin{1}.dat_name; % save dataname
-handles.path_temp = varargin{1}.path_temp; % save path
-handles.listbox_acmain = varargin{1}.listbox_acmain; % save path
-handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
-
-%
-handles.dat = dat; % save data
-handles.datbackup = dat;
-% set default sedmin, sedmax
-handles.sedmin = 0;
-handles.sedmax = 100;
-handles.sedstep = 0.1;
-handles.numsed = 200;
-handles.fh = 0.065;
-handles.orbit7 = [405, 125, 95, 41, 22.43, 23.75, 19.18]; % 7 leading orbit periods
-handles.nsim = 2000;
-handles.age = 0;
-handles.f1 = 0;
-handles.f2 = 0.06;
-handles.slices = 1;
-handles.ecocoS = 0; % 0 = COCO; 1 = eCOCO
-
-[~, MainUnit2] = ismember('MainUnit2',lang_id); % m
-[~, MainUnit3] = ismember('MainUnit3',lang_id); % dm
-[~, MainUnit5] = ismember('MainUnit5',lang_id); % mm
-[~, MainUnit7] = ismember('MainUnit7',lang_id); % km
-[~, MainUnit6] = ismember('MainUnit6',lang_id); % ft
-
-% check unit, set to cm
-if handles.unit_type == 0
-    if lang_choice == 0
-        hwarn = warndlg('Is the Unit m? If not, set unit in Acycle and restart COCO/eCOCO');
-    else
-        hwarn = warndlg(ec26);
-    end
-    dat(:,1) = dat(:,1)*100;
-    dt = dt * 100;
-    dtr = dt * 100;
-elseif handles.unit_type == 2
-    if lang_choice == 0
-        hwarn = warndlg('Unit type is Time! Make sure the unit is m');
-    else
-        hwarn = warndlg(ec27);
-    end
-else
-    if strcmp(handles.unit,lang_var{MainUnit2})
-        dat(:,1) = dat(:,1)*100;
-        dtr = dt*100;dt = dt * 100;
-        %msgbox('Unit is m, now changes to cm','Unit transform')
-    elseif strcmp(handles.unit,lang_var{MainUnit3})
-        dat(:,1) = dat(:,1)*10;
-        dtr = dt*10;dt = dt * 10;
-        if lang_choice == 0
-            msgbox('Unit is dm, now changes to cm','Unit transform')
-        else
-            msgbox(ec29,ec28)
-        end
+        [app.dataRaw, app.data, app.meta] = prepData(ctx);
+        app.fmaxdata = app.meta.fmax_data;
+        app.main_unit_selection = getfielddef(ctx,'main_unit_selection',0);
+        app.mode = 2; % 1=COCO, 2=eCOCO
+        % Public default: the coherent nine-term, method-B bidirectional
+        % held-out engine formerly exposed as cvCOCO9B.
+        app.cocoTargetMode = 'cv9b';
+        app.cvBatchSize = 100;
+        app.cvSeed = 1;
+        app.adaptiveSeed = 1;
+        % Retain the numeric field for workspace/backward compatibility,
+        % but its public meaning is now the selected eCOCO algorithm.
+        app.ecocoCalcMode = 1; % 1=Adaptive, 2=Blocked, 3=Interleaved eCOCO
+        app.anchorFraction = 0.5;
+        app.corrmethod = 1; % 1 Pearson, 2 Spearman
+        app.red = 0; % 0 no
+        app.time_0pad = 1;
+        app.padtype = 1;
+        app.showPeriodCoco = true;
         
-    elseif strcmp(handles.unit,lang_var{MainUnit5})
-        dat(:,1) = dat(:,1)/10;
-        dtr = dt/10;dt = dt / 10;
-        if lang_choice == 0
-            msgbox('Unit is mm, now changes to cm','Unit transform')
-        else
-            msgbox(ec30,ec28)
+        app.orbit9 = [405.6912, 130.6979, 123.8532, 98.8517, 94.8856, 40.9897, 23.6820, 22.3758, 18.9519];
+        app.age = 0;
+        app.f1 = 0;
+        app.f2 = 1.2/min(app.orbit9);
+        app.slices = 1;
+        app.adjust = 0;
+        app.nsim = 2000;
+
+        app.window = max(1e-6, 0.25 * abs(app.data(end,1) - app.data(1,1)));
+        app.step = app.meta.dt;
+        if size(app.data,1) > 300
+            app.step = app.meta.dt * ceil(size(app.data,1)/300);
         end
+
+        app.pad = defaultPad(size(app.data,1));
+        [app.sedmin, app.sedmax, app.sedstep, app.fh] = defaultSedRange(app);
         
-    elseif strcmp(handles.unit,lang_var{MainUnit7})
-        dat(:,1) = dat(:,1)* 1000 * 100;
-        dtr = dt*100*1000;dt = dt * 100*1000;
-        if lang_choice == 0
-            msgbox('Unit is km, now changes to cm','Unit transform')
-        else
-            msgbox(ec31,ec28)
-        end
+        app.run = emptyRunState();
+
+        app.UIFigure = uifigure('Name','Acycle: (Evolutionary) Correlation Coefficient version 2 / (e)COCO v2', ...
+            'Color',app.bg,'Position',figurePos(ctx),'AutoResizeChildren','off');
+        app.UIFigure.SizeChangedFcn = @(~,~)onResize();
+
+        createComponents();
+        loadDefaultsToUI();
+        onModeChanged();
+        refreshSedInfo();
+
+        setappdata(app.UIFigure,'ECOCO_APP',app);
+        onResize();
         
-    elseif strcmp(handles.unit,lang_var{MainUnit6})
-        dat(:,1) = dat(:,1)* 30.48;
-        dtr = dt * 30.48; dt = dt * 30.48;
-        if lang_choice == 0
-            msgbox('Unit is ft, now changes to cm','Unit transform')
-        else
-            msgbox(ec32,ec28)
-        end
-    else % m
-        dat(:,1) = dat(:,1)*100;
-        dtr = dt*100;dt = dt * 100;
-    end
-end
 
-% set default values
-set(handles.radiobutton1,'Value',1) % select COCO
-set(handles.radiobutton2,'Value',0) % not select COCO
-set(handles.text3,'String',handles.dat_name)
-set(handles.checkbox6,'Value',1) % select zero padding
-set(handles.edit12,'String',num2str(handles.pad))
+        function createComponents()
+            app.PMethod = uipanel(app.UIFigure,'Title','Select Method','BackgroundColor',app.bg);
+            app.BGMethod = uibuttongroup(app.PMethod,'BackgroundColor',app.bg,'BorderType','none', ...
+                'SelectionChangedFcn',@(s,e)onModeChanged());
+            app.RCOCO = uiradiobutton(app.BGMethod,'Text','COCO','FontWeight','bold','FontColor',app.blue,'Value',false);
+            app.RECOCO = uiradiobutton(app.BGMethod,'Text','eCOCO','FontWeight','bold','FontColor',app.blue,'Value',true);
+            app.LCOCOMethod = uilabel(app.PMethod,'Text','COCO method','FontColor',app.blue,'BackgroundColor',app.bg);
+            app.DCOCOMethod = uidropdown(app.PMethod, ...
+                'Items',{'cvCOCO — Blocked','cvCOCO — Interleaved', ...
+                'Adaptive COCO','Fixed-target COCO'}, ...
+                'Value','cvCOCO — Blocked','Enable','off', ...
+                'Tooltip',['cvCOCO — Blocked uses two contiguous halves; ', ...
+                'cvCOCO — Interleaved uses odd/even observations. ', ...
+                'Both use bidirectional held-out validation; Adaptive and ', ...
+                'Fixed-target COCO use the full record.'], ...
+                'ValueChangedFcn',@(s,e)onCocoMethodChanged());
+            app.BGEcoCalc = uibuttongroup(app.PMethod,'BackgroundColor',app.bg,'BorderType','none', ...
+                'SelectionChangedFcn',@(s,e)onEcoCalcChanged());
+            % RFast/RAccurate field names are retained so saved app-state
+            % and older callbacks do not fail; the visible choices now
+            % select scientifically distinct sliding algorithms.
+            app.RFast = uiradiobutton(app.BGEcoCalc, ...
+                'Text','Adaptive','Value',true, ...
+                'Tooltip','Adaptive eCOCO: per-window Adaptive COCO method-B target.');
+            app.RAccurate = uiradiobutton(app.BGEcoCalc, ...
+                'Text','Blocked','Value',false, ...
+                'Tooltip',['Blocked eCOCO: frozen method-B targets updated at the selected ', ...
+                'fraction of the sliding-window width.']);
+            app.RInterleaved = uiradiobutton(app.BGEcoCalc, ...
+                'Text','Interleaved','Value',false, ...
+                'Tooltip',['Interleaved eCOCO (I-eCOCO): within each complete ', ...
+                'window, globally fixed odd/even observations reciprocally ', ...
+                'train and validate after fold-specific interpolation.']);
 
-set(handles.checkbox1,'Value',1) % select edge padding
-set(handles.checkbox1,'Visible','off') % padding edge invisible for COCO
+            app.PData = uipanel(app.UIFigure,'Title','Data','BackgroundColor',app.bg);
+            app.LData = uilabel(app.PData,'Text','Data','BackgroundColor',app.bg);
+            app.LDataName = uilabel(app.PData,'Text',app.meta.dat_name,'BackgroundColor',app.bg);
+            app.C0Pad = uicheckbox(app.PData,'Text','0 padding','Value',true,'ValueChangedFcn',@(s,e)onPadToggle());
+            app.EPad = uieditfield(app.PData,'text','Value',num2str(app.pad),'ValueChangedFcn',@(s,e)onNumericSettingEdited(app.EPad,app.pad));
+            app.CPadEdge = uicheckbox(app.PData,'Text','0 padding edge','Value',true, ...
+                'ValueChangedFcn',@(s,e)onPadEdgeToggle());
+            app.DPadEdge = uidropdown(app.PData,'Items',{'zero','mirror','mean','random'},'Value','zero', ...
+                'ValueChangedFcn',@(s,e)markSettingsChanged());
+            app.CFlipY = uicheckbox(app.PData,'Text','Flip Depth (y axis)','Value',true, ...
+                'ValueChangedFcn',@(s,e)markSettingsChanged());
 
-set(handles.popupmenu1,'Value',1) % padding = zero
-set(handles.popupmenu1,'Visible','off') % flip y invisible for COCO
-set(handles.checkbox5,'Value',1) % flip y
-set(handles.checkbox5,'Visible','off') % flip y invisible for COCO
+            app.PPeriod = uipanel(app.UIFigure,'Title','Periodogram of Data','BackgroundColor',app.bg);
+            app.CShowPeriod = uicheckbox(app.PPeriod,'Text','Show period.','Value',true, ...
+                'ValueChangedFcn',@(s,e)onShowPeriodChanged());
+            app.LMaxF = uilabel(app.PPeriod,'Text','Maximum Frequency (cycle/m)','BackgroundColor',app.bg);
+            app.EMaxF = uieditfield(app.PPeriod,'text','Value',num2str(app.meta.fmax_data,'%.4f'), ...
+                'ValueChangedFcn',@(s,e)markSettingsChanged());
+            app.LSlices = uilabel(app.PPeriod,'Text','Number of slices','BackgroundColor',app.bg);
+            app.ESlices = uieditfield(app.PPeriod,'text','Value','1', ...
+                'ValueChangedFcn',@(s,e)markSettingsChanged());
+            app.CRed = uicheckbox(app.PPeriod,'Text','Remove red noise model','FontColor',app.blue, ...
+                'ValueChangedFcn',@(s,e)onRedToggle());
+            app.DRed = uidropdown(app.PPeriod,'Items',{'Classic AR1','Robust AR1','Smoothed Window'}, ...
+                'Enable','off','ValueChangedFcn',@(s,e)markSettingsChanged());
 
-set(handles.checkbox2,'Value',1) % show power spectrum
-set(handles.edit4,'Enable','on')
-set(handles.checkbox4,'Value',0) % remove red noise = 0
-set(handles.popupmenu3,'Value',1) % remove red noise = no
-set(handles.edit13,'Enable','on') % COCO for slices
-set(handles.edit13,'String','1')
+            app.PSed = uipanel(app.UIFigure,'Title','Test sedimentation rate','BackgroundColor',app.bg);
+            app.LSedMin = uilabel(app.PSed,'Text','Minimum','FontColor',app.blue,'BackgroundColor',app.bg);
+            app.ESedMin = uieditfield(app.PSed,'text','Value',num2str(app.sedmin),'ValueChangedFcn',@(s,e)onSedEdited());
+            app.LSedMax = uilabel(app.PSed,'Text','maximum','FontColor',app.blue,'BackgroundColor',app.bg);
+            app.ESedMax = uieditfield(app.PSed,'text','Value',num2str(app.sedmax),'ValueChangedFcn',@(s,e)onSedEdited());
+            app.LSedStep = uilabel(app.PSed,'Text','step','FontColor',app.blue,'BackgroundColor',app.bg);
+            app.ESedStep = uieditfield(app.PSed,'text','Value',num2str(app.sedstep),'ValueChangedFcn',@(s,e)onSedEdited());
+            app.LSedUnit = uilabel(app.PSed,'Text','cm/kyr','FontColor',app.blue,'BackgroundColor',app.bg);
+            app.LSedInfo = uilabel(app.PSed,'Text','','FontAngle','italic','BackgroundColor',app.bg);
 
-set(handles.radiobutton6,'Value',0)
-set(handles.radiobutton7,'Value',1) % default solution = La04
-set(handles.radiobutton8,'Value',0)
-set(handles.edit5,'String',num2str(handles.age)) % middle age of data
-set(handles.edit7,'String',num2str(handles.f2)) % test max orbit frequency
+            app.PTarget = uipanel(app.UIFigure,'Title','Target: Astronomical cycles','BackgroundColor',app.bg);
+            app.LAge = uilabel(app.PTarget,'Text','Middle age of data','FontColor',app.blue,'FontWeight','bold','BackgroundColor',app.bg);
+            app.EAge = uieditfield(app.PTarget,'text','Value','0','ValueChangedFcn',@(s,e)onAgeEdited());
+            app.LMa = uilabel(app.PTarget,'Text','Ma','FontColor',app.blue,'FontWeight','bold','BackgroundColor',app.bg);
+            app.LMaxFreq = uilabel(app.PTarget,'Text','Max frequency','BackgroundColor',app.bg);
+            app.EF2 = uieditfield(app.PTarget,'text', ...
+                'Value',num2str(app.f2,'%.6g'), ...
+                'ValueChangedFcn',@(s,e)markSettingsChanged());
+            app.LUnitFreq = uilabel(app.PTarget,'Text','1/kyr','BackgroundColor',app.bg);
+            app.BGOrbit = uibuttongroup(app.PTarget,'BackgroundColor',app.bg,'BorderType','none','SelectionChangedFcn',@(s,e)onOrbitChanged());
+            app.RLaskar = uiradiobutton(app.BGOrbit,'Text','Farhat+2022','Value',true);
+            app.RUser = uiradiobutton(app.BGOrbit,'Text','User-defined period');
+            app.LOrbit2 = uilabel(app.BGOrbit,'Text',orbitString(app.orbit9),'BackgroundColor',app.bg);
+            app.EOrbitUser = uieditfield(app.BGOrbit,'text','Value',orbitString(app.orbit9),'Enable','off', ...
+                'ValueChangedFcn',@(s,e)onUserOrbitEdited());
+            app.BWaltham = uibutton(app.BGOrbit,'push','Text','?Waltham15','ButtonPushedFcn',@(s,e)onWaltham());
 
-set(handles.radiobutton9,'Value',0) % correlation method: spearman
-set(handles.radiobutton10,'Value',1) % correlation method: pearson
+            app.PCorr = uipanel(app.UIFigure,'Title','Correlation method','BackgroundColor',app.bg);
+            app.BGCorr = uibuttongroup(app.PCorr,'BackgroundColor',app.bg,'BorderType','none','SelectionChangedFcn',@(s,e)onCorrChanged());
+            app.RSpearman = uiradiobutton(app.BGCorr,'Text','Spearman','Value',false);
+            app.RPearson = uiradiobutton(app.BGCorr,'Text','Pearson','FontWeight','bold','Value',true);
 
-set(handles.edit8,'String',num2str(handles.nsim)) % MC number
-set(handles.uibuttongroup6,'Visible','off') % sliding window invisible for COCO
+            app.PMC = uipanel(app.UIFigure,'Title','Monte Carlo','BackgroundColor',app.bg);
+            app.ENsim = uieditfield(app.PMC,'text','Value',num2str(app.nsim), ...
+                'ValueChangedFcn',@(s,e)markSettingsChanged());
+            app.LTimes = uilabel(app.PMC,'Text','times','BackgroundColor',app.bg);
 
-set(handles.edit9,'String',num2str(handles.window)) % window size
-%set(handles.edit10,'String',num2str(handles.step)) % step size
-set(handles.text16,'String',handles.unit)
-set(handles.edit10,'String',num2str(handles.step)) % step
-set(handles.text17,'String',handles.unit)
-set(handles.text19,'String','cm/kyr')
+            app.PSlide = uipanel(app.UIFigure,'Title','Sliding Window','BackgroundColor',app.bg);
+            app.LSize = uilabel(app.PSlide,'Text','Size','BackgroundColor',app.bg);
+            app.ESize = uieditfield(app.PSlide,'text','Value',num2str(app.window,'%.4f'),'FontColor',app.blue,'FontWeight','bold', ...
+                'ValueChangedFcn',@(s,e)markSettingsChanged());
+            app.LSizeUnit = uilabel(app.PSlide,'Text',app.meta.unit,'BackgroundColor',app.bg);
+            app.LStep = uilabel(app.PSlide,'Text','Step','BackgroundColor',app.bg);
+            app.EStep = uieditfield(app.PSlide,'text','Value',num2str(app.step,'%.4f'), ...
+                'ValueChangedFcn',@(s,e)markSettingsChanged());
+            app.LStepUnit = uilabel(app.PSlide,'Text',app.meta.unit,'BackgroundColor',app.bg);
+            app.LTargetUpdate = uilabel(app.PSlide,'Text','Target update', ...
+                'BackgroundColor',app.bg);
+            app.DTargetUpdate = uidropdown(app.PSlide, ...
+                'Items',{'0.25 W','0.5 W','1.0 W','2.0 W'}, ...
+                'ItemsData',[0.25 0.5 1.0 2.0], ...
+                'Value',0.5,'Enable','off', ...
+                'Tooltip',['Blocked eCOCO target-anchor spacing as a ', ...
+                'fraction of the sliding-window width.'], ...
+                'ValueChangedFcn',@(s,e)onEcoTargetUpdateChanged());
 
-fnyq = handles.sedmin/(2*dtr);
-if handles.fh > fnyq
-    sedmin = 2 * dtr * handles.fh;
-    if handles.unit_type == 0
-        sedmin = sedmin/100;
-    end
-    handles.sedmin = sedmin;
-end
-fray = handles.sedmax/(npts * dtr);
-flow = 1/max(handles.orbit7);
-if fray > flow
-    sedmax = npts * dtr * flow;
-    handles.sedmax = sedmax;
-end
-if (handles.sedmax-handles.sedmin)/handles.sedstep > 300
-    handles.sedstep = (handles.sedmax-handles.sedmin)/300;
-end
-set(handles.edit1,'String',num2str(handles.sedmin))
-set(handles.edit2,'String',num2str(handles.sedmax))
-set(handles.edit3,'String',num2str(handles.sedstep))
-% test sed. rate info
-
-sr = handles.sedmin:handles.sedstep:handles.sedmax;
-if lang_choice == 0
-    sedinfo = [num2str(length(sr)),' test sed. rates: ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
-        ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
-else
-    sedinfo = [num2str(length(sr)),ec33,num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
-        ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
-end
-set(handles.text7,'String',sedinfo)
-
-% tooltips for OK button
-if lang_choice == 0
-    s_push_ok = sprintf('Check parameters in BLUE\nclick OK to run eTimeOpt');
-else
-    s_push_ok = sprintf(ec34);
-end
-set(handles.pushbuttonOK,'TooltipString',s_push_ok) 
-%
-%
-red = 0;
-handles.red = red;
-handles.npts = npts;
-handles.dt = dt;
-handles.dtr = dtr;
-handles.sr = sr;
-handles.corrmethod = 1; % 1= 'Pearson'; else = 'Spearman'
-handles.plotn = 1; % plot data
-handles.flipy = 1; % flip y axis
-handles.plot_2d = 1;
-handles.time_0pad = 1;  % updated acycle v1.2.1
-handles.padtype = 1; % updated acycle v1.2.1
-
-%
-handles.ecocofigdata = figure;
-set(0,'Units','normalized') % set units as normalized
-set(gcf,'units','norm') % set location
-set(gcf,'color','w');
-if lang_choice>0
-    [~, locb] = ismember('main02',lang_id);
-    set(gcf,'Name',lang_var{locb});
-else
-    set(gcf,'Name','Data');
-end
-set(handles.ecocofigdata,'position',[0.01,0.01,0.2,0.9]) % set position
-if handles.flipy == 1
-    plot(fliplr(daty),datx,'k')
-else
-    plot(daty,datx,'k')
-end
-if lang_choice == 0
-    xlabel('Value'); ylabel(['Depth',' (',handles.unit,')'])
-else
-    [~, locb] = ismember('main24',lang_id);
-    main24 = lang_var{locb};
-    [~, locb] = ismember('main23',lang_id);
-    main23 = lang_var{locb};
-    xlabel(main24); ylabel([main23,' (',handles.unit,')'])
-end
-%
-handles.ecocofigspectrum = figure;
-set(0,'Units','normalized') % set units as normalized
-set(gcf,'units','norm') % set location
-set(gcf,'color','w');
-if lang_choice>0
-    [~, locb] = ismember('ec09',lang_id);
-    set(gcf,'Name',lang_var{locb});
-else
-    set(gcf,'Name','Periodogram of Data');
-end
-set(handles.ecocofigspectrum,'position',[0.2,0.4,0.2,0.4]) % set position
-dt = (median(diff(datx)));
-
-[p1,f] = periodogram(daty,[],handles.pad,1/dt);  % power of dat
-handles.fmaxdata = max(f);
-% remove AR1 noise
-if red == 0
-    theored = p1;
-    p = p1;
-elseif red == 2
-    [theored]=theoredar1ML(daty,f,mean(p1),dt);
-    p = p1 ./ theored;
-    p = p - 1;
-    p(p<0) = 0;   % power removing AR(1) noise
-elseif red == 1
-    [theored]=theoredar1ML(daty,f,mean(p1),dt);
-    p = p1 - theored;
-    p(p<0) = 0;   % power removing AR(1) noise
-elseif red == 3
-    % robust
-    theored = redconf_any(f,p1,dt,0.25,2);
-    p = p1 - theored;
-    p(p<0) = 0;   % power removing AR(1) noise
-end
-ax1 = subplot(2,1,1);
-plot(ax1,f,p1,'k','LineWidth',1);
-hold on;
-plot(ax1,f,theored,'r','LineWidth',2)
-if lang_choice > 0
-    [~, locb] = ismember('main14',lang_id);
-    main14 = lang_var{locb};
-    [~, locb] = ismember('main46',lang_id);
-    main46 = lang_var{locb};
-end
-if lang_choice == 0
-    xlabel(ax1,'Frequency');ylabel(ax1,'Power');title('raw periodogram (& red noise)')
-else
-    xlabel(ax1,main14);ylabel(ax1,main46);title(ec35)
-end
-xlim([0 max(f)])
-ax2 = subplot(2,1,2);
-plot(ax2,f,p,'k','LineWidth',1);
-if lang_choice == 0
-    xlabel(ax2,'Frequency');ylabel(ax2,'Power');title('red noise removed ?')
-else
-    xlabel(ax2,main14);ylabel(ax2,main46);title(ec36)
-end
-%xlim([0 max(f)])
-xlim([0, handles.fmaxdata])
-
-handles.fmaxdata = max(f);
-set(handles.edit4, 'String', num2str(max(f)))
-
-handles.lang_choice = lang_choice;
-handles.lang_id = lang_id;
-handles.lang_var = lang_var;
-assignin('base','fmaxdata',handles.fmaxdata)
-% Update handles structure
-guidata(hObject, handles);
-
-% throw out warning window
-try figure(hwarn)
-catch
-end
-try figure(hwarn1)
-catch
-end
-% UIWAIT makes eCOCOGUI wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
-
-
-% --- Outputs from this function are returned to the command line.
-function varargout = eCOCOGUI_OutputFcn(hObject, eventdata, handles) 
-% varargout  cell array for returning output args (see VARARGOUT);
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Get default command line output from handles structure
-varargout{1} = handles.output;
-
-
-% --- Executes on button press in radiobutton1.
-function radiobutton1_Callback(hObject, eventdata, handles)
-% hObject    handle to radiobutton1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of radiobutton1
-if get(hObject,'Value')
-    set(handles.radiobutton2,'Value',0)
-    
-    if handles.lang_choice==0
-        set(handles.checkbox6,'String','0 padding')
-    else
-        [~, locb1] = ismember('ec08',handles.lang_id);
-        lang_var = handles.lang_var;
-        set(handles.checkbox6,'String',lang_var{locb1})
-    end   
-    
-    
-    % adjust padding
-    % set zeropadding
-    if handles.npts <= 2500
-        handles.pad = 5000;
-    elseif handles.npts <= 5000 && handles.npts > 2500
-        handles.pad = 10000;
-    else
-        handles.pad = fix(handles.npts/5000) * 5000 + 5000;
-        disp(fix(handles.npts/5000) * 5000 + 5000)
-    end
-    set(handles.edit12,'String',num2str(handles.pad))
-    set(handles.checkbox1,'Visible','off')
-    set(handles.popupmenu1,'Visible','off')
-    set(handles.checkbox5,'Visible','off')
-    set(handles.edit13,'Enable','on')
-    set(handles.uibuttongroup6,'Visible','off')
-    set(handles.pushbutton2,'Visible','off') % 
-    set(handles.pushbutton3,'Visible','off') %
-end
-handles.ecocoS = 0;
-guidata(hObject, handles);
-
-
-% --- Executes on button press in radiobutton2.
-function radiobutton2_Callback(hObject, eventdata, handles)
-% hObject    handle to radiobutton2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of radiobutton2
-if get(hObject,'Value')
-    set(handles.radiobutton1,'Value',0)
-    
-    if handles.lang_choice==0
-        set(handles.checkbox6,'String','0 padding')
-    else
-        [~, locb1] = ismember('ec08',handles.lang_id);
-        lang_var = handles.lang_var;
-        set(handles.checkbox6,'String',lang_var{locb1})
-    end   
-    nptsi = round(handles.window/handles.dt*100);
-    % adjust padding
-    % set zeropadding
-    if nptsi <= 2500
-        handles.pad = 5000;
-    elseif nptsi <= 5000 && nptsi > 2500
-        handles.pad = 10000;
-    else
-        handles.pad = fix(nptsi/5000) * 5000 + 5000;
-    end
-    set(handles.edit12,'String',num2str(handles.pad))
-    set(handles.checkbox1,'Visible','on')
-    set(handles.popupmenu1,'Visible','on')
-    set(handles.checkbox5,'Visible','on')
-    set(handles.edit13,'Enable','off')
-    set(handles.uibuttongroup6,'Visible','on')
-    
-    set(handles.pushbutton2,'Visible','on') % 
-    set(handles.pushbutton3,'Visible','on') %
-end
-handles.ecocoS = 1;
-guidata(hObject, handles);
-
-% --- Executes on button press in checkbox1.
-function checkbox1_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox1
-dat = handles.datbackup;
-handles.dat = dat;
-if get(hObject,'Value')
-    handles.time_0pad = 1;
-    set(handles.popupmenu1,'Enable','on')
-    dat = zeropad2(handles.datbackup,handles.window,handles.padtype);
-    handles.dat = dat;
-    try figure(handles.ecocofigdata)
-        if handles.flipy == 1
-            plot(fliplr(dat(:,2)),dat(:,1),'k')
-        else
-            plot(dat(:,2),dat(:,1),'k')
-        end
-        xlabel('Value'); ylabel(['Depth (',handles.unit,')'])
-        ylim([min(dat(:,1)),max(dat(:,1))]);
-    catch
-        handles.ecocofigdata = figure;
-        set(0,'Units','normalized') % set units as normalized
-        set(gcf,'units','norm') % set location
-        set(gcf,'color','w');
-        if lang_choice>0
-            [~, locb] = ismember('main02',lang_id);
-            set(gcf,'Name',lang_var{locb});
-        else
-            set(gcf,'Name','Data');
-        end
-        set(handles.ecocofigdata,'position',[0.01,0.01,0.2,0.9]) % set position
-        if handles.flipy == 1
-            plot(fliplr(dat(:,2)),dat(:,1),'k')
-        else
-            plot(dat(:,2),dat(:,1),'k')
-        end
-        ylim([min(dat(:,1)),max(dat(:,1))]);
-        if handles.lang_choice==0
-            xlabel('Value'); ylabel(['Depth (',handles.unit,')'])
-        else
-            [~, locb1] = ismember('main24',handles.lang_id);
-            [~, locb2] = ismember('main23',handles.lang_id);
-            lang_var = handles.lang_var;
-            xlabel(lang_var{locb1}); ylabel([lang_var{locb2},' (',handles.unit,')'])
-        end
-    end
-else
-    handles.time_0pad = 0;
-    set(handles.popupmenu1,'Enable','off')
-    try figure(handles.ecocofigdata)
-        if handles.flipy == 1
-            plot(fliplr(dat(:,2)),dat(:,1),'k')
-        else
-            plot(dat(:,2),dat(:,1),'k')
+            app.BPlotE = uibutton(app.UIFigure,'push','Text','eCOCO plot','Enable','off', ...
+                'ButtonPushedFcn',@(s,e)onECOCOPlot());
+            app.BRun = uibutton(app.UIFigure,'push','Text','OK','BackgroundColor',app.blue,'FontColor','white','FontWeight','bold', ...
+                'ButtonPushedFcn',@(s,e)onRun());
         end
 
-        if handles.lang_choice==0
-            xlabel('Value'); ylabel(['Depth (',handles.unit,')'])
-        else
-            [~, locb1] = ismember('main24',handles.lang_id);
-            [~, locb2] = ismember('main23',handles.lang_id);
-            lang_var = handles.lang_var;
-            xlabel(lang_var{locb1}); ylabel([lang_var{locb2},' (',handles.unit,')'])
-        end
-        ylim([min(dat(:,1)),max(dat(:,1))]);
-    catch
-        handles.ecocofigdata = figure;
-        set(0,'Units','normalized') % set units as normalized
-        set(gcf,'units','norm') % set location
-        set(gcf,'color','w');
-        
-        if lang_choice>0
-            [~, locb] = ismember('main02',lang_id);
-            set(gcf,'Name',lang_var{locb});
-        else
-            set(gcf,'Name','Data');
-        end
-        set(handles.ecocofigdata,'position',[0.01,0.01,0.2,0.9]) % set position
-        if handles.flipy == 1
-            plot(fliplr(dat(:,2)),dat(:,1),'k')
-        else
-            plot(dat(:,2),dat(:,1),'k')
-        end
-        ylim([min(dat(:,1)),max(dat(:,1))]);
-        if handles.lang_choice==0
-            xlabel('Value'); ylabel(['Depth (',handles.unit,')'])
-        else
-            [~, locb1] = ismember('main24',handles.lang_id);
-            [~, locb2] = ismember('main23',handles.lang_id);
-            lang_var = handles.lang_var;
-            xlabel(lang_var{locb1}); ylabel([lang_var{locb2},' (',handles.unit,')'])
-        end
-    end
-
-end
-guidata(hObject, handles);
-
-
-% --- Executes on selection change in popupmenu1.
-function popupmenu1_Callback(hObject, eventdata, handles)
-% hObject    handle to popupmenu1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu1 contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from popupmenu1
-handles.padtype = get(hObject,'Value');
-dat = zeropad2(handles.datbackup,handles.window,handles.padtype);
-handles.dat = dat;
-try figure(handles.ecocofigdata)
-    if handles.flipy == 1
-        plot(fliplr(dat(:,2)),dat(:,1),'k')
-    else
-        plot(dat(:,2),dat(:,1),'k')
-    end
-    
-    if handles.lang_choice==0
-        xlabel('Value'); ylabel(['Depth (',handles.unit,')'])
-    else
-        [~, locb1] = ismember('main24',handles.lang_id);
-        [~, locb2] = ismember('main23',handles.lang_id);
-        lang_var = handles.lang_var;
-        xlabel(lang_var{locb1}); ylabel([lang_var{locb2},' (',handles.unit,')'])
-    end
-    ylim([min(dat(:,1)),max(dat(:,1))]);
-catch
-    handles.ecocofigdata = figure;
-    set(0,'Units','normalized') % set units as normalized
-    set(gcf,'units','norm') % set location
-    set(gcf,'color','w');
-        if lang_choice>0
-            [~, locb] = ismember('main02',lang_id);
-            set(gcf,'Name',lang_var{locb});
-        else
-            set(gcf,'Name','Data');
-        end
-    set(handles.ecocofigdata,'position',[0.01,0.01,0.2,0.9]) % set position
-    if handles.flipy == 1
-        plot(fliplr(dat(:,2)),dat(:,1),'k')
-    else
-        plot(dat(:,2),dat(:,1),'k')
-    end
-    ylim([min(dat(:,1)),max(dat(:,1))]);
-    if handles.lang_choice==0
-        xlabel('Value'); ylabel(['Depth (',handles.unit,')'])
-    else
-        [~, locb1] = ismember('main24',handles.lang_id);
-        [~, locb2] = ismember('main23',handles.lang_id);
-        lang_var = handles.lang_var;
-        xlabel(lang_var{locb1}); ylabel([lang_var{locb2},' (',handles.unit,')'])
-    end
-end
-
-guidata(hObject, handles);
-
-
-% --- Executes during object creation, after setting all properties.
-function popupmenu1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to popupmenu1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-function edit1_Callback(hObject, eventdata, handles)
-% hObject    handle to edit1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit1 as text
-%        str2double(get(hObject,'String')) returns contents of edit1 as a double
-handles.sedmin = str2double(get(hObject,'String'));
-set(handles.edit1,'String',num2str(handles.sedmin))
-set(handles.edit2,'String',num2str(handles.sedmax))
-set(handles.edit3,'String',num2str(handles.sedstep))
-% test sed. rate info
-
-sr = handles.sedmin:handles.sedstep:handles.sedmax;
-if handles.lang_choice==0
-    sedinfo = [num2str(length(sr)),' test sed. rates: ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
-        ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
-else
-    [~, locb1] = ismember('ec33',handles.lang_id);
-    lang_var = handles.lang_var;
-    sedinfo = [num2str(length(sr)),lang_var{locb1},num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
-        ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
-end
-    
-set(handles.text7,'String',sedinfo)
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit2_Callback(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit2 as text
-%        str2double(get(hObject,'String')) returns contents of edit2 as a double
-handles.sedmax = str2double(get(hObject,'String'));
-set(handles.edit1,'String',num2str(handles.sedmin))
-set(handles.edit2,'String',num2str(handles.sedmax))
-set(handles.edit3,'String',num2str(handles.sedstep))
-% test sed. rate info
-
-sr = handles.sedmin:handles.sedstep:handles.sedmax;
-if handles.lang_choice==0
-    sedinfo = [num2str(length(sr)),' test sed. rates: ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
-        ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
-else
-    [~, locb1] = ismember('ec33',handles.lang_id);
-    lang_var = handles.lang_var;
-    sedinfo = [num2str(length(sr)),lang_var{locb1},num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
-        ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
-end
-
-set(handles.text7,'String',sedinfo)
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit2_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit3_Callback(hObject, eventdata, handles)
-% hObject    handle to edit3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit3 as text
-%        str2double(get(hObject,'String')) returns contents of edit3 as a double
-handles.sedstep = str2double(get(hObject,'String'));
-set(handles.edit1,'String',num2str(handles.sedmin))
-set(handles.edit2,'String',num2str(handles.sedmax))
-set(handles.edit3,'String',num2str(handles.sedstep))
-% test sed. rate info
-
-sr = handles.sedmin:handles.sedstep:handles.sedmax;
-if handles.lang_choice==0
-    sedinfo = [num2str(length(sr)),' test sed. rates: ',num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
-        ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
-else
-    [~, locb1] = ismember('ec33',handles.lang_id);
-    lang_var = handles.lang_var;
-    sedinfo = [num2str(length(sr)),lang_var{locb1},num2str(sr(1),'% 3.3f'),', ', num2str(sr(2),'% 3.3f'),...
-        ', ',num2str(sr(3),'% 3.3f'),', ..., ',num2str(sr(end),'% 3.3f'),' cm/kyr'];
-end
-
-set(handles.text7,'String',sedinfo)
-
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit3_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in checkbox2.
-function checkbox2_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox2
-
-
-
-function edit4_Callback(hObject, eventdata, handles)
-% hObject    handle to edit4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit4 as text
-%        str2double(get(hObject,'String')) returns contents of edit4 as a double
-%
-handles.fmaxdata = str2double(get(hObject,'String'));
-
-if get(handles.checkbox4,'Value')
-    red = get(handles.popupmenu3,'Value');
-else
-    red = 0;
-end
-dat = handles.dat;
-datx = dat(:,1);
-daty = dat(:,2);
-
-try figure(handles.ecocofigspectrum)
-    subplot(2,1,1);xlim([0, handles.fmaxdata])
-    subplot(2,1,2);xlim([0, handles.fmaxdata])
-catch
-    handles.ecocofigspectrum = figure;
-    set(0,'Units','normalized') % set units as normalized
-    set(gcf,'units','norm') % set location
-    set(gcf,'color','w');
-    if handles.lang_choice>0
-        [~, locb] = ismember('ec09',handles.lang_id);
-        lang_var = handles.lang_var;
-        set(gcf,'Name',lang_var{locb});
-    else
-        set(gcf,'Name','Periodogram of Data');
-    end
-    set(handles.ecocofigspectrum,'position',[0.2,0.4,0.2,0.4]) % set position
-    dt = (median(diff(datx)));
-    [p1,f] = periodogram(daty,[],handles.pad,1/dt);  % power of dat
-    % remove AR1 noise
-    if red == 0
-        theored = p1;
-        p = p1;
-    elseif red == 2
-        [theored]=theoredar1ML(daty,f,mean(p1),dt);
-        p = p1 ./ theored;
-        p = p - 1;
-        p(p<0) = 0;   % power removing AR(1) noise
-    elseif red == 1
-        [theored]=theoredar1ML(daty,f,mean(p1),dt);
-        p = p1 - theored;
-        p(p<0) = 0;   % power removing AR(1) noise
-    elseif red == 3
-        % robust
-        theored = redconf_any(f,p1,dt,0.25,2);
-        p = p1 - theored;
-        p(p<0) = 0;   % power removing AR(1) noise
-    end
-    ax1 = subplot(2,1,1);
-    plot(ax1,f,p1,'k','LineWidth',1);
-    hold on;
-    plot(ax1,f,theored,'r','LineWidth',2)
-    
-    if handles.lang_choice==0
-        xlabel(ax1,'Frequency');ylabel(ax1,'Power');title('raw periodogram (& red noise)')
-    else
-        [~, locb1] = ismember('main14',handles.lang_id);
-        [~, locb2] = ismember('main46',handles.lang_id);
-        [~, locb3] = ismember('ec35',handles.lang_id);
-        lang_var = handles.lang_var;
-        xlabel(ax1,lang_var{locb1});ylabel(ax1,lang_var{locb2});title(lang_var{locb3})
-    end
-        
-    xlim([0, handles.fmaxdata])
-    ax2 = subplot(2,1,2);
-    plot(ax2,f,p,'k','LineWidth',1);
-    if handles.lang_choice==0
-        xlabel(ax2,'Frequency');ylabel(ax2,'Power');title('red noise removed ?')
-    else
-        [~, locb1] = ismember('main14',handles.lang_id);
-        [~, locb2] = ismember('main46',handles.lang_id);
-        [~, locb3] = ismember('ec36',handles.lang_id);
-        lang_var = handles.lang_var;
-        xlabel(ax2,lang_var{locb1});ylabel(ax2,lang_var{locb2});title(lang_var{locb3})
-    end
-    
-    %set(ax2, 'YScale', 'log')
-    xlim([0, handles.fmaxdata])
-end
-assignin('base','fmaxdata',handles.fmaxdata)
-% Update handles structure
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit4_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in checkbox4.
-function checkbox4_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox4
-handles.red = get(hObject,'Value');
-if get(handles.checkbox4,'Value')
-    red = get(handles.popupmenu3,'Value');
-else
-    red = 0;
-end
-handles.red = red;
-if handles.red > 0
-    try close(handles.ecocofigspectrum)
-    catch
-    end
-    dat = handles.dat;
-    
-    datx = dat(:,1);
-    daty = dat(:,2);
-    handles.ecocofigspectrum = figure;
-    set(0,'Units','normalized') % set units as normalized
-    set(gcf,'units','norm') % set location
-    set(gcf,'color','w');
-    if handles.lang_choice>0
-        [~, locb] = ismember('ec09',handles.lang_id);
-        lang_var = handles.lang_var;
-        set(gcf,'Name',lang_var{locb});
-    else
-        set(gcf,'Name','Periodogram of Data');
-    end
-    set(handles.ecocofigspectrum,'position',[0.2,0.4,0.2,0.4]) % set position
-    dt = (median(diff(datx)));
-    [p1,f] = periodogram(daty,[],handles.pad,1/dt);  % power of dat
-    % remove AR1 noise
-    if red == 0
-        theored = p1;
-        p = p1;
-    elseif red == 2
-        [theored]=theoredar1ML(daty,f,mean(p1),dt);
-        p = p1 ./ theored;
-        p = p - 1;
-        p(p<0) = 0;   % power removing AR(1) noise
-    elseif red == 1
-        [theored]=theoredar1ML(daty,f,mean(p1),dt);
-        p = p1 - theored;
-        p(p<0) = 0;   % power removing AR(1) noise
-    elseif red == 3
-        % robust
-        theored = redconf_any(f,p1,dt,0.25,2);
-        p = p1 - theored;
-        p(p<0) = 0;   % power removing AR(1) noise
-    end
-    ax1 = subplot(2,1,1);
-    plot(ax1,f,p1,'k','LineWidth',1);
-    hold on;
-    plot(ax1,f,theored,'r','LineWidth',2)
-    
-    if handles.lang_choice==0
-        xlabel(ax1,'Frequency');ylabel(ax1,'Power');title('raw periodogram (& red noise)')
-    else
-        [~, locb1] = ismember('main14',handles.lang_id);
-        [~, locb2] = ismember('main46',handles.lang_id);
-        [~, locb3] = ismember('ec35',handles.lang_id);
-        lang_var = handles.lang_var;
-        xlabel(ax1,lang_var{locb1});ylabel(ax1,lang_var{locb2});title(lang_var{locb3})
-    end   
-    
-    xlim([0, handles.fmaxdata])
-    ax2 = subplot(2,1,2);
-    plot(ax2,f,p,'k','LineWidth',1);
-    if handles.lang_choice==0
-        xlabel(ax2,'Frequency');ylabel(ax2,'Power');title('red noise removed ?')
-    else
-        [~, locb1] = ismember('main14',handles.lang_id);
-        [~, locb2] = ismember('main46',handles.lang_id);
-        [~, locb3] = ismember('ec36',handles.lang_id);
-        lang_var = handles.lang_var;
-        xlabel(ax2,lang_var{locb1});ylabel(ax2,lang_var{locb2});title(lang_var{locb3})
-    end
-    xlim([0, handles.fmaxdata])
-else
-    try close(handles.ecocofigspectrum)
-    catch
-    end
-    dat = handles.dat;
-    
-    datx = dat(:,1);
-    daty = dat(:,2);
-    handles.ecocofigspectrum = figure;
-    set(0,'Units','normalized') % set units as normalized
-    set(gcf,'units','norm') % set location
-    set(gcf,'color','w');
-    if handles.lang_choice>0
-        [~, locb] = ismember('ec09',handles.lang_id);
-        lang_var = handles.lang_var;
-        set(gcf,'Name',lang_var{locb});
-    else
-        set(gcf,'Name','Periodogram of Data');
-    end
-    set(handles.ecocofigspectrum,'position',[0.2,0.4,0.2,0.4]) % set position
-    dt = (median(diff(datx)));
-    [p1,f] = periodogram(daty,[],handles.pad,1/dt);  % power of dat
-    % remove AR1 noise
-    if red == 0
-        theored = p1;
-        p = p1;
-    elseif red == 2
-        [theored]=theoredar1ML(daty,f,mean(p1),dt);
-        p = p1 ./ theored;
-        p = p - 1;
-        p(p<0) = 0;   % power removing AR(1) noise
-    elseif red == 1
-        [theored]=theoredar1ML(daty,f,mean(p1),dt);
-        p = p1 - theored;
-        p(p<0) = 0;   % power removing AR(1) noise
-    elseif red == 3
-        % robust
-        theored = redconf_any(f,p1,dt,0.25,2);
-        p = p1 - theored;
-        p(p<0) = 0;   % power removing AR(1) noise
-    end
-    ax1 = subplot(2,1,1);
-    plot(ax1,f,p1,'k','LineWidth',1);
-    hold on;
-    plot(ax1,f,theored,'r','LineWidth',2)
-    if handles.lang_choice==0
-        xlabel(ax1,'Frequency');ylabel(ax1,'Power');
-    else
-        [~, locb1] = ismember('main14',handles.lang_id);
-        [~, locb2] = ismember('main46',handles.lang_id);
-        lang_var = handles.lang_var;
-        xlabel(ax1,lang_var{locb1});ylabel(ax1,lang_var{locb2});
-    end
-
-    xlim([0, handles.fmaxdata])
-
-    ax2 = subplot(2,1,2);
-    plot(ax2,f,p,'k','LineWidth',1);
-    if handles.lang_choice==0
-        xlabel(ax2,'Frequency');ylabel(ax2,'Power');
-    else
-        [~, locb1] = ismember('main14',handles.lang_id);
-        [~, locb2] = ismember('main46',handles.lang_id);
-        lang_var = handles.lang_var;
-        xlabel(ax2,lang_var{locb1});ylabel(ax2,lang_var{locb2});
-    end
-    xlim([0, handles.fmaxdata])
-end
-% Update handles structure
-guidata(hObject, handles);
-
-
-% --- Executes on button press in checkbox4.
-function checkbox4_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to checkbox4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% --- Executes on selection change in popupmenu3.
-function popupmenu3_Callback(hObject, eventdata, handles)
-% hObject    handle to popupmenu3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu3 contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from popupmenu3
-if get(handles.checkbox4,'Value')
-    red = get(handles.popupmenu3,'Value');
-else
-    red = 0;
-end
-handles.red = red;
-if handles.red > 0
-    try close(handles.ecocofigspectrum)
-    catch
-    end
-    dat = handles.dat;
-    
-    datx = dat(:,1);
-    daty = dat(:,2);
-    handles.ecocofigspectrum = figure;
-    set(0,'Units','normalized') % set units as normalized
-    set(gcf,'units','norm') % set location
-    set(gcf,'color','w');
-    if handles.lang_choice>0
-        [~, locb] = ismember('ec09',handles.lang_id);
-        lang_var = handles.lang_var;
-        set(gcf,'Name',lang_var{locb});
-    else
-        set(gcf,'Name','Periodogram of Data');
-    end
-    set(handles.ecocofigspectrum,'position',[0.2,0.4,0.2,0.4]) % set position
-    dt = (median(diff(datx)));
-    [p1,f] = periodogram(daty,[],handles.pad,1/dt);  % power of dat
-    % remove AR1 noise
-    if red == 0
-        theored = p1;
-        p = p1;
-    elseif red == 2
-        [theored]=theoredar1ML(daty,f,mean(p1),dt);
-        p = p1 ./ theored;
-        p = p - 1;
-        p(p<0) = 0;   % power removing AR(1) noise
-    elseif red == 1
-        [theored]=theoredar1ML(daty,f,mean(p1),dt);
-        p = p1 - theored;
-        p(p<0) = 0;   % power removing AR(1) noise
-    elseif red == 3
-        % robust
-        theored = redconf_any(f,p1,dt,0.25,2);
-        p = p1 - theored;
-        p(p<0) = 0;   % power removing AR(1) noise
-    end
-    ax1 = subplot(2,1,1);
-    plot(ax1,f,p1,'k','LineWidth',1);
-    hold on;
-    plot(ax1,f,theored,'r','LineWidth',2)
-    if handles.lang_choice==0
-        xlabel(ax1,'Frequency');ylabel(ax1,'Power');
-    else
-        [~, locb1] = ismember('main14',handles.lang_id);
-        [~, locb2] = ismember('main46',handles.lang_id);
-        lang_var = handles.lang_var;
-        xlabel(ax1,lang_var{locb1});ylabel(ax1,lang_var{locb2});
-    end
-
-    xlim([0, handles.fmaxdata])
-
-    ax2 = subplot(2,1,2);
-    plot(ax2,f,p,'k','LineWidth',1);
-    if handles.lang_choice==0
-        xlabel(ax2,'Frequency');ylabel(ax2,'Power');
-    else
-        [~, locb1] = ismember('main14',handles.lang_id);
-        [~, locb2] = ismember('main46',handles.lang_id);
-        lang_var = handles.lang_var;
-        xlabel(ax2,lang_var{locb1});ylabel(ax2,lang_var{locb2});
-    end
-    %set(ax2, 'YScale', 'log')
-    xlim([0, handles.fmaxdata])
-    
-end
-% Update handles structure
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function popupmenu3_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to popupmenu3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit5_Callback(hObject, eventdata, handles)
-% hObject    handle to edit5 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit5 as text
-%        str2double(get(hObject,'String')) returns contents of edit5 as a double
-age = str2double(get(hObject,'String'));
-if age> 250
-    f2  = 0.08;
-    handles.f2 = f2;
-    set(handles.edit7,'String',num2str(f2))
-end
-handles.age = age;
-if age < 0
-    if handles.lang_choice==0
-        errordlg('Error: Age of the data must be no smaller than 0')
-    else
-        [~, locb1] = ismember('ec37',handles.lang_id);
-        lang_var = handles.lang_var;
-        errordlg(lang_var{locb1})
-    end
-    return;
-elseif age == 0 
-    age = .001;
-elseif age > 4000
-    if handles.lang_choice==0
-        errordlg('Error: Age of the data is too large')
-    else
-        [~, locb1] = ismember('ec38',handles.lang_id);
-        lang_var = handles.lang_var;
-        errordlg(lang_var{locb1})
-    end
-    
-end
-if age > 0
-    o7 = getBerger89Period(age);
-end
-orbit7 = [num2str(o7(1),'% .1f'),' ',num2str(o7(2),'% .1f'),' ',...
-    num2str(o7(3),'% .1f'),' ',num2str(o7(4),'% .1f'),' ',...
-    num2str(o7(5),'% .1f'),' ',num2str(o7(6),'% .1f'),' ',num2str(o7(7),'% .1f')];
-set(handles.text20,'String',orbit7)
-
-if get(handles.radiobutton6,'Value')
-    handles.orbit7 = o7;
-end
-
-% Ages for orbit7, equations follow Yao et al., 2015
-% EPSL and Laskar et al., 2004 A&A
-age_obl = 41 - 0.0332 * age;
-age_p1 = 22.43 - 0.0108 * age;
-age_p2 = 23.75 - 0.0121 * age;
-age_p3 = 19.18 - 0.0079 * age;
-o7 = [405 125 95 age_obl age_p2 age_p1 age_p3];
-orbit7 = [num2str(o7(1),'% .1f'),' ',num2str(o7(2),'% .1f'),' ',...
-    num2str(o7(3),'% .1f'),' ',num2str(o7(4),'% .1f'),' ',...
-    num2str(o7(5),'% .1f'),' ',num2str(o7(6),'% .1f'),' ',num2str(o7(7),'% .1f')];
-set(handles.text21,'String',orbit7)
-
-[daymin, daymax,amin, amax, kmin, kmax, obmin,obmax, o1min, o1max, p1min, p1max,...
-    p2min, p2max, p3min, p3max, p4min, p4max] = MilankovitchCal(age);
-age_obl = 0.5 * (o1min + o1max);
-age_p2 = 0.5 * (p1min + p1max); 
-age_p1 = 0.5 * (p2min + p2max); 
-age_p3 = 0.5 * (p3min + p3max);
-o7waltham = [405 125 95 age_obl age_p2 age_p1 age_p3];
-orbit7waltham = [num2str(o7waltham(1),'% .1f'),' ',num2str(o7waltham(2),'% .1f'),' ',...
-    num2str(o7waltham(3),'% .1f'),' ',num2str(o7waltham(4),'% .1f'),' ',...
-    num2str(o7waltham(5),'% .1f'),' ',num2str(o7waltham(6),'% .1f'),' ',num2str(o7waltham(7),'% .1f')];
-set(handles.edit11,'String',orbit7waltham)
-
-if get(handles.radiobutton7,'Value')
-    handles.orbit7  = o7;    
-end
-
-if get(handles.radiobutton8,'Value')
-    handles.orbit7 = strread(get(handles.edit11,'String'));
-end
-% Update handles structure
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit5_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit5 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit6_Callback(hObject, eventdata, handles)
-% hObject    handle to edit6 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit6 as text
-%        str2double(get(hObject,'String')) returns contents of edit6 as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function edit6_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit6 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit7_Callback(hObject, eventdata, handles)
-% hObject    handle to edit7 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit7 as text
-%        str2double(get(hObject,'String')) returns contents of edit7 as a double
-handles.f2 = str2double(get(hObject,'String'));
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit7_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit7 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit8_Callback(hObject, eventdata, handles)
-% hObject    handle to edit8 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit8 as text
-%        str2double(get(hObject,'String')) returns contents of edit8 as a double
-handles.nsim = str2double(get(hObject,'String'));
-guidata(hObject, handles);
-
-
-% --- Executes during object creation, after setting all properties.
-function edit8_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit8 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit9_Callback(hObject, eventdata, handles)
-% hObject    handle to edit9 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit9 as text
-%        str2double(get(hObject,'String')) returns contents of edit9 as a double
-handles.window = str2double(get(hObject,'String'));
-
-dat = zeropad2(handles.datbackup,handles.window,handles.padtype);
-handles.dat = dat;
-try figure(handles.ecocofigdata)
-    if handles.flipy == 1
-        plot(fliplr(dat(:,2)),dat(:,1),'k')
-    else
-        plot(dat(:,2),dat(:,1),'k')
-    end
-    if handles.lang_choice==0
-        xlabel('Value'); ylabel(['Depth (',handles.unit,')'])
-    else
-        [~, locb1] = ismember('main24',handles.lang_id);
-        [~, locb2] = ismember('main23',handles.lang_id);
-        lang_var = handles.lang_var;
-        xlabel(lang_var{locb1}); ylabel([lang_var{locb2},' (',handles.unit,')'])
-    end
-    ylim([min(dat(:,1)),max(dat(:,1))]);
-catch
-    handles.ecocofigdata = figure;
-    set(0,'Units','normalized') % set units as normalized
-    set(gcf,'units','norm') % set location
-    set(gcf,'color','w');
-        if lang_choice>0
-            [~, locb] = ismember('main02',lang_id);
-            set(gcf,'Name',lang_var{locb});
-        else
-            set(gcf,'Name','Data');
-        end
-    set(handles.ecocofigdata,'position',[0.01,0.01,0.2,0.9]) % set position
-    if handles.flipy == 1
-        plot(fliplr(dat(:,2)),dat(:,1),'k')
-    else
-        plot(dat(:,2),dat(:,1),'k')
-    end
-    ylim([min(dat(:,1)),max(dat(:,1))]);
-
-    if handles.lang_choice==0
-        xlabel('Value'); ylabel(['Depth (',handles.unit,')'])
-    else
-        [~, locb1] = ismember('main24',handles.lang_id);
-        [~, locb2] = ismember('main23',handles.lang_id);
-        lang_var = handles.lang_var;
-        xlabel(lang_var{locb1}); ylabel([lang_var{locb2},' (',handles.unit,')'])
-    end
-end
-
-guidata(hObject, handles);
-
-
-% --- Executes during object creation, after setting all properties.
-function edit9_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit9 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit10_Callback(hObject, eventdata, handles)
-% hObject    handle to edit10 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit10 as text
-%        str2double(get(hObject,'String')) returns contents of edit10 as a double
-handles.step = str2double(get(hObject,'String'));
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit10_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit10 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in checkbox5.
-function checkbox5_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox5 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox5
-
-handles.flipy = get(hObject,'Value');
-
-dat = handles.dat;
-try figure(handles.ecocofigdata)
-    if handles.flipy == 0
-        set(gca, 'YDir','reverse')
-    else
-        set(gca, 'YDir','normal')
-    end
-catch
-    handles.ecocofigdata = figure;
-    set(0,'Units','normalized') % set units as normalized
-    set(gcf,'units','norm') % set location
-    set(gcf,'color','w');
-        if lang_choice>0
-            [~, locb] = ismember('main02',lang_id);
-            set(gcf,'Name',lang_var{locb});
-        else
-            set(gcf,'Name','Data');
-        end
-    set(handles.ecocofigdata,'position',[0.01,0.01,0.2,0.9]) % set position
-    if handles.flipy == 1
-        plot(fliplr(dat(:,2)),dat(:,1),'k')
-    else
-        plot(dat(:,2),dat(:,1),'k')
-    end
-    ylim([min(dat(:,1)),max(dat(:,1))]);
-    
-    if handles.lang_choice==0
-        xlabel('Value'); ylabel(['Depth (',handles.unit,')'])
-    else
-        [~, locb1] = ismember('main24',handles.lang_id);
-        [~, locb2] = ismember('main23',handles.lang_id);
-        lang_var = handles.lang_var;
-        xlabel(lang_var{locb1}); ylabel([lang_var{locb2},' (',handles.unit,')'])
-    end
-end
-
-guidata(hObject, handles);
-
-
-function edit11_Callback(hObject, eventdata, handles)
-% hObject    handle to edit11 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit11 as text
-%        str2double(get(hObject,'String')) returns contents of edit11 as a double
-if get(handles.radiobutton8,'Value')
-    handles.orbit7 = strread(get(handles.edit11,'String'));
-end
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit11_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit11 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in checkbox6.
-function checkbox6_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox6 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox6
-
-
-
-function edit12_Callback(hObject, eventdata, handles)
-% hObject    handle to edit12 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit12 as text
-%        str2double(get(hObject,'String')) returns contents of edit12 as a double
-handles.pad = str2double(get(hObject,'String'));
-if handles.pad < 2000
-    handles.pad = 2000;
-    if handles.lang_choice==0
-        warndlg('Padding number changed to 2000')
-    else
-        [~, locb1] = ismember('ec39',handles.lang_id);
-        lang_var = handles.lang_var;
-        warndlg(lang_var{locb1})
-    end
-    
-    set(handles.edit12,'String',num2str(handles.pad))
-end
-guidata(hObject, handles);
-
-
-% --- Executes during object creation, after setting all properties.
-function edit12_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit12 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit13_Callback(hObject, eventdata, handles)
-% hObject    handle to edit13 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit13 as text
-%        str2double(get(hObject,'String')) returns contents of edit13 as a double
-handles.slices = str2double(get(hObject,'String'));
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function edit13_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit13 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in pushbuttonOK.
-function pushbuttonOK_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbuttonOK (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-data = handles.dat;
-srm = mean(diff(data(:,1))); % well, might dt
-npts = handles.npts;
-t1 = 1000 * handles.age;
-f1 = 0.0;
-f2 = handles.f2;
-pad = handles.pad;
-p1 = 1;  % weight of eccentricity
-p2 = .6;  % weight of obliquity
-p3 = .5;  % weight of precession
-[dat_dir,dat_name,ext] = fileparts(handles.filename);
-handles.ext = ext;
-%
-orbit7 = handles.orbit7;
-target = period2spectrum(orbit7,t1-1000,t1+1000,1,f1,f2,1,pad);
-if get(handles.radiobutton6,'Value')
-    % berger89
-    target = period2spectrumB(orbit7,t1-1000,t1+1000,1,f1,f2,1,pad);
-end
-if get(handles.radiobutton7,'Value')
-    if t1 > 249000
-        target = period2spectrum(orbit7,t1-1000,t1+1000,1,f1,f2,1,pad);
-    else
-        % la04
-        if and(t1 <= 248000,t1 > 1000)
-            target = gentarget(4,t1-1000,t1+1000,f1,f2,p1,p2,p3,pad,1);
-        elseif t1 > 248000
-            target = gentarget(4,247000,249000,f1,f2,p1,p2,p3,pad,1);
-        elseif t1 <= 1000
-            target = gentarget(4,1,2000,f1,f2,p1,p2,p3,pad,1);
-        end
-    end
-end
-%
-sr1 = handles.sedmin;
-sr2 = handles.sedmax;
-srstep = handles.sedstep;
-adjust = 0; % no adjust weight of etp
-nsim = handles.nsim;
-red = handles.red;
-plotn = 1; % yes, plot figure
-slices = handles.slices;
-corrmethod = handles.corrmethod;
-if corrmethod == 1
-    method = 'Pearson';
-else
-    method = 'Spearman';
-end
-
-if handles.lang_choice>0
-    lang_var = handles.lang_var;
-    [~, locb] = ismember('ec40',handles.lang_id);
-    ec40 = lang_var{locb};
-    [~, locb] = ismember('ec41',handles.lang_id);
-    ec41 = lang_var{locb};
-    [~, locb] = ismember('ec42',handles.lang_id);
-    ec42 = lang_var{locb};
-    [~, locb] = ismember('ec43',handles.lang_id);
-    ec43 = lang_var{locb};
-    [~, locb] = ismember('ec44',handles.lang_id);
-    ec44 = lang_var{locb};
-    [~, locb] = ismember('ec45',handles.lang_id);
-    ec45 = lang_var{locb};
-    [~, locb] = ismember('ec46',handles.lang_id);
-    ec46 = lang_var{locb};
-    [~, locb] = ismember('main46',handles.lang_id);
-    main46 = lang_var{locb};
-    
-    
-    [~, locb] = ismember('dd38',handles.lang_id);
-    dd38 = lang_var{locb};
-    [~, locb] = ismember('dd39',handles.lang_id);
-    dd39 = lang_var{locb};
-    [~, locb] = ismember('dd40',handles.lang_id);
-    dd40 = lang_var{locb};
-    [~, locb] = ismember('dd41',handles.lang_id);
-    dd41 = lang_var{locb};
-    [~, locb] = ismember('main31',handles.lang_id);
-    main31 = lang_var{locb};
-end
-if handles.lang_choice==0 
-    disp('>> Wait ...')
-else
-    disp(ec40)
-end
-
-if handles.ecocoS == 0
-    % COCO model
-    tic
-    f = figure;
-    set(gcf,'color','w');
-    ax1 = subplot(2,1,1);
-    plot(ax1,target(:,1),target(:,2),'LineWidth',1)
-    xlim(ax1,[f1 f2])
-    set(ax1,'XMinorTick','on','YMinorTick','on')
-    if handles.lang_choice==0 
-        xlabel(ax1,'Frequency (cycle/kyr)')
-        ylabel(ax1,'Power')
-        title(ax1,'Target power spectrum')
-    else
-        xlabel(ax1,ec41)
-        ylabel(ax1,main46)
-        title(ax1,ec42)
-    end
-    %
-    data = handles.datbackup;
-    [corrCI,corr_h0,corry] = corrcoefslices_rank(data,target,orbit7,srm,pad,sr1,sr2,srstep,adjust,red,nsim,plotn,slices,method);
-    cocoFigure = gcf;
-    toc
-else
-    % eCOCO model
-    window = handles.window;
-    stepM = handles.step;  % this 
-    step = round(stepM/srm); % sliding step in meter to sliding step in number
-    delinear = 0;
-    slices = 1;
-    time_0pad = handles.time_0pad;
-    handles.padedgestyle = get(handles.popupmenu1,'Value');
-    if handles.lang_choice==0 
-        if time_0pad == 1
-            if handles.padedgestyle == 1
-                padedgemodel = 'zero';
-            elseif handles.padedgestyle == 2
-                padedgemodel = 'mirror';
-            elseif handles.padedgestyle == 3
-                padedgemodel = 'mean';
-            elseif handles.padedgestyle == 4
-                padedgemodel = 'random';
+        function onResize()
+            app = getappdata(app.UIFigure,'ECOCO_APP');
+            if isempty(app), return; end
+            w = app.UIFigure.Position(3); h = app.UIFigure.Position(4);
+            if w < 1024 || h < 1010
+                app.UIFigure.Position(3:4) = [max(w,1024), max(h,1010)];
+                w = app.UIFigure.Position(3);
             end
-            data = zeropad2(handles.datbackup,handles.window,handles.padtype);
-        else
-            padedgemodel = 'no';
-            data = handles.datbackup;
+            m = 18;
+            gap = 12;
+
+            hMethod = 78;
+            hData = 112;
+            hPeriod = 114;
+            hSed = 126;
+            hTarget = 184;
+            hCorr = 84;
+            hBottom = 172;
+
+            y = m + 10; % bottom anchor
+
+            app.PMC.Position = [m y 190 hBottom];
+            app.ENsim.Position = [20 66 120 34];
+            app.LTimes.Position = [90 32 70 26];
+
+            app.PSlide.Position = [230 y 320 hBottom];
+            app.LSize.Position = [16 104 70 28];
+            app.ESize.Position = [90 106 120 30];
+            app.LSizeUnit.Position = [214 104 90 28];
+            app.LStep.Position = [16 64 70 28];
+            app.EStep.Position = [90 66 120 30];
+            app.LStepUnit.Position = [214 64 90 28];
+            app.LTargetUpdate.Position = [16 22 105 28];
+            app.DTargetUpdate.Position = [130 24 170 30];
+
+            app.BPlotE.Position = [570 y+110 220 52];
+            % The ridge is tracked automatically during every eCOCO run.
+            app.BRun.Position = [810 y+16 100 146];
+
+            y = y + hBottom + gap;
+            app.PCorr.Position = [m y w-2*m hCorr];
+            app.BGCorr.Position = [10 4 app.PCorr.Position(3)-20 56];
+            app.RSpearman.Position = [20 16 140 28];
+            app.RPearson.Position = [260 16 140 28];
+
+            y = y + hCorr + gap;
+            app.PTarget.Position = [m y w-2*m hTarget];
+            app.LAge.Position =     [20 120 180 28];
+            app.EAge.Position =     [300 122 100 30];
+            app.LMa.Position =      [410 120 40 28];
+            app.LMaxFreq.Position = [560 120 120 28];
+            app.EF2.Position =      [700 122 110 30];
+            app.LUnitFreq.Position =[820 120 60 28];
+            
+            app.BGOrbit.Position = [12 10 app.PTarget.Position(3)-24 90];
+            app.RLaskar.Position = [10  62 180 28];
+            app.LOrbit2.Position = [300 62 460 28];
+            app.RUser.Position =      [10 14 200 28];
+            app.EOrbitUser.Position = [300 14 460 30];
+            app.BWaltham.Position =   [780 14 130 30];
+
+            y = y + hTarget + gap;
+            app.PSed.Position = [m y w-2*m hSed];
+            app.LSedMin.Position = [40 52 110 28];
+            app.ESedMin.Position = [170 54 100 30];
+            app.LSedMax.Position = [310 52 110 28];
+            app.ESedMax.Position = [440 54 100 30];
+            app.LSedStep.Position = [580 52 80 28];
+            app.ESedStep.Position = [650 54 80 30];
+            app.LSedUnit.Position = [760 52 100 28];
+            app.LSedInfo.Position = [110 16 w-300 30];
+
+            y = y + hSed + gap;
+            app.PPeriod.Position = [m y w-2*m hPeriod];
+            app.CShowPeriod.Position = [20 38 130 28];
+            app.LMaxF.Position = [210 28 120 48];
+            app.EMaxF.Position = [360 36 90 30];
+            app.LSlices.Position = [480 28 120 48];
+            app.ESlices.Position = [620 36 70 30];
+            
+            app.CRed.Position = [700 52 260 28];
+            app.DRed.Position = [700 16 280 30];
+
+            y = y + hPeriod + gap;
+            app.PData.Position = [m y w-2*m hData];
+            app.LData.Position = [20 56 80 28];
+            app.LDataName.Position = [120 56 520 28];
+            app.C0Pad.Position = [20 12 110 28];
+            app.EPad.Position = [200 14 100 30];
+            app.CPadEdge.Position = [330 12 160 28];
+            app.DPadEdge.Position = [500 14 180 30];
+            app.CFlipY.Position = [700 12 170 28];
+
+            y = y + hData + gap;
+            app.PMethod.Position = [m y w-2*m hMethod];
+
+            app.BGMethod.Position = [8 15 230 26];
+            app.RCOCO.Position =  [10 1 90 24];
+            app.RECOCO.Position = [120 1 100 24];
+            app.LCOCOMethod.Position = [270 14 105 28];
+            app.DCOCOMethod.Position = [380 14 235 30];
+
+            app.BGEcoCalc.Position = [620 2 365 50];
+            app.RFast.Position = [5 13 90 24];
+            app.RAccurate.Position = [98 13 110 24];
+            app.RInterleaved.Position = [212 13 148 24];
+
+            setappdata(app.UIFigure,'ECOCO_APP',app);
         end
-    else
-        if time_0pad == 1
-            if handles.padedgestyle == 1
-                padedgemodel = dd38;
-            elseif handles.padedgestyle == 2
-                padedgemodel = dd39;
-            elseif handles.padedgestyle == 3
-                padedgemodel = dd40;
-            elseif handles.padedgestyle == 4
-                padedgemodel = dd41;
+
+        function loadDefaultsToUI()
+            app.EOrbitUser.Value = orbitString(app.orbit9);
+            app.LOrbit2.Text = orbitString(app.orbit9);
+            app.DTargetUpdate.Value = app.anchorFraction;
+            onPadEdgeToggle();
+        end
+
+        function onPadToggle()
+            tf = app.C0Pad.Value;
+            app.EPad.Enable = onoff(tf);
+            markSettingsChanged();
+        end
+
+        function onPadEdgeToggle()
+            isEco = app.mode == 2;
+            isCrossfit = isEco && app.ecocoCalcMode == 2;
+            isInterleaved = isEco && app.ecocoCalcMode == 3;
+            if isCrossfit
+                % Blocked eCOCO uses the predeclared deterministic
+                % half-window zero edge requested by the method.  Do not
+                % let mirror/mean/random padding silently change its
+                % training and validation records.
+                app.CPadEdge.Value = true;
+                app.DPadEdge.Value = 'zero';
+                app.padtype = 1;
+            elseif isInterleaved
+                % Synthetic edge values cannot be treated as held-out odd
+                % or even observations. I-eCOCO therefore uses complete
+                % raw-data windows only.
+                app.CPadEdge.Value = false;
             end
-            data = zeropad2(handles.datbackup,handles.window,handles.padtype);
-        else
-            padedgemodel = main31;
-            data = handles.datbackup;
+            app.CPadEdge.Enable = onoff( ...
+                isEco && ~isCrossfit && ~isInterleaved);
+            app.DPadEdge.Enable = onoff( ...
+                isEco && app.CPadEdge.Value && ~isCrossfit && ~isInterleaved);
+            markSettingsChanged();
         end
-        
-    end
-    tic
-    [prt_sr,out_depth,out_ecc,out_ep,out_eci,out_ecoco,out_ecocorb,out_norbit,sr_p] = ...
-        ecoco(data,target,orbit7,window,srm,step,delinear,red,pad,sr1,sr2,srstep,nsim,adjust,slices,plotn);
-    toc
-end
-if handles.lang_choice==0 
-    % for output
-    if red == 0
-        redmodel = 'no';
-    elseif red == 2
-        redmodel = 'classic AR1 removed (F./Fred - 1)';
-    elseif red == 1
-        redmodel = 'classic AR1 removed (F - Fred)';
-    elseif red == 3
-        redmodel = 'robust AR1 removed (F - Fred)';
-    end
-else
-    if red == 0
-        redmodel = main31;
-    elseif red == 2
-        redmodel = ec43;
-    elseif red == 1
-        redmodel = ec44;
-    elseif red == 3
-        redmodel = ec45;
-    end
-end
-if get(handles.radiobutton6,'Value')
-    solutionmodel = 'Berger89';
-end
-if get(handles.radiobutton7,'Value')
-    solutionmodel = 'Laskar04';
-end
-if get(handles.radiobutton8,'Value')
-    if handles.lang_choice==0 
-        solutionmodel = 'User-defined';
-    else
-        solutionmodel = ec46;
-    end
-end
-if handles.lang_choice==0 
-    param1 = ['Data',': ',num2str(data(1,1)),' to ',num2str(data(end,1)),'m. Sampling rate: ', num2str(srm),'. Number of data points: ', num2str(npts)];
-    param2 = ['Data: Number of slices is ', num2str(slices),'. Number of simulations is ',num2str(nsim)];
-    param3 = ['Data: Remove red noise model: ',num2str(redmodel),'. Correlation method: ',method];
-    param5 = ['Tested sedimentation rate step is ', num2str(srstep),' cm/kyr from ',num2str(sr1),' to ',num2str(sr2),' cm/kyr'];
-    param6 = ['Target age is ',num2str(t1),' ka. Zero padding is ',num2str(pad), '. Freq. is ',num2str(f1),'-',num2str(f2),' cycles/kyr'];
-    param7 = ['Astronomical solution: ', solutionmodel];
-    param8 = ['Astronomical cycles are: ',num2str(orbit7)];
 
-    if handles.ecocoS == 0
-        param4 = ['Zero padding for the data is ',num2str(pad)];
-    else
-        handles.padedgestyle = get(handles.popupmenu1,'Value');
-        param4 = ['Zero padding for each window is ',num2str(pad),'; Zero padding for the edge of data: ',padedgemodel];
-    end
-else
-
-    lang_var = handles.lang_var;
-    [~, locb] = ismember('main02',handles.lang_id);
-    main02 = lang_var{locb};
-    [~, locb] = ismember('main17',handles.lang_id);
-    main17 = lang_var{locb};
-    [~, locb] = ismember('main16',handles.lang_id);
-    main16 = lang_var{locb};
-    [~, locb] = ismember('menu46',handles.lang_id);
-    menu46 = lang_var{locb};
-    [~, locb] = ismember('ec47',handles.lang_id);
-    ec47 = lang_var{locb};
-    [~, locb] = ismember('ec49',handles.lang_id);
-    ec49 = lang_var{locb};
-    [~, locb] = ismember('ec48',handles.lang_id);
-    ec48 = lang_var{locb};
-    [~, locb] = ismember('ec50',handles.lang_id);
-    ec50 = lang_var{locb};
-
-
-    [~, locb] = ismember('ec51',handles.lang_id);
-    ec51 = lang_var{locb};
-    [~, locb] = ismember('ec52',handles.lang_id);
-    ec52 = lang_var{locb};
-    [~, locb] = ismember('ec53',handles.lang_id);
-    ec53 = lang_var{locb};
-    [~, locb] = ismember('ec54',handles.lang_id);
-    ec54 = lang_var{locb};
-    [~, locb] = ismember('ec55',handles.lang_id);
-    ec55 = lang_var{locb};
-    [~, locb] = ismember('ec56',handles.lang_id);
-    ec56 = lang_var{locb};
-    [~, locb] = ismember('ec57',handles.lang_id);
-    ec57 = lang_var{locb};
-    [~, locb] = ismember('ec58',handles.lang_id);
-    ec58 = lang_var{locb};
-    [~, locb] = ismember('a222',handles.lang_id);
-    a222 = lang_var{locb};
-    [~, locb] = ismember('main14',handles.lang_id);
-    main14 = lang_var{locb};
-    [~, locb] = ismember('menu51',handles.lang_id);
-    menu51 = lang_var{locb};
-
-
-    param1 = [main02,': ',num2str(data(1,1)),main17,num2str(data(end,1)),'m. ',menu46,': ', num2str(srm),ec47, num2str(npts)];
-    param2 = [main02,ec48, num2str(slices),'. ',ec49,num2str(nsim)];
-    param3 = [main02,': ',ec50,': ',num2str(redmodel),'. ',ec51,': ',method];
-    param5 = [ec52, num2str(srstep),' cm/kyr ',main16,num2str(sr1),main17,num2str(sr2),' cm/kyr'];
-    param6 = [ec53,num2str(t1),' ka. ',a222,num2str(pad), '. ',main14,num2str(f1),'-',num2str(f2),ec54];
-    param7 = [menu51,': ', solutionmodel];
-    param8 = [ec55,': ',num2str(orbit7)];
-
-    if handles.ecocoS == 0
-        param4 = [ec56,num2str(pad)];
-    else
-        handles.padedgestyle = get(handles.popupmenu1,'Value');
-        param4 = [ec57,num2str(pad),'; ',ec58,': ',padedgemodel];
-    end
-end
-
-CDac_pwd;
-
-if handles.ecocoS == 0
-    
-    % Log name
-    log_name = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-COCO-log',ext];
-    log_name_CI = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-COCO-data',ext];
-    log_name_coco = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-COCO.fig'];
-    if exist([pwd,handles.slash_v,log_name]) || exist([pwd,handles.slash_v,log_name_coco])
-        for i = 1:100
-            log_name = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-COCO-log-',num2str(i),ext];
-            log_name_CI = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-COCO-data-',num2str(i),ext];
-            log_name_coco = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-COCO-',num2str(i),'.fig'];
-            if exist([pwd,handles.slash_v,log_name]) || exist([pwd,handles.slash_v,log_name_coco])
+        function onRedToggle()
+            if app.CRed.Value
+                app.DRed.Enable = 'on';
             else
-                break
+                app.DRed.Enable = 'off';
             end
+            markSettingsChanged();
         end
-    end
-    figure(cocoFigure);
-    savefig(log_name_coco) % save ac.fig automatically
-    data_COCOCI = [corrCI(:,1:2),corr_h0(:,1:2)];   % corrCI,corr_h0
-    dlmwrite(log_name_CI, data_COCOCI, 'delimiter', ',', 'precision', 9); 
-    
-else
-    % Log name
-    log_name = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-',num2str(window),'win-ECOCO-log',ext];
-    acfig_name = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-',num2str(window),'win-ECOCO.AC.fig'];
-    log_name_eCOCOdata = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-',num2str(window),'win-ECOCO.data.xlsx'];
-    savefile_name =[dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-',num2str(window),'win-ECOCO.Optimal',ext];
-    if exist([pwd,handles.slash_v,acfig_name]) || exist([pwd,handles.slash_v,log_name]) || exist([pwd,handles.slash_v,savefile_name])
-        for i = 1:100
-            acfig_name = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-',num2str(window),'win-ECOCO-',num2str(i),'.AC.fig'];
-            log_name   = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-',num2str(window),'win-ECOCO-',num2str(i),'.log',ext];
-            log_name_eCOCOdata = [dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-',num2str(window),'win-ECOCO.data-',num2str(i),'.xlsx'];
-            savefile_name =[dat_name,'-',num2str(nsim),'sim-',num2str(slices),'slice-',num2str(window),'win-ECOCO-',num2str(i),'.Optimal',ext];
-            if exist([pwd,handles.slash_v,acfig_name]) || exist([pwd,handles.slash_v,log_name]) || exist([pwd,handles.slash_v,savefile_name])
+
+        function onModeChanged()
+            previousMode = app.mode;
+            isEco = app.RECOCO.Value;
+            app.mode = 1 + double(isEco);
+            updateCocoTargetMode();
+            isCv = ~isEco && isCvCocoTargetMode(app.cocoTargetMode);
+            app.CPadEdge.Visible = onoff(isEco);
+            app.DPadEdge.Visible = onoff(isEco);
+            app.CFlipY.Visible = onoff(isEco);
+            app.PSlide.Visible = onoff(isEco);
+            app.BPlotE.Visible = onoff(isEco);
+            if isEco
+                if previousMode == 1
+                    app.showPeriodCoco = app.CShowPeriod.Value;
+                end
+                app.CShowPeriod.Value = false;
             else
-                break
+                app.CShowPeriod.Value = app.showPeriodCoco;
+            end
+            app.CShowPeriod.Enable = onoff(~isEco);
+            app.DCOCOMethod.Enable = onoff(~isEco);
+            app.ESlices.Enable = onoff(~isEco && ~isCv);
+            app.EMaxF.Enable = onoff(isEco || ~isCv);
+            app.RFast.Enable = onoff(isEco);
+            app.RAccurate.Enable = onoff(isEco);
+            app.RInterleaved.Enable = onoff(isEco);
+            app.DTargetUpdate.Enable = onoff( ...
+                isEco && app.ecocoCalcMode == 2);
+            invalidateRunState();
+            onPadEdgeToggle();
+            setappdata(app.UIFigure,'ECOCO_APP',app);
+            onResize();
+        end
+
+        function onShowPeriodChanged()
+            if app.mode == 1
+                app.showPeriodCoco = app.CShowPeriod.Value;
+            end
+            markSettingsChanged();
+        end
+
+        function onCocoMethodChanged()
+            updateCocoTargetMode();
+            isCv = app.mode == 1 && isCvCocoTargetMode(app.cocoTargetMode);
+            app.ESlices.Enable = onoff(app.mode == 1 && ~isCv);
+            app.EMaxF.Enable = onoff(app.mode == 2 || ~isCv);
+            invalidateRunState();
+            setappdata(app.UIFigure,'ECOCO_APP',app);
+        end
+
+        function updateCocoTargetMode()
+            switch app.DCOCOMethod.Value
+                case {'cvCOCO — Blocked','cvCOCO'}
+                    app.cocoTargetMode = 'cv9b';
+                case {'cvCOCO — Interleaved','Interleaved cvCOCO'}
+                    app.cocoTargetMode = 'icv9b';
+                case 'Adaptive COCO'
+                    app.cocoTargetMode = 'adaptive9b';
+                case 'Fixed-target COCO'
+                    app.cocoTargetMode = 'fixed9';
+                otherwise
+                    error('eCOCOGUI:UnknownCOCOMethod', ...
+                        'Unknown COCO method: %s.',app.DCOCOMethod.Value);
+            end
+        end
+
+        function onEcoCalcChanged()
+            if app.RAccurate.Value
+                app.ecocoCalcMode = 2;
+                app.DPadEdge.Value = 'zero';
+                app.padtype = 1;
+            elseif app.RInterleaved.Value
+                app.ecocoCalcMode = 3;
+                app.CPadEdge.Value = false;
+            else
+                app.ecocoCalcMode = 1;
+            end
+            app.DTargetUpdate.Enable = onoff( ...
+                app.mode == 2 && app.ecocoCalcMode == 2);
+            invalidateRunState();
+            onPadEdgeToggle();
+            setappdata(app.UIFigure,'ECOCO_APP',app);
+        end
+
+        function onEcoTargetUpdateChanged()
+            app.anchorFraction = app.DTargetUpdate.Value;
+            invalidateRunState();
+            setappdata(app.UIFigure,'ECOCO_APP',app);
+        end
+
+        function onCorrChanged()
+            app.corrmethod = 1;
+            if app.RSpearman.Value
+                app.corrmethod = 2;
+            end
+            invalidateRunState();
+            setappdata(app.UIFigure,'ECOCO_APP',app);
+        end
+
+        function onOrbitChanged()
+
+            app.EOrbitUser.Enable = 'off';
+
+            if app.RUser.Value
+                app.EOrbitUser.Enable = 'on';
+                candidateOrbit = parseNumericList(app.EOrbitUser.Value);
+                if isempty(candidateOrbit) || any(~isfinite(candidateOrbit)) || ...
+                        any(candidateOrbit <= 0)
+                    markSettingsChanged();
+                    uialert(app.UIFigure, ...
+                        'User-defined periods must be a positive numeric list.', ...
+                        'Invalid astronomical periods');
+                    return
+                end
+                app.orbit9 = candidateOrbit;
+            else                
+                age = str2double(app.EAge.Value);
+                if ~isfinite(age), age = 0; end
+                app.age = age;
+                orbit9 = calculate_orbit9(age);
+                app.orbit9  = orbit9(:,2)/1000;
+            end
+            
+            app.LOrbit2.Text = orbitString(app.orbit9);
+            updateF2FromOrbit();
+
+            if app.RUser.Value
+                app.EOrbitUser.Value = orbitString(app.orbit9);
+            end
+
+            invalidateRunState();
+            setappdata(app.UIFigure,'ECOCO_APP',app);
+        end
+
+        function onAgeEdited()
+            app.age = toNum(app.EAge.Value, app.age);
+            onOrbitChanged();
+        end
+
+        function onUserOrbitEdited()
+            candidateOrbit = parseNumericList(app.EOrbitUser.Value);
+            if ~isempty(candidateOrbit) && all(isfinite(candidateOrbit)) && ...
+                    all(candidateOrbit > 0)
+                app.orbit9 = candidateOrbit(:)';
+                app.LOrbit2.Text = orbitString(app.orbit9);
+                updateF2FromOrbit();
+            end
+            % Leave invalid text visible so ONRUN can report one consistent,
+            % actionable validation error instead of silently restoring it.
+            markSettingsChanged();
+        end
+
+        function updateF2FromOrbit()
+            orbit = app.orbit9(isfinite(app.orbit9));
+            if isempty(orbit)
+                return;
+            end
+            app.f2 = 1.2 / min(orbit);
+            app.EF2.Value = num2str(app.f2,'%.6g');
+        end
+
+        function onSedEdited()
+            app.sedmin = toNum(app.ESedMin.Value, app.sedmin);
+            app.sedmax = toNum(app.ESedMax.Value, app.sedmax);
+            candidateStep = toNum(app.ESedStep.Value,app.sedstep);
+            if isfinite(candidateStep) && candidateStep > 0
+                app.sedstep = candidateStep;
+            end
+            app.ESedMin.Value = num2str(app.sedmin);
+            app.ESedMax.Value = num2str(app.sedmax);
+            app.ESedStep.Value = num2str(app.sedstep);
+            refreshSedInfo();
+            invalidateRunState();
+            setappdata(app.UIFigure,'ECOCO_APP',app);
+        end
+
+        function refreshSedInfo()
+            if ~isfinite(app.sedmin) || ~isfinite(app.sedmax) || ...
+                    ~isfinite(app.sedstep) || app.sedstep <= 0 || ...
+                    app.sedmax < app.sedmin
+                app.LSedInfo.Text = 'No valid test sed. rates.';
+                return;
+            end
+            nRate = floor((app.sedmax-app.sedmin)/app.sedstep)+1;
+            if nRate < 2
+                app.LSedInfo.Text = 'Fewer than two test sed. rates.';
+            elseif nRate == 2
+                app.LSedInfo.Text = sprintf( ...
+                    '2 test sed. rates: %.3f, %.3f cm/kyr', ...
+                    app.sedmin,app.sedmin+app.sedstep);
+            elseif nRate > 10000
+                app.LSedInfo.Text = sprintf( ...
+                    '%d rates is too many; increase the step.',nRate);
+            else
+                app.LSedInfo.Text = sprintf('%d test sed. rates: %.3f, %.3f, %.3f, ..., %.3f cm/kyr', ...
+                    nRate,app.sedmin,app.sedmin+app.sedstep, ...
+                    app.sedmin+2*app.sedstep, ...
+                    app.sedmin+(nRate-1)*app.sedstep);
+            end
+        end
+
+        function onRun()
+            if ~isfield(app,'UIFigure') || ...
+                    ~isgraphics(app.UIFigure,'figure')
+                return
+            end
+            uiFigureAtStart = app.UIFigure;
+            runButtonAtStart = app.BRun;
+            if isgraphics(runButtonAtStart)
+                runButtonAtStart.Enable = 'off';
+            end
+            runButtonCleanup = onCleanup( ...
+                @()restoreRunButton(runButtonAtStart));
+            h = [];
+            conclusionReport = [];
+            figuresBeforeRun = findall(groot,'Type','figure');
+            invalidateRunState();
+            safeStoreAppData(uiFigureAtStart,app);
+            try
+                if ~isfield(app.meta,'depthInMeters') || ~app.meta.depthInMeters
+                    error('eCOCOGUI:DepthUnitRequired', ...
+                        ['COCO/eCOCO sedimentation rates are defined for depth in metres. ', ...
+                         'Select a supported depth unit (m, dm, cm, mm, ft, or km) ', ...
+                         'in the Acycle main window before running this analysis.']);
+                end
+                % Full-record COCO/eCOCO calculations use the uniformly
+                % sampled series. Held-out cvCOCO modes receive the sorted,
+                % de-duplicated raw series so their folds are defined before
+                % each fold is interpolated separately.
+                dat = app.data;
+                if size(app.dataRaw,1) < 20
+                    uialert(app.UIFigure, ...
+                        ['Fewer than 20 finite, unique observed depth levels ', ...
+                         'remain after sorting and de-duplication. Interpolated ', ...
+                         'points do not count as independent observations.'], ...
+                        'eCOCO');
+                    return;
+                end
+                isCvRun = app.mode == 1 && ...
+                    isCvCocoTargetMode(app.cocoTargetMode);
+                isLegacyCvRun = isCvRun && ...
+                    strcmp(app.cocoTargetMode,'cvlegacy');
+                isCv9ARun = isCvRun && strcmp(app.cocoTargetMode,'cv9a');
+                isInterleavedCvRun = isCvRun && ...
+                    strcmp(app.cocoTargetMode,'icv9b');
+                isInterleavedEcoRun = app.mode == 2 && ...
+                    app.ecocoCalcMode == 3;
+                % Keep the former internal cv9 token as a compatibility
+                % alias for the renamed group-band method, cvCOCO9B.
+                isCv9BRun = isCvRun && ...
+                    any(strcmp(app.cocoTargetMode,{'cv9b','cv9'}));
+                dataToCheck = dat;
+                if isCvRun || isInterleavedEcoRun
+                    % cvCOCO must split first, then interpolate each half.
+                    % Passing the full-series interpolation here would leak
+                    % information across the held-out boundary. I-eCOCO
+                    % applies the same rule inside every complete window.
+                    dataToCheck = app.dataRaw;
+                end
+                if isempty(dataToCheck) || size(dataToCheck,1) < 20
+                    uialert(app.UIFigure, ...
+                        'Fewer than 20 valid points remain after preprocessing.', ...
+                        'eCOCO');
+                    return;
+                end
+
+                if app.mode == 1 && ~isCvRun
+                    app.slices = requireIntegerScalar( ...
+                        app.ESlices.Value,'Number of slices',1,Inf);
+                else
+                    app.slices = 1;
+                end
+                if app.C0Pad.Value
+                    app.pad = requireIntegerScalar( ...
+                        app.EPad.Value,'Periodogram NFFT (Pad)',1,Inf);
+                elseif isCvRun
+                    % cvcoco interprets zero as one unpadded FFT per half.
+                    app.pad = 0;
+                elseif app.mode == 1
+                    % A common unpadded frequency grid for all slices uses
+                    % the longest possible equal-depth slice.
+                    app.pad = max(2,ceil(size(dat,1) / max(1,app.slices)));
+                else
+                    requestedWindow = max(eps,toNum(app.ESize.Value,app.window));
+                    windowDt = median(diff(dat(:,1)));
+                    app.pad = max(3, ...
+                        2*round(requestedWindow/(2*windowDt))+1);
+                end
+                if isCvRun
+                    excelMaximumDataRows = 1048572; % spectrum sheets begin at row 5
+                    upperNfft = max(app.pad,size(app.dataRaw,1));
+                    upperSpectrumRows = floor(upperNfft/2)+1;
+                    if size(app.dataRaw,1) > 1048575 || ...
+                            upperSpectrumRows > excelMaximumDataRows
+                        error('eCOCOGUI:CVCOCOExcelRowLimit', ...
+                            ['The requested cvCOCO input/NFFT can exceed the ', ...
+                             'Excel .xlsx row limit used for the mandatory ', ...
+                             'audit workbook. Reduce Pad or the input size.']);
+                    end
+                end
+                requestedNsim = requireIntegerScalar( ...
+                    app.ENsim.Value,'Monte Carlo iterations',100,1e6);
+                app.nsim = requestedNsim;
+                app.ENsim.Value = num2str(app.nsim);
+                if app.nsim < 1999
+                    fprintf(['\n>> COCO Monte Carlo precision note: %d simulations requested.\n', ...
+                        '   At least 1999 simulations are recommended for publication-quality inference.\n\n'], ...
+                        app.nsim);
+                end
+                app.f2 = requirePositiveScalar( ...
+                    app.EF2.Value,'Maximum target frequency');
+                requestedDisplayFrequency = requirePositiveScalar( ...
+                    app.EMaxF.Value,'Maximum displayed data frequency');
+                app.fmaxdata = min(app.meta.fmax_data,requestedDisplayFrequency);
+                if requestedDisplayFrequency > app.meta.fmax_data
+                    fprintf(['\n>> Display-frequency adjustment:\n', ...
+                        '   Requested maximum frequency : %.12g cycle/m\n', ...
+                        '   Data Nyquist frequency      : %.12g cycle/m\n', ...
+                        '   Display maximum used        : %.12g cycle/m\n\n'], ...
+                        requestedDisplayFrequency,app.meta.fmax_data,app.fmaxdata);
+                end
+                app.EMaxF.Value = num2str(app.fmaxdata,'%.12g');
+                if app.mode == 2
+                    app.window = requirePositiveScalar( ...
+                        app.ESize.Value,'Sliding-window size');
+                    app.step = requirePositiveScalar( ...
+                        app.EStep.Value,'Sliding-window step');
+                    app.anchorFraction = app.DTargetUpdate.Value;
+                end
+                app.sedmin = requirePositiveScalar( ...
+                    app.ESedMin.Value,'Minimum sedimentation rate');
+                app.sedmax = requirePositiveScalar( ...
+                    app.ESedMax.Value,'Maximum sedimentation rate');
+                app.sedstep = requirePositiveScalar( ...
+                    app.ESedStep.Value,'Sedimentation-rate step');
+                if app.RUser.Value
+                    candidateAge = str2double(app.EAge.Value);
+                    if isfinite(candidateAge)
+                        app.age = candidateAge;
+                    end
+                else
+                    app.age = requireFiniteScalar(app.EAge.Value,'Middle age');
+                end
+                app.orbit9 = parseOrbit();
+
+                if ~isfinite(app.sedmin) || app.sedmin <= 0 || ...
+                        ~isfinite(app.sedmax) || app.sedmax < app.sedmin || ...
+                        ~isfinite(app.sedstep) || app.sedstep <= 0
+                    error('eCOCOGUI:InvalidSedimentationRateGrid', ...
+                        ['Sedimentation-rate minimum and step must be positive, ', ...
+                         'and the maximum must not be smaller than the minimum.']);
+                end
+                nRate = floor((app.sedmax-app.sedmin)/app.sedstep)+1;
+                if nRate < 2 || nRate > 1000
+                    error('eCOCOGUI:InvalidSedimentationRateGridSize', ...
+                        ['The requested grid contains %d rate(s). Use between ', ...
+                         '2 and 1000 pre-specified sedimentation rates.'],nRate);
+                end
+
+                if numel(app.orbit9) ~= 9 || any(~isfinite(app.orbit9)) || ...
+                        any(app.orbit9 <= 0)
+                    error('eCOCOGUI:InvalidOrbitPeriods', ...
+                        'Exactly nine finite, positive astronomical periods are required.');
+                end
+                minimumTargetCutoff = max(1 ./ app.orbit9);
+                if ~isfinite(app.f2) || app.f2 < minimumTargetCutoff
+                    error('eCOCOGUI:TargetFrequencyTooLow', ...
+                        ['Maximum target frequency must be at least %.6g cycle/kyr ', ...
+                         'to include the shortest selected astronomical period.'], ...
+                        minimumTargetCutoff);
+                end
+                app.red = redCode();
+                app.padtype = selectedPadType();
+                assignin('base','main_unit_selection',app.main_unit_selection);
+
+                srm = median(diff(dat(:,1)));
+                sr1 = app.sedmin; 
+                sr2 = app.sedmax; 
+                srstep = app.sedstep;
+                adjust = app.adjust; nsim = app.nsim; red = app.red; plotn = 1;
+                method = iff(app.corrmethod==1,'Pearson','Spearman');
+
+                if app.mode == 1
+                    if isCvRun
+                        cvDisplayName = 'Blocked cvCOCO';
+                        if isLegacyCvRun
+                            cvDisplayName = 'cvCOCO Legacy';
+                        elseif isCv9ARun
+                            cvDisplayName = 'cvCOCO9A';
+                        elseif isInterleavedCvRun
+                            cvDisplayName = 'Interleaved cvCOCO';
+                        end
+                        h = uiprogressdlg(app.UIFigure,'Title',cvDisplayName, ...
+                            'Message','Preparing bidirectional validation ...  0.0%', ...
+                            'Indeterminate','off','Value',0,'Cancelable','off');
+                        if isInterleavedCvRun
+                            cv = interleavedcvcoco( ...
+                                app.dataRaw,app.orbit9,app.pad, ...
+                                sr1,sr2,srstep,red,nsim,method, ...
+                                'BatchSize',app.cvBatchSize, ...
+                                'Seed',app.cvSeed, ...
+                                'AnalysisName','Interleaved cvCOCO', ...
+                                'MaxFrequency',app.f2, ...
+                                'ProgressFcn',@(fraction,message) ...
+                                updateProgressDialog(h,fraction,message));
+                            cv.name = 'Interleaved cvCOCO';
+                            cv.publicName = 'Interleaved cvCOCO';
+                            cv.analysisRole = [ ...
+                                'Method-B coherent-nine bidirectional ', ...
+                                'odd/even held-out analysis'];
+                            modeName = 'INTERLEAVEDCVCOCO';
+                        elseif isLegacyCvRun
+                            cv = cvcocoLegacy(app.dataRaw,app.orbit9,app.pad, ...
+                                sr1,sr2,srstep,red,nsim,method, ...
+                                'BatchSize',app.cvBatchSize,'Seed',app.cvSeed, ...
+                                'AnalysisName','cvCOCO Legacy', ...
+                                'MaxFrequency',app.f2, ...
+                                'ProgressFcn',@(fraction,message) ...
+                                updateProgressDialog(h,fraction,message));
+                            cv.name = 'cvCOCO Legacy';
+                            cv.engine = 'legacy coherent nine-term held-out engine';
+                            cv.analysisRole = ...
+                                'Legacy compatibility analysis; not confirmatory';
+                            modeName = 'CVCOCOLEGACY';
+                        elseif isCv9ARun
+                            cv = cvcoco9A(app.dataRaw,app.orbit9,app.pad, ...
+                                sr1,sr2,srstep,red,nsim,method, ...
+                                'BatchSize',app.cvBatchSize,'Seed',app.cvSeed, ...
+                                'AnalysisName','cvCOCO9A', ...
+                                'MaxFrequency',app.f2, ...
+                                'ProgressFcn',@(fraction,message) ...
+                                updateProgressDialog(h,fraction,message));
+                            modeName = 'CVCOCO9A';
+                        elseif isCv9BRun
+                            cv = cvcoco9B(app.dataRaw,app.orbit9,app.pad, ...
+                                sr1,sr2,srstep,red,nsim,method, ...
+                                'BatchSize',app.cvBatchSize,'Seed',app.cvSeed, ...
+                                'AnalysisName','Blocked cvCOCO', ...
+                                'MaxFrequency',app.f2, ...
+                                'ProgressFcn',@(fraction,message) ...
+                                updateProgressDialog(h,fraction,message));
+                            % cvCOCO9B remains the callable implementation
+                            % name, while Blocked cvCOCO is its public name.
+                            cv.name = 'Blocked cvCOCO';
+                            cv.publicName = 'Blocked cvCOCO';
+                            cv.abbreviation = 'B-cvCOCO';
+                            cv.analysisRole = [ ...
+                                'Default method-B coherent-nine ', ...
+                                'bidirectional held-out analysis'];
+                            modeName = 'CVCOCO';
+                        else
+                            % Use the current cvCOCO2 four-group engine under
+                            % its final public name, Blocked cvCOCO.
+                            cv = cvcoco(app.dataRaw,app.orbit9,app.pad, ...
+                                sr1,sr2,srstep,red,nsim,method, ...
+                                'BatchSize',app.cvBatchSize,'Seed',app.cvSeed, ...
+                                'TargetModel','four-group', ...
+                                'AnalysisName','Blocked cvCOCO', ...
+                                'MaxFrequency',app.f2, ...
+                                'ProgressFcn',@(fraction,message) ...
+                                updateProgressDialog(h,fraction,message));
+                            cv.targetLabel = 'Phase-averaged four-group piecewise-constant target';
+                            cv.validationLabel = 'Frozen phase-averaged noncoherent four-group target';
+                            cv.engine = 'phase-averaged four-group band-integrated engine';
+                            conclusionReport = ...
+                                cocoConclusionReport('confirmatory',cv);
+                            cv.conclusion = conclusionReport;
+                            cv.pRobust = conclusionReport.pRobust;
+                            cv.confirmatoryPass = conclusionReport.pass;
+                            modeName = 'CVCOCO';
+                        end
+                        if isfield(cv,'degradedMode') && cv.degradedMode
+                            cv.analysisRole = [detailValue(cv, ...
+                                'analysisRole','Bidirectional held-out analysis'), ...
+                                '; partial-orbit exploratory training, ', ...
+                                'not complete all-nine confirmation'];
+                        end
+                        closeProgress(h);
+                        h = [];
+
+                        app.run.cv = cv;
+                        app.run.conclusion = conclusionReport;
+                        app.run.ready = true;
+                        if isInterleavedCvRun
+                            assignin('base','InterleavedCVCOCO_result',cv);
+                        elseif isLegacyCvRun
+                            assignin('base','cvCOCOLegacy_result',cv);
+                        elseif isCv9ARun
+                            assignin('base','cvCOCO9A_result',cv);
+                        elseif isCv9BRun
+                            assignin('base','BlockedCVCOCO_result',cv);
+                            assignin('base','cvCOCO_result',cv);
+                            % Compatibility alias for scripts written while
+                            % this implementation was exposed as cvCOCO9B.
+                            assignin('base','cvCOCO9B_result',cv);
+                        else
+                            assignin('base','BlockedCVCOCO_result',cv);
+                            assignin('base','cvCOCO_result',cv);
+                            assignin('base','cvCOCO_conclusion',conclusionReport);
+                        end
+                        [outputFile,~] = ...
+                            saveCVCOCOOutputs(cv,modeName);
+                        plotCVCOCOResult(cv);
+                    else
+                        cocoDisplayName = char(string(app.DCOCOMethod.Value));
+                        h = uiprogressdlg(app.UIFigure, ...
+                            'Title',cocoDisplayName, ...
+                            'Message','Preparing COCO ...  0.0%', ...
+                            'Indeterminate','off','Value',0,'Cancelable','off');
+                        [corrCI,corr_h0,corry,adaptiveDetails] = ...
+                            corrcoefslices_rankNew(dat,app.orbit9,srm,app.pad, ...
+                            sr1,sr2,srstep,adjust,red,nsim,plotn,app.slices, ...
+                            method,app.fmaxdata,app.main_unit_selection,false, ...
+                            app.cocoTargetMode,'MaxFrequency',app.f2, ...
+                            'Seed',app.adaptiveSeed, ...
+                            'ShowPeriodograms',app.CShowPeriod.Value, ...
+                            'ProgressFcn',@(fraction,message) ...
+                            updateProgressDialog(h,fraction,message));
+                        closeProgress(h);
+                        h = [];
+                        app.run.corrCI = corrCI;
+                        app.run.corr_h0 = corr_h0;
+                        app.run.corry = corry;
+                        app.run.adaptiveDetails = adaptiveDetails;
+                        if isAdaptiveCocoTargetMode(app.cocoTargetMode)
+                            % Use the same strict plus-one/null-maximum audit
+                            % as the non-GUI Adaptive publication path.
+                            conclusionReport = cocoAdaptivePublicationReport( ...
+                                corrCI,corr_h0,adaptiveDetails);
+                            if strcmp(app.cocoTargetMode,'adaptive9b')
+                                conclusionReport = relabelReportMethod( ...
+                                    conclusionReport,'Adaptive COCO9B', ...
+                                    'Adaptive COCO');
+                            end
+                            adaptiveResult = struct( ...
+                                'name',adaptiveCocoDisplayName( ...
+                                    app.cocoTargetMode), ...
+                                'variant',adaptiveCocoVariant( ...
+                                    app.cocoTargetMode), ...
+                                'targetMode',app.cocoTargetMode, ...
+                                'targetAmplitudeMode',detailValue( ...
+                                    adaptiveDetails,'targetAmplitudeMode','adaptive'), ...
+                                'corrCI',corrCI,'corr_h0',corr_h0, ...
+                                'corry',corry,'details',adaptiveDetails, ...
+                                'conclusion',conclusionReport);
+                            if strcmp(app.cocoTargetMode,'adaptive9b')
+                                assignin('base','AdaptiveCOCO_result', ...
+                                    adaptiveResult);
+                                assignin('base','AdaptiveCOCO_conclusion', ...
+                                    conclusionReport);
+                                % Compatibility aliases for existing scripts.
+                                assignin('base','AdaptiveCOCO9B_result', ...
+                                    adaptiveResult);
+                                assignin('base','AdaptiveCOCO9B_conclusion', ...
+                                    conclusionReport);
+                                modeName = 'ADAPTIVECOCO';
+                            elseif any(strcmp(app.cocoTargetMode, ...
+                                    {'adaptive9a','adaptive9'}))
+                                assignin('base','AdaptiveCOCO9A_result', ...
+                                    adaptiveResult);
+                                assignin('base','AdaptiveCOCO9A_conclusion', ...
+                                    conclusionReport);
+                                modeName = 'ADAPTIVECOCO9A';
+                            else
+                                assignin('base','AdaptiveCOCO_result', ...
+                                    adaptiveResult);
+                                assignin('base','AdaptiveCOCO_conclusion', ...
+                                    conclusionReport);
+                                modeName = 'COCO';
+                            end
+                        else
+                            % The fixed-target compatibility mode must not be
+                            % mislabeled with the Adaptive conclusion report.
+                            conclusionReport = [];
+                            isFixed9Run = strcmp(app.cocoTargetMode,'fixed9');
+                            fixedName = 'Fixed COCO';
+                            if isFixed9Run
+                                fixedName = 'Fixed-target COCO';
+                            end
+                            fixedResult = struct('name',fixedName, ...
+                                'targetMode',app.cocoTargetMode,'corrCI',corrCI, ...
+                                'corr_h0',corr_h0,'corry',corry, ...
+                                'details',adaptiveDetails);
+                            if isFixed9Run
+                                assignin('base','FixedTargetCOCO_result',fixedResult);
+                                % Compatibility alias for existing scripts.
+                                assignin('base','FixedCOCO9_result',fixedResult);
+                                modeName = 'FIXEDTARGETCOCO';
+                            else
+                                assignin('base','FixedCOCO_result',fixedResult);
+                                modeName = 'COCO';
+                            end
+                        end
+                        app.run.conclusion = conclusionReport;
+                        app.run.ready = true;
+                        [outputFile,~] = ...
+                            saveCOCOOutputs(corrCI,corr_h0,modeName);
+                    end
+                else
+                    stepN = max(1,round(app.step/srm));
+                    ecoSpec = ecoMethodSpec();
+                    interleavedWindowMode = 'legacy-count';
+                    interleavedStepDepth = [];
+                    ecocoWindowMode = 'physical-depth';
+                    ecocoStepDepth = app.step;
+                    ecocoCenterLimits = [];
+                    if app.ecocoCalcMode == 3
+                        % I-eCOCO must assign global odd/even identity on
+                        % cleaned raw observations before either fold is
+                        % interpolated. DAT is already full-record
+                        % interpolated and would leak information. Its GUI
+                        % window and step are literal depth units, so pass
+                        % the exact step instead of the rounded row count.
+                        dat2 = app.dataRaw;
+                        ecoRawForSave = app.dataRaw;
+                        interleavedWindowMode = 'physical-depth';
+                        interleavedStepDepth = app.step;
+                    else
+                        dat2 = dat;
+                        ecoRawForSave = dat;
+                    end
+                    if app.ecocoCalcMode == 2
+                        % This is an algorithm requirement, not an optional
+                        % display/preprocessing preference. Preserve the
+                        % unpadded output-center limits, and request enough
+                        % synthetic support to cover the exact half-window.
+                        ecocoCenterLimits = dat2([1,end],1)';
+                        dat2 = zeropad2(dat2,app.window,1,true);
+                    elseif app.ecocoCalcMode == 1 && app.CPadEdge.Value
+                        ecocoCenterLimits = dat2([1,end],1)';
+                        dat2 = zeropad2( ...
+                            dat2,app.window,app.padtype,true);
+                    end
+                    ecocoMode = ecoSpec.token;
+                    ecoDisplayName = ecoSpec.displayName;
+                    h = uiprogressdlg(app.UIFigure,'Title',ecoDisplayName, ...
+                        'Message','Preparing sliding windows ...  0.0%', ...
+                        'Indeterminate','off','Value',0,'Cancelable','off');
+                    ecoPlotn = iff(app.CFlipY.Value,-1,1);
+                    [prt_sr,out_depth,out_ecc,out_ep,out_eci,out_ecoco, ...
+                        out_ecocorb,out_norbit,sr_p,ecoDetails] = ...
+                        ecoco(dat2,[],app.orbit9,app.window,srm,stepN,0, ...
+                        red,app.pad,sr1,sr2,srstep,nsim,adjust,1, ...
+                        ecoPlotn,method,app.fmaxdata, ...
+                        app.main_unit_selection,ecocoMode,app.f2, ...
+                        app.adaptiveSeed,app.anchorFraction, ...
+                        'SeparateFinalPanel',true, ...
+                        'ECOCOWindowMode',ecocoWindowMode, ...
+                        'ECOCOStepDepth',ecocoStepDepth, ...
+                        'ECOCOCenterLimits',ecocoCenterLimits, ...
+                        'InterleavedWindowMode',interleavedWindowMode, ...
+                        'InterleavedStepDepth',interleavedStepDepth, ...
+                        'ProgressFcn',@(fraction,message) ...
+                        updateProgressDialog(h,fraction,message));
+                    closeProgress(h);
+                    h = [];
+                    
+                    app.run.prt_sr = prt_sr;
+                    app.run.out_depth = out_depth;
+                    app.run.out_ecc = out_ecc;
+                    app.run.out_ep = out_ep;
+                    app.run.out_eci = out_eci;
+                    app.run.out_ecoco = out_ecoco;
+                    app.run.out_ecocorb = out_ecocorb;
+                    app.run.out_norbit = out_norbit;
+                    app.run.sr_p = sr_p;
+                    app.run.ecoDetails = ecoDetails;
+                    app.run.ecoMethod = ecocoMode;
+                    app.run.anchorFraction = app.anchorFraction;
+                    app.run.ready = true;
+
+                    if isgraphics(app.BPlotE)
+                        app.BPlotE.Enable = 'on';
+                    end
+
+                    assignin('base','prt_sr',prt_sr);
+                    assignin('base','out_depth',out_depth);
+                    assignin('base','out_ecc',out_ecc);
+                    assignin('base','out_ep',out_ep);
+                    assignin('base','out_eci',out_eci);
+                    assignin('base','out_ecoco',out_ecoco);
+                    assignin('base','out_ecocorb',out_ecocorb);
+                    assignin('base','out_norbit',out_norbit);
+                    assignin('base','sr_p_tracked',sr_p);
+                    assignin('base','eCOCO_details',ecoDetails);
+                    [outputFile,~] = saveECOCOOutputs( ...
+                        prt_sr,out_depth,out_ecc,out_ep,out_eci,out_norbit, ...
+                        out_ecoco,out_ecocorb,sr_p,ecoRawForSave,ecoDetails);
+                    modeName = 'ECOCO';
+                end
+
+                runFigures = figuresCreatedSince(figuresBeforeRun);
+                if isgraphics(uiFigureAtStart,'figure')
+                    runFigures = setdiff( ...
+                        runFigures,uiFigureAtStart,'stable');
+                end
+                try
+                    saveArguments = {};
+                    if app.mode == 1
+                        saveArguments = {'CocoPublicationTitle', ...
+                            selectedCocoMethod(modeName)};
+                    end
+                    saveCocoGuiFigures( ...
+                        runFigures,outputFile,saveArguments{:});
+                catch MEfigureSave
+                    warning('eCOCOGUI:FigureAutoSaveFailed', ...
+                        ['The calculation and numerical outputs were saved, ', ...
+                        'but automatic FIG/PDF/PNG export failed [%s]: %s'], ...
+                        MEfigureSave.identifier,MEfigureSave.message);
+                    fprintf(2,'\n>> COCO/eCOCO figure export warning\n%s\n\n', ...
+                        getReport(MEfigureSave,'extended','hyperlinks','off'));
+                    safeUiAlert(uiFigureAtStart, ...
+                        ['The calculation and numerical outputs were saved. ', ...
+                        'Automatic FIG/PDF/PNG export failed: ', ...
+                         MEfigureSave.message], ...
+                        'Figure save warning','warning');
+                end
+                refreshMainListbox(ctx,resolveSaveDir(ctx));
+                safeStoreAppData(uiFigureAtStart,app);
+                if ~isempty(conclusionReport)
+                    showConclusionReport(conclusionReport);
+                end
+            catch ME
+                closeProgress(h);
+                invalidateRunState();
+                safeStoreAppData(uiFigureAtStart,app);
+                try
+                    evalin('base',['clear cvCOCO_result cvCOCO_conclusion ', ...
+                        'cvCOCO9A_result cvCOCO9B_result cvCOCO9_result ', ...
+                        'cvCOCOLegacy_result BlockedCVCOCO_result ', ...
+                        'InterleavedCVCOCO_result ', ...
+                        'AdaptiveCOCO_result AdaptiveCOCO_conclusion ', ...
+                        'AdaptiveCOCO9A_result AdaptiveCOCO9A_conclusion ', ...
+                        'AdaptiveCOCO9B_result AdaptiveCOCO9B_conclusion ', ...
+                        'AdaptiveCOCO9_result AdaptiveCOCO9_conclusion ', ...
+                        'FixedCOCO_result FixedCOCO9_result ', ...
+                        'FixedTargetCOCO_result']);
+                catch
+                end
+                if cocoIsNonfatalResolutionError(ME)
+                    warning(ME.identifier,[ ...
+                        '%s\nThe current COCO/eCOCO method was skipped. ', ...
+                        'No numerical result was produced for this ', ...
+                        'unsupported parameter geometry; the GUI and ', ...
+                        'subsequent runs remain available.'],ME.message);
+                    fprintf(['\n>> COCO/eCOCO resolution warning [%s]\n', ...
+                        '   Current method skipped; no blocking dialog ', ...
+                        'was opened.\n\n'],ME.identifier);
+                    try
+                        refreshMainListbox(ctx,resolveSaveDir(ctx));
+                    catch
+                    end
+                    return
+                end
+                fprintf(2,'\n>> eCOCO error [%s]\n%s\n\n', ...
+                    ME.identifier,getReport(ME,'extended','hyperlinks','off'));
+                safeUiAlert(uiFigureAtStart,ME.message,'eCOCO error','error');
+            end
+        end
+
+        function invalidateRunState()
+            app.run = emptyRunState();
+            try
+                evalin('base',['clear cvCOCO_result cvCOCO_conclusion ', ...
+                    'cvCOCO9A_result cvCOCO9B_result cvCOCO9_result ', ...
+                    'cvCOCOLegacy_result BlockedCVCOCO_result ', ...
+                    'InterleavedCVCOCO_result ', ...
+                    'AdaptiveCOCO_result AdaptiveCOCO_conclusion ', ...
+                    'AdaptiveCOCO9A_result AdaptiveCOCO9A_conclusion ', ...
+                    'AdaptiveCOCO9B_result AdaptiveCOCO9B_conclusion ', ...
+                    'AdaptiveCOCO9_result AdaptiveCOCO9_conclusion ', ...
+                    'FixedCOCO_result FixedCOCO9_result ', ...
+                    'FixedTargetCOCO_result']);
+            catch
+            end
+            if isfield(app,'BPlotE') && isgraphics(app.BPlotE)
+                app.BPlotE.Enable = 'off';
+            end
+        end
+
+        function markSettingsChanged()
+            invalidateRunState();
+            if isfield(app,'UIFigure') && isgraphics(app.UIFigure)
+                setappdata(app.UIFigure,'ECOCO_APP',app);
+            end
+        end
+
+        function onNumericSettingEdited(editor,defaultValue)
+            onEditNum(editor,defaultValue);
+            markSettingsChanged();
+        end
+
+        function closeProgress(h)
+            if isempty(h)
+                return
+            end
+            try
+                if isvalid(h)
+                    close(h);
+                end
+            catch
+            end
+        end
+
+        function updateProgressDialog(h,fraction,message)
+            if isempty(h)
+                return
+            end
+            try
+                if ~isvalid(h)
+                    return
+                end
+                fraction = min(max(double(fraction),0),1);
+                if ~isfinite(fraction)
+                    return
+                end
+                message = strtrim(char(string(message)));
+                if isempty(message)
+                    message = 'Running';
+                end
+                h.Indeterminate = 'off';
+                h.Value = fraction;
+                h.Message = sprintf('%s  %.1f%%',message,100*fraction);
+                drawnow limitrate nocallbacks
+            catch MEprogress
+                warning('eCOCOGUI:ProgressUpdateFailed', ...
+                    'Progress display update failed: %s',MEprogress.message);
+            end
+        end
+
+        function onECOCOPlot()
+            if ~app.run.ready || isempty(app.run.prt_sr)
+                return
+            end
+            a = inputdlg({['Plot: 1=two grouped figs (last map separate); ', ...
+                '2=one fig per map; 3=3D; reverse Y use negative']}, ...
+                'Plot eCOCO',1,{'1'});
+            if isempty(a), return; end
+            plotn = str2double(a{1});
+            if ~isfinite(plotn), plotn = 1; end
+            ecoPlotDetails = app.run.ecoDetails;
+            if ~isstruct(ecoPlotDetails)
+                ecoPlotDetails = struct();
+            end
+            ecoPlotDetails.trackedRate = app.run.sr_p;
+            ecocoplot(app.run.prt_sr,app.run.out_depth,app.run.out_ecc,app.run.out_ep, ...
+                app.run.out_eci,app.run.out_ecoco,app.run.out_ecocorb, ...
+                app.run.out_norbit,plotn,ecoPlotDetails);
+        end
+
+        function onWaltham()
+            msg = sprintf('Waltham, D. (2015). Milankovitch period uncertainties and their impact on cyclostratigraphy. JSR.');
+            uialert(app.UIFigure,msg,'Reference');
+        end
+
+        function [nm,runIndex] = saveCOCOOutputs(corrCI,corr_h0,modeName)
+            if nargin < 3 || isempty(modeName)
+                modeName = 'COCO';
+            end
+            [~,dn,~] = fileparts(app.meta.filename);
+            saveDir = resolveSaveDir(ctx);
+            outputStem = [dn,'-COCO'];
+            if strcmp(modeName,'ADAPTIVECOCO')
+                outputStem = [dn,'-Adaptive-COCO'];
+            elseif strcmp(modeName,'ADAPTIVECOCO9A')
+                outputStem = [dn,'-Adaptive-COCO9A'];
+            elseif strcmp(modeName,'ADAPTIVECOCO9B')
+                outputStem = [dn,'-Adaptive-COCO9B'];
+            elseif strcmp(modeName,'FIXEDTARGETCOCO')
+                outputStem = [dn,'-Fixed-target-COCO'];
+            elseif strcmp(modeName,'FIXEDCOCO9')
+                outputStem = [dn,'-Fixed-COCO9'];
+            end
+            [nm,runIndex] = indexedRunName( ...
+                saveDir,outputStem,'.xlsx');
+            workbook = [tempname(saveDir),'.xlsx'];
+            cleanup = onCleanup(@()deleteIfPresent(workbook));
+            parameters = buildRunParameterTable(modeName,nm);
+            writecell(parameters,workbook,'Sheet','Parameters');
+            if ~isempty(app.run.conclusion)
+                writeConclusionSummary(workbook,app.run.conclusion);
+            end
+            writeAdaptiveAudit(workbook,app.run.adaptiveDetails);
+            writeAdaptiveCurves(workbook,corrCI,corr_h0);
+            [ok,message] = movefile(workbook,nm,'f');
+            if ~ok
+                error('eCOCOGUI:AtomicSaveFailed', ...
+                    'Could not finalize the COCO workbook: %s',message);
+            end
+            clear cleanup
+        end
+
+        function [nm,runIndex] = saveCVCOCOOutputs(cv,modeName)
+            if nargin < 2 || isempty(modeName)
+                modeName = 'CVCOCO';
+            end
+            isInterleavedOutput = strcmp(modeName,'INTERLEAVEDCVCOCO');
+            targetModel = '';
+            if isfield(cv,'targetModel') && ...
+                    (ischar(cv.targetModel) || ...
+                    (isstring(cv.targetModel) && isscalar(cv.targetModel)))
+                targetModel = char(cv.targetModel);
+            end
+            % Detect the implementation from result metadata, rather than
+            % only the public mode name.  The public CVCOCO mode now uses
+            % the former cvCOCO9B coherent-nine method-B implementation.
+            isCv9AOutput = strcmp(targetModel, ...
+                'rayleigh-peak-coherent-nine') || ...
+                strcmp(modeName,'CVCOCO9A');
+            isCv9BOutput = strcmp(targetModel, ...
+                'four-group-coherent-nine') || ...
+                any(strcmp(modeName,{'CVCOCO9B','CVCOCO9'}));
+            isCv9Output = isCv9AOutput || isCv9BOutput;
+            isFourGroupOutput = isfield(cv,'targetModel') && ...
+                any(strcmp(cv.targetModel, ...
+                {'four-group','four-group-coherent-nine'}));
+            degradedMode = isfield(cv,'degradedMode') && ...
+                isscalar(cv.degradedMode) && logical(cv.degradedMode);
+            required = {'srGrid','splitDepth','dataA','dataB','trainA','trainB', ...
+                'dataClean', ...
+                'validateAtoB','validateBtoA','consensus', ...
+                'scoreSymmetric','scoreConsensus','scoreMean', ...
+                'nullSymmetric','nullConsensus','nullAtoB','nullBtoA', ...
+                'nullBestRateAtoB','nullBestRateBtoA', ...
+                'pSym','pConsensus','pA','pB','pAtoB','pBtoA', ...
+                'pSymConfidenceInterval','pConsensusConfidenceInterval', ...
+                'pAConfidenceInterval','pBConfidenceInterval', ...
+                'pCurveAtoB','pCurveBtoA', ...
+                'pLocalCurveAtoB','pLocalCurveBtoA', ...
+                'pCurveConsensus','pLocalCurveConsensus','pCOCO', ...
+                'bestPCOCO','bestPCOCORate','bestPCOCOIndex', ...
+                'rhoM','rhoMA','rhoMB', ...
+                'rhoMethodA','rhoMethodB', ...
+                'nsimRequested','nsimCompleted','nsimValid', ...
+                'nsimValidConsensus','nsimValidAtoB','nsimValidBtoA', ...
+                'seed','validRateMaskA','validRateMaskB','groupNames', ...
+                'groupIndex','orbitPeriods','samplingIntervalA','samplingIntervalB', ...
+                'interpolationA','interpolationB','spectra', ...
+                'orbitCountA','orbitCountB', ...
+                'resolvableOrbitCountA','resolvableOrbitCountB', ...
+                'resolvableGroupCountA','resolvableGroupCountB','targetModel', ...
+                'activeOrbitCountAtoB','activeOrbitCountBtoA', ...
+                'activeOrbitCountConsensus', ...
+                'activeGroupCountAtoB','activeGroupCountBtoA', ...
+                'groupLeakageRcondA','groupLeakageRcondB', ...
+                'trainingRateMaskA','trainingRateMaskB', ...
+                'allNineRateRangeA','allNineRateRangeB','allNineRateRangeShared', ...
+                'config'};
+            missing = required(~cellfun(@(f)isfield(cv,f),required));
+            if ~isempty(missing)
+                error('eCOCOGUI:InvalidCVCOCOResult', ...
+                    'cvCOCO result is missing required field(s): %s.',strjoin(missing,', '));
+            end
+            trainRequired = {'curve','bestRate','bestIndex','amplitudes9', ...
+                'groupRaw','groupNormalized','groupLeakageMatrix', ...
+                'groupLeakageRcond'};
+            validationRequired = {'curve','bestRate','bestIndex','score', ...
+                'pDirectional','pConfidenceInterval','pGlobalCurve', ...
+                'pLocalCurve'};
+            validateNestedFields(cv.trainA,'trainA',trainRequired);
+            validateNestedFields(cv.trainB,'trainB',trainRequired);
+            if isCv9AOutput
+                validateNestedFields(cv.trainA,'trainA', ...
+                    {'amplitudes9Normalized'});
+                validateNestedFields(cv.trainB,'trainB', ...
+                    {'amplitudes9Normalized'});
+            end
+            validateNestedFields(cv.validateAtoB,'validateAtoB',validationRequired);
+            validateNestedFields(cv.validateBtoA,'validateBtoA',validationRequired);
+            validateNestedFields(cv.consensus,'consensus', ...
+                {'curve','bestRate','bestIndex','bestCorrelation', ...
+                 'pGlobalCurve','pLocalCurve','pCOCO'});
+
+            % TRAININGRATEMASK is the mask actually used by the numerical
+            % pipeline. In partial-orbit fallback mode it is deliberately
+            % broader than the strict all-nine mask, so export both.
+            strictTrainingRateMaskA = cv.trainingRateMaskA;
+            strictTrainingRateMaskB = cv.trainingRateMaskB;
+            if isfield(cv,'strictTrainingRateMaskA')
+                strictTrainingRateMaskA = cv.strictTrainingRateMaskA;
+            end
+            if isfield(cv,'strictTrainingRateMaskB')
+                strictTrainingRateMaskB = cv.strictTrainingRateMaskB;
+            end
+            partialOnlyTrainingRateMaskA = false(size(cv.trainingRateMaskA));
+            partialOnlyTrainingRateMaskB = false(size(cv.trainingRateMaskB));
+            if isfield(cv,'partialOnlyTrainingRateMaskA')
+                partialOnlyTrainingRateMaskA = cv.partialOnlyTrainingRateMaskA;
+            end
+            if isfield(cv,'partialOnlyTrainingRateMaskB')
+                partialOnlyTrainingRateMaskB = cv.partialOnlyTrainingRateMaskB;
+            end
+
+            sr = cv.srGrid(:);
+            nRate = numel(sr);
+            curves = [sr, cvColumn(cv.trainA.curve,nRate,'trainA.curve'), ...
+                cvColumn(cv.trainB.curve,nRate,'trainB.curve'), ...
+                cvColumn(cv.validateAtoB.curve,nRate,'validateAtoB.curve'), ...
+                cvColumn(cv.validateBtoA.curve,nRate,'validateBtoA.curve'), ...
+                cvColumn(cv.consensus.curve,nRate,'consensus.curve'), ...
+                cvColumn(cv.pCurveAtoB,nRate,'pCurveAtoB'), ...
+                cvColumn(cv.pCurveBtoA,nRate,'pCurveBtoA'), ...
+                cvColumn(cv.pCurveConsensus,nRate,'pCurveConsensus'), ...
+                cvColumn(cv.pLocalCurveAtoB,nRate,'pLocalCurveAtoB'), ...
+                cvColumn(cv.pLocalCurveBtoA,nRate,'pLocalCurveBtoA'), ...
+                cvColumn(cv.pLocalCurveConsensus,nRate, ...
+                    'pLocalCurveConsensus'), ...
+                cvColumn(cv.pCOCO,nRate,'pCOCO'), ...
+                cvColumn(cv.orbitCountA,nRate,'orbitCountA'), ...
+                cvColumn(cv.orbitCountB,nRate,'orbitCountB'), ...
+                cvColumn(cv.activeOrbitCountAtoB,nRate,'activeOrbitCountAtoB'), ...
+                cvColumn(cv.activeOrbitCountBtoA,nRate,'activeOrbitCountBtoA'), ...
+                cvColumn(cv.activeOrbitCountConsensus,nRate, ...
+                    'activeOrbitCountConsensus')];
+            if isFourGroupOutput
+                fullLeakageRcondA = cv.groupLeakageRcondA;
+                fullLeakageRcondB = cv.groupLeakageRcondB;
+                if isfield(cv,'fullGroupLeakageRcondA')
+                    fullLeakageRcondA = cv.fullGroupLeakageRcondA;
+                end
+                if isfield(cv,'fullGroupLeakageRcondB')
+                    fullLeakageRcondB = cv.fullGroupLeakageRcondB;
+                end
+                curves = [curves, ...
+                    cvColumn(fullLeakageRcondA,nRate,'fullGroupLeakageRcondA'), ...
+                    cvColumn(fullLeakageRcondB,nRate,'fullGroupLeakageRcondB'), ...
+                    cvColumn(cv.groupLeakageRcondA,nRate,'groupLeakageRcondA'), ...
+                    cvColumn(cv.groupLeakageRcondB,nRate,'groupLeakageRcondB')];
+            end
+            curves = [curves, ...
+                double(cvColumn(cv.trainingRateMaskA,nRate,'trainingRateMaskA')), ...
+                double(cvColumn(cv.trainingRateMaskB,nRate,'trainingRateMaskB')), ...
+                double(cvColumn(strictTrainingRateMaskA,nRate, ...
+                    'strictTrainingRateMaskA')), ...
+                double(cvColumn(strictTrainingRateMaskB,nRate, ...
+                    'strictTrainingRateMaskB')), ...
+                double(cvColumn(partialOnlyTrainingRateMaskA,nRate, ...
+                    'partialOnlyTrainingRateMaskA')), ...
+                double(cvColumn(partialOnlyTrainingRateMaskB,nRate, ...
+                    'partialOnlyTrainingRateMaskB')), ...
+                double(cvColumn(cv.validRateMaskA,nRate,'validRateMaskA')), ...
+                double(cvColumn(cv.validRateMaskB,nRate,'validRateMaskB'))];
+
+            nNull = cv.nsimCompleted;
+            nullScore = cvColumn(cv.nullSymmetric,nNull,'nullSymmetric');
+            nullConsensus = cvColumn( ...
+                cv.nullConsensus,nNull,'nullConsensus');
+            nullAtoB = cvColumn(cv.nullAtoB,nNull,'nullAtoB');
+            nullBtoA = cvColumn(cv.nullBtoA,nNull,'nullBtoA');
+            nullRateAtoB = cvColumn(cv.nullBestRateAtoB,nNull,'nullBestRateAtoB');
+            nullRateBtoA = cvColumn(cv.nullBestRateBtoA,nNull,'nullBestRateBtoA');
+            groupNames = cellstr(string(cv.groupNames(:)));
+            nGroup = numel(groupNames);
+            groupAraw = cvColumn(cv.trainA.groupRaw,nGroup,'trainA.groupRaw');
+            groupAnorm = cvColumn(cv.trainA.groupNormalized,nGroup,'trainA.groupNormalized');
+            groupBraw = cvColumn(cv.trainB.groupRaw,nGroup,'trainB.groupRaw');
+            groupBnorm = cvColumn(cv.trainB.groupNormalized,nGroup,'trainB.groupNormalized');
+
+            methodLabel = ['cvCOCO Legacy bidirectional held-out ', ...
+                'compatibility analysis (non-confirmatory)'];
+            analysisRole = 'Legacy compatibility analysis; not confirmatory';
+            trainingLabel = 'Adaptive nine-period peaks reduced to four groups';
+            validationLabel = ['Train one half; freeze four group weights; ', ...
+                'scan sedimentation rate in the other half'];
+            trainingTargetUnits = ...
+                'Nine periods summarized to four validation groups';
+            if isInterleavedOutput
+                methodLabel = ['Four-group-trained coherent nine-term ', ...
+                    'bidirectional odd/even held-out COCO ', ...
+                    '(Interleaved cvCOCO)'];
+                analysisRole = [ ...
+                    'Method-B coherent-nine bidirectional odd/even ', ...
+                    'held-out analysis'];
+                trainingLabel = [ ...
+                    'Four union-band energies de-mixed by a 4-by-4 ', ...
+                    'finite-record leakage matrix and exact nonnegative ', ...
+                    'least squares'];
+                validationLabel = [ ...
+                    'Train one parity fold; freeze four group weights; ', ...
+                    'expand them to nine coherently summed orbital terms; ', ...
+                    'validate on the other parity fold'];
+                trainingTargetUnits = ...
+                    'Long eccentricity / short eccentricity / obliquity / precession';
+            elseif isCv9AOutput
+                methodLabel = ['Rayleigh-band peak-trained coherent ', ...
+                    'nine-term bidirectional held-out COCO (cvCOCO9A)'];
+                analysisRole = [ ...
+                    'Internal coherent-nine method comparison; ', ...
+                    'exploratory and separate from confirmatory Blocked cvCOCO'];
+                trainingLabel = [ ...
+                    'Nine per-orbit amplitudes calibrated from the maximum ', ...
+                    'data PSD in each +/-1-Rayleigh band'];
+                validationLabel = [ ...
+                    'Train one half; freeze the nine normalized per-orbit ', ...
+                    'amplitudes; sum the nine sine terms coherently before power'];
+                trainingTargetUnits = ...
+                    'Nine individual orbital periods; group summaries are descriptive only';
+            elseif isCv9BOutput
+                if strcmp(modeName,'CVCOCO')
+                    methodLabel = ['Four-group-trained coherent nine-term ', ...
+                        'bidirectional held-out COCO (Blocked cvCOCO)'];
+                    analysisRole = [ ...
+                        'Default method-B coherent-nine bidirectional ', ...
+                        'held-out analysis'];
+                else
+                    methodLabel = ['Four-group-trained coherent nine-term ', ...
+                        'bidirectional held-out COCO (cvCOCO9B)'];
+                    analysisRole = [ ...
+                        'Internal coherent-nine method comparison; ', ...
+                        'retained for compatibility'];
+                end
+                trainingLabel = [ ...
+                    'Four union-band energies de-mixed by a 4-by-4 ', ...
+                    'finite-record leakage matrix and exact nonnegative ', ...
+                    'least squares'];
+                validationLabel = [ ...
+                    'Train one half; freeze four group weights; expand ', ...
+                    'them to nine sine terms summed coherently before power'];
+                trainingTargetUnits = ...
+                    'Long eccentricity / short eccentricity / obliquity / precession';
+            elseif isFourGroupOutput
+                methodLabel = ['Four-group band-integrated bidirectional ', ...
+                    'cross-validated COCO (Blocked cvCOCO; confirmatory)'];
+                analysisRole = 'Confirmatory bidirectional held-out analysis';
+                trainingLabel = ['Four union-band energies de-mixed by a ', ...
+                    '4-by-4 finite-record leakage matrix and exact ', ...
+                    'nonnegative least squares, using phase-averaged ', ...
+                    'sine/cosine templates'];
+                validationLabel = ['Train one half; freeze four group ', ...
+                    'weights; compare the other half with noncoherent ', ...
+                    'four-group periodogram targets'];
+                trainingTargetUnits = ...
+                    'Long eccentricity / short eccentricity / obliquity / precession';
+            end
+            if degradedMode
+                methodLabel = [methodLabel, ...
+                    ' (partial-orbit degraded result)'];
+                analysisRole = [analysisRole, ...
+                    '; exploratory partial-orbit result, not complete ', ...
+                    'all-nine confirmation'];
+                trainingLabel = [trainingLabel, ...
+                    '; unresolved groups fixed exactly to zero'];
+            end
+            conclusionRows = cell(0,2);
+            if isfield(cv,'conclusion') && isstruct(cv.conclusion) && ...
+                    isfield(cv.conclusion,'summaryRows')
+                conclusionRows = cv.conclusion.summaryRows;
+                if ~iscell(conclusionRows) || size(conclusionRows,2) ~= 2
+                    error('eCOCOGUI:InvalidConclusionReport', ...
+                        'cvCOCO conclusion summaryRows must be a two-column cell array.');
+                end
+            end
+            foldA = 'Segment A';
+            foldB = 'Segment B';
+            foldTokenA = 'A';
+            foldTokenB = 'B';
+            splitMetricLabel = 'Split depth (m)';
+            splitMetricValue = cv.splitDepth;
+            if isInterleavedOutput
+                foldA = 'Odd fold';
+                foldB = 'Even fold';
+                foldTokenA = 'Odd';
+                foldTokenB = 'Even';
+                if isfield(cv,'foldLabels') && numel(cv.foldLabels) >= 2
+                    foldA = [char(string(cv.foldLabels{1})),' fold'];
+                    foldB = [char(string(cv.foldLabels{2})),' fold'];
+                end
+                splitMetricLabel = 'Fold definition';
+                splitMetricValue = detailValue(cv.config,'splitRule', ...
+                    'odd/even observation index');
+            end
+            pNameA = ['p_',foldTokenA];
+            pNameB = ['p_',foldTokenB];
+            directionAtoB = [foldTokenA,'-to-',foldTokenB];
+            directionBtoA = [foldTokenB,'-to-',foldTokenA];
+            summaryDetails = {
+                'Method',methodLabel;
+                'Analysis role',analysisRole;
+                'Computation status',detailValue(cv,'status','complete');
+                'Degraded partial-orbit training',yesno(degradedMode);
+                'Training completeness',detailValue(cv, ...
+                    'trainingCompleteness','complete-nine');
+                ['Training completeness ',foldTokenA],detailValue(cv, ...
+                    'trainingCompletenessA','complete-nine');
+                ['Training completeness ',foldTokenB],detailValue(cv, ...
+                    'trainingCompletenessB','complete-nine');
+                'Training warning identifier',detailValue(cv, ...
+                    'warningIdentifier','');
+                'Training warning message',detailValue(cv, ...
+                    'warningMessage','');
+                splitMetricLabel,splitMetricValue;
+                [foldA,' sampling interval (m)'],cv.samplingIntervalA;
+                [foldB,' sampling interval (m)'],cv.samplingIntervalB;
+                [foldA,' interpolated'],yesno(cv.interpolationA.applied);
+                [foldB,' interpolated'],yesno(cv.interpolationB.applied);
+                [foldA,' original/interpolated point counts'],sprintf('%d / %d', ...
+                    cv.interpolationA.originalPointCount, ...
+                    cv.interpolationA.interpolatedPointCount);
+                [foldB,' original/interpolated point counts'],sprintf('%d / %d', ...
+                    cv.interpolationB.originalPointCount, ...
+                    cv.interpolationB.interpolatedPointCount);
+                [foldA,' largest gap / median spacing'], ...
+                    cv.interpolationA.maximumGapToMedianRatio;
+                [foldB,' largest gap / median spacing'], ...
+                    cv.interpolationB.maximumGapToMedianRatio;
+                [foldA,' theoretical all-nine rate lower bound (exclusive)'],cv.allNineRateRangeA(1);
+                [foldA,' theoretical all-nine rate upper bound (inclusive)'],cv.allNineRateRangeA(2);
+                [foldB,' theoretical all-nine rate lower bound (exclusive)'],cv.allNineRateRangeB(1);
+                [foldB,' theoretical all-nine rate upper bound (inclusive)'],cv.allNineRateRangeB(2);
+                'Shared all-nine rate lower bound (exclusive)',cv.allNineRateRangeShared(1);
+                'Shared all-nine rate upper bound (inclusive)',cv.allNineRateRangeShared(2);
+                ['Adaptive training rate ',foldTokenA,' (cm/kyr)'],cv.trainA.bestRate;
+                ['Adaptive training rate ',foldTokenB,' (cm/kyr)'],cv.trainB.bestRate;
+                [directionAtoB,' frozen-target validation rate (cm/kyr)'],cv.validateAtoB.bestRate;
+                [directionBtoA,' frozen-target validation rate (cm/kyr)'],cv.validateBtoA.bestRate;
+                [directionAtoB,' validation score'],cv.validateAtoB.score;
+                [directionBtoA,' validation score'],cv.validateBtoA.score;
+                [pNameB,': ',foldA,'-to-',foldB,', ',foldB,' held out'],cv.pB;
+                [pNameB,' null-exceedance probability 95% Wilson CI lower'],cv.pBConfidenceInterval(1);
+                [pNameB,' null-exceedance probability 95% Wilson CI upper'],cv.pBConfidenceInterval(2);
+                ['Finite ',directionAtoB,' null maxima'],cv.nsimValidAtoB;
+                [pNameA,': ',foldB,'-to-',foldA,', ',foldA,' held out'],cv.pA;
+                [pNameA,' null-exceedance probability 95% Wilson CI lower'],cv.pAConfidenceInterval(1);
+                [pNameA,' null-exceedance probability 95% Wilson CI upper'],cv.pAConfidenceInterval(2);
+                ['Finite ',directionBtoA,' null maxima'],cv.nsimValidBtoA;
+                'Consensus best rate (cm/kyr)',cv.consensus.bestRate;
+                'Consensus correlation',cv.consensus.bestCorrelation;
+                'Consensus joint global p-value',cv.pConsensus;
+                'Consensus global p-value 95% Wilson CI lower', ...
+                    cv.pConsensusConfidenceInterval(1);
+                'Consensus global p-value 95% Wilson CI upper', ...
+                    cv.pConsensusConfidenceInterval(2);
+                'Finite consensus null maxima',cv.nsimValidConsensus;
+                'Maximum pCOCO',cv.bestPCOCO;
+                'pCOCO best rate (cm/kyr)',cv.bestPCOCORate;
+                'pCOCO definition',detailValue(cv.config, ...
+                    'pCOCODefinition', ...
+                    ['consensus rho multiplied by abs(log10(', ...
+                     'consensus global p))']);
+                'Symmetric score (minimum)',cv.scoreSymmetric;
+                'Mean directional score',cv.scoreMean;
+                'Symmetric Monte Carlo p-value',cv.pSym;
+                'p_sym null-exceedance probability 95% Wilson CI lower',cv.pSymConfidenceInterval(1);
+                'p_sym null-exceedance probability 95% Wilson CI upper',cv.pSymConfidenceInterval(2);
+                [foldA,' AR(1) rho metadata'],cv.rhoMA;
+                [foldA,' AR(1) estimator'],cv.rhoMethodA;
+                [foldB,' AR(1) rho metadata'],cv.rhoMB;
+                [foldB,' AR(1) estimator'],cv.rhoMethodB;
+                'Full/compatibility AR(1) rho',cv.rhoM;
+                'Monte Carlo iterations requested',cv.nsimRequested;
+                'Monte Carlo iterations completed',cv.nsimCompleted;
+                'Finite null statistics used for p-value',cv.nsimValid;
+                'Random seed',cv.seed;
+                'Maximum temporal frequency used (cycle/kyr)',cv.config.maximumTemporalFrequency;
+                'Training target units',trainingTargetUnits;
+                'Training amplitude rule',trainingLabel;
+                'Validation rule',validationLabel;
+                'Symmetric statistic',sprintf('min(max rho %s, max rho %s)', ...
+                    directionAtoB,directionBtoA)};
+            if isFourGroupOutput
+                summaryDetails = [summaryDetails; {
+                    'Leakage correction', ...
+                    '4-by-4 finite-record leakage matrix; exact nonnegative least squares';
+                    'Minimum leakage-matrix rcond', ...
+                    cv.config.minimumLeakageMatrixRcond}];
+            end
+            summary = [{'Metric','Value'};conclusionRows;summaryDetails];
+
+            [~,dn,~] = fileparts(app.meta.filename);
+            saveDir = resolveSaveDir(ctx);
+            if isInterleavedOutput
+                methodStem = 'Interleaved_cvCOCO';
+            elseif strcmp(modeName,'CVCOCOLEGACY')
+                methodStem = 'cvCOCO-Legacy';
+            elseif strcmp(modeName,'CVCOCO9A')
+                methodStem = 'cvCOCO9A';
+            elseif any(strcmp(modeName,{'CVCOCO9B','CVCOCO9'}))
+                methodStem = 'cvCOCO9B';
+            elseif strcmp(modeName,'CVCOCO2')
+                methodStem = 'cvCOCO2';
+            else
+                methodStem = 'Blocked_cvCOCO';
+            end
+            [nm,runIndex] = indexedRunName(saveDir, ...
+                [dn,'-',methodStem],'.xlsx');
+            workbook = [tempname(saveDir),'.xlsx'];
+            cleanup = onCleanup(@()deleteIfPresent(workbook));
+
+            parameters = buildRunParameterTable(modeName,nm);
+            writecell(parameters,workbook,'Sheet','Parameters');
+            writecell(summary,workbook,'Sheet','Summary','Range','A1');
+            trainPrefix = iff(isFourGroupOutput,'GroupBandTrain','AdaptiveTrain');
+            if isCv9AOutput
+                trainPrefix = 'RayleighPeakTrain';
+            end
+            validatePrefix = iff(isFourGroupOutput,'FourGroupValidate','FixedValidate');
+            if isCv9Output
+                validatePrefix = 'Coherent9Validate';
+            end
+            curveHeader = {'SedRate_cm_per_kyr', ...
+                [trainPrefix,foldTokenA],[trainPrefix,foldTokenB], ...
+                [validatePrefix,'_',foldTokenA,'_to_',foldTokenB], ...
+                [validatePrefix,'_',foldTokenB,'_to_',foldTokenA], ...
+                'ConsensusCorrelation', ...
+                ['GlobalP_',foldTokenA,'_to_',foldTokenB], ...
+                ['GlobalP_',foldTokenB,'_to_',foldTokenA], ...
+                'ConsensusGlobalP', ...
+                ['LocalP_',foldTokenA,'_to_',foldTokenB], ...
+                ['LocalP_',foldTokenB,'_to_',foldTokenA], ...
+                'ConsensusLocalP','pCOCO', ...
+                ['ResolvablePeriods_',foldTokenA], ...
+                ['ResolvablePeriods_',foldTokenB], ...
+                ['ActivePeriods_',foldTokenA,'_to_',foldTokenB], ...
+                ['ActivePeriods_',foldTokenB,'_to_',foldTokenA], ...
+                'ConsensusActivePeriods'};
+            if isFourGroupOutput
+                curveHeader = [curveHeader, ...
+                    {['Full4x4LeakageMatrixRcond_',foldTokenA], ...
+                     ['Full4x4LeakageMatrixRcond_',foldTokenB], ...
+                     ['EffectiveActiveLeakageRcond_',foldTokenA], ...
+                     ['EffectiveActiveLeakageRcond_',foldTokenB]}];
+            end
+            curveHeader = [curveHeader, ...
+                { ...
+                ['EffectiveTrainingRate_',foldTokenA], ...
+                ['EffectiveTrainingRate_',foldTokenB], ...
+                ['CompleteAllNineTrainingRate_',foldTokenA], ...
+                ['CompleteAllNineTrainingRate_',foldTokenB], ...
+                ['PartialOrbitOnlyTrainingRate_',foldTokenA], ...
+                ['PartialOrbitOnlyTrainingRate_',foldTokenB], ...
+                ['ValidRate_',foldTokenA],['ValidRate_',foldTokenB]}];
+            writecell(curveHeader,workbook,'Sheet','SedRateCurves','Range','A1');
+            writematrix(curves,workbook,'Sheet','SedRateCurves','Range','A2');
+
+            groupRows = [groupNames,num2cell([groupAraw,groupAnorm,groupBraw,groupBnorm])];
+            if isCv9AOutput
+                groupHeader = {'Group', ...
+                    ['Train',foldTokenA,'_descriptive_group_RMS_raw_not_used_for_validation'], ...
+                    ['Train',foldTokenA,'_descriptive_group_RMS_relative_not_used_for_validation'], ...
+                    ['Train',foldTokenB,'_descriptive_group_RMS_raw_not_used_for_validation'], ...
+                    ['Train',foldTokenB,'_descriptive_group_RMS_relative_not_used_for_validation']};
+            else
+                groupHeader = {'Group',['Train',foldTokenA,'_raw_amplitude'], ...
+                    ['Train',foldTokenA,'_relative_weight'], ...
+                    ['Train',foldTokenB,'_raw_amplitude'], ...
+                    ['Train',foldTokenB,'_relative_weight']};
+                if isFourGroupOutput && ...
+                        isfield(cv.trainA,'resolvedGroupMask') && ...
+                        isfield(cv.trainB,'resolvedGroupMask')
+                    resolvedA = cvColumn(cv.trainA.resolvedGroupMask, ...
+                        nGroup,'trainA.resolvedGroupMask');
+                    resolvedB = cvColumn(cv.trainB.resolvedGroupMask, ...
+                        nGroup,'trainB.resolvedGroupMask');
+                    groupRows = [groupRows, ...
+                        num2cell(double([resolvedA,resolvedB]))];
+                    groupHeader = [groupHeader, ...
+                        {['Train',foldTokenA,'_group_resolved'], ...
+                         ['Train',foldTokenB,'_group_resolved']}];
+                end
+            end
+            writecell([groupHeader;groupRows],workbook,'Sheet','GroupWeights','Range','A1');
+            if isFourGroupOutput
+                physicalRcondA = cv.trainA.groupLeakageRcond;
+                physicalRcondB = cv.trainB.groupLeakageRcond;
+                if isfield(cv.trainA,'fullGroupLeakageRcond')
+                    physicalRcondA = cv.trainA.fullGroupLeakageRcond;
+                end
+                if isfield(cv.trainB,'fullGroupLeakageRcond')
+                    physicalRcondB = cv.trainB.fullGroupLeakageRcond;
+                end
+                writeLeakageMatrixSheet(workbook, ...
+                    ['LeakageMatrix',foldTokenA],groupNames, ...
+                    cv.trainA.groupLeakageMatrix,physicalRcondA);
+                writeLeakageMatrixSheet(workbook, ...
+                    ['LeakageMatrix',foldTokenB],groupNames, ...
+                    cv.trainB.groupLeakageMatrix,physicalRcondB);
+                if isfield(cv.trainA,'groupLeakageSolveMatrix') && ...
+                        isfield(cv.trainB,'groupLeakageSolveMatrix')
+                    writeLeakageMatrixSheet(workbook, ...
+                        ['LeakageSolve',foldTokenA],groupNames, ...
+                        cv.trainA.groupLeakageSolveMatrix, ...
+                        cv.trainA.groupLeakageRcond);
+                    writeLeakageMatrixSheet(workbook, ...
+                        ['LeakageSolve',foldTokenB],groupNames, ...
+                        cv.trainB.groupLeakageSolveMatrix, ...
+                        cv.trainB.groupLeakageRcond);
+                end
+            end
+            if ~isequal(size(cv.activeGroupCountAtoB),[nRate,4]) || ...
+                    ~isequal(size(cv.activeGroupCountBtoA),[nRate,4])
+                error('eCOCOGUI:InvalidCVCOCOResult', ...
+                    'cvCOCO active-group count curves must be N-rate by four.');
+            end
+            activeGroupHeader = [{'SedRate_cm_per_kyr'}, ...
+                strcat([foldTokenA,'To',foldTokenB,'_active_'],groupNames(:)'), ...
+                strcat([foldTokenB,'To',foldTokenA,'_active_'],groupNames(:)')];
+            writecell(activeGroupHeader,workbook, ...
+                'Sheet','ActiveGroupCounts','Range','A1');
+            writematrix([sr,cv.activeGroupCountAtoB, ...
+                cv.activeGroupCountBtoA],workbook, ...
+                'Sheet','ActiveGroupCounts','Range','A2');
+
+            orbitPeriods = cv.orbitPeriods(:);
+            orbitGroups = cv.groupIndex(:);
+            if numel(orbitPeriods) ~= numel(cv.trainA.amplitudes9) || ...
+                    numel(orbitPeriods) ~= numel(cv.trainB.amplitudes9) || ...
+                    numel(orbitPeriods) ~= numel(orbitGroups)
+                error('eCOCOGUI:InvalidCVCOCOResult', ...
+                    'cvCOCO orbital amplitude arrays have inconsistent lengths.');
+            end
+            groupLabels = groupNames(orbitGroups);
+            if isCv9AOutput && ...
+                    isfield(cv.trainA,'amplitudes9Normalized') && ...
+                    isfield(cv.trainB,'amplitudes9Normalized')
+                normalizedA = cvColumn(cv.trainA.amplitudes9Normalized, ...
+                    numel(orbitPeriods),'trainA.amplitudes9Normalized');
+                normalizedB = cvColumn(cv.trainB.amplitudes9Normalized, ...
+                    numel(orbitPeriods),'trainB.amplitudes9Normalized');
+                amplitudeHeader = {'Period_kyr','Group', ...
+                    ['Train',foldTokenA,'_per_orbit_Rayleigh_peak_raw_amplitude'], ...
+                    ['Train',foldTokenB,'_per_orbit_Rayleigh_peak_raw_amplitude'], ...
+                    ['Train',foldTokenA,'_per_orbit_normalized_weight'], ...
+                    ['Train',foldTokenB,'_per_orbit_normalized_weight']};
+                amplitudeRows = [num2cell(orbitPeriods),groupLabels, ...
+                    num2cell(cv.trainA.amplitudes9(:)), ...
+                    num2cell(cv.trainB.amplitudes9(:)), ...
+                    num2cell(normalizedA),num2cell(normalizedB)];
+            elseif isFourGroupOutput
+                amplitudeHeader = {'Period_kyr','Group', ...
+                    ['Train',foldTokenA,'_group_common_amplitude_repeated_for_member'], ...
+                    ['Train',foldTokenB,'_group_common_amplitude_repeated_for_member']};
+                amplitudeRows = [num2cell(orbitPeriods),groupLabels, ...
+                    num2cell(cv.trainA.amplitudes9(:)), ...
+                    num2cell(cv.trainB.amplitudes9(:))];
+            else
+                amplitudeHeader = {'Period_kyr','Group', ...
+                    ['Train',foldTokenA,'_per_orbit_adaptive_amplitude'], ...
+                    ['Train',foldTokenB,'_per_orbit_adaptive_amplitude']};
+                amplitudeRows = [num2cell(orbitPeriods),groupLabels, ...
+                    num2cell(cv.trainA.amplitudes9(:)), ...
+                    num2cell(cv.trainB.amplitudes9(:))];
+            end
+            writecell([amplitudeHeader;amplitudeRows],workbook, ...
+                'Sheet','OrbitAmplitudes','Range','A1');
+
+            nullHeader = {'Simulation', ...
+                ['S_',foldTokenA,'_to_',foldTokenB], ...
+                ['S_',foldTokenB,'_to_',foldTokenA], ...
+                'T_same_rate_consensus','T_symmetric', ...
+                ['BestRate_',foldTokenA,'_to_',foldTokenB,'_cm_per_kyr'], ...
+                ['BestRate_',foldTokenB,'_to_',foldTokenA,'_cm_per_kyr']};
+            writecell(nullHeader,workbook,'Sheet','NullStatistics','Range','A1');
+            writematrix([(1:nNull)',nullAtoB,nullBtoA, ...
+                nullConsensus,nullScore, ...
+                nullRateAtoB,nullRateBtoA],workbook,'Sheet','NullStatistics','Range','A2');
+
+            writeSegmentSheet(workbook,'CleanInput',cv.dataClean);
+            if isInterleavedOutput
+                if isfield(cv,'rawDataA') && isfield(cv,'rawDataB')
+                    writeSegmentSheet(workbook,'RawOddFold',cv.rawDataA);
+                    writeSegmentSheet(workbook,'RawEvenFold',cv.rawDataB);
+                end
+                writeSegmentSheet(workbook,'OddFold',cv.dataA);
+                writeSegmentSheet(workbook,'EvenFold',cv.dataB);
+                writeSpectrumSheet(workbook,'TrainingSpectrumOdd',cv.spectra.trainA);
+                writeSpectrumSheet(workbook,'TrainingSpectrumEven',cv.spectra.trainB);
+                writeSpectrumSheet(workbook,'Validation_OddToEven',cv.spectra.validateAtoB);
+                writeSpectrumSheet(workbook,'Validation_EvenToOdd',cv.spectra.validateBtoA);
+            else
+                writeSegmentSheet(workbook,'SegmentA',cv.dataA);
+                writeSegmentSheet(workbook,'SegmentB',cv.dataB);
+                writeSpectrumSheet(workbook,'TrainingSpectrumA',cv.spectra.trainA);
+                writeSpectrumSheet(workbook,'TrainingSpectrumB',cv.spectra.trainB);
+                writeSpectrumSheet(workbook,'ValidationSpectrum_AtoB',cv.spectra.validateAtoB);
+                writeSpectrumSheet(workbook,'ValidationSpectrum_BtoA',cv.spectra.validateBtoA);
+            end
+            [ok,message] = movefile(workbook,nm,'f');
+            if ~ok
+                error('eCOCOGUI:AtomicSaveFailed', ...
+                    'Could not finalize the cvCOCO workbook: %s',message);
+            end
+            clear cleanup
+        end
+
+        function validateNestedFields(s,label,required)
+            if ~isstruct(s)
+                error('eCOCOGUI:InvalidCVCOCOResult','cvCOCO result.%s must be a struct.',label);
+            end
+            missing = required(~cellfun(@(f)isfield(s,f),required));
+            if ~isempty(missing)
+                error('eCOCOGUI:InvalidCVCOCOResult', ...
+                    'cvCOCO result.%s is missing required field(s): %s.', ...
+                    label,strjoin(missing,', '));
+            end
+        end
+
+        function x = cvColumn(x,n,label)
+            x = x(:);
+            if numel(x) ~= n
+                error('eCOCOGUI:InvalidCVCOCOResult', ...
+                    'cvCOCO result.%s has %d values; expected %d.',label,numel(x),n);
+            end
+        end
+
+        function writeSegmentSheet(nm,sheetName,data)
+            if ~isnumeric(data) || size(data,2) < 2
+                error('eCOCOGUI:InvalidCVCOCOResult', ...
+                    'cvCOCO result.data%s must be an N-by-2 numeric array.',sheetName(end));
+            end
+            writecell({'Depth_m','Value'},nm,'Sheet',sheetName,'Range','A1');
+            writematrix(data(:,1:2),nm,'Sheet',sheetName,'Range','A2');
+        end
+
+        function writeSpectrumSheet(nm,sheetName,spectrum)
+            required = {'frequency','dataPower','targetPower','rate','mode'};
+            if ~isstruct(spectrum) || any(~isfield(spectrum,required))
+                error('eCOCOGUI:InvalidCVCOCOResult', ...
+                    'cvCOCO spectrum diagnostic %s is incomplete.',sheetName);
+            end
+            writecell({'Rate_cm_per_kyr',spectrum.rate;'Target_mode',spectrum.mode}, ...
+                nm,'Sheet',sheetName,'Range','A1');
+            writecell({'Frequency_cycle_per_kyr','Data_temporal_PSD','Target_temporal_PSD'}, ...
+                nm,'Sheet',sheetName,'Range','A4');
+            if ~isempty(spectrum.frequency)
+                writematrix([spectrum.frequency(:),spectrum.dataPower(:), ...
+                    spectrum.targetPower(:)],nm,'Sheet',sheetName,'Range','A5');
+            end
+        end
+
+        function writeLeakageMatrixSheet( ...
+                nm,sheetName,groupNames,matrixValue,rcondValue)
+            if ~isnumeric(matrixValue) || ~isequal(size(matrixValue),[4,4]) || ...
+                    any(~isfinite(matrixValue),'all') || ...
+                    ~isnumeric(rcondValue) || ~isscalar(rcondValue) || ...
+                    ~isfinite(rcondValue)
+                error('eCOCOGUI:InvalidCVCOCOResult', ...
+                    'cvCOCO %s is not a finite 4-by-4 leakage matrix.',sheetName);
+            end
+            header = [{'Observed_band_energy_by_row'}, ...
+                strcat('Template_',groupNames(:)')];
+            rows = [groupNames,num2cell(matrixValue)];
+            writecell({'Matrix_rcond',rcondValue}, ...
+                nm,'Sheet',sheetName,'Range','A1');
+            writecell([header;rows],nm,'Sheet',sheetName,'Range','A3');
+        end
+
+        function plotCVCOCOResult(cv)
+            if exist('plotcvcoco','file') ~= 2
+                return
+            end
+            try
+                app.run.cocoFigure = plotcvcoco(cv, ...
+                    'ShowSpectra',app.CShowPeriod.Value,'Tabbed',true);
+            catch MEplot
+                warning('eCOCOGUI:CVCOCOPlotFailed', ...
+                    'cvCOCO calculation and output succeeded, but plotting failed: %s',MEplot.message);
+            end
+        end
+
+        function writeConclusionSummary(workbook,report)
+            if isempty(workbook) || ~isfile(workbook) || ~isstruct(report) || ...
+                    ~isfield(report,'summaryRows')
+                return
+            end
+            rows = report.summaryRows;
+            if ~iscell(rows) || size(rows,2) ~= 2
+                error('eCOCOGUI:InvalidConclusionReport', ...
+                    'Conclusion summaryRows must be a two-column cell array.');
+            end
+            writecell([{'Metric','Value'};rows],workbook, ...
+                'Sheet','Summary','Range','A1');
+        end
+
+        function writeAdaptiveAudit(workbook,details)
+            if isempty(workbook) || ~isfile(workbook) || ~isstruct(details)
+                return
+            end
+            rows = {
+                'Metric','Value';
+                'AR1_rhoM',detailValue(details,'rhoM',NaN);
+                'AR1_estimator',detailValue(details,'rhoMethod','');
+                'Random_seed',detailValue(details,'seed',NaN);
+                'MC_requested',detailValue(details,'nsimRequested',NaN);
+                'MC_completed',detailValue(details,'nsimCompleted',NaN);
+                'MC_valid_null_maxima',detailValue(details,'nsimValid',NaN);
+                'Minimum_resolvable_plus_one_p',detailValue(details,'pFloor',NaN);
+                'Maximum_frequency_cycle_per_kyr',detailValue(details,'maxFrequency',NaN);
+                'Data_Nyquist_MaxFrequency_crossover_cm_per_kyr',detailValue(details,'sr0',NaN);
+                'Slices',detailValue(details,'slices',NaN);
+                'NFFT',detailValue(details,'pad',NaN);
+                'MC_spectrum_streaming_batch_size',detailValue(details,'mcSpectrumBatchSize',NaN);
+                'Red_noise_option',detailValue(details,'red',NaN);
+                'Correlation_method',detailValue(details,'method','');
+                'Target_mode',detailValue(details,'targetMode','');
+                'Target_amplitude_mode', ...
+                    detailValue(details,'targetAmplitudeMode','');
+                'Null_conditioning',detailValue(details,'nullConditioning','');
+                'Adaptive_target_construction',detailValue(details,'targetConstruction','');
+                'Adaptive_band_assignment',detailValue(details,'bandAssignment','')};
+            writecell(rows,workbook,'Sheet','AdaptiveAudit','Range','A1');
+            nullMax = detailValue(details,'nullMax',[]);
+            if isnumeric(nullMax) && ~isempty(nullMax)
+                nullMax = nullMax(:);
+                writecell({'Simulation','Null_maximum_correlation'},workbook, ...
+                    'Sheet','NullMaximum','Range','A1');
+                writematrix([(1:numel(nullMax))',nullMax],workbook, ...
+                    'Sheet','NullMaximum','Range','A2');
+            end
+        end
+
+        function writeAdaptiveCurves(workbook,corrCI,corrH0)
+            if ~isnumeric(corrCI) || size(corrCI,2) < 4 || ...
+                    ~isnumeric(corrH0) || size(corrH0,2) < 3 || ...
+                    size(corrCI,1) ~= size(corrH0,1)
+                error('eCOCOGUI:InvalidAdaptiveResult', ...
+                    'Adaptive COCO curve arrays are incomplete.');
+            end
+            header = {'SedRate_cm_per_kyr','Correlation', ...
+                'Parametric_correlation_p_descriptive_only', ...
+                'Missing_or_unresolved_periods','Global_max_statistic_p', ...
+                'Participating_periods','Local_Monte_Carlo_p'};
+            writecell(header,workbook,'Sheet','SedRateCurves','Range','A1');
+            writematrix([corrCI(:,1:4),corrH0(:,1:3)],workbook, ...
+                'Sheet','SedRateCurves','Range','A2');
+        end
+
+        function showConclusionReport(report)
+            if ~isstruct(report) || ~isfield(report,'message')
+                return
+            end
+            fprintf('\n>> COCO conclusion report\n%s\n\n',report.message);
+            try
+                uialert(app.UIFigure,report.message,'COCO conclusion');
+            catch MEreport
+                warning('eCOCOGUI:ConclusionDisplayFailed', ...
+                    'The conclusion was saved, but its dialog failed: %s', ...
+                    MEreport.message);
+            end
+        end
+
+        function [nm,runIndex] = saveECOCOOutputs( ...
+                prt_sr,out_depth,out_ecc,out_ep,out_eci,out_norbit, ...
+                out_ecoco,out_ecocorb,sr_p,rawData,ecoDetails)
+            [~,dn,~] = fileparts(app.meta.filename);
+            saveDir = resolveSaveDir(ctx);
+            ecoSpec = ecoMethodSpec();
+            outputStem = [dn,'-',ecoSpec.outputLabel];
+            [nm,runIndex] = indexedRunName( ...
+                saveDir,outputStem,'.xlsx');
+            workbook = [tempname(saveDir),'.xlsx'];
+            cleanup = onCleanup(@()deleteIfPresent(workbook));
+            parameters = buildRunParameterTable('ECOCO',nm);
+            writecell(parameters,workbook,'Sheet','Parameters');
+            writematrix(prt_sr,workbook,'Sheet','Sed.Rate');
+            writematrix(out_depth,workbook,'Sheet','Depth');
+            writematrix(out_ecc,workbook,'Sheet','COCO');
+            writematrix(out_eci,workbook,'Sheet','p_global');
+            writematrix(out_norbit,workbook,'Sheet','#Orbits');
+            writematrix(out_ecoco,workbook,'Sheet','pCOCO');
+            writematrix(out_ecocorb,workbook,'Sheet','RidgeScore');
+
+            methodName = ecoCalcModeName('ECOCO');
+            engineMethod = ecoSpec.token;
+            detailsAnchorFraction = 'NA';
+            computationStatus = 'complete';
+            degradedMode = false;
+            warningIdentifier = '';
+            warningMessage = '';
+            algorithmVersion = '';
+            scoreDefinition = '';
+            orbitCountRole = '';
+            if ecoSpec.usesAnchor
+                detailsAnchorFraction = app.anchorFraction;
+            end
+            if nargin >= 11 && isstruct(ecoDetails)
+                engineMethod = detailValue( ...
+                    ecoDetails,'method',engineMethod);
+                computationStatus = detailValue( ...
+                    ecoDetails,'status',computationStatus);
+                degradedMode = detailValue( ...
+                    ecoDetails,'degradedMode',degradedMode);
+                warningIdentifier = detailValue( ...
+                    ecoDetails,'warningIdentifier',warningIdentifier);
+                warningMessage = detailValue( ...
+                    ecoDetails,'warningMessage',warningMessage);
+                algorithmVersion = detailValue( ...
+                    ecoDetails,'algorithmVersion',algorithmVersion);
+                scoreDefinition = detailValue( ...
+                    ecoDetails,'scoreDefinition',scoreDefinition);
+                if ecoSpec.usesAnchor
+                    detailsAnchorFraction = detailValue( ...
+                        ecoDetails,'anchorFraction',detailsAnchorFraction);
+                end
+            end
+            if any(strcmpi(char(string(engineMethod)), ...
+                    {'crossfit','interleaved'}))
+                if isempty(scoreDefinition)
+                    scoreDefinition = [ ...
+                        'pCOCO = consensus rho x ', ...
+                        'abs(log10(consensus global p))'];
+                end
+                orbitCountRole = 'Diagnostic only; not used in ridge score';
+            elseif strcmpi(char(string(engineMethod)),'adaptive')
+                if isempty(scoreDefinition)
+                    scoreDefinition = 'pCOCO x N_orbits / 9';
+                end
+                orbitCountRole = 'Ridge-score weight N_orbits / 9';
+            end
+            writecell({'Parameter','Value';'Method',methodName; ...
+                'Engine_method',engineMethod; ...
+                'Algorithm_version',algorithmVersion; ...
+                'Score_definition',scoreDefinition; ...
+                'Orbit_count_role',orbitCountRole; ...
+                'Anchor_fraction_W',detailsAnchorFraction; ...
+                'Computation_status',computationStatus; ...
+                'Degraded_partial_orbit_training',yesno(degradedMode); ...
+                'Training_warning_identifier',warningIdentifier; ...
+                'Training_warning_message',warningMessage},workbook, ...
+                'Sheet','eCOCO_Method','Range','A1');
+
+            if any(strcmpi(char(string(engineMethod)), ...
+                    {'adaptive','crossfit','interleaved'})) && ...
+                    isnumeric(out_ep) && ~isempty(out_ep)
+                writematrix(out_ep,workbook,'Sheet','p_local');
+            end
+
+            if nargin >= 11 && isstruct(ecoDetails)
+                if strcmpi(char(string(engineMethod)),'interleaved')
+                    writeEcoDirectionSheets( ...
+                        workbook,ecoDetails,'forward','OddToEven');
+                    writeEcoDirectionSheets( ...
+                        workbook,ecoDetails,'backward','EvenToOdd');
+                else
+                    writeEcoDirectionSheets(workbook,ecoDetails,'forward','Fwd');
+                    writeEcoDirectionSheets(workbook,ecoDetails,'backward','Bwd');
+                end
+                writeEcoDirectionSheets(workbook,ecoDetails, ...
+                    'consensus','Consensus');
+                if isfield(ecoDetails,'supportDirection')
+                    writeEcoSheet(workbook,'SupportDirection', ...
+                        ecoDetails.supportDirection);
+                end
+                if isfield(ecoDetails,'metadata')
+                    writeEcoMetadata(workbook,'MethodMetadata', ...
+                        ecoDetails.metadata);
+                end
+                if strcmpi(char(string(engineMethod)),'interleaved')
+                    saveInterleavedWindowDiagnostics( ...
+                        workbook,out_depth,ecoDetails);
+                end
+                if isfield(ecoDetails,'anchors')
+                    writeEcoMetadata(workbook,'AnchorMetadata', ...
+                        ecoDetails.anchors);
+                elseif isfield(ecoDetails,'anchor')
+                    writeEcoMetadata(workbook,'AnchorMetadata',ecoDetails.anchor);
+                end
+            end
+
+            if nargin >= 10 && ~isempty(sr_p)
+                trackedHeader = {'Depth_m','SedRate_cm_per_kyr', ...
+                    'Correlation','P_value','N_orbits','Ridge_score', ...
+                    'SedRate_low_cm_per_kyr','SedRate_high_cm_per_kyr'};
+                writecell(trackedHeader,workbook,'Sheet','TrackedSR','Range','A1');
+                writematrix(sr_p,workbook,'Sheet','TrackedSR','Range','A2');
+
+                [ageModel,timeDomainData] = buildAgeModelFromTrackedSR(rawData,sr_p);
+                ageHeader = {'Depth_m','Age_kyr','Age_min_kyr','Age_max_kyr','SedRate_cm_per_kyr','SedRate_low_cm_per_kyr','SedRate_high_cm_per_kyr'};
+                writecell(ageHeader,workbook,'Sheet','AgeModel','Range','A1');
+                writematrix(ageModel,workbook,'Sheet','AgeModel','Range','A2');
+
+                timeHeader = {'Age_kyr','Age_min_kyr','Age_max_kyr','Value','Depth_m'};
+                writecell(timeHeader,workbook,'Sheet','TimeDomainData','Range','A1');
+                writematrix(timeDomainData,workbook,'Sheet','TimeDomainData','Range','A2');
+            end
+            [ok,message] = movefile(workbook,nm,'f');
+            if ~ok
+                error('eCOCOGUI:AtomicSaveFailed', ...
+                    'Could not finalize the eCOCO workbook: %s',message);
+            end
+            clear cleanup
+        end
+
+        function writeEcoDirectionSheets(workbook,details,fieldName,prefix)
+            if ~isfield(details,fieldName) || ...
+                    ~isstruct(details.(fieldName))
+                return
+            end
+            direction = details.(fieldName);
+            fields = {'rho','pLocal','pGlobal','nOrbit','pCOCO','score'};
+            suffix = {'rho','p_local','p_global','Orbits','pCOCO','score'};
+            for fieldIndex = 1:numel(fields)
+                if isfield(direction,fields{fieldIndex})
+                    writeEcoSheet(workbook, ...
+                        [prefix,'_',suffix{fieldIndex}], ...
+                        direction.(fields{fieldIndex}));
+                end
+            end
+        end
+
+        function saveInterleavedWindowDiagnostics(workbook,depth,details)
+            if isfield(details,'windows') && isstruct(details.windows)
+                windows = details.windows;
+                requiredGeometry = {'requestedBounds','actualSpan', ...
+                    'observedCenter','observedSpan','pointCount', ...
+                    'startIndex','endIndex','success'};
+                if all(isfield(windows,requiredGeometry))
+                    observedLower = windows.observedCenter(:)- ...
+                        windows.observedSpan(:)/2;
+                    observedUpper = windows.observedCenter(:)+ ...
+                        windows.observedSpan(:)/2;
+                    oddCount = nan(numel(depth),1);
+                    evenCount = nan(numel(depth),1);
+                    if isfield(details,'folds') && ...
+                            isstruct(details.folds)
+                        if isfield(details.folds,'rawPointCountOdd')
+                            oddCount = details.folds.rawPointCountOdd(:);
+                        end
+                        if isfield(details.folds,'rawPointCountEven')
+                            evenCount = details.folds.rawPointCountEven(:);
+                        end
+                    end
+                    writecell({'Center_m','Requested_lower_m', ...
+                        'Requested_upper_m','Support_span_m', ...
+                        'First_observed_m','Last_observed_m', ...
+                        'Observed_center_m','Observed_span_m', ...
+                        'Raw_point_count','Odd_raw_point_count', ...
+                        'Even_raw_point_count','Start_global_index', ...
+                        'End_global_index','Success'},workbook, ...
+                        'Sheet','Ieco_WindowGeometry','Range','A1');
+                    writematrix([depth(:),windows.requestedBounds, ...
+                        windows.actualSpan(:),observedLower,observedUpper, ...
+                        windows.observedCenter(:),windows.observedSpan(:), ...
+                        windows.pointCount(:),oddCount,evenCount, ...
+                        windows.startIndex(:),windows.endIndex(:), ...
+                        double(windows.success(:))],workbook, ...
+                        'Sheet','Ieco_WindowGeometry','Range','A2');
+                end
+            end
+            requiredP = {'pConsensus','pRobust','pSym'};
+            if all(isfield(details,requiredP))
+                rateDifference = nan(numel(depth),1);
+                if isfield(details,'windows') && ...
+                        isstruct(details.windows) && ...
+                        isfield(details.windows, ...
+                        'directionalBestRateDifference')
+                    rateDifference = ...
+                        details.windows.directionalBestRateDifference(:);
+                end
+                writecell({'Depth_m','Consensus_global_p', ...
+                    'Robust_directional_p','Symmetric_p', ...
+                    'Directional_best_rate_difference'},workbook, ...
+                    'Sheet','Ieco_WindowP','Range','A1');
+                writematrix([depth(:),details.pConsensus(:), ...
+                    details.pRobust(:),details.pSym(:),rateDifference], ...
+                    workbook,'Sheet','Ieco_WindowP','Range','A2');
+            end
+            if isfield(details,'folds') && isstruct(details.folds)
+                folds = details.folds;
+                requiredFold = {'spacingOdd','spacingEven', ...
+                    'allNineRateRangeOdd','allNineRateRangeEven', ...
+                    'allNineRateRangeShared'};
+                if all(isfield(folds,requiredFold))
+                    bestRateAllNineResolved = nan(numel(depth),1);
+                    if isfield(details,'bestRateAllNineResolved')
+                        bestRateAllNineResolved = double( ...
+                            details.bestRateAllNineResolved(:));
+                    end
+                    partialTraining = nan(numel(depth),1);
+                    trainPeriodsOdd = nan(numel(depth),1);
+                    trainPeriodsEven = nan(numel(depth),1);
+                    trainGroupsOdd = nan(numel(depth),4);
+                    trainGroupsEven = nan(numel(depth),4);
+                    if isfield(details,'windows') && ...
+                            isstruct(details.windows)
+                        if isfield(details.windows,'partialOrbitTraining')
+                            partialTraining = double( ...
+                                details.windows.partialOrbitTraining(:));
+                        end
+                        if isfield(details.windows, ...
+                                'trainingResolvablePeriodsOdd')
+                            trainPeriodsOdd = details.windows. ...
+                                trainingResolvablePeriodsOdd(:);
+                        end
+                        if isfield(details.windows, ...
+                                'trainingResolvablePeriodsEven')
+                            trainPeriodsEven = details.windows. ...
+                                trainingResolvablePeriodsEven(:);
+                        end
+                        if isfield(details.windows,'trainingResolvedGroupsOdd')
+                            trainGroupsOdd = double(details.windows. ...
+                                trainingResolvedGroupsOdd);
+                        end
+                        if isfield(details.windows,'trainingResolvedGroupsEven')
+                            trainGroupsEven = double(details.windows. ...
+                                trainingResolvedGroupsEven);
+                        end
+                    end
+                    writecell({'Depth_m','Odd_spacing_m', ...
+                        'Even_spacing_m','Odd_all9_low','Odd_all9_high', ...
+                        'Even_all9_low','Even_all9_high','Shared_all9_low', ...
+                        'Shared_all9_high','Best_rate_all9_resolved', ...
+                        'Partial_orbit_training','Train_periods_Odd', ...
+                        'Train_periods_Even','Train_Odd_longE_resolved', ...
+                        'Train_Odd_shortE_resolved', ...
+                        'Train_Odd_obliquity_resolved', ...
+                        'Train_Odd_precession_resolved', ...
+                        'Train_Even_longE_resolved', ...
+                        'Train_Even_shortE_resolved', ...
+                        'Train_Even_obliquity_resolved', ...
+                        'Train_Even_precession_resolved'},workbook, ...
+                        'Sheet','Ieco_FoldResolution','Range','A1');
+                    writematrix([depth(:),folds.spacingOdd(:), ...
+                        folds.spacingEven(:),folds.allNineRateRangeOdd, ...
+                        folds.allNineRateRangeEven, ...
+                        folds.allNineRateRangeShared, ...
+                        bestRateAllNineResolved,partialTraining, ...
+                        trainPeriodsOdd,trainPeriodsEven,trainGroupsOdd, ...
+                        trainGroupsEven],workbook, ...
+                        'Sheet','Ieco_FoldResolution','Range','A2');
+                end
+            end
+        end
+
+        function writeEcoSheet(workbook,sheetName,value)
+            sheetName = sheetName(1:min(31,numel(sheetName)));
+            if isnumeric(value) || islogical(value)
+                writematrix(value,workbook,'Sheet',sheetName);
+            elseif isstring(value)
+                writecell(cellstr(value),workbook,'Sheet',sheetName);
+            elseif iscell(value)
+                writecell(value,workbook,'Sheet',sheetName);
+            elseif ischar(value)
+                writecell({value},workbook,'Sheet',sheetName);
+            end
+        end
+
+        function writeEcoMetadata(workbook,sheetName,metadata)
+            if ~isstruct(metadata)
+                writeEcoSheet(workbook,sheetName,metadata);
+                return
+            end
+            names = fieldnames(metadata);
+            if isempty(names)
+                return
+            end
+            if isscalar(metadata)
+                rows = cell(numel(names)+1,2);
+                rows(1,:) = {'Field','Value'};
+                for metadataIndex = 1:numel(names)
+                    rows{metadataIndex+1,1} = names{metadataIndex};
+                    rows{metadataIndex+1,2} = metadataText( ...
+                        metadata.(names{metadataIndex}));
+                end
+            else
+                rows = cell(numel(metadata)+1,numel(names));
+                rows(1,:) = names(:).';
+                for itemIndex = 1:numel(metadata)
+                    for metadataIndex = 1:numel(names)
+                        rows{itemIndex+1,metadataIndex} = metadataText( ...
+                            metadata(itemIndex).(names{metadataIndex}));
+                    end
+                end
+            end
+            writecell(rows,workbook,'Sheet',sheetName,'Range','A1');
+        end
+
+        function value = metadataText(value)
+            if isnumeric(value) || islogical(value)
+                value = mat2str(value);
+            elseif ischar(value) || ...
+                    (isstring(value) && isscalar(value))
+                value = char(string(value));
+            else
+                value = sprintf('<%s %s>', ...
+                    class(value),mat2str(size(value)));
+            end
+        end
+
+        function params = buildRunParameterTable(modeName,outputFile)
+            [~,outBase,outExt] = fileparts(outputFile);
+            outputName = [outBase,outExt];
+            params = repmat({''},45,6);
+            params(1,2) = {'Detailed Parameters Used in Data Processing by Acycle'};
+            params(2,2:6) = {'Version','Designed by','Institute','E-mail','Date'};
+            runTimestamp = char(datetime('now', ...
+                'Format','yyyy-MM-dd HH:mm:ss'));
+            params(3,2:6) = {'v1.2','Mingsong Li','Peking University', ...
+                'msli@pku.edu.cn',runTimestamp};
+            params(5,2:5) = {'Tools','Items','Parameters','Explanations'};
+
+            params(7,:) = {'', 'COCO/eCOCO','Input file name',app.meta.filename,'',''};
+            params(8,:) = {'', '', 'Zero padding',app.pad,'',''};
+            params(9,:) = {'', '', 'Number of slices',sliceParameterValue(modeName),'Disabled for cvCOCO',''};
+            params(10,:) = {'', '', 'Remove red noise model',yesno(app.CRed.Value),'Select Yes or No',''};
+            params(11,:) = {'', '', 'Red noise removal method',redMethodName(),'',''};
+            params(12,:) = {'', '', 'Test sedimentation rate: minimum',app.sedmin,'',''};
+            params(13,:) = {'', '', 'Test sedimentation rate: requested maximum',app.sedmax,'The colon grid may end below this value',''};
+            params(14,:) = {'', '', 'Test sedimentation rate: step',app.sedstep,'',''};
+            params(15,:) = {'', '', 'Median age of data',app.age,'',''};
+            params(16,:) = {'', '', 'Maximum temporal frequency used (cycle/kyr)',app.f2,'',''};
+            params(17,:) = {'', '', 'Astronomical solution',astronomicalSolutionName(),'Farhat+2022 vs. User-defined period',''};
+            params(18,:) = {'', '', 'User-defined period',userPeriodValue(),'',''};
+            params(19,:) = {'', '', 'Correlation method',iff(app.corrmethod==1,'Pearson','Spearman'),'',''};
+            params(20,:) = {'', 'COCO','Selected COCO method',selectedCocoMethod(modeName), ...
+                ['Blocked cvCOCO / Interleaved cvCOCO / Adaptive COCO / ', ...
+                 'Fixed-target COCO'],''};
+            params(21,:) = {'', 'COCO','Target mode',cocoTargetModeName(modeName), ...
+                ['Blocked/Interleaved cvCOCO and Adaptive COCO use ', ...
+                 'method-B four-group ', ...
+                 'areas with leakage-matrix NNLS and a coherent ', ...
+                 'nine-term target; Fixed-target COCO uses preset weights'],''};
+            params(22,:) = {'', 'COCO','Fixed target amplitude weights',fixedTargetWeightValue(modeName),'Eccentricity / obliquity / precession',''};
+            params(23,:) = {'', '', 'Monte Carlo iterations',app.nsim,'',''};
+            params(24,:) = {'', 'cvCOCO','Split and validation rule',cvParameterValue(modeName, ...
+                cvSplitRuleValue(modeName)),'For cvCOCO only',''};
+            params(25,:) = {'', 'cvCOCO','Trained target structure', ...
+                cvTrainingTargetValue(modeName),'For cvCOCO only',''};
+            params(26,:) = {'', 'cvCOCO','Symmetric statistic',cvParameterValue(modeName, ...
+                'min(max rho A-to-B, max rho B-to-A)'),'For cvCOCO only',''};
+            params(27,:) = {'', 'cvCOCO','Monte Carlo batch size',cvParameterValue(modeName,app.cvBatchSize),'For cvCOCO only',''};
+            params(28,:) = {'', 'COCO','Random seed',cocoSeedValue(modeName),'Local RNG; restored after the run',''};
+            params(29,:) = {'', 'cvCOCO','Split depth / fold definition', ...
+                cvParameterValue(modeName,cvSplitDefinitionValue(modeName)), ...
+                'For cvCOCO only',''};
+            params(31,:) = {'', 'cvCOCO','Directional p_A',cvResultValue(modeName,'pA'), ...
+                cvDirectionalPExplanation(modeName,'A'),''};
+            params(32,:) = {'', 'cvCOCO','Directional p_B',cvResultValue(modeName,'pB'), ...
+                cvDirectionalPExplanation(modeName,'B'),''};
+            params(33,:) = {'', 'cvCOCO','Monte Carlo null model',cvParameterValue(modeName, ...
+                cvNullModelValue(modeName)), ...
+                'For cvCOCO only',''};
+            params(34,:) = {'', 'eCOCO','Selected eCOCO method', ...
+                ecoCalcModeName(modeName), ...
+                'Adaptive eCOCO / Blocked eCOCO / Interleaved eCOCO',''};
+            params(35,:) = {'', 'eCOCO','Target update interval', ...
+                ecoAnchorFractionValue(modeName), ...
+                'Fraction of window width; Blocked eCOCO only',''};
+            params(36,:) = {'', 'eCOCO','Zero padding edge',ecoPadEdgeValue(modeName),'For eCOCO only',''};
+            params(37,:) = {'', 'eCOCO','Sliding window size', ...
+                ecoValue(modeName,app.window), ...
+                'All modern eCOCO methods: exact physical-depth support width',''};
+            params(38,:) = {'', 'eCOCO','Sliding window step', ...
+                ecoValue(modeName,app.step), ...
+                'All modern eCOCO methods: exact physical center spacing',''};
+            params(39,:) = {'', '', 'Output file name',outputName,'',''};
+            params(40,:) = {'', '', 'Show input/target periodograms',yesno(app.CShowPeriod.Value),'COCO only',''};
+            params(41,:) = {'', '', 'Maximum displayed data frequency (cycle/m)', ...
+                displayedFrequencyParameter(modeName), ...
+                'Adaptive/Fixed COCO and eCOCO display only; not used by cvCOCO',''};
+            params(42,:) = {'', '', 'Depth unit used internally','m','Supported input depth units are converted to metres',''};
+            params(43,:) = {'', '', 'Test sedimentation rate: actual final grid value',actualSedRateMaximum(),'',''};
+            params(44,:) = {'', '', 'Input depth unit',app.meta.input_unit,'Converted before preprocessing',''};
+            params(45,:) = {'', '', 'Input-depth multiplier to metres',app.meta.depth_scale_to_m,'',''};
+            params(30,:) = [];
+        end
+
+        function s = yesno(tf)
+            if tf, s = 'Yes'; else, s = 'No'; end
+        end
+
+        function s = redMethodName()
+            if app.CRed.Value
+                s = app.DRed.Value;
+            else
+                s = 'NA';
+            end
+        end
+
+        function s = astronomicalSolutionName()
+            if app.RUser.Value
+                s = 'User-defined period';
+            else
+                s = 'Farhat+2022';
+            end
+        end
+
+        function v = userPeriodValue()
+            if app.RUser.Value
+                v = orbitString(app.orbit9);
+            else
+                v = 'NA';
+            end
+        end
+
+        function v = ecoCalcModeName(modeName)
+            if strcmp(modeName,'ECOCO')
+                spec = ecoMethodSpec();
+                v = spec.displayName;
+            else
+                v = 'NA';
+            end
+        end
+
+        function spec = ecoMethodSpec()
+            switch app.ecocoCalcMode
+                case 1
+                    spec = struct('token','adaptive', ...
+                        'displayName','Adaptive eCOCO', ...
+                        'outputLabel','Adaptive-eCOCO', ...
+                        'fileStem','Adaptive_eCOCO', ...
+                        'usesAnchor',false);
+                case 2
+                    spec = struct('token','crossfit', ...
+                        'displayName','Blocked eCOCO', ...
+                        'outputLabel','Blocked_eCOCO', ...
+                        'fileStem','Blocked_eCOCO', ...
+                        'usesAnchor',true);
+                case 3
+                    spec = struct('token','interleaved', ...
+                        'displayName','Interleaved eCOCO', ...
+                        'outputLabel','Interleaved_eCOCO', ...
+                        'fileStem','Interleaved_eCOCO', ...
+                        'usesAnchor',false);
+                otherwise
+                    error('eCOCOGUI:UnknownECOCOMethod', ...
+                        'Unknown eCOCO calculation mode: %g.', ...
+                        app.ecocoCalcMode);
+            end
+        end
+
+        function v = ecoAnchorFractionValue(modeName)
+            if strcmp(modeName,'ECOCO') && app.ecocoCalcMode == 2
+                v = sprintf('%.2g W',app.anchorFraction);
+            else
+                v = 'NA';
+            end
+        end
+
+        function v = cocoTargetModeName(modeName)
+            if strcmp(modeName,'ADAPTIVECOCO')
+                v = ['method-B four-group band areas with leakage-matrix ', ...
+                    'NNLS in a coherent nine-term adaptive target'];
+            elseif strcmp(modeName,'FIXEDTARGETCOCO')
+                v = 'coherent nine-term fixed target';
+            elseif isFullRecordCocoModeName(modeName)
+                v = app.cocoTargetMode;
+            elseif strcmp(modeName,'INTERLEAVEDCVCOCO')
+                v = ['method-B four group-band area amplitudes, leakage-', ...
+                    'matrix NNLS, and coherent nine-term target ', ...
+                    '(bidirectional odd/even held-out)'];
+            elseif strcmp(modeName,'CVCOCO')
+                v = ['four group-band area amplitudes, leakage-matrix ', ...
+                    'NNLS, and coherent nine-term target ', ...
+                    '(bidirectional held-out)'];
+            elseif strcmp(modeName,'CVCOCO9A')
+                v = ['nine per-orbit +/-1-Rayleigh peak amplitudes in a ', ...
+                    'coherent nine-term target (bidirectional held-out)'];
+            elseif any(strcmp(modeName,{'CVCOCO9B','CVCOCO9'}))
+                v = ['four group-band area amplitudes, leakage-matrix ', ...
+                    'NNLS, and coherent nine-term target ', ...
+                    '(bidirectional held-out)'];
+            elseif strcmp(modeName,'CVCOCOLEGACY')
+                v = ['legacy coherent nine-term adaptive target ', ...
+                    '(bidirectional held-out compatibility analysis)'];
+            elseif strcmp(modeName,'CVCOCO2')
+                v = 'band-integrated four-group target (bidirectional cross-validation)';
+            else
+                v = 'NA';
+            end
+        end
+
+        function v = selectedCocoMethod(modeName)
+            if strcmp(modeName,'ECOCO')
+                v = 'NA';
+            elseif strcmp(modeName,'INTERLEAVEDCVCOCO')
+                v = 'Interleaved cvCOCO';
+            elseif strcmp(modeName,'CVCOCO')
+                v = 'Blocked cvCOCO';
+            elseif strcmp(modeName,'ADAPTIVECOCO')
+                v = 'Adaptive COCO';
+            elseif strcmp(modeName,'FIXEDTARGETCOCO')
+                v = 'Fixed-target COCO';
+            elseif strcmp(modeName,'CVCOCO9A')
+                v = 'cvCOCO9A';
+            elseif any(strcmp(modeName,{'CVCOCO9B','CVCOCO9'}))
+                v = 'cvCOCO9B';
+            elseif strcmp(modeName,'CVCOCOLEGACY')
+                v = 'cvCOCO Legacy';
+            elseif strcmp(modeName,'CVCOCO2')
+                v = 'cvCOCO2';
+            else
+                v = app.DCOCOMethod.Value;
+            end
+        end
+
+        function v = fixedTargetWeightValue(modeName)
+            if (strcmp(modeName,'COCO') && strcmp(app.cocoTargetMode,'fixed')) || ...
+                    any(strcmp(modeName,{'FIXEDCOCO9','FIXEDTARGETCOCO'}))
+                v = '1.0 / 0.8 / 0.6';
+            else
+                v = 'NA';
+            end
+        end
+
+        function v = sliceParameterValue(modeName)
+            if isCVModeName(modeName) || strcmp(modeName,'ECOCO')
+                v = 'NA';
+            else
+                v = app.slices;
+            end
+        end
+
+        function v = cvParameterValue(modeName,value)
+            if isCVModeName(modeName)
+                v = value;
+            else
+                v = 'NA';
+            end
+        end
+
+        function v = cvTrainingTargetValue(modeName)
+            if strcmp(modeName,'CVCOCOLEGACY')
+                v = ['Nine coherent orbital terms trained adaptively; ', ...
+                    'four group-RMS weights frozen for validation'];
+            elseif strcmp(modeName,'CVCOCO9A')
+                v = ['Nine +/-1-Rayleigh-band peak amplitudes calibrated ', ...
+                    'per orbit, normalized, and frozen for coherent validation'];
+            elseif any(strcmp(modeName, ...
+                    {'CVCOCO9B','CVCOCO9','INTERLEAVEDCVCOCO'}))
+                v = ['Four leakage-corrected group amplitudes expanded ', ...
+                    'to nine coherently summed orbital terms'];
+            elseif strcmp(modeName,'CVCOCO')
+                v = ['Four leakage-corrected group amplitudes expanded ', ...
+                    'to nine coherently summed orbital terms'];
+            elseif isCVModeName(modeName)
+                v = 'Long eccentricity / short eccentricity / obliquity / precession';
+            else
+                v = 'NA';
+            end
+        end
+
+        function v = cvResultValue(modeName,fieldName)
+            v = 'NA';
+            if isCVModeName(modeName) && isstruct(app.run.cv) && ...
+                    isfield(app.run.cv,fieldName)
+                candidate = app.run.cv.(fieldName);
+                if isscalar(candidate) && (isnumeric(candidate) || islogical(candidate))
+                    v = candidate;
+                end
+            end
+        end
+
+        function tf = isCVModeName(modeName)
+            tf = any(strcmp(modeName, ...
+                {'CVCOCO','CVCOCO9A','CVCOCO9B','CVCOCO9', ...
+                 'CVCOCOLEGACY','CVCOCO2','INTERLEAVEDCVCOCO'}));
+        end
+
+        function tf = isFullRecordCocoModeName(modeName)
+            tf = any(strcmp(modeName, ...
+                {'COCO','ADAPTIVECOCO','ADAPTIVECOCO9A', ...
+                 'ADAPTIVECOCO9B','FIXEDTARGETCOCO','FIXEDCOCO9'}));
+        end
+
+        function v = cvSeedValue()
+            v = app.cvSeed;
+            if isstruct(app.run.cv) && isfield(app.run.cv,'seed') && ~isempty(app.run.cv.seed)
+                v = app.run.cv.seed;
+            end
+        end
+
+        function v = cocoSeedValue(modeName)
+            if isCVModeName(modeName)
+                v = cvSeedValue();
+            elseif isFullRecordCocoModeName(modeName)
+                v = app.adaptiveSeed;
+                if isstruct(app.run.adaptiveDetails) && ...
+                        isfield(app.run.adaptiveDetails,'seed')
+                    v = app.run.adaptiveDetails.seed;
+                end
+            else
+                v = 'NA';
+            end
+        end
+
+        function v = selectedPadType()
+            switch app.DPadEdge.Value
+                case 'mirror'
+                    v = 2;
+                case 'mean'
+                    v = 3;
+                case 'random'
+                    v = 4;
+                otherwise
+                    v = 1;
+            end
+        end
+
+        function v = displayedFrequencyParameter(modeName)
+            if isCVModeName(modeName)
+                v = 'NA';
+            else
+                v = app.fmaxdata;
+            end
+        end
+
+        function v = actualSedRateMaximum()
+            nRate = floor((app.sedmax-app.sedmin)/app.sedstep)+1;
+            v = app.sedmin+(max(1,nRate)-1)*app.sedstep;
+        end
+
+        function v = cvSplitDepthValue()
+            v = 'NA';
+            if isstruct(app.run.cv) && isfield(app.run.cv,'splitDepth') && ~isempty(app.run.cv.splitDepth)
+                v = app.run.cv.splitDepth;
+            end
+        end
+
+        function v = cvSplitRuleValue(modeName)
+            if strcmp(modeName,'INTERLEAVEDCVCOCO')
+                v = ['Odd/even observation indices after input cleaning; ', ...
+                    'bidirectional two-fold held-out validation'];
+            else
+                v = 'Depth midpoint; bidirectional two-fold held-out validation';
+            end
+            if isstruct(app.run.cv) && isfield(app.run.cv,'config') && ...
+                    isstruct(app.run.cv.config) && ...
+                    isfield(app.run.cv.config,'splitRule') && ...
+                    ~isempty(app.run.cv.config.splitRule)
+                v = app.run.cv.config.splitRule;
+            end
+        end
+
+        function v = cvSplitDefinitionValue(modeName)
+            if strcmp(modeName,'INTERLEAVEDCVCOCO')
+                v = cvSplitRuleValue(modeName);
+            else
+                v = cvSplitDepthValue();
+            end
+        end
+
+        function v = cvNullModelValue(modeName)
+            if strcmp(modeName,'INTERLEAVEDCVCOCO')
+                v = ['One joint full-record stationary AR(1) realization ', ...
+                    'split into odd/even observations; repeat interpolation, ', ...
+                    'linear detrending, training, validation, and rate search'];
+            else
+                v = ['Independent segment-specific stationary AR(1) nulls; ', ...
+                    'repeat training, frozen-target validation, and rate search'];
+            end
+            if isstruct(app.run.cv) && isfield(app.run.cv,'config') && ...
+                    isstruct(app.run.cv.config) && ...
+                    isfield(app.run.cv.config,'nullConditioning') && ...
+                    ~isempty(app.run.cv.config.nullConditioning)
+                v = app.run.cv.config.nullConditioning;
+            end
+        end
+
+        function v = cvDirectionalPExplanation(modeName,fold)
+            if strcmp(modeName,'INTERLEAVEDCVCOCO')
+                if strcmp(fold,'A')
+                    v = ['Even trains; Odd is held out; ', ...
+                        'rate-search corrected'];
+                else
+                    v = ['Odd trains; Even is held out; ', ...
+                        'rate-search corrected'];
+                end
+            elseif strcmp(fold,'A')
+                v = ['B trains; Segment A is held out; ', ...
+                    'rate-search corrected'];
+            else
+                v = ['A trains; Segment B is held out; ', ...
+                    'rate-search corrected'];
+            end
+        end
+
+        function v = ecoPadEdgeValue(modeName)
+            if strcmp(modeName,'ECOCO')
+                if app.CPadEdge.Value
+                    v = app.DPadEdge.Value;
+                else
+                    v = 'No';
+                end
+            else
+                v = 'NA';
+            end
+        end
+
+        function v = ecoValue(modeName,value)
+            if strcmp(modeName,'ECOCO')
+                v = value;
+            else
+                v = 'NA';
+            end
+        end
+
+        function [ageModel,timeDomainData] = buildAgeModelFromTrackedSR(rawData,sr_p)
+            rawData = rawData(:,1:min(2,size(rawData,2)));
+            rawData = rawData(all(isfinite(rawData),2),:);
+            rawData = sortrows(rawData,1);
+
+            srTrack = sr_p(:,[1,2,7,8]);
+            srTrack = srTrack(isfinite(srTrack(:,1)) & isfinite(srTrack(:,2)) & srTrack(:,2) > 0,:);
+            srTrack = sortrows(srTrack,1);
+            [trackDepth,ia] = unique(srTrack(:,1),'stable');
+            trackSr = srTrack(ia,2);
+            trackSrLow = srTrack(ia,3);
+            trackSrHigh = srTrack(ia,4);
+
+            depth = rawData(:,1);
+            values = rawData(:,2);
+            if isempty(depth)
+                ageModel = [];
+                timeDomainData = [];
+                return
+            end
+
+            if numel(trackDepth) == 0
+                srAtDepth = nan(size(depth));
+                srLowAtDepth = nan(size(depth));
+                srHighAtDepth = nan(size(depth));
+            elseif isscalar(trackDepth)
+                srAtDepth = repmat(trackSr, size(depth));
+                srLowAtDepth = repmat(trackSrLow, size(depth));
+                srHighAtDepth = repmat(trackSrHigh, size(depth));
+            else
+                srAtDepth = interpolateTrackedRate(trackDepth,trackSr,depth);
+                srLowAtDepth = interpolateTrackedRate(trackDepth,trackSrLow,depth);
+                srHighAtDepth = interpolateTrackedRate(trackDepth,trackSrHigh,depth);
+            end
+
+            srAtDepth(~isfinite(srAtDepth) | srAtDepth <= 0) = NaN;
+            srLowAtDepth(~isfinite(srLowAtDepth) | srLowAtDepth <= 0) = NaN;
+            srHighAtDepth(~isfinite(srHighAtDepth) | srHighAtDepth <= 0) = NaN;
+            srBoundLow = min(srLowAtDepth,srHighAtDepth);
+            srBoundHigh = max(srLowAtDepth,srHighAtDepth);
+
+            age = cumulativeAge(depth,srAtDepth);
+            ageMax = cumulativeAge(depth,srBoundLow);
+            ageMin = cumulativeAge(depth,srBoundHigh);
+
+            ageModel = [depth, age, ageMin, ageMax, srAtDepth, srBoundLow, srBoundHigh];
+            timeDomainData = [age, ageMin, ageMax, values, depth];
+        end
+
+        function srAtDepth = interpolateTrackedRate(trackDepth,trackSr,depth)
+            ok = isfinite(trackDepth) & isfinite(trackSr) & trackSr > 0;
+            trackDepth = trackDepth(ok);
+            trackSr = trackSr(ok);
+            if isempty(trackDepth)
+                srAtDepth = nan(size(depth));
+            elseif isscalar(trackDepth)
+                srAtDepth = repmat(trackSr, size(depth));
+            else
+                srAtDepth = interp1(trackDepth,trackSr,depth,'linear','extrap');
+                before = depth < trackDepth(1);
+                after = depth > trackDepth(end);
+                srAtDepth(before) = trackSr(1);
+                srAtDepth(after) = trackSr(end);
+            end
+        end
+
+        function age = cumulativeAge(depth,srAtDepth)
+            age = nan(size(depth));
+            if isempty(depth)
+                return
+            end
+            age(1) = 0;
+            for ii = 2:numel(depth)
+                srMid = mean(srAtDepth(ii-1:ii),'omitnan');
+                if ~isfinite(srMid) || srMid <= 0
+                    age(ii) = NaN;
+                else
+                    age(ii) = age(ii-1) + 100 * (depth(ii) - depth(ii-1)) / srMid;
+                end
+            end
+        end
+
+        function s = uniqueName(nm)
+            s = nm;
+            if ~exist(s,'file'), return; end
+            [p,n,e] = fileparts(nm);
+            for k = 1:999
+                s = fullfile(p,sprintf('%s-%d%s',n,k,e));
+                if ~exist(s,'file'), return; end
+            end
+        end
+
+        function [nm,runIndex] = indexedRunName(saveDir,baseName,ext)
+            for runIndex = 1:9999
+                nm = fullfile(saveDir,sprintf('%s-%d%s',baseName,runIndex,ext));
+                if ~exist(nm,'file')
+                    return
+                end
+            end
+
+            nm = uniqueName(fullfile(saveDir,[baseName,ext]));
+            runIndex = NaN;
+        end
+        
+        function out = parseOrbit()
+            if app.RUser.Value
+                out = parseNumericList(app.EOrbitUser.Value);
+                if isempty(out)
+                    error('eCOCOGUI:InvalidUserOrbitPeriods', ...
+                        'User-defined periods must be a numeric list.');
+                end
+            else
+                age = app.age;
+                orbit9 = calculate_orbit9(age);
+                out = orbit9(:,2)/1000;
+            end
+            out = out(:)';
+        end
+
+        function r = redCode()
+            if ~app.CRed.Value
+                r = 0;
+                return
+            end
+            switch app.DRed.Value
+                case 'Classic AR1'
+                    r = 1;
+                case 'Robust AR1'
+                    r = 2;
+                otherwise
+                    r = 3;
+            end
+        end
+
+        function v = toNum(s,def)
+            v = str2double(s);
+            if ~isfinite(v)
+                v = def;
+            end
+        end
+
+        function v = requireFiniteScalar(textValue,label)
+            v = str2double(textValue);
+            if ~isfinite(v)
+                error('eCOCOGUI:InvalidNumericInput', ...
+                    '%s must be one finite numeric value.',label);
+            end
+        end
+
+        function v = requirePositiveScalar(textValue,label)
+            v = requireFiniteScalar(textValue,label);
+            if v <= 0
+                error('eCOCOGUI:InvalidNumericInput', ...
+                    '%s must be greater than zero.',label);
+            end
+        end
+
+        function v = requireIntegerScalar(textValue,label,minimum,maximum)
+            v = requireFiniteScalar(textValue,label);
+            if v ~= fix(v) || v < minimum || v > maximum
+                if isfinite(maximum)
+                    error('eCOCOGUI:InvalidNumericInput', ...
+                        '%s must be an integer from %.0f to %.0f.', ...
+                        label,minimum,maximum);
+                else
+                    error('eCOCOGUI:InvalidNumericInput', ...
+                        '%s must be an integer greater than or equal to %.0f.', ...
+                        label,minimum);
+                end
+            end
+        end
+
+        function onEditNum(ed,def)
+            v = str2double(ed.Value);
+            if ~isfinite(v)
+                ed.Value = num2str(def);
             end
         end
     end
-    
-    %
-    assignin('base','prt_sr',prt_sr)
-    assignin('base','out_depth',out_depth)
-    assignin('base','out_ecc',out_ecc)
-    assignin('base','out_ep',out_ep)
-    assignin('base','out_eci',out_eci)
-    assignin('base','out_ecoco',out_ecoco)
-    assignin('base','out_ecocorb',out_ecocorb)
-    assignin('base','out_norbit',out_norbit)
-    
-    variables = {prt_sr, out_depth, out_ecc, out_eci, out_norbit, out_ecoco};
-    sheetNames = {'Sed.Rate', 'Depth', 'COCO', 'Conf.Int.', '#Orbits','COCOxH0'};
-    
-    for i = 1:numel(variables)
-        var = variables{i};
-        sheetName = sheetNames{i};
+end
 
-        % Determine the size of the variable
-        %[rows, cols] = size(var);
+function [raw, dat, meta] = prepData(ctx)
+    inputUnit = char(getfielddef(ctx,'unit','m'));
+    [depthScaleToM,depthInMeters] = depthUnitScaleToMetres(inputUnit);
+    raw = getfielddef(ctx,'current_data',[]);
+    if isempty(raw)
+        raw = [0 0; 1 1; 2 0.5; 3 1.5];
+    end
+    if ~isnumeric(raw) || ~ismatrix(raw) || size(raw,2) < 2
+        error('eCOCOGUI:InvalidInputData', ...
+            'The input must be a numeric array with depth and proxy-value columns.');
+    end
+    raw = raw(:,1:2);
 
-        % Write the variable to the Excel sheet
-        %if isnumeric(var) || islogical(var)
-            writematrix(var, log_name_eCOCOdata, 'Sheet', sheetName);%, 'Range', ['A1:', excelColumn(cols), num2str(rows)]);
-        %else
-        %    writecell(var, log_name_eCOCOdata, 'Sheet', sheetName, 'Range', 'A1');
-        %end
+    if depthInMeters
+        raw(:,1) = raw(:,1) .* depthScaleToM;
+        if depthScaleToM ~= 1
+            fprintf('\n>> COCO/eCOCO depth-unit conversion:\n');
+            fprintf('   Input depth unit             : %s\n',inputUnit);
+            fprintf('   Conversion factor to metres : %.12g\n',depthScaleToM);
+            fprintf('   Internal depth unit          : m\n\n');
+        end
     end
 
-end
-
-% open and write log into log_name file
-fileID = fopen(fullfile(dat_dir,log_name),'w+');
-if handles.lang_choice==0 
-    fprintf(fileID,'%s\n',' - - - - - - - - - - - - - Summary - - - - - - - - - - -');
-else
-    [~, locb] = ismember('ec59',handles.lang_id);
-    ec59 = lang_var{locb};
-    fprintf(fileID,'%s\n',ec59);
-end
-fprintf(fileID,'%s\n',datestr(datetime('now')));
-fprintf(fileID,'%s\n',log_name);
-fprintf(fileID,'%s\n',param1);
-fprintf(fileID,'%s\n',param2);
-fprintf(fileID,'%s\n',param3);
-fprintf(fileID,'%s\n',param4);
-fprintf(fileID,'%s\n',param5);
-fprintf(fileID,'%s\n',param6);
-fprintf(fileID,'%s\n',param7);
-fprintf(fileID,'%s\n',param8);
-if handles.lang_choice==0 
-    fprintf(fileID,'%s\n',' - - - - - - - - - - - - - - End - - - - - - - - - - - -');
-else
-    [~, locb] = ismember('ec60',handles.lang_id);
-    ec60 = lang_var{locb};
-    fprintf(fileID,'%s\n',ec60);
-end
-fclose(fileID);
-if handles.ecocoS == 1
-    fileID = fopen(fullfile(dat_dir,savefile_name),'w+');
-    if handles.lang_choice==0 
-        fprintf(fileID,'%s\n','%location, Optimal Sed.Rate, CorrCoef, H0-SL, #Orbits, COCOxH0x#Orbits');   
+    % Full-record COCO/eCOCO and their direct function entry points share
+    % exactly one regularization implementation and tolerance.  Retain CLEAN
+    % as RAW for cvCOCO, whose midpoint/odd-even folds must be defined before
+    % each fold is interpolated independently.
+    preprocessing = struct();
+    if depthInMeters
+        inputLabel = char(getfielddef(ctx,'data_name','eCOCOGUI input'));
+        [dat,preprocessing,raw] = cocoPrepareRegularData( ...
+            raw,inputLabel,'MaximumPoints',5e6, ...
+            'MinimumPoints',4,'Verbose',true);
     else
-        [~, locb] = ismember('ec61',handles.lang_id);
-        ec61 = lang_var{locb};
-        fprintf(fileID,'%s\n',ec61);
+        raw = raw(all(isfinite(raw),2),:);
+        raw = sortrows(raw,1);
+        if ~isempty(raw)
+            [uniqueDepth,~,group] = unique(raw(:,1),'sorted');
+            raw = [uniqueDepth,accumarray(group,raw(:,2),[],@mean)];
+        end
+        dat = raw;
     end
-                     
-    %fprintf(fileID,'%s\n\n',mat2str(sr_p));
-    for row = 1: length(prt_sr)
+    meta = struct();
+    meta.input_unit = inputUnit;
+    meta.depth_scale_to_m = depthScaleToM;
+    meta.depthInMeters = depthInMeters;
+    if depthInMeters
+        meta.unit = 'm';
+    else
+        meta.unit = inputUnit;
+    end
+    meta.unit_type = getfielddef(ctx,'unit_type',0);
+    meta.filename = char(getfielddef(ctx,'data_name','data.txt'));
+    meta.dat_name = char(getfielddef(ctx,'dat_name',meta.filename));
+    meta.preprocessing = preprocessing;
+    
+    if size(dat,1) < 3
+        dat = [0 0;1 1;2 0.5;3 1.5];
+    end
+    
+    dt = median(diff(dat(:,1)));
+    if ~isfinite(dt) || dt <= 0
+        dt = 1;
+    end
+    meta.dt = dt;
+    meta.fmax_data = 1/(2*dt);
+end
+
+function [factor,isSupported] = depthUnitScaleToMetres(unit)
+unit = lower(strtrim(char(unit)));
+factor = NaN;
+isSupported = true;
+switch unit
+    case {'m','meter','meters','metre','metres','米'}
+        factor = 1;
+    case {'dm','decimeter','decimeters','decimetre','decimetres','分米'}
+        factor = 0.1;
+    case {'cm','centimeter','centimeters','centimetre','centimetres','厘米'}
+        factor = 0.01;
+    case {'mm','millimeter','millimeters','millimetre','millimetres','毫米'}
+        factor = 0.001;
+    case {'ft','foot','feet','英尺'}
+        factor = 0.3048;
+    case {'km','kilometer','kilometers','kilometre','kilometres','千米','公里'}
+        factor = 1000;
+    otherwise
+        isSupported = false;
+end
+end
+
+function pad = defaultPad(npts)
+    if npts <= 2500
+        pad = 5000;
+    elseif npts <= 5000
+        pad = 10000;
+    else
+        pad = fix(npts/5000) * 5000 + 5000;
+    end
+end
+
+function [sedmin, sedmax, sedstep, fh] = defaultSedRange(app)
+    sedmin = 0;
+    sedmax = 100;
+    sedstep = 0.1;
+    fh = 0.065;
+    dtr = app.meta.dt;
+    npts = size(app.data,1);
+    fnyq = sedmin/(2*dtr);
+
+    if fh > fnyq
+        sedmin = 2*dtr*fh * 100;
+    end
+
+    fray = sedmax/(npts*dtr);
+    flow = 1/max(app.orbit9);
+    if fray > flow
+        sedmax = npts*dtr*flow * 100;
+    end
+
+    if (sedmax-sedmin)/sedstep > 300
+        sedstep = (sedmax-sedmin)/300;
+    end
+end
+
+function s = orbitString(v)
+    s = strtrim(sprintf('%g ',v));
+end
+
+function s = onoff(tf)
+if tf, s = 'on'; else, s = 'off'; end
+end
+
+function out = iff(cond,a,b)
+if cond, out = a; else, out = b; end
+end
+
+function tf = isCvCocoTargetMode(targetMode)
+tf = any(strcmp(targetMode, ...
+    {'cv2','cv9a','cv9b','cv9','cvlegacy','icv9b'}));
+end
+
+function tf = isAdaptiveCocoTargetMode(targetMode)
+tf = any(strcmp(targetMode, ...
+    {'adaptive','adaptive9a','adaptive9b','adaptive9'}));
+end
+
+function name = adaptiveCocoDisplayName(targetMode)
+if strcmp(targetMode,'adaptive9b')
+    name = 'Adaptive COCO';
+elseif any(strcmp(targetMode,{'adaptive9a','adaptive9'}))
+    name = 'Adaptive COCO9A';
+else
+    name = 'Adaptive COCO';
+end
+end
+
+function variant = adaptiveCocoVariant(targetMode)
+if strcmp(targetMode,'adaptive9b')
+    variant = 'B';
+elseif any(strcmp(targetMode,{'adaptive9a','adaptive9'}))
+    variant = 'A';
+else
+    variant = 'baseline';
+end
+end
+
+function report = relabelReportMethod(report,oldName,newName)
+% Keep the audited numeric result intact while applying the current public
+% GUI method name to human-readable report fields.
+if ~isstruct(report) || ~isscalar(report)
+    return
+end
+textFields = {'method','classification','conclusion','message'};
+for fieldIndex = 1:numel(textFields)
+    fieldName = textFields{fieldIndex};
+    if isfield(report,fieldName) && ...
+            (ischar(report.(fieldName)) || ...
+            (isstring(report.(fieldName)) && isscalar(report.(fieldName))))
+        report.(fieldName) = strrep(report.(fieldName),oldName,newName);
+    end
+end
+if isfield(report,'summaryRows') && iscell(report.summaryRows)
+    for cellIndex = 1:numel(report.summaryRows)
+        value = report.summaryRows{cellIndex};
+        if ischar(value) || (isstring(value) && isscalar(value))
+            report.summaryRows{cellIndex} = strrep(value,oldName,newName);
+        end
+    end
+end
+end
+
+function run = emptyRunState()
+run = struct('ready',false,'target',[],'prt_sr',[],'out_depth',[], ...
+    'out_ecc',[],'out_ep',[],'out_eci',[],'out_ecoco',[], ...
+    'out_ecocorb',[],'out_norbit',[],'sr_p',[],'corrCI',[], ...
+    'corr_h0',[],'corry',[],'adaptiveDetails',[],'ecoDetails',[], ...
+    'ecoMethod','','anchorFraction',NaN,'cv',[], ...
+    'conclusion',[],'cocoFigure',[]);
+end
+
+function values = parseNumericList(textValue)
+textValue = char(string(textValue));
+textValue = regexprep(textValue,'[\[\],;]',' ');
+if ~isempty(regexp(textValue,'[^0-9eE+\-.\s]','once'))
+    values = [];
+    return
+end
+values = sscanf(textValue,'%f')';
+end
+
+function value = detailValue(details,name,fallback)
+value = fallback;
+if isstruct(details) && isfield(details,name) && ~isempty(details.(name))
+    value = details.(name);
+end
+end
+
+function deleteIfPresent(filename)
+if ischar(filename) || (isstring(filename) && isscalar(filename))
+    filename = char(filename);
+    if isfile(filename)
         try
-            fprintf(fileID,'%s, %s, %s, %s, %d, %s\n',sr_p(row,1),sr_p(row,2),sr_p(row,3),sr_p(row,4),sr_p(row,5),sr_p(row,6));
+            delete(filename);
         catch
         end
     end
-    fclose(fileID);
+end
 end
 
-
-if handles.ecocoS == 1
-
-    figure(handles.acfigmain);
-    disp('>>  *ECOCO.AC.fig file:')
-    disp(acfig_name)
-    disp('>>  *ECOCO-log.txt file:')
-    disp(log_name)
-    disp('>>  *ECOCO.Optimal.txt file:')
-    disp(savefile_name)
-end
-cd(pre_dirML);
-
-% display info
-disp('')
-if handles.lang_choice==0 
-    disp(' - - - - - - - - - - - - - Summary - - - - - - - - - - -');
-else
-    [~, locb] = ismember('ec59',handles.lang_id);
-    ec59 = lang_var{locb};
-    disp(ec59);
-end
-disp(handles.filename);
-disp(param1);
-disp(param2);
-disp(param3);
-disp(param4);
-disp(param5);
-disp(param6);
-disp(param7);
-disp(param8);
-if handles.lang_choice==0 
-    disp(' - - - - - - - - - - - - - - End - - - - - - - - - - - -');
-else
-    [~, locb] = ismember('ec60',handles.lang_id);
-    ec60 = lang_var{locb};
-    disp(ec60);
-end
-if handles.lang_choice==0
-    disp('>> Writing log file ...')
-    disp('>> Done')
-else
-    [~, locb] = ismember('ec62',handles.lang_id);
-    ec62 = lang_var{locb};
-    [~, locb] = ismember('ec63',handles.lang_id);
-    ec63 = lang_var{locb};
-    disp(ec62)
-    disp(ec63)
+function p = figurePos(ctx)
+monzoom = getfielddef(ctx,'MonZoom',1);
+sc = get(groot,'ScreenSize');
+p = [0.38*sc(3), 0.08*sc(4), 0.46*sc(3), 0.84*sc(4)] .* monzoom;
+p = round(p);
+% Reduce overall GUI size by ~20% compared with the previous enlarged layout.
+if p(3) < 1024, p(3) = 1024; end
+if p(4) < 976, p(4) = 976; end
 end
 
-%
-handles.t1 = t1/1000;
-handles.f1 = f1;
-handles.f2 = f2;
-handles.sr1 = sr1;
-handles.sr2 = sr2;
-handles.srm = srm;
-handles.srstep = srstep;
-handles.nsim = nsim;
-handles.red = red;
-handles.adjust = adjust;
-handles.slices = slices;
-handles.target = target;
-
-set(handles.pushbutton2,'Enable','on') % 
-set(handles.pushbutton3,'Enable','on') %
-if handles.ecocoS == 1
-    handles.window = window;
-    handles.step = step;
-    handles.prt_sr = prt_sr;
-    handles.out_depth = out_depth;
-    handles.out_ecc = out_ecc;
-    handles.out_ep = out_ep;
-    handles.out_eci = out_eci;
-    handles.out_ecoco = out_ecoco;
-    handles.out_ecocorb = out_ecocorb;
-    handles.out_norbit = out_norbit;
-
-end
-
-% update acycle main figure for both COCO and eCOCO
-d = dir; %get files
-set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-refreshcolor;
-
-guidata(hObject, handles);
-
-
-% --- Executes on button press in radiobutton8.
-function radiobutton8_Callback(hObject, eventdata, handles)
-% hObject    handle to radiobutton8 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of radiobutton8
-if get(hObject,'Value')
-    handles.orbit7 = strread(get(handles.edit11,'String'));
-end
-
-
-% --- Executes on button press in radiobutton6.
-function radiobutton6_Callback(hObject, eventdata, handles)
-% hObject    handle to radiobutton6 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of radiobutton6
-if get(hObject,'Value')
-    if handles.age > 0
-        handles.orbit7 = getBerger89Period(handles.age);
+function refreshMainListbox(ctx,dirpath)
+    listbox = getfielddef(ctx,'listbox_acmain',[]);
+    editdir = getfielddef(ctx,'edit_acfigmain_dir',[]);
+    if isempty(listbox) || ~isgraphics(listbox)
+        return
     end
-end
-% Update handles structure
-guidata(hObject, handles);
-
-
-% --- Executes on button press in radiobutton7.
-function radiobutton7_Callback(hObject, eventdata, handles)
-% hObject    handle to radiobutton7 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of radiobutton7
-% Ages for orbit7, equations follow Yao et al., 2015
-    % EPSL and Laskar et al., 2004 A&A      
-age = handles.age;
-age_obl = 41 - 0.0332 * age;
-age_p1 = 22.43 - 0.0108 * age;
-age_p2 = 23.75 - 0.0121 * age;
-age_p3 = 19.18 - 0.0079 * age;
-handles.orbit7 = [405 125 95 age_obl age_p2 age_p1 age_p3];
-% Update handles structure
-guidata(hObject, handles);
-
-
-% --- Executes on button press in radiobutton9.
-function radiobutton9_Callback(hObject, eventdata, handles)
-% hObject    handle to radiobutton9 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of radiobutton9
-if get(hObject,'Value')
-    handles.corrmethod = 2; % 1= 'Pearson'; else = 'Spearman'
-end
-% Update handles structure
-guidata(hObject, handles);
-
-
-% --- Executes on button press in radiobutton10.
-function radiobutton10_Callback(hObject, eventdata, handles)
-% hObject    handle to radiobutton10 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of radiobutton10
-if get(hObject,'Value')
-    handles.corrmethod = 1; % 1= 'Pearson'; else = 'Spearman'
-end
-% Update handles structure
-guidata(hObject, handles);
-
-
-% --- Executes on button press in pushbutton2.
-function pushbutton2_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-if handles.lang_choice==0 
-    prompt = {'Plot: 1 = one fig; 2 = multi-figs; 3 = 3D figs; reverse Y-axis = (-1,-2,or -3)'};
-    dlg_title = 'Plot eCOCO results';
-else
-    lang_var = handles.lang_var;
-    [~, locb] = ismember('ec64',handles.lang_id);
-    ec64 = lang_var{locb};
-    [~, locb] = ismember('ec65',handles.lang_id);
-    ec65 = lang_var{locb};
-    
-    prompt = {ec64};
-    dlg_title = ec65;
-end
-
-num_lines = 1;
-defaultans = {'1'};
-options.Resize='on';
-answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-if ~isempty(answer)
-    hwarn = warndlg('Wait, eCOCO plot ...');
-    plotn = str2double(answer{1});
-    [~] = ecocoplot(handles.prt_sr,handles.out_depth,...
-    handles.out_ecc,handles.out_ep,handles.out_eci,handles.out_ecoco,handles.out_ecocorb,handles.out_norbit,plotn);
-    try 
-        close(hwarn)
+    if nargin < 2 || isempty(dirpath) || ~isfolder(dirpath)
+        dirpath = pwd;
+    end
+    try
+        d = dir(dirpath);
+        if numel(d) >= 2
+            d = d(~ismember({d.name},{'.','..'}));
+        end
+        names = {};
+        isDir = false(0,1);
+        if ~isempty(d)
+            T = struct2table(d);
+            val1 = getSortMode(ctx,listbox);
+            switch val1
+                case 1
+                    sortedT = sortrows(T,'name','ascend');
+                case 2
+                    sortedT = sortrows(T,'name','descend');
+                case 3
+                    sortedT = sortrows(T,'date','ascend');
+                case 4
+                    sortedT = sortrows(T,'date','descend');
+                case 5
+                    sortedT = sortrows(T,'bytes','ascend');
+                case 6
+                    sortedT = sortrows(T,'bytes','descend');
+                otherwise
+                    sortedT = sortrows(T,'date','descend');
+            end
+            sd = table2struct(sortedT);
+            names = {sd.name};
+            isDir = [sd.isdir];
+        end
+        if ~isempty(editdir) && isgraphics(editdir)
+            set(editdir,'String',dirpath);
+        end
+        syncAcPwd(dirpath);
+        if exist('ac_update_listbox_acmain','file') == 2
+            ac_update_listbox_acmain(listbox,names,isDir);
+        elseif isempty(names)
+            set(listbox,'String',{},'Value',[]);
+        else
+            set(listbox,'String',names,'Value',1);
+        end
+        drawnow limitrate;
     catch
     end
-    
 end
 
-% --- Executes on button press in pushbutton3.
-function pushbutton3_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-if handles.lang_choice==0 
-    prompt = {'How many peaks within each window?',...
-        'Threshold H0 significant level',...
-        'Threshold correlation coefficient',...
-        'Threshold number of orbital parameters',...
-        'Threshold sedimentation rate searching radius',...
-        'How many intervals to cut the series?',...
-        'Plot? 1 = Yes, 0 = No',...
-        'Optional: sedimentation rate ranges from',...
-        'Optional: sedimentation rate ranges to'};
-    dlg_title = 'Track optimal sedimentation rates';
+function val1 = getSortMode(ctx,listbox)
+val1 = getfielddef(ctx,'val1',4);
+try
+    mainFig = ancestor(listbox,'figure');
+    mainHandles = guidata(mainFig);
+    if isstruct(mainHandles) && isfield(mainHandles,'val1') && ~isempty(mainHandles.val1)
+        val1 = mainHandles.val1;
+    end
+catch
+end
+end
+
+function syncAcPwd(dirpath)
+try
+    acPwdFile = which('ac_pwd.txt');
+    if isempty(acPwdFile)
+        return
+    end
+    fid = fopen(acPwdFile,'w');
+    if fid == -1
+        return
+    end
+    fprintf(fid,'%s',dirpath);
+    fclose(fid);
+catch
+end
+end
+
+function saveDir = resolveSaveDir(ctx)
+saveDir = pwd;
+editdir = getfielddef(ctx,'edit_acfigmain_dir',[]);
+if ~isempty(editdir) && isgraphics(editdir)
+    try
+        p = get(editdir,'String');
+        if iscell(p), p = p{1}; end
+        if isstring(p), p = char(p); end
+        if ischar(p)
+            p = strtrim(p);
+            if ~isempty(p) && isfolder(p)
+                saveDir = p;
+                return
+            end
+        end
+    catch
+    end
+end
+try
+    acPwdFile = which('ac_pwd.txt');
+    if ~isempty(acPwdFile)
+        p = strtrim(fileread(acPwdFile));
+        if ~isempty(p) && isfolder(p)
+            saveDir = p;
+        end
+    end
+catch
+end
+end
+
+function figures = figuresCreatedSince(before)
+after = findall(groot,'Type','figure');
+figures = setdiff(after,before);
+figures = figures(isgraphics(figures,'figure'));
+if numel(figures) < 2
+    return
+end
+numbers = arrayfun(@(fig)get(fig,'Number'),figures);
+[~,order] = sort(numbers);
+figures = figures(order);
+end
+
+function safeStoreAppData(uiFigure,app)
+% A long Monte Carlo/export callback may outlive a user-closed UIFigure.
+% Updating appdata is optional finalization and must never replace the
+% original calculation/export outcome with a DestroyedObject exception.
+try
+    if isgraphics(uiFigure,'figure')
+        setappdata(uiFigure,'ECOCO_APP',app);
+    end
+catch
+end
+end
+
+function safeUiAlert(uiFigure,message,titleText,iconName)
+try
+    if isgraphics(uiFigure,'figure')
+        uialert(uiFigure,message,titleText,'Icon',iconName);
+    end
+catch
+end
+end
+
+function restoreRunButton(button)
+try
+    if isgraphics(button)
+        button.Enable = 'on';
+    end
+catch
+end
+end
+
+function v = getfielddef(s,name,def)
+if isstruct(s) && isfield(s,name) && ~isempty(s.(name))
+    v = s.(name);
 else
-    lang_var = handles.lang_var;
-    [~, locb] = ismember('ec59',handles.lang_id);
-    ec59 = lang_var{locb};
-    [~, locb] = ismember('ec60',handles.lang_id);
-    ec60 = lang_var{locb};
-    [~, locb] = ismember('ec67',handles.lang_id);
-    ec67 = lang_var{locb};
-    [~, locb] = ismember('ec68',handles.lang_id);
-    ec68 = lang_var{locb};
-    [~, locb] = ismember('ec69',handles.lang_id);
-    ec69 = lang_var{locb};
-    [~, locb] = ismember('ec70',handles.lang_id);
-    ec70 = lang_var{locb};
-    [~, locb] = ismember('ec71',handles.lang_id);
-    ec71 = lang_var{locb};
-    [~, locb] = ismember('ec72',handles.lang_id);
-    ec72 = lang_var{locb};
-    [~, locb] = ismember('ec73',handles.lang_id);
-    ec73 = lang_var{locb};
-    [~, locb] = ismember('ec74',handles.lang_id);
-    ec74 = lang_var{locb};
-    [~, locb] = ismember('ec75',handles.lang_id);
-    ec75 = lang_var{locb};
-    [~, locb] = ismember('ec76',handles.lang_id);
-    ec76 = lang_var{locb};
-    [~, locb] = ismember('ec77',handles.lang_id);
-    ec77 = lang_var{locb};
-    [~, locb] = ismember('ec78',handles.lang_id);
-    ec78 = lang_var{locb};
-    
-    prompt = {ec68,ec69,ec70,ec71,ec72,ec73,ec74,ec75,ec76};
-    dlg_title = ec67;
+    v = def;
 end
-    
-num_lines = 1;
-defaultans = {'3','5','0.3','4','2','3','1',num2str(handles.sr1),num2str(handles.sr2)};
-options.Resize='on';
-answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-if ~isempty(answer)
-    n = str2double(answer{1});
-    ci = str2double(answer{2});
-    corrcf = str2double(answer{3});
-    sh_norb = str2double(answer{4});
-    srsh = str2double(answer{5});
-    srslice = str2double(answer{6});
-    plotn = str2double(answer{7});
-    sr1 = str2double(answer{8});
-    sr2 = str2double(answer{9});
-
-    %
-    ecc = handles.out_ecc;  % matrix
-    eci = handles.out_eci;  % matrix
-    norbit = handles.out_norbit; % matrix
-    ecoco = handles.out_ecoco;
-    % cut using given sedimentation range
-    srstep = handles.srstep;
-    if or(sr1 ~= handles.sr1, sr2~= handles.sr2)
-        %srshrange = round((sr1:srsh:sr2)/srstep);
-        srsh_1 = round((sr1-handles.sr1)/srstep); % start number of selected sed. rate
-        if srsh_1 == 0; srsh_1 = 1; end
-        srsh_n = round(abs(sr2-sr1)/srstep); % end number of selected sed. rate
-        ecc = ecc(srsh_1:srsh_n,:); % selected data
-        eci = eci(srsh_1:srsh_n,:); % selected data
-        norbit = norbit(srsh_1:srsh_n,:); % selected data
-        ecoco = ecoco(srsh_1:srsh_n,:); % selected data
-    end
-    [Y] = ebrief(ecc,2,-2); % brief ecoco
-    [Ypcc,locatcc] = eccpeaks(Y,ecc,eci,norbit,corrcf,ci,sh_norb,n,1,NaN); % get peaks
-
-    [~,~,srn_best,~] = ecocotrack(locatcc,ecc,eci,ecoco,...
-    norbit,handles.out_depth,sr1,sr2,srstep,...
-    srsh,srslice,corrcf,ci,plotn,sh_norb);
-% 
-%     assignin('base','Y',Y)
-%     assignin('base','Ypcc',Ypcc)
-    
-    name0 = [handles.dat_name,'-',num2str(n),'pk-',num2str(ci),'%H0SL',...
-        num2str(corrcf),'co-',num2str(srslice),'sl','-SR'];  % New name
-    name1 = [name0,handles.ext];  % name for sedrate file
-    if exist([pwd,handles.slash_v,name1])
-        for i = 1:100
-            name1 = [name0,num2str(i),handles.ext];
-            if exist([pwd,handles.slash_v,name1])
-            else
-                break
-            end
-        end
-    end
-    srn_map(:,2) = (sr1+handles.srstep*(srn_best(1,:)-1))';
-    srn_map(:,1) = handles.out_depth;
-    CDac_pwd
-    dlmwrite(name1, srn_map, 'delimiter', ' ', 'precision', 9);
-    if handles.lang_choice==0 
-        disp(['>> Sedimentation rate file: ',name1])
-    else
-        disp([ec77,name1])
-    end
-
-    % Log name
-    log_name = [name0,'-log',handles.ext]; 
-    if exist([pwd,handles.slash_v,log_name])
-        for i = 1:100
-            log_name = [name0,'-log',num2str(i),'.txt'];
-            if exist([pwd,handles.slash_v,log_name])
-            else
-                break
-            end
-        end
-    end
-    if handles.lang_choice==0 
-        disp(['>> Log file: ',log_name])
-    else
-        disp([ec78,log_name])
-    end
-    % open and write log into log_name file
-    fileID = fopen(fullfile(pwd,handles.slash_v,log_name),'w+');
-    if handles.lang_choice==0 
-        fprintf(fileID,'%s\n',' - - - - - - - - - - - - - Summary - - - - - - - - - - -');
-        fprintf(fileID,'%s\n\n',datestr(datetime('now')));
-        fprintf(fileID,'%s\n\n',log_name);
-        fprintf(fileID,'%s\n','How many peaks each window?');
-        fprintf(fileID,'%s\n',num2str(n));
-        fprintf(fileID,'%s\n','Threshold H0 significant level');
-        fprintf(fileID,'%s\n',num2str(ci));
-        fprintf(fileID,'%s\n','Threshold correlation coefficient');
-        fprintf(fileID,'%s\n',num2str(corrcf));
-        fprintf(fileID,'%s\n','Threshold number of orbital parameters?');
-        fprintf(fileID,'%s\n',num2str(sh_norb));
-        fprintf(fileID,'%s\n','Threshold sedimentation rate');
-        fprintf(fileID,'%s\n',num2str(srsh));
-        fprintf(fileID,'%s\n','How many intervals to cut the series?');
-        fprintf(fileID,'%s\n',num2str(srslice));
-        fprintf(fileID,'%s\n','Optional: sedimentation rate ranges from');
-        fprintf(fileID,'%s\n',num2str(sr1));
-        fprintf(fileID,'%s\n','Optional: sedimentation rate ranges to');
-        fprintf(fileID,'%s\n',num2str(sr2));
-        fprintf(fileID,'%s\n',' - - - - - - - - - - - - - - End - - - - - - - - - - - -');
-        fclose(fileID);
-    else
-        fprintf(fileID,'%s\n',ec59);
-        fprintf(fileID,'%s\n\n',datestr(datetime('now')));
-        fprintf(fileID,'%s\n\n',log_name);
-        fprintf(fileID,'%s\n',ec68);
-        fprintf(fileID,'%s\n',num2str(n));
-        fprintf(fileID,'%s\n',ec69);
-        fprintf(fileID,'%s\n',num2str(ci));
-        fprintf(fileID,'%s\n',ec70);
-        fprintf(fileID,'%s\n',num2str(corrcf));
-        fprintf(fileID,'%s\n',ec71);
-        fprintf(fileID,'%s\n',num2str(sh_norb));
-        fprintf(fileID,'%s\n',ec72);
-        fprintf(fileID,'%s\n',num2str(srsh));
-        fprintf(fileID,'%s\n',ec73);
-        fprintf(fileID,'%s\n',num2str(srslice));
-        fprintf(fileID,'%s\n',ec75);
-        fprintf(fileID,'%s\n',num2str(sr1));
-        fprintf(fileID,'%s\n',ec76);
-        fprintf(fileID,'%s\n',num2str(sr2));
-        fprintf(fileID,'%s\n',ec60);
-        fclose(fileID);
-    end
-    
-    d = dir; %get files
-    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-    refreshcolor;
-    cd(pre_dirML); % return to matlab view folder
 end
-
-guidata(hObject, handles);
-
-
-% --- Executes on button press in pushbutton4.
-function pushbutton4_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-%url = 'https://davidwaltham.com/wp-content/uploads/2014/01/Milankovitch.html';
-%web(url,'-browser')
-guidata(hObject, handles);
-LODGUI(handles);

@@ -7,8 +7,12 @@ function foldername = strrep2(filename, pre, post)
 %post = '</FONT></HTML>';
 try
     % if filename is a HTML name
-    filename = strrep(filename,pre,'');
-    filename = strrep(filename,post,'');
+    if nargin >= 3
+        filename = strrep(filename,pre,'');
+        filename = strrep(filename,post,'');
+    end
+    % Robust cleanup for both upper/lowercase HTML wrappers.
+    filename = regexprep(filename,'<[^>]+>','');
     foldername = filename;
 catch
     % if file name is a pure name

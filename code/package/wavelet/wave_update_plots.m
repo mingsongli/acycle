@@ -20,6 +20,7 @@ if and(plot_spectrum == 1,plot_series ==1)
         set(gcf,'Name',['Acycle: ',lang_var{menu109}])
         set(gcf,'units','norm') % set location
         set(gcf, 'color','white')
+        set(gcf,'Renderer','opengl')
     end
     
     % update panel A: time series
@@ -63,6 +64,7 @@ elseif and(plot_spectrum == 0,plot_series ==1)
         set(gcf,'Name',['Acycle: ',lang_var{menu109}])
         set(gcf,'units','norm') % set location
         set(gcf, 'color','white')
+        set(gcf,'Renderer','opengl')
 
     end
     
@@ -94,6 +96,7 @@ elseif and(plot_spectrum == 1,plot_series == 0)
         set(gcf,'Name',['Acycle: ',lang_var{menu109}])
         set(gcf,'units','norm') % set location
         set(gcf, 'color','white')
+        set(gcf,'Renderer','opengl')
     end
     %--- Contour plot wavelet power spectrum
     if plot_swap == 0
@@ -122,6 +125,7 @@ elseif and(plot_spectrum == 0,plot_series == 0)
         set(gcf,'Name',['Acycle: ',lang_var{menu109}])
         set(gcf,'units','norm') % set location
         set(gcf, 'color','white')
+        set(gcf,'Renderer','opengl')
     end
     %--- Contour plot wavelet power spectrum
     if plot_swap == 0

@@ -1,659 +1,622 @@
-function varargout = DynamicFilter(varargin)
-% DYNAMICFILTER MATLAB code for DynamicFilter.fig
-%      DYNAMICFILTER, by itself, creates a new DYNAMICFILTER or raises the existing
-%      singleton*.
-%
-%      H = DYNAMICFILTER returns the handle to a new DYNAMICFILTER or the handle to
-%      the existing singleton*.
-%
-%      DYNAMICFILTER('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in DYNAMICFILTER.M with the given input arguments.
-%
-%      DYNAMICFILTER('Property','Value',...) creates a new DYNAMICFILTER or raises the
-%      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before DynamicFilter_OpeningFcn gets called.  An
-%      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to DynamicFilter_OpeningFcn via varargin.
-%
-%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
-%      instance to run (singleton)".
-%
-% See also: GUIDE, GUIDATA, GUIHANDLES
+classdef DynamicFilter < matlab.apps.AppBase
+    % App Designer style migration of legacy GUIDE DynamicFilter.
 
-% Edit the above text to modify the response to help DynamicFilter
+    properties (Access = public)
+        UIFigure matlab.ui.Figure
 
-% Last Modified by GUIDE v2.5 29-Jun-2020 01:00:10
+        PanelFreq matlab.ui.container.Panel
+        GroupFreqMax matlab.ui.container.ButtonGroup
+        LabelFreqMin matlab.ui.control.Label
+        EditFreqMin matlab.ui.control.EditField
+        RadioUseNyquist matlab.ui.control.RadioButton
+        RadioUseInput matlab.ui.control.RadioButton
+        LabelNyquist matlab.ui.control.Label
+        EditFreqMax matlab.ui.control.EditField
 
-% Begin initialization code - DO NOT EDIT
-gui_Singleton = 1;
-gui_State = struct('gui_Name',       mfilename, ...
-                   'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @DynamicFilter_OpeningFcn, ...
-                   'gui_OutputFcn',  @DynamicFilter_OutputFcn, ...
-                   'gui_LayoutFcn',  [] , ...
-                   'gui_Callback',   []);
-if nargin && ischar(varargin{1})
-    gui_State.gui_Callback = str2func(varargin{1});
-end
+        PanelStep matlab.ui.container.Panel
+        EditStep matlab.ui.control.EditField
+        ButtonStepTips matlab.ui.control.Button
+        EditUnit matlab.ui.control.EditField
+        LabelUnit matlab.ui.control.Label
 
-if nargout
-    [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
-else
-    gui_mainfcn(gui_State, varargin{:});
-end
-% End initialization code - DO NOT EDIT
+        PanelWindow matlab.ui.container.Panel
+        EditWindow matlab.ui.control.EditField
+        ButtonWindowTips matlab.ui.control.Button
 
+        PanelPlot matlab.ui.container.Panel
+        CheckNormalize matlab.ui.control.CheckBox
+        LabelPadding matlab.ui.control.Label
+        DropPadding matlab.ui.control.DropDown
 
-% --- Executes just before DynamicFilter is made visible.
-function DynamicFilter_OpeningFcn(hObject, eventdata, handles, varargin)
-% This function has no output args, see OutputFcn.
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to DynamicFilter (see VARARGIN)
-handles.MonZoom = varargin{1}.MonZoom;
-handles.sortdata = varargin{1}.sortdata;
-handles.val1 = varargin{1}.val1;
-
-
-set(0,'Units','normalized') % set units as normalized
-set(gcf,'units','norm') % set location
-h=get(gcf,'Children');  % get all content
-h1=findobj(h,'FontUnits','norm');  % find all font units as points
-set(h1,'FontUnits','points','FontSize',11.5);  % set as norm
-h2=findobj(h,'FontUnits','points');  % find all font units as points
-set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
-set(gcf,'position',[0.63,0.4,0.35,0.22]* handles.MonZoom) % set position
-
-set(handles.uibuttongroup1,'position',[0.05,0.35,0.38,0.55])
-set(handles.uipanel1,'position',[0.45,0.35,0.25,0.55])
-set(handles.text3,'position',[0.05,0.7,0.4,0.24])
-set(handles.radiobutton2,'position',[0.05,0.4,0.6,0.24])
-set(handles.radiobutton1,'position',[0.05,0.1,0.5,0.24])
-set(handles.edit2,'position',[0.65,0.7,0.3,0.27])
-set(handles.text2,'position',[0.65,0.4,0.3,0.22])
-set(handles.edit1,'position',[0.65,0.1,0.3,0.27])
-
-set(handles.uipanel2,'position',[0.73,0.35,0.22,0.55])
-set(handles.edit3,'position',[0.1,0.55,0.4,0.27])
-set(handles.pushbutton1,'position',[0.55,0.55,0.4,0.27])
-set(handles.edit4,'position',[0.1,0.1,0.4,0.27])
-set(handles.text4,'position',[0.55,0.1,0.4,0.27])
-
-set(handles.uipanel3,'Units','normalized','position',[0.05,0.05,0.77,0.25])
-set(handles.edit5,'position',[0.1,0.55,0.75,0.27])
-set(handles.pushbutton2,'position',[0.1,0.1,0.75,0.27])
-
-set(handles.pushbutton4,'Units','normalized','position',[0.85,0.05,0.1,0.25])
-set(handles.checkbox1,'position',[0.03,0.2,0.45,0.7])
-set(handles.checkbox2,'position',[0.5,0.2,0.275,0.7])
-set(handles.popupmenu1,'position',[0.75,0.2,0.23,0.7])
-
-data_s = varargin{1}.current_data;
-% remove mean value
-data_s(:,2) = data_s(:,2) - mean(data_s(:,2));
-%
-handles.acfigmain = varargin{1}.acfigmain;
-handles.listbox_acmain = varargin{1}.listbox_acmain; % save path
-handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
-handles.unit = varargin{1}.unit;
-handles.unit_type = varargin{1}.unit_type;
-handles.current_data = data_s;
-handles.filename = varargin{1}.filename;
-handles.data_name = varargin{1}.data_name; % save dataname
-handles.path_temp = varargin{1}.path_temp;
-handles.ext = varargin{1}.ext;
-handles.slash_v = varargin{1}.slash_v;
-
-
-
-% language
-lang_choice = varargin{1}.lang_choice;
-lang_id = varargin{1}.lang_id;
-lang_var = varargin{1}.lang_var;
-if lang_choice>0
-    %
-    [~, locb] = ismember('dd30',lang_id);
-    set(gcf,'Name',lang_var{locb})
-    %
-    [~, locb1] = ismember('dd31',lang_id);
-    set(handles.uibuttongroup1,'title',lang_var{locb1})
-    [~, locb1] = ismember('dd32',lang_id);
-    set(handles.text3,'string',lang_var{locb1})
-    [~, locb1] = ismember('dd33',lang_id);
-    set(handles.radiobutton2,'string',lang_var{locb1})
-    [~, locb1] = ismember('dd34',lang_id);
-    set(handles.radiobutton1,'string',lang_var{locb1})
-    %
-    [~, locb1] = ismember('main32',lang_id);
-    set(handles.uipanel1,'title',lang_var{locb1})
-    [~, locb1] = ismember('main33',lang_id);
-    set(handles.pushbutton1,'string',lang_var{locb1})
-    set(handles.pushbutton2,'string',lang_var{locb1})
-    [~, locb1] = ismember('main07',lang_id);
-    set(handles.uipanel2,'title',lang_var{locb1})
-    
-    [~, locb1] = ismember('menu03',lang_id);
-    set(handles.uipanel3,'title',lang_var{locb1})
-    [~, locb1] = ismember('dd35',lang_id);
-    set(handles.checkbox1,'string',lang_var{locb1})
-    [~, locb1] = ismember('dd36',lang_id);
-    set(handles.checkbox2,'string',lang_var{locb1})
-    [~, locb1] = ismember('main00',lang_id);
-    set(handles.pushbutton4,'string',lang_var{locb1})
-    
-    [~, locb1] = ismember('dd37',lang_id);
-    dd37 = lang_var{locb1};
-    
-    [~, locb1] = ismember('dd38',lang_id);
-    dd38 = lang_var{locb1};
-    [~, locb1] = ismember('dd39',lang_id);
-    dd39 = lang_var{locb1};
-    [~, locb1] = ismember('dd40',lang_id);
-    dd40 = lang_var{locb1};
-    [~, locb1] = ismember('dd41',lang_id);
-    dd41 = lang_var{locb1};
-    set(handles.popupmenu1,'string',{dd38,dd39,dd40,dd41})
-else
-    set(gcf,'Name','Acycle: Dynamic Filtering | Frequency Stabilization')
-end
-
-% language
-handles.lang_choice = lang_choice;
-handles.lang_id = lang_id;
-handles.lang_var = lang_var;
-
-
-xmin = min(data_s(:,1));
-xmax = max(data_s(:,1));
-mean1 = median(diff(data_s(:,1)));
-handles.mean = mean1;
-handles.step = 4*mean1;
-handles.nyquist = 1/(2*handles.mean);     % prepare nyquist
-handles.window = 0.2*(xmax-xmin);
-
-handles.normal = 1;
-handles.lenthx = xmax-xmin;
-handles.time_0pad = 1;
-handles.padtype = 1;
-% if number of calculations is larger than 500;
-% then, a large step is recommended. This way, the ncal is ~500.
-ncal = (xmax-xmin - handles.window)/mean1;
-if ncal > 500
-    handles.step = abs(xmax - xmin - handles.window)/500;
-end
-set(handles.edit2, 'String', '0');
-set(handles.edit4, 'String', handles.unit);
-set(handles.text2, 'String', num2str(handles.nyquist));
-set(handles.edit1, 'String', num2str(0.5*handles.nyquist));
-set(handles.edit3, 'String', num2str(handles.step),'Value',1);
-set(handles.edit5, 'String', num2str(handles.window));
-set(handles.radiobutton2, 'Value',1);
-set(handles.radiobutton1, 'Value',0);
-set(handles.checkbox2, 'Value',1);
-set(handles.checkbox1, 'Value',1);
-set(handles.popupmenu1, 'Value',1);
-
-% Choose default command line output for DynamicFilter
-handles.output = hObject;
-
-diffx = diff(data_s(:,1));
-if max(diffx) - min(diffx) > 2*eps('single')
-    if lang_choice==0
-        hwarn = warndlg('Not uniformly spaced data. Interpolated using mean sampling rate!');
-    else
-        hwarn = warndlg(dd37);
+        ButtonOK matlab.ui.control.Button
     end
-    interpolate_rate = mean(diffx);
-    handles.current_data = interpolate(data_s,interpolate_rate);
-    %set(0,'Units','normalized') % set units as normalized
-    set(gcf,'units','norm') % set location
-    set(gcf,'position',[0.15,0.6,0.25,0.1])
-    figure(hwarn);
-end
 
-% Update handles structure
-guidata(hObject, handles);
+    properties (Access = private)
+        Context struct = struct()
+        MonZoom double = 1
+        val1 double = 1
 
+        acfigmain
+        listbox_acmain
+        edit_acfigmain_dir
+        unit char = ''
+        unit_type
+        current_data = []
+        filename char = ''
+        data_name char = ''
+        path_temp char = ''
+        ext char = ''
+        slash_v char = filesep
 
-% UIWAIT makes DynamicFilter wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
+        lang_choice double = 0
+        lang_id = {}
+        lang_var = {}
 
+        meanStep double = 0
+        step double = 0
+        nyquist double = 0
+        window double = 0
+        normal double = 1
+        lenthx double = 0
+        time_0pad double = 1
+        padtype double = 1
 
-% --- Outputs from this function are returned to the command line.
-function varargout = DynamicFilter_OutputFcn(hObject, eventdata, handles) 
-% varargout  cell array for returning output args (see VARARGOUT);
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+        UIColorBg double = [0.94 0.94 0.94]
+        UIColorBlue double = [0.08 0.02 0.95]
+        UIFontSize double = 11.5
+    end
 
-% Get default command line output from handles structure
-varargout{1} = handles.output;
+    methods (Access = private)
+        function txt = getLang(app, key, fallback)
+            txt = fallback;
+            if app.lang_choice <= 0 || isempty(app.lang_id) || isempty(app.lang_var)
+                return
+            end
+            [~, idx] = ismember(key, app.lang_id);
+            if idx > 0 && idx <= numel(app.lang_var)
+                txt = app.lang_var{idx};
+            end
+        end
 
+        function screenSize = getScreenSizePixels(~)
+            oldUnits = get(groot,'Units');
+            set(groot,'Units','pixels');
+            screenSize = get(groot,'ScreenSize');
+            set(groot,'Units',oldUnits);
+        end
 
-% --- Executes on button press in checkbox1.
-function checkbox1_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+        function pos = normalizedToPixelPosition(app, normPos)
+            screen = app.getScreenSizePixels();
+            zoom = app.MonZoom;
+            if isnumeric(zoom)
+                if isscalar(zoom)
+                    normPos = normPos * zoom;
+                elseif numel(zoom) >= 4
+                    normPos = normPos .* zoom(1:4);
+                end
+            end
+            w = max(1080, normPos(3)*screen(3));
+            h = max(410, normPos(4)*screen(4));
+            x = screen(1) + normPos(1)*screen(3);
+            y = screen(2) + normPos(2)*screen(4);
+            x = min(max(x,screen(1)), screen(1)+screen(3)-w);
+            y = min(max(y,screen(2)), screen(2)+screen(4)-h);
+            pos = round([x y w h]);
+        end
 
-% Hint: get(hObject,'Value') returns toggle state of checkbox1
-handles.normal = get(handles.checkbox1,'Value');
-guidata(hObject, handles);
+        function p = childPos(~, parentPos, rel)
+            p = round([rel(1)*parentPos(3), rel(2)*parentPos(4), rel(3)*parentPos(3), rel(4)*parentPos(4)]);
+        end
 
-% --- Executes on button press in checkbox2.
-function checkbox2_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+        function createComponents(app)
+            app.UIFigure = uifigure('Name','Acycle: Dynamic Filtering | Frequency Stabilization', ...
+                'Color',app.UIColorBg, ...
+                'Resize','on', ...
+                'Position',app.normalizedToPixelPosition([0.63,0.4,0.35,0.22]));
+            app.UIFigure.AutoResizeChildren = 'off';
+            app.UIFigure.SizeChangedFcn = @(~,~)app.applyLayout();
 
-% Hint: get(hObject,'Value') returns toggle state of checkbox2
-handles.time_0pad = get(hObject,'Value');
-guidata(hObject, handles);
+            app.PanelFreq = uipanel(app.UIFigure,'Title','Plot: Maximum Frequency', ...
+                'BackgroundColor',app.UIColorBg,'FontSize',app.UIFontSize+1,'FontWeight','bold');
+            app.LabelFreqMin = uilabel(app.PanelFreq,'Text','Freq. min.', ...
+                'BackgroundColor',app.UIColorBg,'FontSize',app.UIFontSize+1);
+            app.EditFreqMin = uieditfield(app.PanelFreq,'text','Value','0', ...
+                'HorizontalAlignment','center','BackgroundColor',[1 1 1],'FontSize',app.UIFontSize+1, ...
+                'ValueChangedFcn',@(~,~)app.onFreqMinChanged());
+            app.GroupFreqMax = uibuttongroup(app.PanelFreq, ...
+                'BorderType','none','BackgroundColor',app.UIColorBg, ...
+                'SelectionChangedFcn',@(~,~)app.onFreqModeChanged());
+            app.RadioUseNyquist = uiradiobutton(app.GroupFreqMax,'Text','Use Nyquist', ...
+                'Value',true,'FontSize',app.UIFontSize+1);
+            app.LabelNyquist = uilabel(app.PanelFreq,'Text','0', ...
+                'HorizontalAlignment','center','BackgroundColor',app.UIColorBg,'FontSize',app.UIFontSize+1);
+            app.RadioUseInput = uiradiobutton(app.GroupFreqMax,'Text','Use Input', ...
+                'Value',false,'FontSize',app.UIFontSize+1);
+            app.EditFreqMax = uieditfield(app.PanelFreq,'text','Value','0', ...
+                'HorizontalAlignment','center','BackgroundColor',[1 1 1],'FontColor',[0 0 0.8], ...
+                'FontWeight','bold','FontSize',app.UIFontSize+1, ...
+                'ValueChangedFcn',@(~,~)app.onFreqMaxChanged());
 
-% --- Executes on selection change in popupmenu1.
-function popupmenu1_Callback(hObject, eventdata, handles)
-% hObject    handle to popupmenu1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+            app.PanelStep = uipanel(app.UIFigure,'Title','Step', ...
+                'BackgroundColor',app.UIColorBg,'FontSize',app.UIFontSize+1,'FontWeight','bold');
+            app.EditStep = uieditfield(app.PanelStep,'text','Value','1', ...
+                'HorizontalAlignment','center','BackgroundColor',[1 1 1],'FontSize',app.UIFontSize+1, ...
+                'ValueChangedFcn',@(~,~)app.onStepChanged());
+            app.ButtonStepTips = uibutton(app.PanelStep,'push','Text','Tips', ...
+                'FontSize',app.UIFontSize+1,'ButtonPushedFcn',@(~,~)app.onStepTips());
+            app.EditUnit = uieditfield(app.PanelStep,'text','Editable','off','Value','unit', ...
+                'HorizontalAlignment','center','BackgroundColor',[1 1 1],'FontSize',app.UIFontSize+1);
+            app.LabelUnit = uilabel(app.PanelStep,'Text','Unit', ...
+                'BackgroundColor',app.UIColorBg,'FontSize',app.UIFontSize+1);
 
-% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu1 contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from popupmenu1
-handles.padtype = get(hObject,'Value');
-guidata(hObject, handles);
+            app.PanelWindow = uipanel(app.UIFigure,'Title','Sliding Window', ...
+                'BackgroundColor',app.UIColorBg,'FontSize',app.UIFontSize+1,'FontWeight','bold');
+            app.EditWindow = uieditfield(app.PanelWindow,'text','Value','1', ...
+                'HorizontalAlignment','center','BackgroundColor',[1 1 1],'FontColor',[0 0 0.8], ...
+                'FontWeight','bold','FontSize',app.UIFontSize+1, ...
+                'ValueChangedFcn',@(~,~)app.onWindowChanged());
+            app.ButtonWindowTips = uibutton(app.PanelWindow,'push','Text','Tips', ...
+                'FontSize',app.UIFontSize+1,'ButtonPushedFcn',@(~,~)app.onWindowTips());
 
-% --- Executes during object creation, after setting all properties.
-function popupmenu1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to popupmenu1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
+            app.PanelPlot = uipanel(app.UIFigure,'Title','Plot', ...
+                'BackgroundColor',app.UIColorBg,'FontSize',app.UIFontSize+1,'FontWeight','bold');
+            app.CheckNormalize = uicheckbox(app.PanelPlot,'Text','Normalize each window', ...
+                'Value',true,'FontSize',app.UIFontSize+1, ...
+                'ValueChangedFcn',@(~,~)app.onNormalizeChanged());
+            app.LabelPadding = uilabel(app.PanelPlot,'Text','Padding X', ...
+                'BackgroundColor',app.UIColorBg,'FontSize',app.UIFontSize+1);
+            app.DropPadding = uidropdown(app.PanelPlot,'Items',{'zero','mirror','periodic','none'}, ...
+                'ItemsData',[1 2 3 4], ...
+                'Value',1,'BackgroundColor',[1 1 1],'FontSize',app.UIFontSize+1, ...
+                'ValueChangedFcn',@(~,~)app.onPaddingChanged());
 
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+            app.ButtonOK = uibutton(app.UIFigure,'push','Text','OK', ...
+                'BackgroundColor',app.UIColorBlue,'FontColor',[1 1 1],'FontWeight','bold', ...
+                'FontSize',app.UIFontSize+2,'ButtonPushedFcn',@(~,~)app.onOK());
 
-% --- Executes on button press in pushbutton4.
-function pushbutton4_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+            app.applyLayout();
+        end
 
-lang_id = handles.lang_id;
-if handles.lang_choice > 0
-    [~, locb1] = ismember('main23',lang_id);
-    main23 = handles.lang_var{locb1};
-    [~, locb1] = ismember('main24',lang_id);
-    main24 = handles.lang_var{locb1};
-    [~, locb] = ismember('main02',lang_id);
-    main02 = handles.lang_var{locb};
-    [~, locb] = ismember('dd42',lang_id);
-    dd42 = handles.lang_var{locb};
-end
+        function applyLayout(app)
+            fr = [0 0 app.UIFigure.Position(3) app.UIFigure.Position(4)];
 
+            app.PanelFreq.Position = app.childPos(fr,[0.05,0.35,0.38,0.55]);
+            app.LabelFreqMin.Position = app.childPos(app.PanelFreq.Position,[0.05,0.62,0.40,0.22]);
+            app.EditFreqMin.Position = app.childPos(app.PanelFreq.Position,[0.65,0.62,0.30,0.24]);
+            app.GroupFreqMax.Position = app.childPos(app.PanelFreq.Position,[0.03,0.02,0.6,0.58]);
+            app.RadioUseNyquist.Position = app.childPos(app.GroupFreqMax.Position,[0.02,0.56,0.96,0.34]);
+            app.LabelNyquist.Position = app.childPos(app.PanelFreq.Position,[0.65,0.37,0.3,0.20]);
+            app.RadioUseInput.Position = app.childPos(app.GroupFreqMax.Position,[0.02,0.08,0.96,0.34]);
+            app.EditFreqMax.Position = app.childPos(app.PanelFreq.Position,[0.65,0.08,0.30,0.25]);
 
-figft = gcf;
-data =  handles.current_data;
-window = handles.window;
-fmin = str2double(get(handles.edit2,'String'));
-fmax_select = get(handles.radiobutton2,'Value');
-if fmax_select == 1
-    fmax = handles.nyquist;
-else
-    fmax = str2double(get(handles.edit1,'String'));
-end
-unit = get(handles.edit4,'String');
-step = str2double(get(handles.edit3,'String'));
-norm = handles.normal;
-padding = handles.padtype;
+            app.PanelStep.Position = app.childPos(fr,[0.45,0.35,0.25,0.55]);
+            app.EditStep.Position = app.childPos(app.PanelStep.Position,[0.1,0.50,0.4,0.25]);
+            app.ButtonStepTips.Position = app.childPos(app.PanelStep.Position,[0.55,0.50,0.4,0.25]);
+            app.EditUnit.Position = app.childPos(app.PanelStep.Position,[0.1,0.08,0.4,0.25]);
+            app.LabelUnit.Position = app.childPos(app.PanelStep.Position,[0.55,0.08,0.4,0.25]);
 
-% plot data
-figdata = figure;
-plot(data(:,1),data(:,2),'k-')
-xlim([min(data(:,1)),max(data(:,1))])
-if handles.lang_choice == 0
-    xlabel(['Depth (',unit,')'])
-    ylabel('Value')
-    title('Data')
-    set(gca,'TickDir','out')
-    set(figdata,'units','norm') % set location
-    set(figdata,'position',[0.05,0.02,0.9,0.3]) % set position
-    set(figdata,'Name','Acycle: Data') % set position
-else
-    xlabel([main23,' (',unit,')'])
-    ylabel(main24)
-    title(main02)
-    set(gca,'TickDir','out')
-    set(figdata,'units','norm') % set location
-    set(figdata,'position',[0.05,0.02,0.9,0.3]) % set position
-    set(figdata,'Name',['Acycle: ',main02]) % set position
-end
-%[xdata_filtered,time,freqboundlow,freqboundhigh]=dynamic_filter(data,window,step,fmin,fmax,unit,norm,padding);
-[xdata_filtered,time,freqboundlow,freqboundhigh]=dynamic_filter_lang(data,window,step,fmin,fmax,unit,norm,padding); % with language option
-% save figure handles
-figdynfilter = gcf;
+            app.PanelWindow.Position = app.childPos(fr,[0.73,0.35,0.22,0.55]);
+            app.EditWindow.Position = app.childPos(app.PanelWindow.Position,[0.1,0.50,0.75,0.25]);
+            app.ButtonWindowTips.Position = app.childPos(app.PanelWindow.Position,[0.1,0.08,0.75,0.25]);
 
-% save data
-CDac_pwd;
-[dat_dir,data_name,ext] = fileparts(handles.filename);
-name0 = [data_name,'-','DynFilter'];
-name1 = [name0,ext];  % name for file
-log_name = [data_name,'-','DynFilter-log',ext];
-dynfilfigname = [data_name,'-','DynFilter'];
-dynfilfigname1 = [dynfilfigname,'.fig'];
+            app.PanelPlot.Position = app.childPos(fr,[0.05,0.05,0.77,0.25]);
+            app.CheckNormalize.Position = app.childPos(app.PanelPlot.Position,[0.03,0.14,0.45,0.6]);
+            app.LabelPadding.Position = app.childPos(app.PanelPlot.Position,[0.58,0.14,0.2,0.6]);
+            app.DropPadding.Position = app.childPos(app.PanelPlot.Position,[0.76,0.14,0.22,0.6]);
 
-if exist([pwd,handles.slash_v,log_name]) || exist([pwd,handles.slash_v,name1]) || exist([pwd,handles.slash_v,dynfilfigname1])
-    for i = 1:100
-        name1 = [name0,'-',num2str(i),ext];  % name for file
-        log_name = [data_name,'-','DynFilter-',num2str(i),'-log',ext];
-        dynfilfigname1 = [dynfilfigname,'-',num2str(i),'.fig'];
-        if exist([pwd,handles.slash_v,log_name]) || exist([pwd,handles.slash_v,name1]) || exist([pwd,handles.slash_v,dynfilfigname1])
-        else
-            break
+            app.ButtonOK.Position = app.childPos(fr,[0.85,0.05,0.1,0.25]);
+        end
+
+        function initializeState(app)
+            c = app.Context;
+            if isfield(c,'MonZoom'), app.MonZoom = c.MonZoom; end
+            if isfield(c,'val1'), app.val1 = c.val1; end
+
+            if isfield(c,'acfigmain'), app.acfigmain = c.acfigmain; end
+            if isfield(c,'listbox_acmain'), app.listbox_acmain = c.listbox_acmain; end
+            if isfield(c,'edit_acfigmain_dir'), app.edit_acfigmain_dir = c.edit_acfigmain_dir; end
+            if isfield(c,'unit'), app.unit = c.unit; end
+            if isfield(c,'unit_type'), app.unit_type = c.unit_type; end
+            if isfield(c,'current_data'), app.current_data = c.current_data; end
+            if isfield(c,'filename'), app.filename = c.filename; end
+            if isfield(c,'data_name'), app.data_name = c.data_name; end
+            if isfield(c,'path_temp'), app.path_temp = c.path_temp; end
+            if isfield(c,'ext'), app.ext = c.ext; end
+            if isfield(c,'slash_v'), app.slash_v = c.slash_v; end
+
+            if isfield(c,'lang_choice'), app.lang_choice = c.lang_choice; end
+            if isfield(c,'lang_id'), app.lang_id = c.lang_id; end
+            if isfield(c,'lang_var'), app.lang_var = c.lang_var; end
+
+            app.UIFigure.Name = app.getLang('dd30','Acycle: Dynamic Filtering | Frequency Stabilization');
+            app.PanelFreq.Title = app.getLang('dd31','Plot: Maximum Frequency');
+            app.LabelFreqMin.Text = app.getLang('dd32','Freq. min.');
+            app.RadioUseNyquist.Text = app.getLang('dd33','Use Nyquist');
+            app.RadioUseInput.Text = app.getLang('dd34','Use Input');
+
+            app.PanelStep.Title = app.getLang('main32','Step');
+            app.ButtonStepTips.Text = app.getLang('main33','Tips');
+            app.PanelWindow.Title = app.getLang('main07','Sliding Window');
+            app.ButtonWindowTips.Text = app.getLang('main33','Tips');
+
+            app.PanelPlot.Title = app.getLang('menu03','Plot');
+            app.CheckNormalize.Text = app.getLang('dd35','Normalize each window');
+            app.LabelPadding.Text = app.getLang('dd36','Padding X');
+            app.ButtonOK.Text = app.getLang('main00','OK');
+
+            if isempty(app.current_data)
+                error('DynamicFilter requires current_data from AC handles.');
+            end
+
+            data_s = app.current_data;
+            data_s(:,2) = data_s(:,2) - mean(data_s(:,2));
+            app.current_data = data_s;
+
+            xmin = min(data_s(:,1));
+            xmax = max(data_s(:,1));
+            app.meanStep = median(diff(data_s(:,1)));
+            app.step = 4*app.meanStep;
+            app.nyquist = 1/(2*app.meanStep);
+            app.window = 0.2*(xmax-xmin);
+            app.normal = 1;
+            app.lenthx = xmax - xmin;
+            app.time_0pad = 1;
+            app.padtype = 1;
+
+            ncal = (xmax - xmin - app.window) / app.meanStep;
+            if ncal > 500
+                app.step = abs(xmax - xmin - app.window) / 500;
+            end
+
+            app.EditFreqMin.Value = '0';
+            app.EditUnit.Value = app.unit;
+            app.LabelNyquist.Text = num2str(app.nyquist);
+            app.EditFreqMax.Value = num2str(0.5*app.nyquist);
+            app.EditStep.Value = num2str(app.step);
+            app.EditWindow.Value = num2str(app.window);
+            app.RadioUseNyquist.Value = true;
+            app.RadioUseInput.Value = false;
+            app.GroupFreqMax.SelectedObject = app.RadioUseNyquist;
+            app.CheckNormalize.Value = true;
+            app.DropPadding.Value = 1;
+
+            app.EditFreqMax.Editable = 'off';
+            app.EditFreqMax.BackgroundColor = app.UIColorBg;
+
+            if app.lang_choice > 0
+                app.DropPadding.Items = { ...
+                    app.getLang('dd38','zero'), ...
+                    app.getLang('dd39','mirror'), ...
+                    app.getLang('dd40','periodic'), ...
+                    app.getLang('dd41','none')};
+                app.DropPadding.ItemsData = [1 2 3 4];
+                app.DropPadding.Value = 1;
+            end
+
+            diffx = diff(data_s(:,1));
+            if max(diffx) - min(diffx) > 2*eps('single')
+                hwarn = warndlg(app.getLang('dd37','Not uniformly spaced data. Interpolated using mean sampling rate!'));
+                interpolate_rate = mean(diffx);
+                app.current_data = interpolate(data_s,interpolate_rate);
+                try
+                    set(hwarn,'Units','normalized');
+                    set(hwarn,'Position',[0.15,0.6,0.25,0.1]);
+                catch
+                end
+            end
+
+            app.UIFigure.Position = app.normalizedToPixelPosition([0.63,0.4,0.35,0.22]);
+            app.applyLayout();
+        end
+
+        function onNormalizeChanged(app)
+            app.normal = double(app.CheckNormalize.Value);
+        end
+
+        function onPaddingChanged(app)
+            app.padtype = app.DropPadding.Value;
+        end
+
+        function onFreqModeChanged(app)
+            if app.RadioUseNyquist.Value
+                app.GroupFreqMax.SelectedObject = app.RadioUseNyquist;
+                app.EditFreqMax.Value = num2str(0.5*app.nyquist);
+                app.EditFreqMax.Editable = 'off';
+                app.EditFreqMax.BackgroundColor = app.UIColorBg;
+            else
+                app.GroupFreqMax.SelectedObject = app.RadioUseInput;
+                app.EditFreqMax.Editable = 'on';
+                app.EditFreqMax.BackgroundColor = [1 1 1];
+            end
+        end
+
+        function onStepTips(app)
+            if app.lang_choice == 0
+                warndlg('Tips: Step  >= mean sample rate','Tips: Step length');
+            else
+                warndlg(app.getLang('dd45','Tips: Step  >= mean sample rate'), app.getLang('dd46','Tips: Step length'));
+            end
+        end
+
+        function onWindowTips(app)
+            if app.lang_choice == 0
+                warndlg('Tips: window  < total data length; window ~= 2x aimed cycle. i.e. 20 m for a 10-m cycles','Tips: window length');
+            else
+                warndlg(app.getLang('dd43','Tips: window < total data length; window ~= 2x aimed cycle'), app.getLang('dd44','Tips: window length'));
+            end
+        end
+
+        function onWindowChanged(app)
+            w = str2double(app.EditWindow.Value);
+            if isnan(w) || w <= 0
+                app.EditWindow.Value = num2str(app.window);
+                return
+            end
+            app.window = w;
+            ncal = (app.lenthx - app.window)/app.meanStep;
+            if ncal > 500
+                app.step = abs(app.lenthx - app.window)/500;
+                app.EditStep.Value = num2str(app.step);
+            end
+        end
+
+        function onStepChanged(app)
+            v = str2double(app.EditStep.Value);
+            if isnan(v)
+                app.EditStep.Value = num2str(app.step);
+                return
+            end
+            if v < app.meanStep
+                warndlg(app.getLang('dd47','Step must be no smaller than the mean sampling rate'), app.getLang('main29','Warning'));
+                app.EditStep.Value = num2str(app.meanStep);
+                return
+            end
+            if v > 0.5 * app.lenthx
+                warndlg(app.getLang('dd48','Step is too large'), app.getLang('main29','Warning'));
+                app.EditStep.Value = num2str(app.meanStep*5);
+                return
+            end
+            app.step = v;
+        end
+
+        function onFreqMaxChanged(app)
+            v = str2double(app.EditFreqMax.Value);
+            if isnan(v)
+                app.EditFreqMax.Value = num2str(0.5*app.nyquist);
+                return
+            end
+            fmin = str2double(app.EditFreqMin.Value);
+            if v <= fmin
+                warndlg(app.getLang('dd49','Maximum Freq. must be larger than freq. min'), app.getLang('main29','Warning'));
+                app.EditFreqMax.Value = num2str(app.nyquist*0.5);
+                return
+            end
+            if v > app.nyquist
+                warndlg(app.getLang('dd50','Maximum Freq. must be no larger than the Nyquist frequency'), app.getLang('main29','Warning'));
+                app.EditFreqMax.Value = num2str(app.nyquist);
+                return
+            end
+            app.RadioUseInput.Value = true;
+            app.RadioUseNyquist.Value = false;
+            app.GroupFreqMax.SelectedObject = app.RadioUseInput;
+            app.EditFreqMax.Editable = 'on';
+            app.EditFreqMax.BackgroundColor = [1 1 1];
+        end
+
+        function onFreqMinChanged(app)
+            v = str2double(app.EditFreqMin.Value);
+            if isnan(v)
+                app.EditFreqMin.Value = '0';
+                return
+            end
+            if v >= app.nyquist
+                warndlg(app.getLang('dd51','Freq. min must be smaller than the Nyquist frequency'), app.getLang('main29','Warning'));
+                app.EditFreqMin.Value = '0';
+                return
+            end
+            if v < 0
+                warndlg(app.getLang('dd52','Freq. min must be no less than 0'), app.getLang('main29','Warning'));
+                app.EditFreqMin.Value = '0';
+                return
+            end
+        end
+
+        function refreshMainListbox(app)
+            if ac_refresh_main_list(app.listbox_acmain)
+                return
+            end
+            pre = '<HTML><FONT color="blue">';
+            post = '</FONT></HTML>';
+            d = dir;
+            if numel(d) >= 2, d(1:2) = []; end
+            address = pwd;
+
+            if ~isempty(app.edit_acfigmain_dir) && isgraphics(app.edit_acfigmain_dir)
+                set(app.edit_acfigmain_dir,'String',address);
+            end
+
+            ac_pwd_str = which('ac_pwd.txt');
+            if ~isempty(ac_pwd_str)
+                [ac_pwd_dir,~,~] = fileparts(ac_pwd_str);
+                fileID = fopen(fullfile(ac_pwd_dir,'ac_pwd.txt'),'w');
+                if fileID ~= -1
+                    fprintf(fileID,'%s',address);
+                    fclose(fileID);
+                end
+            end
+
+            if isempty(d) || isempty(app.listbox_acmain) || ~isgraphics(app.listbox_acmain)
+                return
+            end
+
+            T = struct2table(d);
+            switch app.val1
+                case 1
+                    sortedT = sortrows(T,'name','ascend');
+                case 2
+                    sortedT = sortrows(T,'name','descend');
+                case 3
+                    sortedT = sortrows(T,'date','ascend');
+                case 4
+                    sortedT = sortrows(T,'date','descend');
+                case 5
+                    sortedT = sortrows(T,'bytes','ascend');
+                case 6
+                    sortedT = sortrows(T,'bytes','descend');
+                otherwise
+                    sortedT = sortrows(T,'name','ascend');
+            end
+            sd = table2struct(sortedT);
+            listboxStr = cell(numel(sd),1);
+            for i = 1:numel(sd)
+                if isdir(sd(i).name)
+                    listboxStr{i} = [pre,sd(i).name,post];
+                else
+                    listboxStr{i} = sd(i).name;
+                end
+            end
+            set(app.listbox_acmain,'String',listboxStr,'Value',[]);
+        end
+
+        function onOK(app)
+            figft = app.UIFigure;
+            data = app.current_data;
+            window = str2double(app.EditWindow.Value);
+            fmin = str2double(app.EditFreqMin.Value);
+            if app.RadioUseNyquist.Value
+                fmax = app.nyquist;
+            else
+                fmax = str2double(app.EditFreqMax.Value);
+            end
+            unitv = app.EditUnit.Value;
+            stepv = str2double(app.EditStep.Value);
+            normv = app.normal;
+            padding = app.padtype;
+
+            if isnan(window) || isnan(fmin) || isnan(fmax) || isnan(stepv)
+                warndlg('Invalid numeric input.');
+                return
+            end
+
+            lang_main23 = app.getLang('main23','Depth');
+            lang_main24 = app.getLang('main24','Value');
+            lang_main02 = app.getLang('main02','Data');
+            lang_dd42 = app.getLang('dd42','Data & dynamic filtered output');
+
+            figdata = figure;
+            plot(data(:,1),data(:,2),'k-');
+            xlim([min(data(:,1)),max(data(:,1))]);
+            xlabel([lang_main23,' (',unitv,')']);
+            ylabel(lang_main24);
+            title(lang_main02);
+            set(gca,'TickDir','out');
+            set(figdata,'Units','normalized','Position',[0.05,0.02,0.9,0.3]);
+            set(figdata,'Name',['Acycle: ',lang_main02]);
+
+            [xdata_filtered,time,freqboundlow,freqboundhigh,cancelled] = dynamic_filter_lang(data,window,stepv,fmin,fmax,unitv,normv,padding);
+            if cancelled
+                if isgraphics(figdata)
+                    close(figdata);
+                end
+                try
+                    figure(figft);
+                catch
+                end
+                return
+            end
+            figdynfilter = gcf;
+
+            pre_dirML = pwd;
+            CDac_pwd;
+            cleanupObj = onCleanup(@()cd(pre_dirML)); %#ok<NASGU>
+
+            [dat_dir,data_name1,ext1] = fileparts(app.filename);
+            name0 = [data_name1,'-','DynFilter'];
+            name1 = [name0,ext1];
+            log_name = [data_name1,'-','DynFilter-log',ext1];
+            dynfilfigname = [data_name1,'-','DynFilter'];
+            dynfilfigname1 = [dynfilfigname,'.fig'];
+
+            if exist(fullfile(pwd,log_name),'file') || exist(fullfile(pwd,name1),'file') || exist(fullfile(pwd,dynfilfigname1),'file')
+                for i = 1:100
+                    name1 = [name0,'-',num2str(i),ext1];
+                    log_name = [data_name1,'-','DynFilter-',num2str(i),'-log',ext1];
+                    dynfilfigname1 = [dynfilfigname,'-',num2str(i),'.fig'];
+                    if ~(exist(fullfile(pwd,log_name),'file') || exist(fullfile(pwd,name1),'file') || exist(fullfile(pwd,dynfilfigname1),'file'))
+                        break
+                    end
+                end
+            end
+
+            dlmwrite(name1, [time,xdata_filtered'], 'delimiter', ' ', 'precision', 9);
+            figure(figdynfilter); savefig(dynfilfigname1);
+
+            figure(figdata); hold on;
+            plot(time,xdata_filtered,'r-');
+            title(lang_dd42);
+            hold off;
+
+            fileID = fopen(fullfile(dat_dir,log_name),'w+');
+            if fileID ~= -1
+                fprintf(fileID,'%s\n','% - - - - - - - - - - - - - Summary - - - - - - - - - - -');
+                fprintf(fileID,'%s\n',datestr(datetime('now')));
+                fprintf(fileID,'%s\n',log_name);
+                fprintf(fileID,'\n');
+                fprintf(fileID,'%s\n','%lower frequency boundary');
+                fprintf(fileID,'\n');
+                for ii = 1:size(freqboundlow,1)
+                    fprintf(fileID,'%f\t',freqboundlow(ii,:));
+                    fprintf(fileID,'\n');
+                end
+                fprintf(fileID,'\n');
+                fprintf(fileID,'%s\n','%higher frequency boundary');
+                fprintf(fileID,'\n');
+                for ii = 1:size(freqboundhigh,1)
+                    fprintf(fileID,'%f\t',freqboundhigh(ii,:));
+                    fprintf(fileID,'\n');
+                end
+                fclose(fileID);
+            end
+
+            app.refreshMainListbox();
+            try
+                figure(figft);
+            catch
+            end
+            try
+                figure(figdynfilter);
+            catch
+            end
+            try
+                figure(figdata);
+            catch
+            end
         end
     end
-end
 
-dlmwrite(name1, [time,xdata_filtered'], 'delimiter', ' ', 'precision', 9);
+    methods (Access = public)
+        function app = DynamicFilter(varargin)
+            if nargin > 0 && isstruct(varargin{1})
+                app.Context = varargin{1};
+                if isfield(app.Context,'MonZoom')
+                    app.MonZoom = app.Context.MonZoom;
+                end
+            else
+                error('DynamicFilter requires a handles/context struct input.');
+            end
 
-figure(figdynfilter);
-savefig(dynfilfigname1) % save ac.fig
+            app.createComponents();
+            app.initializeState();
+            registerApp(app, app.UIFigure);
+            if nargout == 0
+                clear app
+            end
+        end
 
-figure(figdata);
-hold on;
-plot(time, xdata_filtered,'r-')
-if handles.lang_choice == 0
-    title('Data & dynamic filtered output')
-else
-    title(dd42)
-end
-hold off;
-
-% open and write log into log_name file
-fileID = fopen(fullfile(dat_dir,log_name),'w+');
-fprintf(fileID,'%s\n','% - - - - - - - - - - - - - Summary - - - - - - - - - - -');
-fprintf(fileID,'%s\n',datestr(datetime('now')));
-fprintf(fileID,'%s\n',log_name);
-fprintf(fileID,'\n');
-fprintf(fileID,'%s\n','%lower frequency boundary');
-fprintf(fileID,'\n');
-for ii = 1:size(freqboundlow,1)
-    fprintf(fileID,'%f\t',freqboundlow(ii,:));
-    fprintf(fileID,'\n');
-end
-fprintf(fileID,'\n');
-fprintf(fileID,'%s\n','%higher frequency boundary');
-fprintf(fileID,'\n');
-for ii = 1:size(freqboundhigh,1)
-    fprintf(fileID,'%f\t',freqboundhigh(ii,:));
-    fprintf(fileID,'\n');
-end
-fclose(fileID);
-%
-cd(pre_dirML); % return to matlab view folder
-% refresh AC main window
-figure(handles.acfigmain);
-CDac_pwd; % cd working dir
-refreshcolor;
-cd(pre_dirML); % return view dir
-figure(figft);
-figure(figdynfilter);
-figure(figdata);
-
-guidata(hObject, handles);
-
-% --- Executes on button press in pushbutton2.
-function pushbutton2_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-lang_id = handles.lang_id;
-if handles.lang_choice > 0
-    [~, locb1] = ismember('dd43',lang_id);
-    dd43 = handles.lang_var{locb1};
-    [~, locb1] = ismember('dd44',lang_id);
-    dd44 = handles.lang_var{locb1};
-end
-if handles.lang_choice == 0
-    evofft_tips_win = 'Tips: window  < total data length; window ~= 2x aimed cycle. i.e. 20 m for a 10-m cycles';
-    warndlg(evofft_tips_win,'Tips: window length')
-else
-    warndlg(dd43,dd44)
-end
-
-function edit5_Callback(hObject, eventdata, handles)
-% hObject    handle to edit5 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit5 as text
-%        str2double(get(hObject,'String')) returns contents of edit5 as a double
-handles.window = str2double(get(hObject,'String'));
-
-% if number of calculations is larger than 500;
-% then, a large step is recommended. This way, the ncal is ~500.
-ncal = (handles.lenthx - handles.window)/handles.mean;
-if ncal > 500
-    handles.step = abs(handles.lenthx - handles.window)/500;
-end
-set(handles.edit3, 'String', num2str(handles.step),'Value',1);
-
-guidata(hObject,handles)
-
-% --- Executes during object creation, after setting all properties.
-function edit5_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit5 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in pushbutton1.
-function pushbutton1_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-lang_id = handles.lang_id;
-if handles.lang_choice > 0
-    [~, locb1] = ismember('dd45',lang_id);
-    dd45 = handles.lang_var{locb1};
-    [~, locb1] = ismember('dd46',lang_id);
-    dd46 = handles.lang_var{locb1};
-end
-if handles.lang_choice == 0
-    evofft_tips_step = 'Tips: Step  >= mean sample rate';
-    warndlg(evofft_tips_step,'Tips: Step length')
-else
-    warndlg(dd45,dd46)
-end
-
-
-
-function edit3_Callback(hObject, eventdata, handles)
-% hObject    handle to edit3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit3 as text
-%        str2double(get(hObject,'String')) returns contents of edit3 as a double
-
-lang_id = handles.lang_id;
-if handles.lang_choice > 0
-    [~, locb1] = ismember('dd47',lang_id);
-    dd47 = handles.lang_var{locb1};
-    [~, locb1] = ismember('dd48',lang_id);
-    dd48 = handles.lang_var{locb1};
-    [~, locb1] = ismember('main29',lang_id);
-    main29 = handles.lang_var{locb1};
-end
-
-val = str2double(get(hObject,'String'));
-if val < handles.mean
-    if handles.lang_choice == 0
-        warndlg('Step must be no smaller than the mean sampling rate','Warning')
-    else
-        warndlg(dd47,main29)
+        function delete(app)
+            if ~isempty(app.UIFigure) && isvalid(app.UIFigure)
+                delete(app.UIFigure);
+            end
+        end
     end
-    set(handles.edit3,'string',num2str(handles.mean))
-end
-if val > 0.5 * handles.lenthx
-    if handles.lang_choice == 0
-        warndlg('Step is too large','Warning')
-    else
-        warndlg(dd48,main29)
-    end
-    
-    set(handles.edit3,'string',num2str(handles.mean * 5))
-end
-% --- Executes during object creation, after setting all properties.
-function edit3_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit4_Callback(hObject, eventdata, handles)
-% hObject    handle to edit4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit4 as text
-%        str2double(get(hObject,'String')) returns contents of edit4 as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function edit4_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit1_Callback(hObject, eventdata, handles)
-% hObject    handle to edit1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit1 as text
-%        str2double(get(hObject,'String')) returns contents of edit1 as a double
-
-
-lang_id = handles.lang_id;
-if handles.lang_choice > 0
-    [~, locb1] = ismember('dd49',lang_id);
-    dd49 = handles.lang_var{locb1};
-    [~, locb1] = ismember('dd50',lang_id);
-    dd50 = handles.lang_var{locb1};
-    [~, locb1] = ismember('main29',lang_id);
-    main29 = handles.lang_var{locb1};
-end
-
-
-val = str2double(get(hObject,'String'));
-if val <= str2double(get(handles.edit2,'String'))
-    
-    if handles.lang_choice == 0
-        warndlg('Maximum Freq. must be larger than freq. min','Warning')
-    else
-        warndlg(dd49,main29)
-    end
-    set(handles.edit1,'string',num2str(handles.nyquist * 0.5))
-end
-if val > handles.nyquist
-    
-    if handles.lang_choice == 0
-        warndlg('Maximum Freq. must be no larger than the Nyquist frequency','Warning')
-    else
-        warndlg(dd50,main29)
-    end
-    set(handles.edit1,'string',num2str(handles.nyquist))
-end
-set(handles.radiobutton1,'value',1)
-set(handles.radiobutton2,'value',0)
-
-
-% --- Executes during object creation, after setting all properties.
-function edit1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-function edit2_Callback(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit2 as text
-%        str2double(get(hObject,'String')) returns contents of edit2 as a double
-
-lang_id = handles.lang_id;
-if handles.lang_choice > 0
-    [~, locb1] = ismember('dd51',lang_id);
-    dd51 = handles.lang_var{locb1};
-    [~, locb1] = ismember('dd52',lang_id);
-    dd52 = handles.lang_var{locb1};
-    [~, locb1] = ismember('main29',lang_id);
-    main29 = handles.lang_var{locb1};
-end
-
-val = str2double(get(hObject,'String'));
-if val >= handles.nyquist
-    
-    if handles.lang_choice == 0
-        warndlg('Freq. min must be smaller than the Nyquist frequency','Warning')
-    else
-        warndlg(dd51,main29)
-    end
-    set(handles.edit2,'string','0')
-end
-if val < 0
-    
-    if handles.lang_choice == 0
-        warndlg('Freq. min must be no less than 0','Warning')
-    else
-        warndlg(dd52,main29)
-    end
-    set(handles.edit2,'string','0')
-end
-
-% --- Executes during object creation, after setting all properties.
-function edit2_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
 end

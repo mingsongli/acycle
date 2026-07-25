@@ -1,1483 +1,996 @@
-function varargout = evofftGUI(varargin)
-% evofftGUI MATLAB code for evofftGUI.fig
-%      evofftGUI, by itself, creates a new evofftGUI or raises the existing
-%      singleton*.
-%
-%      H = evofftGUI returns the handle to a new evofftGUI or the handle to
-%      the existing singleton*.
-%
-%      evofftGUI('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in evofftGUI.M with the given input arguments.
-%
-%      evofftGUI('Property','Value',...) creates a new evofftGUI or raises the
-%      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before evofftGUI_OpeningFcn gets called.  An
-%      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to evofftGUI_OpeningFcn via varargin.
-%
-%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
-%      instance to run (singleton)".
-%
-% See also: GUIDE, GUIDATA, GUIHANDLES
+classdef evofftGUI < matlab.apps.AppBase
+    % App Designer style migration of legacy GUIDE evofftGUI.
 
-% Edit the above text to modify the response to help evofftGUI
+    properties (Access = public)
+        UIFigure matlab.ui.Figure
 
-% Last Modified by GUIDE v2.5 29-May-2021 22:36:49
+        LabelMethod matlab.ui.control.Label
+        DropMethod matlab.ui.control.DropDown
 
-% Begin initialization code - DO NOT EDIT
-gui_Singleton = 1;
-gui_State = struct('gui_Name',       mfilename, ...
-                   'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @evofftGUI_OpeningFcn, ...
-                   'gui_OutputFcn',  @evofftGUI_OutputFcn, ...
-                   'gui_LayoutFcn',  [] , ...
-                   'gui_Callback',   []);
-if nargin && ischar(varargin{1})
-    gui_State.gui_Callback = str2func(varargin{1});
-end
+        PanelMain matlab.ui.container.Panel
+        PanelFmax matlab.ui.container.Panel
+        PanelStep matlab.ui.container.Panel
+        PanelWindow matlab.ui.container.Panel
+        PanelDim matlab.ui.container.Panel
+        PanelCmap matlab.ui.container.Panel
 
-if nargout
-    [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
-else
-    gui_mainfcn(gui_State, varargin{:});
-end
-% End initialization code - DO NOT EDIT
+        LabelFmin matlab.ui.control.Label
+        EditFmin matlab.ui.control.EditField
+        GroupFmax matlab.ui.container.ButtonGroup
+        RadioNyquist matlab.ui.control.RadioButton
+        RadioInput matlab.ui.control.RadioButton
+        LabelNyquist matlab.ui.control.Label
+        EditFmax matlab.ui.control.EditField
 
+        EditStep matlab.ui.control.EditField
+        ButtonStepTips matlab.ui.control.Button
+        EditUnit matlab.ui.control.EditField
+        LabelUnit matlab.ui.control.Label
 
-% --- Executes just before evofftGUI is made visible.
-function evofftGUI_OpeningFcn(hObject, eventdata, handles, varargin)
-% This function has no output args, see OutputFcn.
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to evofftGUI (see VARARGIN)
-set(0,'Units','normalized') % set units as normalized
-set(gcf,'units','norm') % set location
-h=get(gcf,'Children');  % get all content
-h1=findobj(h,'FontUnits','norm');  % find all font units as points
-set(h1,'FontUnits','points','FontSize',11.5);  % set as norm
-h2=findobj(h,'FontUnits','points');  % find all font units as points
-set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
-handles.MonZoom = varargin{1}.MonZoom;
-handles.sortdata = varargin{1}.sortdata;
-handles.val1 = varargin{1}.val1;
-% language
-lang_choice = varargin{1}.lang_choice;
-handles.lang_choice = lang_choice;
-lang_id = varargin{1}.lang_id;
-lang_var = varargin{1}.lang_var;
-handles.lang_id = lang_id;
-handles.lang_var = lang_var;
-handles.main_unit_selection = varargin{1}.main_unit_selection;
+        EditWindow matlab.ui.control.EditField
+        ButtonWinTips matlab.ui.control.Button
 
+        CheckPlotSeries matlab.ui.control.CheckBox
+        CheckMTMRed matlab.ui.control.CheckBox
+        CheckNormalize matlab.ui.control.CheckBox
+        CheckFlipY matlab.ui.control.CheckBox
+        CheckLogFreq matlab.ui.control.CheckBox
+        CheckLogPower matlab.ui.control.CheckBox
+        CheckXPadding matlab.ui.control.CheckBox
 
-if handles.lang_choice == 0
-    set(gcf,'Name','Acycle: Evolutionary Spectral Analysis')
-else
-    [~, menu108] = ismember('menu108',lang_id);
-    set(gcf,'Name',['Acycle: ',lang_var{menu108}])
-end
-% language
-if handles.lang_choice > 0
-    [~, main49] = ismember('main49',handles.lang_id);
-    set(handles.text5,'String',lang_var{main49})
-    
-    [~, evofft01] = ismember('evofft01',handles.lang_id);
-    set(handles.uipanel1,'Title',lang_var{evofft01})
-    
-    [~, evofft02] = ismember('evofft02',handles.lang_id);
-    set(handles.uipanel2,'Title',lang_var{evofft02})
-    
-    [~, evofft03] = ismember('evofft03',handles.lang_id);
-    set(handles.text6,'String',lang_var{evofft03})
-    
-    [~, evofft04] = ismember('evofft04',handles.lang_id);
-    set(handles.evofft_Nyquist_radiobutton,'String',lang_var{evofft04})
-    
-    [~, spectral14] = ismember('spectral14',handles.lang_id);
-    set(handles.radiobutton2,'String',lang_var{spectral14})
-    
-    [~, main32] = ismember('main32',handles.lang_id);
-    set(handles.uipanel5,'Title',lang_var{main32})
-    
-    [~, main33] = ismember('main33',handles.lang_id);
-    set(handles.pushbutton8,'String',lang_var{main33})
-    set(handles.evofft_tips_win_pushbutton,'String',lang_var{main33})
-    
-    [~, main34] = ismember('main34',handles.lang_id);
-    set(handles.text7,'String',lang_var{main34})
-    
-    [~, main07] = ismember('main07',handles.lang_id);
-    set(handles.uipanel3,'Title',lang_var{main07})
-    
-    [~, evofft05] = ismember('evofft05',handles.lang_id);
-    set(handles.checkbox8,'String',lang_var{evofft05})
-    
-    [~, evofft06] = ismember('evofft06',handles.lang_id);
-    set(handles.checkbox7,'String',lang_var{evofft06})
-    
-    [~, evofft07] = ismember('evofft07',handles.lang_id);
-    set(handles.uipanel6,'Title',lang_var{evofft07})
-    
-    [~, evofft08] = ismember('evofft08',handles.lang_id);
-    set(handles.rotation,'String',lang_var{evofft08})
-    
-    [~, evofft09] = ismember('evofft09',handles.lang_id);
-    set(handles.checkbox2,'String',lang_var{evofft09})
-    
-    [~, main10] = ismember('main10',handles.lang_id);
-    set(handles.checkbox3,'String',lang_var{main10})
-    
-    [~, evofft10] = ismember('evofft10',handles.lang_id);
-    set(handles.checkbox4,'String',lang_var{evofft10})
-    
-    [~, evofft11] = ismember('evofft11',handles.lang_id);
-    set(handles.checkbox5,'String',lang_var{evofft11})
-        
-    [~, main43] = ismember('main43',handles.lang_id);
-    set(handles.checkbox6,'String',['x ',lang_var{main43}])
-    
-    [~, main50] = ismember('main50',handles.lang_id);
-    set(handles.uipanel10,'Title',lang_var{main50})
-    
-    [~, evofft12] = ismember('evofft12',handles.lang_id);
-    set(handles.text8,'String',lang_var{evofft12})
-    
-    [~, main01] = ismember('main01',handles.lang_id);
-    set(handles.checkbox9,'String',lang_var{main01})
-    
-    [~, main00] = ismember('main00',handles.lang_id);
-    set(handles.evofft_ok_pushbutton,'String',lang_var{main00})
-end
+        GroupDim matlab.ui.container.ButtonGroup
+        Radio2D matlab.ui.control.RadioButton
+        Radio3D matlab.ui.control.RadioButton
+        CheckRotation matlab.ui.control.CheckBox
 
+        DropCmap matlab.ui.control.DropDown
+        LabelGrid matlab.ui.control.Label
+        EditGrid matlab.ui.control.EditField
 
-if ismac
-    set(gcf,'position',[0.45,0.4,0.4,0.35]* handles.MonZoom) % set position
-elseif ispc
-    set(gcf,'position',[0.45,0.4,0.4,0.35]* handles.MonZoom) % set position
-end
-set(handles.text5,'position',[0.018,0.856,0.2,0.06])
-set(handles.popupmenu2,'position',[0.26,0.856,0.68,0.06])
-set(handles.uipanel1,'position',[0.034,0.037,0.906,0.793])
-set(handles.uipanel2,'position',[0.029,0.553,0.454,0.42])
-set(handles.uipanel5,'position',[0.496,0.559,0.239,0.419])
-set(handles.uipanel3,'position',[0.738,0.559,0.257,0.419])
-
-set(handles.checkbox2,'position',[0.293,0.45,0.36,0.1])
-set(handles.checkbox3,'position',[0.293,0.35,0.36,0.1])
-set(handles.checkbox5,'position',[0.293,0.25,0.36,0.1])
-set(handles.checkbox4,'position',[0.293,0.15,0.36,0.1])
-set(handles.checkbox6,'position',[0.293,0.05,0.2,0.1])
-set(handles.checkbox7,'position',[0.029,0.35,0.25,0.08])
-set(handles.checkbox7,'Value',0)
-set(handles.checkbox8,'position',[0.029,0.45,0.25,0.08])
-set(handles.checkbox8,'Value',1)
-set(handles.popupmenu4,'position',[0.46,0.03,0.18,0.11])
-
-set(handles.uipanel6,'position',[0.029,0.05,0.251,0.28])
-set(handles.uipanel10,'position',[0.637,0.08,0.251,0.42])
-set(handles.popupmenu3,'position',[0.02,0.5,0.95,0.36])
-set(handles.text8,'position',[0.0637,0.22,0.371,0.173])
-set(handles.edit9,'position',[0.412,0.2,0.4,0.25])
-set(handles.checkbox9,'position',[0.888,0.4,0.11,0.08])
-set(handles.evofft_ok_pushbutton,'position',[0.888,0.08,0.11,0.22])
-set(handles.text6,'position',[0.138,0.714,0.316,0.238])
-set(handles.edit7,'position',[0.651,0.698,0.309,0.27])
-set(handles.evofft_Nyquist_radiobutton,'position',[0.111,0.381,0.687,0.365])
-set(handles.evofft_nyquist_text,'position',[0.629,0.397,0.281,0.223])
-set(handles.radiobutton2,'position',[0.111,0.1,0.549,0.388])
-set(handles.evofft_fmax_edit,'position',[0.645,0.127,0.309,0.27])
-set(handles.edit_step,'position',[0.103,0.54,0.4,0.38])
-set(handles.pushbutton8,'position',[0.538,0.556,0.41,0.349])
-set(handles.edit8,'position',[0.103,0.143,0.397,0.381])
-set(handles.text7,'position',[0.577,0.206,0.346,0.206])
-set(handles.evofft_win_text,'position',[0.131,0.55,0.738,0.375])
-set(handles.evofft_tips_win_pushbutton,'position',[0.095,0.075,0.774,0.35])
-set(handles.radiobutton_2d,'position',[0.048,0.524,0.56,0.365])
-set(handles.radiobutton_3d,'position',[0.512,0.524,0.476,0.365])
-set(handles.rotation,'position',[0.06,0.127,0.881,0.365])
-
-% Choose default command line output for evofftGUI
-handles.output = hObject;
-
-data_s = varargin{1}.current_data;
-handles.unit = varargin{1}.unit;
-handles.unit_type = varargin{1}.unit_type;
-handles.current_data = data_s;
-handles.data_name = varargin{1}.data_name;
-handles.path_temp = varargin{1}.path_temp;
-handles.listbox_acmain = varargin{1}.listbox_acmain; % save path
-handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
-[dat_dir,handles.filename,exten] = fileparts(handles.data_name);
-
-handles.plot_2d = 1;
-handles.plot_log = 0;
-handles.freq_log = 0;
-handles.normal = 1;
-handles.flipy = 1;
-handles.color = 'parula'; % default
-handles.colorgrid = [];
-
-xmin = min(data_s(:,1));
-xmax = max(data_s(:,1));
-mean1 = median(diff(data_s(:,1)));
-handles.mean = mean1;
-handles.step = handles.mean;
-handles.nyquist = 1/(2*handles.mean);     % prepare nyquist
-handles.window = 0.2*(xmax-xmin);
-handles.rotate = 0;
-handles.method = 'Fast Fourier transform (LAH)';
-handles.lenthx = xmax-xmin;
-handles.time_0pad = 1;
-handles.padtype = 1;
-% if number of calculations is larger than 500;
-% then, a large step is recommended. This way, the ncal is ~500.
-ncal = (xmax-xmin - handles.window)/mean1;
-if ncal > 500
-    handles.step = abs(xmax - xmin - handles.window)/500;
-end
-%
-set(handles.evofft_nyquist_text, 'String', num2str(handles.nyquist));
-set(handles.evofft_fmax_edit, 'String', num2str(handles.nyquist));
-set(handles.evofft_win_text, 'String', num2str(handles.window));
-set(handles.edit7, 'String', '0');
-set(handles.edit8, 'String', handles.unit);
-set(handles.edit_step, 'String', num2str(handles.step),'Value',1);
-set(handles.evofft_Nyquist_radiobutton, 'Value',0,'Enable','Off');
-set(handles.radiobutton2, 'Value',1,'Enable','Off');
-set(handles.popupmenu2, 'Value',1);
-set(handles.evofft_Nyquist_radiobutton, 'Value',1);
-set(handles.radiobutton_2d, 'Value',1);
-set(handles.radiobutton_3d, 'Value',0);
-set(handles.rotation, 'Value',0);
-set(handles.checkbox2, 'Value',1);
-set(handles.checkbox3, 'Value',1);
-set(handles.checkbox4, 'Value',0);
-set(handles.checkbox5, 'Value',0);
-set(handles.checkbox6, 'Value',1);
-set(handles.popupmenu3, 'Value',1);
-set(handles.edit9, 'String', '');
-set(handles.checkbox9, 'Value',0);
-
-
-diffx = diff(data_s(:,1));
-if max(diffx) - min(diffx) > 10*eps('single')
-    
-    if handles.lang_choice == 0
-        hwarn = warndlg('Not equally spaced data. Interpolated using mean sampling rate!');
-    else
-        [~, evofft14] = ismember('evofft14',handles.lang_id);
-        hwarn = warndlg(lang_var{evofft14});
+        CheckSave matlab.ui.control.CheckBox
+        ButtonOK matlab.ui.control.Button
+        DropPadType matlab.ui.control.DropDown
     end
-    interpolate_rate = mean(diffx);
-    handles.current_data = interpolate(data_s,interpolate_rate);
-    %set(0,'Units','normalized') % set units as normalized
-    set(gcf,'units','norm') % set location
-    set(gcf,'position',[0.15,0.6,0.15,0.08]* handles.MonZoom)
-    figure(hwarn);
-end
-% Update handles structure
-guidata(hObject, handles);
-% UIWAIT makes evofftGUI wait for user response (see UIRESUME)
-% uiwait(handles.evofftGUI_figure);
 
+    properties (Access = private)
+        Context struct = struct()
+        MonZoom double = 1
 
-% --- Outputs from this function are returned to the command line.
-function varargout = evofftGUI_OutputFcn(hObject, eventdata, handles) 
-% varargout  cell array for returning output args (see VARARGOUT);
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+        lang_choice double = 0
+        lang_id = {}
+        lang_var = {}
+        main_unit_selection double = 0
 
-% Get default command line output from handles structure
-handles.output = 0;
-varargout{1} = handles.output;
+        listbox_acmain
+        edit_acfigmain_dir
 
-guidata(hObject, handles);
+        current_data double = zeros(0,2)
+        data_name char = ''
+        filename char = ''
+        unit char = 'unit'
+        unit_type double = 0
 
+        plot_2d double = 1
+        plot_log double = 0
+        freq_log double = 0
+        normal double = 1
+        flipy double = 0
+        color char = 'parula'
+        colorgrid = []
 
-% --- Executes on button press in evofft_ok_pushbutton.
-function evofft_ok_pushbutton_Callback(hObject, eventdata, handles)
-% hObject    handle to evofft_ok_pushbutton (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-% handles = findobj('Tag','AutoC_main_figure');
-% lang
-lang_var = handles.lang_var;
+        mean_step double = 1
+        step double = 1
+        nyquist double = 0.5
+        window double = 1
+        rotate double = 0
+        method char = 'Evolutionary FFT'
+        lenthx double = 1
+        time_0pad double = 1
+        padtype double = 1
+        fmingrid double = 0
 
-data =  handles.current_data;
-dataraw = data;
-window = handles.window;
-step = str2double(get(handles.edit_step,'String'));
-fmax_select = get(handles.evofft_Nyquist_radiobutton,'Value');
-freq_log = get(handles.checkbox5,'Value');
-method = handles.method;
-MTMred = get(handles.checkbox7,'Value');
-plotseries = get(handles.checkbox8,'Value');
-fmin = str2double(get(handles.edit7,'String'));
-unit = get(handles.edit8,'String');
-filename =  handles.filename;
-[~,dat_name,ext] = fileparts(filename);
-norm = handles.normal;
-if fmax_select == 1
-    fmax = handles.nyquist;
-else
-    fmax = str2double(get(handles.evofft_fmax_edit,'String'));
-end
-    
-if handles.time_0pad == 1
-    % restore time/depth
-    data = zeropad2(data,window,handles.padtype);
-else
-    data(:,2) = data(:,2) - mean(data(:,2));
-end
-% Evofft Plot
-if strcmp(method,'Periodogram')
-    [s,x_grid,y_grid]=evoperiodogram(data,window,step,fmin,handles.nyquist,norm);
-elseif strcmp(method,'Lomb-Scargle periodogram')
-    [s,x_grid,y_grid]=evoplomb(data,window,step,fmin,handles.nyquist,norm);
-elseif strcmp(method,'Multi-taper method')
-    [s,x_grid,y_grid] = evopmtm(data,window,step,fmin,handles.nyquist,norm);
-elseif strcmp(method,'Fast Fourier transform (MatLab)')
-    fmin = str2double(get(handles.edit7,'String'));
-    [s,x_grid,y_grid]=evofftML(data,window,step,fmin,handles.nyquist,norm);
-elseif strcmp(method,'Fast Fourier transform (LAH)')
-    dt = data(2,1)-data(1,1);
-    %[s,x_grid,y_grid]=evofftLAH(data,window,step,dt,fmin,fmax,norm);
-    [s,x_grid,y_grid]=evofft(data,window,step,dt,fmin,handles.nyquist,norm);
-end
-fmingrid = x_grid(2) - x_grid(1);
-handles.fmingrid = fmingrid;
+        evofftfig = []
 
-assignin('base','s',s);
-assignin('base','x',x_grid);
-assignin('base','y',y_grid);
-evofftfig = figure;
-set(gcf,'Color', 'white')
+        UIBg double = [0.94 0.94 0.94]
+        UIFontSize double = 11.5
+        Blue double = [0.1137 0.0235 0.9725]
+    end
 
-[~, spectral30] = ismember('spectral30',handles.lang_id); % power
-[~, spectral06] = ismember('spectral06',handles.lang_id); % Robust AR(1)
-[~, main40] = ismember('main40',handles.lang_id); % median
-[~, main14] = ismember('main14',handles.lang_id); % Frequency
-[~, main34] = ismember('main34',handles.lang_id); % Unit
-[~, main23] = ismember('main23',handles.lang_id); % Depth
-[~, main21] = ismember('main21',handles.lang_id); % Time
-[~, menu108] = ismember('menu108',handles.lang_id); % 
-[~, main41] = ismember('main41',handles.lang_id); % Window
-[~, main32] = ismember('main32',handles.lang_id); % Step
-
-if handles.plot_2d == 1
-    if and(MTMred == 1, plotseries ==0)
-        % show MTM red noise, no data series is shown
-        dt = median(diff(data(:,1)));
-        nfft = length(data(:,1));
-        [~, ~,~,redconfML96]=redconfML(data(:,2),dt,2,5*nfft,2,0.25,fmax,0);
-        
-        subplot(4,1,1)
-        if handles.plot_log == 1
-            % log power
-            semilogy(redconfML96(:,1),redconfML96(:,2),'k')
-            hold on;
-            semilogy(redconfML96(:,1),redconfML96(:,3),'m-.');
-            semilogy(redconfML96(:,1),redconfML96(:,5),'r--','LineWidth',2);
-            semilogy(redconfML96(:,1),redconfML96(:,6),'b-.');
-        else
-            plot(redconfML96(:,1),redconfML96(:,2),'k')
-            hold on; 
-            plot(redconfML96(:,1),redconfML96(:,3),'m-.');
-            plot(redconfML96(:,1),redconfML96(:,5),'r--','LineWidth',2);
-            plot(redconfML96(:,1),redconfML96(:,6),'b-.');
-            ylabel(lang_var{spectral30})
-            legend(lang_var{spectral30},[lang_var{spectral06},' ',lang_var{main40}],...
-            [lang_var{spectral06},' 95%'],[lang_var{spectral06},' 99%'])
-        end
-        xlim([fmin fmax])
-        if freq_log == 1;
-            xlim([fmingrid fmax])
-            set(gca, 'XScale', 'log')
-        end
-        
-        subplot(4,1,[2 3 4])
-        if handles.plot_log == 0;
-            pcolor(x_grid,y_grid,s)
-        else
-            s = log10(s);
-            pcolor(x_grid(2:end),y_grid,s(:,2:end))
-        end
-        shading interp
-        xlim([fmin fmax])
-        set(gca,'XMinorTick','on','YMinorTick','on')
-        xlabel([lang_var{main14},' (1/',unit,')'])
-        set(gca,'TickDir','out');
-        if handles.flipy == 1;
-            set(gca,'Ydir','reverse')
-        end
-        if freq_log == 1;
-            xlim([fmingrid fmax])
-            set(gca, 'XScale', 'log')
-        end
-        
-    elseif and(MTMred == 1, plotseries == 1)
-        % working
-        dt = median(diff(dataraw(:,1)));
-        nfft = length(dataraw(:,1));
-        [~, ~,~,redconfML96]=redconfML(data(:,2),dt,2,5*nfft,2,0.25,fmax,0);
-        subplot(4,4,[2 3 4])
-        if handles.plot_log == 1
-            % log power
-            semilogy(redconfML96(:,1),redconfML96(:,2),'k')
-            hold on; 
-            semilogy(redconfML96(:,1),redconfML96(:,3),'m-.');
-            semilogy(redconfML96(:,1),redconfML96(:,5),'r--','LineWidth',2);
-            semilogy(redconfML96(:,1),redconfML96(:,6),'b-.');
-        elseif handles.plot_log == 0
-            plot(redconfML96(:,1),redconfML96(:,2),'k')
-            hold on; 
-            plot(redconfML96(:,1),redconfML96(:,3),'m-.');
-            plot(redconfML96(:,1),redconfML96(:,5),'r--','LineWidth',2);
-            plot(redconfML96(:,1),redconfML96(:,6),'b-.');
-            ylabel(lang_var{spectral30})
-            legend(lang_var{spectral30},[lang_var{spectral06},' ',lang_var{main40}],...
-            [lang_var{spectral06},' 95%'],[lang_var{spectral06},' 99%'])
-        end
-        xlim([fmin fmax])
-        if freq_log == 1;
-            xlim([fmingrid fmax])
-            set(gca, 'XScale', 'log')
-        end
-        
-        subplot(4,4,[5 9 13])
-        plot(dataraw(:,2),dataraw(:,1), 'k')
-        ylim([dataraw(1,1) dataraw(end,1)])
-        xlim([min(dataraw(:,2)) max(dataraw(:,2))])
-        if handles.flipy == 1;
-            set(gca,'Ydir','reverse')
-        end
-        
-        if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
-            if handles.unit_type == 0
-                ylabel(['Unit (',handles.unit,')'])
-            elseif handles.unit_type == 1
-                ylabel(['Depth (',handles.unit,')'])
-            else
-                ylabel(['Time (',handles.unit,')'])
+    methods (Access = private)
+        function txt = getLang(app, key, fallback)
+            txt = fallback;
+            if app.lang_choice <= 0 || isempty(app.lang_id) || isempty(app.lang_var)
+                return
             end
-        else
-            if handles.unit_type == 0
-                ylabel([lang_var{main34},' (',handles.unit,')'])
-            elseif handles.unit_type == 1
-                ylabel([lang_var{main23},' (',handles.unit,')'])
-            else
-                ylabel([lang_var{main21},' (',handles.unit,')'])
-            end
-        end
-        
-        subplot(4,4,[6,7,8,10,11,12,14,15,16])
-        
-        if handles.plot_log == 0;
-            pcolor(x_grid,y_grid,s)
-        else
-            s = log10(s);
-            pcolor(x_grid,y_grid,s)
-            %pcolor(x_grid(2:end),y_grid,s(:,2:end))
-        end
-        shading interp
-        ylim([dataraw(1,1) dataraw(end,1)])
-        xlim([fmin fmax])
-        xlabel([lang_var{main14},' (1/',unit,')'])
-        if handles.flipy == 1;
-            set(gca,'Ydir','reverse')
-        end
-        if freq_log == 1;
-            xlim([fmingrid fmax])
-            set(gca, 'XScale', 'log')
-        end
-        set(gca,'TickDir','out');
-        set(gca,'XMinorTick','on','YMinorTick','on')
-    elseif and(MTMred == 0, plotseries == 1)
-        % done...
-        subplot(1,4,1)
-        plot(dataraw(:,2),dataraw(:,1), 'k')
-        ylim([dataraw(1,1) dataraw(end,1)])
-        xlim([min(dataraw(:,2)) max(dataraw(:,2))])
-        if handles.flipy == 1;
-            set(gca,'Ydir','reverse')
-        end
-        
-        if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
-            if handles.unit_type == 0
-                ylabel(['Unit (',handles.unit,')'])
-            elseif handles.unit_type == 1
-                ylabel(['Depth (',handles.unit,')'])
-            else
-                ylabel(['Time (',handles.unit,')'])
-            end
-        else
-            if handles.unit_type == 0
-                ylabel([lang_var{main34},' (',handles.unit,')'])
-            elseif handles.unit_type == 1
-                ylabel([lang_var{main23},' (',handles.unit,')'])
-            else
-                ylabel([lang_var{main21},' (',handles.unit,')'])
+            [~, idx] = ismember(key, app.lang_id);
+            if idx > 0 && idx <= numel(app.lang_var)
+                txt = app.lang_var{idx};
             end
         end
 
-        subplot(1,4,[2 3 4])
-        if handles.plot_log == 0;
-            pcolor(x_grid,y_grid,s)
-        else
-            s = log10(s);
-            pcolor(x_grid(2:end),y_grid,s(:,2:end))
+        function screenSize = getScreenSizePixels(~)
+            oldUnits = get(groot,'Units');
+            set(groot,'Units','pixels');
+            screenSize = get(groot,'ScreenSize');
+            set(groot,'Units',oldUnits);
         end
-        shading interp
-        xlabel([lang_var{main14},' (1/',unit,')'])
-        xlim([fmin fmax])
-        ylim([dataraw(1,1) dataraw(end,1)])
-        if handles.flipy == 1;
-            set(gca,'Ydir','reverse')
-        end
-        if freq_log == 1;
-            xlim([fmingrid fmax])
-            set(gca, 'XScale', 'log')
-        end
-        set(gca,'XMinorTick','on','YMinorTick','on')
-        set(gca,'TickDir','out');
-    elseif and(MTMred == 0, plotseries == 0)
-        % done
-        if handles.plot_log == 0;
-            pcolor(x_grid,y_grid,s)
-        else
-            s = log10(s);
-            pcolor(x_grid(2:end),y_grid,s(:,2:end))
-        end
-        shading interp
-        xlabel([lang_var{main14},' (1/',unit,')'])
-        xlim([fmin fmax])
-        set(gca,'XMinorTick','on','YMinorTick','on')
-        if handles.flipy == 1;
-            set(gca,'Ydir','reverse')
-        end
-        if freq_log == 1;
-            xlim([fmingrid fmax])
-            set(gca, 'XScale', 'log')
-        end
-        set(gca,'TickDir','out');
-    end
-    
-    if plotseries == 0
-        if or(handles.lang_choice == 0, handles.main_unit_selection == 0)
-            if handles.unit_type == 0
-                ylabel(['Unit (',handles.unit,')'])
-            elseif handles.unit_type == 1
-                ylabel(['Depth (',handles.unit,')'])
-            else
-                ylabel(['Time (',handles.unit,')'])
+
+        function pos = normalizedToPixelPosition(app, normPos)
+            screen = app.getScreenSizePixels();
+            zoom = app.MonZoom;
+            if isnumeric(zoom)
+                if isscalar(zoom)
+                    normPos = normPos * zoom;
+                elseif numel(zoom) >= 4
+                    normPos = normPos .* zoom(1:4);
+                end
             end
-        else
-            if handles.unit_type == 0
-                ylabel([lang_var{main34},' (',handles.unit,')'])
-            elseif handles.unit_type == 1
-                ylabel([lang_var{main23},' (',handles.unit,')'])
-            else
-                ylabel([lang_var{main21},' (',handles.unit,')'])
+            w = max(885, normPos(3) * screen(3));
+            h = max(458, normPos(4) * screen(4));
+            x = screen(1) + normPos(1) * screen(3);
+            y = screen(2) + normPos(2) * screen(4);
+            x = min(max(x,screen(1)), screen(1)+screen(3)-w);
+            y = min(max(y,screen(2)), screen(2)+screen(4)-h);
+            pos = round([x y w h]);
+        end
+
+        function p = childPos(~, parentPos, rel)
+            p = round([rel(1)*parentPos(3), rel(2)*parentPos(4), rel(3)*parentPos(3), rel(4)*parentPos(4)]);
+        end
+
+        function createComponents(app)
+            app.UIFigure = uifigure('Name','Acycle: Evolutionary Spectral Analysis', ...
+                'Color',app.UIBg, 'Resize','on', ...
+                'Position',app.normalizedToPixelPosition([0.45,0.4,0.3,0.2625]));
+            app.UIFigure.AutoResizeChildren = 'off';
+            app.UIFigure.SizeChangedFcn = @(~,~)app.applyLayout();
+            app.UIFigure.KeyPressFcn = @(src,evt)app.onKeyPress(src,evt);
+            try
+                app.UIFigure.WindowKeyPressFcn = @(src,evt)app.onKeyPress(src,evt);
+            catch
+            end
+
+            app.LabelMethod = uilabel(app.UIFigure,'Text','Select method', ...
+                'BackgroundColor',app.UIBg,'FontSize',app.UIFontSize+1);
+            app.DropMethod = uidropdown(app.UIFigure, ...
+                'Items',{'Evolutionary FFT','Periodogram','Lomb-Scargle periodogram','Multi-taper method'}, ...
+                'Value','Evolutionary FFT','FontSize',app.UIFontSize+1, ...
+                'ValueChangedFcn',@(~,~)app.onMethodChanged());
+
+            app.PanelMain = uipanel(app.UIFigure,'Title','Input for Evolutive FFT', ...
+                'BackgroundColor',app.UIBg,'FontSize',app.UIFontSize+1);
+
+            app.PanelFmax = uipanel(app.PanelMain,'Title','Plot: Maximum Frequency', ...
+                'BackgroundColor',app.UIBg,'FontSize',app.UIFontSize+1);
+            app.LabelFmin = uilabel(app.PanelFmax,'Text','Freq. min.','BackgroundColor',app.UIBg, ...
+                'FontSize',app.UIFontSize,'FontColor',[0 0 0]);
+            app.EditFmin = uieditfield(app.PanelFmax,'text','Value','0', ...
+                'HorizontalAlignment','center','FontSize',app.UIFontSize+1,'ValueChangedFcn',@(~,~)app.onFminChanged());
+            app.GroupFmax = uibuttongroup(app.PanelFmax,'BorderType','none','BackgroundColor',app.UIBg, ...
+                'SelectionChangedFcn',@(~,~)app.onFmaxModeChanged());
+            app.RadioNyquist = uiradiobutton(app.GroupFmax,'Text','Use Nyquist','Value',true,'FontSize',app.UIFontSize+1);
+            app.RadioInput = uiradiobutton(app.GroupFmax,'Text','Use Input','FontSize',app.UIFontSize+1);
+            app.LabelNyquist = uilabel(app.PanelFmax,'Text','0','BackgroundColor',app.UIBg, ...
+                'HorizontalAlignment','center','FontSize',app.UIFontSize+1,'FontColor',[0.45 0.45 0.45]);
+            app.EditFmax = uieditfield(app.PanelFmax,'text','Value','0', ...
+                'HorizontalAlignment','center','FontSize',app.UIFontSize+1,'FontColor',app.Blue, ...
+                'ValueChangedFcn',@(~,~)app.onFmaxEditChanged());
+
+            app.PanelStep = uipanel(app.PanelMain,'Title','Step','BackgroundColor',app.UIBg,'FontSize',app.UIFontSize+1);
+            app.EditStep = uieditfield(app.PanelStep,'text','HorizontalAlignment','center','FontSize',app.UIFontSize+1, ...
+                'ValueChangedFcn',@(~,~)app.onStepChanged());
+            app.ButtonStepTips = uibutton(app.PanelStep,'push','Text','Tips','FontSize',app.UIFontSize+2, ...
+                'ButtonPushedFcn',@(~,~)app.onStepTips());
+            app.EditUnit = uieditfield(app.PanelStep,'text','HorizontalAlignment','center','Editable','off', ...
+                'FontSize',app.UIFontSize+1,'BackgroundColor',[1 1 1]);
+            app.LabelUnit = uilabel(app.PanelStep,'Text','Unit','BackgroundColor',app.UIBg,'FontSize',app.UIFontSize+2);
+
+            app.PanelWindow = uipanel(app.PanelMain,'Title','Sliding Window','BackgroundColor',app.UIBg,'FontSize',app.UIFontSize+1);
+            app.EditWindow = uieditfield(app.PanelWindow,'text','Value','0','BackgroundColor',[1 1 1], ...
+                'HorizontalAlignment','center','FontSize',app.UIFontSize+2,'FontWeight','bold','FontColor',app.Blue, ...
+                'ValueChangedFcn',@(~,~)app.onWindowChanged());
+            app.ButtonWinTips = uibutton(app.PanelWindow,'push','Text','Tips','FontSize',app.UIFontSize+2, ...
+                'ButtonPushedFcn',@(~,~)app.onWindowTips());
+
+            app.CheckPlotSeries = uicheckbox(app.PanelMain,'Text','Plot series','Value',true,'FontSize',app.UIFontSize+2);
+            app.CheckMTMRed = uicheckbox(app.PanelMain,'Text','2pi MTM + red','Value',false,'FontSize',app.UIFontSize+2);
+            app.CheckNormalize = uicheckbox(app.PanelMain,'Text','Normalize each window','Value',true,'FontSize',app.UIFontSize+2, ...
+                'ValueChangedFcn',@(~,~)app.onNormalizeChanged());
+            app.CheckFlipY = uicheckbox(app.PanelMain,'Text','Flip Y-axis','Value',false,'FontSize',app.UIFontSize+2, ...
+                'ValueChangedFcn',@(~,~)app.onFlipYChanged());
+            app.CheckLogFreq = uicheckbox(app.PanelMain,'Text','Log(frequency)','Value',false,'FontSize',app.UIFontSize+2, ...
+                'ValueChangedFcn',@(~,~)app.onLogFreqChanged());
+            app.CheckLogPower = uicheckbox(app.PanelMain,'Text','Log(power)','Value',false,'FontSize',app.UIFontSize+2, ...
+                'ValueChangedFcn',@(~,~)app.onLogPowerChanged());
+            app.CheckXPadding = uicheckbox(app.PanelMain,'Text','x padding','Value',true,'FontSize',app.UIFontSize+2, ...
+                'ValueChangedFcn',@(~,~)app.onXPaddingChanged());
+
+            app.DropPadType = uidropdown(app.PanelMain,'Items',{'zero','mirror','mean','random'}, ...
+                'Value','zero','FontSize',app.UIFontSize+1, ...
+                'ValueChangedFcn',@(~,~)app.onPadTypeChanged());
+
+            app.PanelDim = uipanel(app.PanelMain,'Title','Plot-dimension','BackgroundColor',app.UIBg,'FontSize',app.UIFontSize+1);
+            app.GroupDim = uibuttongroup(app.PanelDim,'BorderType','none','BackgroundColor',app.UIBg, ...
+                'SelectionChangedFcn',@(~,~)app.onDimChanged());
+            app.Radio2D = uiradiobutton(app.GroupDim,'Text','2D','Value',true,'FontSize',app.UIFontSize+2);
+            app.Radio3D = uiradiobutton(app.GroupDim,'Text','3D','FontSize',app.UIFontSize+2);
+            app.CheckRotation = uicheckbox(app.PanelDim,'Text','Rotation','Value',false,'FontSize',app.UIFontSize+2, ...
+                'ValueChangedFcn',@(~,~)app.onRotationChanged());
+
+            app.PanelCmap = uipanel(app.PanelMain,'Title','Colormap','BackgroundColor',app.UIBg,'FontSize',app.UIFontSize+1);
+            app.DropCmap = uidropdown(app.PanelCmap, ...
+                'Items',{'Default','parula','jet','hsv','hot','cool','spring','summer','autumn','winter','gray','bone','copper','pink','lines','colorcube','prism','flag','white'}, ...
+                'FontSize',app.UIFontSize+1,'ValueChangedFcn',@(~,~)app.onCmapChanged());
+            app.DropCmap.Value = 'Default';
+            app.LabelGrid = uilabel(app.PanelCmap,'Text','Grid #','BackgroundColor',app.UIBg,'FontSize',app.UIFontSize+2);
+            app.EditGrid = uieditfield(app.PanelCmap,'text','Value','', ...
+                'HorizontalAlignment','center','FontSize',app.UIFontSize+1,'ValueChangedFcn',@(~,~)app.onGridChanged());
+
+            app.CheckSave = uicheckbox(app.PanelMain,'Text','Save data','Value',false,'FontSize',app.UIFontSize+2);
+            app.ButtonOK = uibutton(app.PanelMain,'push','Text','OK','FontSize',app.UIFontSize+4,'FontWeight','bold', ...
+                'BackgroundColor',app.Blue,'FontColor',[1 1 1],'ButtonPushedFcn',@(~,~)app.onOK());
+
+            app.applyLayout();
+        end
+
+        function applyLayout(app)
+            r = [0 0 app.UIFigure.Position(3) app.UIFigure.Position(4)];
+
+            app.LabelMethod.Position = app.childPos(r,[0.065,0.858,0.2,0.06]);
+            app.DropMethod.Position = app.childPos(r,[0.267,0.858,0.66,0.06]);
+            app.PanelMain.Position = app.childPos(r,[0.034,0.037,0.906,0.73]);
+
+            pm = app.PanelMain.Position;
+            app.PanelFmax.Position = app.childPos(pm,[0.03,0.54,0.454,0.35]);
+            app.PanelStep.Position = app.childPos(pm,[0.496,0.545,0.239,0.345]);
+            app.PanelWindow.Position = app.childPos(pm,[0.74,0.545,0.255,0.345]);
+
+            pf = app.PanelFmax.Position;
+            app.LabelFmin.Position = app.childPos(pf,[0.14,0.62,0.40,0.12]);
+            app.EditFmin.Position = app.childPos(pf,[0.65,0.60,0.30,0.14]);
+            app.GroupFmax.Position = app.childPos(pf,[0.10,0.08,0.42,0.44]);
+            app.RadioNyquist.Position = app.childPos(app.GroupFmax.Position,[0.02,0.55,0.95,0.28]);
+            app.RadioInput.Position = app.childPos(app.GroupFmax.Position,[0.02,0.11,0.95,0.28]);
+            app.LabelNyquist.Position = app.childPos(pf,[0.63,0.35,0.30,0.14]);
+            app.EditFmax.Position = app.childPos(pf,[0.64,0.10,0.31,0.22]);
+
+            ps = app.PanelStep.Position;
+            app.EditStep.Position = app.childPos(ps,[0.10,0.45,0.38,0.30]);
+            app.ButtonStepTips.Position = app.childPos(ps,[0.54,0.50,0.36,0.24]);
+            app.EditUnit.Position = app.childPos(ps,[0.10,0.14,0.38,0.30]);
+            app.LabelUnit.Position = app.childPos(ps,[0.61,0.18,0.28,0.18]);
+
+            pw = app.PanelWindow.Position;
+            app.EditWindow.Position = app.childPos(pw,[0.13,0.47,0.72,0.30]);
+            app.ButtonWinTips.Position = app.childPos(pw,[0.10,0.10,0.80,0.24]);
+
+            app.CheckPlotSeries.Position = app.childPos(pm,[0.029,0.45,0.25,0.08]);
+            app.CheckMTMRed.Position = app.childPos(pm,[0.029,0.35,0.25,0.08]);
+            app.CheckNormalize.Position = app.childPos(pm,[0.293,0.45,0.36,0.1]);
+            app.CheckFlipY.Position = app.childPos(pm,[0.293,0.35,0.36,0.1]);
+            app.CheckLogFreq.Position = app.childPos(pm,[0.293,0.25,0.36,0.1]);
+            app.CheckLogPower.Position = app.childPos(pm,[0.293,0.15,0.36,0.1]);
+            app.CheckXPadding.Position = app.childPos(pm,[0.293,0.045,0.2,0.1]);
+            app.DropPadType.Position = app.childPos(pm,[0.425,0.04,0.19,0.07]);
+
+            app.PanelDim.Position = app.childPos(pm,[0.029,0.048,0.251,0.28]);
+            pd = app.PanelDim.Position;
+            app.GroupDim.Position = app.childPos(pd,[0.04,0.28,0.90,0.42]);
+            app.Radio2D.Position = app.childPos(app.GroupDim.Position,[0.05,0.12,0.44,0.70]);
+            app.Radio3D.Position = app.childPos(app.GroupDim.Position,[0.52,0.12,0.44,0.70]);
+            app.CheckRotation.Position = app.childPos(pd,[0.06,0.04,0.84,0.20]);
+
+            app.PanelCmap.Position = app.childPos(pm,[0.628,0.08,0.245,0.38]);
+            pc = app.PanelCmap.Position;
+            app.DropCmap.Position = app.childPos(pc,[0.06,0.64,0.84,0.17]);
+            app.LabelGrid.Position = app.childPos(pc,[0.16,0.23,0.30,0.18]);
+            app.EditGrid.Position = app.childPos(pc,[0.42,0.20,0.40,0.22]);
+
+            app.CheckSave.Position = app.childPos(pm,[0.882,0.405,0.11,0.08]);
+            app.ButtonOK.Position = app.childPos(pm,[0.888,0.082,0.108,0.20]);
+        end
+
+        function initializeState(app)
+            c = app.Context;
+            if isfield(c,'MonZoom'), app.MonZoom = c.MonZoom; end
+            if isfield(c,'lang_choice'), app.lang_choice = c.lang_choice; end
+            if isfield(c,'lang_id'), app.lang_id = c.lang_id; end
+            if isfield(c,'lang_var'), app.lang_var = c.lang_var; end
+            if isfield(c,'main_unit_selection'), app.main_unit_selection = c.main_unit_selection; end
+            if isfield(c,'listbox_acmain'), app.listbox_acmain = c.listbox_acmain; end
+            if isfield(c,'edit_acfigmain_dir'), app.edit_acfigmain_dir = c.edit_acfigmain_dir; end
+
+            if isfield(c,'current_data'), app.current_data = c.current_data; end
+            if isfield(c,'data_name'), app.data_name = c.data_name; end
+            if isfield(c,'unit'), app.unit = c.unit; end
+            if isfield(c,'unit_type'), app.unit_type = c.unit_type; end
+            stepUnitLabel = app.unit;
+            if isfield(c,'popupmenu1') && isgraphics(c.popupmenu1)
+                unitItems = get(c.popupmenu1,'String');
+                unitIndex = get(c.popupmenu1,'Value');
+                if ischar(unitItems)
+                    unitItems = cellstr(unitItems);
+                elseif isstring(unitItems)
+                    unitItems = cellstr(unitItems);
+                end
+                if iscell(unitItems) && unitIndex >= 1 && unitIndex <= numel(unitItems)
+                    stepUnitLabel = char(unitItems{unitIndex});
+                end
+            end
+            if isfield(c,'path_temp')
+                % no-op; preserved for compatibility
+            end
+            [~,app.filename,~] = fileparts(app.data_name);
+
+            app.UIFigure.Name = app.getLang('menu108','Acycle: Evolutionary Spectral Analysis');
+            app.LabelMethod.Text = app.getLang('main49','Select method');
+            app.PanelMain.Title = app.getLang('evofft01','Input for Evolutive FFT');
+            app.PanelFmax.Title = app.getLang('evofft02','Plot: Maximum Frequency');
+            app.LabelFmin.Text = app.getLang('evofft03','Freq. min.');
+            app.RadioNyquist.Text = app.getLang('evofft04','Use Nyquist');
+            app.RadioInput.Text = app.getLang('spectral14','Use Input');
+            app.PanelStep.Title = app.getLang('main32','Step');
+            app.ButtonStepTips.Text = app.getLang('main33','Tips');
+            app.LabelUnit.Text = stepUnitLabel;
+            app.PanelWindow.Title = app.getLang('main07','Sliding Window');
+            app.CheckPlotSeries.Text = app.getLang('evofft05','Plot series');
+            app.CheckMTMRed.Text = app.getLang('evofft06','2pi MTM + red');
+            app.PanelDim.Title = app.getLang('evofft07','Plot-dimension');
+            app.CheckRotation.Text = app.getLang('evofft08','Rotation');
+            app.CheckNormalize.Text = app.getLang('evofft09','Normalize each window');
+            app.CheckFlipY.Text = app.getLang('main10','Flip Y-axis');
+            app.CheckLogPower.Text = app.getLang('evofft10','Log(power)');
+            app.CheckLogFreq.Text = app.getLang('evofft11','Log(frequency)');
+            app.CheckXPadding.Text = ['x ',app.getLang('main43','padding')];
+            app.PanelCmap.Title = app.getLang('main50','Colormap');
+            app.LabelGrid.Text = app.getLang('evofft12','Grid #');
+            app.CheckSave.Text = app.getLang('main01','Save Data');
+            app.ButtonOK.Text = app.getLang('main00','OK');
+
+            if isempty(app.current_data) || size(app.current_data,2) < 2
+                error('evofftGUI requires current_data in handles struct.');
+            end
+
+            data_s = app.current_data;
+            xmin = min(data_s(:,1));
+            xmax = max(data_s(:,1));
+            app.mean_step = median(diff(data_s(:,1)));
+            app.step = app.mean_step;
+            app.nyquist = 1/(2*app.mean_step);
+            app.window = 0.2*(xmax-xmin);
+            app.method = 'Evolutionary FFT';
+            app.lenthx = xmax-xmin;
+            app.time_0pad = 1;
+            app.padtype = 1;
+
+            ncal = (xmax-xmin - app.window)/app.mean_step;
+            if ncal > 500
+                app.step = abs(xmax - xmin - app.window)/500;
+            end
+
+            app.LabelNyquist.Text = num2str(app.nyquist);
+            app.EditFmax.Value = num2str(app.nyquist);
+            app.EditWindow.Value = num2str(app.window);
+            app.EditFmin.Value = '0';
+            app.EditUnit.Value = app.unit;
+            app.EditStep.Value = num2str(app.step);
+            app.DropMethod.Value = app.method;
+
+            app.GroupFmax.SelectedObject = app.RadioNyquist;
+            app.RadioNyquist.Enable = 'off';
+            app.RadioInput.Enable = 'off';
+            app.Radio2D.Value = true;
+            app.Radio3D.Value = false;
+            app.CheckRotation.Value = false;
+            app.CheckNormalize.Value = true;
+            app.CheckFlipY.Value = false;
+            app.flipy = 0;
+            app.CheckLogPower.Value = false;
+            app.CheckLogFreq.Value = false;
+            app.CheckXPadding.Value = true;
+            app.DropCmap.Value = 'Default';
+            app.EditGrid.Value = '';
+            app.CheckSave.Value = false;
+
+            diffx = diff(data_s(:,1));
+            if max(diffx) - min(diffx) > 10*eps('single')
+                warndlg(app.getLang('evofft14','Not equally spaced data. Interpolated using mean sampling rate!'));
+                interpolate_rate = mean(diffx);
+                app.current_data = interpolate(data_s,interpolate_rate);
+            end
+
+            app.onDimChanged();
+        end
+
+        function onMethodChanged(app)
+            app.method = app.DropMethod.Value;
+        end
+
+        function onKeyPress(app,src,evt)
+            try
+                key = lower(string(evt.Key));
+                mods = lower(string(evt.Modifier));
+                isMacClose = key == "w" && any(mods == "command");
+                isOtherClose = key == "w" && any(mods == "control");
+                if isMacClose || isOtherClose
+                    if ~isempty(app) && ~isempty(app.UIFigure) && isvalid(app.UIFigure)
+                        delete(app.UIFigure);
+                    else
+                        delete(src);
+                    end
+                end
+            catch
             end
         end
-    else
-        if MTMred == 0
-            subplot(1,4,[2 3 4])
-            set(gca,'YTickLabel',[]);
-        else
-            subplot(4,4,[6,7,8,10,11,12,14,15,16])
-            set(gca,'YTickLabel',[]);
+
+        function onNormalizeChanged(app)
+            app.normal = double(app.CheckNormalize.Value);
+        end
+
+        function onFlipYChanged(app)
+            app.flipy = double(app.CheckFlipY.Value);
+            app.applyAxisFlags();
+        end
+
+        function onLogPowerChanged(app)
+            app.plot_log = double(app.CheckLogPower.Value);
+        end
+
+        function onLogFreqChanged(app)
+            app.freq_log = double(app.CheckLogFreq.Value);
+            if app.freq_log == 1
+                if app.fmingrid > 0
+                    app.EditFmin.Value = num2str(app.fmingrid);
+                end
+            end
+            app.applyAxisFlags();
+        end
+
+        function onXPaddingChanged(app)
+            app.time_0pad = double(app.CheckXPadding.Value);
+        end
+
+        function onPadTypeChanged(app)
+            switch app.DropPadType.Value
+                case 'zero'
+                    app.padtype = 1;
+                case 'mirror'
+                    app.padtype = 2;
+                case 'mean'
+                    app.padtype = 3;
+                case 'random'
+                    app.padtype = 4;
+            end
+        end
+
+        function onGridChanged(app)
+            colorgrid = str2double(app.EditGrid.Value);
+            if isnan(colorgrid) || colorgrid <= 0
+                app.colorgrid = [];
+            else
+                app.colorgrid = colorgrid;
+            end
+            app.applyColormap();
+        end
+
+        function onCmapChanged(app)
+            app.color = app.DropCmap.Value;
+            if strcmp(app.color,'Default')
+                app.EditGrid.Value = '';
+                app.colorgrid = [];
+            end
+            app.applyColormap();
+        end
+
+        function onFmaxModeChanged(app)
+            if app.GroupFmax.SelectedObject == app.RadioNyquist
+                app.EditFmax.Value = num2str(app.nyquist);
+            end
+            app.applyAxisLimitsOnly();
+        end
+
+        function onFmaxEditChanged(app)
+            app.GroupFmax.SelectedObject = app.RadioInput;
+            app.applyAxisLimitsOnly();
+        end
+
+        function onFminChanged(app)
+            app.applyAxisLimitsOnly();
+        end
+
+        function onStepChanged(app)
+            app.step = str2double(app.EditStep.Value);
+            if isnan(app.step) || app.step <= 0
+                return
+            end
+            ncal = (app.lenthx - app.window)/app.step;
+            if ncal > 500
+                warndlg('Step is too small. Close this warning box and revise, OR come back after a cup of coffee ...');
+            end
+        end
+
+        function onWindowChanged(app)
+            newWindow = str2double(app.EditWindow.Value);
+            if isnan(newWindow) || ~isfinite(newWindow) || newWindow <= 0 || newWindow > app.lenthx
+                app.EditWindow.Value = num2str(app.window);
+                errordlg(sprintf('Sliding window must be positive and no larger than %g.',app.lenthx));
+                return
+            end
+            app.window = newWindow;
+            ncal = (app.lenthx - app.window)/app.step;
+            if ncal > 500
+                warndlg('The selected window and step produce more than 500 sliding windows.');
+            end
+        end
+
+        function onStepTips(app)
+            warndlg(app.getLang('dd45','For long series, use larger step to reduce calculations.'), ...
+                app.getLang('dd46','Tips: step'));
+        end
+
+        function onWindowTips(app)
+            warndlg(app.getLang('evofft16','Window controls frequency resolution and temporal sensitivity.'), ...
+                app.getLang('evofft15','Tips: window length'));
+        end
+
+        function onDimChanged(app)
+            app.plot_2d = double(app.GroupDim.SelectedObject == app.Radio2D);
+            if app.plot_2d == 1
+                app.CheckMTMRed.Enable = 'on';
+                app.CheckPlotSeries.Enable = 'on';
+                app.CheckRotation.Value = false;
+            else
+                app.CheckMTMRed.Enable = 'off';
+                app.CheckPlotSeries.Enable = 'off';
+                app.CheckRotation.Value = true;
+            end
+            app.rotate = double(app.CheckRotation.Value);
+        end
+
+        function onRotationChanged(app)
+            app.rotate = double(app.CheckRotation.Value);
+        end
+
+        function applyAxisLimitsOnly(app)
+            try
+                if isempty(app.evofftfig) || ~isvalid(app.evofftfig)
+                    return
+                end
+                figure(app.evofftfig);
+                fmin = str2double(app.EditFmin.Value);
+                if isnan(fmin), fmin = 0; end
+                fmax = app.getFmaxValue();
+                axs = findobj(app.evofftfig,'Type','axes');
+                for i = 1:numel(axs)
+                    try
+                        xlim(axs(i),[fmin fmax]);
+                    catch
+                    end
+                end
+            catch
+            end
+        end
+
+        function applyAxisFlags(app)
+            try
+                if isempty(app.evofftfig) || ~isvalid(app.evofftfig)
+                    return
+                end
+                axs = findobj(app.evofftfig,'Type','axes');
+                for i = 1:numel(axs)
+                    role = get(axs(i),'Tag');
+                    isFrequencyAxis = any(strcmp(role,{'evofft-spectrum','evofft-top'}));
+                    isDepthAxis = any(strcmp(role,{'evofft-spectrum','evofft-series'}));
+                    if isFrequencyAxis && app.freq_log == 1
+                        set(axs(i),'XScale','log');
+                    elseif isFrequencyAxis
+                        set(axs(i),'XScale','linear');
+                    end
+                    if isDepthAxis && app.flipy == 1
+                        set(axs(i),'YDir','reverse');
+                    elseif isDepthAxis
+                        set(axs(i),'YDir','normal');
+                    end
+                end
+            catch
+            end
+        end
+
+        function applyColormap(app)
+            try
+                if isempty(app.evofftfig) || ~isvalid(app.evofftfig)
+                    return
+                end
+                figure(app.evofftfig);
+                if isempty(app.colorgrid)
+                    setcolor = app.color;
+                else
+                    setcolor = [app.color,'(',round(num2str(app.colorgrid)),')'];
+                end
+                try
+                    colormap(setcolor);
+                catch
+                    colormap default;
+                end
+            catch
+            end
+        end
+
+        function fmax = getFmaxValue(app)
+            if app.GroupFmax.SelectedObject == app.RadioNyquist
+                fmax = app.nyquist;
+            else
+                fmax = str2double(app.EditFmax.Value);
+                if isnan(fmax) || fmax <= 0
+                    fmax = app.nyquist;
+                end
+            end
+        end
+
+        function onOK(app)
+            data = app.current_data;
+            dataraw = data;
+            window = str2double(app.EditWindow.Value);
+            if isnan(window) || ~isfinite(window) || window <= 0 || window > app.lenthx
+                errordlg(sprintf('Sliding window must be positive and no larger than %g.',app.lenthx));
+                app.EditWindow.Value = num2str(app.window);
+                return
+            end
+            app.window = window;
+            step = str2double(app.EditStep.Value);
+            if isnan(step) || step <= 0
+                errordlg('Step must be positive.');
+                return
+            end
+            fmax = app.getFmaxValue();
+            fmin = str2double(app.EditFmin.Value);
+            if isnan(fmin), fmin = 0; end
+            unit = app.EditUnit.Value;
+            if isempty(unit), unit = app.unit; end
+
+            if app.time_0pad == 1
+                data = zeropad2(data,window,app.padtype);
+            else
+                data(:,2) = data(:,2) - mean(data(:,2));
+            end
+
+            if strcmp(app.method,'Periodogram')
+                [s,x_grid,y_grid] = evoperiodogram(data,window,step,fmin,app.nyquist,app.normal);
+            elseif strcmp(app.method,'Lomb-Scargle periodogram')
+                [s,x_grid,y_grid] = evoplomb(data,window,step,fmin,app.nyquist,app.normal);
+            elseif strcmp(app.method,'Multi-taper method')
+                [s,x_grid,y_grid] = evopmtm(data,window,step,fmin,app.nyquist,app.normal);
+            else
+                dt = data(2,1)-data(1,1);
+                [s,x_grid,y_grid] = evofft(data,window,step,dt,fmin,app.nyquist,app.normal);
+            end
+            if numel(x_grid) > 1
+                app.fmingrid = x_grid(2)-x_grid(1);
+            end
+
+            assignin('base','s',s);
+            assignin('base','x',x_grid);
+            assignin('base','y',y_grid);
+
+            evofig = figure;
+            set(evofig,'Color','white');
+            app.evofftfig = evofig;
+
+            % language labels
+            l_power = app.getLang('spectral30','Power');
+            l_rar1 = app.getLang('spectral06','Robust AR(1)');
+            l_median = app.getLang('main40','median');
+            l_freq = app.getLang('main14','Frequency');
+            l_unit = app.getLang('main34','Unit');
+            l_depth = app.getLang('main23','Depth');
+            l_time = app.getLang('main21','Time');
+            l_title = app.getLang('menu108','Evolutionary Spectral Analysis');
+            l_window = app.getLang('main41','Window');
+            l_step = app.getLang('main32','Step');
+
+            MTMred = app.CheckMTMRed.Value;
+            plotseries = app.CheckPlotSeries.Value;
+            plot2d = app.Radio2D.Value;
+            rotateNow = app.CheckRotation.Value;
+            axSeries = [];
+            axRight = [];
+            axTop = [];
+
+            if plot2d == 1
+                if MTMred && ~plotseries
+                    dt = median(diff(data(:,1)));
+                    nfft = length(data(:,1));
+                    [~,~,~,redconf] = redconfML(data(:,2),dt,2,5*nfft,2,0.25,fmax,0);
+                    subplot(4,1,1);
+                    axTop = gca;
+                    if app.plot_log == 1
+                        semilogy(redconf(:,1),redconf(:,2),'k'); hold on;
+                        semilogy(redconf(:,1),redconf(:,3),'m-.');
+                        semilogy(redconf(:,1),redconf(:,5),'r--','LineWidth',2);
+                        semilogy(redconf(:,1),redconf(:,6),'b-.');
+                    else
+                        plot(redconf(:,1),redconf(:,2),'k'); hold on;
+                        plot(redconf(:,1),redconf(:,3),'m-.');
+                        plot(redconf(:,1),redconf(:,5),'r--','LineWidth',2);
+                        plot(redconf(:,1),redconf(:,6),'b-.');
+                        ylabel(l_power);
+                        legend(l_power,[l_rar1,' ',l_median],[l_rar1,' 95%'],[l_rar1,' 99%']);
+                    end
+                    xlim([fmin fmax]);
+
+                    subplot(4,1,[2 3 4]);
+                    axRight = gca;
+                    if app.plot_log == 0
+                        pcolor(x_grid,y_grid,s);
+                    else
+                        pcolor(x_grid(2:end),y_grid,log10(s(:,2:end)));
+                    end
+                    shading interp;
+                    xlim([fmin fmax]);
+                    xlabel([l_freq,' (1/',unit,')']);
+                elseif MTMred && plotseries
+                    dt = median(diff(dataraw(:,1)));
+                    nfft = length(dataraw(:,1));
+                    [~,~,~,redconf] = redconfML(data(:,2),dt,2,5*nfft,2,0.25,fmax,0);
+                    subplot(4,4,[2 3 4]);
+                    axTop = gca;
+                    if app.plot_log == 1
+                        semilogy(redconf(:,1),redconf(:,2),'k'); hold on;
+                        semilogy(redconf(:,1),redconf(:,3),'m-.');
+                        semilogy(redconf(:,1),redconf(:,5),'r--','LineWidth',2);
+                        semilogy(redconf(:,1),redconf(:,6),'b-.');
+                    else
+                        plot(redconf(:,1),redconf(:,2),'k'); hold on;
+                        plot(redconf(:,1),redconf(:,3),'m-.');
+                        plot(redconf(:,1),redconf(:,5),'r--','LineWidth',2);
+                        plot(redconf(:,1),redconf(:,6),'b-.');
+                        ylabel(l_power);
+                    end
+                    xlim([fmin fmax]);
+
+                    subplot(4,4,[5 9 13]);
+                    axSeries = gca;
+                    plot(dataraw(:,2),dataraw(:,1),'k');
+                    ylim([dataraw(1,1) dataraw(end,1)]);
+                    xlim([min(dataraw(:,2)) max(dataraw(:,2))]);
+
+                    subplot(4,4,[6,7,8,10,11,12,14,15,16]);
+                    axRight = gca;
+                    if app.plot_log == 0
+                        pcolor(x_grid,y_grid,s);
+                    else
+                        pcolor(x_grid,y_grid,log10(s));
+                    end
+                    shading interp;
+                    ylim([dataraw(1,1) dataraw(end,1)]);
+                    xlim([fmin fmax]);
+                    xlabel([l_freq,' (1/',unit,')']);
+                elseif ~MTMred && plotseries
+                    subplot(1,4,1);
+                    axSeries = gca;
+                    plot(dataraw(:,2),dataraw(:,1),'k');
+                    ylim([dataraw(1,1) dataraw(end,1)]);
+                    xlim([min(dataraw(:,2)) max(dataraw(:,2))]);
+
+                    subplot(1,4,[2 3 4]);
+                    axRight = gca;
+                    if app.plot_log == 0
+                        pcolor(x_grid,y_grid,s);
+                    else
+                        pcolor(x_grid(2:end),y_grid,log10(s(:,2:end)));
+                    end
+                    shading interp;
+                    xlabel([l_freq,' (1/',unit,')']);
+                    xlim([fmin fmax]);
+                    ylim([dataraw(1,1) dataraw(end,1)]);
+                else
+                    axRight = gca;
+                    if app.plot_log == 0
+                        pcolor(x_grid,y_grid,s);
+                    else
+                        pcolor(x_grid(2:end),y_grid,log10(s(:,2:end)));
+                    end
+                    shading interp;
+                    xlabel([l_freq,' (1/',unit,')']);
+                    xlim([fmin fmax]);
+                end
+
+                if or(app.lang_choice == 0, app.main_unit_selection == 0)
+                    if app.unit_type == 0
+                        yLabelText = ['Unit (',app.unit,')'];
+                    elseif app.unit_type == 1
+                        yLabelText = ['Depth (',app.unit,')'];
+                    else
+                        yLabelText = ['Time (',app.unit,')'];
+                    end
+                else
+                    if app.unit_type == 0
+                        yLabelText = [l_unit,' (',app.unit,')'];
+                    elseif app.unit_type == 1
+                        yLabelText = [l_depth,' (',app.unit,')'];
+                    else
+                        yLabelText = [l_time,' (',app.unit,')'];
+                    end
+                end
+
+                plotTitle = [app.method,'; ',l_window,' = ',num2str(window),' ',unit,'; ',l_step,' = ',num2str(step),' ',unit];
+                if plotseries && isgraphics(axSeries,'axes')
+                    ylabel(axSeries,yLabelText);
+                    if isgraphics(axRight,'axes')
+                        ylabel(axRight,'');
+                    end
+                elseif isgraphics(axRight,'axes')
+                    ylabel(axRight,yLabelText);
+                end
+
+                if MTMred && isgraphics(axTop,'axes')
+                    title(axTop,plotTitle);
+                    if isgraphics(axRight,'axes')
+                        title(axRight,'');
+                    end
+                elseif isgraphics(axRight,'axes')
+                    title(axRight,plotTitle);
+                end
+            else
+                if app.plot_log == 1
+                    surf(x_grid(2:end),y_grid,log10(s(:,2:end)));
+                else
+                    surf(x_grid,y_grid,s);
+                end
+                ax3d = gca;
+                shading interp;
+                xlabel([l_freq,' (1/',unit,')']);
+                xlim([fmin fmax]);
+                if ~rotateNow
+                    if isgraphics(ax3d,'axes')
+                        view(ax3d,10,70);
+                    end
+                else
+                    for i = 1:360
+                        if ~isvalid(evofig) || ~isgraphics(ax3d,'axes')
+                            return
+                        end
+                        view(ax3d,i,70);
+                        drawnow;
+                    end
+                end
+            end
+
+            if isgraphics(axTop,'axes'), set(axTop,'Tag','evofft-top'); end
+            if isgraphics(axSeries,'axes'), set(axSeries,'Tag','evofft-series'); end
+            if isgraphics(axRight,'axes'), set(axRight,'Tag','evofft-spectrum'); end
+            if exist('ax3d','var') && isgraphics(ax3d,'axes')
+                set(ax3d,'Tag','evofft-spectrum');
+            end
+
+            if ~isvalid(evofig)
+                return
+            end
+            figure(evofig);
+            if app.freq_log == 1 && app.fmingrid > 0 && isgraphics(axRight,'axes')
+                xlim(axRight,[app.fmingrid fmax]);
+            end
+            app.applyAxisFlags();
+            set(gca,'TickDir','out');
+            set(gca,'XMinorTick','on','YMinorTick','on');
+
+            app.applyColormap();
+            set(gcf,'Name',[app.filename,': ',l_title]);
+
+            if app.CheckSave.Value
+                pre_dirML = pwd;
+                CDac_pwd;
+                cleanupObj = onCleanup(@()cd(pre_dirML));
+                outputFile = app.nextIndexedFile( ...
+                    [app.filename,'-evofft'],'.xlsx');
+                params = app.buildEvofftParameterTable( ...
+                    fmin,fmax,window,step,outputFile,s,x_grid,y_grid);
+                redNoiseResult = [];
+                if exist('redconf','var') && isnumeric(redconf)
+                    redNoiseResult = redconf;
+                end
+                saveEvofftWorkbook( ...
+                    outputFile,params,s,x_grid,y_grid,redNoiseResult);
+                fprintf('>> saved evolutionary spectrum: %s\n',outputFile);
+                ac_refresh_main_list(app.listbox_acmain,pwd);
+            end
+        end
+
+        function params = buildEvofftParameterTable( ...
+                app,fmin,fmax,window,step,outputFile,s,xGrid,yGrid)
+            params = repmat({''},29,6);
+            params(1,2) = {'Detailed Parameters Used in Data Processing by Acycle'};
+            params(2,2:6) = {'Version','Designed by','Institute','E-mail','Date'};
+            params(3,2:6) = {'v1.1','Mingsong Li','Peking University','msli@pku.edu.cn',datestr(now,'yyyy-mm-dd HH:MM:SS')};
+            params(5,2:5) = {'Tools','Items','Parameters','Explanations'};
+
+            [~,inputBase,inputExt] = fileparts(app.data_name);
+            params(7,:) = {'','Evolutionary FFT','Input file name',[inputBase,inputExt],'',''};
+            params(8,:) = {'','','Method',app.method,'',''};
+            params(9,:) = {'','','Frequency minimum',fmin,'',''};
+            params(10,:) = {'','','Displayed frequency maximum',fmax,'',''};
+            params(11,:) = {'','','Sliding window size',window,'',''};
+            params(12,:) = {'','','Sliding window step',step,'',''};
+            params(13,:) = {'','','Normalize each window',app.yesNo(app.CheckNormalize.Value),'Select Yes or No',''};
+            params(14,:) = {'','','Plot input series',app.yesNo(app.CheckPlotSeries.Value),'Display only',''};
+            params(15,:) = {'','','MTM red-noise overlay',app.yesNo(app.CheckMTMRed.Value),'Display only',''};
+            params(16,:) = {'','','Log(frequency)',app.yesNo(app.CheckLogFreq.Value),'Display only',''};
+            params(17,:) = {'','','Log(power)',app.yesNo(app.CheckLogPower.Value),'Display only',''};
+            params(18,:) = {'','','Flip Y axis',app.yesNo(app.CheckFlipY.Value),'Display only',''};
+            params(19,:) = {'','','Plot dimension',app.plotDimensionName(),'2D or 3D',''};
+            params(20,:) = {'','','Rotation',app.yesNo(app.CheckRotation.Value),'3D display only',''};
+            params(21,:) = {'','','X padding',app.yesNo(app.CheckXPadding.Value),'Select Yes or No',''};
+            params(22,:) = {'','','Padding edge method',app.padMethodName(),'Select zero/mirror/mean/random',''};
+            params(23,:) = {'','','Colormap',app.DropCmap.Value,'Display only',''};
+            params(24,:) = {'','','Grid number',app.naIfEmpty(app.EditGrid.Value),'Display only',''};
+            params(25,:) = {'','','Input unit',app.EditUnit.Value,'',''};
+            params(26,:) = {'','','Calculation frequency maximum',app.nyquist,'Nyquist frequency',''};
+            params(27,:) = {'','','Output workbook',outputFile,'',''};
+            params(28,:) = {'','','Power matrix size',mat2str(size(s)),'Rows=time; columns=frequency',''};
+            params(29,:) = {'','','Frequency / time coordinates', ...
+                sprintf('%d / %d',numel(xGrid),numel(yGrid)), ...
+                'Stored in separate sheets',''};
+        end
+
+        function filename = nextIndexedFile(~, baseName, ext)
+            for ii = 1:9999
+                filename = sprintf('%s-%d%s',baseName,ii,ext);
+                if ~exist(filename,'file')
+                    return
+                end
+            end
+            filename = sprintf('%s-%s%s',baseName,datestr(now,'yyyymmddTHHMMSS'),ext);
+        end
+
+        function s = padMethodName(app)
+            if app.CheckXPadding.Value
+                s = app.DropPadType.Value;
+            else
+                s = 'No';
+            end
+        end
+
+        function s = plotDimensionName(app)
+            if app.Radio2D.Value
+                s = '2D';
+            else
+                s = '3D';
+            end
+        end
+
+        function s = yesNo(~, tf)
+            if tf
+                s = 'Yes';
+            else
+                s = 'No';
+            end
+        end
+
+        function s = naIfEmpty(~, v)
+            s = strtrim(char(v));
+            if isempty(s)
+                s = 'NA';
+            end
         end
     end
-    
-    % set
-    if MTMred == 0
-        title([method,'; ',lang_var{main41},' = ',num2str(window),' ',unit,'; ',lang_var{main32},' = ',num2str(step),' ', unit])
-    else
-        if plotseries == 0
-            subplot(4,1,1)
-            title([method,'; ',lang_var{main41},' = ',num2str(window),' ',unit,'; ',lang_var{main32},' = ',num2str(step),' ', unit])
-        else
-            subplot(4,4,[2 3 4])
-            title([method,'; ',lang_var{main41},' = ',num2str(window),' ',unit,'; ',lang_var{main32},' = ',num2str(step),' ', unit])
+
+    methods (Access = public)
+        function app = evofftGUI(varargin)
+            if nargin >= 1 && isstruct(varargin{1})
+                app.Context = varargin{1};
+            end
+            createComponents(app);
+            initializeState(app);
+            registerApp(app, app.UIFigure);
+            if nargout == 0
+                clear app
+            end
         end
-        set(gca,'XTickLabel',[]);
-    end
 
-    
-else
-    % 3D
-    if handles.plot_log == 1;
-        s = log10(s); 
-        handles.rotate = get(handles.rotation,'Value');
-        surf(x_grid(2:end),y_grid,s(:,2:end))
-    else
-        handles.rotate = get(handles.rotation,'Value');
-        surf(x_grid,y_grid,s)
-    end
-    shading interp
-    set(gca,'TickDir','out');
-    set(gca,'XMinorTick','on','YMinorTick','on')
-    xlabel([lang_var{main14},' (1/',unit,')'])
-    xlim([fmin fmax])
-    if handles.flipy == 1
-        set(gca,'Ydir','reverse')
-    end
-    if freq_log == 1
-        xlim([fmingrid fmax])
-        set(gca, 'XScale', 'log')
-    end
-end
-
-%colormap(jet)
-if isempty(handles.colorgrid)
-    % no grid
-    setcolor = handles.color;
-else
-    setcolor = [handles.color,'(',round(num2str(handles.colorgrid)),')'];
-end
-
-try colormap(setcolor)
-catch
-    colormap default
-end
-
-shading interp
-set(gcf,'Name',[dat_name,ext,': ',lang_var{menu108}])
-set(gca,'XMinorTick','on','YMinorTick','on')
-if handles.plot_2d == 1
-    set(gca, 'TickDir', 'out')
-else
-   set(gca, 'TickDir', 'out')
-   if handles.rotate == 0
-        view(10,70);
-    else
-        for i = 1: 370
-            view(i,70); 
-            pause(0.05); 
-        end
-   end
-end
-handles.evofftfig = evofftfig;
-%
-if get(handles.checkbox9,'value')
-    CDac_pwd
-    filename = handles.filename;
-    name1 = [filename,'-evofft-s','.txt'];
-    name2 = [filename,'-evofft-freq','.txt'];
-    name3 = [filename,'-evofft-time','.txt'];
-    dlmwrite(name1, s, 'delimiter', ' ', 'precision', 9); 
-    dlmwrite(name2, x_grid', 'delimiter', ' ', 'precision', 9); 
-    dlmwrite(name3, y_grid', 'delimiter', ' ', 'precision', 9); 
-    d = dir; %get files
-    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-    refreshcolor;
-    cd(pre_dirML); % return to matlab view folder
-end
-guidata(hObject, handles);
-
-
-% --------------------------------------------------------------------
-function checkbox2_Callback(hObject, eventdata, handles)
-% hObject    handle to menuFile (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-handles.normal = get(handles.checkbox2,'Value');
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function checkbox2_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit8 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-% --------------------------------------------------------------------
-function checkbox3_Callback(hObject, eventdata, handles)
-% hObject    handle to menuFile (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-handles.flipy = (get(hObject,'Value'));
-
-MTMred = get(handles.checkbox7,'Value');
-plotseries = get(handles.checkbox8,'Value');
-
-try figure(handles.evofftfig)
-    
-    if and(MTMred == 1, plotseries == 1)
-        subplot(4,4,[5 9 13])
-        if handles.flipy == 1;
-            set(gca,'Ydir','reverse')
-        else
-            set(gca,'Ydir','normal')
-        end
-        subplot(4,4,[6,7,8,10,11,12,14,15,16])
-        if handles.flipy == 1;
-            set(gca,'Ydir','reverse')
-        else
-            set(gca,'Ydir','normal')
-        end
-        
-    elseif and(MTMred == 1, plotseries == 0)
-        subplot(4,1,[2 3 4])
-        if handles.flipy == 1;
-            set(gca,'Ydir','reverse')
-        else
-            set(gca,'Ydir','normal')
-        end
-    elseif and(MTMred == 0, plotseries == 1)
-        subplot(1,4,1)
-        if handles.flipy == 1;
-            set(gca,'Ydir','reverse')
-        else
-            set(gca,'Ydir','normal')
-        end
-        subplot(1,4,[2 3 4])
-        if handles.flipy == 1;
-            set(gca,'Ydir','reverse')
-        else
-            set(gca,'Ydir','normal')
-        end
-    else
-        if handles.flipy == 1;
-            set(gca,'Ydir','reverse')
-        else
-            set(gca,'Ydir','normal')
+        function delete(app)
+            if ~isempty(app.UIFigure) && isvalid(app.UIFigure)
+                delete(app.UIFigure);
+            end
         end
     end
-    
-catch
 end
-guidata(hObject, handles);
-
-% --------------------------------------------------------------------
-function checkbox4_Callback(hObject, eventdata, handles)
-% hObject    handle to menuFile (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-handles.plot_log = (get(hObject,'Value'));
-guidata(hObject, handles);
-
-% --------------------------------------------------------------------
-function checkbox5_Callback(hObject, eventdata, handles)
-% hObject    handle to menuFile (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-handles.freq_log = (get(hObject,'Value'));
-try
-    set(handles.edit7,'String',num2str(handles.fmingrid))
-    fmin = handles.fmingrid;
-catch
-end
-MTMred = get(handles.checkbox7,'Value');
-plotseries = get(handles.checkbox8,'Value');
-
-try figure(handles.evofftfig)
-    fmax = str2double(get(handles.evofft_fmax_edit,'String'));
-    if and(MTMred == 1, plotseries == 1)
-        subplot(4,4,[2 3 4])
-        xlim([fmin fmax])
-        if handles.freq_log == 1;
-            set(gca, 'XScale', 'log')
-        else
-            set(gca, 'XScale', 'linear')
-        end
-        subplot(4,4,[6,7,8,10,11,12,14,15,16])
-        xlim([fmin fmax])
-        if handles.freq_log == 1;
-            set(gca, 'XScale', 'log')
-        else
-            set(gca, 'XScale', 'linear')
-        end
-        
-    elseif and(MTMred == 1, plotseries == 0)
-        subplot(4,1,1)
-        xlim([fmin fmax])
-        if handles.freq_log == 1;
-            set(gca, 'XScale', 'log')
-        else
-            set(gca, 'XScale', 'linear')
-        end
-        subplot(4,1,[2 3 4])
-        xlim([fmin fmax])
-        if handles.freq_log == 1;
-            set(gca, 'XScale', 'log')
-        else
-            set(gca, 'XScale', 'linear')
-        end
-    elseif and(MTMred == 0, plotseries == 1)
-        subplot(1,4,[2 3 4])
-        %xlim([fmin fmax])
-        if handles.freq_log == 1;
-            set(gca, 'XScale', 'log')
-        else
-            set(gca, 'XScale', 'linear')
-        end
-    else
-        if handles.freq_log == 1;
-            set(gca, 'XScale', 'log')
-        else
-            set(gca, 'XScale', 'linear')
-        end
-    end
-    
-catch
-end
-
-guidata(hObject, handles);
-
-% --------------------------------------------------------------------
-function edit9_Callback(hObject, eventdata, handles)
-% hObject    handle to menuFile (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-try
-    colorgrid = str2double(get(handles.edit9,'String'));
-    if colorgrid > 0
-        handles.colorgrid = colorgrid;
-        %disp('set grid')
-    else
-        handles.colorgrid = [];
-    end
-catch
-    msgbox('Grid # should be a positive integer','Error')
-end
-disp(handles.colorgrid);
-try figure(handles.evofftfig)
-    %colormap(jet)
-    if isempty(handles.colorgrid)
-        % no grid
-        setcolor = handles.color;
-        %disp('no set grid')
-    else
-        setcolor = [handles.color,'(',round(num2str(handles.colorgrid)),')'];
-        %disp('1 set grid')
-    end
-    try colormap(setcolor)
-        %disp('set grid ok')
-    catch
-        colormap default
-    end
-catch
-end
-
-guidata(hObject, handles);
-
-% --------------------------------------------------------------------
-function popupmenu3_Callback(hObject, eventdata, handles)
-% hObject    handle to menuFile (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-str = get(hObject, 'String');
-val = get(hObject,'Value');
-% Set current data to the selected data set.
-handles.color = str{val};
-if val == 1;
-    set(handles.edit9,'String','')
-    handles.colorgrid = [];
-end
-
-try figure(handles.evofftfig)
-    %colormap(jet)
-    if isempty(handles.colorgrid)
-        % no grid
-        setcolor = handles.color;
-    else
-        setcolor = [handles.color,'(',round(num2str(handles.colorgrid)),')'];
-    end
-    try colormap(setcolor)
-    catch
-        colormap default
-    end
-catch
-end
-guidata(hObject, handles);
-
-function evofft_win_text_Callback(hObject, eventdata, handles)
-% hObject    handle to evofft_win_text (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of evofft_win_text as text
-%        str2double(get(hObject,'String')) returns contents of evofft_win_text as a double
-handles.window = str2double(get(hObject,'String'));
-
-% if number of calculations is larger than 500;
-% then, a large step is recommended. This way, the ncal is ~500.
-ncal = (handles.lenthx - handles.window)/handles.mean;
-if ncal > 500
-    handles.step = abs(handles.lenthx - handles.window)/500;
-end
-set(handles.edit_step, 'String', num2str(handles.step),'Value',1);
-
-guidata(hObject,handles)
-
-
-function edit_step_Callback(hObject, eventdata, handles)
-% hObject    handle to edit_step (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit_step as text
-%        str2double(get(hObject,'String')) returns contents of edit_step as a double
-content = get(hObject,'String');
-handles.step = str2double(content);
-
-% if number of calculations is larger than 500;
-% then, a large step is recommended. This way, the ncal is ~500.
-ncal = (handles.lenthx - handles.window)/handles.step;
-if ncal > 500
-    warndlg('Step is too small. Close this warning box and revise, OR come back after a cup of coffee ...')
-end
-
-guidata(hObject, handles);
-
-% --------------------------------------------------------------------
-function menuFile_Callback(hObject, eventdata, handles)
-% hObject    handle to menuFile (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --------------------------------------------------------------------
-function munuPlot_Callback(hObject, eventdata, handles)
-% hObject    handle to munuPlot (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --------------------------------------------------------------------
-function menuEvofft_Callback(hObject, eventdata, handles)
-% hObject    handle to menuEvofft (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-
-% --- Executes during object creation, after setting all properties.
-function evofft_win_text_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit_step (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-function evofft_fmax_edit_Callback(hObject, eventdata, handles)
-% hObject    handle to evofft_fmax_edit (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of evofft_fmax_edit as text
-%        str2double(get(hObject,'String')) returns contents of evofft_fmax_edit as a double
-fmax = str2double(get(handles.evofft_fmax_edit,'String'));
-if isnan(fmax)
-    handles.evofft_fmax = handles.nyquist;
-else
-    handles.evofft_fmax = fmax;
-end
-
-set(handles.evofft_Nyquist_radiobutton, 'Value', 0);
-set(handles.radiobutton2, 'Value', 1);
-
-MTMred = get(handles.checkbox7,'Value');
-plotseries = get(handles.checkbox8,'Value');
-
-try figure(handles.evofftfig)
-    fmin = str2double(get(handles.edit7,'String'));
-    if and(MTMred == 1, plotseries == 1)
-        subplot(4,4,[2 3 4])
-        xlim([fmin fmax])
-        subplot(4,4,[6,7,8,10,11,12,14,15,16])
-        xlim([fmin fmax])
-    elseif and(MTMred == 1, plotseries == 0)
-        subplot(4,1,1)
-        xlim([fmin fmax])
-        subplot(4,1,[2 3 4])
-        xlim([fmin fmax])
-    elseif and(MTMred == 0, plotseries == 1)
-        subplot(1,4,[2 3 4])
-        xlim([fmin fmax])
-    else
-        xlim([fmin fmax])
-    end
-    
-catch
-end
-
-guidata(hObject,handles)
-
-% --- Executes during object creation, after setting all properties.
-function evofft_fmax_edit_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to evofft_fmax_edit (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in pushbutton1.
-function pushbutton1_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes on button press in pushbutton2.
-function pushbutton2_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes when selected object is changed in uipanel2.
-function uipanel2_SelectionChangeFcn(hObject, eventdata, handles)
-% hObject    handle to the selected object in uipanel2 
-% eventdata  structure with the following fields (see UIBUTTONGROUP)
-%	EventName: string 'SelectionChanged' (read only)
-%	OldValue: handle of the previously selected object or empty if none was selected
-%	NewValue: handle of the currently selected object
-% handles    structure with handles and user data (see GUIDATA)
-evofft_fmax = get(eventdata.NewValue, 'Tag');
-if strcmp(evofft_fmax,'Use Nyquist')
-    handles.evofft_fmax = handles.nyquist;
-    set(handles.evofft_nyquist_text, 'String', num2str(handles.nyquist));
-elseif strcmp(evofft_fmax,'Use Input')
-    handles.evofft_fmax = handles.evofft_fmax_edit;
-    set(handles.evofft_nyquist_text, 'String', num2str(handles.nyquist));
-else
-   % warndlg('Input maximum frequency for plot','Tips: window length')
-end
-guidata(hObject,handles)
-
-% --- Executes on button press in evofft_Nyquist_radiobutton.
-function evofft_Nyquist_radiobutton_Callback(hObject, eventdata, handles)
-% hObject    handle to evofft_Nyquist_radiobutton (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes on button press in radiobutton2.
-function radiobutton2_Callback(hObject, eventdata, handles)
-% hObject    handle to radiobutton2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-%Hint: get(hObject,'Value') returns toggle state of radiobutton2
-val = get(handles.radiobutton2,'Value');
-if val > 0
-    set(handles.evofft_Nyquist_radiobutton,'Value',0)
-    set(handles.radiobutton2, 'Value', 1);
-    handles.evofft_fmax = str2double(get(handles.evofft_fmax_edit, 'String'));
-else 
-    set(handles.evofft_Nyquist_radiobutton,'Value',0)
-    handles.evofft_fmax = handles.nyquist;
-end
-
-% --- Executes on button press in evofft_tips_win_pushbutton.
-function evofft_tips_win_pushbutton_Callback(hObject, eventdata, handles)
-% hObject    handle to evofft_tips_win_pushbutton (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-lang_var = handles.lang_var;
-
-[~, evofft16] = ismember('evofft16',handles.lang_id);
-[~, evofft15] = ismember('evofft15',handles.lang_id);
-
-warndlg(lang_var{evofft16},lang_var{evofft15})
-
-
-
-% --- Executes during object creation, after setting all properties.
-function evofft_nyquist_text_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to evofft_nyquist_text (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-guidata(hObject, handles);
-
-function evofft_nyquist_text_Callback(hObject, eventdata, handles)
-evofft_nyquist_text = get(hObject, 'String');
-handles.evofft_nyquist_text = evofft_nyquist_text; % This overwrites the object's handle!
-guidata(hObject, handles);
-
-% --------------------------------------------------------------------
-function menuOpen_Callback(hObject, eventdata, handles)
-% hObject    handle to menuOpen (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes on button press in evofft_get_pushbutton.
-function evofft_get_pushbutton_Callback(hObject, eventdata, handles)
-% hObject    handle to evofft_get_pushbutton (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-
-% --- Executes on button press in evofft_open_pushbutton.
-function evofft_open_pushbutton_Callback(hObject, eventdata, handles)
-% hObject    handle to evofft_open_pushbutton (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-uiopen;
-
-handles.current_data = data;
-handles.step = handles.current_data(2,1)-handles.current_data(1,1);
-handles.nyquist = abs(1/(2*handles.step));
-handles.evofft_fmax = handles.nyquist;
-set(handles.evofft_nyquist_text, 'String', num2str(handles.nyquist));
-
-existdata = evalin('base','who');
-if ismember('unit',existdata)
-    handles.unit = evalin('base','unit');
-else
-    handles.unit = 'unit';
-end
-
-if ismember('filename',existdata)
-    handles.filename = evalin('base','filename');
-else
-    handles.filename = 'filename';
-end
-
-guidata(hObject, handles);
-
-
-% --- Executes on button press in pushbutton8.
-function pushbutton8_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton8 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-lang_var = handles.lang_var;
-
-[~, dd46] = ismember('dd46',handles.lang_id);
-[~, dd45] = ismember('dd45',handles.lang_id);
-
-warndlg(lang_var{dd45},lang_var{dd46})
-
-
-% --- Executes during object creation, after setting all properties.
-function edit_step_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit_step (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in radiobutton_2d.
-function radiobutton_2d_Callback(hObject, eventdata, handles)
-% hObject    handle to radiobutton_2d (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of radiobutton_2d
-val = get(handles.radiobutton_2d,'Value');
-if val == 1
-    set (handles.radiobutton_3d, 'Value', 0);
-    set (handles.rotation, 'Value', 0);
-    handles.plot_2d = 1;
-    set (handles.checkbox7, 'Enable', 'on');
-    set (handles.checkbox8, 'Enable', 'on');
-else
-    set (handles.radiobutton_3d, 'Value', 1);
-    set (handles.rotation, 'Value', 1);
-    handles.plot_2d = 0;
-    set (handles.checkbox7, 'Enable', 'off');
-    set (handles.checkbox8, 'Enable', 'off');
-end
-guidata(hObject, handles);
-
-% --- Executes on button press in radiobutton_3d.
-function radiobutton_3d_Callback(hObject, eventdata, handles)
-% hObject    handle to radiobutton_3d (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of radiobutton_3d
-val = get(handles.radiobutton_3d,'Value');
-if val == 1
-    set (handles.radiobutton_2d, 'Value', 0);
-    set (handles.checkbox7, 'Enable', 'off');
-    set (handles.checkbox8, 'Enable', 'off');
-    handles.plot_2d = 0;
-    set (handles.rotation, 'Value', 1);
-else
-    set (handles.radiobutton_2d, 'Value', 1);
-    handles.plot_2d = 1;
-    set (handles.checkbox7, 'Enable', 'on');
-    set (handles.checkbox8, 'Enable', 'on');
-    set (handles.rotation, 'Value', 0);
-end
-guidata(hObject, handles);
-
-% --- Executes on key press with focus on evofft_Nyquist_radiobutton and none of its controls.
-function evofft_Nyquist_radiobutton_KeyPressFcn(hObject, eventdata, handles)
-% hObject    handle to evofft_Nyquist_radiobutton (see GCBO)
-% eventdata  structure with the following fields (see MATLAB.UI.CONTROL.UICONTROL)
-%	Key: name of the key that was pressed, in lower case
-%	Character: character interpretation of the key(s) that was pressed
-%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes on selection change in listbox2.
-function listbox2_Callback(hObject, eventdata, handles)
-% hObject    handle to listbox2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns listbox2 contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from listbox2
-handles.index_selected  = get(hObject,'Value');
-guidata(hObject,handles)
-
-% --- Executes during object creation, after setting all properties.
-function listbox2_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to listbox2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: listbox controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in pushbutton16.
-function pushbutton16_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton16 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-
-% --- Executes on button press in rotation.
-function rotation_Callback(hObject, eventdata, handles)
-% hObject    handle to rotation (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of rotation
-
-
-% --- Executes on selection change in popupmenu2.
-function popupmenu2_Callback(hObject, eventdata, handles)
-% hObject    handle to popupmenu2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu2 contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from popupmenu2
-contents = cellstr(get(hObject,'String'));
-handles.method = contents{get(hObject,'Value')};
-guidata(hObject, handles);
-
-
-% --- Executes during object creation, after setting all properties.
-function popupmenu2_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to popupmenu2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit7_Callback(hObject, eventdata, handles)
-% hObject    handle to edit7 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit7 as text
-%        str2double(get(hObject,'String')) returns contents of edit7 as a double
-fmin = str2double(get(handles.edit7,'String'));
-MTMred = get(handles.checkbox7,'Value');
-plotseries = get(handles.checkbox8,'Value');
-try figure(handles.evofftfig)
-    fmax = str2double(get(handles.evofft_fmax_edit,'String'));
-    if and(MTMred == 1, plotseries == 1)
-        subplot(4,4,[2 3 4])
-        xlim([fmin fmax])
-        subplot(4,4,[6,7,8,10,11,12,14,15,16])
-        xlim([fmin fmax])
-    elseif and(MTMred == 1, plotseries == 0)
-        subplot(4,1,1)
-        xlim([fmin fmax])
-        subplot(4,1,[2 3 4])
-        xlim([fmin fmax])
-    elseif and(MTMred == 0, plotseries == 1)
-        subplot(1,4,[2 3 4])
-        xlim([fmin fmax])
-    else
-        xlim([fmin fmax])
-    end
-catch
-end
-
-guidata(hObject,handles)
-
-
-% --- Executes during object creation, after setting all properties.
-function edit7_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit7 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit8_Callback(hObject, eventdata, handles)
-% hObject    handle to edit8 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit8 as text
-%        str2double(get(hObject,'String')) returns contents of edit8 as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function edit8_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit8 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes during object creation, after setting all properties.
-function popupmenu3_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to popupmenu3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes during object creation, after setting all properties.
-function edit9_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit9 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in checkbox6.
-function checkbox6_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox6 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox6
-
-handles.time_0pad = get(hObject,'Value');
-guidata(hObject, handles);
-
-
-% --- Executes on button press in checkbox7.
-function checkbox7_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox7 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox7
-
-
-% --- Executes on button press in checkbox8.
-function checkbox8_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox8 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox8
-
-
-% --- Executes on selection change in popupmenu4.
-function popupmenu4_Callback(hObject, eventdata, handles)
-% hObject    handle to popupmenu4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu4 contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from popupmenu4
-contents = cellstr(get(hObject,'String'));
-val = contents{get(hObject,'Value')};
-if strcmp(val,'zero')
-    %disp('zero')
-    handles.padtype = 1;
-elseif strcmp(val,'mirror')
-    %disp('mirror')
-    handles.padtype = 2;
-elseif strcmp(val,'mean')
-    %disp('mean')
-    handles.padtype = 3;
-elseif strcmp(val,'random')
-    %disp('random')
-    handles.padtype = 4;
-end
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function popupmenu4_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to popupmenu4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in checkbox9.
-function checkbox9_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox9 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox9

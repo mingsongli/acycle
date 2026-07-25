@@ -135,7 +135,6 @@ function column_manipulateGUI(varargin)
         'String', 'OK', 'FontSize', 12, ...
         'Callback', @onOKButtonPressed);
     %%
-    %function onOKButtonPressed(yt, fnt, data_name)
     function onOKButtonPressed(~,~)
         % Callback function code here
         disp('OK Button Pressed');
@@ -225,5 +224,25 @@ end
             
             dataTable2.Data = [mergedData(:,1), dataMan];
         end
+        
+        % Define the desired figure name
+        figName = 'Acycle: Data Manipulate Plot';
+
+        % Find any open figures with this name
+        figs = findall(groot, 'Type', 'figure', 'Name', figName);
+
+        if isempty(figs)
+            % If no figure with the name exists, create it
+            fig1 = figure('Name', figName);
+        else
+            % If it exists, clear the existing figure
+            fig1 = figs(1); % In case there are multiple, take the first
+            clf(fig1);
+        end
+        figure(fig1)
+        plot(mergedData(:,1), dataMan)
+        xlabel('X-Axis')
+        ylabel('Y-Axis')
+        title('Output')
     end
 end

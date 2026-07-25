@@ -1,5 +1,6 @@
 function target = period2spectrum(orbit7,t1,t2,sr,f1,f2,method,pad)
-% usging 7 orbit periods to calculate the power spectrum
+% using 7 orbit periods, calculate the power spectrum
+
 % INPUT
 %   orbit7: e.g., [405 125 95 41 24 22 19]
 %   t1: 300000
@@ -17,21 +18,25 @@ x = x';
 data(:,1) = x;
 ono = length(orbit7);
 y0 = zeros(length(x),1);
+
 for i = 1: 3
     periodi = orbit7(i);
     y = 1 * sin(2*pi/periodi*x + Ph) + B;
     y0 = y + y0;
 end
+
 for i = 4
     periodi = orbit7(i);
     y = .8 * sin(2*pi/periodi*x + Ph) + B;
     y0 = y + y0;
 end
+
 for i = 5:ono
     periodi = orbit7(i);
     y = .6 * sin(2*pi/periodi*x + Ph) + B;
     y0 = y + y0;
 end
+
 data(:,2) = y0;
 
 if method == 2
@@ -40,6 +45,7 @@ if method == 2
 else
     [p,f] = periodogram(data(:,2),[],pad,1/sr);
 end
-    target1 = [f,p];
+
+target1 = [f,p];
 
 [target] = select_interval(target1,f1,f2);

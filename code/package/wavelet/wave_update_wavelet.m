@@ -298,7 +298,7 @@ if plot_coi
         if plot_2d == 1
             %plot(datax,coi,'w','LineWidth',2)
             hcoi=fill(tt,[period([end 1]) coi period([1 end])],'w');
-            set(hcoi,'alphadatamapping','direct','facealpha',.4)
+            set(hcoi,'FaceAlpha',0.35,'EdgeColor','none')
         elseif plot_2d == 0
             if plot_log2pow
                 plot3(datax,coi,max(log2(power)),'w','LineWidth',2)
@@ -310,7 +310,7 @@ if plot_coi
         if plot_2d == 1
             %plot(datax,log2(coi),'w','LineWidth',2)
             hcoi=fill(tt,log2([period([end 1]) coi period([1 end])]),'w');
-            set(hcoi,'alphadatamapping','direct','facealpha',.4)
+            set(hcoi,'FaceAlpha',0.35,'EdgeColor','none')
         elseif plot_2d == 0
             if plot_log2pow
                 plot3(datax,log2(coi),max(log2(power)),'w','LineWidth',2)

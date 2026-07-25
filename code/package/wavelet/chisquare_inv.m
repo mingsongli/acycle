@@ -1,4 +1,4 @@
-function X = chisquare_inv(P,V);
+function X = chisquare_inv(P,V)
 %CHISQUARE_INV  Inverse of chi-square cumulative distribution function (cdf).
 %
 %   X = chisquare_inv(P,V) returns the inverse of chi-square cdf with V
@@ -7,14 +7,16 @@ function X = chisquare_inv(P,V);
 %
 %   To check, the answer should satisfy:   P==gammainc(X/2,V/2)
 
-% Uses FMIN and CHISQUARE_SOLVE
+% Uses FMINBND and CHISQUARE_SOLVE
 %
 % Written January 1998 by C. Torrence
+% Updated Jan 2026 by Mingsong Li
+%   fmin is no longer available
 
-	if (nargin < 2), error('Must input both P and V');, end
-	if ((1-P) < 1E-4), error('P must be < 0.9999');, end
+	if (nargin < 2), error('Must input both P and V'); end
+	if ((1-P) < 1E-4), error('P must be < 0.9999'); end
 	
-	if ((P==0.95) & (V==2)) % this is a no-brainer
+	if ((P==0.95) && (V==2)) % this is a no-brainer
 		X = 5.9915;
 		return
 	end
@@ -23,24 +25,20 @@ function X = chisquare_inv(P,V);
 	MAXX = 1;            % actually starts at 10 (see while loop below)
 	X = 1;
 	TOLERANCE = 1E-4;    % this should be accurate enough
-    vers = version;
-    vers = str2num(vers(1));
-
+    
+    opts = optimset('TolX', TOLERANCE, 'Display', 'off');
+    
 	while ((X+TOLERANCE) >= MAXX)  % should only need to loop thru once
 		MAXX = MAXX*10.;
-% this calculates value for X, NORMALIZED by V
-% Note: We need two different versions, depending upon the version of Matlab.
-        if (vers >= 6)
-            X = fminbnd('chisquare_solve',MINN,MAXX,optimset('TolX',TOLERANCE),P,V);
-        else
-    		X = fmin('chisquare_solve',MINN,MAXX,[0,TOLERANCE],P,V);
-        end
-		MINN = MAXX;
+        
+        % this calculates value for X, NORMALIZED by V
+        % Modern MATLAB: fmin() is not available; use fminbnd() instead.
+        obj = @(x) chisquare_solve(x, P, V);
+        X = fminbnd(obj, MINN, MAXX, opts);
+        
+        MINN = MAXX;
 	end
 	
 	X = X*V;  % put back in the goofy V factor
 
 	return
-
-% end of code
-

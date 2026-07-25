@@ -1,767 +1,708 @@
-function varargout = agescale(varargin)
-% AGESCALE MATLAB code for agescale.fig
-%      AGESCALE, by itself, creates a new AGESCALE or raises the existing
-%      singleton*.
-%
-%      H = AGESCALE returns the handle to a new AGESCALE or the handle to
-%      the existing singleton*.
-%
-%      AGESCALE('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in AGESCALE.M with the given input arguments.
-%
-%      AGESCALE('Property','Value',...) creates a new AGESCALE or raises the
-%      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before agescale_OpeningFcn gets called.  An
-%      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to agescale_OpeningFcn via varargin.
-%
-%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
-%      instance to run (singleton)".
-%
-% See also: GUIDE, GUIDATA, GUIHANDLES
+classdef agescale < matlab.apps.AppBase
+    % App Designer style replacement for legacy GUIDE agescale GUI.
 
-% Edit the above text to modify the response to help agescale
+    properties (Access = public)
+        UIFigure matlab.ui.Figure
 
-% Last Modified by GUIDE v2.5 24-Feb-2020 11:34:49
+        ButtonUp matlab.ui.control.Button
+        ButtonOpen matlab.ui.control.Button
+        EditPath matlab.ui.control.EditField
+        ListFiles matlab.ui.control.ListBox
 
-% Begin initialization code - DO NOT EDIT
-gui_Singleton = 1;
-gui_State = struct('gui_Name',       mfilename, ...
-                   'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @agescale_OpeningFcn, ...
-                   'gui_OutputFcn',  @agescale_OutputFcn, ...
-                   'gui_LayoutFcn',  [] , ...
-                   'gui_Callback',   []);
-if nargin && ischar(varargin{1})
-    gui_State.gui_Callback = str2func(varargin{1});
-end
+        ButtonSetAgeModel matlab.ui.control.Button
+        ButtonSetSeries matlab.ui.control.Button
 
-if nargout
-    [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
-else
-    gui_mainfcn(gui_State, varargin{:});
-end
-% End initialization code - DO NOT EDIT
+        LabelAgeModel matlab.ui.control.Label
+        EditAgeModel matlab.ui.control.EditField
+        LabelSeries matlab.ui.control.Label
+        ListSeries matlab.ui.control.ListBox
 
-
-% --- Executes just before agescale is made visible.
-function agescale_OpeningFcn(hObject, eventdata, handles, varargin)
-% This function has no output args, see OutputFcn.
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to agescale (see VARARGIN)
-% contact with acycle main window
-handles.acfigmain = varargin{1}.acfigmain;
-handles.listbox_acmain = varargin{1}.listbox_acmain;
-handles.edit_acfigmain_dir = varargin{1}.edit_acfigmain_dir;
-handles.unit = varargin{1}.unit;
-handles.MonZoom = varargin{1}.MonZoom;
-handles.sortdata = varargin{1}.sortdata;
-
-% Choose default command line output for agescale
-handles.output = hObject;
-handles.val1 = varargin{1}.val1;
-% language
-lang_choice = varargin{1}.lang_choice;
-lang_id = varargin{1}.lang_id;
-lang_var = varargin{1}.lang_var;
-if lang_choice>0
-
-    [~, locb] = ismember('a00',lang_id);
-    set(gcf,'Name',lang_var{locb})
-    [~, locb] = ismember('main27',lang_id);
-    set(handles.text3,'string',lang_var{locb})
-    [~, locb] = ismember('a02',lang_id);
-    set(handles.text4,'string',lang_var{locb})
-    [~, locb] = ismember('a03',lang_id);
-    set(handles.pushbutton11,'string',lang_var{locb})
-    [~, locb] = ismember('a04',lang_id);
-    set(handles.pushbutton12,'string',lang_var{locb})
-    [~, locb] = ismember('a05',lang_id);
-    set(handles.pushbutton13,'string',lang_var{locb})
-    [~, locb] = ismember('a06',lang_id);
-    set(handles.pushbutton8,'string',lang_var{locb})
-    
-else
-    set(gcf,'Name','Acycle: Age Scale')
-end
-
-% language
-handles.lang_choice = lang_choice;
-handles.lang_id = lang_id;
-handles.lang_var = lang_var;
-%
-
-set(0,'Units','normalized') % set units as normalized
-set(gcf,'units','norm') % set location
-h=get(gcf,'Children');  % get all content
-h1=findobj(h,'FontUnits','norm');  % find all font units as points
-set(h1,'FontUnits','points','FontSize',11.5);  % set as norm
-h2=findobj(h,'FontUnits','points');  % find all font units as points
-set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
-
-set(gcf,'position',[0.05,0.4,0.9,0.4]* handles.MonZoom) % set position
-
-set(handles.pushbutton2,'position',[0.034,0.84,0.06,0.06]) % set position
-set(handles.pushbutton3,'position',[0.1,0.84,0.06,0.06]) % set position
-set(handles.pushbutton4,'position',[0.485,0.732,0.06,0.06]) % set position
-set(handles.pushbutton7,'position',[0.485,0.527,0.06,0.06]) % set position
-set(handles.pushbutton8,'position',[0.465,0.114,0.1,0.06]) % set position
-
-set(handles.pushbutton11,'position',[0.465,0.366,0.11,0.06]) % set position
-set(handles.pushbutton12,'position',[0.465,0.293,0.11,0.06]) % set position
-set(handles.pushbutton13,'position',[0.465,0.221,0.11,0.06]) % set position
-
-set(handles.edit1,'position',[0.018,0.748,0.436,0.06]) % set position
-set(handles.edit2,'position',[0.58,0.738,0.4,0.06]) % set position
-set(handles.listbox1,'position',[0.018,0.114,0.436,0.634]) % set position
-set(handles.listbox2,'position',[0.58,0.114,0.4,0.476]) % set position
-set(handles.text3,'position',[0.58,0.84, 0.15,0.06]) % set position
-set(handles.text4,'position',[0.58,0.606,0.1,0.06]) % set position
-
-CDac_pwd; % cd ac_pwd dir
-d = dir; %get files
-set(handles.listbox1,'String',{d.name},'Value',1) %set string
-set(handles.edit1,'String',pwd) % set position
-cd(pre_dirML); % return to matlab view folder
-% Update handles structure
-guidata(hObject, handles);
-
-% UIWAIT makes agescale wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
-
-
-% --- Outputs from this function are returned to the command line.
-function varargout = agescale_OutputFcn(hObject, eventdata, handles) 
-% varargout  cell array for returning output args (see VARARGOUT);
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Get default command line output from handles structure
-varargout{1} = handles.output;
-
-
-% --- Executes on selection change in listbox1.
-function listbox1_Callback(hObject, eventdata, handles)
-% hObject    handle to listbox1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns listbox1 contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from listbox1
-plot_selected = get(hObject,'Value');
-handles.index_selected  = plot_selected;
-handles.nplot = length(plot_selected);   % length
-guidata(hObject,handles)
-
-% --- Executes during object creation, after setting all properties.
-function listbox1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to listbox1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: listbox controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit1_Callback(hObject, eventdata, handles)
-% hObject    handle to edit1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit1 as text
-%        str2double(get(hObject,'String')) returns contents of edit1 as a double
-address = get(hObject,'String');
-cd(address)
-d = dir; %get files
-set(handles.listbox1,'String',{d.name},'Value',1) %set string
-guidata(hObject,handles)
-
-% --- Executes during object creation, after setting all properties.
-function edit1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in pushbutton2.
-function pushbutton2_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-cd ..;
-address = pwd;
-set(handles.edit1,'String',address);
-d = dir; %get files
-set(handles.listbox1,'String',{d.name},'Value',1) %set string
-guidata(hObject,handles)
-
-% --- Executes on button press in pushbutton3.
-function pushbutton3_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-list_content = cellstr(get(handles.listbox1,'String')); % read contents of listbox 1 
-plot_selected = handles.index_selected;  % read selection in listbox 1; minus 2 for listbox
-nplot = length(plot_selected);   % length
-if nplot > 1
-    open_data = 'Tips: Select 1 folder';
-    h = helpdlg(open_data,'Tips: Close');
-    uiwait(h);
-else
-    
-    plot_filter_selection = char(list_content(plot_selected));
-    if ~exist(plot_filter_selection,'dir')==1
-        h = helpdlg('This is not a folder','Tips: Close');
-        uiwait(h);
-    else
-        cd(plot_filter_selection)
-        address = pwd;
-        set(handles.edit1,'String',address);
-    end
-d = dir; %get files
-set(handles.listbox1,'String',{d.name},'Value',1) %set string
-end
-guidata(hObject,handles)
-
-% --- Executes on button press in pushbutton4.
-function pushbutton4_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-list_content = cellstr(get(handles.listbox1,'String')); % read contents of listbox 1 
-index_selected = handles.index_selected;
-nplot = handles.nplot;
-if index_selected > 2
-    if nplot == 1
-        handles.agemodelname = list_content(index_selected,1);
-        set(handles.edit2,'String',handles.agemodelname,'Value',1);
-    end
-end
-guidata(hObject,handles)
-
-
-function edit2_Callback(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit2 as text
-%        str2double(get(hObject,'String')) returns contents of edit2 as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function edit2_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in pushbutton7.
-function pushbutton7_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton7 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-list_content = cellstr(get(handles.listbox1,'String')); % read contents of listbox 1 
-index_selected = handles.index_selected;
-nplot = handles.nplot;
-series_num = 0;
-if index_selected > 2
-    for i=1:nplot
-        seriesname = char(list_content(index_selected(i),1));
-        series_num = series_num + 1;
-        series(series_num,1) = {seriesname};
-    end
-end
-set(handles.listbox2,'String',char(series),'Value',1);
-guidata(hObject,handles)
-
-% --- Executes on selection change in listbox2.
-function listbox2_Callback(hObject, eventdata, handles)
-% hObject    handle to listbox2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns listbox2 contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from listbox2
-
-
-% --- Executes during object creation, after setting all properties.
-function listbox2_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to listbox2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: listbox controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in pushbutton8.
-function pushbutton8_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton8 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-pre_dirML = pwd;
-CDac_pwd; % cd working dir
-
-agemodelname = char(get(handles.edit2,'String'));
-agemodel = load(agemodelname);
-
-list_content = cellstr(get(handles.listbox2,'String')); % read contents of listbox 1 
-nrow = length(list_content);
-
-figagescale = gcf;
-figdata = figure;
-xmax1 = nan;
-xmin1 = nan;
-xmax2 = nan;
-xmin2 = nan;
-
-for i = 1:nrow
-    data_name = char(list_content(i,1));
-    data = load(data_name);
-    [~,dat_name,~] = fileparts(data_name);
-    subplot(2,1,1)
-    plot(data(:,1),data(:,2)); hold on;
-    set(gca,'XMinorTick','on','YMinorTick','on')
-    xmin1 = nanmin(xmin1,min(data(:,1)));
-    xmax1 = nanmax(xmax1,max(data(:,1)));
-    if handles.lang_choice==0
-        title('Origin data')
-    else
-        [~, locb1] = ismember('a41',handles.lang_id);
-        lang_var = handles.lang_var;
-        title(lang_var{locb1})
-    end
-    xlim([xmin1,xmax1])
-    [time,handles.sr] = depthtotime(data(:,1),agemodel);
-    handles.tunedseries = [time,data(:,2)];
-    subplot(2,1,2)
-    plot(time,data(:,2)); hold on;
-    set(gca,'XMinorTick','on','YMinorTick','on')
-    if handles.lang_choice==0
-        title('Tuned data')
-    else
-        [~, locb1] = ismember('a42',handles.lang_id);
-        lang_var = handles.lang_var;
-        title(lang_var{locb1})
-    end
-    xmin2 = nanmin(xmin2,min(time));
-    xmax2 = nanmax(xmax2,max(time));
-    xlim([xmin2,xmax2])
-    add_list = [dat_name,'-TD-',agemodelname];
-    dlmwrite(add_list, handles.tunedseries, 'delimiter', ' ', 'precision', 9);
-    d = dir; %get files
-    set(handles.listbox1,'String',{d.name},'Value',1) %set string
-end
-
-% refresh AC main window
-figure(handles.acfigmain);
-refreshcolor;
-cd(pre_dirML); % return view dir
-figure(figagescale);
-figure(figdata); % return plot
-guidata(hObject,handles)
-
-
-% --- Executes on button press in pushbutton11.
-function pushbutton11_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton11 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-pre_dirML = pwd;
-CDac_pwd; % cd working dir
-
-agemodelname = char(get(handles.edit2,'String'));
-tiepoints = load(agemodelname);
-x1 = min(tiepoints(:,1));  % depth
-x2 = max(tiepoints(:,1));  % depth
-y1 = min(tiepoints(:,2));  % time
-y2 = max(tiepoints(:,2));  % time
-
-figure('Position',[100 800 500 500],...
-  'Color',[1 1 1])
-axes('Position',[0.2 0.2 0.7 0.7],...
-  'XLim',[y1 y2],...
-  'YLim',[x1 x2],...
-  'YDir','Reverse',...
-  'Box','On',...
-  'FontSize',14)
-line(tiepoints(:,2),tiepoints(:,1),...
-  'LineWidth',1)
-
-if handles.lang_choice==0
-    xlabel('Age')
-    ylabel(['Depth (',handles.unit,')'])
-    title(['Age Model'])
-else
-    [~, locb1] = ismember('main22',handles.lang_id);
-    lang_var = handles.lang_var;
-    xlabel(lang_var{locb1})
-    [~, locb1] = ismember('main27',handles.lang_id);
-    title(lang_var{locb1})
-    [~, locb1] = ismember('main23',handles.lang_id);
-    ylabel([lang_var{locb1},' (',handles.unit,')'])
-end
-
-set(gca,'XMinorTick','on','YMinorTick','on')
-
-cd(pre_dirML); % return view dir
-
-% --- Executes on button press in pushbutton12.
-function pushbutton12_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton12 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-pre_dirML = pwd;
-CDac_pwd; % cd working dir
-agemodelname = char(get(handles.edit2,'String'));
-tiepoints = load(agemodelname);
-list_content = cellstr(get(handles.listbox2,'String')); % read contents of listbox 1 
-nrow = length(list_content);
-for i = 1:nrow
-    data_name = char(list_content(i,1));
-    data = load(data_name);
-    [~,dat_name,~] = fileparts(data_name);
-    [time,handles.sr] = depthtotime(data(:,1),tiepoints);
-    
-    t1 = min(time);  % time
-    t2 = max(time);  % time
-    y1 = min(data(:,2));  % value
-    y2 = max(data(:,2));  % value
-    d1 = min(data(:,1));  % value
-    d2 = max(data(:,1));  % value
-    
-    t = time; 
-    rec = data(:,2);
-
-    lenexp = fix(log10(t2-t1));  % exp
-    if lenexp >= 0 % length [1 10]
-        XTickStep = 0.05 * round(fix((t2-t1)/10^lenexp)) * 10^lenexp;
-        t1r = round(fix(t1/10^lenexp)) * 10^lenexp;
-        age = t1r:XTickStep:t2;
-        depthint = interp1(tiepoints(:,2),tiepoints(:,1),age,'linear','extrap');
-        depthintlabels = num2str(depthint,'%.0f\n');
-    else
-        XTickStep = (t2-t1)/20;
-        age = t1:XTickStep:t2;
-        depthint = interp1(tiepoints(:,2),tiepoints(:,1),age,'linear','extrap');
-        depthintlabels = num2str(depthint,'%.3f\n');
-    end
-    
-    %  display in a first diagram with two axes.
-    figure1 = figure('Position',[50 50 1000 400], 'Color',[1 1 1]) ;
-    
-    ax(1) = axes('Position',[0.1 0.4 0.8 0.4],...
-      'Color','None',...
-      'XTick',age,...
-      'XLim',[t1 t2],...
-      'YLim',[y1 y2],...
-      'FontSize',14);
-    line1 = line(t,rec,...
-      'LineWidth',1);
-    
-    
-    set(gca,'XMinorTick','on','YMinorTick','on')
-    
-    if handles.lang_choice==0
-        xlabel(ax(1),'Age')
-        ylabel(ax(1),'Proxy Value')
-        title(ax(1),[dat_name,': Tuned'], 'Interpreter', 'none')
-    else
-        [~, locb1] = ismember('main22',handles.lang_id);
-        lang_var = handles.lang_var;
-        xlabel(ax(1),lang_var{locb1})
-        [~, locb1] = ismember('main24',handles.lang_id);
-        ylabel(ax(1),lang_var{locb1})
-        [~, locb1] = ismember('a42',handles.lang_id);
-        title(ax(1),[dat_name,': ',lang_var{locb1}], 'Interpreter', 'none')
+        ButtonShowAgeModel matlab.ui.control.Button
+        ButtonPreviewTime matlab.ui.control.Button
+        ButtonPreviewDepth matlab.ui.control.Button
+        ButtonTuning matlab.ui.control.Button
     end
 
-    ax(2) = axes('Position',[0.1 0.25 0.8 0.4],...
-      'Color','None',...
-      'XLim',[t1 t2],...
-      'XTickMode','Manual',...
-      'XTick',age,...
-      'XTickLabels',depthintlabels,...
-      'YLim',[y1 y2],...
-      'YTick',[],...
-      'YColor','None',...
-      'FontSize',14);
-    if handles.lang_choice==0
-        xlabel(ax(2),['Depth (',handles.unit,')'])
-    else
-        [~, locb] = ismember('main23',handles.lang_id);
-        lang_var = handles.lang_var;
-        xlabel(ax(2),[lang_var{locb},' (',handles.unit,')'])
+    properties (Access = private)
+        Context struct = struct()
+        MonZoom double = 1
+        val1 double = 1
+
+        acfigmain
+        listbox_acmain
+        edit_acfigmain_dir
+        unit char = ''
+
+        lang_choice double = 0
+        lang_id = {}
+        lang_var = {}
+
+        workingDir char = ''
+        fileList cell = {}
+        selectedFileIndices = []
+
+        agemodelname char = ''
+        seriesNames cell = {}
+
+        UIColorBg double = [0.94 0.94 0.94]
+        UIColorBlue double = [0.08 0.02 0.95]
+        UIFontSize double = 11.5
     end
-    set(gca,'XMinorTick','on','YMinorTick','on')
-    
-    % Then we interpolate the  ages to an evenly-spaced depth scale
-    
-    lenexp = fix(log10(d2-d1));  % exp
-    if lenexp >= 0 % length [1 10]
-        XTickStep = 0.05 * round(fix((d2-d1)/10^lenexp)) * 10^lenexp;
-        if d1>=0
-            d1r = round(fix(d1/10^lenexp)) * 10^lenexp;
-        else
-            d1r = round(d1);
+
+    methods (Access = private)
+        function txt = getLang(app, key, fallback)
+            txt = fallback;
+            if app.lang_choice <= 0 || isempty(app.lang_id) || isempty(app.lang_var)
+                return
+            end
+            [~, idx] = ismember(key, app.lang_id);
+            if idx > 0 && idx <= numel(app.lang_var)
+                txt = app.lang_var{idx};
+            end
         end
-        depth = d1r:XTickStep:d2;
-        ageint = interp1(depthint,age,depth,'linear','extrap');
-        depthlabels = num2str(depth,'%.0f\n');
-    else
-        XTickStep = (d2-d1)/20;
-        depth = d1:XTickStep:d2;
-        ageint = interp1(depthint,age,depth,'linear','extrap');
-        depthlabels = num2str(depth,'%.3f\n');
-    end
 
-    figure1 = figure('Position',[50 500 1000 400],...
-      'Color',[1 1 1]);
-    ax(1) = axes('Position',[0.1 0.4 0.8 0.4],...
-      'Color','None',...
-      'XLim',[t1 t2],...
-      'XTick',age,...
-      'YLim',[y1 y2],...
-      'FontSize',14);
-    line1 = line(t,rec,...
-      'LineWidth',1);
-    
-    if handles.lang_choice==0
-        xlabel(ax(1),'Age')
-        ylabel(ax(1),'Proxy Value')
-        title(ax(1),[dat_name,': Tuned'], 'Interpreter', 'none')
-    else
-        [~, locb1] = ismember('main22',handles.lang_id);
-        lang_var = handles.lang_var;
-        xlabel(ax(1),lang_var{locb1})
-        [~, locb1] = ismember('main24',handles.lang_id);
-        ylabel(ax(1),lang_var{locb1})
-        [~, locb1] = ismember('a42',handles.lang_id);
-        title(ax(1),[dat_name,': ',lang_var{locb1}], 'Interpreter', 'none')
-    end
-    
-    set(gca,'XMinorTick','on','YMinorTick','on')
-    try
-        ax(2) = axes('Position',[0.1 0.25 0.8 0.4],...
-          'Color','None',...
-          'XLim',[t1 t2],...
-          'XTickMode','Manual',...
-          'XTick',ageint,...
-          'XTickLabels',depthlabels,...
-          'YLim',[y1 y2],...
-          'YTick',[],...
-          'YColor','None',...
-          'FontSize',14);
-    catch
-        ageint = fliplr(ageint);
-        depth = d2:-1*XTickStep:d1r;
-        depthlabels = num2str(depth,'%.0f\n');
-        ax(2) = axes('Position',[0.1 0.25 0.8 0.4],...
-          'Color','None',...
-          'XLim',[t1 t2],...
-          'XTickMode','Manual',...
-          'XTick',ageint,...
-          'XTickLabels',depthlabels,...
-          'YLim',[y1 y2],...
-          'YTick',[],...
-          'YColor','None',...
-          'FontSize',14);
-    end
-    if handles.lang_choice==0
-        xlabel(ax(2),['Depth (',handles.unit,')'])
-    else
-        [~, locb] = ismember('main23',handles.lang_id);
-        lang_var = handles.lang_var;
-        xlabel(ax(2),[lang_var{locb},' (',handles.unit,')'])
-    end
-    
-    set(gca,'XMinorTick','on','YMinorTick','on')
-end
-cd(pre_dirML); % return view dir
-
-
-% --- Executes on button press in pushbutton13.
-function pushbutton13_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton13 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-pre_dirML = pwd;
-CDac_pwd; % cd working dir
-agemodelname = char(get(handles.edit2,'String'));
-tiepoints = load(agemodelname);
-list_content = cellstr(get(handles.listbox2,'String')); % read contents of listbox 1 
-nrow = length(list_content);
-for i = 1:nrow
-    data_name = char(list_content(i,1));
-    data = load(data_name);
-    [~,dat_name,~] = fileparts(data_name);
-    [time,handles.sr] = depthtotime(data(:,1),tiepoints);
-    
-    t1 = min(time);  % time
-    t2 = max(time);  % time
-    y1 = min(data(:,2));  % value
-    y2 = max(data(:,2));  % value
-    d1 = min(data(:,1));  % value
-    d2 = max(data(:,1));  % value
-    
-    t = time;
-    rec = data(:,2);
-    
-    lenexp = fix(log10(d2-d1));  % exp
-    if lenexp >= 0 % length [1 10]
-        XTickStep = 0.1 * round(fix((d2-d1)/10^lenexp)) * 10^lenexp;
-        if d1>=0
-            d1r = round(fix(d1/10^lenexp)) * 10^lenexp;
-        else
-            d1r = round(d1);
+        function screenSize = getScreenSizePixels(~)
+            oldUnits = get(groot,'Units');
+            set(groot,'Units','pixels');
+            screenSize = get(groot,'ScreenSize');
+            set(groot,'Units',oldUnits);
         end
-        XTickListDepth = d1r:XTickStep:d2;
-        timeint = interp1(tiepoints(:,1),tiepoints(:,2),XTickListDepth,'linear','extrap');
-        timeintlabels = num2str(timeint,'%.0f\n');
-    else
-        XTickStep = (d2-d1)/20;
-        XTickListDepth = d1:XTickStep:d2;
-        timeint = interp1(tiepoints(:,1),tiepoints(:,2),XTickListDepth,'linear','extrap');
-        timeintlabels = num2str(timeint,'%3.3f\n');
-    end
-    figure1 = figure('Position',[50 50 1000 400], 'Color',[1 1 1]) ;
-    ax(1) = axes('Position',[0.1 0.4 0.8 0.4],...
-      'Color','None',...
-      'XTick',XTickListDepth,...
-      'XLim',[d1 d2],...
-      'YLim',[y1 y2],...
-      'FontSize',14);
-    line1 = line(data(:,1),rec,...
-      'LineWidth',1);
-    if handles.lang_choice==0
-        xlabel(ax(1),['Depth (',handles.unit,')'])
-        ylabel(ax(1),'Proxy Value')
-        title(ax(1),[dat_name,': Depth'], 'Interpreter', 'none')
-    else
-        [~, locb1] = ismember('main23',handles.lang_id);
-        lang_var = handles.lang_var;
-        xlabel(ax(1),[lang_var{locb1},' (',handles.unit,')'])
-        title(ax(1),[dat_name,': ',lang_var{locb1}], 'Interpreter', 'none')
-        [~, locb1] = ismember('main24',handles.lang_id);
-        ylabel(ax(1),lang_var{locb1})
-    end
-    
-    set(gca,'XMinorTick','on','YMinorTick','on')
-    ax(2) = axes('Position',[0.1 0.25 0.8 0.4],...
-      'Color','None',...
-      'XLim',[d1 d2],...
-      'XTickMode','Manual',...
-      'XTick',XTickListDepth,...
-      'XTickLabels',timeintlabels,...
-      'YLim',[y1 y2],...
-      'YTick',[],...
-      'YColor','None',...
-      'FontSize',14);
-    if handles.lang_choice==0
-        xlabel(ax(2),'Age')
-    else
-        [~, locb] = ismember('main22',handles.lang_id);
-        lang_var = handles.lang_var;
-        xlabel(ax(2),lang_var{locb})
-    end
-    
-    set(gca,'XMinorTick','on','YMinorTick','on')
-    
-    % Then we interpolate the  ages to an evenly-spaced depth scale
-    lenexp = fix(log10(t2-t1));  % exp
-    if lenexp >= 0 % length [1 10]
-        XTickStep = 0.05 * round(fix((t2-t1)/10^lenexp)) * 10^lenexp;
-        t1r = round(fix(t1/10^lenexp)) * 10^lenexp;
-        age = t1r:XTickStep:t2;
-        depthint = interp1(tiepoints(:,2),tiepoints(:,1),age,'linear','extrap');
-        depthintlabels = num2str(age,'%.0f\n');
-    else
-        XTickStep = (t2-t1)/20;
-        age = t1:XTickStep:t2;
-        depthint = interp1(tiepoints(:,2),tiepoints(:,1),age,'linear','extrap');
-        depthintlabels = num2str(age,'%.3f\n');
+
+        function pos = normalizedToPixelPosition(app, normPos)
+            screen = app.getScreenSizePixels();
+            zoom = app.MonZoom;
+            if isnumeric(zoom)
+                if isscalar(zoom)
+                    normPos = normPos * zoom;
+                elseif numel(zoom) >= 4
+                    normPos = normPos .* zoom(1:4);
+                end
+            end
+            w = max(1500, normPos(3)*screen(3));
+            h = max(650, normPos(4)*screen(4));
+            x = screen(1) + normPos(1)*screen(3);
+            y = screen(2) + normPos(2)*screen(4);
+            x = min(max(x,screen(1)), screen(1)+screen(3)-w);
+            y = min(max(y,screen(2)), screen(2)+screen(4)-h);
+            pos = round([x y w h]);
+        end
+
+        function p = childPos(~, parentPos, rel)
+            p = round([rel(1)*parentPos(3), rel(2)*parentPos(4), rel(3)*parentPos(3), rel(4)*parentPos(4)]);
+        end
+
+        function createComponents(app)
+            app.UIFigure = uifigure('Name','Acycle: Age Scale', ...
+                'Color',app.UIColorBg, ...
+                'Resize','on', ...
+                'Position',app.normalizedToPixelPosition([0.05,0.4,0.9,0.4]));
+            app.UIFigure.AutoResizeChildren = 'off';
+            app.UIFigure.SizeChangedFcn = @(~,~)app.applyLayout();
+
+            app.ButtonUp = uibutton(app.UIFigure,'push','Text','<--', ...
+                'BackgroundColor',app.UIColorBlue,'FontColor',[1 1 1], ...
+                'FontSize',app.UIFontSize+1,'FontWeight','bold', ...
+                'ButtonPushedFcn',@(~,~)app.onUpDir());
+            app.ButtonOpen = uibutton(app.UIFigure,'push','Text','-->', ...
+                'BackgroundColor',app.UIColorBlue,'FontColor',[1 1 1], ...
+                'FontSize',app.UIFontSize+1,'FontWeight','bold', ...
+                'ButtonPushedFcn',@(~,~)app.onOpenDir());
+
+            app.EditPath = uieditfield(app.UIFigure,'text', ...
+                'BackgroundColor',[1 1 1], ...
+                'FontSize',app.UIFontSize+1, ...
+                'ValueChangedFcn',@(~,~)app.onPathChanged());
+
+            app.ListFiles = uilistbox(app.UIFigure,'Multiselect','on', ...
+                'BackgroundColor',[1 1 1], ...
+                'FontSize',app.UIFontSize+1, ...
+                'ValueChangedFcn',@(~,~)app.onListFilesChanged());
+
+            app.ButtonSetAgeModel = uibutton(app.UIFigure,'push','Text','==>', ...
+                'BackgroundColor',app.UIColorBlue,'FontColor',[1 1 1], ...
+                'FontSize',app.UIFontSize+1,'FontWeight','bold', ...
+                'ButtonPushedFcn',@(~,~)app.onSetAgeModel());
+            app.ButtonSetSeries = uibutton(app.UIFigure,'push','Text','==>', ...
+                'BackgroundColor',app.UIColorBlue,'FontColor',[1 1 1], ...
+                'FontSize',app.UIFontSize+1,'FontWeight','bold', ...
+                'ButtonPushedFcn',@(~,~)app.onSetSeries());
+
+            app.LabelAgeModel = uilabel(app.UIFigure,'Text','Age Model', ...
+                'BackgroundColor',app.UIColorBg,'FontSize',app.UIFontSize+1);
+            app.EditAgeModel = uieditfield(app.UIFigure,'text','Editable','off', ...
+                'BackgroundColor',[1 1 1],'FontSize',app.UIFontSize+1);
+
+            app.LabelSeries = uilabel(app.UIFigure,'Text','Series', ...
+                'BackgroundColor',app.UIColorBg,'FontSize',app.UIFontSize+1);
+            app.ListSeries = uilistbox(app.UIFigure, ...
+                'Items',{}, ...
+                'BackgroundColor',[1 1 1],'FontSize',app.UIFontSize+1);
+
+            app.ButtonShowAgeModel = uibutton(app.UIFigure,'push','Text','Show Age Model', ...
+                'BackgroundColor',[0.45 0.45 0.45],'FontColor',[1 1 1], ...
+                'FontSize',app.UIFontSize+1,'FontWeight','bold', ...
+                'ButtonPushedFcn',@(~,~)app.onShowAgeModel());
+            app.ButtonPreviewTime = uibutton(app.UIFigure,'push','Text','Tuning Preview Time', ...
+                'BackgroundColor',[0.45 0.45 0.45],'FontColor',[1 1 1], ...
+                'FontSize',app.UIFontSize+1,'FontWeight','bold', ...
+                'ButtonPushedFcn',@(~,~)app.onPreviewTime());
+            app.ButtonPreviewDepth = uibutton(app.UIFigure,'push','Text','Tuning Preview Depth', ...
+                'BackgroundColor',[0.45 0.45 0.45],'FontColor',[1 1 1], ...
+                'FontSize',app.UIFontSize+1,'FontWeight','bold', ...
+                'ButtonPushedFcn',@(~,~)app.onPreviewDepth());
+            app.ButtonTuning = uibutton(app.UIFigure,'push','Text','Tuning', ...
+                'BackgroundColor',app.UIColorBlue,'FontColor',[1 1 1], ...
+                'FontSize',app.UIFontSize+1,'FontWeight','bold', ...
+                'ButtonPushedFcn',@(~,~)app.onTuning());
+
+            app.applyLayout();
+        end
+
+        function applyLayout(app)
+            fr = [0 0 app.UIFigure.Position(3) app.UIFigure.Position(4)];
+
+            app.ButtonUp.Position = app.childPos(fr,[0.034,0.84,0.06,0.06]);
+            app.ButtonOpen.Position = app.childPos(fr,[0.10,0.84,0.06,0.06]);
+
+            app.EditPath.Position = app.childPos(fr,[0.018,0.748,0.436,0.06]);
+            app.ListFiles.Position = app.childPos(fr,[0.018,0.114,0.436,0.634]);
+
+            app.ButtonSetAgeModel.Position = app.childPos(fr,[0.485,0.732,0.06,0.06]);
+            app.ButtonSetSeries.Position = app.childPos(fr,[0.485,0.527,0.06,0.06]);
+
+            app.LabelAgeModel.Position = app.childPos(fr,[0.58,0.84,0.15,0.06]);
+            app.EditAgeModel.Position = app.childPos(fr,[0.58,0.738,0.4,0.06]);
+            app.LabelSeries.Position = app.childPos(fr,[0.58,0.606,0.1,0.06]);
+            app.ListSeries.Position = app.childPos(fr,[0.58,0.114,0.4,0.476]);
+
+            app.ButtonShowAgeModel.Position = app.childPos(fr,[0.465,0.366,0.11,0.06]);
+            app.ButtonPreviewTime.Position = app.childPos(fr,[0.465,0.293,0.11,0.06]);
+            app.ButtonPreviewDepth.Position = app.childPos(fr,[0.465,0.221,0.11,0.06]);
+            app.ButtonTuning.Position = app.childPos(fr,[0.465,0.114,0.10,0.06]);
+        end
+
+        function initializeState(app)
+            c = app.Context;
+            if isfield(c,'acfigmain'), app.acfigmain = c.acfigmain; end
+            if isfield(c,'listbox_acmain'), app.listbox_acmain = c.listbox_acmain; end
+            if isfield(c,'edit_acfigmain_dir'), app.edit_acfigmain_dir = c.edit_acfigmain_dir; end
+            if isfield(c,'unit'), app.unit = c.unit; end
+            if isfield(c,'MonZoom'), app.MonZoom = c.MonZoom; end
+            if isfield(c,'val1'), app.val1 = c.val1; end
+            if isfield(c,'lang_choice'), app.lang_choice = c.lang_choice; end
+            if isfield(c,'lang_id'), app.lang_id = c.lang_id; end
+            if isfield(c,'lang_var'), app.lang_var = c.lang_var; end
+
+            app.UIFigure.Name = app.getLang('a00','Acycle: Age Scale');
+            app.LabelAgeModel.Text = app.getLang('main27','Age Model');
+            app.LabelSeries.Text = app.getLang('a02','Series');
+            app.ButtonShowAgeModel.Text = app.getLang('a03','Show Age Model');
+            app.ButtonPreviewTime.Text = app.getLang('a04','Tuning Preview Time');
+            app.ButtonPreviewDepth.Text = app.getLang('a05','Tuning Preview Depth');
+            app.ButtonTuning.Text = app.getLang('a06','Tuning');
+
+            pre_dirML = pwd;
+            CDac_pwd;
+            app.workingDir = pwd;
+            cd(pre_dirML);
+            app.loadDirectory(app.workingDir);
+
+            app.UIFigure.Position = app.normalizedToPixelPosition([0.05,0.4,0.9,0.4]);
+            app.applyLayout();
+        end
+
+        function loadDirectory(app, address)
+            if ~isfolder(address)
+                return
+            end
+            app.workingDir = address;
+            d = dir(address);
+            names = {d.name};
+            names = names(~ismember(names,{'.','..'}));
+            app.fileList = names;
+            app.ListFiles.Items = names;
+            if ~isempty(names)
+                app.ListFiles.Value = names{1};
+            end
+            app.EditPath.Value = address;
+            app.selectedFileIndices = [];
+        end
+
+        function onPathChanged(app)
+            address = strtrim(app.EditPath.Value);
+            if isfolder(address)
+                app.loadDirectory(address);
+            else
+                app.EditPath.Value = app.workingDir;
+            end
+        end
+
+        function onListFilesChanged(app)
+            vals = app.ListFiles.Value;
+            if ischar(vals)
+                vals = {vals};
+            elseif isstring(vals)
+                vals = cellstr(vals);
+            end
+            idx = [];
+            for i = 1:numel(vals)
+                j = find(strcmp(app.fileList, vals{i}), 1, 'first');
+                if ~isempty(j)
+                    idx(end+1) = j; %#ok<AGROW>
+                end
+            end
+            app.selectedFileIndices = idx;
+        end
+
+        function onUpDir(app)
+            if isempty(app.workingDir)
+                return
+            end
+            parentDir = fileparts(app.workingDir);
+            if isempty(parentDir)
+                parentDir = app.workingDir;
+            end
+            app.loadDirectory(parentDir);
+        end
+
+        function onOpenDir(app)
+            if isempty(app.selectedFileIndices) || numel(app.selectedFileIndices) ~= 1
+                helpdlg('Tips: Select 1 folder','Tips: Close');
+                return
+            end
+            idx = app.selectedFileIndices(1);
+            if idx < 1 || idx > numel(app.fileList)
+                return
+            end
+            candidate = app.fileList{idx};
+            fullCandidate = fullfile(app.workingDir, candidate);
+            if ~isfolder(fullCandidate)
+                helpdlg('This is not a folder','Tips: Close');
+                return
+            end
+            app.loadDirectory(fullCandidate);
+        end
+
+        function onSetAgeModel(app)
+            if isempty(app.selectedFileIndices) || numel(app.selectedFileIndices) ~= 1
+                return
+            end
+            idx = app.selectedFileIndices(1);
+            if idx < 1 || idx > numel(app.fileList)
+                return
+            end
+            name = app.fileList{idx};
+            if isfolder(fullfile(app.workingDir,name))
+                return
+            end
+            app.agemodelname = name;
+            app.EditAgeModel.Value = name;
+        end
+
+        function onSetSeries(app)
+            if isempty(app.selectedFileIndices)
+                return
+            end
+            s = {};
+            for i = 1:numel(app.selectedFileIndices)
+                idx = app.selectedFileIndices(i);
+                if idx >= 1 && idx <= numel(app.fileList)
+                    name = app.fileList{idx};
+                    if ~isfolder(fullfile(app.workingDir,name))
+                        s{end+1} = name; %#ok<AGROW>
+                    end
+                end
+            end
+            app.seriesNames = s;
+            app.ListSeries.Items = s;
+            if ~isempty(s)
+                app.ListSeries.Value = s{1};
+            end
+        end
+
+        function onTuning(app)
+            if isempty(app.agemodelname) || isempty(app.seriesNames)
+                return
+            end
+            pre_dirML = pwd;
+            CDac_pwd;
+            saveDir = pwd;
+            agemodel = load(fullfile(app.workingDir, app.agemodelname));
+
+            figagescale = app.UIFigure;
+            figdata = figure;
+            xmax1 = nan; xmin1 = nan; xmax2 = nan; xmin2 = nan;
+
+            for i = 1:numel(app.seriesNames)
+                data_name = app.seriesNames{i};
+                data = load(fullfile(app.workingDir, data_name));
+                [~,dat_name,~] = fileparts(data_name);
+                subplot(2,1,1);
+                plot(data(:,1),data(:,2)); hold on;
+                set(gca,'XMinorTick','on','YMinorTick','on');
+                xmin1 = nanmin(xmin1,min(data(:,1))); xmax1 = nanmax(xmax1,max(data(:,1)));
+                if app.lang_choice == 0
+                    title('Origin data');
+                else
+                    title(app.getLang('a41','Origin data'));
+                end
+                xlim([xmin1,xmax1]);
+
+                [time,~] = depthtotime(data(:,1),agemodel);
+                tunedseries = [time,data(:,2)];
+                subplot(2,1,2);
+                plot(time,data(:,2)); hold on;
+                set(gca,'XMinorTick','on','YMinorTick','on');
+                if app.lang_choice == 0
+                    title('Tuned data');
+                else
+                    title(app.getLang('a42','Tuned data'));
+                end
+                xmin2 = nanmin(xmin2,min(time)); xmax2 = nanmax(xmax2,max(time));
+                xlim([xmin2,xmax2]);
+
+                add_list = [dat_name,'-TD-',app.agemodelname];
+                dlmwrite(add_list,tunedseries,'delimiter',' ','precision',9);
+            end
+
+            app.refreshMainListbox(saveDir);
+            cd(pre_dirML);
+            figure(figagescale);
+            figure(figdata);
+        end
+
+        function onShowAgeModel(app)
+            if isempty(app.agemodelname)
+                return
+            end
+            pre_dirML = pwd;
+            CDac_pwd;
+            tiepoints = load(fullfile(app.workingDir, app.agemodelname));
+            x1 = min(tiepoints(:,1)); x2 = max(tiepoints(:,1));
+            y1 = min(tiepoints(:,2)); y2 = max(tiepoints(:,2));
+
+            figure('Position',[100 800 500 500],'Color',[1 1 1]);
+            axes('Position',[0.2 0.2 0.7 0.7], ...
+                'XLim',[y1 y2],'YLim',[x1 x2],'YDir','Reverse','Box','On','FontSize',14);
+            line(tiepoints(:,2),tiepoints(:,1),'LineWidth',1);
+            if app.lang_choice == 0
+                xlabel('Age'); ylabel(['Depth (',app.unit,')']); title('Age Model');
+            else
+                xlabel(app.getLang('main22','Age'));
+                ylabel([app.getLang('main23','Depth'),' (',app.unit,')']);
+                title(app.getLang('main27','Age Model'));
+            end
+            set(gca,'XMinorTick','on','YMinorTick','on');
+            cd(pre_dirML);
+        end
+
+        function onPreviewTime(app)
+            if isempty(app.agemodelname) || isempty(app.seriesNames)
+                return
+            end
+            pre_dirML = pwd;
+            CDac_pwd;
+            tiepoints = load(fullfile(app.workingDir, app.agemodelname));
+
+            for i = 1:numel(app.seriesNames)
+                data_name = app.seriesNames{i};
+                data = load(fullfile(app.workingDir, data_name));
+                [~,dat_name,~] = fileparts(data_name);
+                [time,~] = depthtotime(data(:,1),tiepoints);
+
+                t1 = min(time); t2 = max(time);
+                y1 = min(data(:,2)); y2 = max(data(:,2));
+                d1 = min(data(:,1)); d2 = max(data(:,1));
+                t = time; rec = data(:,2);
+
+                lenexp = fix(log10(t2-t1));
+                if lenexp >= 0
+                    XTickStep = 0.05 * round(fix((t2-t1)/10^lenexp)) * 10^lenexp;
+                    t1r = round(fix(t1/10^lenexp)) * 10^lenexp;
+                    age = t1r:XTickStep:t2;
+                    depthint = interp1(tiepoints(:,2),tiepoints(:,1),age,'linear','extrap');
+                    depthintlabels = num2str(depthint,'%.0f\n');
+                else
+                    XTickStep = (t2-t1)/20;
+                    age = t1:XTickStep:t2;
+                    depthint = interp1(tiepoints(:,2),tiepoints(:,1),age,'linear','extrap');
+                    depthintlabels = num2str(depthint,'%.3f\n');
+                end
+
+                figure('Position',[50 50 1000 400],'Color',[1 1 1]);
+                ax1 = axes('Position',[0.1 0.4 0.8 0.4],'Color','None','XTick',age,'XLim',[t1 t2],'YLim',[y1 y2],'FontSize',14);
+                line(t,rec,'LineWidth',1);
+                if app.lang_choice==0
+                    xlabel(ax1,'Age'); ylabel(ax1,'Proxy Value'); title(ax1,[dat_name,': Tuned'],'Interpreter','none');
+                else
+                    xlabel(ax1,app.getLang('main22','Age')); ylabel(ax1,app.getLang('main24','Proxy Value'));
+                    title(ax1,[dat_name,': ',app.getLang('a42','Tuned')],'Interpreter','none');
+                end
+                set(gca,'XMinorTick','on','YMinorTick','on');
+
+                ax2 = axes('Position',[0.1 0.25 0.8 0.4],'Color','None','XLim',[t1 t2], ...
+                    'XTickMode','Manual','XTick',age,'XTickLabels',depthintlabels,'YLim',[y1 y2], ...
+                    'YTick',[],'YColor','None','FontSize',14);
+                if app.lang_choice == 0
+                    xlabel(ax2,['Depth (',app.unit,')']);
+                else
+                    xlabel(ax2,[app.getLang('main23','Depth'),' (',app.unit,')']);
+                end
+                set(gca,'XMinorTick','on','YMinorTick','on');
+
+                lenexp = fix(log10(d2-d1));
+                if lenexp >= 0
+                    XTickStep = 0.05 * round(fix((d2-d1)/10^lenexp)) * 10^lenexp;
+                    if d1>=0, d1r = round(fix(d1/10^lenexp)) * 10^lenexp; else, d1r = round(d1); end
+                    depth = d1r:XTickStep:d2;
+                    ageint = interp1(depthint,age,depth,'linear','extrap');
+                    depthlabels = num2str(depth,'%.0f\n');
+                else
+                    XTickStep = (d2-d1)/20;
+                    depth = d1:XTickStep:d2;
+                    ageint = interp1(depthint,age,depth,'linear','extrap');
+                    depthlabels = num2str(depth,'%.3f\n');
+                end
+
+                figure('Position',[50 500 1000 400],'Color',[1 1 1]);
+                ax1 = axes('Position',[0.1 0.4 0.8 0.4],'Color','None','XLim',[t1 t2],'XTick',age,'YLim',[y1 y2],'FontSize',14);
+                line(t,rec,'LineWidth',1);
+                if app.lang_choice==0
+                    xlabel(ax1,'Age'); ylabel(ax1,'Proxy Value'); title(ax1,[dat_name,': Tuned'],'Interpreter','none');
+                else
+                    xlabel(ax1,app.getLang('main22','Age')); ylabel(ax1,app.getLang('main24','Proxy Value'));
+                    title(ax1,[dat_name,': ',app.getLang('a42','Tuned')],'Interpreter','none');
+                end
+                set(gca,'XMinorTick','on','YMinorTick','on');
+
+                try
+                    ax2 = axes('Position',[0.1 0.25 0.8 0.4],'Color','None','XLim',[t1 t2], ...
+                        'XTickMode','Manual','XTick',ageint,'XTickLabels',depthlabels,'YLim',[y1 y2], ...
+                        'YTick',[],'YColor','None','FontSize',14);
+                catch
+                    ageint = fliplr(ageint);
+                    depth = d2:-1*XTickStep:d1r;
+                    depthlabels = num2str(depth,'%.0f\n');
+                    ax2 = axes('Position',[0.1 0.25 0.8 0.4],'Color','None','XLim',[t1 t2], ...
+                        'XTickMode','Manual','XTick',ageint,'XTickLabels',depthlabels,'YLim',[y1 y2], ...
+                        'YTick',[],'YColor','None','FontSize',14);
+                end
+                if app.lang_choice == 0
+                    xlabel(ax2,['Depth (',app.unit,')']);
+                else
+                    xlabel(ax2,[app.getLang('main23','Depth'),' (',app.unit,')']);
+                end
+                set(gca,'XMinorTick','on','YMinorTick','on');
+            end
+            cd(pre_dirML);
+        end
+
+        function onPreviewDepth(app)
+            if isempty(app.agemodelname) || isempty(app.seriesNames)
+                return
+            end
+            pre_dirML = pwd;
+            CDac_pwd;
+            tiepoints = load(fullfile(app.workingDir, app.agemodelname));
+
+            for i = 1:numel(app.seriesNames)
+                data_name = app.seriesNames{i};
+                data = load(fullfile(app.workingDir, data_name));
+                [~,dat_name,~] = fileparts(data_name);
+                [time,~] = depthtotime(data(:,1),tiepoints);
+
+                t1 = min(time); t2 = max(time);
+                y1 = min(data(:,2)); y2 = max(data(:,2));
+                d1 = min(data(:,1)); d2 = max(data(:,1));
+                rec = data(:,2);
+
+                lenexp = fix(log10(d2-d1));
+                if lenexp >= 0
+                    XTickStep = 0.1 * round(fix((d2-d1)/10^lenexp)) * 10^lenexp;
+                    if d1>=0, d1r = round(fix(d1/10^lenexp)) * 10^lenexp; else, d1r = round(d1); end
+                    XTickListDepth = d1r:XTickStep:d2;
+                    timeint = interp1(tiepoints(:,1),tiepoints(:,2),XTickListDepth,'linear','extrap');
+                    timeintlabels = num2str(timeint,'%.0f\n');
+                else
+                    XTickStep = (d2-d1)/20;
+                    XTickListDepth = d1:XTickStep:d2;
+                    timeint = interp1(tiepoints(:,1),tiepoints(:,2),XTickListDepth,'linear','extrap');
+                    timeintlabels = num2str(timeint,'%3.3f\n');
+                end
+
+                figure('Position',[50 50 1000 400],'Color',[1 1 1]);
+                ax1 = axes('Position',[0.1 0.4 0.8 0.4],'Color','None','XTick',XTickListDepth,'XLim',[d1 d2],'YLim',[y1 y2],'FontSize',14);
+                line(data(:,1),rec,'LineWidth',1);
+                if app.lang_choice==0
+                    xlabel(ax1,['Depth (',app.unit,')']); ylabel(ax1,'Proxy Value'); title(ax1,[dat_name,': Depth'],'Interpreter','none');
+                else
+                    xlabel(ax1,[app.getLang('main23','Depth'),' (',app.unit,')']); ylabel(ax1,app.getLang('main24','Proxy Value'));
+                    title(ax1,[dat_name,': ',app.getLang('main23','Depth')],'Interpreter','none');
+                end
+                set(gca,'XMinorTick','on','YMinorTick','on');
+
+                ax2 = axes('Position',[0.1 0.25 0.8 0.4],'Color','None','XLim',[d1 d2], ...
+                    'XTickMode','Manual','XTick',XTickListDepth,'XTickLabels',timeintlabels,'YLim',[y1 y2], ...
+                    'YTick',[],'YColor','None','FontSize',14);
+                if app.lang_choice==0
+                    xlabel(ax2,'Age');
+                else
+                    xlabel(ax2,app.getLang('main22','Age'));
+                end
+                set(gca,'XMinorTick','on','YMinorTick','on');
+
+                lenexp = fix(log10(t2-t1));
+                if lenexp >= 0
+                    XTickStep = 0.05 * round(fix((t2-t1)/10^lenexp)) * 10^lenexp;
+                    t1r = round(fix(t1/10^lenexp)) * 10^lenexp;
+                    age = t1r:XTickStep:t2;
+                    depthint = interp1(tiepoints(:,2),tiepoints(:,1),age,'linear','extrap');
+                    depthintlabels = num2str(age,'%.0f\n');
+                else
+                    XTickStep = (t2-t1)/20;
+                    age = t1:XTickStep:t2;
+                    depthint = interp1(tiepoints(:,2),tiepoints(:,1),age,'linear','extrap');
+                    depthintlabels = num2str(age,'%.3f\n');
+                end
+
+                figure('Position',[50 500 1000 400],'Color',[1 1 1]);
+                ax1 = axes('Position',[0.1 0.4 0.8 0.4],'Color','None','XTick',XTickListDepth,'XLim',[d1 d2],'YLim',[y1 y2],'FontSize',14);
+                line(data(:,1),rec,'LineWidth',1);
+                if app.lang_choice==0
+                    xlabel(ax1,['Depth (',app.unit,')']); ylabel(ax1,'Proxy Value'); title(ax1,[dat_name,': Depth'],'Interpreter','none');
+                else
+                    xlabel(ax1,[app.getLang('main23','Depth'),' (',app.unit,')']); ylabel(ax1,app.getLang('main24','Proxy Value'));
+                    title(ax1,[dat_name,': ',app.getLang('main23','Depth')],'Interpreter','none');
+                end
+                set(gca,'XMinorTick','on','YMinorTick','on');
+
+                try
+                    ax2 = axes('Position',[0.1 0.25 0.8 0.4],'Color','None','XLim',[d1 d2], ...
+                        'XTickMode','Manual','XTick',depthint,'XTickLabels',depthintlabels,'YLim',[y1 y2], ...
+                        'YTick',[],'YColor','None','FontSize',14);
+                catch
+                    depthint = fliplr(depthint);
+                    age = t2:-1*XTickStep:t1r;
+                    depthintlabels = num2str(age,'%.3f\n');
+                    ax2 = axes('Position',[0.1 0.25 0.8 0.4],'Color','None','XLim',[d1 d2], ...
+                        'XTickMode','Manual','XTick',depthint,'XTickLabels',depthintlabels,'YLim',[y1 y2], ...
+                        'YTick',[],'YColor','None','FontSize',14);
+                end
+                if app.lang_choice==0
+                    xlabel(ax2,'Age');
+                else
+                    xlabel(ax2,app.getLang('main22','Age'));
+                end
+                set(gca,'XMinorTick','on','YMinorTick','on');
+            end
+
+            cd(pre_dirML);
+        end
+
+        function refreshMainListbox(app,dirpath)
+            if isempty(app.listbox_acmain) || ~isgraphics(app.listbox_acmain)
+                return
+            end
+            if nargin < 2 || isempty(dirpath) || exist(dirpath,'dir') ~= 7
+                dirpath = pwd;
+            end
+            try
+                d = dir(dirpath);
+                if numel(d) >= 2
+                    d = d(~ismember({d.name},{'.','..'}));
+                end
+                names = {};
+                isDir = false(0,1);
+                if ~isempty(d)
+                    T = struct2table(d);
+                    switch app.getSortMode()
+                        case 1
+                            sortedT = sortrows(T,'name','ascend');
+                        case 2
+                            sortedT = sortrows(T,'name','descend');
+                        case 3
+                            sortedT = sortrows(T,'date','ascend');
+                        case 4
+                            sortedT = sortrows(T,'date','descend');
+                        case 5
+                            sortedT = sortrows(T,'bytes','ascend');
+                        case 6
+                            sortedT = sortrows(T,'bytes','descend');
+                        otherwise
+                            sortedT = sortrows(T,'date','descend');
+                    end
+                    sd = table2struct(sortedT);
+                    names = {sd.name};
+                    isDir = [sd.isdir];
+                end
+                if ~isempty(app.edit_acfigmain_dir) && isgraphics(app.edit_acfigmain_dir)
+                    set(app.edit_acfigmain_dir,'String',dirpath);
+                end
+                app.syncAcPwd(dirpath);
+                if exist('ac_update_listbox_acmain','file') == 2
+                    ac_update_listbox_acmain(app.listbox_acmain,names,isDir);
+                elseif isempty(names)
+                    set(app.listbox_acmain,'String',{},'Value',[]);
+                else
+                    set(app.listbox_acmain,'String',names,'Value',1);
+                end
+                drawnow limitrate;
+            catch
+            end
+        end
+
+        function val1 = getSortMode(app)
+            val1 = app.val1;
+            try
+                mainFig = ancestor(app.listbox_acmain,'figure');
+                mainHandles = guidata(mainFig);
+                if isstruct(mainHandles) && isfield(mainHandles,'val1') && ~isempty(mainHandles.val1)
+                    val1 = mainHandles.val1;
+                end
+            catch
+            end
+        end
+
+        function syncAcPwd(~,dirpath)
+            try
+                acPwdFile = which('ac_pwd.txt');
+                if isempty(acPwdFile)
+                    return
+                end
+                fid = fopen(acPwdFile,'w');
+                if fid == -1
+                    return
+                end
+                fprintf(fid,'%s',dirpath);
+                fclose(fid);
+            catch
+            end
+        end
     end
 
-    figure1 = figure('Position',[50 500 1000 400],'Color',[1 1 1]);
-    ax(1) = axes('Position',[0.1 0.4 0.8 0.4],...
-      'Color','None',...
-      'XTick',XTickListDepth,...
-      'XLim',[d1 d2],...
-      'YLim',[y1 y2],...
-      'FontSize',14);
-    line1 = line(data(:,1),rec,...
-      'LineWidth',1);
-  
-    if handles.lang_choice==0
-        xlabel(ax(1),['Depth (',handles.unit,')'])
-        ylabel(ax(1),'Proxy Value')
-        title(ax(1),[dat_name,': Depth'], 'Interpreter', 'none')
-    else
-        [~, locb1] = ismember('main23',handles.lang_id);
-        lang_var = handles.lang_var;
-        xlabel(ax(1),[lang_var{locb1},' (',handles.unit,')'])
-        title(ax(1),[dat_name,': ',lang_var{locb1}], 'Interpreter', 'none')
-        [~, locb1] = ismember('main24',handles.lang_id);
-        ylabel(ax(1),lang_var{locb1})
+    methods (Access = public)
+        function app = agescale(varargin)
+            if nargin > 0 && isstruct(varargin{1})
+                app.Context = varargin{1};
+                if isfield(app.Context,'MonZoom')
+                    app.MonZoom = app.Context.MonZoom;
+                end
+            else
+                error('agescale requires a handles/context struct input.');
+            end
+
+            app.createComponents();
+            app.initializeState();
+            registerApp(app, app.UIFigure);
+            if nargout == 0
+                clear app
+            end
+        end
+
+        function delete(app)
+            if ~isempty(app.UIFigure) && isvalid(app.UIFigure)
+                delete(app.UIFigure);
+            end
+        end
     end
-    
-    set(gca,'XMinorTick','on','YMinorTick','on')
-    try
-        ax(2) = axes('Position',[0.1 0.25 0.8 0.4],...
-          'Color','None',...
-          'XLim',[d1 d2],...
-          'XTickMode','Manual',...
-          'XTick',depthint,...
-          'XTickLabels',depthintlabels,...
-          'YLim',[y1 y2],...
-          'YTick',[],...
-          'YColor','None',...
-          'FontSize',14);
-    catch
-        depthint = fliplr(depthint);
-        age = t2:-1*XTickStep:t1r;
-        depthintlabels = num2str(age,'%.3f\n');
-        ax(2) = axes('Position',[0.1 0.25 0.8 0.4],...
-          'Color','None',...
-          'XLim',[d1 d2],...
-          'XTickMode','Manual',...
-          'XTick',depthint,...
-          'XTickLabels',depthintlabels,...
-          'YLim',[y1 y2],...
-          'YTick',[],...
-          'YColor','None',...
-          'FontSize',14);
-    end
-    if handles.lang_choice==0
-        xlabel(ax(2),'Age')
-    else
-        [~, locb] = ismember('main22',handles.lang_id);
-        lang_var = handles.lang_var;
-        xlabel(ax(2),lang_var{locb})
-    end
-    set(gca,'XMinorTick','on','YMinorTick','on')
 end
-cd(pre_dirML); % return view dir

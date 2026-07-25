@@ -18,7 +18,7 @@ orbit5 = [0;2/(orbit7(1)+orbit7(2));2/(orbit7(3)+orbit7(4));2/(orbit7(4)+orbit7(
 %  spectrum of tuned series using sr (cm/kyr); f is cycles/m. Thus need a
 %  100x
 aimarx = f * sr / 100;  % transfer f in cycles/m to cycles/kyr.
-aimpower = power';
+aimpower = power(:);
 
 p_orbit4 = zeros(4,1);
 
@@ -32,14 +32,26 @@ for i = 1 : 4
     end
 end
 targetx = target(:,1);
+targetp = target(:,2);
+targ1 = zeros(size(targetx));
 ext5 = find(targetx <= orbit5(2));  % E
 ext6 = find(and(targetx > orbit5(2), targetx <= orbit5(3)));  % e
 ext7 = find(and(targetx > orbit5(3), targetx <= orbit5(4)));  % O
 ext8 = find(and(targetx > orbit5(4), targetx <= orbit5(5)));  % p
 %
-targ1(ext5) = p_orbit4(1) .* target(ext5,2) / max(target(ext5,2)); % E
-targ1(ext6) = p_orbit4(2) .* target(ext6,2) / max(target(ext6,2)); % e
-targ1(ext7) = p_orbit4(3) .* target(ext7,2) / max(target(ext7,2)); % O
-targ1(ext8) = p_orbit4(4) .* target(ext8,2) / max(target(ext8,2)); % p
+targ1 = scaleTargetBand(targ1, targetp, ext5, p_orbit4(1)); % E
+targ1 = scaleTargetBand(targ1, targetp, ext6, p_orbit4(2)); % e
+targ1 = scaleTargetBand(targ1, targetp, ext7, p_orbit4(3)); % O
+targ1 = scaleTargetBand(targ1, targetp, ext8, p_orbit4(4)); % p
 targ(:,1) = target(:,1);
 targ(:,2) = targ1;
+
+function targ1 = scaleTargetBand(targ1, targetp, idx, bandPower)
+if isempty(idx) || ~isfinite(bandPower)
+    return
+end
+denom = max(targetp(idx));
+if ~isfinite(denom) || denom <= 0
+    return
+end
+targ1(idx) = bandPower .* targetp(idx) ./ denom;
