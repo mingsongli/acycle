@@ -1,5 +1,5 @@
 function tests = test_ecoco_crossfit_core
-%TEST_ECOCO_CROSSFIT_CORE Cross-fitted eCOCO numerical invariants.
+%TEST_ECOCO_CROSSFIT_CORE Blocked eCOCO numerical invariants.
 tests = functiontests(localfunctions);
 end
 
@@ -46,6 +46,12 @@ r = runCore(testCase,0,2);
 nWindow = round(testCase.TestData.window/testCase.TestData.dt)+1;
 anchorStep = round(0.5*(nWindow-1));
 
+verifyEqual(testCase,r.name,'Blocked eCOCO');
+verifyEqual(testCase,r.publicName,'Blocked eCOCO');
+verifyEqual(testCase,r.abbreviation,'B-eCOCO');
+verifyEqual(testCase,r.version,3);
+verifyEqual(testCase,r.algorithmVersion, ...
+    'Crossfit-eCOCO9B-full-grid-partial-group-v4');
 verifyEqual(testCase,r.metadata.windowPointCount,nWindow);
 verifyEqual(testCase,r.metadata.windowActualSpan, ...
     testCase.TestData.window,'AbsTol',1e-13);
@@ -107,6 +113,24 @@ end
 verifyTrue(testCase,isfield(r,'anchor'));
 end
 
+function testAge566PeriodsDoNotStopBlockedEcoco(testCase)
+t = testCase.TestData;
+orbitMatrix = calculate_orbit9(566);
+periods = orbitMatrix(:,2)/1000;
+timeKyr = t.data(:,1)*100/4;
+phase = (0:8)'*0.31;
+value = sum(sin(2*pi*timeKyr./periods'+phase'),2)+ ...
+    0.03*cos(2*pi*timeKyr/37.1)+0.0003*t.data(:,1);
+
+r = ecocoCrossfitCore([t.data(:,1),value],periods,t.window,t.dt, ...
+    t.step,0,t.pad,t.srGrid,0,'Pearson',1.2/min(periods), ...
+    t.seed,0.5,'BatchSize',2,'ComputeLocalP',true, ...
+    'MemoryBudgetMiB',64);
+
+verifyEqual(testCase,r.geometry.groupIndex,[1;2;2;2;2;3;4;4;4]);
+verifyTrue(testCase,any(isfinite(r.rho),'all'));
+end
+
 function testMatchesCvCoco9BOneDirectionOracle(testCase)
 r = runCore(testCase,0,2);
 j = find(r.windows.hasForward & r.windows.hasBackward,1,'first');
@@ -164,6 +188,15 @@ verifyEqual(testCase,r1.consensus.pGlobal,r3.consensus.pGlobal,'AbsTol',0);
 verifyEqual(testCase,r1.forward.pLocal,r3.forward.pLocal,'AbsTol',0);
 verifyEqual(testCase,r1.backward.pLocal,r3.backward.pLocal,'AbsTol',0);
 verifyEqual(testCase,r1.consensus.pLocal,r3.consensus.pLocal,'AbsTol',0);
+verifyEqual(testCase,r1.rho,r1.consensus.rho,'AbsTol',0);
+verifyEqual(testCase,r1.pGlobal,r1.consensus.pGlobal,'AbsTol',0);
+verifyEqual(testCase,r1.pCOCO,r1.consensus.pCOCO,'AbsTol',0);
+verifyEqual(testCase,r1.score,r1.consensus.score,'AbsTol',0);
+verifyEqual(testCase,r1.score,r1.pCOCO,'AbsTol',0);
+verifyEqual(testCase,r1.consensus.score,r1.consensus.pCOCO,'AbsTol',0);
+verifyEqual(testCase,r1.scoreDefinition, ...
+    ['pCOCO = consensus rho x abs(log10(consensus global p)); ', ...
+     'no orbit-count weighting']);
 verifyEqual(testCase,r1.monteCarlo.exceedanceGlobalForward, ...
     r3.monteCarlo.exceedanceGlobalForward);
 verifyEqual(testCase,r1.monteCarlo.exceedanceGlobalBackward, ...
@@ -225,6 +258,63 @@ verifyNotEmpty(testCase,both);
 verifyTrue(testCase,isfinite(r.forward.rho(2,both)));
 verifyGreaterThan(testCase,r.forward.nOrbit(2,both),0);
 verifyLessThan(testCase,r.forward.nOrbit(2,both),9);
+end
+
+function testPartialTrainingFallbackReturnsAuditedNumerics(testCase)
+t = testCase.TestData;
+r = ecocoCrossfitCore(t.data,t.orbit9,t.window,t.dt,t.step,0, ...
+    t.pad,10,2,'Pearson',t.maxFrequency,t.seed,0.5, ...
+    'BatchSize',1,'ComputeLocalP',true, ...
+    'WarnOnPartialTraining',false,'MemoryBudgetMiB',64);
+
+verifyTrue(testCase,r.degradedMode);
+verifyEqual(testCase,r.status,'complete-with-warning');
+verifyEqual(testCase,r.warningIdentifier, ...
+    'ecocoCrossfitCore:PartialOrbitTraining');
+verifyFalse(testCase,any(r.geometry.strictTrainingRateMask));
+verifyTrue(testCase,all(r.geometry.trainingRateMask));
+verifyTrue(testCase,all(r.geometry.partialOnlyTrainingRateMask));
+verifyGreaterThan(testCase,r.partialTrainingAnchorCount,0);
+verifyGreaterThan(testCase,r.partialTrainingWindowCount,0);
+verifyEqual(testCase,r.nsimCompleted,2);
+verifyEqual(testCase,r.score,r.pCOCO,'AbsTol',0);
+for directionName = {'forward','backward','consensus','strictConsensus'}
+    direction = r.(directionName{1});
+    verifyEqual(testCase,direction.score,direction.pCOCO,'AbsTol',0);
+end
+partialScore = isfinite(r.score) & isfinite(r.pCOCO) & ...
+    r.nOrbit > 0 & r.nOrbit < numel(t.orbit9) & abs(r.pCOCO) > 1e-12;
+verifyTrue(testCase,any(partialScore,'all'));
+oldWeightedScore = r.pCOCO(partialScore).* ...
+    r.nOrbit(partialScore)./numel(t.orbit9);
+verifyGreaterThan(testCase,max(abs( ...
+    r.score(partialScore)-oldWeightedScore)),1e-12);
+
+for anchorIndex = find(r.anchors.valid(:))'
+    inactive = ~r.anchors.trainingActiveGroupMask(anchorIndex,:)';
+    verifyEqual(testCase,r.anchors.groupWeights(inactive,anchorIndex), ...
+        zeros(nnz(inactive),1),'AbsTol',0);
+end
+supported = r.windows.hasForward | r.windows.hasBackward;
+verifyTrue(testCase,all(isfinite(r.consensus.rho(:,supported)),'all'));
+verifyTrue(testCase,all(isfinite(r.consensus.pGlobal(:,supported)),'all'));
+end
+
+function testPartialSolveSupportsSeveralInactiveGroups(testCase)
+t = testCase.TestData;
+r = ecocoCrossfitCore(t.data,t.orbit9,t.window,t.dt,t.step,0, ...
+    t.pad,50,0,'Pearson',t.maxFrequency,t.seed,0.5, ...
+    'WarnOnPartialTraining',false);
+
+verifyTrue(testCase,r.degradedMode);
+verifyTrue(testCase,all(r.geometry.trainingRateMask));
+verifyGreaterThanOrEqual(testCase, ...
+    max(sum(~r.anchors.trainingActiveGroupMask(r.anchors.valid,:),2)),2);
+for anchorIndex = find(r.anchors.valid(:))'
+    inactive = ~r.anchors.trainingActiveGroupMask(anchorIndex,:)';
+    verifyEqual(testCase,r.anchors.groupWeights(inactive,anchorIndex), ...
+        zeros(nnz(inactive),1),'AbsTol',0);
+end
 end
 
 function testPaddedSeriesIncludesBothEndpointCentres(testCase)

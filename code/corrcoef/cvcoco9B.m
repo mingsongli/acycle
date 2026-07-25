@@ -32,5 +32,9 @@ result.validationLabel = ...
 result.engine = 'four-group-trained coherent nine-term held-out engine';
 result.variant = 'B';
 result.analysisRole = ...
-    'Method-B held-out development analysis; not confirmatory cvCOCO';
+    'Method-B held-out development analysis; not confirmatory Blocked cvCOCO';
+if result.degradedMode
+    result.analysisRole = [result.analysisRole, ...
+        '; partial-orbit exploratory training'];
+end
 end

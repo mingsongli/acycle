@@ -449,21 +449,8 @@ end
 end
 
 function groupIndex = adaptiveOrbitGroups(periods)
-groupIndex = zeros(numel(periods),1);
-groupIndex(periods >= 200) = 1;
-groupIndex(periods >= 80 & periods < 200) = 2;
-groupIndex(periods >= 30 & periods < 80) = 3;
-groupIndex(periods < 30) = 4;
-counts = accumarray(groupIndex,1,[4,1]);
-required = [1;4;1;3];
-if ~isequal(counts,required)
-    error('cocoAdaptiveEvaluate:InvalidOrbitGroups', ...
-        ['Four-group area fitting requires 1 long-eccentricity period ', ...
-         '(>=200 kyr), 4 short-eccentricity periods (80-<200 kyr), ', ...
-         '1 obliquity period (30-<80 kyr), and 3 precession periods ', ...
-         '(<30 kyr). Detected counts: %d/%d/%d/%d.'], ...
-        counts(1),counts(2),counts(3),counts(4));
-end
+groups = cocoOrbitGroups(periods);
+groupIndex = groups.index;
 end
 
 function geometry = emptyGroupAreaGeometry()

@@ -50,8 +50,8 @@ function [corrCI,corr_h0,corry,details] = corrcoefslices_rankNew(dat,orbit9,dt,p
 %   details:    reproducibility and Monte Carlo diagnostics. Important
 %               fields include rhoM, rhoEstimator, seed, nSimRequested,
 %               nSimCompleted, nSimValid, nullMax, MaxFrequency, and pFloor.
-% The Monte Carlo null is conditional on DAT after sorting, duplicate
-% handling, and any regular-grid interpolation performed by the caller.
+% The Monte Carlo null is conditional on DAT after the shared entry-point
+% finite/sort/de-duplicate/median-grid regularization.
 %   Mingsong Li, June 2017 @ Penn State
 % Revised and publication-audited, 2026.
 if nargin < 16 || isempty(showProgress)
@@ -89,6 +89,25 @@ randomSeed = optionParser.Results.Seed;
 showPeriodograms = logical(optionParser.Results.ShowPeriodograms);
 progressFcn = optionParser.Results.ProgressFcn;
 
+% Full-record COCO accepts the cleaned-but-not-yet-interpolated input
+% convention used by eCOCOGUI.  Regularize here as well so direct calls and
+% GUI calls have identical finite/sort/de-duplicate/median-grid behavior.
+% Held-out cvCOCO has its own split-first preprocessing and never enters
+% this function.
+validateattributes(dt,{'numeric'}, ...
+    {'scalar','real','finite','positive'},mfilename,'dt',3);
+requestedSamplingInterval = dt;
+[dat,inputPreprocessing] = cocoPrepareRegularData( ...
+    dat,sprintf('%s full-record COCO input',targetMode), ...
+    'MaximumPoints',1e6,'MinimumPoints',4,'Verbose',true);
+dt = inputPreprocessing.outputSpacing;
+if abs(requestedSamplingInterval-dt) > ...
+        cocoSamplingTolerance(dat(:,1),dt)
+    fprintf(['>> COCO sampling interval updated from the caller value ', ...
+        '%.12g m to the preprocessed median interval %.12g m.\n'], ...
+        requestedSamplingInterval,dt);
+end
+
 [dat,orbit9,dt,method,showProgress] = validateCocoInputs( ...
     dat,orbit9,dt,pad,sr1,sr2,srstep,adjust,red,nsim,plotn,slices, ...
     method,fmaxdata,main_unit_selection,showProgress);
@@ -112,6 +131,9 @@ details.pad = pad;
 details.red = red;
 details.method = method;
 details.targetMode = targetMode;
+details.inputPreprocessing = inputPreprocessing;
+details.requestedSamplingInterval = requestedSamplingInterval;
+details.samplingInterval = dt;
 details.nullConditioning = [ ...
     'stationary Gaussian AR(1) conditional on the regularized grid, ', ...
     'pre-specified periods/rate grid/Pad/MaxFrequency/red/slices/method; ', ...
@@ -238,18 +260,10 @@ lang_id = {};
 lang_var = {};
 ec79 = [];
 ec80 = [];
-ec81 = [];
-ec82 = [];
-ec83 = [];
-ec84 = [];
 if plotn == 1 || showProgress
     [lang_choice,lang_id,lang_var] = cocoLanguageSettings();
     [~, ec79] = ismember('ec79',lang_id);
     [~, ec80] = ismember('ec80',lang_id);
-    [~, ec81] = ismember('ec81',lang_id);
-    [~, ec82] = ismember('ec82',lang_id);
-    [~, ec83] = ismember('ec83',lang_id);
-    [~, ec84] = ismember('ec84',lang_id);
 end
 
 %% Peridogram of the data series
@@ -264,6 +278,10 @@ datap = nan(periodogramRows,slices);
 ndata = max(2, size(datForTarget, 1));
 dat_nyq = 1/(2*dt);   % Nyquist
 dat_ray = 1/(ndata * dt);  % rayleigh, matched to the effective slice length
+allNineRateRange = cocoAllPeriodRateRange(orbit9,dt,ndata);
+details.allNineRateRange = allNineRateRange;
+details.effectiveSpectrumSampleCount = ndata;
+details.effectiveSpectrumLength = ndata*dt;
 for j = 1: slices
     sliceValue = dat_slice(:,2*j);
     sliceValue = sliceValue(isfinite(sliceValue));
@@ -696,52 +714,48 @@ if nsim > 0
     corr_h0(:,3) = p_local;                  % local, uncorrected p-value
 
     if plotn == 1        
-        [cocoPlotFigure,cocoPlotTabs] = ensureCocoPlotTabs( ...
+        [~,cocoPlotTabs] = ensureCocoPlotTabs( ...
             cocoPlotFigure,cocoPlotTabs);
         resultTab = uitab(cocoPlotTabs,'Title','Correlation and significance');
         resultLayout = tiledlayout(resultTab,4,1, ...
             'TileSpacing','compact','Padding','compact');
         ax1 = nexttile(resultLayout,1);
         plot(ax1,corrxch,corry_rch,'r','LineWidth',1);
-        if or(lang_choice == 0, main_unit_selection == 0)
-            xlabel(ax1,'Sedimentation rate (cm/kyr)')
-            title(ax1,'Correlation coefficient')
-        else
-            xlabel(ax1,lang_var{ec80})
-            title(ax1,lang_var{ec81})
-        end
+        set(ax1,'Tag','COCO-correlation');
+        title(ax1,'Correlation coefficient')
         ylabel(ax1,'\rho')
         set(ax1,'XMinorTick','on','YMinorTick','on')
         xlim(ax1,[sr1, sr2])
         
         nMC = size(corry, 2);
 
-        % Local p-value: original per-sedimentation-rate null comparison.
-        ax2 = nexttile(resultLayout,2);
-        plotPValuePanel(ax2,corrxch,p_local,nMC,sr1,sr2, ...
-            'Local p-value','Local null hypothesis', ...
-            lang_choice,main_unit_selection,lang_var,ec80,ec82,ec83,false);
-
         % Global p-value: max-statistic correction across the whole grid.
+        ax2 = nexttile(resultLayout,2);
+        plotPValuePanel(ax2,corrxch,p_global,nMC,sr1,sr2, ...
+            'Global p','Global p',true);
+
+        % Local p-value: original per-sedimentation-rate null comparison.
         ax3 = nexttile(resultLayout,3);
-        plotPValuePanel(ax3,corrxch,p_global,nMC,sr1,sr2, ...
-            'Global p-value','Global null hypothesis', ...
-            lang_choice,main_unit_selection,lang_var,ec80,ec82,ec83,true);
+        plotPValuePanel(ax3,corrxch,p_local,nMC,sr1,sr2, ...
+            'Local p','Local p',false);
         
         % Plot number of orbital cycles
         ax4 = nexttile(resultLayout,4);
+        set(ax4,'Tag','COCO-orbit-count');
+        xlim(ax4,[sr1, sr2])
+        ylim(ax4,[0 orbitn+0.5])
+        hold(ax4,'on')
+        cocoShadeOutsideAllPeriodRange( ...
+            ax4,corrxch,allNineRateRange);
         plot(ax4,corrxch,corr_h0(:,2),'b','LineWidth',1);
         
         if or(lang_choice == 0, main_unit_selection == 0)
             xlabel(ax4,'Sedimentation rate (cm/kyr)')
-            title(ax4,'Number of contributing astronomical parameters')
         else
             xlabel(ax4,lang_var{ec80})
-            title(ax4,lang_var{ec84})
         end
+        title(ax4,'Number of contributing astronomical parameters')
         ylabel(ax4,'#')
-        ylim(ax4,[0 orbitn+0.5])
-        xlim(ax4,[sr1, sr2])
         set(ax4,'XMinorTick','on','YMinorTick','on')
 
         pcocoTab = uitab(cocoPlotTabs,'Title','pCOCO');
@@ -806,6 +820,12 @@ details = struct( ...
     'red',NaN, ...
     'method','', ...
     'targetMode','', ...
+    'inputPreprocessing',struct(), ...
+    'requestedSamplingInterval',NaN, ...
+    'samplingInterval',NaN, ...
+    'allNineRateRange',[NaN NaN], ...
+    'effectiveSpectrumSampleCount',NaN, ...
+    'effectiveSpectrumLength',NaN, ...
     'targetModel','', ...
     'targetAmplitudeMode','', ...
     'nullConditioning','', ...
@@ -950,8 +970,7 @@ if any(depthDifference <= 0)
          'the depth series before COCO analysis.']);
 end
 dataDt = median(depthDifference);
-spacingTolerance = max(1e-10*max(1,abs(dataDt)), ...
-    32*eps(max(abs(depth))));
+spacingTolerance = cocoSamplingTolerance(depth,dataDt);
 if any(abs(depthDifference-dataDt) > spacingTolerance)
     error('corrcoefslices_rankNew:UnevenSampling', ...
         ['DAT(:,1) must be evenly spaced. Sort, de-duplicate, and ', ...
@@ -1185,7 +1204,7 @@ end
 function [fig,tabs] = ensureCocoPlotTabs(fig,tabs)
 if isempty(fig) || ~isgraphics(fig)
     fig = figure('Color','w','Name','COCO diagnostics', ...
-        'Units','normalized','Position',[0.10 0.05 0.80 0.88]);
+        'Units','normalized','Position',[0.30 0.05 0.40 0.88]);
     tabs = uitabgroup(fig);
 elseif isempty(tabs) || ~isgraphics(tabs)
     tabs = uitabgroup(fig);
@@ -1245,7 +1264,8 @@ title(ax, sprintf([ ...
     'Maximum-correlation / minimum-global-p spectrum at %.4g cm/kyr ', ...
     '(%s target)'], ...
     bestSr,targetMode));
-legend(ax, {'Data spectrum', 'Target spectrum'}, 'Location', 'best');
+legend(ax, {'Data spectrum', 'Target spectrum'}, 'Location', 'best', ...
+    'NumColumns',1,'Orientation','vertical');
 set(ax, 'XMinorTick', 'on', 'YMinorTick', 'on');
 box(ax, 'on');
 end
@@ -1262,8 +1282,8 @@ end
 yNorm = y ./ scale;
 end
 
-function plotPValuePanel(ax,corrx,pValues,nMC,sr1,sr2,yLabelText,titleText, ...
-    lang_choice,main_unit_selection,lang_var,ec80,ec82,ec83,isGlobalPanel)
+function plotPValuePanel(ax,corrx,pValues,nMC,sr1,sr2, ...
+    yLabelText,titleText,isGlobalPanel)
 pPlot = pValues(:);
 % Minimum p-value resolvable by the Monte Carlo simulations.
 % For example, 100 simulations give p_min = 1/101.
@@ -1275,15 +1295,8 @@ pPlot(pPlot > 1) = 1;
 % Transform p-values: smaller p-values are plotted higher.
 pScore = -log10(pPlot);
 plot(ax, corrx, pScore, 'r', 'LineWidth', 1);
-if lang_choice == 0 || main_unit_selection == 0
-    xlabel(ax, 'Sedimentation rate (cm/kyr)')
-    ylabel(ax, yLabelText)
-    title(ax, titleText)
-else
-    xlabel(ax, lang_var{ec80})
-    ylabel(ax, lang_var{ec82})
-    title(ax, lang_var{ec83})
-end
+ylabel(ax, yLabelText)
+title(ax, titleText)
 
 % Actual p-values to display on the y-axis.  The global panel spans the
 % complete p-value range and therefore also labels p = 1.

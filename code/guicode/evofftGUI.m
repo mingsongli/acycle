@@ -880,21 +880,25 @@ classdef evofftGUI < matlab.apps.AppBase
             if app.CheckSave.Value
                 pre_dirML = pwd;
                 CDac_pwd;
-                cleanupObj = onCleanup(@()cd(pre_dirML)); %#ok<NASGU>
-                name1 = [app.filename,'-evofft-s','.txt'];
-                name2 = [app.filename,'-evofft-freq','.txt'];
-                name3 = [app.filename,'-evofft-time','.txt'];
-                dlmwrite(name1, s, 'delimiter', ' ', 'precision', 9);
-                dlmwrite(name2, x_grid', 'delimiter', ' ', 'precision', 9);
-                dlmwrite(name3, y_grid', 'delimiter', ' ', 'precision', 9);
-                app.saveEvofftParameterTable(fmin,fmax,window,step);
+                cleanupObj = onCleanup(@()cd(pre_dirML));
+                outputFile = app.nextIndexedFile( ...
+                    [app.filename,'-evofft'],'.xlsx');
+                params = app.buildEvofftParameterTable( ...
+                    fmin,fmax,window,step,outputFile,s,x_grid,y_grid);
+                redNoiseResult = [];
+                if exist('redconf','var') && isnumeric(redconf)
+                    redNoiseResult = redconf;
+                end
+                saveEvofftWorkbook( ...
+                    outputFile,params,s,x_grid,y_grid,redNoiseResult);
+                fprintf('>> saved evolutionary spectrum: %s\n',outputFile);
                 ac_refresh_main_list(app.listbox_acmain,pwd);
             end
         end
 
-        function saveEvofftParameterTable(app, fmin, fmax, window, step)
-            paramFile = app.nextIndexedFile([app.filename,'-eFFT-parameters'],'.xls');
-            params = repmat({''},18,6);
+        function params = buildEvofftParameterTable( ...
+                app,fmin,fmax,window,step,outputFile,s,xGrid,yGrid)
+            params = repmat({''},29,6);
             params(1,2) = {'Detailed Parameters Used in Data Processing by Acycle'};
             params(2,2:6) = {'Version','Designed by','Institute','E-mail','Date'};
             params(3,2:6) = {'v1.1','Mingsong Li','Peking University','msli@pku.edu.cn',datestr(now,'yyyy-mm-dd HH:MM:SS')};
@@ -904,17 +908,28 @@ classdef evofftGUI < matlab.apps.AppBase
             params(7,:) = {'','Evolutionary FFT','Input file name',[inputBase,inputExt],'',''};
             params(8,:) = {'','','Method',app.method,'',''};
             params(9,:) = {'','','Frequency minimum',fmin,'',''};
-            params(10,:) = {'','','Frequency maximum',fmax,'',''};
+            params(10,:) = {'','','Displayed frequency maximum',fmax,'',''};
             params(11,:) = {'','','Sliding window size',window,'',''};
             params(12,:) = {'','','Sliding window step',step,'',''};
             params(13,:) = {'','','Normalize each window',app.yesNo(app.CheckNormalize.Value),'Select Yes or No',''};
-            params(14,:) = {'','','Log(frequency)',app.yesNo(app.CheckLogFreq.Value),'Select Yes or No',''};
-            params(15,:) = {'','','Log(power)',app.yesNo(app.CheckLogPower.Value),'Select Yes or No',''};
-            params(16,:) = {'','','Padding edge method',app.padMethodName(),'Select zero/mirror/mean/random',''};
-            params(17,:) = {'','','Colormap',app.DropCmap.Value,'',''};
-            params(18,:) = {'','','Grid number',app.naIfEmpty(app.EditGrid.Value),'',''};
-
-            writecell(params,paramFile,'Sheet','COCO');
+            params(14,:) = {'','','Plot input series',app.yesNo(app.CheckPlotSeries.Value),'Display only',''};
+            params(15,:) = {'','','MTM red-noise overlay',app.yesNo(app.CheckMTMRed.Value),'Display only',''};
+            params(16,:) = {'','','Log(frequency)',app.yesNo(app.CheckLogFreq.Value),'Display only',''};
+            params(17,:) = {'','','Log(power)',app.yesNo(app.CheckLogPower.Value),'Display only',''};
+            params(18,:) = {'','','Flip Y axis',app.yesNo(app.CheckFlipY.Value),'Display only',''};
+            params(19,:) = {'','','Plot dimension',app.plotDimensionName(),'2D or 3D',''};
+            params(20,:) = {'','','Rotation',app.yesNo(app.CheckRotation.Value),'3D display only',''};
+            params(21,:) = {'','','X padding',app.yesNo(app.CheckXPadding.Value),'Select Yes or No',''};
+            params(22,:) = {'','','Padding edge method',app.padMethodName(),'Select zero/mirror/mean/random',''};
+            params(23,:) = {'','','Colormap',app.DropCmap.Value,'Display only',''};
+            params(24,:) = {'','','Grid number',app.naIfEmpty(app.EditGrid.Value),'Display only',''};
+            params(25,:) = {'','','Input unit',app.EditUnit.Value,'',''};
+            params(26,:) = {'','','Calculation frequency maximum',app.nyquist,'Nyquist frequency',''};
+            params(27,:) = {'','','Output workbook',outputFile,'',''};
+            params(28,:) = {'','','Power matrix size',mat2str(size(s)),'Rows=time; columns=frequency',''};
+            params(29,:) = {'','','Frequency / time coordinates', ...
+                sprintf('%d / %d',numel(xGrid),numel(yGrid)), ...
+                'Stored in separate sheets',''};
         end
 
         function filename = nextIndexedFile(~, baseName, ext)
@@ -932,6 +947,14 @@ classdef evofftGUI < matlab.apps.AppBase
                 s = app.DropPadType.Value;
             else
                 s = 'No';
+            end
+        end
+
+        function s = plotDimensionName(app)
+            if app.Radio2D.Value
+                s = '2D';
+            else
+                s = '3D';
             end
         end
 

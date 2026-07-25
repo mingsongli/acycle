@@ -8,6 +8,13 @@ code/test/*
 !code/test/test_ecocoplot_adaptive_graphics.m
 !code/test/test_ecoco_crossfit_core.m
 !code/test/test_run_ecoco_two_method_experiment.m
+!code/test/test_interleaved_cvcoco.m
+!code/test/test_ecoco_interleaved_core.m
+!code/test/test_coco_shared_preprocessing.m
+!code/test/test_coco_rate_reliability_shading.m
+!code/test/test_run_interleaved_cvcoco_comparison.m
+!code/test/test_gui_output_saving.m
+!code/test/test_coco_nonfatal_resolution_policy.m
 !code/test/build_coco_publication_reports.py
 !code/test/coco_publication_report_manifest.schema.json
 !code/test/refresh_coco_artifact_inventory.py

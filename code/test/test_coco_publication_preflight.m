@@ -54,7 +54,9 @@ orbit9 = testCase.TestData.orbit9;
 expectedAutomaticLimit = 1.2*max(1./orbit9);
 
 cv = runCv(testCase,0,0,11,2,[]);
-verifyEqual(testCase,cv.name,'cvCOCO');
+verifyEqual(testCase,cv.name,'Blocked cvCOCO');
+verifyEqual(testCase,cv.publicName,'Blocked cvCOCO');
+verifyEqual(testCase,cv.abbreviation,'B-cvCOCO');
 verifyEqual(testCase,cv.targetModel,'four-group');
 verifyEqual(testCase,cv.config.targetModel,'four-group');
 verifyTrue(testCase,cv.config.maximumTemporalFrequencyWasDefault);
@@ -64,7 +66,9 @@ verifyEqual(testCase,cv.config.maximumTemporalFrequency, ...
 wrapped = cvcoco2(testCase.TestData.data,orbit9, ...
     testCase.TestData.padCv,1,8,1,0,0,'Pearson', ...
     'MaxFrequency',testCase.TestData.maximumFrequency,'Seed',11);
-verifyEqual(testCase,wrapped.name,'cvCOCO');
+verifyEqual(testCase,wrapped.name,'Blocked cvCOCO');
+verifyEqual(testCase,wrapped.publicName,'Blocked cvCOCO');
+verifyEqual(testCase,wrapped.abbreviation,'B-cvCOCO');
 verifyEqual(testCase,wrapped.targetModel,'four-group');
 verifyEqual(testCase,wrapped.entryPoint,'cvcoco2 compatibility wrapper');
 
@@ -303,7 +307,7 @@ end
 
 function testSpecswaQuietOptionUsedByPublicRed3Paths(testCase)
 frequency = linspace(0,0.5,129)';
-logPower = log10(0.2+1./(1+25*frequency)); %#ok<NASGU>
+logPower = log10(0.2+1./(1+25*frequency));
 commandText = evalc( ...
     'specswa(frequency,logPower,256,false);');
 verifyEmpty(testCase,strtrim(commandText));
@@ -710,7 +714,18 @@ verifyEqual(testCase,cv.pAtoB,plusOneP(cv.nullAtoB, ...
     cv.validateAtoB.score),'AbsTol',0);
 verifyEqual(testCase,cv.pBtoA,plusOneP(cv.nullBtoA, ...
     cv.validateBtoA.score),'AbsTol',0);
-verifyMonteCarloGrid(testCase,[cv.pSym;cv.pA;cv.pB],n);
+verifyEqual(testCase,cv.pConsensus,plusOneP(cv.nullConsensus, ...
+    cv.scoreConsensus),'AbsTol',0);
+verifyMonteCarloGrid(testCase, ...
+    [cv.pSym;cv.pA;cv.pB;cv.pConsensus],n);
+
+expectedConsensus = nan(size(cv.srGrid));
+bothFinite = isfinite(cv.validateAtoB.curve) & ...
+    isfinite(cv.validateBtoA.curve);
+expectedConsensus(bothFinite) = min( ...
+    cv.validateAtoB.curve(bothFinite), ...
+    cv.validateBtoA.curve(bothFinite));
+verifyEqual(testCase,cv.consensus.curve,expectedConsensus,'AbsTol',0);
 for ii = 1:numel(cv.srGrid)
     if isfinite(cv.validateAtoB.curve(ii))
         verifyEqual(testCase,cv.pCurveAtoB(ii), ...
@@ -721,6 +736,14 @@ for ii = 1:numel(cv.srGrid)
         verifyEqual(testCase,cv.pCurveBtoA(ii), ...
             plusOneP(cv.nullBtoA,cv.validateBtoA.curve(ii)), ...
             'AbsTol',0);
+    end
+    if isfinite(expectedConsensus(ii))
+        verifyEqual(testCase,cv.pCurveConsensus(ii), ...
+            plusOneP(cv.nullConsensus,expectedConsensus(ii)), ...
+            'AbsTol',0);
+        verifyEqual(testCase,cv.pLocalCurveConsensus(ii), ...
+            (cv.localExceedanceCountConsensus(ii)+1)/( ...
+            cv.localValidCountConsensus(ii)+1),'AbsTol',0);
     end
 end
 
@@ -744,6 +767,13 @@ verifyEqual(testCase,cv.pLocalCurveAtoB(validAtoB), ...
 verifyEqual(testCase,cv.pLocalCurveBtoA(validBtoA), ...
     (cv.localExceedanceCountBtoA(validBtoA)+1)./( ...
     cv.localValidCountBtoA(validBtoA)+1),'AbsTol',0);
+verifyEqual(testCase,isfinite(cv.pLocalCurveConsensus),bothFinite);
+verifyEqual(testCase,cv.localValidCountConsensus(bothFinite), ...
+    n*ones(nnz(bothFinite),1));
+verifyMonteCarloGrid(testCase, ...
+    cv.pLocalCurveConsensus(bothFinite),n);
+verifyGreaterThanOrEqual(testCase,cv.pCurveConsensus(bothFinite), ...
+    cv.pLocalCurveConsensus(bothFinite)-32*eps);
 verifyEqual(testCase,cv.validateAtoB.pLocalCurve, ...
     cv.pLocalCurveAtoB,'AbsTol',0);
 verifyEqual(testCase,cv.validateBtoA.pLocalCurve, ...
@@ -756,18 +786,73 @@ function testCvPlotIncludesDirectionalLocalPPanel(testCase)
 cv = testCase.TestData.cv;
 figures = plotcvcoco(cv,'ShowSpectra',false);
 cleanup = onCleanup(@()closeTestFigures(figures));
-verifyNumElements(testCase,figures,2);
+verifyNumElements(testCase,figures,3);
 
+correlationAxis = findobj(figures(1),'Type','axes', ...
+    'Tag','cvCOCO-correlation');
 globalAxis = findobj(figures(1),'Type','axes','Tag','cvCOCO-global-p');
 localAxis = findobj(figures(1),'Type','axes','Tag','cvCOCO-local-p');
+orbitAxis = findobj(figures(1),'Type','axes','Tag','COCO-orbit-count');
+verifyNumElements(testCase,correlationAxis,1);
 verifyNumElements(testCase,globalAxis,1);
 verifyNumElements(testCase,localAxis,1);
+verifyNumElements(testCase,orbitAxis,1);
+consensusAuditAxis = findall(figures(3),'Type','axes', ...
+    'Tag','cvCOCO-consensus-global-audit');
+verifyNumElements(testCase,consensusAuditAxis,1);
+verifyTrue(testCase,any(contains( ...
+    string(consensusAuditAxis.Title.String),'Consensus global p')));
+verifyEqual(testCase,consensusAuditAxis.XLabel.String, ...
+    'Null consensus maximum');
+consensusHistogram = findall(consensusAuditAxis, ...
+    'Type','histogram');
+verifyNumElements(testCase,consensusHistogram,1);
+verifyEqual(testCase,consensusHistogram.Data(:), ...
+    cv.nullConsensus(isfinite(cv.nullConsensus)),'AbsTol',0);
+consensusObserved = findall(consensusAuditAxis,'Type','line', ...
+    'Color',[1 0 0]);
+verifyNumElements(testCase,consensusObserved,1);
+verifyEqual(testCase,consensusObserved.XData, ...
+    [cv.scoreConsensus cv.scoreConsensus],'AbsTol',0);
 verifyEqual(testCase,globalAxis.Layout.Tile,2);
 verifyEqual(testCase,localAxis.Layout.Tile,3);
+verifyEqual(testCase,correlationAxis.Layout.Tile,1);
+verifyEqual(testCase,orbitAxis.Layout.Tile,4);
+verifyEqual(testCase,correlationAxis.Title.String, ...
+    'Correlation coefficient');
+verifyEqual(testCase,correlationAxis.YLabel.String,'\rho');
+verifyEqual(testCase,globalAxis.Title.String,'Global p');
 verifyEqual(testCase,globalAxis.YLabel.String,'Global p');
-verifyTrue(testCase,contains(localAxis.Title.String,'descriptive'));
+verifyEqual(testCase,localAxis.Title.String,'Local p');
 verifyEqual(testCase,localAxis.YLabel.String,'Local p');
+verifyEqual(testCase,orbitAxis.Title.String, ...
+    'Number of contributing astronomical parameters');
+verifyEqual(testCase,orbitAxis.YLabel.String,'#');
 verifyEqual(testCase,globalAxis.YLim,[0 -log10(0.002)],'AbsTol',8*eps);
+
+pCOCOAxis = findobj(figures(2),'Type','axes', ...
+    'Tag','cvCOCO-pCOCO-axis');
+pCOCOLine = findobj(pCOCOAxis,'Type','line','Tag','cvCOCO-pCOCO');
+pCOCOPeak = findall(pCOCOAxis,'Type','line', ...
+    'Tag','cvCOCO-pCOCO-peak');
+verifyNumElements(testCase,pCOCOAxis,1);
+verifyNumElements(testCase,pCOCOLine,1);
+verifyNumElements(testCase,pCOCOPeak,1);
+expectedPCOCO = cv.consensus.curve(:).* ...
+    abs(log10(cv.pCurveConsensus(:)));
+verifyEqual(testCase,cv.pCOCO,expectedPCOCO,'AbsTol',0);
+verifyEqual(testCase,cv.consensus.pCOCO,expectedPCOCO,'AbsTol',0);
+verifyEqual(testCase,pCOCOLine.XData(:),cv.srGrid(:),'AbsTol',0);
+verifyEqual(testCase,pCOCOLine.YData(:),expectedPCOCO,'AbsTol',0);
+verifyEqual(testCase,pCOCOLine.Color,[1 0 0],'AbsTol',0);
+verifyEqual(testCase,pCOCOLine.LineWidth,2,'AbsTol',0);
+[expectedBestPCOCO,expectedBestIndex] = max(expectedPCOCO,[],'omitnan');
+verifyEqual(testCase,cv.bestPCOCO,expectedBestPCOCO,'AbsTol',0);
+verifyEqual(testCase,cv.bestPCOCORate, ...
+    cv.srGrid(expectedBestIndex),'AbsTol',0);
+verifyEqual(testCase,pCOCOPeak.XData,cv.bestPCOCORate,'AbsTol',0);
+verifyEqual(testCase,pCOCOPeak.YData,cv.bestPCOCO,'AbsTol',0);
+verifyEqual(testCase,pCOCOPeak.MarkerSize,4,'AbsTol',0);
 
 globalLineAtoB = findobj(globalAxis,'Type','line', ...
     'Tag','cvCOCO-global-p-AtoB');
@@ -775,8 +860,22 @@ globalLineBtoA = findobj(globalAxis,'Type','line', ...
     'Tag','cvCOCO-global-p-BtoA');
 verifyNumElements(testCase,globalLineAtoB,1);
 verifyNumElements(testCase,globalLineBtoA,1);
-verifyTrue(testCase,startsWith(globalLineAtoB.DisplayName,'B held out;'));
-verifyTrue(testCase,startsWith(globalLineBtoA.DisplayName,'A held out;'));
+verifyEqual(testCase,globalLineAtoB.DisplayName, ...
+    sprintf('p_B=%s',formatProbability4Expected(cv.pB)));
+verifyEqual(testCase,globalLineBtoA.DisplayName, ...
+    sprintf('p_A=%s',formatProbability4Expected(cv.pA)));
+
+correlationConsensus = findobj(correlationAxis,'Type','line', ...
+    'Tag','cvCOCO-correlation-consensus');
+globalConsensus = findobj(globalAxis,'Type','line', ...
+    'Tag','cvCOCO-global-p-consensus');
+localConsensus = findobj(localAxis,'Type','line', ...
+    'Tag','cvCOCO-local-p-consensus');
+verifyNumElements(testCase,correlationConsensus,1);
+verifyNumElements(testCase,globalConsensus,1);
+verifyNumElements(testCase,localConsensus,1);
+verifyEqual(testCase,correlationConsensus.YData(:), ...
+    cv.consensus.curve(:),'AbsTol',0);
 
 lineAtoB = findobj(localAxis,'Type','line','Tag','cvCOCO-local-p-AtoB');
 lineBtoA = findobj(localAxis,'Type','line','Tag','cvCOCO-local-p-BtoA');
@@ -787,12 +886,85 @@ verifyEqual(testCase,lineBtoA.XData(:),cv.srGrid(:),'AbsTol',0);
 pFloor = 1/(max(cv.nsimValidAtoB,cv.nsimValidBtoA)+1);
 expectedAtoB = -log10(max(cv.pLocalCurveAtoB(:),pFloor));
 expectedBtoA = -log10(max(cv.pLocalCurveBtoA(:),pFloor));
+expectedGlobalConsensus = -log10(max(cv.pCurveConsensus(:),pFloor));
+expectedLocalConsensus = -log10(max( ...
+    cv.pLocalCurveConsensus(:),pFloor));
 verifyEqual(testCase,lineAtoB.YData(:),expectedAtoB,'AbsTol',0);
 verifyEqual(testCase,lineBtoA.YData(:),expectedBtoA,'AbsTol',0);
+verifyEqual(testCase,globalConsensus.YData(:), ...
+    expectedGlobalConsensus,'AbsTol',0);
+verifyEqual(testCase,localConsensus.YData(:), ...
+    expectedLocalConsensus,'AbsTol',0);
 verifyEqual(testCase,lineAtoB.Color,[1 0 0],'AbsTol',0);
 verifyEqual(testCase,lineBtoA.Color,[0 0 1],'AbsTol',0);
-verifyTrue(testCase,contains(lineAtoB.DisplayName,'Segment B held out'));
-verifyTrue(testCase,contains(lineBtoA.DisplayName,'Segment A held out'));
+verifyEqual(testCase,[globalLineAtoB.LineWidth; ...
+    globalLineBtoA.LineWidth;lineAtoB.LineWidth;lineBtoA.LineWidth], ...
+    0.6*ones(4,1),'AbsTol',0);
+consensusLines = [correlationConsensus;globalConsensus;localConsensus];
+verifyEqual(testCase,vertcat(consensusLines.Color),zeros(3,3), ...
+    'AbsTol',0);
+verifyEqual(testCase,vertcat(consensusLines.LineWidth),1.2*ones(3,1), ...
+    'AbsTol',0);
+verifyEqual(testCase,correlationConsensus.DisplayName,'Consensus');
+verifyEqual(testCase,globalConsensus.DisplayName, ...
+    sprintf('p_{cons}=%s',formatProbability4Expected(cv.pConsensus)));
+verifyEqual(testCase,localConsensus.DisplayName, ...
+    sprintf('p_{cons}=%s', ...
+    formatProbability4Expected(cv.consensus.pLocalAtBest)));
+verifyEqual(testCase,lineAtoB.DisplayName, ...
+    sprintf('p_B=%s',formatProbability4Expected( ...
+    cv.pLocalCurveAtoB(cv.validateAtoB.bestIndex))));
+verifyEqual(testCase,lineBtoA.DisplayName, ...
+    sprintf('p_A=%s',formatProbability4Expected( ...
+    cv.pLocalCurveBtoA(cv.validateBtoA.bestIndex))));
+
+correlationDirections = findobj(correlationAxis,'Type','line','Tag','');
+correlationDirections = correlationDirections(arrayfun(@(line) ...
+    ismember(line.Color,[1 0 0;0 0 1],'rows') && ...
+    strcmp(line.LineStyle,'-'),correlationDirections));
+verifyEqual(testCase,sort(string({correlationDirections.DisplayName})), ...
+    ["A","B"]);
+verifyEqual(testCase,vertcat(correlationDirections.LineWidth), ...
+    0.55*ones(2,1),'AbsTol',0);
+
+blueOrbit = findobj(orbitAxis,'Type','line','Color',[0 0 1]);
+redOrbit = findobj(orbitAxis,'Type','line','Color',[1 0 0]);
+verifyNumElements(testCase,blueOrbit,1);
+verifyNumElements(testCase,redOrbit,1);
+verifyEqual(testCase,blueOrbit.LineWidth,1,'AbsTol',0);
+verifyEqual(testCase,redOrbit.LineWidth,0.5,'AbsTol',0);
+
+coloredPeakTags = { ...
+    'cvCOCO-correlation-AtoB-peak'; ...
+    'cvCOCO-correlation-BtoA-peak'; ...
+    'cvCOCO-global-p-AtoB-peak'; ...
+    'cvCOCO-global-p-BtoA-peak'; ...
+    'cvCOCO-local-p-AtoB-peak'; ...
+    'cvCOCO-local-p-BtoA-peak'};
+for peakIndex = 1:numel(coloredPeakTags)
+    peak = findall(figures(1),'Type','line', ...
+        'Tag',coloredPeakTags{peakIndex});
+    verifyNumElements(testCase,peak,1);
+    verifyEqual(testCase,peak.MarkerSize,2.5,'AbsTol',0);
+end
+
+blackPeakTags = { ...
+    'cvCOCO-correlation-consensus-peak'; ...
+    'cvCOCO-global-p-consensus-peak'; ...
+    'cvCOCO-local-p-consensus-peak'};
+blackPeakY = [cv.consensus.bestCorrelation; ...
+    -log10(max(cv.pCurveConsensus(cv.consensus.bestIndex),pFloor)); ...
+    -log10(max(cv.pLocalCurveConsensus(cv.consensus.bestIndex),pFloor))];
+for peakIndex = 1:numel(blackPeakTags)
+    peak = findall(figures(1),'Type','line', ...
+        'Tag',blackPeakTags{peakIndex});
+    verifyNumElements(testCase,peak,1);
+    verifyEqual(testCase,peak.XData,cv.consensus.bestRate,'AbsTol',0);
+    verifyEqual(testCase,peak.YData,blackPeakY(peakIndex),'AbsTol',0);
+    verifyEqual(testCase,peak.Color,[0 0 0],'AbsTol',0);
+    verifyEqual(testCase,peak.MarkerFaceColor,[0 0 0],'AbsTol',0);
+    verifyEqual(testCase,peak.MarkerSize,2.5,'AbsTol',0);
+end
 clear cleanup
 closeTestFigures(figures);
 end
@@ -833,6 +1005,11 @@ verifyEqual(testCase,depthAxisB.Title.String,'Segment B depth series');
 verifyNumElements(testCase,spectrumBtoA.Title.String,2);
 verifyNumElements(testCase,spectrumAtoB.Title.String,2);
 verifyNumElements(testCase,findobj(figures(1),'Type','Legend'),1);
+legends = findall(figures,'Type','legend');
+verifyNotEmpty(testCase,legends);
+verifyEqual(testCase,vertcat(legends.NumColumns), ...
+    ones(numel(legends),1));
+verifyTrue(testCase,all(strcmp({legends.Orientation},'vertical')));
 
 clear cleanup
 closeTestFigures(figures);
@@ -844,13 +1021,16 @@ fig = plotcvcoco(testCase.TestData.cv, ...
 cleanup = onCleanup(@()closeTestFigures(fig));
 
 verifyNumElements(testCase,fig,1);
+verifyEqual(testCase,fig.Units,'normalized');
+verifyEqual(testCase,fig.Position,[0.29 0.04 0.42 0.90], ...
+    'AbsTol',64*eps);
 tabGroups = findobj(fig,'Type','uitabgroup');
 verifyNumElements(testCase,tabGroups,1);
 tabs = findobj(tabGroups,'Type','uitab');
-verifyNumElements(testCase,tabs,3);
+verifyNumElements(testCase,tabs,4);
 titles = sort(string({tabs.Title}));
 verifyEqual(testCase,titles,sort(["Data and spectra", ...
-    "Correlation and significance","Monte Carlo audit"]));
+    "Correlation and significance","pCOCO","Monte Carlo audit"]));
 
 clear cleanup
 closeTestFigures(fig);
@@ -1110,7 +1290,7 @@ distance = legacyRhoDistance(rhoGrid,s0Grid,cosine,power,linlog,true);
 rho = rhoGrid(rhoIndex);
 s0 = s0Grid(s0Index);
 refinedGrid = nGrid/2;
-for iteration = 1:3 %#ok<NASGU>
+for iteration = 1:3
     s0Maximum = s0Grid(s0Index)+(s0Grid(2)-s0Grid(1));
     s0Minimum = s0Grid(s0Index)-(s0Grid(2)-s0Grid(1));
     rhoMaximum = min(0.9999, ...
@@ -1150,6 +1330,16 @@ end
 function [row,column] = firstReferenceMinimum(distance)
 [~,index] = min(distance(:));
 [row,column] = ind2sub(size(distance),index);
+end
+
+function textValue = formatProbability4Expected(value)
+if value == 0
+    textValue = '0.000';
+    return
+end
+exponent = floor(log10(abs(value)));
+decimalPlaces = max(0,4-exponent-1);
+textValue = sprintf(['%0.',num2str(decimalPlaces),'f'],value);
 end
 
 function state = captureBaseVariables(names)

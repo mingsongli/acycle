@@ -28,7 +28,7 @@ end
         app.adaptiveSeed = 1;
         % Retain the numeric field for workspace/backward compatibility,
         % but its public meaning is now the selected eCOCO algorithm.
-        app.ecocoCalcMode = 1; % 1=Adaptive eCOCO, 2=Cross-fitted eCOCO
+        app.ecocoCalcMode = 1; % 1=Adaptive, 2=Blocked, 3=Interleaved eCOCO
         app.anchorFraction = 0.5;
         app.corrmethod = 1; % 1 Pearson, 2 Spearman
         app.red = 0; % 0 no
@@ -76,10 +76,13 @@ end
             app.RECOCO = uiradiobutton(app.BGMethod,'Text','eCOCO','FontWeight','bold','FontColor',app.blue,'Value',true);
             app.LCOCOMethod = uilabel(app.PMethod,'Text','COCO method','FontColor',app.blue,'BackgroundColor',app.bg);
             app.DCOCOMethod = uidropdown(app.PMethod, ...
-                'Items',{'cvCOCO','Adaptive COCO','Fixed-target COCO'}, ...
-                'Value','cvCOCO','Enable','off', ...
-                'Tooltip',['cvCOCO uses bidirectional held-out validation; ', ...
-                'Adaptive and Fixed-target COCO use the full record.'], ...
+                'Items',{'cvCOCO — Blocked','cvCOCO — Interleaved', ...
+                'Adaptive COCO','Fixed-target COCO'}, ...
+                'Value','cvCOCO — Blocked','Enable','off', ...
+                'Tooltip',['cvCOCO — Blocked uses two contiguous halves; ', ...
+                'cvCOCO — Interleaved uses odd/even observations. ', ...
+                'Both use bidirectional held-out validation; Adaptive and ', ...
+                'Fixed-target COCO use the full record.'], ...
                 'ValueChangedFcn',@(s,e)onCocoMethodChanged());
             app.BGEcoCalc = uibuttongroup(app.PMethod,'BackgroundColor',app.bg,'BorderType','none', ...
                 'SelectionChangedFcn',@(s,e)onEcoCalcChanged());
@@ -87,12 +90,17 @@ end
             % and older callbacks do not fail; the visible choices now
             % select scientifically distinct sliding algorithms.
             app.RFast = uiradiobutton(app.BGEcoCalc, ...
-                'Text','Adaptive eCOCO','Value',true, ...
-                'Tooltip','Per-window Adaptive COCO method-B target.');
+                'Text','Adaptive','Value',true, ...
+                'Tooltip','Adaptive eCOCO: per-window Adaptive COCO method-B target.');
             app.RAccurate = uiradiobutton(app.BGEcoCalc, ...
-                'Text','Cross-fitted eCOCO','Value',false, ...
-                'Tooltip',['Frozen method-B targets updated at the selected ', ...
+                'Text','Blocked','Value',false, ...
+                'Tooltip',['Blocked eCOCO: frozen method-B targets updated at the selected ', ...
                 'fraction of the sliding-window width.']);
+            app.RInterleaved = uiradiobutton(app.BGEcoCalc, ...
+                'Text','Interleaved','Value',false, ...
+                'Tooltip',['Interleaved eCOCO (I-eCOCO): within each complete ', ...
+                'window, globally fixed odd/even observations reciprocally ', ...
+                'train and validate after fold-specific interpolation.']);
 
             app.PData = uipanel(app.UIFigure,'Title','Data','BackgroundColor',app.bg);
             app.LData = uilabel(app.PData,'Text','Data','BackgroundColor',app.bg);
@@ -172,7 +180,7 @@ end
                 'Items',{'0.25 W','0.5 W','1.0 W','2.0 W'}, ...
                 'ItemsData',[0.25 0.5 1.0 2.0], ...
                 'Value',0.5,'Enable','off', ...
-                'Tooltip',['Cross-fitted eCOCO target-anchor spacing as a ', ...
+                'Tooltip',['Blocked eCOCO target-anchor spacing as a ', ...
                 'fraction of the sliding-window width.'], ...
                 'ValueChangedFcn',@(s,e)onEcoTargetUpdateChanged());
 
@@ -284,9 +292,10 @@ end
             app.LCOCOMethod.Position = [270 14 105 28];
             app.DCOCOMethod.Position = [380 14 235 30];
 
-            app.BGEcoCalc.Position = [640 2 345 50];
-            app.RFast.Position = [8 13 145 24];
-            app.RAccurate.Position = [160 13 175 24];
+            app.BGEcoCalc.Position = [620 2 365 50];
+            app.RFast.Position = [5 13 90 24];
+            app.RAccurate.Position = [98 13 110 24];
+            app.RInterleaved.Position = [212 13 148 24];
 
             setappdata(app.UIFigure,'ECOCO_APP',app);
         end
@@ -306,19 +315,26 @@ end
 
         function onPadEdgeToggle()
             isEco = app.mode == 2;
-            isCrossfit = isEco && app.RAccurate.Value;
+            isCrossfit = isEco && app.ecocoCalcMode == 2;
+            isInterleaved = isEco && app.ecocoCalcMode == 3;
             if isCrossfit
-                % Cross-fitted eCOCO uses the predeclared deterministic
+                % Blocked eCOCO uses the predeclared deterministic
                 % half-window zero edge requested by the method.  Do not
                 % let mirror/mean/random padding silently change its
                 % training and validation records.
                 app.CPadEdge.Value = true;
                 app.DPadEdge.Value = 'zero';
                 app.padtype = 1;
+            elseif isInterleaved
+                % Synthetic edge values cannot be treated as held-out odd
+                % or even observations. I-eCOCO therefore uses complete
+                % raw-data windows only.
+                app.CPadEdge.Value = false;
             end
-            app.CPadEdge.Enable = onoff(isEco && ~isCrossfit);
+            app.CPadEdge.Enable = onoff( ...
+                isEco && ~isCrossfit && ~isInterleaved);
             app.DPadEdge.Enable = onoff( ...
-                isEco && app.CPadEdge.Value && ~isCrossfit);
+                isEco && app.CPadEdge.Value && ~isCrossfit && ~isInterleaved);
             markSettingsChanged();
         end
 
@@ -356,7 +372,9 @@ end
             app.EMaxF.Enable = onoff(isEco || ~isCv);
             app.RFast.Enable = onoff(isEco);
             app.RAccurate.Enable = onoff(isEco);
-            app.DTargetUpdate.Enable = onoff(isEco && app.RAccurate.Value);
+            app.RInterleaved.Enable = onoff(isEco);
+            app.DTargetUpdate.Enable = onoff( ...
+                isEco && app.ecocoCalcMode == 2);
             invalidateRunState();
             onPadEdgeToggle();
             setappdata(app.UIFigure,'ECOCO_APP',app);
@@ -381,8 +399,10 @@ end
 
         function updateCocoTargetMode()
             switch app.DCOCOMethod.Value
-                case 'cvCOCO'
+                case {'cvCOCO — Blocked','cvCOCO'}
                     app.cocoTargetMode = 'cv9b';
+                case {'cvCOCO — Interleaved','Interleaved cvCOCO'}
+                    app.cocoTargetMode = 'icv9b';
                 case 'Adaptive COCO'
                     app.cocoTargetMode = 'adaptive9b';
                 case 'Fixed-target COCO'
@@ -394,11 +414,15 @@ end
         end
 
         function onEcoCalcChanged()
-            app.ecocoCalcMode = 1;
             if app.RAccurate.Value
                 app.ecocoCalcMode = 2;
                 app.DPadEdge.Value = 'zero';
                 app.padtype = 1;
+            elseif app.RInterleaved.Value
+                app.ecocoCalcMode = 3;
+                app.CPadEdge.Value = false;
+            else
+                app.ecocoCalcMode = 1;
             end
             app.DTargetUpdate.Enable = onoff( ...
                 app.mode == 2 && app.ecocoCalcMode == 2);
@@ -525,10 +549,22 @@ end
         end
 
         function onRun()
+            if ~isfield(app,'UIFigure') || ...
+                    ~isgraphics(app.UIFigure,'figure')
+                return
+            end
+            uiFigureAtStart = app.UIFigure;
+            runButtonAtStart = app.BRun;
+            if isgraphics(runButtonAtStart)
+                runButtonAtStart.Enable = 'off';
+            end
+            runButtonCleanup = onCleanup( ...
+                @()restoreRunButton(runButtonAtStart));
             h = [];
             conclusionReport = [];
+            figuresBeforeRun = findall(groot,'Type','figure');
             invalidateRunState();
-            setappdata(app.UIFigure,'ECOCO_APP',app);
+            safeStoreAppData(uiFigureAtStart,app);
             try
                 if ~isfield(app.meta,'depthInMeters') || ~app.meta.depthInMeters
                     error('eCOCOGUI:DepthUnitRequired', ...
@@ -537,9 +573,9 @@ end
                          'in the Acycle main window before running this analysis.']);
                 end
                 % Full-record COCO/eCOCO calculations use the uniformly
-                % sampled series. Both cvCOCO engines receive the sorted,
-                % de-duplicated raw
-                % series so its two halves can be interpolated separately.
+                % sampled series. Held-out cvCOCO modes receive the sorted,
+                % de-duplicated raw series so their folds are defined before
+                % each fold is interpolated separately.
                 dat = app.data;
                 if size(app.dataRaw,1) < 20
                     uialert(app.UIFigure, ...
@@ -554,15 +590,20 @@ end
                 isLegacyCvRun = isCvRun && ...
                     strcmp(app.cocoTargetMode,'cvlegacy');
                 isCv9ARun = isCvRun && strcmp(app.cocoTargetMode,'cv9a');
+                isInterleavedCvRun = isCvRun && ...
+                    strcmp(app.cocoTargetMode,'icv9b');
+                isInterleavedEcoRun = app.mode == 2 && ...
+                    app.ecocoCalcMode == 3;
                 % Keep the former internal cv9 token as a compatibility
                 % alias for the renamed group-band method, cvCOCO9B.
                 isCv9BRun = isCvRun && ...
                     any(strcmp(app.cocoTargetMode,{'cv9b','cv9'}));
                 dataToCheck = dat;
-                if isCvRun
+                if isCvRun || isInterleavedEcoRun
                     % cvCOCO must split first, then interpolate each half.
                     % Passing the full-series interpolation here would leak
-                    % information across the held-out boundary.
+                    % information across the held-out boundary. I-eCOCO
+                    % applies the same rule inside every complete window.
                     dataToCheck = app.dataRaw;
                 end
                 if isempty(dataToCheck) || size(dataToCheck,1) < 20
@@ -659,10 +700,10 @@ end
                          'and the maximum must not be smaller than the minimum.']);
                 end
                 nRate = floor((app.sedmax-app.sedmin)/app.sedstep)+1;
-                if nRate < 2 || nRate > 10000
+                if nRate < 2 || nRate > 1000
                     error('eCOCOGUI:InvalidSedimentationRateGridSize', ...
                         ['The requested grid contains %d rate(s). Use between ', ...
-                         '2 and 10000 pre-specified sedimentation rates.'],nRate);
+                         '2 and 1000 pre-specified sedimentation rates.'],nRate);
                 end
 
                 if numel(app.orbit9) ~= 9 || any(~isfinite(app.orbit9)) || ...
@@ -690,16 +731,34 @@ end
 
                 if app.mode == 1
                     if isCvRun
-                        cvDisplayName = 'cvCOCO';
+                        cvDisplayName = 'Blocked cvCOCO';
                         if isLegacyCvRun
                             cvDisplayName = 'cvCOCO Legacy';
                         elseif isCv9ARun
                             cvDisplayName = 'cvCOCO9A';
+                        elseif isInterleavedCvRun
+                            cvDisplayName = 'Interleaved cvCOCO';
                         end
                         h = uiprogressdlg(app.UIFigure,'Title',cvDisplayName, ...
                             'Message','Preparing bidirectional validation ...  0.0%', ...
                             'Indeterminate','off','Value',0,'Cancelable','off');
-                        if isLegacyCvRun
+                        if isInterleavedCvRun
+                            cv = interleavedcvcoco( ...
+                                app.dataRaw,app.orbit9,app.pad, ...
+                                sr1,sr2,srstep,red,nsim,method, ...
+                                'BatchSize',app.cvBatchSize, ...
+                                'Seed',app.cvSeed, ...
+                                'AnalysisName','Interleaved cvCOCO', ...
+                                'MaxFrequency',app.f2, ...
+                                'ProgressFcn',@(fraction,message) ...
+                                updateProgressDialog(h,fraction,message));
+                            cv.name = 'Interleaved cvCOCO';
+                            cv.publicName = 'Interleaved cvCOCO';
+                            cv.analysisRole = [ ...
+                                'Method-B coherent-nine bidirectional ', ...
+                                'odd/even held-out analysis'];
+                            modeName = 'INTERLEAVEDCVCOCO';
+                        elseif isLegacyCvRun
                             cv = cvcocoLegacy(app.dataRaw,app.orbit9,app.pad, ...
                                 sr1,sr2,srstep,red,nsim,method, ...
                                 'BatchSize',app.cvBatchSize,'Seed',app.cvSeed, ...
@@ -725,25 +784,27 @@ end
                             cv = cvcoco9B(app.dataRaw,app.orbit9,app.pad, ...
                                 sr1,sr2,srstep,red,nsim,method, ...
                                 'BatchSize',app.cvBatchSize,'Seed',app.cvSeed, ...
-                                'AnalysisName','cvCOCO', ...
+                                'AnalysisName','Blocked cvCOCO', ...
                                 'MaxFrequency',app.f2, ...
                                 'ProgressFcn',@(fraction,message) ...
                                 updateProgressDialog(h,fraction,message));
                             % cvCOCO9B remains the callable implementation
-                            % name, while cvCOCO is now its public GUI name.
-                            cv.name = 'cvCOCO';
-                            cv.publicName = 'cvCOCO';
+                            % name, while Blocked cvCOCO is its public name.
+                            cv.name = 'Blocked cvCOCO';
+                            cv.publicName = 'Blocked cvCOCO';
+                            cv.abbreviation = 'B-cvCOCO';
                             cv.analysisRole = [ ...
                                 'Default method-B coherent-nine ', ...
                                 'bidirectional held-out analysis'];
                             modeName = 'CVCOCO';
                         else
                             % Use the current cvCOCO2 four-group engine under
-                            % its final public name, cvCOCO.
+                            % its final public name, Blocked cvCOCO.
                             cv = cvcoco(app.dataRaw,app.orbit9,app.pad, ...
                                 sr1,sr2,srstep,red,nsim,method, ...
                                 'BatchSize',app.cvBatchSize,'Seed',app.cvSeed, ...
-                                'TargetModel','four-group','AnalysisName','cvCOCO', ...
+                                'TargetModel','four-group', ...
+                                'AnalysisName','Blocked cvCOCO', ...
                                 'MaxFrequency',app.f2, ...
                                 'ProgressFcn',@(fraction,message) ...
                                 updateProgressDialog(h,fraction,message));
@@ -757,26 +818,36 @@ end
                             cv.confirmatoryPass = conclusionReport.pass;
                             modeName = 'CVCOCO';
                         end
+                        if isfield(cv,'degradedMode') && cv.degradedMode
+                            cv.analysisRole = [detailValue(cv, ...
+                                'analysisRole','Bidirectional held-out analysis'), ...
+                                '; partial-orbit exploratory training, ', ...
+                                'not complete all-nine confirmation'];
+                        end
                         closeProgress(h);
                         h = [];
 
                         app.run.cv = cv;
                         app.run.conclusion = conclusionReport;
                         app.run.ready = true;
-                        if isLegacyCvRun
+                        if isInterleavedCvRun
+                            assignin('base','InterleavedCVCOCO_result',cv);
+                        elseif isLegacyCvRun
                             assignin('base','cvCOCOLegacy_result',cv);
                         elseif isCv9ARun
                             assignin('base','cvCOCO9A_result',cv);
                         elseif isCv9BRun
+                            assignin('base','BlockedCVCOCO_result',cv);
                             assignin('base','cvCOCO_result',cv);
                             % Compatibility alias for scripts written while
                             % this implementation was exposed as cvCOCO9B.
                             assignin('base','cvCOCO9B_result',cv);
                         else
+                            assignin('base','BlockedCVCOCO_result',cv);
                             assignin('base','cvCOCO_result',cv);
                             assignin('base','cvCOCO_conclusion',conclusionReport);
                         end
-                        [outputFile,outputIndex] = ...
+                        [outputFile,~] = ...
                             saveCVCOCOOutputs(cv,modeName);
                         plotCVCOCOResult(cv);
                     else
@@ -871,24 +942,46 @@ end
                         end
                         app.run.conclusion = conclusionReport;
                         app.run.ready = true;
-                        [outputFile,outputIndex] = ...
+                        [outputFile,~] = ...
                             saveCOCOOutputs(corrCI,corr_h0,modeName);
                     end
                 else
                     stepN = max(1,round(app.step/srm));
-                    dat2 = dat;
-                    isCrossfitRun = app.ecocoCalcMode == 2;
-                    if isCrossfitRun
-                        % This is an algorithm requirement, not an optional
-                        % display/preprocessing preference.
-                        dat2 = zeropad2(dat2,app.window,1);
-                    elseif app.CPadEdge.Value
-                        dat2 = zeropad2(dat2,app.window,app.padtype);
+                    ecoSpec = ecoMethodSpec();
+                    interleavedWindowMode = 'legacy-count';
+                    interleavedStepDepth = [];
+                    ecocoWindowMode = 'physical-depth';
+                    ecocoStepDepth = app.step;
+                    ecocoCenterLimits = [];
+                    if app.ecocoCalcMode == 3
+                        % I-eCOCO must assign global odd/even identity on
+                        % cleaned raw observations before either fold is
+                        % interpolated. DAT is already full-record
+                        % interpolated and would leak information. Its GUI
+                        % window and step are literal depth units, so pass
+                        % the exact step instead of the rounded row count.
+                        dat2 = app.dataRaw;
+                        ecoRawForSave = app.dataRaw;
+                        interleavedWindowMode = 'physical-depth';
+                        interleavedStepDepth = app.step;
+                    else
+                        dat2 = dat;
+                        ecoRawForSave = dat;
                     end
-                    ecocoMode = iff(app.ecocoCalcMode == 1, ...
-                        'adaptive','crossfit');
-                    ecoDisplayName = iff(app.ecocoCalcMode == 1, ...
-                        'Adaptive eCOCO','Cross-fitted eCOCO');
+                    if app.ecocoCalcMode == 2
+                        % This is an algorithm requirement, not an optional
+                        % display/preprocessing preference. Preserve the
+                        % unpadded output-center limits, and request enough
+                        % synthetic support to cover the exact half-window.
+                        ecocoCenterLimits = dat2([1,end],1)';
+                        dat2 = zeropad2(dat2,app.window,1,true);
+                    elseif app.ecocoCalcMode == 1 && app.CPadEdge.Value
+                        ecocoCenterLimits = dat2([1,end],1)';
+                        dat2 = zeropad2( ...
+                            dat2,app.window,app.padtype,true);
+                    end
+                    ecocoMode = ecoSpec.token;
+                    ecoDisplayName = ecoSpec.displayName;
                     h = uiprogressdlg(app.UIFigure,'Title',ecoDisplayName, ...
                         'Message','Preparing sliding windows ...  0.0%', ...
                         'Indeterminate','off','Value',0,'Cancelable','off');
@@ -900,6 +993,12 @@ end
                         ecoPlotn,method,app.fmaxdata, ...
                         app.main_unit_selection,ecocoMode,app.f2, ...
                         app.adaptiveSeed,app.anchorFraction, ...
+                        'SeparateFinalPanel',true, ...
+                        'ECOCOWindowMode',ecocoWindowMode, ...
+                        'ECOCOStepDepth',ecocoStepDepth, ...
+                        'ECOCOCenterLimits',ecocoCenterLimits, ...
+                        'InterleavedWindowMode',interleavedWindowMode, ...
+                        'InterleavedStepDepth',interleavedStepDepth, ...
                         'ProgressFcn',@(fraction,message) ...
                         updateProgressDialog(h,fraction,message));
                     closeProgress(h);
@@ -919,7 +1018,9 @@ end
                     app.run.anchorFraction = app.anchorFraction;
                     app.run.ready = true;
 
-                    app.BPlotE.Enable = 'on';
+                    if isgraphics(app.BPlotE)
+                        app.BPlotE.Enable = 'on';
+                    end
 
                     assignin('base','prt_sr',prt_sr);
                     assignin('base','out_depth',out_depth);
@@ -931,28 +1032,52 @@ end
                     assignin('base','out_norbit',out_norbit);
                     assignin('base','sr_p_tracked',sr_p);
                     assignin('base','eCOCO_details',ecoDetails);
-                    [outputFile,outputIndex] = saveECOCOOutputs( ...
+                    [outputFile,~] = saveECOCOOutputs( ...
                         prt_sr,out_depth,out_ecc,out_ep,out_eci,out_norbit, ...
-                        out_ecoco,out_ecocorb,sr_p,dat,ecoDetails);
+                        out_ecoco,out_ecocorb,sr_p,ecoRawForSave,ecoDetails);
                     modeName = 'ECOCO';
                 end
 
-                saveRunParameterTable( ...
-                    modeName,outputFile,outputIndex,conclusionReport, ...
-                    app.run.adaptiveDetails);
+                runFigures = figuresCreatedSince(figuresBeforeRun);
+                if isgraphics(uiFigureAtStart,'figure')
+                    runFigures = setdiff( ...
+                        runFigures,uiFigureAtStart,'stable');
+                end
+                try
+                    saveArguments = {};
+                    if app.mode == 1
+                        saveArguments = {'CocoPublicationTitle', ...
+                            selectedCocoMethod(modeName)};
+                    end
+                    saveCocoGuiFigures( ...
+                        runFigures,outputFile,saveArguments{:});
+                catch MEfigureSave
+                    warning('eCOCOGUI:FigureAutoSaveFailed', ...
+                        ['The calculation and numerical outputs were saved, ', ...
+                        'but automatic FIG/PDF/PNG export failed [%s]: %s'], ...
+                        MEfigureSave.identifier,MEfigureSave.message);
+                    fprintf(2,'\n>> COCO/eCOCO figure export warning\n%s\n\n', ...
+                        getReport(MEfigureSave,'extended','hyperlinks','off'));
+                    safeUiAlert(uiFigureAtStart, ...
+                        ['The calculation and numerical outputs were saved. ', ...
+                        'Automatic FIG/PDF/PNG export failed: ', ...
+                         MEfigureSave.message], ...
+                        'Figure save warning','warning');
+                end
                 refreshMainListbox(ctx,resolveSaveDir(ctx));
-                setappdata(app.UIFigure,'ECOCO_APP',app);
+                safeStoreAppData(uiFigureAtStart,app);
                 if ~isempty(conclusionReport)
                     showConclusionReport(conclusionReport);
                 end
             catch ME
                 closeProgress(h);
                 invalidateRunState();
-                setappdata(app.UIFigure,'ECOCO_APP',app);
+                safeStoreAppData(uiFigureAtStart,app);
                 try
                     evalin('base',['clear cvCOCO_result cvCOCO_conclusion ', ...
                         'cvCOCO9A_result cvCOCO9B_result cvCOCO9_result ', ...
-                        'cvCOCOLegacy_result ', ...
+                        'cvCOCOLegacy_result BlockedCVCOCO_result ', ...
+                        'InterleavedCVCOCO_result ', ...
                         'AdaptiveCOCO_result AdaptiveCOCO_conclusion ', ...
                         'AdaptiveCOCO9A_result AdaptiveCOCO9A_conclusion ', ...
                         'AdaptiveCOCO9B_result AdaptiveCOCO9B_conclusion ', ...
@@ -961,9 +1086,24 @@ end
                         'FixedTargetCOCO_result']);
                 catch
                 end
+                if cocoIsNonfatalResolutionError(ME)
+                    warning(ME.identifier,[ ...
+                        '%s\nThe current COCO/eCOCO method was skipped. ', ...
+                        'No numerical result was produced for this ', ...
+                        'unsupported parameter geometry; the GUI and ', ...
+                        'subsequent runs remain available.'],ME.message);
+                    fprintf(['\n>> COCO/eCOCO resolution warning [%s]\n', ...
+                        '   Current method skipped; no blocking dialog ', ...
+                        'was opened.\n\n'],ME.identifier);
+                    try
+                        refreshMainListbox(ctx,resolveSaveDir(ctx));
+                    catch
+                    end
+                    return
+                end
                 fprintf(2,'\n>> eCOCO error [%s]\n%s\n\n', ...
                     ME.identifier,getReport(ME,'extended','hyperlinks','off'));
-                uialert(app.UIFigure,ME.message,'eCOCO error');
+                safeUiAlert(uiFigureAtStart,ME.message,'eCOCO error','error');
             end
         end
 
@@ -972,7 +1112,8 @@ end
             try
                 evalin('base',['clear cvCOCO_result cvCOCO_conclusion ', ...
                     'cvCOCO9A_result cvCOCO9B_result cvCOCO9_result ', ...
-                    'cvCOCOLegacy_result ', ...
+                    'cvCOCOLegacy_result BlockedCVCOCO_result ', ...
+                    'InterleavedCVCOCO_result ', ...
                     'AdaptiveCOCO_result AdaptiveCOCO_conclusion ', ...
                     'AdaptiveCOCO9A_result AdaptiveCOCO9A_conclusion ', ...
                     'AdaptiveCOCO9B_result AdaptiveCOCO9B_conclusion ', ...
@@ -1040,7 +1181,9 @@ end
             if ~app.run.ready || isempty(app.run.prt_sr)
                 return
             end
-            a = inputdlg({'Plot: 1=one fig; 2=multi-figs; 3=3D; reverse Y use negative'},'Plot eCOCO',1,{'1'});
+            a = inputdlg({['Plot: 1=two grouped figs (last map separate); ', ...
+                '2=one fig per map; 3=3D; reverse Y use negative']}, ...
+                'Plot eCOCO',1,{'1'});
             if isempty(a), return; end
             plotn = str2double(a{1});
             if ~isfinite(plotn), plotn = 1; end
@@ -1065,28 +1208,33 @@ end
             end
             [~,dn,~] = fileparts(app.meta.filename);
             saveDir = resolveSaveDir(ctx);
-            data_COCOCI = [corrCI(:,1:2),corr_h0(:,1),corr_h0(:,3),corr_h0(:,2)];
-            outputStem = [dn,'-COCO-data'];
+            outputStem = [dn,'-COCO'];
             if strcmp(modeName,'ADAPTIVECOCO')
-                outputStem = [dn,'-Adaptive-COCO-data'];
+                outputStem = [dn,'-Adaptive-COCO'];
             elseif strcmp(modeName,'ADAPTIVECOCO9A')
-                outputStem = [dn,'-Adaptive-COCO9A-data'];
+                outputStem = [dn,'-Adaptive-COCO9A'];
             elseif strcmp(modeName,'ADAPTIVECOCO9B')
-                outputStem = [dn,'-Adaptive-COCO9B-data'];
+                outputStem = [dn,'-Adaptive-COCO9B'];
             elseif strcmp(modeName,'FIXEDTARGETCOCO')
-                outputStem = [dn,'-Fixed-target-COCO-data'];
+                outputStem = [dn,'-Fixed-target-COCO'];
             elseif strcmp(modeName,'FIXEDCOCO9')
-                outputStem = [dn,'-Fixed-COCO9-data'];
+                outputStem = [dn,'-Fixed-COCO9'];
             end
             [nm,runIndex] = indexedRunName( ...
-                saveDir,outputStem,'.txt',dn,modeName);
-            temporaryFile = [tempname(saveDir),'.txt'];
-            cleanup = onCleanup(@()deleteIfPresent(temporaryFile));
-            writematrix(data_COCOCI,temporaryFile,'Delimiter',',');
-            [ok,message] = movefile(temporaryFile,nm,'f');
+                saveDir,outputStem,'.xlsx');
+            workbook = [tempname(saveDir),'.xlsx'];
+            cleanup = onCleanup(@()deleteIfPresent(workbook));
+            parameters = buildRunParameterTable(modeName,nm);
+            writecell(parameters,workbook,'Sheet','Parameters');
+            if ~isempty(app.run.conclusion)
+                writeConclusionSummary(workbook,app.run.conclusion);
+            end
+            writeAdaptiveAudit(workbook,app.run.adaptiveDetails);
+            writeAdaptiveCurves(workbook,corrCI,corr_h0);
+            [ok,message] = movefile(workbook,nm,'f');
             if ~ok
                 error('eCOCOGUI:AtomicSaveFailed', ...
-                    'Could not finalize the COCO output: %s',message);
+                    'Could not finalize the COCO workbook: %s',message);
             end
             clear cleanup
         end
@@ -1095,6 +1243,7 @@ end
             if nargin < 2 || isempty(modeName)
                 modeName = 'CVCOCO';
             end
+            isInterleavedOutput = strcmp(modeName,'INTERLEAVEDCVCOCO');
             targetModel = '';
             if isfield(cv,'targetModel') && ...
                     (ischar(cv.targetModel) || ...
@@ -1114,19 +1263,25 @@ end
             isFourGroupOutput = isfield(cv,'targetModel') && ...
                 any(strcmp(cv.targetModel, ...
                 {'four-group','four-group-coherent-nine'}));
+            degradedMode = isfield(cv,'degradedMode') && ...
+                isscalar(cv.degradedMode) && logical(cv.degradedMode);
             required = {'srGrid','splitDepth','dataA','dataB','trainA','trainB', ...
                 'dataClean', ...
-                'validateAtoB','validateBtoA','scoreSymmetric','scoreMean', ...
-                'nullSymmetric','nullAtoB','nullBtoA', ...
+                'validateAtoB','validateBtoA','consensus', ...
+                'scoreSymmetric','scoreConsensus','scoreMean', ...
+                'nullSymmetric','nullConsensus','nullAtoB','nullBtoA', ...
                 'nullBestRateAtoB','nullBestRateBtoA', ...
-                'pSym','pA','pB','pAtoB','pBtoA', ...
-                'pSymConfidenceInterval','pAConfidenceInterval','pBConfidenceInterval', ...
+                'pSym','pConsensus','pA','pB','pAtoB','pBtoA', ...
+                'pSymConfidenceInterval','pConsensusConfidenceInterval', ...
+                'pAConfidenceInterval','pBConfidenceInterval', ...
                 'pCurveAtoB','pCurveBtoA', ...
                 'pLocalCurveAtoB','pLocalCurveBtoA', ...
+                'pCurveConsensus','pLocalCurveConsensus','pCOCO', ...
+                'bestPCOCO','bestPCOCORate','bestPCOCOIndex', ...
                 'rhoM','rhoMA','rhoMB', ...
                 'rhoMethodA','rhoMethodB', ...
                 'nsimRequested','nsimCompleted','nsimValid', ...
-                'nsimValidAtoB','nsimValidBtoA', ...
+                'nsimValidConsensus','nsimValidAtoB','nsimValidBtoA', ...
                 'seed','validRateMaskA','validRateMaskB','groupNames', ...
                 'groupIndex','orbitPeriods','samplingIntervalA','samplingIntervalB', ...
                 'interpolationA','interpolationB','spectra', ...
@@ -1134,6 +1289,7 @@ end
                 'resolvableOrbitCountA','resolvableOrbitCountB', ...
                 'resolvableGroupCountA','resolvableGroupCountB','targetModel', ...
                 'activeOrbitCountAtoB','activeOrbitCountBtoA', ...
+                'activeOrbitCountConsensus', ...
                 'activeGroupCountAtoB','activeGroupCountBtoA', ...
                 'groupLeakageRcondA','groupLeakageRcondB', ...
                 'trainingRateMaskA','trainingRateMaskB', ...
@@ -1160,6 +1316,29 @@ end
             end
             validateNestedFields(cv.validateAtoB,'validateAtoB',validationRequired);
             validateNestedFields(cv.validateBtoA,'validateBtoA',validationRequired);
+            validateNestedFields(cv.consensus,'consensus', ...
+                {'curve','bestRate','bestIndex','bestCorrelation', ...
+                 'pGlobalCurve','pLocalCurve','pCOCO'});
+
+            % TRAININGRATEMASK is the mask actually used by the numerical
+            % pipeline. In partial-orbit fallback mode it is deliberately
+            % broader than the strict all-nine mask, so export both.
+            strictTrainingRateMaskA = cv.trainingRateMaskA;
+            strictTrainingRateMaskB = cv.trainingRateMaskB;
+            if isfield(cv,'strictTrainingRateMaskA')
+                strictTrainingRateMaskA = cv.strictTrainingRateMaskA;
+            end
+            if isfield(cv,'strictTrainingRateMaskB')
+                strictTrainingRateMaskB = cv.strictTrainingRateMaskB;
+            end
+            partialOnlyTrainingRateMaskA = false(size(cv.trainingRateMaskA));
+            partialOnlyTrainingRateMaskB = false(size(cv.trainingRateMaskB));
+            if isfield(cv,'partialOnlyTrainingRateMaskA')
+                partialOnlyTrainingRateMaskA = cv.partialOnlyTrainingRateMaskA;
+            end
+            if isfield(cv,'partialOnlyTrainingRateMaskB')
+                partialOnlyTrainingRateMaskB = cv.partialOnlyTrainingRateMaskB;
+            end
 
             sr = cv.srGrid(:);
             nRate = numel(sr);
@@ -1167,27 +1346,54 @@ end
                 cvColumn(cv.trainB.curve,nRate,'trainB.curve'), ...
                 cvColumn(cv.validateAtoB.curve,nRate,'validateAtoB.curve'), ...
                 cvColumn(cv.validateBtoA.curve,nRate,'validateBtoA.curve'), ...
+                cvColumn(cv.consensus.curve,nRate,'consensus.curve'), ...
                 cvColumn(cv.pCurveAtoB,nRate,'pCurveAtoB'), ...
                 cvColumn(cv.pCurveBtoA,nRate,'pCurveBtoA'), ...
+                cvColumn(cv.pCurveConsensus,nRate,'pCurveConsensus'), ...
                 cvColumn(cv.pLocalCurveAtoB,nRate,'pLocalCurveAtoB'), ...
                 cvColumn(cv.pLocalCurveBtoA,nRate,'pLocalCurveBtoA'), ...
+                cvColumn(cv.pLocalCurveConsensus,nRate, ...
+                    'pLocalCurveConsensus'), ...
+                cvColumn(cv.pCOCO,nRate,'pCOCO'), ...
                 cvColumn(cv.orbitCountA,nRate,'orbitCountA'), ...
                 cvColumn(cv.orbitCountB,nRate,'orbitCountB'), ...
                 cvColumn(cv.activeOrbitCountAtoB,nRate,'activeOrbitCountAtoB'), ...
-                cvColumn(cv.activeOrbitCountBtoA,nRate,'activeOrbitCountBtoA')];
+                cvColumn(cv.activeOrbitCountBtoA,nRate,'activeOrbitCountBtoA'), ...
+                cvColumn(cv.activeOrbitCountConsensus,nRate, ...
+                    'activeOrbitCountConsensus')];
             if isFourGroupOutput
+                fullLeakageRcondA = cv.groupLeakageRcondA;
+                fullLeakageRcondB = cv.groupLeakageRcondB;
+                if isfield(cv,'fullGroupLeakageRcondA')
+                    fullLeakageRcondA = cv.fullGroupLeakageRcondA;
+                end
+                if isfield(cv,'fullGroupLeakageRcondB')
+                    fullLeakageRcondB = cv.fullGroupLeakageRcondB;
+                end
                 curves = [curves, ...
+                    cvColumn(fullLeakageRcondA,nRate,'fullGroupLeakageRcondA'), ...
+                    cvColumn(fullLeakageRcondB,nRate,'fullGroupLeakageRcondB'), ...
                     cvColumn(cv.groupLeakageRcondA,nRate,'groupLeakageRcondA'), ...
                     cvColumn(cv.groupLeakageRcondB,nRate,'groupLeakageRcondB')];
             end
             curves = [curves, ...
                 double(cvColumn(cv.trainingRateMaskA,nRate,'trainingRateMaskA')), ...
                 double(cvColumn(cv.trainingRateMaskB,nRate,'trainingRateMaskB')), ...
+                double(cvColumn(strictTrainingRateMaskA,nRate, ...
+                    'strictTrainingRateMaskA')), ...
+                double(cvColumn(strictTrainingRateMaskB,nRate, ...
+                    'strictTrainingRateMaskB')), ...
+                double(cvColumn(partialOnlyTrainingRateMaskA,nRate, ...
+                    'partialOnlyTrainingRateMaskA')), ...
+                double(cvColumn(partialOnlyTrainingRateMaskB,nRate, ...
+                    'partialOnlyTrainingRateMaskB')), ...
                 double(cvColumn(cv.validRateMaskA,nRate,'validRateMaskA')), ...
                 double(cvColumn(cv.validRateMaskB,nRate,'validRateMaskB'))];
 
             nNull = cv.nsimCompleted;
             nullScore = cvColumn(cv.nullSymmetric,nNull,'nullSymmetric');
+            nullConsensus = cvColumn( ...
+                cv.nullConsensus,nNull,'nullConsensus');
             nullAtoB = cvColumn(cv.nullAtoB,nNull,'nullAtoB');
             nullBtoA = cvColumn(cv.nullBtoA,nNull,'nullBtoA');
             nullRateAtoB = cvColumn(cv.nullBestRateAtoB,nNull,'nullBestRateAtoB');
@@ -1207,12 +1413,29 @@ end
                 'scan sedimentation rate in the other half'];
             trainingTargetUnits = ...
                 'Nine periods summarized to four validation groups';
-            if isCv9AOutput
+            if isInterleavedOutput
+                methodLabel = ['Four-group-trained coherent nine-term ', ...
+                    'bidirectional odd/even held-out COCO ', ...
+                    '(Interleaved cvCOCO)'];
+                analysisRole = [ ...
+                    'Method-B coherent-nine bidirectional odd/even ', ...
+                    'held-out analysis'];
+                trainingLabel = [ ...
+                    'Four union-band energies de-mixed by a 4-by-4 ', ...
+                    'finite-record leakage matrix and exact nonnegative ', ...
+                    'least squares'];
+                validationLabel = [ ...
+                    'Train one parity fold; freeze four group weights; ', ...
+                    'expand them to nine coherently summed orbital terms; ', ...
+                    'validate on the other parity fold'];
+                trainingTargetUnits = ...
+                    'Long eccentricity / short eccentricity / obliquity / precession';
+            elseif isCv9AOutput
                 methodLabel = ['Rayleigh-band peak-trained coherent ', ...
                     'nine-term bidirectional held-out COCO (cvCOCO9A)'];
                 analysisRole = [ ...
                     'Internal coherent-nine method comparison; ', ...
-                    'exploratory and separate from confirmatory cvCOCO'];
+                    'exploratory and separate from confirmatory Blocked cvCOCO'];
                 trainingLabel = [ ...
                     'Nine per-orbit amplitudes calibrated from the maximum ', ...
                     'data PSD in each +/-1-Rayleigh band'];
@@ -1224,7 +1447,7 @@ end
             elseif isCv9BOutput
                 if strcmp(modeName,'CVCOCO')
                     methodLabel = ['Four-group-trained coherent nine-term ', ...
-                        'bidirectional held-out COCO (cvCOCO)'];
+                        'bidirectional held-out COCO (Blocked cvCOCO)'];
                     analysisRole = [ ...
                         'Default method-B coherent-nine bidirectional ', ...
                         'held-out analysis'];
@@ -1246,7 +1469,7 @@ end
                     'Long eccentricity / short eccentricity / obliquity / precession';
             elseif isFourGroupOutput
                 methodLabel = ['Four-group band-integrated bidirectional ', ...
-                    'cross-validated COCO (cvCOCO; confirmatory)'];
+                    'cross-validated COCO (Blocked cvCOCO; confirmatory)'];
                 analysisRole = 'Confirmatory bidirectional held-out analysis';
                 trainingLabel = ['Four union-band energies de-mixed by a ', ...
                     '4-by-4 finite-record leakage matrix and exact ', ...
@@ -1258,6 +1481,15 @@ end
                 trainingTargetUnits = ...
                     'Long eccentricity / short eccentricity / obliquity / precession';
             end
+            if degradedMode
+                methodLabel = [methodLabel, ...
+                    ' (partial-orbit degraded result)'];
+                analysisRole = [analysisRole, ...
+                    '; exploratory partial-orbit result, not complete ', ...
+                    'all-nine confirmation'];
+                trainingLabel = [trainingLabel, ...
+                    '; unresolved groups fixed exactly to zero'];
+            end
             conclusionRows = cell(0,2);
             if isfield(cv,'conclusion') && isstruct(cv.conclusion) && ...
                     isfield(cv.conclusion,'summaryRows')
@@ -1267,54 +1499,103 @@ end
                         'cvCOCO conclusion summaryRows must be a two-column cell array.');
                 end
             end
+            foldA = 'Segment A';
+            foldB = 'Segment B';
+            foldTokenA = 'A';
+            foldTokenB = 'B';
+            splitMetricLabel = 'Split depth (m)';
+            splitMetricValue = cv.splitDepth;
+            if isInterleavedOutput
+                foldA = 'Odd fold';
+                foldB = 'Even fold';
+                foldTokenA = 'Odd';
+                foldTokenB = 'Even';
+                if isfield(cv,'foldLabels') && numel(cv.foldLabels) >= 2
+                    foldA = [char(string(cv.foldLabels{1})),' fold'];
+                    foldB = [char(string(cv.foldLabels{2})),' fold'];
+                end
+                splitMetricLabel = 'Fold definition';
+                splitMetricValue = detailValue(cv.config,'splitRule', ...
+                    'odd/even observation index');
+            end
+            pNameA = ['p_',foldTokenA];
+            pNameB = ['p_',foldTokenB];
+            directionAtoB = [foldTokenA,'-to-',foldTokenB];
+            directionBtoA = [foldTokenB,'-to-',foldTokenA];
             summaryDetails = {
                 'Method',methodLabel;
                 'Analysis role',analysisRole;
-                'Split depth (m)',cv.splitDepth;
-                'Segment A sampling interval (m)',cv.samplingIntervalA;
-                'Segment B sampling interval (m)',cv.samplingIntervalB;
-                'Segment A interpolated',yesno(cv.interpolationA.applied);
-                'Segment B interpolated',yesno(cv.interpolationB.applied);
-                'Segment A original/interpolated point counts',sprintf('%d / %d', ...
+                'Computation status',detailValue(cv,'status','complete');
+                'Degraded partial-orbit training',yesno(degradedMode);
+                'Training completeness',detailValue(cv, ...
+                    'trainingCompleteness','complete-nine');
+                ['Training completeness ',foldTokenA],detailValue(cv, ...
+                    'trainingCompletenessA','complete-nine');
+                ['Training completeness ',foldTokenB],detailValue(cv, ...
+                    'trainingCompletenessB','complete-nine');
+                'Training warning identifier',detailValue(cv, ...
+                    'warningIdentifier','');
+                'Training warning message',detailValue(cv, ...
+                    'warningMessage','');
+                splitMetricLabel,splitMetricValue;
+                [foldA,' sampling interval (m)'],cv.samplingIntervalA;
+                [foldB,' sampling interval (m)'],cv.samplingIntervalB;
+                [foldA,' interpolated'],yesno(cv.interpolationA.applied);
+                [foldB,' interpolated'],yesno(cv.interpolationB.applied);
+                [foldA,' original/interpolated point counts'],sprintf('%d / %d', ...
                     cv.interpolationA.originalPointCount, ...
                     cv.interpolationA.interpolatedPointCount);
-                'Segment B original/interpolated point counts',sprintf('%d / %d', ...
+                [foldB,' original/interpolated point counts'],sprintf('%d / %d', ...
                     cv.interpolationB.originalPointCount, ...
                     cv.interpolationB.interpolatedPointCount);
-                'Segment A largest gap / median spacing', ...
+                [foldA,' largest gap / median spacing'], ...
                     cv.interpolationA.maximumGapToMedianRatio;
-                'Segment B largest gap / median spacing', ...
+                [foldB,' largest gap / median spacing'], ...
                     cv.interpolationB.maximumGapToMedianRatio;
-                'Segment A theoretical all-nine rate lower bound (exclusive)',cv.allNineRateRangeA(1);
-                'Segment A theoretical all-nine rate upper bound (inclusive)',cv.allNineRateRangeA(2);
-                'Segment B theoretical all-nine rate lower bound (exclusive)',cv.allNineRateRangeB(1);
-                'Segment B theoretical all-nine rate upper bound (inclusive)',cv.allNineRateRangeB(2);
+                [foldA,' theoretical all-nine rate lower bound (exclusive)'],cv.allNineRateRangeA(1);
+                [foldA,' theoretical all-nine rate upper bound (inclusive)'],cv.allNineRateRangeA(2);
+                [foldB,' theoretical all-nine rate lower bound (exclusive)'],cv.allNineRateRangeB(1);
+                [foldB,' theoretical all-nine rate upper bound (inclusive)'],cv.allNineRateRangeB(2);
                 'Shared all-nine rate lower bound (exclusive)',cv.allNineRateRangeShared(1);
                 'Shared all-nine rate upper bound (inclusive)',cv.allNineRateRangeShared(2);
-                'Adaptive training rate A (cm/kyr)',cv.trainA.bestRate;
-                'Adaptive training rate B (cm/kyr)',cv.trainB.bestRate;
-                'A-to-B frozen-target validation rate (cm/kyr)',cv.validateAtoB.bestRate;
-                'B-to-A frozen-target validation rate (cm/kyr)',cv.validateBtoA.bestRate;
-                'A-to-B validation score',cv.validateAtoB.score;
-                'B-to-A validation score',cv.validateBtoA.score;
-                'p_B: A-to-B, Segment B held out',cv.pB;
-                'p_B null-exceedance probability 95% Wilson CI lower',cv.pBConfidenceInterval(1);
-                'p_B null-exceedance probability 95% Wilson CI upper',cv.pBConfidenceInterval(2);
-                'Finite A-to-B null maxima',cv.nsimValidAtoB;
-                'p_A: B-to-A, Segment A held out',cv.pA;
-                'p_A null-exceedance probability 95% Wilson CI lower',cv.pAConfidenceInterval(1);
-                'p_A null-exceedance probability 95% Wilson CI upper',cv.pAConfidenceInterval(2);
-                'Finite B-to-A null maxima',cv.nsimValidBtoA;
+                ['Adaptive training rate ',foldTokenA,' (cm/kyr)'],cv.trainA.bestRate;
+                ['Adaptive training rate ',foldTokenB,' (cm/kyr)'],cv.trainB.bestRate;
+                [directionAtoB,' frozen-target validation rate (cm/kyr)'],cv.validateAtoB.bestRate;
+                [directionBtoA,' frozen-target validation rate (cm/kyr)'],cv.validateBtoA.bestRate;
+                [directionAtoB,' validation score'],cv.validateAtoB.score;
+                [directionBtoA,' validation score'],cv.validateBtoA.score;
+                [pNameB,': ',foldA,'-to-',foldB,', ',foldB,' held out'],cv.pB;
+                [pNameB,' null-exceedance probability 95% Wilson CI lower'],cv.pBConfidenceInterval(1);
+                [pNameB,' null-exceedance probability 95% Wilson CI upper'],cv.pBConfidenceInterval(2);
+                ['Finite ',directionAtoB,' null maxima'],cv.nsimValidAtoB;
+                [pNameA,': ',foldB,'-to-',foldA,', ',foldA,' held out'],cv.pA;
+                [pNameA,' null-exceedance probability 95% Wilson CI lower'],cv.pAConfidenceInterval(1);
+                [pNameA,' null-exceedance probability 95% Wilson CI upper'],cv.pAConfidenceInterval(2);
+                ['Finite ',directionBtoA,' null maxima'],cv.nsimValidBtoA;
+                'Consensus best rate (cm/kyr)',cv.consensus.bestRate;
+                'Consensus correlation',cv.consensus.bestCorrelation;
+                'Consensus joint global p-value',cv.pConsensus;
+                'Consensus global p-value 95% Wilson CI lower', ...
+                    cv.pConsensusConfidenceInterval(1);
+                'Consensus global p-value 95% Wilson CI upper', ...
+                    cv.pConsensusConfidenceInterval(2);
+                'Finite consensus null maxima',cv.nsimValidConsensus;
+                'Maximum pCOCO',cv.bestPCOCO;
+                'pCOCO best rate (cm/kyr)',cv.bestPCOCORate;
+                'pCOCO definition',detailValue(cv.config, ...
+                    'pCOCODefinition', ...
+                    ['consensus rho multiplied by abs(log10(', ...
+                     'consensus global p))']);
                 'Symmetric score (minimum)',cv.scoreSymmetric;
                 'Mean directional score',cv.scoreMean;
                 'Symmetric Monte Carlo p-value',cv.pSym;
                 'p_sym null-exceedance probability 95% Wilson CI lower',cv.pSymConfidenceInterval(1);
                 'p_sym null-exceedance probability 95% Wilson CI upper',cv.pSymConfidenceInterval(2);
-                'Segment A AR(1) rho used in null',cv.rhoMA;
-                'Segment A AR(1) estimator',cv.rhoMethodA;
-                'Segment B AR(1) rho used in null',cv.rhoMB;
-                'Segment B AR(1) estimator',cv.rhoMethodB;
-                'Compatibility mean rhoM (not used to simulate)',cv.rhoM;
+                [foldA,' AR(1) rho metadata'],cv.rhoMA;
+                [foldA,' AR(1) estimator'],cv.rhoMethodA;
+                [foldB,' AR(1) rho metadata'],cv.rhoMB;
+                [foldB,' AR(1) estimator'],cv.rhoMethodB;
+                'Full/compatibility AR(1) rho',cv.rhoM;
                 'Monte Carlo iterations requested',cv.nsimRequested;
                 'Monte Carlo iterations completed',cv.nsimCompleted;
                 'Finite null statistics used for p-value',cv.nsimValid;
@@ -1323,7 +1604,8 @@ end
                 'Training target units',trainingTargetUnits;
                 'Training amplitude rule',trainingLabel;
                 'Validation rule',validationLabel;
-                'Symmetric statistic','min(max rho A-to-B, max rho B-to-A)'};
+                'Symmetric statistic',sprintf('min(max rho %s, max rho %s)', ...
+                    directionAtoB,directionBtoA)};
             if isFourGroupOutput
                 summaryDetails = [summaryDetails; {
                     'Leakage correction', ...
@@ -1335,7 +1617,9 @@ end
 
             [~,dn,~] = fileparts(app.meta.filename);
             saveDir = resolveSaveDir(ctx);
-            if strcmp(modeName,'CVCOCOLEGACY')
+            if isInterleavedOutput
+                methodStem = 'Interleaved_cvCOCO';
+            elseif strcmp(modeName,'CVCOCOLEGACY')
                 methodStem = 'cvCOCO-Legacy';
             elseif strcmp(modeName,'CVCOCO9A')
                 methodStem = 'cvCOCO9A';
@@ -1344,13 +1628,15 @@ end
             elseif strcmp(modeName,'CVCOCO2')
                 methodStem = 'cvCOCO2';
             else
-                methodStem = 'cvCOCO';
+                methodStem = 'Blocked_cvCOCO';
             end
             [nm,runIndex] = indexedRunName(saveDir, ...
-                [dn,'-',methodStem,'-data'],'.xlsx',dn,modeName);
+                [dn,'-',methodStem],'.xlsx');
             workbook = [tempname(saveDir),'.xlsx'];
             cleanup = onCleanup(@()deleteIfPresent(workbook));
 
+            parameters = buildRunParameterTable(modeName,nm);
+            writecell(parameters,workbook,'Sheet','Parameters');
             writecell(summary,workbook,'Sheet','Summary','Range','A1');
             trainPrefix = iff(isFourGroupOutput,'GroupBandTrain','AdaptiveTrain');
             if isCv9AOutput
@@ -1360,41 +1646,94 @@ end
             if isCv9Output
                 validatePrefix = 'Coherent9Validate';
             end
-            curveHeader = {'SedRate_cm_per_kyr',[trainPrefix,'A'],[trainPrefix,'B'], ...
-                [validatePrefix,'_A_to_B'],[validatePrefix,'_B_to_A'], ...
-                'GlobalP_A_to_B','GlobalP_B_to_A', ...
-                'LocalP_A_to_B','LocalP_B_to_A', ...
-                'ResolvablePeriods_A','ResolvablePeriods_B', ...
-                'ActivePeriods_A_to_B','ActivePeriods_B_to_A'};
+            curveHeader = {'SedRate_cm_per_kyr', ...
+                [trainPrefix,foldTokenA],[trainPrefix,foldTokenB], ...
+                [validatePrefix,'_',foldTokenA,'_to_',foldTokenB], ...
+                [validatePrefix,'_',foldTokenB,'_to_',foldTokenA], ...
+                'ConsensusCorrelation', ...
+                ['GlobalP_',foldTokenA,'_to_',foldTokenB], ...
+                ['GlobalP_',foldTokenB,'_to_',foldTokenA], ...
+                'ConsensusGlobalP', ...
+                ['LocalP_',foldTokenA,'_to_',foldTokenB], ...
+                ['LocalP_',foldTokenB,'_to_',foldTokenA], ...
+                'ConsensusLocalP','pCOCO', ...
+                ['ResolvablePeriods_',foldTokenA], ...
+                ['ResolvablePeriods_',foldTokenB], ...
+                ['ActivePeriods_',foldTokenA,'_to_',foldTokenB], ...
+                ['ActivePeriods_',foldTokenB,'_to_',foldTokenA], ...
+                'ConsensusActivePeriods'};
             if isFourGroupOutput
                 curveHeader = [curveHeader, ...
-                    {'LeakageMatrixRcond_A','LeakageMatrixRcond_B'}];
+                    {['Full4x4LeakageMatrixRcond_',foldTokenA], ...
+                     ['Full4x4LeakageMatrixRcond_',foldTokenB], ...
+                     ['EffectiveActiveLeakageRcond_',foldTokenA], ...
+                     ['EffectiveActiveLeakageRcond_',foldTokenB]}];
             end
             curveHeader = [curveHeader, ...
                 { ...
-                'AllNineTrainingRate_A','AllNineTrainingRate_B', ...
-                'ValidRate_A','ValidRate_B'}];
+                ['EffectiveTrainingRate_',foldTokenA], ...
+                ['EffectiveTrainingRate_',foldTokenB], ...
+                ['CompleteAllNineTrainingRate_',foldTokenA], ...
+                ['CompleteAllNineTrainingRate_',foldTokenB], ...
+                ['PartialOrbitOnlyTrainingRate_',foldTokenA], ...
+                ['PartialOrbitOnlyTrainingRate_',foldTokenB], ...
+                ['ValidRate_',foldTokenA],['ValidRate_',foldTokenB]}];
             writecell(curveHeader,workbook,'Sheet','SedRateCurves','Range','A1');
             writematrix(curves,workbook,'Sheet','SedRateCurves','Range','A2');
 
             groupRows = [groupNames,num2cell([groupAraw,groupAnorm,groupBraw,groupBnorm])];
             if isCv9AOutput
                 groupHeader = {'Group', ...
-                    'TrainA_descriptive_group_RMS_raw_not_used_for_validation', ...
-                    'TrainA_descriptive_group_RMS_relative_not_used_for_validation', ...
-                    'TrainB_descriptive_group_RMS_raw_not_used_for_validation', ...
-                    'TrainB_descriptive_group_RMS_relative_not_used_for_validation'};
+                    ['Train',foldTokenA,'_descriptive_group_RMS_raw_not_used_for_validation'], ...
+                    ['Train',foldTokenA,'_descriptive_group_RMS_relative_not_used_for_validation'], ...
+                    ['Train',foldTokenB,'_descriptive_group_RMS_raw_not_used_for_validation'], ...
+                    ['Train',foldTokenB,'_descriptive_group_RMS_relative_not_used_for_validation']};
             else
-                groupHeader = {'Group','TrainA_raw_amplitude', ...
-                    'TrainA_relative_weight','TrainB_raw_amplitude', ...
-                    'TrainB_relative_weight'};
+                groupHeader = {'Group',['Train',foldTokenA,'_raw_amplitude'], ...
+                    ['Train',foldTokenA,'_relative_weight'], ...
+                    ['Train',foldTokenB,'_raw_amplitude'], ...
+                    ['Train',foldTokenB,'_relative_weight']};
+                if isFourGroupOutput && ...
+                        isfield(cv.trainA,'resolvedGroupMask') && ...
+                        isfield(cv.trainB,'resolvedGroupMask')
+                    resolvedA = cvColumn(cv.trainA.resolvedGroupMask, ...
+                        nGroup,'trainA.resolvedGroupMask');
+                    resolvedB = cvColumn(cv.trainB.resolvedGroupMask, ...
+                        nGroup,'trainB.resolvedGroupMask');
+                    groupRows = [groupRows, ...
+                        num2cell(double([resolvedA,resolvedB]))];
+                    groupHeader = [groupHeader, ...
+                        {['Train',foldTokenA,'_group_resolved'], ...
+                         ['Train',foldTokenB,'_group_resolved']}];
+                end
             end
             writecell([groupHeader;groupRows],workbook,'Sheet','GroupWeights','Range','A1');
             if isFourGroupOutput
-                writeLeakageMatrixSheet(workbook,'LeakageMatrixA',groupNames, ...
-                    cv.trainA.groupLeakageMatrix,cv.trainA.groupLeakageRcond);
-                writeLeakageMatrixSheet(workbook,'LeakageMatrixB',groupNames, ...
-                    cv.trainB.groupLeakageMatrix,cv.trainB.groupLeakageRcond);
+                physicalRcondA = cv.trainA.groupLeakageRcond;
+                physicalRcondB = cv.trainB.groupLeakageRcond;
+                if isfield(cv.trainA,'fullGroupLeakageRcond')
+                    physicalRcondA = cv.trainA.fullGroupLeakageRcond;
+                end
+                if isfield(cv.trainB,'fullGroupLeakageRcond')
+                    physicalRcondB = cv.trainB.fullGroupLeakageRcond;
+                end
+                writeLeakageMatrixSheet(workbook, ...
+                    ['LeakageMatrix',foldTokenA],groupNames, ...
+                    cv.trainA.groupLeakageMatrix,physicalRcondA);
+                writeLeakageMatrixSheet(workbook, ...
+                    ['LeakageMatrix',foldTokenB],groupNames, ...
+                    cv.trainB.groupLeakageMatrix,physicalRcondB);
+                if isfield(cv.trainA,'groupLeakageSolveMatrix') && ...
+                        isfield(cv.trainB,'groupLeakageSolveMatrix')
+                    writeLeakageMatrixSheet(workbook, ...
+                        ['LeakageSolve',foldTokenA],groupNames, ...
+                        cv.trainA.groupLeakageSolveMatrix, ...
+                        cv.trainA.groupLeakageRcond);
+                    writeLeakageMatrixSheet(workbook, ...
+                        ['LeakageSolve',foldTokenB],groupNames, ...
+                        cv.trainB.groupLeakageSolveMatrix, ...
+                        cv.trainB.groupLeakageRcond);
+                end
             end
             if ~isequal(size(cv.activeGroupCountAtoB),[nRate,4]) || ...
                     ~isequal(size(cv.activeGroupCountBtoA),[nRate,4])
@@ -1402,8 +1741,8 @@ end
                     'cvCOCO active-group count curves must be N-rate by four.');
             end
             activeGroupHeader = [{'SedRate_cm_per_kyr'}, ...
-                strcat('AtoB_active_',groupNames(:)'), ...
-                strcat('BtoA_active_',groupNames(:)')];
+                strcat([foldTokenA,'To',foldTokenB,'_active_'],groupNames(:)'), ...
+                strcat([foldTokenB,'To',foldTokenA,'_active_'],groupNames(:)')];
             writecell(activeGroupHeader,workbook, ...
                 'Sheet','ActiveGroupCounts','Range','A1');
             writematrix([sr,cv.activeGroupCountAtoB, ...
@@ -1427,25 +1766,25 @@ end
                 normalizedB = cvColumn(cv.trainB.amplitudes9Normalized, ...
                     numel(orbitPeriods),'trainB.amplitudes9Normalized');
                 amplitudeHeader = {'Period_kyr','Group', ...
-                    'TrainA_per_orbit_Rayleigh_peak_raw_amplitude', ...
-                    'TrainB_per_orbit_Rayleigh_peak_raw_amplitude', ...
-                    'TrainA_per_orbit_normalized_weight', ...
-                    'TrainB_per_orbit_normalized_weight'};
+                    ['Train',foldTokenA,'_per_orbit_Rayleigh_peak_raw_amplitude'], ...
+                    ['Train',foldTokenB,'_per_orbit_Rayleigh_peak_raw_amplitude'], ...
+                    ['Train',foldTokenA,'_per_orbit_normalized_weight'], ...
+                    ['Train',foldTokenB,'_per_orbit_normalized_weight']};
                 amplitudeRows = [num2cell(orbitPeriods),groupLabels, ...
                     num2cell(cv.trainA.amplitudes9(:)), ...
                     num2cell(cv.trainB.amplitudes9(:)), ...
                     num2cell(normalizedA),num2cell(normalizedB)];
             elseif isFourGroupOutput
                 amplitudeHeader = {'Period_kyr','Group', ...
-                    'TrainA_group_common_amplitude_repeated_for_member', ...
-                    'TrainB_group_common_amplitude_repeated_for_member'};
+                    ['Train',foldTokenA,'_group_common_amplitude_repeated_for_member'], ...
+                    ['Train',foldTokenB,'_group_common_amplitude_repeated_for_member']};
                 amplitudeRows = [num2cell(orbitPeriods),groupLabels, ...
                     num2cell(cv.trainA.amplitudes9(:)), ...
                     num2cell(cv.trainB.amplitudes9(:))];
             else
                 amplitudeHeader = {'Period_kyr','Group', ...
-                    'TrainA_per_orbit_adaptive_amplitude', ...
-                    'TrainB_per_orbit_adaptive_amplitude'};
+                    ['Train',foldTokenA,'_per_orbit_adaptive_amplitude'], ...
+                    ['Train',foldTokenB,'_per_orbit_adaptive_amplitude']};
                 amplitudeRows = [num2cell(orbitPeriods),groupLabels, ...
                     num2cell(cv.trainA.amplitudes9(:)), ...
                     num2cell(cv.trainB.amplitudes9(:))];
@@ -1453,19 +1792,37 @@ end
             writecell([amplitudeHeader;amplitudeRows],workbook, ...
                 'Sheet','OrbitAmplitudes','Range','A1');
 
-            nullHeader = {'Simulation','S_A_to_B','S_B_to_A','T_symmetric', ...
-                'BestRate_A_to_B_cm_per_kyr','BestRate_B_to_A_cm_per_kyr'};
+            nullHeader = {'Simulation', ...
+                ['S_',foldTokenA,'_to_',foldTokenB], ...
+                ['S_',foldTokenB,'_to_',foldTokenA], ...
+                'T_same_rate_consensus','T_symmetric', ...
+                ['BestRate_',foldTokenA,'_to_',foldTokenB,'_cm_per_kyr'], ...
+                ['BestRate_',foldTokenB,'_to_',foldTokenA,'_cm_per_kyr']};
             writecell(nullHeader,workbook,'Sheet','NullStatistics','Range','A1');
-            writematrix([(1:nNull)',nullAtoB,nullBtoA,nullScore, ...
+            writematrix([(1:nNull)',nullAtoB,nullBtoA, ...
+                nullConsensus,nullScore, ...
                 nullRateAtoB,nullRateBtoA],workbook,'Sheet','NullStatistics','Range','A2');
 
             writeSegmentSheet(workbook,'CleanInput',cv.dataClean);
-            writeSegmentSheet(workbook,'SegmentA',cv.dataA);
-            writeSegmentSheet(workbook,'SegmentB',cv.dataB);
-            writeSpectrumSheet(workbook,'TrainingSpectrumA',cv.spectra.trainA);
-            writeSpectrumSheet(workbook,'TrainingSpectrumB',cv.spectra.trainB);
-            writeSpectrumSheet(workbook,'ValidationSpectrum_AtoB',cv.spectra.validateAtoB);
-            writeSpectrumSheet(workbook,'ValidationSpectrum_BtoA',cv.spectra.validateBtoA);
+            if isInterleavedOutput
+                if isfield(cv,'rawDataA') && isfield(cv,'rawDataB')
+                    writeSegmentSheet(workbook,'RawOddFold',cv.rawDataA);
+                    writeSegmentSheet(workbook,'RawEvenFold',cv.rawDataB);
+                end
+                writeSegmentSheet(workbook,'OddFold',cv.dataA);
+                writeSegmentSheet(workbook,'EvenFold',cv.dataB);
+                writeSpectrumSheet(workbook,'TrainingSpectrumOdd',cv.spectra.trainA);
+                writeSpectrumSheet(workbook,'TrainingSpectrumEven',cv.spectra.trainB);
+                writeSpectrumSheet(workbook,'Validation_OddToEven',cv.spectra.validateAtoB);
+                writeSpectrumSheet(workbook,'Validation_EvenToOdd',cv.spectra.validateBtoA);
+            else
+                writeSegmentSheet(workbook,'SegmentA',cv.dataA);
+                writeSegmentSheet(workbook,'SegmentB',cv.dataB);
+                writeSpectrumSheet(workbook,'TrainingSpectrumA',cv.spectra.trainA);
+                writeSpectrumSheet(workbook,'TrainingSpectrumB',cv.spectra.trainB);
+                writeSpectrumSheet(workbook,'ValidationSpectrum_AtoB',cv.spectra.validateAtoB);
+                writeSpectrumSheet(workbook,'ValidationSpectrum_BtoA',cv.spectra.validateBtoA);
+            end
             [ok,message] = movefile(workbook,nm,'f');
             if ~ok
                 error('eCOCOGUI:AtomicSaveFailed', ...
@@ -1635,73 +1992,141 @@ end
                 out_ecoco,out_ecocorb,sr_p,rawData,ecoDetails)
             [~,dn,~] = fileparts(app.meta.filename);
             saveDir = resolveSaveDir(ctx);
-            if app.ecocoCalcMode == 1
-                outputStem = [dn,'-Adaptive-eCOCO-data'];
-            else
-                outputStem = [dn,'-Cross-fitted-eCOCO-data'];
-            end
+            ecoSpec = ecoMethodSpec();
+            outputStem = [dn,'-',ecoSpec.outputLabel];
             [nm,runIndex] = indexedRunName( ...
-                saveDir,outputStem,'.xlsx',dn,'ECOCO');
-            writematrix(prt_sr,nm,'Sheet','Sed.Rate');
-            writematrix(out_depth,nm,'Sheet','Depth');
-            writematrix(out_ecc,nm,'Sheet','COCO');
-            writematrix(out_eci,nm,'Sheet','p_global');
-            writematrix(out_norbit,nm,'Sheet','#Orbits');
-            writematrix(out_ecoco,nm,'Sheet','pCOCO');
-            writematrix(out_ecocorb,nm,'Sheet','RidgeScore');
+                saveDir,outputStem,'.xlsx');
+            workbook = [tempname(saveDir),'.xlsx'];
+            cleanup = onCleanup(@()deleteIfPresent(workbook));
+            parameters = buildRunParameterTable('ECOCO',nm);
+            writecell(parameters,workbook,'Sheet','Parameters');
+            writematrix(prt_sr,workbook,'Sheet','Sed.Rate');
+            writematrix(out_depth,workbook,'Sheet','Depth');
+            writematrix(out_ecc,workbook,'Sheet','COCO');
+            writematrix(out_eci,workbook,'Sheet','p_global');
+            writematrix(out_norbit,workbook,'Sheet','#Orbits');
+            writematrix(out_ecoco,workbook,'Sheet','pCOCO');
+            writematrix(out_ecocorb,workbook,'Sheet','RidgeScore');
 
             methodName = ecoCalcModeName('ECOCO');
-            engineMethod = iff(app.ecocoCalcMode == 1, ...
-                'adaptive','crossfit');
-            detailsAnchorFraction = app.anchorFraction;
+            engineMethod = ecoSpec.token;
+            detailsAnchorFraction = 'NA';
+            computationStatus = 'complete';
+            degradedMode = false;
+            warningIdentifier = '';
+            warningMessage = '';
+            algorithmVersion = '';
+            scoreDefinition = '';
+            orbitCountRole = '';
+            if ecoSpec.usesAnchor
+                detailsAnchorFraction = app.anchorFraction;
+            end
             if nargin >= 11 && isstruct(ecoDetails)
                 engineMethod = detailValue( ...
                     ecoDetails,'method',engineMethod);
-                detailsAnchorFraction = detailValue( ...
-                    ecoDetails,'anchorFraction',detailsAnchorFraction);
+                computationStatus = detailValue( ...
+                    ecoDetails,'status',computationStatus);
+                degradedMode = detailValue( ...
+                    ecoDetails,'degradedMode',degradedMode);
+                warningIdentifier = detailValue( ...
+                    ecoDetails,'warningIdentifier',warningIdentifier);
+                warningMessage = detailValue( ...
+                    ecoDetails,'warningMessage',warningMessage);
+                algorithmVersion = detailValue( ...
+                    ecoDetails,'algorithmVersion',algorithmVersion);
+                scoreDefinition = detailValue( ...
+                    ecoDetails,'scoreDefinition',scoreDefinition);
+                if ecoSpec.usesAnchor
+                    detailsAnchorFraction = detailValue( ...
+                        ecoDetails,'anchorFraction',detailsAnchorFraction);
+                end
+            end
+            if any(strcmpi(char(string(engineMethod)), ...
+                    {'crossfit','interleaved'}))
+                if isempty(scoreDefinition)
+                    scoreDefinition = [ ...
+                        'pCOCO = consensus rho x ', ...
+                        'abs(log10(consensus global p))'];
+                end
+                orbitCountRole = 'Diagnostic only; not used in ridge score';
+            elseif strcmpi(char(string(engineMethod)),'adaptive')
+                if isempty(scoreDefinition)
+                    scoreDefinition = 'pCOCO x N_orbits / 9';
+                end
+                orbitCountRole = 'Ridge-score weight N_orbits / 9';
             end
             writecell({'Parameter','Value';'Method',methodName; ...
                 'Engine_method',engineMethod; ...
-                'Anchor_fraction_W',detailsAnchorFraction},nm, ...
+                'Algorithm_version',algorithmVersion; ...
+                'Score_definition',scoreDefinition; ...
+                'Orbit_count_role',orbitCountRole; ...
+                'Anchor_fraction_W',detailsAnchorFraction; ...
+                'Computation_status',computationStatus; ...
+                'Degraded_partial_orbit_training',yesno(degradedMode); ...
+                'Training_warning_identifier',warningIdentifier; ...
+                'Training_warning_message',warningMessage},workbook, ...
                 'Sheet','eCOCO_Method','Range','A1');
 
             if any(strcmpi(char(string(engineMethod)), ...
-                    {'adaptive','crossfit'})) && ...
+                    {'adaptive','crossfit','interleaved'})) && ...
                     isnumeric(out_ep) && ~isempty(out_ep)
-                writematrix(out_ep,nm,'Sheet','p_local');
+                writematrix(out_ep,workbook,'Sheet','p_local');
             end
 
             if nargin >= 11 && isstruct(ecoDetails)
-                writeEcoDirectionSheets(nm,ecoDetails,'forward','Fwd');
-                writeEcoDirectionSheets(nm,ecoDetails,'backward','Bwd');
-                writeEcoDirectionSheets(nm,ecoDetails, ...
+                if strcmpi(char(string(engineMethod)),'interleaved')
+                    writeEcoDirectionSheets( ...
+                        workbook,ecoDetails,'forward','OddToEven');
+                    writeEcoDirectionSheets( ...
+                        workbook,ecoDetails,'backward','EvenToOdd');
+                else
+                    writeEcoDirectionSheets(workbook,ecoDetails,'forward','Fwd');
+                    writeEcoDirectionSheets(workbook,ecoDetails,'backward','Bwd');
+                end
+                writeEcoDirectionSheets(workbook,ecoDetails, ...
                     'consensus','Consensus');
                 if isfield(ecoDetails,'supportDirection')
-                    writeEcoSheet(nm,'SupportDirection', ...
+                    writeEcoSheet(workbook,'SupportDirection', ...
                         ecoDetails.supportDirection);
                 end
+                if isfield(ecoDetails,'metadata')
+                    writeEcoMetadata(workbook,'MethodMetadata', ...
+                        ecoDetails.metadata);
+                end
+                if strcmpi(char(string(engineMethod)),'interleaved')
+                    saveInterleavedWindowDiagnostics( ...
+                        workbook,out_depth,ecoDetails);
+                end
                 if isfield(ecoDetails,'anchors')
-                    writeEcoMetadata(nm,'AnchorMetadata', ...
+                    writeEcoMetadata(workbook,'AnchorMetadata', ...
                         ecoDetails.anchors);
                 elseif isfield(ecoDetails,'anchor')
-                    writeEcoMetadata(nm,'AnchorMetadata',ecoDetails.anchor);
+                    writeEcoMetadata(workbook,'AnchorMetadata',ecoDetails.anchor);
                 end
             end
 
             if nargin >= 10 && ~isempty(sr_p)
-                trackedHeader = {'Depth_m','SedRate_cm_per_kyr','Correlation','P_value','N_orbits','pCOCOxOrbits','SedRate_low_cm_per_kyr','SedRate_high_cm_per_kyr'};
-                writecell(trackedHeader,nm,'Sheet','TrackedSR','Range','A1');
-                writematrix(sr_p,nm,'Sheet','TrackedSR','Range','A2');
+                trackedHeader = {'Depth_m','SedRate_cm_per_kyr', ...
+                    'Correlation','P_value','N_orbits','Ridge_score', ...
+                    'SedRate_low_cm_per_kyr','SedRate_high_cm_per_kyr'};
+                writecell(trackedHeader,workbook,'Sheet','TrackedSR','Range','A1');
+                writematrix(sr_p,workbook,'Sheet','TrackedSR','Range','A2');
 
                 [ageModel,timeDomainData] = buildAgeModelFromTrackedSR(rawData,sr_p);
                 ageHeader = {'Depth_m','Age_kyr','Age_min_kyr','Age_max_kyr','SedRate_cm_per_kyr','SedRate_low_cm_per_kyr','SedRate_high_cm_per_kyr'};
-                writecell(ageHeader,nm,'Sheet','AgeModel','Range','A1');
-                writematrix(ageModel,nm,'Sheet','AgeModel','Range','A2');
+                writecell(ageHeader,workbook,'Sheet','AgeModel','Range','A1');
+                writematrix(ageModel,workbook,'Sheet','AgeModel','Range','A2');
 
                 timeHeader = {'Age_kyr','Age_min_kyr','Age_max_kyr','Value','Depth_m'};
-                writecell(timeHeader,nm,'Sheet','TimeDomainData','Range','A1');
-                writematrix(timeDomainData,nm,'Sheet','TimeDomainData','Range','A2');
+                writecell(timeHeader,workbook,'Sheet','TimeDomainData','Range','A1');
+                writematrix(timeDomainData,workbook,'Sheet','TimeDomainData','Range','A2');
             end
+            [ok,message] = movefile(workbook,nm,'f');
+            if ~ok
+                error('eCOCOGUI:AtomicSaveFailed', ...
+                    'Could not finalize the eCOCO workbook: %s',message);
+            end
+            clear cleanup
         end
 
         function writeEcoDirectionSheets(workbook,details,fieldName,prefix)
@@ -1710,13 +2135,137 @@ end
                 return
             end
             direction = details.(fieldName);
-            fields = {'rho','pLocal','pGlobal','nOrbit','score'};
-            suffix = {'rho','p_local','p_global','Orbits','score'};
+            fields = {'rho','pLocal','pGlobal','nOrbit','pCOCO','score'};
+            suffix = {'rho','p_local','p_global','Orbits','pCOCO','score'};
             for fieldIndex = 1:numel(fields)
                 if isfield(direction,fields{fieldIndex})
                     writeEcoSheet(workbook, ...
                         [prefix,'_',suffix{fieldIndex}], ...
                         direction.(fields{fieldIndex}));
+                end
+            end
+        end
+
+        function saveInterleavedWindowDiagnostics(workbook,depth,details)
+            if isfield(details,'windows') && isstruct(details.windows)
+                windows = details.windows;
+                requiredGeometry = {'requestedBounds','actualSpan', ...
+                    'observedCenter','observedSpan','pointCount', ...
+                    'startIndex','endIndex','success'};
+                if all(isfield(windows,requiredGeometry))
+                    observedLower = windows.observedCenter(:)- ...
+                        windows.observedSpan(:)/2;
+                    observedUpper = windows.observedCenter(:)+ ...
+                        windows.observedSpan(:)/2;
+                    oddCount = nan(numel(depth),1);
+                    evenCount = nan(numel(depth),1);
+                    if isfield(details,'folds') && ...
+                            isstruct(details.folds)
+                        if isfield(details.folds,'rawPointCountOdd')
+                            oddCount = details.folds.rawPointCountOdd(:);
+                        end
+                        if isfield(details.folds,'rawPointCountEven')
+                            evenCount = details.folds.rawPointCountEven(:);
+                        end
+                    end
+                    writecell({'Center_m','Requested_lower_m', ...
+                        'Requested_upper_m','Support_span_m', ...
+                        'First_observed_m','Last_observed_m', ...
+                        'Observed_center_m','Observed_span_m', ...
+                        'Raw_point_count','Odd_raw_point_count', ...
+                        'Even_raw_point_count','Start_global_index', ...
+                        'End_global_index','Success'},workbook, ...
+                        'Sheet','Ieco_WindowGeometry','Range','A1');
+                    writematrix([depth(:),windows.requestedBounds, ...
+                        windows.actualSpan(:),observedLower,observedUpper, ...
+                        windows.observedCenter(:),windows.observedSpan(:), ...
+                        windows.pointCount(:),oddCount,evenCount, ...
+                        windows.startIndex(:),windows.endIndex(:), ...
+                        double(windows.success(:))],workbook, ...
+                        'Sheet','Ieco_WindowGeometry','Range','A2');
+                end
+            end
+            requiredP = {'pConsensus','pRobust','pSym'};
+            if all(isfield(details,requiredP))
+                rateDifference = nan(numel(depth),1);
+                if isfield(details,'windows') && ...
+                        isstruct(details.windows) && ...
+                        isfield(details.windows, ...
+                        'directionalBestRateDifference')
+                    rateDifference = ...
+                        details.windows.directionalBestRateDifference(:);
+                end
+                writecell({'Depth_m','Consensus_global_p', ...
+                    'Robust_directional_p','Symmetric_p', ...
+                    'Directional_best_rate_difference'},workbook, ...
+                    'Sheet','Ieco_WindowP','Range','A1');
+                writematrix([depth(:),details.pConsensus(:), ...
+                    details.pRobust(:),details.pSym(:),rateDifference], ...
+                    workbook,'Sheet','Ieco_WindowP','Range','A2');
+            end
+            if isfield(details,'folds') && isstruct(details.folds)
+                folds = details.folds;
+                requiredFold = {'spacingOdd','spacingEven', ...
+                    'allNineRateRangeOdd','allNineRateRangeEven', ...
+                    'allNineRateRangeShared'};
+                if all(isfield(folds,requiredFold))
+                    bestRateAllNineResolved = nan(numel(depth),1);
+                    if isfield(details,'bestRateAllNineResolved')
+                        bestRateAllNineResolved = double( ...
+                            details.bestRateAllNineResolved(:));
+                    end
+                    partialTraining = nan(numel(depth),1);
+                    trainPeriodsOdd = nan(numel(depth),1);
+                    trainPeriodsEven = nan(numel(depth),1);
+                    trainGroupsOdd = nan(numel(depth),4);
+                    trainGroupsEven = nan(numel(depth),4);
+                    if isfield(details,'windows') && ...
+                            isstruct(details.windows)
+                        if isfield(details.windows,'partialOrbitTraining')
+                            partialTraining = double( ...
+                                details.windows.partialOrbitTraining(:));
+                        end
+                        if isfield(details.windows, ...
+                                'trainingResolvablePeriodsOdd')
+                            trainPeriodsOdd = details.windows. ...
+                                trainingResolvablePeriodsOdd(:);
+                        end
+                        if isfield(details.windows, ...
+                                'trainingResolvablePeriodsEven')
+                            trainPeriodsEven = details.windows. ...
+                                trainingResolvablePeriodsEven(:);
+                        end
+                        if isfield(details.windows,'trainingResolvedGroupsOdd')
+                            trainGroupsOdd = double(details.windows. ...
+                                trainingResolvedGroupsOdd);
+                        end
+                        if isfield(details.windows,'trainingResolvedGroupsEven')
+                            trainGroupsEven = double(details.windows. ...
+                                trainingResolvedGroupsEven);
+                        end
+                    end
+                    writecell({'Depth_m','Odd_spacing_m', ...
+                        'Even_spacing_m','Odd_all9_low','Odd_all9_high', ...
+                        'Even_all9_low','Even_all9_high','Shared_all9_low', ...
+                        'Shared_all9_high','Best_rate_all9_resolved', ...
+                        'Partial_orbit_training','Train_periods_Odd', ...
+                        'Train_periods_Even','Train_Odd_longE_resolved', ...
+                        'Train_Odd_shortE_resolved', ...
+                        'Train_Odd_obliquity_resolved', ...
+                        'Train_Odd_precession_resolved', ...
+                        'Train_Even_longE_resolved', ...
+                        'Train_Even_shortE_resolved', ...
+                        'Train_Even_obliquity_resolved', ...
+                        'Train_Even_precession_resolved'},workbook, ...
+                        'Sheet','Ieco_FoldResolution','Range','A1');
+                    writematrix([depth(:),folds.spacingOdd(:), ...
+                        folds.spacingEven(:),folds.allNineRateRangeOdd, ...
+                        folds.allNineRateRangeEven, ...
+                        folds.allNineRateRangeShared, ...
+                        bestRateAllNineResolved,partialTraining, ...
+                        trainPeriodsOdd,trainPeriodsEven,trainGroupsOdd, ...
+                        trainGroupsEven],workbook, ...
+                        'Sheet','Ieco_FoldResolution','Range','A2');
                 end
             end
         end
@@ -1776,53 +2325,6 @@ end
             end
         end
 
-        function nm = saveRunParameterTable( ...
-                modeName,outputFile,runIndex,conclusionReport,adaptiveDetails)
-            [~,dn,~] = fileparts(app.meta.filename);
-            saveDir = resolveSaveDir(ctx);
-            nm = indexedParameterName(saveDir,dn,modeName,runIndex);
-            params = buildRunParameterTable(modeName,outputFile);
-            temporaryWorkbook = [tempname(saveDir),'.xlsx'];
-            cleanup = onCleanup(@()deleteIfPresent(temporaryWorkbook));
-            if strcmp(modeName,'CVCOCOLEGACY')
-                sheetName = 'cvCOCO Legacy';
-            elseif strcmp(modeName,'CVCOCO9A')
-                sheetName = 'cvCOCO9A';
-            elseif any(strcmp(modeName,{'CVCOCO9B','CVCOCO9'}))
-                sheetName = 'cvCOCO9B';
-            elseif strcmp(modeName,'CVCOCO2')
-                sheetName = 'cvCOCO2';
-            elseif strcmp(modeName,'CVCOCO')
-                sheetName = 'cvCOCO';
-            elseif strcmp(modeName,'ADAPTIVECOCO')
-                sheetName = 'Adaptive COCO';
-            elseif strcmp(modeName,'ADAPTIVECOCO9A')
-                sheetName = 'Adaptive COCO9A';
-            elseif strcmp(modeName,'ADAPTIVECOCO9B')
-                sheetName = 'Adaptive COCO9B';
-            elseif strcmp(modeName,'FIXEDCOCO9')
-                sheetName = 'Fixed COCO9';
-            elseif strcmp(modeName,'FIXEDTARGETCOCO')
-                sheetName = 'Fixed-target COCO';
-            else
-                sheetName = 'COCO';
-            end
-            writecell(params,temporaryWorkbook,'Sheet',sheetName);
-            if isFullRecordCocoModeName(modeName) && ...
-                    ~isempty(conclusionReport)
-                writeConclusionSummary(temporaryWorkbook,conclusionReport);
-                writeAdaptiveAudit(temporaryWorkbook,adaptiveDetails);
-                writeAdaptiveCurves(temporaryWorkbook, ...
-                    app.run.corrCI,app.run.corr_h0);
-            end
-            [ok,message] = movefile(temporaryWorkbook,nm,'f');
-            if ~ok
-                error('eCOCOGUI:AtomicSaveFailed', ...
-                    'Could not finalize the parameter workbook: %s',message);
-            end
-            clear cleanup
-        end
-
         function params = buildRunParameterTable(modeName,outputFile)
             [~,outBase,outExt] = fileparts(outputFile);
             outputName = [outBase,outExt];
@@ -1849,41 +2351,46 @@ end
             params(18,:) = {'', '', 'User-defined period',userPeriodValue(),'',''};
             params(19,:) = {'', '', 'Correlation method',iff(app.corrmethod==1,'Pearson','Spearman'),'',''};
             params(20,:) = {'', 'COCO','Selected COCO method',selectedCocoMethod(modeName), ...
-                'cvCOCO / Adaptive COCO / Fixed-target COCO',''};
+                ['Blocked cvCOCO / Interleaved cvCOCO / Adaptive COCO / ', ...
+                 'Fixed-target COCO'],''};
             params(21,:) = {'', 'COCO','Target mode',cocoTargetModeName(modeName), ...
-                ['cvCOCO and Adaptive COCO use method-B four-group ', ...
+                ['Blocked/Interleaved cvCOCO and Adaptive COCO use ', ...
+                 'method-B four-group ', ...
                  'areas with leakage-matrix NNLS and a coherent ', ...
                  'nine-term target; Fixed-target COCO uses preset weights'],''};
             params(22,:) = {'', 'COCO','Fixed target amplitude weights',fixedTargetWeightValue(modeName),'Eccentricity / obliquity / precession',''};
             params(23,:) = {'', '', 'Monte Carlo iterations',app.nsim,'',''};
             params(24,:) = {'', 'cvCOCO','Split and validation rule',cvParameterValue(modeName, ...
-                'Depth midpoint; bidirectional two-fold held-out validation'),'For cvCOCO only',''};
+                cvSplitRuleValue(modeName)),'For cvCOCO only',''};
             params(25,:) = {'', 'cvCOCO','Trained target structure', ...
                 cvTrainingTargetValue(modeName),'For cvCOCO only',''};
             params(26,:) = {'', 'cvCOCO','Symmetric statistic',cvParameterValue(modeName, ...
                 'min(max rho A-to-B, max rho B-to-A)'),'For cvCOCO only',''};
             params(27,:) = {'', 'cvCOCO','Monte Carlo batch size',cvParameterValue(modeName,app.cvBatchSize),'For cvCOCO only',''};
             params(28,:) = {'', 'COCO','Random seed',cocoSeedValue(modeName),'Local RNG; restored after the run',''};
-            params(29,:) = {'', 'cvCOCO','Split depth (m)',cvParameterValue(modeName,cvSplitDepthValue()),'For cvCOCO only',''};
-            params(30,:) = {'', 'cvCOCO','Secondary p_sym',cvResultValue(modeName,'pSym'), ...
-                'Joint statistic; does not override directional global-p failure',''};
+            params(29,:) = {'', 'cvCOCO','Split depth / fold definition', ...
+                cvParameterValue(modeName,cvSplitDefinitionValue(modeName)), ...
+                'For cvCOCO only',''};
             params(31,:) = {'', 'cvCOCO','Directional p_A',cvResultValue(modeName,'pA'), ...
-                'B trains; Segment A is held out; rate-search corrected',''};
+                cvDirectionalPExplanation(modeName,'A'),''};
             params(32,:) = {'', 'cvCOCO','Directional p_B',cvResultValue(modeName,'pB'), ...
-                'A trains; Segment B is held out; rate-search corrected',''};
+                cvDirectionalPExplanation(modeName,'B'),''};
             params(33,:) = {'', 'cvCOCO','Monte Carlo null model',cvParameterValue(modeName, ...
-                ['Independent segment-specific stationary AR(1) nulls; ', ...
-                 'repeat training, frozen-target validation, and rate search']), ...
+                cvNullModelValue(modeName)), ...
                 'For cvCOCO only',''};
             params(34,:) = {'', 'eCOCO','Selected eCOCO method', ...
                 ecoCalcModeName(modeName), ...
-                'Adaptive eCOCO / Cross-fitted eCOCO',''};
+                'Adaptive eCOCO / Blocked eCOCO / Interleaved eCOCO',''};
             params(35,:) = {'', 'eCOCO','Target update interval', ...
                 ecoAnchorFractionValue(modeName), ...
-                'Fraction of window width; Cross-fitted eCOCO only',''};
+                'Fraction of window width; Blocked eCOCO only',''};
             params(36,:) = {'', 'eCOCO','Zero padding edge',ecoPadEdgeValue(modeName),'For eCOCO only',''};
-            params(37,:) = {'', 'eCOCO','Sliding window size',ecoValue(modeName,app.window),'For eCOCO only',''};
-            params(38,:) = {'', 'eCOCO','Sliding window step',ecoValue(modeName,app.step),'For eCOCO only',''};
+            params(37,:) = {'', 'eCOCO','Sliding window size', ...
+                ecoValue(modeName,app.window), ...
+                'All modern eCOCO methods: exact physical-depth support width',''};
+            params(38,:) = {'', 'eCOCO','Sliding window step', ...
+                ecoValue(modeName,app.step), ...
+                'All modern eCOCO methods: exact physical center spacing',''};
             params(39,:) = {'', '', 'Output file name',outputName,'',''};
             params(40,:) = {'', '', 'Show input/target periodograms',yesno(app.CShowPeriod.Value),'COCO only',''};
             params(41,:) = {'', '', 'Maximum displayed data frequency (cycle/m)', ...
@@ -1893,23 +2400,7 @@ end
             params(43,:) = {'', '', 'Test sedimentation rate: actual final grid value',actualSedRateMaximum(),'',''};
             params(44,:) = {'', '', 'Input depth unit',app.meta.input_unit,'Converted before preprocessing',''};
             params(45,:) = {'', '', 'Input-depth multiplier to metres',app.meta.depth_scale_to_m,'',''};
-        end
-
-        function nm = indexedParameterName(saveDir,dn,modeName,runIndex)
-            if nargin >= 4 && ~isempty(runIndex) && isfinite(runIndex)
-                nm = fullfile(saveDir,sprintf('%s-%s-parameters-%d.xlsx',dn,modeName,runIndex));
-                if ~exist(nm,'file')
-                    return
-                end
-            end
-
-            for k = 1:9999
-                nm = fullfile(saveDir,sprintf('%s-%s-parameters-%d.xlsx',dn,modeName,k));
-                if ~exist(nm,'file')
-                    return;
-                end
-            end
-            nm = uniqueName(fullfile(saveDir,sprintf('%s-%s-parameters.xlsx',dn,modeName)));
+            params(30,:) = [];
         end
 
         function s = yesno(tf)
@@ -1942,10 +2433,37 @@ end
 
         function v = ecoCalcModeName(modeName)
             if strcmp(modeName,'ECOCO')
-                v = iff(app.ecocoCalcMode==1, ...
-                    'Adaptive eCOCO','Cross-fitted eCOCO');
+                spec = ecoMethodSpec();
+                v = spec.displayName;
             else
                 v = 'NA';
+            end
+        end
+
+        function spec = ecoMethodSpec()
+            switch app.ecocoCalcMode
+                case 1
+                    spec = struct('token','adaptive', ...
+                        'displayName','Adaptive eCOCO', ...
+                        'outputLabel','Adaptive-eCOCO', ...
+                        'fileStem','Adaptive_eCOCO', ...
+                        'usesAnchor',false);
+                case 2
+                    spec = struct('token','crossfit', ...
+                        'displayName','Blocked eCOCO', ...
+                        'outputLabel','Blocked_eCOCO', ...
+                        'fileStem','Blocked_eCOCO', ...
+                        'usesAnchor',true);
+                case 3
+                    spec = struct('token','interleaved', ...
+                        'displayName','Interleaved eCOCO', ...
+                        'outputLabel','Interleaved_eCOCO', ...
+                        'fileStem','Interleaved_eCOCO', ...
+                        'usesAnchor',false);
+                otherwise
+                    error('eCOCOGUI:UnknownECOCOMethod', ...
+                        'Unknown eCOCO calculation mode: %g.', ...
+                        app.ecocoCalcMode);
             end
         end
 
@@ -1965,6 +2483,10 @@ end
                 v = 'coherent nine-term fixed target';
             elseif isFullRecordCocoModeName(modeName)
                 v = app.cocoTargetMode;
+            elseif strcmp(modeName,'INTERLEAVEDCVCOCO')
+                v = ['method-B four group-band area amplitudes, leakage-', ...
+                    'matrix NNLS, and coherent nine-term target ', ...
+                    '(bidirectional odd/even held-out)'];
             elseif strcmp(modeName,'CVCOCO')
                 v = ['four group-band area amplitudes, leakage-matrix ', ...
                     'NNLS, and coherent nine-term target ', ...
@@ -1989,8 +2511,10 @@ end
         function v = selectedCocoMethod(modeName)
             if strcmp(modeName,'ECOCO')
                 v = 'NA';
+            elseif strcmp(modeName,'INTERLEAVEDCVCOCO')
+                v = 'Interleaved cvCOCO';
             elseif strcmp(modeName,'CVCOCO')
-                v = 'cvCOCO';
+                v = 'Blocked cvCOCO';
             elseif strcmp(modeName,'ADAPTIVECOCO')
                 v = 'Adaptive COCO';
             elseif strcmp(modeName,'FIXEDTARGETCOCO')
@@ -2040,7 +2564,8 @@ end
             elseif strcmp(modeName,'CVCOCO9A')
                 v = ['Nine +/-1-Rayleigh-band peak amplitudes calibrated ', ...
                     'per orbit, normalized, and frozen for coherent validation'];
-            elseif any(strcmp(modeName,{'CVCOCO9B','CVCOCO9'}))
+            elseif any(strcmp(modeName, ...
+                    {'CVCOCO9B','CVCOCO9','INTERLEAVEDCVCOCO'}))
                 v = ['Four leakage-corrected group amplitudes expanded ', ...
                     'to nine coherently summed orbital terms'];
             elseif strcmp(modeName,'CVCOCO')
@@ -2067,7 +2592,7 @@ end
         function tf = isCVModeName(modeName)
             tf = any(strcmp(modeName, ...
                 {'CVCOCO','CVCOCO9A','CVCOCO9B','CVCOCO9', ...
-                 'CVCOCOLEGACY','CVCOCO2'}));
+                 'CVCOCOLEGACY','CVCOCO2','INTERLEAVEDCVCOCO'}));
         end
 
         function tf = isFullRecordCocoModeName(modeName)
@@ -2127,6 +2652,64 @@ end
             v = 'NA';
             if isstruct(app.run.cv) && isfield(app.run.cv,'splitDepth') && ~isempty(app.run.cv.splitDepth)
                 v = app.run.cv.splitDepth;
+            end
+        end
+
+        function v = cvSplitRuleValue(modeName)
+            if strcmp(modeName,'INTERLEAVEDCVCOCO')
+                v = ['Odd/even observation indices after input cleaning; ', ...
+                    'bidirectional two-fold held-out validation'];
+            else
+                v = 'Depth midpoint; bidirectional two-fold held-out validation';
+            end
+            if isstruct(app.run.cv) && isfield(app.run.cv,'config') && ...
+                    isstruct(app.run.cv.config) && ...
+                    isfield(app.run.cv.config,'splitRule') && ...
+                    ~isempty(app.run.cv.config.splitRule)
+                v = app.run.cv.config.splitRule;
+            end
+        end
+
+        function v = cvSplitDefinitionValue(modeName)
+            if strcmp(modeName,'INTERLEAVEDCVCOCO')
+                v = cvSplitRuleValue(modeName);
+            else
+                v = cvSplitDepthValue();
+            end
+        end
+
+        function v = cvNullModelValue(modeName)
+            if strcmp(modeName,'INTERLEAVEDCVCOCO')
+                v = ['One joint full-record stationary AR(1) realization ', ...
+                    'split into odd/even observations; repeat interpolation, ', ...
+                    'linear detrending, training, validation, and rate search'];
+            else
+                v = ['Independent segment-specific stationary AR(1) nulls; ', ...
+                    'repeat training, frozen-target validation, and rate search'];
+            end
+            if isstruct(app.run.cv) && isfield(app.run.cv,'config') && ...
+                    isstruct(app.run.cv.config) && ...
+                    isfield(app.run.cv.config,'nullConditioning') && ...
+                    ~isempty(app.run.cv.config.nullConditioning)
+                v = app.run.cv.config.nullConditioning;
+            end
+        end
+
+        function v = cvDirectionalPExplanation(modeName,fold)
+            if strcmp(modeName,'INTERLEAVEDCVCOCO')
+                if strcmp(fold,'A')
+                    v = ['Even trains; Odd is held out; ', ...
+                        'rate-search corrected'];
+                else
+                    v = ['Odd trains; Even is held out; ', ...
+                        'rate-search corrected'];
+                end
+            elseif strcmp(fold,'A')
+                v = ['B trains; Segment A is held out; ', ...
+                    'rate-search corrected'];
+            else
+                v = ['A trains; Segment B is held out; ', ...
+                    'rate-search corrected'];
             end
         end
 
@@ -2242,14 +2825,10 @@ end
             end
         end
 
-        function [nm,runIndex] = indexedRunName(saveDir,baseName,ext,dn,modeName)
+        function [nm,runIndex] = indexedRunName(saveDir,baseName,ext)
             for runIndex = 1:9999
                 nm = fullfile(saveDir,sprintf('%s-%d%s',baseName,runIndex,ext));
-                paramName = '';
-                if nargin >= 5
-                    paramName = fullfile(saveDir,sprintf('%s-%s-parameters-%d.xlsx',dn,modeName,runIndex));
-                end
-                if ~exist(nm,'file') && (isempty(paramName) || ~exist(paramName,'file'))
+                if ~exist(nm,'file')
                     return
                 end
             end
@@ -2347,17 +2926,6 @@ function [raw, dat, meta] = prepData(ctx)
             'The input must be a numeric array with depth and proxy-value columns.');
     end
     raw = raw(:,1:2);
-    raw = raw(all(isfinite(raw),2),:);
-    raw = sortrows(raw,1);
-    if ~isempty(raw)
-        originalCount = size(raw,1);
-        [uniqueDepth,~,group] = unique(raw(:,1),'sorted');
-        raw = [uniqueDepth,accumarray(group,raw(:,2),[],@mean)];
-        if size(raw,1) < originalCount
-            fprintf('>> Duplicate depths were merged by averaging proxy values (%d -> %d rows).\n', ...
-                originalCount,size(raw,1));
-        end
-    end
 
     if depthInMeters
         raw(:,1) = raw(:,1) .* depthScaleToM;
@@ -2368,15 +2936,24 @@ function [raw, dat, meta] = prepData(ctx)
             fprintf('   Internal depth unit          : m\n\n');
         end
     end
-    
-    % Periodogram-based COCO/eCOCO calculations require a uniformly sampled
-    % depth series.  After sorting and merging duplicate depths, use the
-    % median observed spacing to construct the regular grid.  Keeping the
-    % original cleaned series in raw makes the preprocessing explicit while
-    % dat is the series used by every downstream calculation.
+
+    % Full-record COCO/eCOCO and their direct function entry points share
+    % exactly one regularization implementation and tolerance.  Retain CLEAN
+    % as RAW for cvCOCO, whose midpoint/odd-even folds must be defined before
+    % each fold is interpolated independently.
+    preprocessing = struct();
     if depthInMeters
-        dat = interpolateAtMedianSpacing(raw);
+        inputLabel = char(getfielddef(ctx,'data_name','eCOCOGUI input'));
+        [dat,preprocessing,raw] = cocoPrepareRegularData( ...
+            raw,inputLabel,'MaximumPoints',5e6, ...
+            'MinimumPoints',4,'Verbose',true);
     else
+        raw = raw(all(isfinite(raw),2),:);
+        raw = sortrows(raw,1);
+        if ~isempty(raw)
+            [uniqueDepth,~,group] = unique(raw(:,1),'sorted');
+            raw = [uniqueDepth,accumarray(group,raw(:,2),[],@mean)];
+        end
         dat = raw;
     end
     meta = struct();
@@ -2391,6 +2968,7 @@ function [raw, dat, meta] = prepData(ctx)
     meta.unit_type = getfielddef(ctx,'unit_type',0);
     meta.filename = char(getfielddef(ctx,'data_name','data.txt'));
     meta.dat_name = char(getfielddef(ctx,'dat_name',meta.filename));
+    meta.preprocessing = preprocessing;
     
     if size(dat,1) < 3
         dat = [0 0;1 1;2 0.5;3 1.5];
@@ -2424,90 +3002,6 @@ switch unit
     otherwise
         isSupported = false;
 end
-end
-
-function dat = interpolateAtMedianSpacing(raw)
-    dat = raw;
-    if size(raw,1) < 2
-        return
-    end
-
-    spacing = diff(raw(:,1));
-    spacing = spacing(isfinite(spacing) & spacing > 0);
-    if isempty(spacing)
-        return
-    end
-
-    dt = median(spacing);
-    if ~isfinite(dt) || dt <= 0
-        return
-    end
-
-    % Do not interpolate an already uniform series.  The tolerance absorbs
-    % only floating-point roundoff in decimal depth coordinates.
-    spacingTolerance = max(64 * eps(max(1,max(abs(raw(:,1))))), ...
-        1e-8 * max(1,abs(dt)));
-    maxSpacingDeviation = max(abs(spacing - dt));
-    if maxSpacingDeviation <= spacingTolerance
-        return
-    end
-
-    intervalCountExact = (raw(end,1)-raw(1,1))/dt;
-    intervalCountRounded = round(intervalCountExact);
-    countTolerance = 1e-10*max(1,abs(intervalCountExact));
-    if abs(intervalCountExact-intervalCountRounded) <= countTolerance
-        intervalCount = intervalCountRounded;
-    else
-        intervalCount = floor(intervalCountExact);
-    end
-    interpolatedPointCount = intervalCount+1;
-    maximumInterpolatedPoints = 5e6;
-    if ~isfinite(interpolatedPointCount) || interpolatedPointCount < 2 || ...
-            interpolatedPointCount > maximumInterpolatedPoints
-        error('eCOCOGUI:InterpolationGridTooLarge', ...
-            ['Median-spacing interpolation would create approximately %.6g ', ...
-             'points (safety limit %.6g). Inspect large gaps/outliers or ', ...
-             'preprocess the record in scientifically defensible segments.'], ...
-            interpolatedPointCount,maximumInterpolatedPoints);
-    end
-    depthEven = raw(1,1) + (0:intervalCount)'*dt;
-    if numel(depthEven) < 2
-        return
-    end
-
-    % Avoid leaving an endpoint microscopically different from the original
-    % because of floating-point accumulation, without adding a short final
-    % interval that would make the grid uneven.
-    endpointTolerance = 16 * eps(max(1,max(abs(raw([1,end],1))))) * ...
-        max(1,numel(depthEven));
-    if abs(depthEven(end) - raw(end,1)) <= endpointTolerance
-        depthEven(end) = raw(end,1);
-    end
-
-    valueEven = interp1(raw(:,1),raw(:,2),depthEven,'linear');
-    dat = [depthEven,valueEven];
-
-    maximumGapRatio = max(spacing)/dt;
-    fprintf(['\n>> Full-record preprocessing for Adaptive COCO/eCOCO: ', ...
-        'uneven depth spacing detected.\n']);
-    fprintf(['   Note: cvCOCO does not use this full-record grid; it splits ', ...
-        'the cleaned observations first and regularizes A/B separately.\n']);
-    fprintf('   Original valid points        : %d\n',size(raw,1));
-    fprintf('   Original depth range         : %.12g to %.12g m\n',raw(1,1),raw(end,1));
-    fprintf('   Original spacing (min/median/max): %.12g / %.12g / %.12g m\n', ...
-        min(spacing),dt,max(spacing));
-    fprintf('   Uniformity tolerance         : %.12g m\n',spacingTolerance);
-    fprintf('   Maximum spacing deviation    : %.12g m\n',maxSpacingDeviation);
-    fprintf('   Largest gap / median spacing : %.12g\n',maximumGapRatio);
-    if maximumGapRatio > 10
-        fprintf(['   WARNING: linear interpolation bridges a gap larger than ', ...
-            '10 median intervals; the AR(1) null conditions on this ', ...
-            'interpolation and does not model missingness.\n']);
-    end
-    fprintf('   Interpolation method         : linear\n');
-    fprintf('   Interpolation interval       : %.12g m\n',dt);
-    fprintf('   Interpolated points          : %d\n',size(dat,1));
-    fprintf('   Interpolated depth range     : %.12g to %.12g m\n\n',dat(1,1),dat(end,1));
 end
 
 function pad = defaultPad(npts)
@@ -2557,7 +3051,8 @@ if cond, out = a; else, out = b; end
 end
 
 function tf = isCvCocoTargetMode(targetMode)
-tf = any(strcmp(targetMode,{'cv2','cv9a','cv9b','cv9','cvlegacy'}));
+tf = any(strcmp(targetMode, ...
+    {'cv2','cv9a','cv9b','cv9','cvlegacy','icv9b'}));
 end
 
 function tf = isAdaptiveCocoTargetMode(targetMode)
@@ -2766,6 +3261,48 @@ try
         if ~isempty(p) && isfolder(p)
             saveDir = p;
         end
+    end
+catch
+end
+end
+
+function figures = figuresCreatedSince(before)
+after = findall(groot,'Type','figure');
+figures = setdiff(after,before);
+figures = figures(isgraphics(figures,'figure'));
+if numel(figures) < 2
+    return
+end
+numbers = arrayfun(@(fig)get(fig,'Number'),figures);
+[~,order] = sort(numbers);
+figures = figures(order);
+end
+
+function safeStoreAppData(uiFigure,app)
+% A long Monte Carlo/export callback may outlive a user-closed UIFigure.
+% Updating appdata is optional finalization and must never replace the
+% original calculation/export outcome with a DestroyedObject exception.
+try
+    if isgraphics(uiFigure,'figure')
+        setappdata(uiFigure,'ECOCO_APP',app);
+    end
+catch
+end
+end
+
+function safeUiAlert(uiFigure,message,titleText,iconName)
+try
+    if isgraphics(uiFigure,'figure')
+        uialert(uiFigure,message,titleText,'Icon',iconName);
+    end
+catch
+end
+end
+
+function restoreRunButton(button)
+try
+    if isgraphics(button)
+        button.Enable = 'on';
     end
 catch
 end

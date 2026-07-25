@@ -47,23 +47,34 @@ layout = tiledlayout(figs(1),4,1,'TileSpacing','compact','Padding','compact');
 
 ax = nexttile(layout,1);
 plot(ax,rate,rho,'r-','LineWidth',1.25);
+set(ax,'Tag','COCO-correlation');
 hold(ax,'on');
 plot(ax,report.bestRate,report.bestCorrelation,'ro', ...
-    'MarkerFaceColor','r','MarkerSize',4);
-formatRateAxis(ax,rate,'Adaptive spectral correlation','\rho');
+    'MarkerFaceColor','r','MarkerSize',2, ...
+    'Tag','COCO-correlation-peak');
+formatRateAxis(ax,rate,'Correlation coefficient','\rho');
 
 ax = nexttile(layout,2);
 plotPAsPeak(ax,rate,pGlobal,pFloor,0.05, ...
-    'Global max-statistic p-value',true);
+    'Global p','Global p',true);
 
 ax = nexttile(layout,3);
 plotPAsPeak(ax,rate,pLocal,pFloor,0.01, ...
-    'Local p-value (descriptive diagnostic only)',false);
+    'Local p','Local p',false);
 
 ax = nexttile(layout,4);
-stairs(ax,rate,nPeriod,'b-','LineWidth',1.25);
-formatRateAxis(ax,rate,'Frequency-resolved participating periods','#');
+set(ax,'Tag','COCO-orbit-count');
+formatRateAxis(ax,rate, ...
+    'Number of contributing astronomical parameters','#');
 ylim(ax,[0,max(9.5,max(nPeriod(isfinite(nPeriod)))+0.5)]);
+hold(ax,'on');
+if isfield(details,'allNineRateRange') && ...
+        numel(details.allNineRateRange) == 2 && ...
+        all(isfinite(details.allNineRateRange))
+    cocoShadeOutsideAllPeriodRange( ...
+        ax,rate,details.allNineRateRange);
+end
+stairs(ax,rate,nPeriod,'b-','LineWidth',1.25);
 xlabel(ax,'Sedimentation rate (cm/kyr)');
 title(layout,sprintf('%s (exploratory; global p = %.4g)', ...
     titlePrefix,report.minimumGlobalP));
@@ -92,7 +103,7 @@ set(ax,'XMinorTick','on','YMinorTick','on');
 end
 
 function plotPAsPeak( ...
-        ax,rate,p,pFloor,threshold,titleText,isGlobalPanel)
+        ax,rate,p,pFloor,threshold,titleText,yLabelText,isGlobalPanel)
 score = nan(size(p));
 valid = isfinite(p) & p > 0;
 score(valid) = -log10(max(p(valid),pFloor));
@@ -103,7 +114,7 @@ if threshold >= pFloor
     % corresponding value remains available from the p-value y ticks.
     yline(ax,-log10(threshold),'k--','LineWidth',0.9);
 end
-formatRateAxis(ax,rate,titleText,'p');
+formatRateAxis(ax,rate,titleText,yLabelText);
 finiteScore = score(isfinite(score));
 defaultGlobalMinimumP = 0.002;
 hasVerySmallGlobalP = isGlobalPanel && ...

@@ -68,7 +68,7 @@ MAX_HALF_FIGURE_HEIGHT_MM = 165.0
 
 STANDARD_METHODS = (
     (
-        "Confirmatory cvCOCO",
+        "Confirmatory Blocked cvCOCO",
         "The depth series is divided at its midpoint into segments A and B. "
         "In each direction, the training half is used to locate an adaptive "
         "training sedimentation rate and estimate four orbital-group weights "
@@ -513,7 +513,7 @@ def _normalize_figure(
     if not method:
         filename = path.name.casefold()
         method = "Adaptive COCO" if "adaptive" in filename else (
-            "cvCOCO" if "cvcoco" in filename or "cv_coco" in filename else "COCO"
+            "Blocked cvCOCO" if "cvcoco" in filename or "cv_coco" in filename else "COCO"
         )
     return {
         "path": path,
@@ -699,7 +699,7 @@ def _configure_document(doc: Any, title: str) -> None:
     doc.core_properties.title = title
     doc.core_properties.subject = "COCO publication validation"
     doc.core_properties.author = "Acycle COCO publication validation workflow"
-    doc.core_properties.keywords = "cyclostratigraphy, COCO, cvCOCO, AR(1), periodogram"
+    doc.core_properties.keywords = "cyclostratigraphy, COCO, Blocked cvCOCO, AR(1), periodogram"
 
 
 def _add_title_page(doc: Any, title: str, subtitle: str, metadata: Sequence[tuple[str, str]]) -> None:
@@ -731,7 +731,7 @@ def _add_title_page(doc: Any, title: str, subtitle: str, metadata: Sequence[tupl
     note.paragraph_format.space_before = Pt(16)
     note.alignment = WD_ALIGN_PARAGRAPH.CENTER
     run = note.add_run(
-        "Primary inference: bidirectional held-out cvCOCO. "
+        "Primary inference: bidirectional held-out Blocked cvCOCO. "
         "Adaptive COCO is reported as exploratory."
     )
     _set_font(run, "Times New Roman", 10, True)
@@ -823,11 +823,21 @@ def _case_role(case: Mapping[str, Any]) -> str:
     explicit = case.get("design_role") or case.get("kind") or case.get("role")
     if explicit:
         return _text(explicit)
+    case_id = _text(case.get("id")).casefold()
     searchable = (
         _text(case.get("title")) + " " + _text(case.get("expected_rate"))
     ).casefold()
     if "negative control" in searchable or "pure noise" in searchable:
         return "Negative control"
+    if (
+        "4to6" in case_id
+        or "4_to_6" in case_id
+        or "4-to-6" in searchable
+        or "4 to 6" in searchable
+    ) and ("la04" in case_id or "la2004" in searchable):
+        return "Variable-rate synthetic stress test"
+    if "la04" in case_id or "la2004" in searchable or "1e1t1p" in searchable:
+        return "Positive synthetic control"
     if "pure astronomical signal" in searchable or "synthetic signal" in searchable:
         return "Positive synthetic control"
     return "Observed paleoclimate record"
@@ -877,7 +887,7 @@ def _short(value: str, limit: int = 90) -> str:
 def _add_executive_summary(doc: Any, cases: Sequence[Mapping[str, Any]]) -> None:
     doc.add_heading("Executive summary", level=1)
     doc.add_paragraph(
-        "The confirmatory interpretation is governed by cvCOCO and its "
+        "The confirmatory interpretation is governed by Blocked cvCOCO and its "
         "preregistered p_robust < 0.05 rule. The Adaptive COCO result is retained "
         "as an exploratory diagnostic and should not replace the held-out result."
     )
@@ -886,7 +896,7 @@ def _add_executive_summary(doc: Any, cases: Sequence[Mapping[str, Any]]) -> None
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
     table.autofit = False
     widths = (Mm(37), Mm(27), Mm(32), Mm(42), Mm(42))
-    headings = ("Data set", "Role", "Expected rate", "cvCOCO", "Adaptive COCO")
+    headings = ("Data set", "Role", "Expected rate", "Blocked cvCOCO", "Adaptive COCO")
     for cell, heading, width in zip(table.rows[0].cells, headings, widths):
         cell.text = heading
         cell.width = width
@@ -1140,7 +1150,7 @@ def _add_case_section(
     _add_key_value_table(
         doc,
         [
-            ("cvCOCO classification", decisions["cv"]),
+            ("Blocked cvCOCO classification", decisions["cv"]),
             ("p_robust = max(p_A, p_B)", decisions["p_robust"]),
             ("Secondary p_sym", decisions["p_sym"]),
             ("Adaptive COCO classification", decisions["adaptive"]),
@@ -1247,7 +1257,7 @@ def build_combined_document(
     )
     subtitle = _text(
         manifest.get("report_subtitle"),
-        "Confirmatory bidirectional held-out cvCOCO and exploratory Adaptive COCO",
+        "Confirmatory bidirectional held-out Blocked cvCOCO and exploratory Adaptive COCO",
     )
     doc = Document()
     _configure_document(doc, title)
@@ -1301,7 +1311,7 @@ def build_case_document(
     _add_title_page(
         doc,
         title,
-        "Confirmatory cvCOCO and exploratory Adaptive COCO",
+        "Confirmatory Blocked cvCOCO and exploratory Adaptive COCO",
         (
             ("Case ID", _text(case.get("id"))),
             ("Result directory", str(case.get("_case_dir"))),

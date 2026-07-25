@@ -12,23 +12,23 @@ import tempfile
 
 NOTES = {
     "rednoise_long": [
-        "Both formal primary analyses are negative (cvCOCO p_robust = 0.4602; Adaptive global p = 0.6540), as expected for this long pure-noise control.",
+        "Both formal primary analyses are negative (Blocked cvCOCO p_robust = 0.4602; Adaptive global p = 0.6540), as expected for this long pure-noise control.",
         "The best-rate labels have no physical meaning in a negative control and must not be interpreted as sedimentation-rate estimates.",
     ],
     "rednoise_short": [
-        "Both formal primary analyses are negative (cvCOCO p_robust = 0.3803; Adaptive global p = 0.6620), despite the low power expected from only about 100 observations per held-out half.",
+        "Both formal primary analyses are negative (Blocked cvCOCO p_robust = 0.3803; Adaptive global p = 0.6620), despite the low power expected from only about 100 observations per held-out half.",
         "In the red=0 sensitivity run, a smaller local Adaptive p-value is erased by full rate-search correction; this illustrates why the global result is primary.",
     ],
     "signal_4_to_6": [
-        "The expected rates are accurately localized (4.00 and 5.98 cm/kyr), but the primary full-flow tests are not significant (cvCOCO p_robust = 0.2207; Adaptive global p = 0.1973). Rate recovery and hypothesis rejection are distinct claims.",
-        "The deterministic depth-midpoint split places the true 4-to-6 rate transition inside one half, while cvCOCO assumes one constant rate within each half; full-record Adaptive COCO likewise assumes one rate. This positive-control failure is therefore an explicit model/power limitation, not evidence that the recovered rates are wrong.",
+        "The expected rates are accurately localized (4.00 and 5.98 cm/kyr), but the primary full-flow tests are not significant (Blocked cvCOCO p_robust = 0.2207; Adaptive global p = 0.1973). Rate recovery and hypothesis rejection are distinct claims.",
+        "The deterministic depth-midpoint split places the true 4-to-6 rate transition inside one half, while Blocked cvCOCO assumes one constant rate within each half; full-record Adaptive COCO likewise assumes one rate. This positive-control failure is therefore an explicit model/power limitation, not evidence that the recovered rates are wrong.",
     ],
     "newark_late_triassic": [
-        "This is the only robust confirmatory positive in the six-case suite: cvCOCO p_robust = 0.0072 and secondary p_sym = 0.0004, with both directions using all nine periods.",
+        "This is the only robust confirmatory positive in the six-case suite: Blocked cvCOCO p_robust = 0.0072 and secondary p_sym = 0.0004, with both directions using all nine periods.",
         "The held-out rates (14.35 and 14.55 cm/kyr) and Adaptive rate (14.15 cm/kyr) agree with the expected 10-15 cm/kyr range. The association is consistent with astronomical pacing but is not unconditional proof of causation.",
     ],
     "site1262_eocene": [
-        "The expected approximately 1.2 cm/kyr rate is localized (held-out 0.96/1.19; Adaptive 1.20), but neither formal test is significant (cvCOCO p_robust = 0.4198; Adaptive global p = 0.1750).",
+        "The expected approximately 1.2 cm/kyr rate is localized (held-out 0.96/1.19; Adaptive 1.20), but neither formal test is significant (Blocked cvCOCO p_robust = 0.4198; Adaptive global p = 0.1750).",
         "Small local Adaptive p-values do not override the global search-corrected result. One frozen cv direction also has only eight nonzero-weight periods, which is reported as a partial-target qualification.",
     ],
     "givetian_dd14": [

@@ -47,6 +47,9 @@ verifyEqual(testCase,first.status,'complete');
 verifyTrue(testCase,isfile(fullfile(outputRoot,'manifest.json')));
 verifyTrue(testCase,isfile(fullfile(outputRoot,'overall_summary.csv')));
 verifyTrue(testCase,isfile(fullfile(outputRoot,'run_summary.mat')));
+rootManifest = jsondecode(fileread(fullfile(outputRoot,'manifest.json')));
+verifyEqual(testCase,rootManifest.report_title, ...
+    'Adaptive and Blocked eCOCO: 1-data-set comparison');
 
 caseDirectory = fullfile(outputRoot,'01_synthetic');
 verifyTrue(testCase,isfile(fullfile(caseDirectory,'parameters.csv')));
@@ -94,6 +97,11 @@ for method = ["adaptive","crossfit"]
             sprintf('Missing %s/%s',method,required{ii}));
     end
     saved = load(fullfile(methodDirectory,'results.mat'),'analysis');
+    resultMetadata = jsondecode(fileread( ...
+        fullfile(methodDirectory,'result.json')));
+    resultSignature = jsondecode(resultMetadata.signature);
+    verifyFalse(testCase,startsWith(string( ...
+        resultSignature.engine_sha256),"missing:"));
     verifyTrue(testCase,isfield(saved.analysis,'details'));
     verifyEqual(testCase,size(saved.analysis.out_ecc,1),3);
     verifyEqual(testCase,size(saved.analysis.out_ecc,2), ...
@@ -109,6 +117,23 @@ for method = ["adaptive","crossfit"]
         nnz(interior(:)' & validMap & mapMinimum < 0.05));
     methodParameters = jsondecode(fileread( ...
         fullfile(methodDirectory,'parameters.json')));
+    tracked = saved.analysis.sr_p;
+    for windowIndex = 1:size(tracked,1)
+        if ~isfinite(tracked(windowIndex,2))
+            continue
+        end
+        [~,rateIndex] = min(abs( ...
+            saved.analysis.prt_sr-tracked(windowIndex,2)));
+        verifyEqual(testCase,tracked(windowIndex,6), ...
+            saved.analysis.out_ecocorb(rateIndex,windowIndex), ...
+            'AbsTol',0);
+    end
+    verifyEqual(testCase,resultMetadata.algorithm_version, ...
+        methodParameters.algorithm_version);
+    verifyEqual(testCase,resultMetadata.score_definition, ...
+        methodParameters.score_definition);
+    verifyEqual(testCase,resultMetadata.orbit_count_role, ...
+        methodParameters.orbit_count_role);
     if method == "adaptive"
         localPath = fullfile(methodDirectory,'p_local.csv');
         verifyTrue(testCase,isfile(localPath));
@@ -118,6 +143,11 @@ for method = ["adaptive","crossfit"]
             saved.analysis.details.pLocal,'AbsTol',1e-14);
         verifyEqual(testCase,saved.analysis.out_ep, ...
             saved.analysis.details.pLocal,'AbsTol',0);
+        verifyEqual(testCase,saved.analysis.out_ecocorb, ...
+            saved.analysis.out_ecoco.*saved.analysis.out_norbit./9, ...
+            'AbsTol',0);
+        verifyEqual(testCase,methodParameters.orbit_count_role, ...
+            'ridge-score weight');
     else
         localPath = fullfile(methodDirectory,'p_local.csv');
         verifyTrue(testCase,isfile(localPath));
@@ -129,19 +159,47 @@ for method = ["adaptive","crossfit"]
             saved.analysis.details.consensus.pLocal,'AbsTol',0);
         verifyEqual(testCase,methodParameters.target_mode, ...
             'four-group-coherent-nine');
+        verifyEqual(testCase,saved.analysis.out_ecocorb, ...
+            saved.analysis.out_ecoco,'AbsTol',0);
+        verifyEqual(testCase,readmatrix(fullfile( ...
+            methodDirectory,'ridge_score.csv')), ...
+            readmatrix(fullfile(methodDirectory,'pcoco.csv')), ...
+            'AbsTol',0);
+        verifyEqual(testCase,methodParameters.orbit_count_role, ...
+            'diagnostic only');
+        verifyTrue(testCase,contains( ...
+            methodParameters.score_definition, ...
+            'no orbit-count weighting'));
     end
-    png = fullfile(caseDirectory,'figures', ...
-        sprintf('synthetic_%s.png',method));
-    pdf = fullfile(caseDirectory,'figures', ...
-        sprintf('synthetic_%s.pdf',method));
-    verifyTrue(testCase,isfile(png));
-    verifyTrue(testCase,isfile(pdf));
+    savedFigures = load(fullfile(methodDirectory,'results.mat'), ...
+        'figureEntries');
+    verifyNumElements(testCase,savedFigures.figureEntries,2);
+    for suffix = ["","_ridge"]
+        stem = sprintf('synthetic_%s%s',method,suffix);
+        png = fullfile(caseDirectory,'figures',[stem,'.png']);
+        pdf = fullfile(caseDirectory,'figures',[stem,'.pdf']);
+        fig = fullfile(caseDirectory,'figures',[stem,'.fig']);
+        verifyTrue(testCase,isfile(png));
+        verifyTrue(testCase,isfile(pdf));
+        verifyTrue(testCase,isfile(fig));
+    end
 end
+
+firstCaseManifest = jsondecode(fileread( ...
+    fullfile(caseDirectory,'case_manifest.json')));
+verifyNumElements(testCase,firstCaseManifest.figures,4);
+verifyTrue(testCase,all(arrayfun(@(item) ...
+    numel(item.figures) == 2,firstCaseManifest.methods)));
+ridgeToRegenerate = fullfile(caseDirectory,'figures', ...
+    'synthetic_adaptive_ridge.png');
+delete(ridgeToRegenerate);
+verifyFalse(testCase,isfile(ridgeToRegenerate));
 
 second = runEcocoTwoMethodExperiment(outputRoot, ...
     'DatasetPlan',plan,'NSim',2,'MaxWindows',20, ...
     'ExportFigures',true,'Visible','off','ContinueOnError',false);
 verifyEqual(testCase,second.status,'complete');
+verifyTrue(testCase,isfile(ridgeToRegenerate));
 caseManifest = jsondecode(fileread( ...
     fullfile(caseDirectory,'case_manifest.json')));
 verifyTrue(testCase,all([caseManifest.methods.reused]));

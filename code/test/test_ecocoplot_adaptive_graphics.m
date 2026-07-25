@@ -40,11 +40,10 @@ details = struct('method','adaptive','pLocal',fixture.localP, ...
 
 ecocoplot(fixture.rates,fixture.depths,fixture.rho,fixture.localP, ...
     fixture.globalP,fixture.empty,fixture.score,fixture.nOrbit,1,details);
-fig = onlyNewFigure(testCase);
+fig = figureWithPanelTitle(testCase,"Local p");
 
 verifyPanelTitles(testCase,fig,["Correlation coefficient", ...
-    "Local p","Global p","Contributing orbital periods", ...
-    "Ridge score"]);
+    "Global p","Local p","Contributing orbital periods"]);
 localAxis = axisWithTitle(testCase,fig,"Local p");
 globalAxis = axisWithTitle(testCase,fig,"Global p");
 
@@ -69,6 +68,84 @@ verifyEqual(testCase,globalBoundary.LevelList,-log10(0.05), ...
     'AbsTol',64*eps);
 verifyTrue(testCase,isBlack(localBoundary.LineColor));
 verifyTrue(testCase,isBlack(globalBoundary.LineColor));
+verifyEqual(testCase,localBoundary.LineWidth,0.6,'AbsTol',0);
+verifyEqual(testCase,globalBoundary.LineWidth,0.6,'AbsTol',0);
+end
+
+function testFinalPanelIsAlwaysPlottedSeparately(testCase)
+fixture = plotFixture();
+% Old saved results may still contain false; the low-level plotting rule
+% must override that stale preference.
+details = struct('method','adaptive','pLocal',fixture.localP, ...
+    'trackedSedimentationRate',fixture.trackedRate, ...
+    'separateFinalPanel',false);
+
+[~,figures] = ecocoplot(fixture.rates,fixture.depths,fixture.rho, ...
+    fixture.localP,fixture.globalP,fixture.empty,fixture.score, ...
+    fixture.nOrbit,1,details);
+
+verifyNumElements(testCase,figures,2);
+verifyPanelTitles(testCase,figures(1),["Correlation coefficient", ...
+    "Global p","Local p","Contributing orbital periods"]);
+verifyPanelTitles(testCase,figures(2),"Ridge score");
+end
+
+function testGroupedReverseDepthAppliesToBothFigures(testCase)
+fixture = plotFixture();
+details = struct('method','adaptive','pLocal',fixture.localP, ...
+    'trackedSedimentationRate',fixture.trackedRate);
+
+[~,figures] = ecocoplot(fixture.rates,fixture.depths,fixture.rho, ...
+    fixture.localP,fixture.globalP,fixture.empty,fixture.score, ...
+    fixture.nOrbit,-1,details);
+
+verifyNumElements(testCase,figures,2);
+for figureIndex = 1:2
+    axesHandles = findall(figures(figureIndex),'Type','axes');
+    verifyNotEmpty(testCase,axesHandles);
+    verifyTrue(testCase,all(string({axesHandles.YDir}) == "reverse"));
+end
+end
+
+function testThreeDimensionalSignificanceBoundariesUseHalfWidth(testCase)
+fixture = plotFixture();
+details = struct('method','adaptive','pLocal',fixture.localP, ...
+    'trackedSedimentationRate',fixture.trackedRate);
+
+[~,figures] = ecocoplot(fixture.rates,fixture.depths,fixture.rho, ...
+    fixture.localP,fixture.globalP,fixture.empty,fixture.score, ...
+    fixture.nOrbit,3,details);
+
+verifyNumElements(testCase,figures,5);
+localAxis = axisWithTitle(testCase, ...
+    figureWithPanelTitle(testCase,"Local p"),"Local p");
+globalAxis = axisWithTitle(testCase, ...
+    figureWithPanelTitle(testCase,"Global p"),"Global p");
+localBoundary = significanceBoundary(localAxis);
+globalBoundary = significanceBoundary(globalAxis);
+verifyNumElements(testCase,localBoundary,1);
+verifyNumElements(testCase,globalBoundary,1);
+for boundary = [localBoundary;globalBoundary].'
+    verifyEqual(testCase,string(boundary.Tag), ...
+        "eCOCO-significance-boundary");
+    verifyEqual(testCase,boundary.LineWidth,0.6,'AbsTol',0);
+end
+end
+
+function testFullySupportedConstantMapUsesVectorPatch(testCase)
+fixture = plotFixture();
+fixture.nOrbit(:) = 9;
+details = struct('method','adaptive','pLocal',fixture.localP, ...
+    'trackedSedimentationRate',fixture.trackedRate);
+
+ecocoplot(fixture.rates,fixture.depths,fixture.rho,fixture.localP, ...
+    fixture.globalP,fixture.empty,fixture.score,fixture.nOrbit,1,details);
+fig = figureWithPanelTitle(testCase,"Contributing orbital periods");
+orbitAxis = axisWithTitle(testCase,fig,"Contributing orbital periods");
+
+verifyEmpty(testCase,findall(orbitAxis,'Type','image'), ...
+    'A constant data panel must not become a raster image in vector PDF.');
+verifyNumElements(testCase,findall(orbitAxis,'Type','patch'),1);
 end
 
 function testAdaptiveScoreBackgroundIsNormalizedByWindow(testCase)
@@ -78,7 +155,7 @@ details = struct('method','adaptive','pLocal',fixture.localP, ...
 
 ecocoplot(fixture.rates,fixture.depths,fixture.rho,fixture.localP, ...
     fixture.globalP,fixture.empty,fixture.score,fixture.nOrbit,1,details);
-fig = onlyNewFigure(testCase);
+fig = figureWithPanelTitle(testCase,"Ridge score");
 scoreAxis = axisWithTitle(testCase,fig,"Ridge score");
 displayedScore = backgroundMatrix(scoreAxis,size(fixture.score.'));
 
@@ -99,7 +176,7 @@ details = struct('method','adaptive','pLocal',fixture.localP, ...
 
 ecocoplot(fixture.rates,fixture.depths,fixture.rho,fixture.localP, ...
     fixture.globalP,fixture.empty,fixture.score,fixture.nOrbit,1,details);
-fig = onlyNewFigure(testCase);
+fig = figureWithPanelTitle(testCase,"Ridge score");
 scoreAxis = axisWithTitle(testCase,fig,"Ridge score");
 ridge = trackedRidge(scoreAxis);
 
@@ -113,29 +190,37 @@ verifyEqual(testCase,string(ridge.Marker),"none");
 verifyRidgeMarkers(testCase,scoreAxis,2,1,1);
 end
 
-function testCrossfitSixPanelsDynamicPScoreAndFilledPoints(testCase)
+function testBlockedFivePanelsUseConsensusAndFilledPoints(testCase)
 fixture = plotFixture();
 details = struct();
 details.method = 'crossfit';
 details.forward = struct('rho',fixture.rho);
 details.backward = struct('rho',flipud(fixture.rho));
-details.consensus = struct('pLocal',fixture.localP, ...
+consensusRho = min(details.forward.rho,details.backward.rho);
+details.consensus = struct('rho',consensusRho, ...
+    'pLocal',fixture.localP, ...
     'pGlobal',fixture.globalP, ...
     'nOrbit',fixture.nOrbit,'score',fixture.score);
 details.trackedSedimentationRate = fixture.trackedRate;
 
 % Deliberately conflicting OUT_EP verifies that nested consensus Local p
-% takes precedence in the Cross-fitted plotting contract.
+% takes precedence in the Blocked plotting contract.
 ecocoplot(fixture.rates,fixture.depths,fixture.rho,0.5*ones(4), ...
     fixture.globalP,fixture.empty,fixture.score,fixture.nOrbit,1,details);
-fig = onlyNewFigure(testCase);
+mainFig = figureWithPanelTitle(testCase,"Local p");
+scoreFig = figureWithPanelTitle(testCase,"Ridge score");
 
-verifyPanelTitles(testCase,fig,["Forward correlation", ...
-    "Backward correlation","Local p","Global p", ...
-    "Contributing orbital periods","Ridge score"]);
-localAxis = axisWithTitle(testCase,fig,"Local p");
-globalAxis = axisWithTitle(testCase,fig,"Global p");
-scoreAxis = axisWithTitle(testCase,fig,"Ridge score");
+verifyEqual(testCase,string(mainFig.Name),"Blocked eCOCO");
+verifyPanelTitles(testCase,mainFig,["Consensus correlation", ...
+    "Global p","Local p", ...
+    "Contributing orbital periods"]);
+verifyPanelTitles(testCase,scoreFig,"Ridge score");
+consensusAxis = axisWithTitle(testCase,mainFig,"Consensus correlation");
+localAxis = axisWithTitle(testCase,mainFig,"Local p");
+globalAxis = axisWithTitle(testCase,mainFig,"Global p");
+scoreAxis = axisWithTitle(testCase,scoreFig,"Ridge score");
+verifyEqual(testCase,backgroundMatrix( ...
+    consensusAxis,size(consensusRho.')),consensusRho.','AbsTol',64*eps);
 verifyEqual(testCase,localAxis.CLim,[0 -log10(0.005)], ...
     'AbsTol',64*eps);
 verifyEqual(testCase,globalAxis.CLim,[0 -log10(0.02)], ...
@@ -162,6 +247,42 @@ verifyEqual(testCase,string(ridge.Marker),"none");
 verifyRidgeMarkers(testCase,scoreAxis,2,1,1);
 end
 
+function testInterleavedUsesOddEvenLabelsAndTwoFigureLayout(testCase)
+fixture = plotFixture();
+details = struct();
+details.method = 'interleaved';
+details.forward = struct('rho',fixture.rho);
+details.backward = struct('rho',flipud(fixture.rho));
+details.oddToEven = details.forward;
+details.evenToOdd = details.backward;
+consensusRho = min(details.forward.rho,details.backward.rho);
+details.consensus = struct('rho',consensusRho, ...
+    'pLocal',fixture.localP, ...
+    'pGlobal',fixture.globalP,'nOrbit',fixture.nOrbit, ...
+    'score',fixture.score);
+details.trackedSedimentationRate = fixture.trackedRate;
+
+[~,figures] = ecocoplot(fixture.rates,fixture.depths,fixture.rho, ...
+    fixture.localP,fixture.globalP,fixture.empty,fixture.score, ...
+    fixture.nOrbit,1,details);
+
+verifyNumElements(testCase,figures,2);
+verifyEqual(testCase,string(figures(1).Name),"Interleaved eCOCO");
+verifyPanelTitles(testCase,figures(1),["Consensus correlation", ...
+    "Global p","Local p", ...
+    "Contributing orbital periods"]);
+verifyPanelTitles(testCase,figures(2),"Ridge score");
+verifyEqual(testCase,backgroundMatrix(axisWithTitle( ...
+    testCase,figures(1),"Consensus correlation"), ...
+    size(consensusRho.')),consensusRho.','AbsTol',64*eps);
+verifyEqual(testCase,significanceBoundary( ...
+    axisWithTitle(testCase,figures(1),"Local p")).LineWidth, ...
+    0.6,'AbsTol',0);
+verifyEqual(testCase,significanceBoundary( ...
+    axisWithTitle(testCase,figures(1),"Global p")).LineWidth, ...
+    0.6,'AbsTol',0);
+end
+
 function testDynamicPScaleRespectsMonteCarloFloor(testCase)
 fixture = plotFixture();
 localWithZeros = fixture.localP;
@@ -171,7 +292,7 @@ details = struct('method','adaptive','pLocal',localWithZeros, ...
 
 ecocoplot(fixture.rates,fixture.depths,fixture.rho,localWithZeros, ...
     fixture.globalP,fixture.empty,fixture.score,fixture.nOrbit,1,details);
-fig = onlyNewFigure(testCase);
+fig = figureWithPanelTitle(testCase,"Local p");
 localAxis = axisWithTitle(testCase,fig,"Local p");
 verifyEqual(testCase,localAxis.CLim,[0 -log10(0.02)], ...
     'AbsTol',64*eps);
@@ -218,11 +339,22 @@ for columnIndex = 1:size(values,2)
 end
 end
 
-function fig = onlyNewFigure(testCase)
+function fig = figureWithPanelTitle(testCase,titleText)
 figures = findall(groot,'Type','figure');
 figures = setdiff(figures,testCase.TestData.figuresBefore);
-verifyNumElements(testCase,figures,1);
-fig = figures(1);
+matches = false(size(figures));
+for figureIndex = 1:numel(figures)
+    axesHandles = findall(figures(figureIndex),'Type','axes');
+    for axisIndex = 1:numel(axesHandles)
+        if string(axesHandles(axisIndex).Title.String) == titleText
+            matches(figureIndex) = true;
+            break
+        end
+    end
+end
+verifyEqual(testCase,sum(matches),1, ...
+    sprintf('Expected exactly one figure containing "%s".',titleText));
+fig = figures(matches);
 end
 
 function verifyPanelTitles(testCase,fig,expected)
@@ -292,10 +424,17 @@ end
 function verifyRidgeMarkers(testCase,ax,nHollow,nLocal,nGlobal)
 markers = findall(ax,'Type','scatter');
 verifyNumElements(testCase,markers,3);
-isSquare = arrayfun(@(h)string(h.Marker)=="s",markers);
+isSquare = arrayfun(@(h)any(string(h.Marker)==["s","square"]),markers);
 square = markers(isSquare);
 circles = markers(~isSquare);
-hollow = circles(arrayfun(@(h)string(h.MarkerFaceColor)=="none",circles));
+isHollow = false(size(circles));
+for markerIndex = 1:numel(circles)
+    faceColor = circles(markerIndex).MarkerFaceColor;
+    isHollow(markerIndex) = (ischar(faceColor) || ...
+        (isstring(faceColor) && isscalar(faceColor))) && ...
+        string(faceColor) == "none";
+end
+hollow = circles(isHollow);
 filled = setdiff(circles,hollow);
 verifyNumElements(testCase,hollow,1);
 verifyNumElements(testCase,filled,1);

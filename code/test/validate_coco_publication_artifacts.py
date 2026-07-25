@@ -102,7 +102,7 @@ def main() -> None:
             for field in ("result_file", "workbook", "conclusion_file"):
                 require((root / method[field]).is_file(), f"Missing method artifact: {method[field]}")
         figures = case.get("figures", [])
-        require(len(figures) == 10, f"Expected ten figure entries for {case.get('id')}")
+        require(len(figures) == 12, f"Expected twelve figure entries for {case.get('id')}")
         for figure in figures:
             figure_count += 1
             require(float(figure.get("width_mm")) <= 180, "Manifest figure width exceeds 180 mm")

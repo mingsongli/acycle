@@ -2,7 +2,7 @@ function runSummary = runEcocoTwoMethodExperiment(outputRoot,varargin)
 %RUNECOCOTWOMETHODEXPERIMENT Run the registered 6-data x 2-method eCOCO suite.
 %
 % RUNSUMMARY = RUNECOCOTWOMETHODEXPERIMENT(OUTPUTROOT) compares Adaptive
-% eCOCO and Cross-fitted eCOCO on six pre-registered records.  Each method
+% eCOCO and Blocked eCOCO on six pre-registered records.  Each method
 % calls the public ECOCO interface, retains the complete sedimentation-rate
 % grid, and receives the tenth ECODETAILS output.  Method checkpoints are
 % atomic and signature matched, so interrupted runs can be resumed.
@@ -21,7 +21,9 @@ function runSummary = runEcocoTwoMethodExperiment(outputRoot,varargin)
 % Name-value options useful for tests and resumable production runs:
 %   InputRoot, NSim, Seed, Red, Method, AnchorFraction, StepFraction,
 %   MaxWindows, DatasetIDs, MethodIDs, Resume, ContinueOnError,
-%   ExportFigures, CloseFigures, Visible, DatasetPlan, ShowProgress.
+%   ExportFigures, CloseFigures, Visible, DatasetPlan, ShowProgress,
+%   Verbose.  Verbose controls detailed ECOCO console output and defaults
+%   to true for backward compatibility.
 %
 % DatasetPlan is intended primarily for tests.  A custom item must provide
 % id, title, category, age_ma, sr1, sr2, srstep, windowRate, and either
@@ -56,6 +58,7 @@ addParameter(parser,'CloseFigures',true,@isLogicalScalar);
 addParameter(parser,'Visible','off',@isScalarText);
 addParameter(parser,'DatasetPlan',struct([]),@(x) isempty(x) || isstruct(x));
 addParameter(parser,'ShowProgress',false,@isLogicalScalar);
+addParameter(parser,'Verbose',true,@isLogicalScalar);
 parse(parser,varargin{:});
 options = parser.Results;
 options.InputRoot = char(string(options.InputRoot));
@@ -67,6 +70,7 @@ options.ContinueOnError = logical(options.ContinueOnError);
 options.ExportFigures = logical(options.ExportFigures);
 options.CloseFigures = logical(options.CloseFigures);
 options.ShowProgress = logical(options.ShowProgress);
+options.Verbose = logical(options.Verbose);
 if options.AnchorFraction > 2
     error('runEcocoTwoMethodExperiment:AnchorFractionTooLarge', ...
         'AnchorFraction must not exceed two windows.');
@@ -101,14 +105,18 @@ set(groot,'defaultFigureVisible',options.Visible);
 
 manifestPath = fullfile(outputRoot,'manifest.json');
 summaryPath = fullfile(outputRoot,'overall_summary.csv');
+eventLogPath = fullfile(outputRoot,'run.log');
 manifest = struct( ...
     'schema_version',2, ...
-    'report_title','Adaptive eCOCO 与 Cross-fitted eCOCO 六数据对比报告', ...
+    'report_title',sprintf( ...
+    'Adaptive and Blocked eCOCO: %d-data-set comparison', ...
+    numel(datasets)), ...
     'created_at',timestampNow(), ...
     'updated_at',timestampNow(), ...
     'status','running', ...
     'output_root',outputRoot, ...
     'summary_csv','overall_summary.csv', ...
+    'event_log','run.log', ...
     'options',publicOptions(options), ...
     'method_order',{string({methods.title})}, ...
     'cases',repmat(emptyCaseManifest(),0,1));
@@ -119,13 +127,9 @@ allRows = repmat(emptySummaryRow(),0,1);
 fatalException = [];
 for caseIndex = 1:numel(datasets)
     spec = datasets(caseIndex);
-    fprintf('\n============================================================\n');
-    fprintf('eCOCO two-method case %d/%d: %s\n', ...
-        caseIndex,numel(datasets),spec.title);
-    fprintf('============================================================\n');
     try
         [caseManifests(caseIndex),caseRows] = runOneCase( ...
-            spec,caseIndex,methods,outputRoot,options);
+            spec,caseIndex,methods,outputRoot,options,eventLogPath);
         allRows = [allRows;caseRows(:)]; %#ok<AGROW>
     catch exception
         caseManifests(caseIndex) = failedCaseManifest( ...
@@ -159,7 +163,7 @@ end
 end
 
 function [caseManifest,summaryRows] = runOneCase( ...
-        spec,index,methods,outputRoot,options)
+        spec,index,methods,outputRoot,options,eventLogPath)
 inputFile = resolveInputFile(spec,options.InputRoot);
 inputHash = sha256File(inputFile);
 [data,preprocessing] = prepareInput(inputFile,spec);
@@ -231,13 +235,14 @@ figures = repmat(emptyFigureEntry(),0,1);
 methodManifests = repmat(emptyMethodManifest(),numel(methods),1);
 for methodIndex = 1:numel(methods)
     task = methods(methodIndex);
-    fprintf('\n[%d/%d] %s\n',methodIndex,numel(methods),task.title);
     methodDirectory = fullfile(caseDirectory,task.id);
     ensureDirectory(methodDirectory);
     signatureValue = baseSignature;
     signatureValue.method_id = task.id;
     signatureValue.engine_sha256 = engineFingerprint(task);
     signature = jsonencode(signatureValue);
+    emitMethodEvent(eventLogPath,'START',spec.id,task.id,sprintf( ...
+        'engine=%s nsim=%d',task.title,options.NSim));
     try
         [~,row,methodFigures,reused] = runOneMethod( ...
             task,analysisData,orbit9,windowActual,dt,stepSamples,pad, ...
@@ -247,12 +252,17 @@ for methodIndex = 1:numel(methods)
         figures = [figures;methodFigures(:)]; %#ok<AGROW>
         methodManifests(methodIndex) = completeMethodManifest( ...
             task,methodDirectory,caseDirectory,row,methodFigures,reused);
+        emitMethodEvent(eventLogPath,'END',spec.id,task.id,sprintf( ...
+            'status=complete reused=%d',reused));
     catch exception
         summaryRows(methodIndex) = failedSummaryRow(spec,task,exception,options);
         methodManifests(methodIndex) = failedMethodManifest( ...
             task,methodDirectory,caseDirectory,exception);
         writeTextAtomic(fullfile(methodDirectory,'error.txt'), ...
             exceptionReport(exception));
+        emitMethodEvent(eventLogPath,'ERROR',spec.id,task.id,sprintf( ...
+            'identifier=%s message=%s', ...
+            exception.identifier,exception.message));
         if ~options.ContinueOnError
             rethrow(exception)
         end
@@ -319,16 +329,21 @@ checkpoint = struct('status','running','signature',signature, ...
 saveAtomic(checkpointFile,struct('checkpoint',checkpoint));
 try
     fmaxData = 1/(2*dt);
+    progressFcn = [];
     if options.ShowProgress
-        fprintf('Running %s with %d Monte Carlo simulations.\n', ...
-            task.title,options.NSim);
+        progressFcn = @(fraction,message)reportExperimentProgress( ...
+            task.title,fraction,message);
     end
     [prt_sr,out_depth,out_ecc,out_ep,out_eci,out_ecoco,out_ecocorb, ...
         out_norbit,sr_p,details] = ecoco( ...
         data,[],orbit9,window,dt,stepSamples,0,options.Red,pad, ...
         spec.sr1,spec.sr2,spec.srstep,options.NSim,0,1,0, ...
         options.Method,fmaxData,0,task.mode,maxFrequency,options.Seed, ...
-        options.AnchorFraction);
+        options.AnchorFraction,'ProgressFcn',progressFcn, ...
+        'Verbose',options.Verbose, ...
+        'ECOCOWindowMode','physical-depth', ...
+        'ECOCOStepDepth',stepSamples*dt, ...
+        'ECOCOCenterLimits',originalDepth([1,end])');
     analysis = struct( ...
         'method',task.title,'method_id',task.id,'mode',task.mode, ...
         'prt_sr',prt_sr,'out_depth',out_depth,'out_ecc',out_ecc, ...
@@ -354,6 +369,9 @@ try
     writeTextAtomic(fullfile(methodDirectory,'conclusion.txt'),row.conclusion);
     writeJsonAtomic(manifestFile,struct( ...
         'signature',signature,'summary',row,'figures',figureEntries, ...
+        'algorithm_version',methodParameters.algorithm_version, ...
+        'score_definition',methodParameters.score_definition, ...
+        'orbit_count_role',methodParameters.orbit_count_role, ...
         'parameters_csv','parameters.csv','parameters_json','parameters.json', ...
         'results_mat','results.mat','matrices_dir','.'));
     checkpoint.status = 'complete';
@@ -366,6 +384,19 @@ catch exception
     checkpoint.error = exceptionReport(exception);
     saveAtomic(checkpointFile,struct('checkpoint',checkpoint));
     rethrow(exception)
+end
+end
+
+function reportExperimentProgress(methodName,fraction,message)
+persistent previousMethod previousPercent
+percent = floor(100*min(max(double(fraction),0),1));
+methodChanged = isempty(previousMethod) || ~strcmp(previousMethod,methodName);
+if methodChanged || isempty(previousPercent) || percent >= previousPercent+5 || ...
+        fraction <= 0 || fraction >= 1
+    fprintf('[%s] PROGRESS method=%s percent=%5.1f message=%s\n', ...
+        timestampNow(),methodName,100*fraction,char(string(message)));
+    previousMethod = methodName;
+    previousPercent = percent;
 end
 end
 
@@ -439,12 +470,14 @@ if any(trackedValidP)
     row.tracked_median_sr_global_p = ...
         median(trackedP(trackedValidP),'omitnan');
 end
-if isfinite(spec.windowRate) && any(valid)
-    row.median_absolute_rate_error = ...
-        median(abs(rate(valid)-spec.windowRate),'omitnan');
+referenceRate = referenceRateByDepth(spec,depth,originalDepth);
+validReference = valid & isfinite(referenceRate);
+if any(validReference)
+    row.median_absolute_rate_error = median( ...
+        abs(rate(validReference)-referenceRate(validReference)),'omitnan');
 end
 
-midpoint = mean([min(originalDepth),max(originalDepth)]);
+midpoint = expectedSegmentBoundary(spec,originalDepth);
 firstRate = valid & depth <= midpoint;
 secondRate = valid & depth > midpoint;
 if any(firstRate)
@@ -477,6 +510,29 @@ row.conclusion = sprintf([ ...
     row.target_band_significant_window_count,row.false_positive_count);
 end
 
+function reference = referenceRateByDepth(spec,depth,originalDepth)
+reference = nan(size(depth));
+if isfield(spec,'expectedKind') && strcmp(spec.expectedKind,'piecewise46')
+    boundary = expectedSegmentBoundary(spec,originalDepth);
+    reference(depth <= boundary) = 4;
+    reference(depth > boundary) = 6;
+elseif isfield(spec,'referenceRate') && isfinite(spec.referenceRate)
+    reference(:) = spec.referenceRate;
+elseif isfinite(spec.windowRate)
+    reference(:) = spec.windowRate;
+end
+end
+
+function boundary = expectedSegmentBoundary(spec,originalDepth)
+fraction = 0.5;
+if isfield(spec,'expectedSplitDepthFraction') && ...
+        isfinite(spec.expectedSplitDepthFraction)
+    fraction = spec.expectedSplitDepthFraction;
+end
+depthMinimum = min(originalDepth);
+boundary = depthMinimum + fraction*(max(originalDepth)-depthMinimum);
+end
+
 function [minimumP,rateAtMinimum] = minimumPByWindow(pGlobal,srGrid,rowMask)
 rowMask = logical(rowMask(:));
 if size(pGlobal,1) ~= numel(srGrid) || numel(rowMask) ~= numel(srGrid)
@@ -502,45 +558,96 @@ end
 
 function entries = exportMethodFigure( ...
         task,analysis,spec,figureDirectory,outputRoot,options)
-before = findall(groot,'Type','figure');
-ecocoplot(analysis.prt_sr,analysis.out_depth,analysis.out_ecc, ...
+[~,figures] = ecocoplot(analysis.prt_sr,analysis.out_depth,analysis.out_ecc, ...
     analysis.out_ep,analysis.out_eci,analysis.out_ecoco, ...
-    analysis.out_ecocorb,analysis.out_norbit,1,analysis.details);
-after = findall(groot,'Type','figure');
-created = setdiff(after,before);
-if numel(created) ~= 1
-    for ii = 1:numel(created)
-        if isgraphics(created(ii)), close(created(ii)); end
-    end
+    analysis.out_ecocorb,analysis.out_norbit,-1,analysis.details);
+figures = figures(isgraphics(figures,'figure'));
+if numel(figures) ~= 2
+    closeFigures(figures);
     error('runEcocoTwoMethodExperiment:UnexpectedFigureCount', ...
-        '%s created %d figures; one composite figure was expected.', ...
-        task.title,numel(created));
+        ['%s created %d figures; the standard eCOCO layout requires ', ...
+         'one main-map figure and one standalone final-map figure.'], ...
+        task.title,numel(figures));
 end
-fig = created(1);
-set(fig,'Color','w','Visible',options.Visible,'Units','centimeters', ...
-    'Position',[1,1,28,14.5],'Name',sprintf('%s - %s',spec.title,task.title));
-drawnow;
-stem = sprintf('%s_%s',sanitizeFilename(spec.id),task.id);
-pngPath = fullfile(figureDirectory,[stem,'.png']);
-pdfPath = fullfile(figureDirectory,[stem,'.pdf']);
-exportgraphics(fig,pngPath,'Resolution',300,'BackgroundColor','white');
-exportgraphics(fig,pdfPath,'ContentType','vector','BackgroundColor','white');
-entry = emptyFigureEntry();
-entry.png = relativePath(pngPath,outputRoot);
-entry.pdf = relativePath(pdfPath,outputRoot);
-entry.title = sprintf('%s — %s',spec.title,task.title);
-entry.caption = sprintf([ ...
-    '%s。完整沉积速率网格 %.6g–%.6g cm/kyr（步长 %.6g）；', ...
-    'W=%.6g m，滑动步长=%.6g m，Pad=%d，%s，red=%d，', ...
-    'N_{MC}=%d，seed=%d，SR-global p。'], ...
-    entry.title,spec.sr1,spec.sr2,spec.srstep,analysis.window, ...
-    analysis.stepSamples*analysis.dt,analysis.pad,options.Method,options.Red, ...
-    options.NSim,options.Seed);
-entry.method = task.title;
-entry.method_id = task.id;
-entries = entry;
-if options.CloseFigures && isgraphics(fig)
-    close(fig);
+entries = repmat(emptyFigureEntry(),2,1);
+baseStem = sprintf('%s_%s',sanitizeFilename(spec.id),task.id);
+suffixes = {'','_ridge'};
+panelLabels = {'Main maps','Ridge score'};
+widths = [28,17.95];
+try
+    for figureIndex = 1:2
+        fig = figures(figureIndex);
+        set(fig,'Color','w','Visible',options.Visible, ...
+            'Units','centimeters','Position',[1,1,widths(figureIndex),14.5], ...
+            'Name',sprintf('%s - %s - %s',spec.title,task.title, ...
+            panelLabels{figureIndex}));
+        drawnow;
+        stem = [baseStem,suffixes{figureIndex}];
+        pngPath = fullfile(figureDirectory,[stem,'.png']);
+        pdfPath = fullfile(figureDirectory,[stem,'.pdf']);
+        figPath = fullfile(figureDirectory,[stem,'.fig']);
+        exportgraphics(fig,pngPath,'Resolution',300, ...
+            'BackgroundColor','white');
+        exportVectorPdf(fig,pdfPath);
+        savefig(fig,figPath);
+        entry = emptyFigureEntry();
+        entry.png = relativePath(pngPath,outputRoot);
+        entry.pdf = relativePath(pdfPath,outputRoot);
+        entry.fig = relativePath(figPath,outputRoot);
+        entry.title = sprintf('%s — %s — %s', ...
+            spec.title,task.title,panelLabels{figureIndex});
+        if figureIndex == 1
+            displayNote = ['Black contours mark the saved Local-p and ', ...
+                'Global-p significance thresholds.'];
+        else
+            displayNote = ['The tracked rate is overlaid on the standalone ', ...
+                'window-normalized ridge-score map.'];
+        end
+        entry.caption = sprintf([ ...
+            '%s. Complete sedimentation-rate grid %.6g–%.6g cm/kyr ', ...
+            '(step %.6g); W=%.6g m; sliding step=%.6g m; Pad=%d; ', ...
+            '%s correlation; red=%d; N_{MC}=%d; seed=%d. %s'], ...
+            entry.title,spec.sr1,spec.sr2,spec.srstep,analysis.window, ...
+            analysis.stepSamples*analysis.dt,analysis.pad,options.Method, ...
+            options.Red,options.NSim,options.Seed,displayNote);
+        entry.method = task.title;
+        entry.method_id = task.id;
+        entries(figureIndex) = entry;
+    end
+catch exception
+    closeFigures(figures);
+    rethrow(exception)
+end
+if options.CloseFigures
+    closeFigures(figures);
+end
+
+function closeFigures(figures)
+figures = figures(isgraphics(figures,'figure'));
+if ~isempty(figures)
+    close(figures);
+end
+end
+
+function exportVectorPdf(fig,path)
+% Force the Painters backend so dense contour data panels remain editable
+% vector objects instead of being silently replaced by JPEG images. MATLAB
+% may retain the narrow colorbar gradients as small raster strips.
+ensureDirectory(fileparts(path));
+temporary = [tempname(fileparts(path)),'.pdf'];
+cleanup = onCleanup(@()deleteIfPresent(temporary));
+oldUnits = get(fig,'Units');
+set(fig,'Units','centimeters');
+position = get(fig,'Position');
+set(fig, ...
+    'Renderer','painters', ...
+    'PaperUnits','centimeters', ...
+    'PaperSize',position(3:4), ...
+    'PaperPosition',[0,0,position(3:4)]);
+print(fig,temporary,'-dpdf','-vector','-r300');
+set(fig,'Units',oldUnits);
+finalizeAtomicFile(temporary,path);
+clear cleanup
 end
 end
 
@@ -645,8 +752,30 @@ end
 function parameters = methodParameterStruct(spec,task,analysis,options)
 if strcmp(task.mode,'crossfit')
     targetMode = 'four-group-coherent-nine';
+    defaultScoreDefinition = [ ...
+        'pCOCO = consensus rho x abs(log10(consensus global p)); ', ...
+        'no orbit-count weighting'];
+    orbitCountRole = 'diagnostic only';
 else
     targetMode = 'window-specific-four-group-coherent-nine';
+    defaultScoreDefinition = 'pCOCO x N_orbits / 9';
+    orbitCountRole = 'ridge-score weight';
+end
+algorithmVersion = '';
+scoreDefinition = defaultScoreDefinition;
+if isstruct(analysis.details)
+    if isfield(analysis.details,'algorithmVersion') && ...
+            (ischar(analysis.details.algorithmVersion) || ...
+             (isstring(analysis.details.algorithmVersion) && ...
+              isscalar(analysis.details.algorithmVersion)))
+        algorithmVersion = char(string(analysis.details.algorithmVersion));
+    end
+    if isfield(analysis.details,'scoreDefinition') && ...
+            (ischar(analysis.details.scoreDefinition) || ...
+             (isstring(analysis.details.scoreDefinition) && ...
+              isscalar(analysis.details.scoreDefinition)))
+        scoreDefinition = char(string(analysis.details.scoreDefinition));
+    end
 end
 parameters = struct( ...
     'dataset_id',spec.id,'method_id',task.id,'method',task.title, ...
@@ -658,6 +787,9 @@ parameters = struct( ...
     'nsim',options.NSim,'red',options.Red, ...
     'correlation_method',options.Method, ...
     'seed',options.Seed,'anchor_fraction',options.AnchorFraction, ...
+    'algorithm_version',algorithmVersion, ...
+    'score_definition',scoreDefinition, ...
+    'orbit_count_role',orbitCountRole, ...
     'sr_global_p',true,'map_global_p',false);
 end
 
@@ -798,7 +930,7 @@ end
 function methods = methodPlan()
 items = {
     'adaptive','Adaptive eCOCO','adaptive';
-    'crossfit','Cross-fitted eCOCO','crossfit'};
+    'crossfit','Blocked eCOCO','crossfit'};
 methods = repmat(struct('id','','title','','mode',''),size(items,1),1);
 for ii = 1:size(items,1)
     methods(ii).id = items{ii,1};
@@ -919,7 +1051,7 @@ item = struct('id','','title','','category','','expected_rate','', ...
 end
 
 function entry = emptyFigureEntry()
-entry = struct('png','','pdf','','title','','caption','', ...
+entry = struct('png','','pdf','','fig','','title','','caption','', ...
     'method','','method_id','');
 end
 
@@ -1006,7 +1138,11 @@ end
 end
 
 function digest = engineFingerprint(task)
-paths = {mfilename('fullpath'),which('ecoco'),which('cocoAdaptiveEvaluate')};
+% MFILE('fullpath') can be empty inside a local function in some MATLAB
+% releases. Resolve the public runner explicitly so the signature never
+% begins with an unexplained "missing" component.
+paths = {which('runEcocoTwoMethodExperiment'),which('ecoco'), ...
+    which('cocoAdaptiveEvaluate')};
 if strcmp(task.id,'adaptive')
     paths{end+1} = which('ecocoAdaptiveCore');
 else
@@ -1039,7 +1175,8 @@ function tf = figuresExist(entries,root)
 tf = ~isempty(entries);
 for ii = 1:numel(entries)
     tf = tf && isfile(fullfile(root,entries(ii).png)) && ...
-        isfile(fullfile(root,entries(ii).pdf));
+        isfile(fullfile(root,entries(ii).pdf)) && ...
+        isfield(entries,'fig') && isfile(fullfile(root,entries(ii).fig));
 end
 end
 
@@ -1163,6 +1300,27 @@ fprintf(file,'%s',char(string(value)));
 clear fileCleanup
 finalizeAtomicFile(temporary,path);
 clear cleanup
+end
+
+function emitMethodEvent(path,eventName,datasetID,methodID,detail)
+timestamp = timestampNow();
+detail = regexprep(char(string(detail)),'\s+',' ');
+line = sprintf('[%s] %s dataset=%s method=%s',timestamp, ...
+    upper(char(string(eventName))),char(string(datasetID)), ...
+    char(string(methodID)));
+if ~isempty(detail)
+    line = sprintf('%s %s',line,detail);
+end
+fprintf('%s\n',line);
+ensureDirectory(fileparts(path));
+file = fopen(path,'a','n','UTF-8');
+if file < 0
+    warning('runEcocoTwoMethodExperiment:LogOpenFailed', ...
+        'Could not append to %s.',path);
+    return
+end
+cleanup = onCleanup(@()fclose(file));
+fprintf(file,'%s\n',line);
 end
 
 function saveAtomic(path,payload)

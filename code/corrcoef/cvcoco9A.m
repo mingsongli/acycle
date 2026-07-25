@@ -34,5 +34,5 @@ result.validationLabel = ...
 result.engine = 'Rayleigh-peak-trained coherent nine-term held-out engine';
 result.variant = 'A';
 result.analysisRole = ...
-    'Method-A held-out development analysis; not confirmatory cvCOCO';
+    'Method-A held-out development analysis; not confirmatory Blocked cvCOCO';
 end

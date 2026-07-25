@@ -34,7 +34,9 @@ end
 
 result = cvcoco(data,orbit9,pad,sr1,sr2,srstep,red,nsim,method, ...
     varargin{:},'TargetModel','four-group');
-result.name = 'cvCOCO';
+result.name = 'Blocked cvCOCO';
+result.publicName = 'Blocked cvCOCO';
+result.abbreviation = 'B-cvCOCO';
 result.entryPoint = 'cvcoco2 compatibility wrapper';
 result.targetLabel = 'Phase-averaged four-group piecewise-constant target';
 result.validationLabel = 'Frozen phase-averaged noncoherent four-group target';

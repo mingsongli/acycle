@@ -2,11 +2,11 @@ function runSummary = runCocoPublicationValidation(outputRoot,varargin)
 %RUNCOCOPUBLICATIONVALIDATION Reproducible non-GUI COCO publication suite.
 %
 % RUNSUMMARY = RUNCOCOPUBLICATIONVALIDATION(OUTPUTROOT) analyzes the six
-% pre-registered validation records with confirmatory cvCOCO and
+% pre-registered validation records with confirmatory Blocked cvCOCO and
 % exploratory Adaptive COCO.  Every method is checkpointed independently.
 % The suite writes MAT and XLSX numerical results, CSV parameter/summary
 % tables, plain-text conclusions, editable FIG files, vector PDF figures,
-% and 600-dpi PNG figures.  Figure width is fixed at 180 mm (full column).
+% and 600-dpi PNG figures.  Figure width defaults to 180 mm (full column).
 % Root and per-case JSON manifests are suitable for automated Word report
 % construction.  No GUI is created or required.
 %
@@ -20,9 +20,10 @@ function runSummary = runCocoPublicationValidation(outputRoot,varargin)
 %   DatasetIDs      subset of case ids to run (default all)
 %   Resume          reuse signature-matched checkpoints (default true)
 %   ContinueOnError continue with remaining methods/cases (default true)
-%   RunCV           run confirmatory cvCOCO (default true)
+%   RunCV           run confirmatory Blocked cvCOCO (default true)
 %   RunAdaptive     run exploratory Adaptive COCO (default true)
 %   ExportFigures   write FIG/PDF/PNG artifacts (default true)
+%   FigureWidthCm   exported figure width in centimetres (default 18)
 %   DatasetPlan     caller-supplied plan structure (default registered six)
 %
 % The default rate grids and expected-rate statements are encoded by
@@ -57,6 +58,7 @@ addParameter(parser,'ExportFigures',true,@isLogicalScalar);
 addParameter(parser,'CloseFigures',true,@isLogicalScalar);
 addParameter(parser,'Visible','off',@isScalarText);
 addParameter(parser,'DatasetPlan',struct([]),@(x) isempty(x) || isstruct(x));
+addParameter(parser,'FigureWidthCm',18,@isPositiveScalar);
 parse(parser,varargin{:});
 options = parser.Results;
 options.InputRoot = char(string(options.InputRoot));
@@ -144,6 +146,7 @@ manifest.git_status = gitInfo.status;
 manifest.matlab_version = version;
 manifest.artifact_sha256_csv = 'artifact_sha256.csv';
 manifest.combined_report_docx = 'COCO_publication_validation_report.docx';
+manifest.event_log = 'run.log';
 manifest.options = publicOptions(options);
 manifest.code_fingerprint = codeAudit;
 manifest.cases = repmat(emptyCaseManifest(),0,1);
@@ -153,9 +156,6 @@ caseManifests = repmat(emptyCaseManifest(),numel(plan),1);
 fatalException = [];
 for caseIndex = 1:numel(plan)
     spec = plan(caseIndex);
-    fprintf('\n============================================================\n');
-    fprintf('COCO publication case %d/%d: %s\n',caseIndex,numel(plan),spec.title);
-    fprintf('============================================================\n');
     appendLog(logFile,'Case %d/%d started: %s',caseIndex,numel(plan),spec.id);
     try
         caseManifests(caseIndex) = runOneCase( ...
@@ -253,6 +253,7 @@ parameters.nsim_sensitivity = options.NSimSensitivity;
 parameters.seed = options.Seed;
 parameters.correlation_method = options.Method;
 parameters.slices = options.Slices;
+parameters.figure_width_cm = options.FigureWidthCm;
 parameters.cv_target_model = 'four-group';
 parameters.adaptive_target_model = 'adaptive phase-averaged noncoherent';
 parameters.preprocessing = preprocessing;
@@ -290,8 +291,9 @@ for taskIndex = 1:numel(tasks)
     methodSignature.red = task.red;
     methodSignature.nsim = task.nsim;
     signature = jsonencode(methodSignature);
-    appendLog(caseLog,'Method started: %s, red=%d, N=%d', ...
-        task.engine,task.red,task.nsim);
+    emitMethodEvent({rootLog,caseLog},'START',spec.id,task.folder, ...
+        sprintf('engine=%s role=%s red=%d nsim=%d', ...
+        task.engine,task.role,task.red,task.nsim));
     try
         if strcmp(task.engine,'cvCOCO')
             [record,row,block,figures] = runCvTask( ...
@@ -307,17 +309,17 @@ for taskIndex = 1:numel(tasks)
         summaryRows(end+1,:) = row; %#ok<AGROW>
         conclusionBlocks(end+1,1) = block; %#ok<AGROW>
         figureEntries = [figureEntries;figures(:)]; %#ok<AGROW>
-        appendLog(caseLog,'Method completed: %s (%s)',task.folder,record.status);
+        emitMethodEvent({rootLog,caseLog},'END',spec.id,task.folder, ...
+            sprintf('status=%s',record.status));
     catch exception
         methodRecords(taskIndex) = failedMethodRecord(task,exception);
         summaryRows(end+1,:) = failureSummaryRow(task,exception); %#ok<AGROW>
         conclusionBlocks(end+1,1) = sprintf( ...
-            '%s [%s]\nFAILED: %s (%s)',task.engine,task.role, ...
+            '%s [%s]\nFAILED: %s (%s)',task.displayName,task.role, ...
             exception.message,exception.identifier); %#ok<AGROW>
-        appendLog(caseLog,'Method failed: %s: %s (%s)', ...
-            task.folder,exception.message,exception.identifier);
-        appendLog(rootLog,'Case %s method %s failed: %s', ...
-            spec.id,task.folder,exception.message);
+        emitMethodEvent({rootLog,caseLog},'ERROR',spec.id,task.folder, ...
+            sprintf('identifier=%s message=%s', ...
+            exception.identifier,exception.message));
         if ~options.ContinueOnError
             rethrow(exception)
         end
@@ -383,7 +385,8 @@ try
         cv = cvcoco(raw,orbit9,pad,spec.sr1,spec.sr2,spec.srstep, ...
             task.red,task.nsim,options.Method,'BatchSize',options.BatchSize, ...
             'Seed',options.Seed,'TargetModel','four-group', ...
-            'AnalysisName','cvCOCO','MaxFrequency',maximumFrequency, ...
+            'AnalysisName','Blocked cvCOCO', ...
+            'MaxFrequency',maximumFrequency, ...
             'ProgressFcn',[]);
         report = cocoConclusionReport('confirmatory',cv);
         cv.conclusion = report;
@@ -405,7 +408,8 @@ try
     if options.ExportFigures
         [figures,stems,captions,heights] = createCvFigures(cv,spec,task);
         figureEntries = exportFigureSet(figures,stems,captions,heights, ...
-            task,figureDirectory,outputRoot,options.CloseFigures);
+            task,figureDirectory,outputRoot,options.CloseFigures, ...
+            options.FigureWidthCm);
     end
     checkpoint.status = 'complete';
     checkpoint.updated_at = timestampNow();
@@ -426,6 +430,7 @@ end
 
 record = emptyMethodRecord();
 record.method = task.engine;
+record.display_name = task.displayName;
 record.role = task.role;
 record.red = task.red;
 record.nsim = task.nsim;
@@ -438,7 +443,7 @@ record.conclusion_file = relativePath(conclusionFile,outputRoot);
 record.error = '';
 row = cvSummaryRow(task,report,spec.expected_rate);
 block = sprintf('%s [%s; red=%d]\n%s', ...
-    task.engine,task.role,task.red,report.message);
+    task.displayName,task.role,task.red,report.message);
 end
 
 function [record,row,block,figureEntries] = runAdaptiveTask( ...
@@ -502,7 +507,8 @@ try
             spec.title,task.red)};
         heights = [24,12];
         figureEntries = exportFigureSet(figures,stems,captions,heights, ...
-            task,figureDirectory,outputRoot,options.CloseFigures);
+            task,figureDirectory,outputRoot,options.CloseFigures, ...
+            options.FigureWidthCm);
     end
     checkpoint.status = 'complete';
     checkpoint.updated_at = timestampNow();
@@ -523,6 +529,7 @@ end
 
 record = emptyMethodRecord();
 record.method = task.engine;
+record.display_name = task.displayName;
 record.role = task.role;
 record.red = task.red;
 record.nsim = task.nsim;
@@ -535,27 +542,32 @@ record.conclusion_file = relativePath(conclusionFile,outputRoot);
 record.error = '';
 row = adaptiveSummaryRow(task,report,spec.expected_rate);
 block = sprintf('%s [%s; red=%d]\n%s', ...
-    task.engine,task.role,task.red,report.message);
+    task.displayName,task.role,task.red,report.message);
 end
 
 function [figures,stems,captions,heights] = createCvFigures(cv,spec,task)
 figures = plotcvcoco(cv,'ShowSpectra',true);
-stems = {sprintf('%s_cvCOCO_depth_validation',task.folder), ...
-    sprintf('%s_cvCOCO_curves',task.folder), ...
-    sprintf('%s_cvCOCO_MC_audit',task.folder)};
+stems = {sprintf('%s_Blocked_cvCOCO_depth_validation',task.folder), ...
+    sprintf('%s_Blocked_cvCOCO_curves',task.folder), ...
+    sprintf('%s_Blocked_cvCOCO_pCOCO',task.folder), ...
+    sprintf('%s_Blocked_cvCOCO_MC_audit',task.folder)};
 captions = {sprintf([ ...
     '%s. Midpoint-held-out segments and reciprocal frozen-target ', ...
-    'validation spectra (cvCOCO; red-noise option %d).'], ...
+    'validation spectra (Blocked cvCOCO; red-noise option %d).'], ...
     spec.title,task.red), ...
     sprintf([ ...
-    '%s. Confirmatory cvCOCO directional correlations and global ', ...
+    '%s. Confirmatory Blocked cvCOCO directional correlations and global ', ...
     'significance, descriptive directional local p-values, and ', ...
     'participating-period geometry (red-noise option %d).'], ...
     spec.title,task.red), ...
     sprintf([ ...
+    '%s. Blocked cvCOCO same-rate consensus pCOCO, calculated from ', ...
+    'consensus correlation and its joint global p curve ', ...
+    '(red-noise option %d).'],spec.title,task.red), ...
+    sprintf([ ...
     '%s. Full-pipeline bidirectional stationary AR(1) Monte Carlo audit ', ...
-    'for cvCOCO (red-noise option %d).'],spec.title,task.red)};
-heights = [15,24,24];
+    'for Blocked cvCOCO (red-noise option %d).'],spec.title,task.red)};
+heights = [15,24,12,24];
 if numel(figures) ~= numel(stems)
     error('runCocoPublicationValidation:UnexpectedCVFigureCount', ...
         'plotcvcoco returned %d figures; expected %d.',numel(figures),numel(stems));
@@ -563,11 +575,11 @@ end
 end
 
 function entries = exportFigureSet(figures,stems,captions,heights, ...
-        task,figureDirectory,outputRoot,closeFigures)
+        task,figureDirectory,outputRoot,closeFigures,figureWidthCm)
 entries = repmat(emptyFigureEntry(),numel(figures),1);
 for ii = 1:numel(figures)
     entries(ii) = exportPublicationFigure(figures(ii),stems{ii}, ...
-        captions{ii},heights(ii),task,figureDirectory,outputRoot);
+        captions{ii},heights(ii),figureWidthCm,task,figureDirectory,outputRoot);
 end
 if closeFigures
     for ii = 1:numel(figures)
@@ -578,13 +590,12 @@ if closeFigures
 end
 end
 
-function entry = exportPublicationFigure(fig,stem,caption,heightCm, ...
+function entry = exportPublicationFigure(fig,stem,caption,heightCm,widthCm, ...
         task,figureDirectory,outputRoot)
 if ~isgraphics(fig,'figure')
     error('runCocoPublicationValidation:InvalidFigure', ...
         'A publication figure handle is invalid.');
 end
-widthCm = 18; % 180 mm journal full-column limit
 set(fig,'Color','w','Units','centimeters', ...
     'Position',[1,1,widthCm,heightCm], ...
     'PaperUnits','centimeters','PaperPosition',[0,0,widthCm,heightCm], ...
@@ -611,12 +622,13 @@ pngFile = fullfile(figureDirectory,[stem,'.png']);
 savefig(fig,figFile);
 try
     % PRINT honours PaperSize/PaperPosition and therefore preserves the
-    % declared 180-mm physical width. EXPORTGRAPHICS can instead derive a
+    % declared physical width. EXPORTGRAPHICS can instead derive a
     % PDF page from on-screen pixel geometry on macOS/Retina displays,
     % yielding a vector page substantially wider than the journal limit.
     % PDF MediaBox dimensions are integer PostScript points in MATLAB's
     % PRINT path.  Use a 0.5-mm safety inset so rounding can never make the
-    % physical page exceed the journal's strict 180-mm maximum.
+    % physical page exceed the journal's strict 180-mm maximum at the
+    % default full-column setting.
     pdfWidthCm = min(widthCm,17.95);
     pdfHeightCm = heightCm*pdfWidthCm/widthCm;
     set(fig,'PaperPosition',[0,0,pdfWidthCm,pdfHeightCm], ...
@@ -633,9 +645,15 @@ entry.path = relativePath(pngFile,outputRoot);
 entry.pdf_path = relativePath(pdfFile,outputRoot);
 entry.fig_path = relativePath(figFile,outputRoot);
 entry.caption = caption;
-entry.width = 'full';
-entry.width_mm = 180;
-entry.method = task.engine;
+if abs(widthCm-9) <= 64*eps(9)
+    entry.width = 'half';
+elseif abs(widthCm-18) <= 64*eps(18)
+    entry.width = 'full';
+else
+    entry.width = 'custom';
+end
+entry.width_mm = 10*widthCm;
+entry.method = task.displayName;
 entry.role = task.role;
 entry.red = task.red;
 end
@@ -653,24 +671,32 @@ extra = {
     'Split depth (m)',cv.splitDepth;
     'Segment A interpolation applied',logicalText(cv.interpolationA.applied);
     'Segment B interpolation applied',logicalText(cv.interpolationB.applied);
-    'Shared all-nine range (cm/kyr)',mat2str(cv.allNineRateRangeShared)};
+    'Shared all-nine range (cm/kyr)',mat2str(cv.allNineRateRangeShared);
+    'Maximum pCOCO',cv.bestPCOCO;
+    'pCOCO best rate (cm/kyr)',cv.bestPCOCORate;
+    'pCOCO definition',cv.pCOCODefinition};
 writecell([{'Metric','Value'};summaryRows;extra],temporary, ...
     'Sheet','Summary','Range','A1');
 
 curves = [cv.srGrid(:),cv.trainA.curve(:),cv.trainB.curve(:), ...
     cv.validateAtoB.curve(:),cv.validateBtoA.curve(:), ...
-    cv.pCurveAtoB(:),cv.pCurveBtoA(:), ...
-    cv.pLocalCurveAtoB(:),cv.pLocalCurveBtoA(:),cv.orbitCountA(:), ...
+    cv.consensus.curve(:),cv.pCurveAtoB(:),cv.pCurveBtoA(:), ...
+    cv.pCurveConsensus(:),cv.pLocalCurveAtoB(:), ...
+    cv.pLocalCurveBtoA(:),cv.pLocalCurveConsensus(:),cv.pCOCO(:), ...
+    cv.orbitCountA(:), ...
     cv.orbitCountB(:),cv.activeOrbitCountAtoB(:), ...
-    cv.activeOrbitCountBtoA(:),cv.groupLeakageRcondA(:), ...
+    cv.activeOrbitCountBtoA(:),cv.activeOrbitCountConsensus(:), ...
+    cv.groupLeakageRcondA(:), ...
     cv.groupLeakageRcondB(:),double(cv.trainingRateMaskA(:)), ...
     double(cv.trainingRateMaskB(:)),double(cv.validRateMaskA(:)), ...
     double(cv.validRateMaskB(:))];
 curveHeader = {'SedRate_cm_per_kyr','Train_A','Train_B', ...
-    'Validate_A_to_B','Validate_B_to_A','GlobalP_A_to_B', ...
-    'GlobalP_B_to_A','LocalP_A_to_B','LocalP_B_to_A', ...
+    'Validate_A_to_B','Validate_B_to_A','ConsensusCorrelation', ...
+    'GlobalP_A_to_B','GlobalP_B_to_A','ConsensusGlobalP', ...
+    'LocalP_A_to_B','LocalP_B_to_A','ConsensusLocalP','pCOCO', ...
     'ResolvablePeriods_A','ResolvablePeriods_B', ...
     'ActivePeriods_A_to_B','ActivePeriods_B_to_A', ...
+    'ConsensusActivePeriods', ...
     'LeakageRcond_A','LeakageRcond_B','TrainingRate_A', ...
     'TrainingRate_B','ValidRate_A','ValidRate_B'};
 writecell(curveHeader,temporary,'Sheet','SedRateCurves','Range','A1');
@@ -678,8 +704,10 @@ writematrix(curves,temporary,'Sheet','SedRateCurves','Range','A2');
 
 nNull = numel(cv.nullSymmetric);
 nullData = [(1:nNull)',cv.nullAtoB(:),cv.nullBtoA(:), ...
-    cv.nullSymmetric(:),cv.nullBestRateAtoB(:),cv.nullBestRateBtoA(:)];
-writecell({'Simulation','S_A_to_B','S_B_to_A','T_symmetric', ...
+    cv.nullConsensus(:),cv.nullSymmetric(:), ...
+    cv.nullBestRateAtoB(:),cv.nullBestRateBtoA(:)];
+writecell({'Simulation','S_A_to_B','S_B_to_A', ...
+    'T_same_rate_consensus','T_symmetric', ...
     'BestRate_A_to_B','BestRate_B_to_A'},temporary, ...
     'Sheet','NullStatistics','Range','A1');
 writematrix(nullData,temporary,'Sheet','NullStatistics','Range','A2');
@@ -756,8 +784,8 @@ end
 end
 
 function tasks = methodTasks(options)
-tasks = repmat(struct('engine','','role','','red',NaN,'nsim',NaN, ...
-    'folder',''),0,1);
+tasks = repmat(struct('engine','','displayName','','fileStem','', ...
+    'role','','red',NaN,'nsim',NaN,'folder',''),0,1);
 if options.RunCV
     tasks(end+1) = makeTask('cvCOCO','primary confirmatory', ...
         options.Red,options.NSim,'primary');
@@ -779,12 +807,19 @@ end
 end
 
 function task = makeTask(engine,role,red,nsim,suffix)
-task = struct('engine',engine,'role',role,'red',red,'nsim',nsim, ...
-    'folder',sprintf('%s_red%d_%s',sanitizeFilename(engine),red,suffix));
+displayName = engine;
+fileStem = sanitizeFilename(engine);
+if strcmp(engine,'cvCOCO')
+    displayName = 'Blocked cvCOCO';
+    fileStem = 'Blocked_cvCOCO';
+end
+task = struct('engine',engine,'displayName',displayName, ...
+    'fileStem',fileStem,'role',role,'red',red,'nsim',nsim, ...
+    'folder',sprintf('%s_red%d_%s',fileStem,red,suffix));
 end
 
 function row = cvSummaryRow(task,report,expectedRate)
-row = {task.engine,task.role,task.red,'complete',report.classification, ...
+row = {task.displayName,task.role,task.red,'complete',report.classification, ...
     double(report.pass),report.bestRateAtoB,report.bestRateBtoA,NaN, ...
     report.pA,report.pB,report.pRobust,report.pSym,NaN,NaN, ...
     min(report.participatingPeriodsAtoB,report.participatingPeriodsBtoA), ...
@@ -792,14 +827,14 @@ row = {task.engine,task.role,task.red,'complete',report.classification, ...
 end
 
 function row = adaptiveSummaryRow(task,report,expectedRate)
-row = {task.engine,task.role,task.red,'complete',report.classification, ...
+row = {task.displayName,task.role,task.red,'complete',report.classification, ...
     double(report.pass),NaN,NaN,report.bestRate,NaN,NaN,NaN,NaN, ...
     report.minimumGlobalP,report.localPAtBest,report.periodCountAtBest, ...
     expectedRate,report.conclusion};
 end
 
 function row = failureSummaryRow(task,exception)
-row = {task.engine,task.role,task.red,'failed','FAILED',0, ...
+row = {task.displayName,task.role,task.red,'failed','FAILED',0, ...
     NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,'', ...
     sprintf('%s (%s)',exception.message,exception.identifier)};
 end
@@ -1119,7 +1154,7 @@ writeCaseManifest(fullfile(caseDirectory,'case_manifest.json'),item);
 end
 
 function item = emptyMethodRecord()
-item = struct('method','','role','','red',NaN,'nsim',NaN, ...
+item = struct('method','','display_name','','role','','red',NaN,'nsim',NaN, ...
     'status','pending','classification','','pass',false, ...
     'result_file','','workbook','','conclusion_file','','error','');
 end
@@ -1127,6 +1162,7 @@ end
 function item = failedMethodRecord(task,exception)
 item = emptyMethodRecord();
 item.method = task.engine;
+item.display_name = task.displayName;
 item.role = task.role;
 item.red = task.red;
 item.nsim = task.nsim;
@@ -1153,6 +1189,8 @@ end
 function audit = codeFingerprint(repositoryRoot)
 relative = {
     fullfile('code','corrcoef','cvcoco.m');
+    fullfile('code','corrcoef','cocoAllPeriodRateRange.m');
+    fullfile('code','corrcoef','cocoShadeOutsideAllPeriodRange.m');
     fullfile('code','corrcoef','cocoAdaptiveEvaluate.m');
     fullfile('code','corrcoef','corrcoefslices_rankNew.m');
     fullfile('code','corrcoef','redNoisePeriodogramMC.m');
@@ -1319,6 +1357,32 @@ cleanup = onCleanup(@()fclose(file));
 fprintf(file,'[%s] ',timestampNow());
 fprintf(file,format,varargin{:});
 fprintf(file,'\n');
+end
+
+function emitMethodEvent(paths,eventName,datasetID,methodID,detail)
+timestamp = timestampNow();
+detail = regexprep(char(string(detail)),'\s+',' ');
+line = sprintf('[%s] %s dataset=%s method=%s',timestamp, ...
+    upper(char(string(eventName))),char(string(datasetID)), ...
+    char(string(methodID)));
+if ~isempty(detail)
+    line = sprintf('%s %s',line,detail);
+end
+fprintf('%s\n',line);
+paths = unique(string(paths(:)),'stable');
+for ii = 1:numel(paths)
+    path = char(paths(ii));
+    ensureDirectory(fileparts(path));
+    file = fopen(path,'a','n','UTF-8');
+    if file < 0
+        warning('runCocoPublicationValidation:LogOpenFailed', ...
+            'Could not append to %s.',path);
+        continue
+    end
+    cleanup = onCleanup(@()fclose(file));
+    fprintf(file,'%s\n',line);
+    clear cleanup
+end
 end
 
 function ensureDirectory(path)

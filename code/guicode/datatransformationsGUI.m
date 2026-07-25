@@ -245,7 +245,7 @@ function datatransformationsGUI(varargin)
         
         % refresh main window
         pre_dirML = pwd;
-        ac_pwd = fileread('ac_pwd.txt');
+        ac_pwd = strtrim(fileread('ac_pwd.txt'));
         if isdir(ac_pwd)
             cd(ac_pwd)
             disp([' Working Dir: ', ac_pwd])
@@ -331,26 +331,27 @@ function datatransformationsGUI(varargin)
         end
         fclose(file_id);
         
-        % refresh main window
-        d = dir; %get files
-        set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-        % define some nested parameters
-        pre  = '<HTML><FONT color="blue">';
-        post = '</FONT></HTML>';
-        address = pwd;
-        d = dir; %get files
-        d(1)=[];
-        d(1)=[];
-        listboxStr = cell(numel(d),1);
-        ac_pwd_str = which('ac_pwd.txt');
-        [ac_pwd_dir,ac_pwd_name, ext] = fileparts(ac_pwd_str);
-        fileID = fopen(fullfile(ac_pwd_dir,'ac_pwd.txt'),'w');
-        T = struct2table(d);
-        sortedT = [];
-        sd = [];
-        str=[];
-        i=[];
-        refreshcolor;
+        % REFRESHCOLOR is a script and cannot safely run inside this GUI's
+        % nested-callback (static) workspace.  Delegate it to the shared
+        % child-GUI refresh function, whose ordinary function workspace
+        % also recovers the live AC handles and preserves sorting/colors.
+        saveDirectory = pwd;
+        refreshed = ac_refresh_main_list( ...
+            handles.listbox_acmain,saveDirectory);
+        if ~refreshed && isgraphics(handles.listbox_acmain)
+            % Keep the newly saved file visible even if the main GUIDE
+            % handles are unavailable (for example while AC is closing).
+            listing = dir(saveDirectory);
+            listing = listing(~ismember({listing.name},{'.','..'}));
+            [~,sortOrder] = sort(lower(string({listing.name})));
+            listing = listing(sortOrder);
+            ac_update_listbox_acmain(handles.listbox_acmain, ...
+                {listing.name},[listing.isdir]);
+            if isgraphics(handles.edit_acfigmain_dir)
+                set(handles.edit_acfigmain_dir,'String',saveDirectory);
+            end
+            drawnow limitrate;
+        end
         cd(pre_dirML); % return to matlab view folder
     end
     

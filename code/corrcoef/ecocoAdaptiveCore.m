@@ -9,15 +9,37 @@ function result = ecocoAdaptiveCore(data,orbit9,window,dt,step,red,pad, ...
 % within-window maximum-over-rate (SR-global) Monte Carlo p-value; no
 % correction over the sliding-window dimension is applied.  PLOCAL is the
 % same-rate Monte Carlo p-value from those identical null realizations.
+%
+% Name-value window options:
+%   WindowMode   'legacy-count' (direct-core compatibility default) or
+%                'physical-depth'. The public ECOCO wrapper and GUI use
+%                physical-depth for modern Adaptive eCOCO runs.
+%   StepDepth    exact physical center spacing in physical-depth mode.
+%   CenterLimits optional [first last] output-center limits, used when an
+%                upstream caller supplied explicit edge padding.
 
 parser = inputParser;
 parser.FunctionName = mfilename;
 addParameter(parser,'BatchSimulations',[],@(x) isempty(x) || ...
     (isnumeric(x) && isscalar(x) && isfinite(x) && x >= 1 && x == fix(x)));
 addParameter(parser,'ProgressFcn',[],@(x) isempty(x) || isa(x,'function_handle'));
+addParameter(parser,'WindowMode','legacy-count',@(x) ischar(x) || ...
+    (isstring(x) && isscalar(x)));
+addParameter(parser,'StepDepth',[],@(x) isempty(x) || ...
+    (isnumeric(x) && isscalar(x) && isreal(x) && isfinite(x) && x > 0));
+addParameter(parser,'CenterLimits',[],@(x) isempty(x) || ...
+    (isnumeric(x) && isvector(x) && numel(x) == 2 && ...
+    isreal(x) && all(isfinite(x)) && x(2) >= x(1)));
 parse(parser,varargin{:});
 requestedBatch = parser.Results.BatchSimulations;
 progressFcn = parser.Results.ProgressFcn;
+windowMode = validatestring(char(parser.Results.WindowMode), ...
+    {'legacy-count','physical-depth'},mfilename,'WindowMode');
+stepDepth = parser.Results.StepDepth;
+centerLimits = parser.Results.CenterLimits;
+if strcmp(windowMode,'physical-depth') && isempty(stepDepth)
+    stepDepth = step*dt;
+end
 
 validateattributes(data,{'numeric'},{'2d','ncols',2,'real','finite','nonempty'}, ...
     mfilename,'data',1);
@@ -46,10 +68,16 @@ validateattributes(seed,{'numeric'}, ...
 
 data = sortrows(data,1);
 spacing = diff(data(:,1));
-spacingTolerance = max(1e-10*max(1,dt),64*eps(max(abs(data(:,1)))));
-if any(spacing <= 0) || any(abs(spacing-dt) > spacingTolerance)
+spacingTolerance = cocoSamplingTolerance(data(:,1),dt);
+if any(spacing <= 0)
+    error('ecocoAdaptiveCore:InvalidDepth', ...
+        'DATA depths must be distinct and strictly increasing after sorting.');
+end
+if strcmp(windowMode,'legacy-count') && ...
+        any(abs(spacing-dt) > spacingTolerance)
     error('ecocoAdaptiveCore:UnevenSampling', ...
-        'DATA must be a strictly increasing, evenly sampled depth series.');
+        ['DATA must be evenly sampled at DT in legacy-count mode. Use ', ...
+         'physical-depth mode for irregularly sampled observations.']);
 end
 srGrid = srGrid(:);
 if any(diff(srGrid) <= 0)
@@ -57,40 +85,67 @@ if any(diff(srGrid) <= 0)
         'SRGRID must be strictly increasing.');
 end
 
-% Use an odd point count whose two equal half-spans match ZEROPAD2's
-% integer half-window padding.  This keeps the first/last result centres
-% on the first/last observed depths even when WINDOW/(2*DT) is fractional.
-nWindow = 2*round(window/(2*dt))+1;
-if nWindow < 4 || nWindow > size(data,1)
+if strcmp(windowMode,'physical-depth')
+    [depth,centerInfo] = ecocoPhysicalCenters( ...
+        data(:,1),window,stepDepth,centerLimits);
+    [values,windowInfo] = ecocoPhysicalWindowValues( ...
+        data,window,depth,dt,'MinimumSourcePoints',4);
+    nWindow = windowInfo.windowPointCount;
+    windowDt = windowInfo.analysisSamplingInterval;
+    starts = windowInfo.sourceStartIndex;
+    ends = windowInfo.sourceEndIndex;
+    requestedBounds = windowInfo.requestedBounds;
+    sourcePointCount = windowInfo.sourcePointCount;
+    actualWindowSpan = requestedBounds(:,2)-requestedBounds(:,1);
+else
+    % Historical fixed-row geometry.  Retained only for scripts that
+    % explicitly request legacy-count compatibility.
+    nWindow = 2*round(window/(2*dt))+1;
+    if nWindow < 4 || nWindow > size(data,1)
+        error('ecocoAdaptiveCore:InvalidWindow', ...
+            'The requested window must contain 4..N data points.');
+    end
+    lastStart = size(data,1)-nWindow+1;
+    starts = endpointInclusiveStarts(lastStart,step)';
+    ends = starts+nWindow-1;
+    if isempty(starts)
+        error('ecocoAdaptiveCore:NoWindows', ...
+            'No complete sliding windows remain.');
+    end
+    nWindowsLegacy = numel(starts);
+    values = zeros(nWindow,nWindowsLegacy);
+    depth = zeros(nWindowsLegacy,1);
+    for windowIndex = 1:nWindowsLegacy
+        index = starts(windowIndex):ends(windowIndex);
+        values(:,windowIndex) = data(index,2);
+        depth(windowIndex) = mean(data(index([1,end]),1));
+    end
+    windowDt = dt;
+    requestedBounds = [data(starts,1),data(ends,1)];
+    sourcePointCount = repmat(nWindow,nWindowsLegacy,1);
+    actualWindowSpan = requestedBounds(:,2)-requestedBounds(:,1);
+    centerInfo = struct('centerLimits',[depth(1),depth(end)]);
+    windowInfo = struct( ...
+        'observedCenter',depth, ...
+        'observedSpan',actualWindowSpan, ...
+        'coverageFraction',actualWindowSpan./window);
+end
+if nWindow < 4
     error('ecocoAdaptiveCore:InvalidWindow', ...
-        'The requested window must contain 4..N data points.');
+        'The requested window must contain at least four analysis points.');
 end
 if pad < nWindow
     error('ecocoAdaptiveCore:PadTooShort', ...
         'PAD (%d) must be at least the %d samples in one window.',pad,nWindow);
 end
-lastStart = size(data,1)-nWindow+1;
-starts = endpointInclusiveStarts(lastStart,step);
-if isempty(starts)
-    error('ecocoAdaptiveCore:NoWindows','No complete sliding windows remain.');
-end
-ends = starts+nWindow-1;
 nRate = numel(srGrid);
-nWindows = numel(starts);
-
-values = zeros(nWindow,nWindows);
-depth = zeros(nWindows,1);
-for windowIndex = 1:nWindows
-    index = starts(windowIndex):ends(windowIndex);
-    values(:,windowIndex) = data(index,2);
-    depth(windowIndex) = mean(data(index([1,end]),1));
-end
+nWindows = numel(depth);
 
 reportProgress(progressFcn,0,sprintf( ...
     'Preparing %d Adaptive eCOCO sliding windows.',nWindows));
-[observedPower,frequency] = ecocoWindowSpectra(values,dt,pad,red);
-templateData = [(0:nWindow-1)'*dt,zeros(nWindow,1)];
-rayleigh = enbw(rectwin(nWindow),1/dt);
+[observedPower,frequency] = ecocoWindowSpectra(values,windowDt,pad,red);
+templateData = [(0:nWindow-1)'*windowDt,zeros(nWindow,1)];
+rayleigh = enbw(rectwin(nWindow),1/windowDt);
 [rho,~,nMissing] = cocoAdaptiveEvaluate( ...
     observedPower,templateData,pad,frequency,[],orbit9,rayleigh, ...
     srGrid,[],method,'BatchSize',max(1,min(100,nWindows)), ...
@@ -131,7 +186,7 @@ if nsim > 0
         validRep = repmat(validNullWindow,1,nBatch);
         nullValues = stationaryAr1Batch(nWindow,rhoRep,stdRep,validRep);
         [nullPower,nullFrequency] = ...
-            ecocoWindowSpectra(nullValues,dt,pad,red);
+            ecocoWindowSpectra(nullValues,windowDt,pad,red);
         if ~isequal(frequency,nullFrequency)
             error('ecocoAdaptiveCore:NullFrequencyChanged', ...
                 'Observed and null frequency grids differ.');
@@ -173,6 +228,7 @@ result = struct;
 result.method = 'adaptive';
 result.name = 'Adaptive eCOCO';
 result.targetMode = 'adaptive9b';
+result.windowMode = windowMode;
 result.srGrid = srGrid;
 result.depth = depth;
 result.rho = rho;
@@ -188,10 +244,32 @@ result.score = score;
 result.windowStartIndex = starts(:);
 result.windowEndIndex = ends(:);
 result.windowPointCount = nWindow;
+result.windowSourcePointCount = sourcePointCount(:);
 result.requestedWindow = window;
-result.actualWindowSpan = (nWindow-1)*dt;
-result.stepSamples = step;
-result.stepDepth = step*dt;
+result.actualWindowSpan = median(actualWindowSpan);
+result.actualWindowSpanByWindow = actualWindowSpan(:);
+if strcmp(windowMode,'physical-depth')
+    result.stepSamples = NaN;
+    result.stepDepth = stepDepth;
+else
+    result.stepSamples = step;
+    result.stepDepth = step*dt;
+end
+result.sourceSamplingInterval = dt;
+result.analysisSamplingInterval = windowDt;
+result.samplingInterval = windowDt;
+result.windows = struct( ...
+    'startIndex',starts(:), ...
+    'endIndex',ends(:), ...
+    'sourcePointCount',sourcePointCount(:), ...
+    'pointCount',sourcePointCount(:), ...
+    'centerDepth',depth(:), ...
+    'requestedCenter',depth(:), ...
+    'requestedBounds',requestedBounds, ...
+    'actualSpan',actualWindowSpan(:), ...
+    'observedCenter',windowInfo.observedCenter(:), ...
+    'observedSpan',windowInfo.observedSpan(:), ...
+    'coverageFraction',windowInfo.coverageFraction(:));
 result.rhoM = rhoM(:);
 result.validNullWindow = validNullWindow(:);
 result.nsimRequested = nsim;
@@ -209,7 +287,35 @@ result.localDefinition = [ ...
     'null realizations used for SR-global p'];
 result.mapGlobalApplied = false;
 result.batchSimulations = batchSimulations;
-result.algorithmVersion = 'Adaptive-eCOCO9B-full-grid-local-p-v2';
+if strcmp(windowMode,'physical-depth')
+    result.algorithmVersion = ...
+        'Adaptive-eCOCO9B-physical-window-full-grid-v3';
+    selectionRule = [ ...
+        'source rows selected by physical depth bounds; each window ', ...
+        'regularized independently on one exact common physical grid'];
+    tailRule = 'strict step lattice; no off-step terminal window appended';
+else
+    result.algorithmVersion = 'Adaptive-eCOCO9B-full-grid-local-p-v2';
+    selectionRule = 'fixed-row complete windows on an even input grid';
+    tailRule = 'legacy endpoint-inclusive terminal window';
+end
+result.metadata = struct( ...
+    'algorithm','Adaptive Method-B coherent-nine eCOCO', ...
+    'windowMode',windowMode, ...
+    'windowRequested',window, ...
+    'windowActualSpan',median(actualWindowSpan), ...
+    'windowPointCount',nWindow, ...
+    'windowStepRequestedDepth',result.stepDepth, ...
+    'sourceSamplingInterval',dt, ...
+    'analysisSamplingInterval',windowDt, ...
+    'centerLimits',centerInfo.centerLimits, ...
+    'windowSelectionRule',selectionRule, ...
+    'tailRule',tailRule, ...
+    'method',method, ...
+    'red',red, ...
+    'pad',pad, ...
+    'maximumFrequency',maxFrequency, ...
+    'seed',seed);
 reportProgress(progressFcn,1,sprintf( ...
     'Adaptive eCOCO sliding-window analysis complete: %d windows.', ...
     nWindows));

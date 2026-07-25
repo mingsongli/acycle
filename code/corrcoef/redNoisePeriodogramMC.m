@@ -86,7 +86,7 @@ if any(timeDifference <= 0)
         'DATA(:,1) must be strictly increasing.');
 end
 dt = median(timeDifference);
-spacingTolerance = max(1e-10*max(1,abs(dt)),32*eps(max(abs(time))));
+spacingTolerance = cocoSamplingTolerance(time,dt);
 if any(abs(timeDifference-dt) > spacingTolerance)
     error('redNoisePeriodogramMC:UnevenSampling', ...
         ['DATA(:,1) must be evenly spaced. Sort, de-duplicate, and ', ...

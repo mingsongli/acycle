@@ -5,9 +5,32 @@ function [prt_sr,out_depth,out_ecc,out_ep,out_eci,out_ecoco,out_ecocorb,out_norb
 % Each window is evaluated by corrcoefslices_rankNew, so eCOCO uses the
 % same target construction, Monte Carlo p-value, and pCOCO definition as
 % the upgraded COCO workflow.
+% Modern Adaptive/Blocked modes clean, sort, average duplicate depths,
+% and conditionally interpolate at the median spacing at this public entry
+% point. Interleaved mode instead retains cleaned raw observations so every
+% complete window can split by globally fixed odd/even identity before
+% fold-specific interpolation. Every observed and null fold/window is then
+% linearly detrended.
 % Optional trailing name-value input:
 %   ProgressFcn  callback FCN(fraction,message), with a determinate
 %                FRACTION on [0,1].
+%   SeparateFinalPanel  compatibility option. Plot mode 1 always displays
+%                the final eCOCO map in its own figure (default true).
+%   Verbose      print detailed tracked-rate and legacy window messages
+%                (default true for backward compatibility).
+%   InterleavedWindowMode  'physical-depth' (default) or 'legacy-count'.
+%                The GUI uses physical-depth so WINDOW and the requested
+%                sliding step retain their literal depth units.
+%   InterleavedStepDepth  exact depth-coordinate center spacing. Empty
+%                uses STEP*DT, preserving STEP's sample-count units.
+%   ECOCOWindowMode  common modern eCOCO window contract:
+%                'physical-depth' (default) or 'legacy-count'.
+%   ECOCOStepDepth  exact physical center spacing for Adaptive,
+%                Blocked, and Interleaved eCOCO. Empty preserves the
+%                historical STEP*DT interpretation.
+%   ECOCOCenterLimits  optional [first last] physical output-center limits.
+%                The GUI uses the unpadded record limits when edge padding
+%                is enabled, so synthetic padding never creates extra maps.
 
 if nargin < 20 || isempty(calcMode)
     calcMode = 'adaptive';
@@ -25,8 +48,42 @@ progressParser = inputParser;
 progressParser.FunctionName = mfilename;
 addParameter(progressParser,'ProgressFcn',[],@(x) isempty(x) || ...
     isa(x,'function_handle'));
+addParameter(progressParser,'SeparateFinalPanel',true,@(x) ...
+    (islogical(x) || isnumeric(x)) && isscalar(x) && isfinite(x) && ...
+    any(x == [0 1]));
+addParameter(progressParser,'Verbose',true,@(x) ...
+    (islogical(x) || isnumeric(x)) && isscalar(x) && isfinite(x) && ...
+    any(x == [0 1]));
+addParameter(progressParser,'InterleavedWindowMode','physical-depth', ...
+    @(x) ischar(x) || (isstring(x) && isscalar(x)));
+addParameter(progressParser,'InterleavedStepDepth',[],@(x) isempty(x) || ...
+    (isnumeric(x) && isscalar(x) && isreal(x) && isfinite(x) && x > 0));
+addParameter(progressParser,'ECOCOWindowMode','physical-depth', ...
+    @(x) ischar(x) || (isstring(x) && isscalar(x)));
+addParameter(progressParser,'ECOCOStepDepth',[],@(x) isempty(x) || ...
+    (isnumeric(x) && isscalar(x) && isreal(x) && isfinite(x) && x > 0));
+addParameter(progressParser,'ECOCOCenterLimits',[],@(x) isempty(x) || ...
+    (isnumeric(x) && isvector(x) && numel(x) == 2 && isreal(x) && ...
+    all(isfinite(x)) && x(2) >= x(1)));
 parse(progressParser,varargin{:});
 progressFcn = progressParser.Results.ProgressFcn;
+% Retain the accepted name-value option for existing scripts, but enforce
+% the common plotting contract at the public wrapper and in ECOCOPLOT.
+separateFinalPanel = true;
+verbose = logical(progressParser.Results.Verbose);
+interleavedWindowMode = validatestring( ...
+    char(progressParser.Results.InterleavedWindowMode), ...
+    {'legacy-count','physical-depth'},mfilename,'InterleavedWindowMode');
+interleavedStepDepth = progressParser.Results.InterleavedStepDepth;
+ecocoWindowMode = validatestring( ...
+    char(progressParser.Results.ECOCOWindowMode), ...
+    {'legacy-count','physical-depth'},mfilename,'ECOCOWindowMode');
+ecocoStepDepth = progressParser.Results.ECOCOStepDepth;
+ecocoCenterLimits = progressParser.Results.ECOCOCenterLimits;
+interleavedModeExplicit = ~any(strcmpi( ...
+    progressParser.UsingDefaults,'InterleavedWindowMode'));
+interleavedStepExplicit = ~any(strcmpi( ...
+    progressParser.UsingDefaults,'InterleavedStepDepth'));
 validateattributes(maxFrequency,{'numeric'}, ...
     {'scalar','real','finite','positive'},mfilename,'maxFrequency',21);
 validateattributes(seed,{'numeric'}, ...
@@ -53,43 +110,98 @@ if nargin < 16 || isempty(plotn)
     plotn = 1;
 end
 calcMode = lower(strtrim(char(calcMode)));
-if ~ismember(calcMode,{'adaptive','crossfit','fast','accurate'})
-    error(['calcMode must be ''adaptive'' or ''crossfit'' ', ...
+if ~ismember(calcMode,{'adaptive','crossfit','interleaved','fast','accurate'})
+    error(['calcMode must be ''adaptive'', ''crossfit'', or ''interleaved'' ', ...
         '(''fast''/''accurate'' remain legacy compatibility modes).']);
 end
 
 ecoDetails = struct;
 
-% New public eCOCO algorithms.  Both retain the complete sedimentation-
+% New public eCOCO algorithms.  All retain the complete sedimentation-
 % rate grid.  The old Fast/Accurate implementation remains below as an
 % unadvertised compatibility branch for scripts that still call it.
-if any(strcmp(calcMode,{'adaptive','crossfit'}))
+if any(strcmp(calcMode,{'adaptive','crossfit','interleaved'}))
     if adjust ~= 0
         error('ecoco:LegacyAdjustmentUnsupported', ...
-            'Adaptive and Cross-fitted eCOCO require ADJUST=0.');
+            'Modern eCOCO algorithms require ADJUST=0.');
+    end
+    validateattributes(dt,{'numeric'}, ...
+        {'scalar','real','finite','positive'},mfilename,'dt',5);
+    requestedSamplingInterval = dt;
+    if strcmp(calcMode,'interleaved')
+        % Do not call cocoPrepareRegularData here: whole-record
+        % interpolation would mix the future training and validation folds.
+        inputPreprocessing = struct( ...
+            'method','clean raw then split each window before interpolation', ...
+            'fullRecordInterpolation',false, ...
+            'splitBeforeInterpolation',true);
+    else
+        [data,inputPreprocessing] = cocoPrepareRegularData( ...
+            data,sprintf('%s eCOCO input',calcMode), ...
+            'MaximumPoints',1e6,'MinimumPoints',4,'Verbose',true);
+        dt = inputPreprocessing.outputSpacing;
+        if abs(requestedSamplingInterval-dt) > ...
+                cocoSamplingTolerance(data(:,1),dt)
+            fprintf(['>> eCOCO sampling interval updated from the caller value ', ...
+                '%.12g m to the preprocessed median interval %.12g m.\n'], ...
+                requestedSamplingInterval,dt);
+        end
     end
     srGrid = (sr1:srstep:sr2)';
     coreProgressFcn = [];
     if ~isempty(progressFcn)
         % Reserve the final two percent for ridge tracking and plotting in
         % this wrapper so the dialog does not claim completion too early.
-        coreProgressFcn = @(fraction,message) reportEcocoProgress( ...
-            progressFcn,0.98*fraction,message);
+        % Suppress the core's terminal 100% message: scaling that message to
+        % 98% would mislabel a completion notice as intermediate work.  This
+        % wrapper emits the single terminal completion message after ridge
+        % tracking and plotting are actually finished.
+        coreProgressFcn = @(fraction,message) reportEcocoCoreProgress( ...
+            progressFcn,fraction,message);
     end
-    if strcmp(calcMode,'adaptive')
-        result = ecocoAdaptiveCore(data,orbit9,window,dt,step,red,pad, ...
-            srGrid,nsim,method,maxFrequency,seed, ...
-            'ProgressFcn',coreProgressFcn);
-    else
-        result = ecocoCrossfitCore(data,orbit9,window,dt,step,red,pad, ...
-            srGrid,nsim,method,maxFrequency,seed,anchorFraction, ...
-            'ComputeLocalP',true, ...
-            'ProgressFcn',coreProgressFcn);
+    switch calcMode
+        case 'adaptive'
+            if isempty(ecocoStepDepth)
+                ecocoStepDepth = step*dt;
+            end
+            result = ecocoAdaptiveCore(data,orbit9,window,dt,step,red,pad, ...
+                srGrid,nsim,method,maxFrequency,seed, ...
+                'ProgressFcn',coreProgressFcn, ...
+                'WindowMode',ecocoWindowMode, ...
+                'StepDepth',ecocoStepDepth, ...
+                'CenterLimits',ecocoCenterLimits);
+        case 'crossfit'
+            if isempty(ecocoStepDepth)
+                ecocoStepDepth = step*dt;
+            end
+            result = ecocoCrossfitCore(data,orbit9,window,dt,step,red,pad, ...
+                srGrid,nsim,method,maxFrequency,seed,anchorFraction, ...
+                'ComputeLocalP',true, ...
+                'ProgressFcn',coreProgressFcn, ...
+                'WindowMode',ecocoWindowMode, ...
+                'StepDepth',ecocoStepDepth, ...
+                'CenterLimits',ecocoCenterLimits);
+        case 'interleaved'
+            if ~interleavedModeExplicit
+                interleavedWindowMode = ecocoWindowMode;
+            end
+            if ~interleavedStepExplicit
+                interleavedStepDepth = ecocoStepDepth;
+            end
+            if strcmp(interleavedWindowMode,'physical-depth') && ...
+                    isempty(interleavedStepDepth)
+                interleavedStepDepth = step*dt;
+            end
+            result = ecocoInterleavedCore( ...
+                data,orbit9,window,dt,step,red,pad,srGrid,nsim,method, ...
+                maxFrequency,seed,'ProgressFcn',coreProgressFcn, ...
+                'WindowMode',interleavedWindowMode, ...
+                'StepDepth',interleavedStepDepth);
     end
     prt_sr = result.srGrid(:);
     out_depth = result.depth(:);
     out_ecc = result.rho;
-    % In upgraded Adaptive and Cross-fitted eCOCO, OUT_EP carries the
+    % In upgraded Adaptive and Blocked eCOCO, OUT_EP carries the
     % same-rate Monte Carlo Local p map. The legacy output position is
     % retained for GUI and script compatibility; analytic correlation
     % p-values are not valid for a target estimated from the spectra.
@@ -103,14 +215,36 @@ if any(strcmp(calcMode,{'adaptive','crossfit'}))
     out_ecocorb = result.score;
     out_norbit = result.nOrbit;
     ecoDetails = result;
+    if isfield(result,'inputPreprocessing')
+        inputPreprocessing = result.inputPreprocessing;
+    end
+    ecoDetails.separateFinalPanel = separateFinalPanel;
+    ecoDetails.inputPreprocessing = inputPreprocessing;
+    ecoDetails.requestedSamplingInterval = requestedSamplingInterval;
+    ecoDetails.samplingInterval = dt;
+    if isfield(result,'samplingInterval') && ...
+            isfinite(result.samplingInterval)
+        ecoDetails.samplingInterval = result.samplingInterval;
+    end
     orbitn = numel(orbit9);
     sr_p_fallback = bestPerWindowSummary( ...
-        prt_sr,out_depth,out_ecc,out_eci,out_norbit,out_ecoco, ...
-        out_ecocorb,orbitn);
+        prt_sr,out_depth,out_ecc,out_eci,out_norbit,out_ecocorb);
     sr_p = trackEcocoRidge(out_ecocorb,prt_sr,out_depth,out_ecc, ...
-        out_eci,out_norbit,out_ecoco,orbitn,sr_p_fallback);
+        out_eci,out_norbit,sr_p_fallback);
     ecoDetails.trackedSedimentationRate = sr_p;
-    printTrackedEcocoResults(sr_p,orbitn);
+    if verbose
+        if strcmp(calcMode,'interleaved') && ...
+                isfield(result,'resolutionWarningWindowCount') && ...
+                result.resolutionWarningWindowCount > 0
+            fprintf(['>> Interleaved eCOCO resolution note: %d resolved ', ...
+                'window(s) have their consensus best rate outside the ', ...
+                'shared odd/even all-nine resolvability interval. ', ...
+                'Interpret those ridge points as partial-orbit results; ', ...
+                'see folds/allNineRateRangeShared in the saved details.\n'], ...
+                result.resolutionWarningWindowCount);
+        end
+        printTrackedEcocoResults(sr_p,orbitn);
+    end
     if abs(plotn) > 0
         ecocoplot(prt_sr,out_depth,out_ecc,out_ep,out_eci,out_ecoco, ...
             out_ecocorb,out_norbit,plotn,ecoDetails);
@@ -191,10 +325,12 @@ if ~isempty(hwaitbar)
     updateEcocoWaitbar(hwaitbar,0,'Preparing sliding windows.');
 end
 
-if strcmp(calcMode,'fast')
-    disp('>> Step 1: prepare sliding windows and run Fast eCOCO');
-else
-    disp('>> Step 1: prepare sliding windows and run Accurate eCOCO');
+if verbose
+    if strcmp(calcMode,'fast')
+        disp('>> Step 1: prepare sliding windows and run Fast eCOCO');
+    else
+        disp('>> Step 1: prepare sliding windows and run Accurate eCOCO');
+    end
 end
 
 fastNull = [];
@@ -260,18 +396,23 @@ for i = 1:m3
         sr_p(i,5) = out_norbit(bestIdx,i);
         sr_p(i,6) = out_ecocorb(bestIdx,i);
 
-        disp(['-----> Location : ',num2str(out_depth(i)),' m. Iteration : ',num2str(m3),' -> ',num2str(i)])
-        disp(['>>  Sedimentation rate = [ ',num2str(sr_p(i,2)), ...
-            ' ] cm/kyr. # of orbital cycles involved : ', ...
-            num2str(sr_p(i,5)),' of ',num2str(orbitn)]);
-        disp(['    Correlation coefficient ',num2str(sr_p(i,3)), ...
-            '. p-value ',num2str(sr_p(i,4)), ...
-            '. pCOCO ',num2str(out_ecoco(bestIdx,i)), ...
-            '. pCOCOxOrbits ',num2str(sr_p(i,6))])
+        if verbose
+            disp(['-----> Location : ',num2str(out_depth(i)), ...
+                ' m. Iteration : ',num2str(m3),' -> ',num2str(i)])
+            disp(['>>  Sedimentation rate = [ ',num2str(sr_p(i,2)), ...
+                ' ] cm/kyr. # of orbital cycles involved : ', ...
+                num2str(sr_p(i,5)),' of ',num2str(orbitn)]);
+            disp(['    Correlation coefficient ',num2str(sr_p(i,3)), ...
+                '. p-value ',num2str(sr_p(i,4)), ...
+                '. pCOCO ',num2str(out_ecoco(bestIdx,i)), ...
+                '. pCOCOxOrbits ',num2str(sr_p(i,6))])
+        end
     else
-        disp(['-----> Location : ',num2str(out_depth(i)), ...
-            ' m. Iteration : ',num2str(m3),' -> ',num2str(i), ...
-            '. No finite pCOCO solution.'])
+        if verbose
+            disp(['-----> Location : ',num2str(out_depth(i)), ...
+                ' m. Iteration : ',num2str(m3),' -> ',num2str(i), ...
+                '. No finite pCOCO solution.'])
+        end
     end
 
     if (rem(i,nmc_n) == 0 || i == m3) && ~isempty(hwaitbar)
@@ -289,8 +430,11 @@ end
 reportEcocoProgress(progressFcn,0.98,sprintf( ...
     'Sliding windows completed: %d of %d',m3,m3));
 
-sr_p = trackEcocoRidge(out_ecocorb,prt_sr,out_depth,out_ecc,out_eci,out_norbit,out_ecoco,orbitn,sr_p);
-printTrackedEcocoResults(sr_p,orbitn);
+sr_p = trackEcocoRidge(out_ecocorb,prt_sr,out_depth,out_ecc, ...
+    out_eci,out_norbit,sr_p);
+if verbose
+    printTrackedEcocoResults(sr_p,orbitn);
+end
 
 if abs(plotn) > 0
     if lang_choice == 0
@@ -365,7 +509,7 @@ end
 idx = valid(loc);
 
 function summary = bestPerWindowSummary( ...
-        srGrid,depth,rho,pGlobal,nOrbit,pCOCO,score,orbitCount)
+        srGrid,depth,rho,pGlobal,nOrbit,score)
 nWindows = numel(depth);
 summary = nan(nWindows,8);
 for windowIndex = 1:nWindows
@@ -378,8 +522,7 @@ for windowIndex = 1:nWindows
     summary(windowIndex,3) = rho(bestIndex,windowIndex);
     summary(windowIndex,4) = pGlobal(bestIndex,windowIndex);
     summary(windowIndex,5) = nOrbit(bestIndex,windowIndex);
-    summary(windowIndex,6) = nOrbit(bestIndex,windowIndex)./orbitCount .* ...
-        pCOCO(bestIndex,windowIndex);
+    summary(windowIndex,6) = score(bestIndex,windowIndex);
 end
 
 function printTrackedEcocoResults(sr_p,orbitn)
@@ -396,10 +539,11 @@ for ii = 1:size(sr_p,1)
         num2str(sr_p(ii,5)),' of ',num2str(orbitn)]);
     disp(['    Correlation coefficient ',num2str(sr_p(ii,3)), ...
         '. p-value ',num2str(sr_p(ii,4)), ...
-        '. pCOCOxOrbits ',num2str(sr_p(ii,6))])
+        '. Ridge score ',num2str(sr_p(ii,6))])
 end
 
-function sr_p = trackEcocoRidge(score,prt_sr,out_depth,out_ecc,out_eci,out_norbit,out_ecoco,orbitn,sr_p_fallback)
+function sr_p = trackEcocoRidge( ...
+        score,prt_sr,out_depth,out_ecc,out_eci,out_norbit,sr_p_fallback)
 sr_p = sr_p_fallback;
 [nSr,nWin] = size(score);
 if nSr == 0 || nWin == 0 || numel(prt_sr) ~= nSr
@@ -484,7 +628,7 @@ for col = 1:nWin
     sr_p(col,3) = out_ecc(row,col);
     sr_p(col,4) = out_eci(row,col);
     sr_p(col,5) = out_norbit(row,col);
-    sr_p(col,6) = out_norbit(row,col) ./ orbitn .* out_ecoco(row,col);
+    sr_p(col,6) = score(row,col);
     [sr_p(col,7),sr_p(col,8)] = localSrRange(score(:,col),prt_sr,row,0.9);
 end
 
@@ -549,6 +693,14 @@ randomState = rng;
 restoreRandomState = onCleanup(@()rng(randomState));
 progressFcn(min(max(double(fraction),0),1),message);
 clear restoreRandomState
+
+function reportEcocoCoreProgress(progressFcn,fraction,message)
+isTerminalMessage = fraction >= 1 && ...
+    contains(lower(string(message)),'complete');
+if isempty(progressFcn) || isTerminalMessage
+    return
+end
+reportEcocoProgress(progressFcn,0.98*fraction,message);
 
 function [langChoice,langId,langVar] = ecocoLanguageSettings()
 langChoice = 0;

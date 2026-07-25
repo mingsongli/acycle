@@ -34,15 +34,32 @@ rng(9302,'twister');
 externalState = rng;
 withoutCallback = ecocoCrossfitCore(args{:});
 verifyEqual(testCase,rng,externalState, ...
-    'Cross-fitted eCOCO changed the caller RNG without a callback.');
+    'Blocked eCOCO changed the caller RNG without a callback.');
 rng(externalState);
 [withCallback,fractions,messages] = runCrossfitWithProgress(args);
 verifyEqual(testCase,rng,externalState, ...
-    'Cross-fitted eCOCO exposed callback RNG consumption to its caller.');
+    'Blocked eCOCO exposed callback RNG consumption to its caller.');
 
 verifyTrue(testCase,isequaln(withCallback,withoutCallback), ...
-    'Installing a progress callback changed a Cross-fitted eCOCO result.');
+    'Installing a progress callback changed a Blocked eCOCO result.');
 verifyStreamlinedProgress(testCase,fractions,messages,'window work');
+end
+
+function testInterleavedCoreProgressIsDeterminateAndObservational(testCase)
+args = interleavedArguments();
+rng(9304,'twister');
+externalState = rng;
+withoutCallback = ecocoInterleavedCore(args{:});
+verifyEqual(testCase,rng,externalState, ...
+    'Interleaved eCOCO changed the caller RNG without a callback.');
+rng(externalState);
+[withCallback,fractions,messages] = runInterleavedWithProgress(args);
+verifyEqual(testCase,rng,externalState, ...
+    'Interleaved eCOCO exposed callback RNG consumption to its caller.');
+
+verifyTrue(testCase,isequaln(withCallback,withoutCallback), ...
+    'Installing a progress callback changed an Interleaved eCOCO result.');
+verifyStreamlinedProgress(testCase,fractions,messages,'monte carlo work');
 end
 
 function testEcocoWrapperProgressIsDeterminateAndObservational(testCase)
@@ -88,6 +105,16 @@ args = {[depth,value],periods,20,dt,125,0,1024, ...
     'BatchSize',1,'ComputeLocalP',true,'MemoryBudgetMiB',64};
 end
 
+function args = interleavedArguments()
+periods = defaultPeriods();
+dt = 0.15;
+depth = (0:178)'*dt;
+timeKyr = depth*100/4;
+value = orbitalSignal(timeKyr,periods);
+args = {[depth,value],periods,20,dt,45,0,256, ...
+    [3.8;4.0;4.2],2,'Pearson',0.06,2718,'BatchSize',1};
+end
+
 function args = wrapperArguments()
 coreArguments = adaptiveArguments();
 data = coreArguments{1};
@@ -128,6 +155,18 @@ function [result,fractions,messages] = runCrossfitWithProgress(args)
 fractions = zeros(0,1);
 messages = strings(0,1);
 result = ecocoCrossfitCore(args{:},'ProgressFcn',@captureProgress);
+
+    function captureProgress(fraction,message)
+        callbackDraw = [rand(1,3),randn(1,2)]; %#ok<NASGU>
+        fractions(end+1,1) = fraction;
+        messages(end+1,1) = string(message);
+    end
+end
+
+function [result,fractions,messages] = runInterleavedWithProgress(args)
+fractions = zeros(0,1);
+messages = strings(0,1);
+result = ecocoInterleavedCore(args{:},'ProgressFcn',@captureProgress);
 
     function captureProgress(fraction,message)
         callbackDraw = [rand(1,3),randn(1,2)]; %#ok<NASGU>

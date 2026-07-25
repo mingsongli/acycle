@@ -1,27 +1,32 @@
-function prt_sr = ecocoplot(prt_sr,out_depth,out_ecc,out_ep,out_eci, ...
+function [prt_sr,figures] = ecocoplot(prt_sr,out_depth,out_ecc,out_ep,out_eci, ...
     out_ecoco,out_ecocorb,out_norbit,plotn,ecoDetails)
-%ECOCOPLOT Plot Adaptive or cross-fitted evolutionary COCO maps.
+%ECOCOPLOT Plot Adaptive, Blocked, or Interleaved evolutionary COCO maps.
 %
-% Adaptive eCOCO uses five panels: correlation, same-rate local p,
-% sedimentation-rate-search global p, number of contributing orbital
+% Adaptive eCOCO uses five panels: correlation, sedimentation-rate-search
+% global p, same-rate local p, number of contributing orbital
 % periods, and the within-window normalized ridge-score background. Ridge
-% tracking itself always uses the original unnormalized score. Cross-fitted
-% eCOCO uses six panels: forward correlation, backward correlation,
-% consensus same-rate local p, consensus SR-global p, consensus orbital
-% count, and the within-window normalized consensus score. Each p panel is
+% tracking itself always uses the original unnormalized score. Blocked and
+% Interleaved eCOCO use five panels: consensus correlation, consensus
+% SR-global p, consensus same-rate local p, consensus orbital count, and
+% the within-window normalized consensus score. Each p panel is
 % shown directly as -log10(p) with an independent range determined from
 % its own finite Monte Carlo results; p values themselves are not
 % normalized.
+% Plot mode 1 always creates two figures: every map except the final map is
+% grouped in the first figure, and the final (ridge-score for modern
+% methods) map is drawn alone in the second figure.  This layout is
+% enforced here so GUI, script, and saved-result replotting stay identical.
 %
 % The tenth input is optional for compatibility with older callers. Its
-% cross-fitted contract is:
+% directional cross-validation contract is:
 %   ecoDetails.forward.rho/pLocal/pGlobal/nOrbit/score
 %   ecoDetails.backward.rho/pLocal/pGlobal/nOrbit/score
 %   ecoDetails.consensus.rho/pLocal/pGlobal/nOrbit/score
 % A tracked rate may optionally be supplied as
 % ecoDetails.trackedSedimentationRate, ecoDetails.trackedRate, or
 % ecoDetails.sr_p. Otherwise the final-panel ridge is the finite maximum
-% score at each window.
+% score at each window. Interleaved eCOCO uses the same five-map display,
+% with forward/backward aliases meaning Odd->Even and Even->Odd.
 
 if nargin > 10
     error('ecocoplot:TooManyInputs','Too many input arguments.');
@@ -43,6 +48,7 @@ if ~isnumeric(plotn) || ~isscalar(plotn) || ~isfinite(plotn)
     error('ecocoplot:InvalidPlotMode','PLOTN must be a finite scalar.');
 end
 if plotn == 0
+    figures = gobjects(0,1);
     return
 end
 
@@ -57,9 +63,9 @@ nRate = numel(prt_sr);
 nWindow = numel(out_depth);
 
 % OUT_ECOCO remains accepted because it is part of the public legacy
-% plotting signature. For Adaptive and Cross-fitted eCOCO, OUT_EP carries
+% plotting signature. For Adaptive and Blocked eCOCO, OUT_EP carries
 % the audited same-rate local p map. Nested consensus results take
-% precedence for Cross-fitted eCOCO.
+% precedence for both directional eCOCO methods.
 legacyOutputs = {out_ecoco}; %#ok<NASGU>
 out_ecc = mapSized(out_ecc,nRate,nWindow);
 out_ep = mapSized(out_ep,nRate,nWindow);
@@ -68,8 +74,11 @@ out_ecocorb = mapSized(out_ecocorb,nRate,nWindow);
 out_norbit = mapSized(out_norbit,nRate,nWindow);
 
 methodName = lower(string(detailField(ecoDetails,'method','')));
-isCrossfit = contains(methodName,'cross') || ...
-    (isfield(ecoDetails,'forward') && isfield(ecoDetails,'backward'));
+isInterleaved = contains(methodName,'interleav') || ...
+    isfield(ecoDetails,'oddToEven') || isfield(ecoDetails,'evenToOdd');
+isCrossfit = ~isInterleaved && (contains(methodName,'cross') || ...
+    (isfield(ecoDetails,'forward') && isfield(ecoDetails,'backward')));
+isDirectional = isInterleaved || isCrossfit;
 isAdaptive = contains(methodName,'adaptive') || ...
     isfield(ecoDetails,'pLocal');
 ridgeScoreRaw = [];
@@ -78,11 +87,12 @@ ridgeGlobalP = [];
 ridgeLocalPThreshold = 0.01;
 ridgeGlobalPThreshold = 0.05;
 
-if isCrossfit
-    forwardRho = directionMap(ecoDetails,'forward','rho', ...
-        nan(nRate,nWindow),nRate,nWindow);
-    backwardRho = directionMap(ecoDetails,'backward','rho', ...
-        nan(nRate,nWindow),nRate,nWindow);
+if isDirectional
+    % Plot the exact consensus map computed by the numerical core. OUT_ECC
+    % is the compatibility fallback for older saved results that predate
+    % the nested CONSENSUS structure.
+    consensusRho = directionMap(ecoDetails,'consensus','rho', ...
+        out_ecc,nRate,nWindow);
     consensusLocalP = directionMap(ecoDetails,'consensus','pLocal', ...
         out_ep,nRate,nWindow);
     consensusGlobalP = directionMap(ecoDetails,'consensus','pGlobal', ...
@@ -95,15 +105,18 @@ if isCrossfit
     ridgeLocalP = consensusLocalP;
     ridgeGlobalP = consensusGlobalP;
     normalizedScore = normalizeScoreByWindow(consensusScore);
+    if isInterleaved
+        figureTitle = 'Interleaved eCOCO';
+    else
+        figureTitle = 'Blocked eCOCO';
+    end
     panels = [ ...
-        makePanel(forwardRho,'Forward correlation','rho'); ...
-        makePanel(backwardRho,'Backward correlation','rho'); ...
-        makePanel(consensusLocalP,'Local p','p',NaN,'Local p',0.01); ...
+        makePanel(consensusRho,'Consensus correlation','rho'); ...
         makePanel(consensusGlobalP,'Global p','p',NaN,'Global p',0.05); ...
+        makePanel(consensusLocalP,'Local p','p',NaN,'Local p',0.01); ...
         makePanel(consensusOrbit,'Contributing orbital periods','orbit'); ...
         makePanel(normalizedScore,'Ridge score','score-normalized', ...
         NaN,'Window-normalized score')];
-    figureTitle = 'Cross-fitted eCOCO';
 elseif isAdaptive
     localP = detailMap(ecoDetails,{'pLocal','localP'},out_ep, ...
         nRate,nWindow);
@@ -113,8 +126,8 @@ elseif isAdaptive
     normalizedScore = normalizeScoreByWindow(out_ecocorb);
     panels = [ ...
         makePanel(out_ecc,'Correlation coefficient','rho'); ...
-        makePanel(localP,'Local p','p',NaN,'Local p',0.01); ...
         makePanel(out_eci,'Global p','p',NaN,'Global p',0.05); ...
+        makePanel(localP,'Local p','p',NaN,'Local p',0.01); ...
         makePanel(out_norbit,'Contributing orbital periods','orbit'); ...
         makePanel(normalizedScore,'Ridge score','score-normalized', ...
         NaN,'Window-normalized score')];
@@ -129,6 +142,14 @@ else
         makePanel(out_norbit,'Contributing orbital periods','orbit')];
     figureTitle = 'eCOCO';
 end
+if isstruct(ecoDetails) && isfield(ecoDetails,'degradedMode') && ...
+        isscalar(ecoDetails.degradedMode) && ...
+        (islogical(ecoDetails.degradedMode) || ...
+         isnumeric(ecoDetails.degradedMode)) && ...
+        isfinite(ecoDetails.degradedMode) && ...
+        logical(ecoDetails.degradedMode)
+    figureTitle = [figureTitle,' (partial-orbit exploratory)'];
+end
 
 rhoLimits = sharedLimits(panels,'rho');
 pFloor = monteCarloPFloor(ecoDetails);
@@ -139,17 +160,43 @@ if plotMode < 1
 end
 
 if plotMode == 1
+    % The final map is intentionally not configurable in the grouped view:
+    % all public eCOCO plotting paths must produce the same two-figure
+    % layout, including direct ECOCOPLOT calls and old saved results.
+    mainPanelCount = max(1,numel(panels)-1);
+    groupedContentScale = 0.95;
+    figures = gobjects(1+double(mainPanelCount < numel(panels)),1);
     fig = figure('Color','w','Name',figureTitle, ...
-        'Position',[80 100 max(1180,270*numel(panels)) 600]);
-    layout = tiledlayout(fig,1,numel(panels), ...
-        'TileSpacing','compact','Padding','compact');
-    title(layout,figureTitle,'FontWeight','bold');
-    for panelIndex = 1:numel(panels)
-        ax = nexttile(layout,panelIndex);
+        'Position',[80 100 max(1180,270*mainPanelCount) 780]);
+    % Store the scale with the FIG so the PDF exporter can distinguish
+    % current layouts from older saved figures that still need export-time
+    % inset protection.
+    setappdata(fig,'eCOCOGroupedContentScale',groupedContentScale);
+    figures(1) = fig;
+    mainAxes = gobjects(mainPanelCount,1);
+    for panelIndex = 1:mainPanelCount
+        ax = axes('Parent',fig,'Units','normalized', ...
+            'Position',groupedPanelPosition( ...
+                panelIndex,mainPanelCount,groupedContentScale));
+        mainAxes(panelIndex) = ax;
         pLogMaximum = pDisplayMaximum(panels(panelIndex),ecoDetails);
         drawPanel(ax,panels(panelIndex),prt_sr,out_depth,false, ...
             reverseDepth,pLogMaximum,pFloor,rhoLimits,panelIndex == 1);
-        if panelIndex == numel(panels) && ~isempty(ridgeScoreRaw)
+    end
+    % Use the same unscaled typography as the separately plotted ridge
+    % figure; only the horizontal colorbar geometry remains compact.
+    applyGroupedFigureStyle(fig,mainAxes,1.00,0.70,0.85);
+    if mainPanelCount < numel(panels)
+        panelIndex = numel(panels);
+        fig = figure('Color','w','Name', ...
+            [figureTitle,' - ',panels(panelIndex).title], ...
+            'Position',[100 100 650 600]);
+        figures(2) = fig;
+        ax = axes('Parent',fig);
+        pLogMaximum = pDisplayMaximum(panels(panelIndex),ecoDetails);
+        drawPanel(ax,panels(panelIndex),prt_sr,out_depth,false, ...
+            reverseDepth,pLogMaximum,pFloor,rhoLimits,true);
+        if ~isempty(ridgeScoreRaw)
             overlayRidge(ax,ridgeScoreRaw,prt_sr, ...
                 out_depth,ecoDetails,ridgeLocalP,ridgeGlobalP, ...
                 ridgeLocalPThreshold,ridgeGlobalPThreshold, ...
@@ -157,10 +204,12 @@ if plotMode == 1
         end
     end
 elseif plotMode == 2
+    figures = gobjects(numel(panels),1);
     for panelIndex = 1:numel(panels)
         fig = figure('Color','w','Name', ...
             [figureTitle,' - ',panels(panelIndex).title]);
-        ax = axes(fig);
+        figures(panelIndex) = fig;
+        ax = axes('Parent',fig);
         pLogMaximum = pDisplayMaximum(panels(panelIndex),ecoDetails);
         drawPanel(ax,panels(panelIndex),prt_sr,out_depth,false, ...
             reverseDepth,pLogMaximum,pFloor,rhoLimits,true);
@@ -172,10 +221,12 @@ elseif plotMode == 2
         end
     end
 else
+    figures = gobjects(numel(panels),1);
     for panelIndex = 1:numel(panels)
         fig = figure('Color','w','Name', ...
             [figureTitle,' - ',panels(panelIndex).title]);
-        ax = axes(fig);
+        figures(panelIndex) = fig;
+        ax = axes('Parent',fig);
         pLogMaximum = pDisplayMaximum(panels(panelIndex),ecoDetails);
         drawPanel(ax,panels(panelIndex),prt_sr,out_depth,true, ...
             reverseDepth,pLogMaximum,pFloor,rhoLimits,true);
@@ -415,6 +466,17 @@ else
         max(finiteData) > min(finiteData);
     if canContour
         contourf(ax,rates,depths,z,20,'LineStyle','none');
+    elseif ~isempty(finiteData) && all(isfinite(z(:))) && ...
+            max(finiteData) == min(finiteData)
+        % A fully supported constant map has no contour levels. Draw one
+        % flat patch instead of IMAGESC so vector PDF export does not turn
+        % the complete data panel into a raster image.
+        [rateMinimum,rateMaximum] = coordinateCoverage(rates);
+        [depthMinimum,depthMaximum] = coordinateCoverage(depths);
+        patch(ax, ...
+            [rateMinimum rateMaximum rateMaximum rateMinimum], ...
+            [depthMinimum depthMinimum depthMaximum depthMaximum], ...
+            finiteData(1),'FaceColor','flat','EdgeColor','none');
     else
         imageHandle = imagesc(ax,rates,depths,z);
         imageHandle.AlphaData = isfinite(z);
@@ -440,6 +502,9 @@ switch panel.kind
         end
         clim(ax,[0 orbitMaximum]);
         color.Ticks = 0:orbitMaximum;
+        % ColorBar exposes label rotation through its numeric ruler rather
+        % than as a direct public property in supported MATLAB releases.
+        color.Ruler.TickLabelRotation = 0;
         color.Label.String = 'Number of periods';
     case 'score-normalized'
         clim(ax,[0 1]);
@@ -468,6 +533,17 @@ if numel(rates) > 1
 end
 if numel(depths) > 1
     ylim(ax,[min(depths) max(depths)]);
+end
+end
+
+function [minimumValue,maximumValue] = coordinateCoverage(values)
+values = values(:);
+minimumValue = min(values);
+maximumValue = max(values);
+if minimumValue == maximumValue
+    halfWidth = max(0.5,abs(minimumValue)*1e-6);
+    minimumValue = minimumValue-halfWidth;
+    maximumValue = maximumValue+halfWidth;
 end
 end
 
@@ -505,6 +581,7 @@ tickLogs = min(max(tickLogs,0),pLogMaximum);
 tickLogs = uniqueSortedTolerance(tickLogs);
 tickLogs(1) = 0;
 tickLogs(end) = pLogMaximum;
+tickLogs = separateSmallestPLabels(tickLogs,pLogMaximum);
 pValues = 10.^(-tickLogs);
 color.Ticks = tickLogs;
 color.TickLabels = arrayfun(@(x)sprintf('%.3g',x),pValues, ...
@@ -515,6 +592,21 @@ end
 color.Label.String = labelText;
 end
 
+function tickLogs = separateSmallestPLabels(tickLogs,pLogMaximum)
+% Horizontal colorbars place the two smallest p labels at the right edge.
+% A Monte Carlo floor just below a round decade (for example 0.0005 next
+% to 0.001) makes those long labels collide in the narrow four-panel view.
+% Preserve the exact resolution endpoint and omit only its crowded
+% penultimate neighbour.
+minimumSeparation = 0.18;
+if numel(tickLogs) >= 3 && isfinite(pLogMaximum) && pLogMaximum > 0
+    endpointGap = (tickLogs(end)-tickLogs(end-1))/pLogMaximum;
+    if endpointGap < minimumSeparation
+        tickLogs(end-1) = [];
+    end
+end
+end
+
 function values = uniqueSortedTolerance(values)
 values = sort(values(:).');
 if isempty(values)
@@ -522,6 +614,143 @@ if isempty(values)
 end
 tolerance = 64*eps(max(1,max(abs(values))));
 values = values([true,diff(values) > tolerance]);
+end
+
+function position = groupedPanelPosition(panelIndex,panelCount,contentScale)
+leftMargin = 0.065;
+rightMargin = 0.025;
+% Only the first map carries depth tick labels, so the remaining panels do
+% not need the former label clearance between axes.
+gap = 0.035;
+bottom = 0.08;
+top = 0.95;
+width = (1-leftMargin-rightMargin-gap*(panelCount-1))/panelCount;
+position = [leftMargin+(panelIndex-1)*(width+gap), ...
+    bottom,width,top-bottom];
+% Inset the complete four-map plate, rather than modifying only its saved
+% PDF.  The resulting on-screen figure, FIG, and every later re-export all
+% reserve the same small page margin for the leftmost Depth (m) label.
+position = scalePositionAboutFigureCenter(position,contentScale);
+end
+
+function applyGroupedFigureStyle( ...
+        fig,axesHandles,fontScale,colorbarScale,axesHeightScale)
+% The saved eCOCO overview is a compact map plate rather than a dashboard:
+% the figure and axes names remain available as object metadata, but title
+% text is not drawn inside the image.  A-D are placed just above the four
+% axes, and the map boxes are shortened from below to keep their horizontal
+% colorbars and labels clear.
+drawnow;
+
+textHandles = findall(fig,'Type','text');
+for textIndex = 1:numel(textHandles)
+    textHandle = textHandles(textIndex);
+    originalFontSize = textHandle.FontSize;
+    setappdata(textHandle,'eCOCOOriginalFontSize',originalFontSize);
+    textHandle.FontSize = fontScale*originalFontSize;
+end
+
+for axisIndex = 1:numel(axesHandles)
+    ax = axesHandles(axisIndex);
+    originalFontSize = ax.FontSize;
+    originalPosition = ax.Position;
+    setappdata(ax,'eCOCOOriginalFontSize',originalFontSize);
+    setappdata(ax,'eCOCOOriginalPosition',originalPosition);
+    ax.FontSize = fontScale*originalFontSize;
+    ax.Title.Visible = 'off';
+    ax.XLabel.Visible = 'off';
+    if axisIndex > 1
+        % The four maps share one depth coordinate. Retain the complete
+        % depth axis on panel A and suppress repeated numbers on B-D.
+        ax.YLabel.Visible = 'off';
+        ax.YTickLabel = {};
+    end
+    ax.Position = shortenPositionFromBottom( ...
+        originalPosition,axesHeightScale);
+end
+
+colorbars = findall(fig,'Type','colorbar');
+legendFontSize = axesHandles(1).FontSize;
+for colorIndex = 1:numel(colorbars)
+    color = colorbars(colorIndex);
+    originalFontSize = color.FontSize;
+    originalPosition = color.Position;
+    setappdata(color,'eCOCOOriginalFontSize',originalFontSize);
+    setappdata(color,'eCOCOOriginalPosition',originalPosition);
+    % The colorbar is the map legend.  Match both its tick labels and its
+    % descriptive label exactly to the sedimentation-rate tick numbers.
+    color.FontSize = legendFontSize;
+    color.Label.FontSize = legendFontSize;
+    color.Position = shrinkCenteredPosition( ...
+        originalPosition,colorbarScale);
+    color.Position(2) = color.Position(2)-0.04;
+    % Put the complete legend (ticks plus label) below the southoutside
+    % colorbar.  The 15% map-height reduction leaves this side clear, while
+    % the axes-facing side remains reserved for sedimentation-rate ticks and
+    % the x-axis label.
+    color.AxisLocation = 'out';
+end
+
+panelLabels = 'ABCD';
+for panelIndex = 1:min(numel(axesHandles),numel(panelLabels))
+    ax = axesHandles(panelIndex);
+    text(ax,0,1.02,panelLabels(panelIndex), ...
+        'Units','normalized', ...
+        'HorizontalAlignment','left', ...
+        'VerticalAlignment','bottom', ...
+        'FontSize',ax.FontSize, ...
+        'FontWeight','bold', ...
+        'Color','black', ...
+        'Clipping','off', ...
+        'Tag','eCOCO-panel-label');
+end
+
+% All four maps share one sedimentation-rate axis.  At the unscaled ridge
+% typography, repeating the long x label four times makes neighbouring
+% labels collide, so draw one centered label while keeping every panel's
+% own tick numbers.
+referenceLabel = axesHandles(1).XLabel;
+contentScale = getEcocoGroupedContentScale(fig);
+xLabelPosition = scalePositionAboutFigureCenter( ...
+    [0.05 0.244 0.90 0.035],contentScale);
+annotation(fig,'textbox',xLabelPosition, ...
+    'String','Sedimentation rate (cm/kyr)', ...
+    'HorizontalAlignment','center', ...
+    'VerticalAlignment','middle', ...
+    'LineStyle','none', ...
+    'FontName',referenceLabel.FontName, ...
+    'FontSize',referenceLabel.FontSize, ...
+    'FontWeight',referenceLabel.FontWeight, ...
+    'Color','black', ...
+    'Tag','eCOCO-shared-x-label');
+end
+
+function scale = getEcocoGroupedContentScale(fig)
+scale = getappdata(fig,'eCOCOGroupedContentScale');
+if ~(isnumeric(scale) && isscalar(scale) && isfinite(scale) && ...
+        scale > 0 && scale <= 1)
+    scale = 1;
+end
+end
+
+function position = scalePositionAboutFigureCenter(position,scale)
+validateattributes(scale,{'numeric'}, ...
+    {'scalar','real','finite','positive','<=',1}, ...
+    mfilename,'contentScale');
+position(1:2) = 0.5+(position(1:2)-0.5).*scale;
+position(3:4) = position(3:4).*scale;
+end
+
+function position = shortenPositionFromBottom(position,scale)
+heightReduction = (1-scale)*position(4);
+position(2) = position(2)+heightReduction;
+position(4) = scale*position(4);
+end
+
+function position = shrinkCenteredPosition(position,scale)
+sizeReduction = (1-scale).*position(3:4);
+position(1:2) = position(1:2)+0.5.*sizeReduction;
+position(3:4) = scale.*position(3:4);
 end
 
 function overlaySignificanceBoundary(ax,panel,rates,depths, ...
@@ -541,12 +770,18 @@ if isempty(finiteValues) || isempty(finiteRaw) || ...
     return
 end
 hold(ax,'on');
+% This is exactly half the former 1.2-point boundary.  Keep the styling in
+% this shared low-level helper so both Local-p and Global-p contours, in 2-D
+% and 3-D, use the same publication weight for every eCOCO caller.
+boundaryLineWidth = 0.6;
 if useSurface
     contour3(ax,rates,depths,z,[level level], ...
-        'LineColor','k','LineWidth',1.2,'HandleVisibility','off');
+        'LineColor','k','LineWidth',boundaryLineWidth, ...
+        'Tag','eCOCO-significance-boundary','HandleVisibility','off');
 else
     contour(ax,rates,depths,z,[level level], ...
-        'LineColor','k','LineWidth',1.2,'HandleVisibility','off');
+        'LineColor','k','LineWidth',boundaryLineWidth, ...
+        'Tag','eCOCO-significance-boundary','HandleVisibility','off');
 end
 end
 

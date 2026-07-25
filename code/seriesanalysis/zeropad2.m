@@ -1,4 +1,4 @@
-function [dataX] = zeropad2(data,win,padding)
+function [dataX] = zeropad2(data,win,padding,ensureHalfWindowCoverage)
 % Zero-pad the input data at both ends
 %
 % Inputs:
@@ -9,6 +9,10 @@ function [dataX] = zeropad2(data,win,padding)
 %               2 = mirror padding
 %               3 = mean-value padding
 %               4 = random-value padding
+%   ensureHalfWindowCoverage - optional logical. When true, use CEIL rather
+%               than ROUND so the synthetic coordinate support reaches at
+%               least WIN/2 beyond both original endpoints. This is used
+%               by exact physical-depth eCOCO windows (default false).
 %
 % Based on evofft19.m
 % April 2019 update by Nicolas Thibault & Giovanni Rizzi: added padding options
@@ -16,6 +20,11 @@ function [dataX] = zeropad2(data,win,padding)
 
 if nargin < 3; padding = 1; end
 if nargin < 2; win = 0.35 * abs(data(end,1) - data(1,1)); end
+if nargin < 4 || isempty(ensureHalfWindowCoverage)
+    ensureHalfWindowCoverage = false;
+end
+validateattributes(ensureHalfWindowCoverage,{'logical','numeric'}, ...
+    {'scalar'},mfilename,'ensureHalfWindowCoverage',4);
 % ensure data is sorted in the ascending order
 data = sortrows(data);
 
@@ -31,7 +40,11 @@ data(:,2) = y;
 % get mean sampling rate
 dt = mean(diff(x));
 % number of zero-padding data
-n = round(win/2/dt);
+if logical(ensureHalfWindowCoverage)
+    n = ceil(win/2/dt);
+else
+    n = round(win/2/dt);
+end
 
 % Build exactly N grid-aligned samples on each side.  Colon expressions
 % ending at WIN/2 become uneven at the join whenever WIN/(2*DT) is not an

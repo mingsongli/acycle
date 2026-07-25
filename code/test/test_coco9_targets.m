@@ -55,6 +55,69 @@ testCase.TestData.dataFrequency = dataFrequency;
 testCase.TestData.rayleigh = 1/(size(data,1)*dt);
 end
 
+function testAge566GroupsFollowPhysicalRankWithoutCutoffs(testCase)
+orbitMatrix = calculate_orbit9(566);
+periods = orbitMatrix(:,2)/1000;
+
+% At 566 Ma the obliquity member is physically valid but shorter than the
+% old 30-kyr cutoff that incorrectly reclassified it as precession.
+verifyLessThan(testCase,periods(6),30);
+groups = cocoOrbitGroups(periods);
+expected = [1;2;2;2;2;3;4;4;4];
+verifyEqual(testCase,groups.index,expected);
+verifyEqual(testCase,groups.counts,[1;4;1;3]);
+verifyTrue(testCase,contains(groups.rule,'no fixed period thresholds'));
+
+% Group identity must remain independent of the caller's period order.
+permutation = [9;3;1;7;5;2;6;4;8];
+permutedGroups = cocoOrbitGroups(periods(permutation));
+verifyEqual(testCase,permutedGroups.index,expected(permutation));
+end
+
+function testAge566FixedWeightsKeepObliquityIdentity(testCase)
+orbitMatrix = calculate_orbit9(566);
+periods = orbitMatrix(:,2)/1000;
+expected = [ones(5,1);0.8;0.6*ones(3,1)];
+
+verifyEqual(testCase,cocoFixedTargetWeights(periods),expected,'AbsTol',0);
+
+permutation = [9;3;1;7;5;2;6;4;8];
+verifyEqual(testCase,cocoFixedTargetWeights(periods(permutation)), ...
+    expected(permutation),'AbsTol',0);
+end
+
+function testAge566CvCocoAndAdaptiveEvaluatorContinue(testCase)
+orbitMatrix = calculate_orbit9(566);
+periods = orbitMatrix(:,2)/1000;
+rate = 4;
+timeKyr = (0:4000)';
+depth = timeKyr*rate/100;
+phase = (0:8)'*0.37;
+value = sum(sin(2*pi*timeKyr./periods'+phase'),2)+0.001*depth;
+data = [depth,value];
+pad = 8192;
+maximumFrequency = 1.2/min(periods);
+
+cv = cvcoco(data,periods,pad,rate,rate,1,0,0,'Pearson', ...
+    'MaxFrequency',maximumFrequency,'Verbose',false);
+expected = [1;2;2;2;2;3;4;4;4];
+verifyEqual(testCase,cv.groupIndex,expected);
+verifyTrue(testCase,any(isfinite(cv.validateAtoB.curve)));
+verifyTrue(testCase,any(isfinite(cv.validateBtoA.curve)));
+
+samplingFrequency = 1/median(diff(depth));
+[dataPower,dataFrequency] = periodogram( ...
+    detrend(value,1),[],pad,samplingFrequency);
+rayleigh = enbw(rectwin(size(data,1)),samplingFrequency);
+[rho,~,~,diagnostic] = cocoAdaptiveEvaluate( ...
+    dataPower,data,pad,dataFrequency,[],periods,rayleigh,rate,0, ...
+    'Pearson','BatchSize',1,'RateBounds',[rate rate], ...
+    'MaxFrequency',maximumFrequency,'TargetModel','coherent-nine', ...
+    'AmplitudeMode','four-group-area');
+verifyTrue(testCase,isfinite(rho));
+verifyEqual(testCase,diagnostic.groupIndex,expected);
+end
+
 function testCvCoco9ABAndCompatibilityAlias(testCase)
 data = testCase.TestData.data;
 orbit9 = testCase.TestData.orbit9;
