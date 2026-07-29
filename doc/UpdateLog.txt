@@ -5,20 +5,59 @@ _______________________________________
 
 
 Version : Acycle_v3.0
-Date    : Oct. 19, 2023 - Jan. 30 2026
+Date    : Oct. 19, 2023 - July. 28 2026
 By      : Mingsong Li (Peking University)
-    1. Allow Mac to use shortcut keys Command +C/V/X
-    2. Correct a bug in the COCO/eCOCO "Middle Age" feature. 
-        The earlier version might not function properly when the 
-        "user-defined period" radio button is chosen.
-	3. Univariate menu
-        Summary Statistics
-        t test
-    4. EEMD/EMD: Added variance calculation for each IMF. 
-        The output table header now includes (as comments) each IMF’s 
-        variance and its percentage contribution.
-        Special thanks to Prof. Zhengtang Guo for valuable suggestions.
-    5. DET: debug by Zhixin Wang, Peking University
+
+	IMPORTANT — MATLAB Runtime Requirement
+    The standalone edition of Acycle v3.0 requires MATLAB Runtime R2026a. 
+    It is not compatible with MATLAB Runtime R2020b. Users upgrading from 
+    Acycle v2.8 must install MATLAB Runtime R2026a before launching the 
+    new version.
+
+    1. NEW: Rebuilt graphical user interface.
+        The graphical user interface has been comprehensively rebuilt in 
+        programmatic MATLAB code. The legacy GUIDE framework and its .fig 
+        dependencies have been removed, providing a cleaner and more 
+        maintainable foundation for future development while making Acycle 
+        easier for AI-assisted tools to inspect and invoke directly.
+
+    2. NEW: COCO 2.0.
+        COCO and eCOCO have been substantially redesigned. COCO 2.0 brings 
+        together adaptive and fixed-target analyses, blocked and interleaved 
+        cross-validated COCO workflows, improved AR(1) Monte Carlo significance 
+        testing, clearer resolution and reliability diagnostics, enhanced 
+        visualization, and expanded workbook and figure exports.
+        Special thanks to Prof. Stephen Meyers for his valuable suggestions.
+
+    3. NEW: Expanded statistical analysis tools.
+        New Univariate and Bivariate menus provide summary statistics, 
+        one- and two-sample tests, ANOVA, normality tests, chi-square 
+        goodness-of-fit tests, correlation, covariance, and linear regression.
+
+    4. IMPROVED: EEMD and EMD variance reporting.
+        The variance of each intrinsic mode function (IMF), together with 
+        its percentage contribution to the total variance, is now included 
+        as comments in the output table header.
+        Special thanks to Prof. Zhengtang Guo for his valuable suggestions.
+
+    5. IMPROVED: Native macOS keyboard shortcuts.
+        Acycle now supports the standard Command+C, Command+V, and 
+        Command+X shortcuts on macOS.
+
+    6. FIXED: COCO/eCOCO "Middle Age" option.
+        A bug that could prevent the "Middle Age" option from functioning 
+        correctly when user-defined orbital periods were selected has been corrected.
+
+    7. FIXED: Recurrence-analysis DET calculation.
+        The determinism (DET) calculation in recurrence analysis has been 
+        corrected. We thank Zhixin Wang of Peking University for 
+        debugging and correcting this issue.
+
+    8. FIXED: Spectral and wavelet analysis issues.
+        The MTM bandwidth calculation has been corrected; SWA processing 
+        has been stabilized for long series containing more than 10,000 data 
+        points; and the wavelet chi-square calculation has been updated for 
+        compatibility with modern MATLAB releases.
 
 _______________________________________
 

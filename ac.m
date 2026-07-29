@@ -101,6 +101,7 @@ if ~isdeployed
                          'ProgressBar', 'on', ...
                          'ProgressPosition', 1, ...
                          'ProgressRatio', 0.05);
+        splashCleanup = onCleanup(@()deleteSplashSafely(s));
         s.addText(160, 460, 'Loading ...', 'FontSize', 50, 'Color', 'white');
         pause(0.25);  % Short pause to display the splash screen
     catch
@@ -115,6 +116,7 @@ else
                          'ProgressBar', 'on', ...
                          'ProgressPosition', 1, ...
                          'ProgressRatio', 0.05);
+        splashCleanup = onCleanup(@()deleteSplashSafely(s));
         s.addText(160, 460, 'Loading ...', 'FontSize', 50, 'Color', 'white');
         s.addText(140, 488, 'may take 10-60 seconds', 'FontSize', 20, 'Color', 'white');
         pause(1);
@@ -130,5 +132,18 @@ end
 % Launch the Acycle GUI
 AC;
 
-% Close the splash screen at the end
-delete(s);
+% Close the splash screen now on success. If AC errors, onCleanup closes it
+% during stack unwinding while preserving the original exception.
+if exist('splashCleanup','var')
+    clear splashCleanup
+end
+
+
+function deleteSplashSafely(splash)
+try
+    if ~isempty(splash)
+        delete(splash);
+    end
+catch
+    % Splash cleanup must not replace the original startup error.
+end
