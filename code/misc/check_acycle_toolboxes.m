@@ -1,5 +1,9 @@
 A={'Matlab toolboxes are'};
 
+if isdeployed
+    return
+end
+
 % Now go to each acycle folder that includes matlab codes run the following
 % code
 
@@ -9,6 +13,7 @@ list_cell = struct2cell(list);
 for i = 3:listn(1)
     i
     files      = list_cell{1,i};
+    %#exclude matlab.codetools.requiredFilesAndProducts
     [fList,pList] = matlab.codetools.requiredFilesAndProducts(files);
     pl = {pList.Name}';
     listsize = size(pl);

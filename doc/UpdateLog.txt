@@ -3,8 +3,8 @@
 _______________________________________
 
 
-Version : Acycle_v3.0.1
-Date    : July 29, 2026 -
+Version : Acycle_v3.0.2
+Date    : July 30, 2026
 By      : Mingsong Li (Peking University)
 
     1. IMPROVED: Standalone version for Windows.
@@ -20,8 +20,8 @@ By      : Mingsong Li (Peking University)
     3. IMPROVED: Main file browser.
         The address bar now supports reliable clipboard operations; name
         sorting is case-insensitive in both directions; date sorting uses file
-        modification time; and list scrolling, scrollbar direction, font size,
-        and row spacing have been corrected and unified.
+        modification time; and list scrolling, scrollbar direction, and font
+        size have been corrected and unified.
 
     4. IMPROVED: Minor startup and interface refinements.
         The splash screen has been hardened, the main-window title now reads
@@ -30,6 +30,19 @@ By      : Mingsong Li (Peking University)
 
         Special thanks to Prof. Zhengtang Guo, Zhixin Wang, and Y Bin for
         their valuable help with testing and debugging.
+
+_______________________________________
+
+
+Version : Acycle_v3.0.1
+Date    : July 29, 2026 - July 29, 2026
+By      : Mingsong Li (Peking University)
+
+    1. IMPROVED: Main file browser.
+        Font size and row spacing have been corrected and unified.
+
+        Special thanks to Prof. Zhengtang Guo for
+        his valuable help with testing.
 
 _______________________________________
 

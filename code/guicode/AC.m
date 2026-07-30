@@ -80,10 +80,22 @@ if nargin > 0 && ischar(varargin{1})
     return;
 end
 
+showWhenReady = strcmpi(get(groot,'DefaultFigureVisible'),'on');
 [hFig, handles] = AC_buildCodeUI();
-guidata(hFig, handles);
-AC_OpeningFcn(hFig, [], handles, varargin{:});
-handles = guidata(hFig);
+try
+    guidata(hFig, handles);
+    AC_OpeningFcn(hFig, [], handles, varargin{:});
+    handles = guidata(hFig);
+    if showWhenReady && isgraphics(hFig)
+        set(hFig,'Visible','on');
+        drawnow;
+    end
+catch startupError
+    if isgraphics(hFig)
+        delete(hFig);
+    end
+    rethrow(startupError);
+end
 
 if nargout > 0
     varargout{1} = handles.output;
@@ -98,9 +110,11 @@ hFig = figure('Name',mainFigureTitle, ...
     'Color',bg, ...
     'MenuBar','none', ...
     'Toolbar','none', ...
+    'Visible','off', ...
     'Units','normalized', ...
     'Position',[0.25,0.08,0.58,0.84], ...
     'Tag','acfigmain');
+AC_applyFigureIcon(hFig);
 
 handles = struct();
 handles.acfigmain = hFig;
@@ -396,14 +410,10 @@ handles.listbox_acmain = uicontrol(hFig,'Style','listbox','Units','normalized', 
     'Callback',@(h,e)AC_dispatch('listbox_acmain_Callback',h,e), ...
     'ButtonDownFcn',@(h,e)AC_dispatch('listbox_acmain_ButtonDownFcn',h,e));
 
-% Create all menu handles referenced by OpeningFcn and attach to visible parents.
-src = fileread([mfilename('fullpath'),'.m']);
-tok = regexp(src,'handles\.(menu_[A-Za-z0-9_]+|linegenerator|menuac)','tokens');
-if ~isempty(tok)
-    names = unique([tok{:}]);
-else
-    names = {};
-end
+% These legacy callbacks still reference three hidden menu placeholders.
+% Keep the list explicit: deployed MATLAB source files in the CTF archive
+% are encrypted and must never be inspected with fileread at run time.
+names = {'menu_log10','menu_norm','menu_utilities'};
 for i = 1:numel(names)
     key = names{i};
     if isfield(handles,key)
@@ -416,6 +426,51 @@ for i = 1:numel(names)
 end
 
 % Top-level menus should expand submenus; keep callbacks on child items only.
+
+function AC_applyFigureIcon(figureHandle)
+% Use the supported Figure Icon property instead of JavaFrame/im2java.
+try
+    iconPath = AC_resourcePath('acycle_logo.jpg');
+    if ~isempty(iconPath) && isprop(figureHandle,'Icon')
+        set(figureHandle,'Icon',iconPath);
+    end
+catch
+    % A missing icon must never prevent the application from starting.
+end
+
+
+function resourcePath = AC_resourcePath(resourceName)
+% Locate packaged resources without depending on pwd or the executable path.
+resourcePath = which(resourceName);
+if ~isempty(resourcePath)
+    return
+end
+
+guiDirectory = fileparts(mfilename('fullpath'));
+candidates = {
+    fullfile(guiDirectory,'..','bin',resourceName)
+    fullfile(guiDirectory,'..','icons',resourceName)
+    fullfile(guiDirectory,resourceName)
+    };
+for candidateIndex = 1:numel(candidates)
+    if exist(candidates{candidateIndex},'file') == 2
+        resourcePath = candidates{candidateIndex};
+        return
+    end
+end
+resourcePath = '';
+
+
+function AC_setButtonIcon(buttonHandle,resourceName)
+try
+    iconPath = AC_resourcePath(resourceName);
+    if ~isempty(iconPath)
+        set(buttonHandle,'CData',imread(iconPath));
+    end
+catch
+    % Text/tooltips and callbacks remain usable if an icon is unavailable.
+end
+
 
 function figureTitle = AC_mainFigureTitle(varargin)
 figureTitle = 'Acycle';
@@ -558,7 +613,12 @@ set(gcf,'units','norm') % set location
 
 userSettings = ac_user_settings('load');
 lang_choice = userSettings.languageChoice;
-langdict = readtable('langdict.xlsx','VariableNamingRule','preserve');
+langdictPath = AC_resourcePath('langdict.xlsx');
+if isempty(langdictPath)
+    error('Acycle:Startup:MissingLanguageDictionary', ...
+        'Required resource langdict.xlsx was not found in the application archive.');
+end
+langdict = readtable(langdictPath,'VariableNamingRule','preserve');
 lang_id = langdict.ID;
 lang_var = table2cell(langdict(:, 2 + lang_choice));
 
@@ -810,7 +870,8 @@ else
     tooltip = '<html>Up<br>one level';  % tooltip
 end
 
-set(h_push_up,'tooltip',tooltip,'CData',imread('menu_up.jpg'))  % set tooltip and button image
+set(h_push_up,'tooltip',tooltip)
+AC_setButtonIcon(h_push_up,'menu_up.jpg')
 set(h_push_up,'Callback',@push_up_clbk)  % set callback function
 
 %% push_folder
@@ -827,7 +888,8 @@ else
     tooltip = '<html>Open<br>working folder';  % tooltip
 end
 
-set(h_push_folder,'tooltip',tooltip,'CData',imread('menu_folder.jpg'))  % set tooltip and button image
+set(h_push_folder,'tooltip',tooltip)
+AC_setButtonIcon(h_push_folder,'menu_folder.jpg')
 set(h_push_folder,'Callback',@push_folder_clbk)  % set callback function
 
 %% push_plot
@@ -844,7 +906,8 @@ else
     tooltip = '<html>Plot Pro';  % tooltip
 end
 
-set(h_push_plot,'tooltip',tooltip,'CData',imread('menu_plot.jpg'))  % set tooltip and button image
+set(h_push_plot,'tooltip',tooltip)
+AC_setButtonIcon(h_push_plot,'menu_plot.jpg')
 set(h_push_plot,'Callback',@push_plot_clbk)  % set callback function
 
 %% push_refresh
@@ -862,7 +925,8 @@ else
 end
 
 
-set(h_push_refresh,'tooltip',tooltip,'CData',imread('menu_refresh.jpg'))  % set tooltip and button image
+set(h_push_refresh,'tooltip',tooltip)
+AC_setButtonIcon(h_push_refresh,'menu_refresh.jpg')
 set(h_push_refresh,'Callback',@push_refresh_clbk)  % set callback function
 
 %% push_robot
@@ -880,7 +944,8 @@ else
 end
 
 
-set(h_push_robot,'tooltip',tooltip,'CData',imread('menu_robot.jpg'))  % set tooltip and button image
+set(h_push_robot,'tooltip',tooltip)
+AC_setButtonIcon(h_push_robot,'menu_robot.jpg')
 set(h_push_robot,'Callback',@push_robot_clbk)  % set callback function
 
 %% push_openfolder
@@ -897,7 +962,8 @@ else
     tooltip = '<html>Change<br>directory';  % tooltip
 end
 
-set(h_push_openfolder,'tooltip',tooltip,'CData',imread('menu_open.jpg'))  % set tooltip and button image
+set(h_push_openfolder,'tooltip',tooltip)
+AC_setButtonIcon(h_push_openfolder,'menu_open.jpg')
 set(h_push_openfolder,'Callback',@push_openfolder_clbk)  % set callback function
 %%
 if ispc
@@ -959,8 +1025,12 @@ end
 handles.acfigmain = hObject;  % handle of the ac main window
 set(handles.acfigmain, 'WindowKeyPressFcn', @KeyPress)
 set(handles.acfigmain, 'WindowScrollWheelFcn', @MainListScrollWheel)
-drawnow;
-setupMainListJavaScroll(handles.listbox_acmain);
+% The Java peer hook only works around a MATLAB-on-macOS trackpad issue.
+% It is undocumented and can corrupt graphics initialization in Runtime.
+if ismac && ~isdeployed && usejava('jvm')
+    drawnow;
+    setupMainListJavaScroll(handles.listbox_acmain);
+end
 h=get(handles.acfigmain,'Children');  % get all content
 h1=findobj(h,'FontUnits','norm');  % find all font units as points
 
@@ -984,24 +1054,19 @@ handles.foldname = 'foldname'; % default file name
 
 handles.path_temp = [path_root,handles.slash_v,'temp'];
 handles.working_folder = [handles.path_temp,handles.slash_v,handles.foldname];
-% if ad_pwd.txt exist; then go to this folder
-if exist('ac_pwd.txt', 'file') == 2
-    GETac_pwd;
-    if isdir(ac_pwd)
-        cd(ac_pwd)
-    end
-else
-    ac_pwd_str = which('refreshcolor.m');
-    [ac_pwd_dir,~,~] = fileparts(ac_pwd_str);
-    fileID = fopen(fullfile(ac_pwd_dir,'ac_pwd.txt'),'w');
-    fprintf(fileID,'%s',pwd);
-    fclose(fileID);
+% Persistent state belongs in the user's profile, never in the read-only/
+% refreshable CTF extraction cache.
+ac_pwd = ac_working_directory('get',path_root);
+if isfolder(ac_pwd)
+    cd(ac_pwd)
 end
 handles.sortdata = 'date descend';
 handles.val1 = 4;
 set(handles.popupmenu2,'value',handles.val1)
 refreshcolor;
-cd(path_root) %back to root path
+if ~isdeployed
+    cd(path_root) % back to the MATLAB caller's folder
+end
 
 handles.doubleclick = 0;
 handles.unit = 'unit'; % default file name
@@ -1048,21 +1113,6 @@ handles.popupmenu1_default = get(handles.popupmenu1,'String');
 
 % Update handles structure
 guidata(hObject, handles);
-
-% Deployment doesn't work
-% logo
-if ispc
-    try
-        Ilogo = imread('acycle_logo.jpg');
-        javaImage = im2java(Ilogo);
-        newIcon = javax.swing.ImageIcon(javaImage);    
-        figFrame = get(handles.acfigmain,'JavaFrame');
-        figFrame.setFigureIcon(newIcon);
-    catch
-    end
-end
-% Deployment doesn't work
-
 
 % Update reminder
 pause(0.0001);%

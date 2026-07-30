@@ -737,15 +737,7 @@ address = pwd;
 if ~isempty(S.edit_acfigmain_dir) && isgraphics(S.edit_acfigmain_dir)
     set(S.edit_acfigmain_dir,'String',address);
 end
-ac_pwd_str = which('ac_pwd.txt');
-if ~isempty(ac_pwd_str)
-    [ac_pwd_dir,~,~] = fileparts(ac_pwd_str);
-    fid = fopen(fullfile(ac_pwd_dir,'ac_pwd.txt'),'w');
-    if fid~=-1
-        fprintf(fid,'%s',address);
-        fclose(fid);
-    end
-end
+ac_working_directory('set',address);
 if isempty(d)
     set(S.listbox_acmain,'String',{},'Value',[]);
     return

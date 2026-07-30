@@ -8,12 +8,8 @@ else
 end
 address = pwd;
 set(handles.edit_acfigmain_dir,'String',address);
-% Save pwd into a text file
-ac_pwd_str = which('ac_pwd.txt');
-[ac_pwd_dir,ac_pwd_name,ext] = fileparts(ac_pwd_str);
-fileID = fopen(fullfile(ac_pwd_dir,'ac_pwd.txt'),'w');
-fprintf(fileID,'%s',address);
-fclose(fileID);
+% Save pwd outside the packaged CTF cache.
+ac_working_directory('set',address);
 
 if isempty(d)
     ac_update_listbox_acmain(handles.listbox_acmain,{},false(0,1));

@@ -44,7 +44,7 @@ if ~isfolder(workingDirectory)
 end
 if isempty(workingDirectory) || ~isfolder(workingDirectory)
     try
-        workingDirectory = strtrim(fileread('ac_pwd.txt'));
+        workingDirectory = ac_working_directory('get',pwd);
     catch
         workingDirectory = '';
     end

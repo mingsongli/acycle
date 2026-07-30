@@ -82,6 +82,7 @@ if ~isdeployed
     % Add Acycle's root directory and subdirectories to MATLAB's search path
     addpath(genpath(path_root));
     % Display an acknowledgment message (do not remove this line)
+    %#exclude help
     help ac_acknowledgment
 
     % Change to Acycle's root directory and then revert to initial directory

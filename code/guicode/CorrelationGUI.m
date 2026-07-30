@@ -812,15 +812,7 @@ classdef CorrelationGUI < matlab.apps.AppBase
                 set(app.edit_acfigmain_dir,'String',address);
             end
 
-            ac_pwd_str = which('ac_pwd.txt');
-            if ~isempty(ac_pwd_str)
-                [ac_pwd_dir,~,~] = fileparts(ac_pwd_str);
-                fileID = fopen(fullfile(ac_pwd_dir,'ac_pwd.txt'),'w');
-                if fileID ~= -1
-                    fprintf(fileID,'%s',address);
-                    fclose(fileID);
-                end
-            end
+            ac_working_directory('set',address);
 
             if isempty(d) || isempty(app.listbox_acmain) || ~isgraphics(app.listbox_acmain)
                 return
