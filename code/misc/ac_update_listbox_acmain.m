@@ -16,30 +16,12 @@ try
 catch
 end
 
-if isdeployed
-    % Prefer MATLAB's native peer in Runtime. The custom axes/text overlay
-    % adds a fragile graphics object tree during standalone startup.
-    ac_update_native_listbox(hListbox,names);
-elseif ac_has_items_property(hListbox)
+if ac_has_items_property(hListbox)
     ac_update_uilistbox(hListbox,names,isDir);
 else
     ac_update_drawn_listbox(hListbox,names,isDir);
 end
 
-end
-
-function ac_update_native_listbox(hListbox,names)
-try
-    hPanel = getappdata(hListbox,'ACDrawnListboxPanel');
-    if ~isempty(hPanel) && isgraphics(hPanel)
-        delete(hPanel);
-    end
-catch
-end
-try
-    set(hListbox,'String',names,'Value',[],'Visible','on');
-catch
-end
 end
 
 function tf = ac_has_items_property(hListbox)
