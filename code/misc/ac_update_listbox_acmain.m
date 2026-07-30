@@ -201,11 +201,13 @@ topIndex = min(max(1,round(topIndex)),maxTop);
 setappdata(hListbox,'ACListTopIndex',topIndex);
 
 if n > visibleRows
+    sliderRange = maxTop - 1;
     set(hSlider,'Visible','on', ...
         'Min',1, ...
         'Max',maxTop, ...
-        'Value',topIndex, ...
-        'SliderStep',[min(1,1/maxTop), min(1,visibleRows/maxTop)]);
+        'Value',ac_flip_scroll_index(topIndex,maxTop), ...
+        'SliderStep',[min(1,1/sliderRange), ...
+        min(1,visibleRows/sliderRange)]);
     set(hAxes,'Position',[0 0 0.965 1]);
 else
     set(hSlider,'Visible','off');
@@ -219,6 +221,8 @@ set(hAxes, ...
     'YDir','reverse', ...
     'Visible','off', ...
     'ButtonDownFcn',{@ac_axes_click,hListbox});
+
+listFontSize = get(hListbox,'FontSize');
 
 lastIndex = min(n,topIndex+visibleRows-1);
 row = 0;
@@ -247,7 +251,7 @@ for idx = topIndex:lastIndex
         'String',names{idx}, ...
         'Interpreter','none', ...
         'FontUnits','points', ...
-        'FontSize',11.5, ...
+        'FontSize',listFontSize, ...
         'Units','data', ...
         'Position',[0 row-0.5 0], ...
         'VerticalAlignment','middle', ...
@@ -307,8 +311,13 @@ end
 function rows = ac_visible_rows(hListbox)
 rows = 12;
 try
+    rowHeight = getappdata(hListbox,'ACListRowHeight');
+    if isempty(rowHeight) || ~isnumeric(rowHeight) || ...
+            ~isscalar(rowHeight) || ~isfinite(rowHeight) || rowHeight <= 0
+        return
+    end
     pos = getpixelposition(hListbox,true);
-    rows = max(1,floor(pos(4)/20));
+    rows = max(1,floor(pos(4)/rowHeight));
 catch
 end
 end
@@ -316,7 +325,10 @@ end
 function ac_slider_callback(hListbox)
 try
     hSlider = getappdata(hListbox,'ACDrawnListboxSlider');
-    setappdata(hListbox,'ACListTopIndex',round(get(hSlider,'Value')));
+    maxTop = round(get(hSlider,'Max'));
+    sliderValue = round(get(hSlider,'Value'));
+    setappdata(hListbox,'ACListTopIndex', ...
+        ac_flip_scroll_index(sliderValue,maxTop));
     setappdata(hListbox,'ACListLastClickIndex',[]);
     setappdata(hListbox,'ACListLastClickTic',[]);
     ac_render_drawn_listbox(hListbox);
@@ -344,11 +356,17 @@ try
 
     hSlider = getappdata(hListbox,'ACDrawnListboxSlider');
     if ~isempty(hSlider) && isgraphics(hSlider)
-        set(hSlider,'Value',topIndex);
+        set(hSlider,'Value',ac_flip_scroll_index(topIndex,maxTop));
     end
     ac_render_drawn_listbox(hListbox);
 catch
 end
+end
+
+function flippedIndex = ac_flip_scroll_index(index,maxTop)
+maxTop = max(1,round(maxTop));
+index = min(max(1,round(index)),maxTop);
+flippedIndex = maxTop-index+1;
 end
 
 function ac_axes_click(hAxes,evt,hListbox)

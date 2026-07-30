@@ -1,5 +1,35 @@
 - - - - - -    What's New   - - - - - -
 
+_______________________________________
+
+
+Version : Acycle_v3.0.1
+Date    : July 29, 2026 -
+By      : Mingsong Li (Peking University)
+
+    1. IMPROVED: Standalone version for Windows.
+        Following extensive debugging, Acycle v3.0.1 can now run reliably as a
+        standalone application on Windows with MATLAB Runtime R2026a. Startup
+        handling has also been made more robust.
+
+    2. NEW: Unified Settings panel.
+        A new Help > Setting... window provides four persistent font-size
+        options. The Language tab is included, with language selection
+        temporarily disabled.
+
+    3. IMPROVED: Main file browser.
+        The address bar now supports reliable clipboard operations; name
+        sorting is case-insensitive in both directions; date sorting uses file
+        modification time; and list scrolling, scrollbar direction, font size,
+        and row spacing have been corrected and unified.
+
+    4. IMPROVED: Minor startup and interface refinements.
+        The splash screen has been hardened, the main-window title now reads
+        its version from ac_version.txt, and other small compatibility and
+        interface fixes have been included.
+
+        Special thanks to Prof. Zhengtang Guo, Zhixin Wang, and Y Bin for
+        their valuable help with testing and debugging.
 
 _______________________________________
 

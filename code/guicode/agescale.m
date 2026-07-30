@@ -614,24 +614,8 @@ classdef agescale < matlab.apps.AppBase
                 names = {};
                 isDir = false(0,1);
                 if ~isempty(d)
-                    T = struct2table(d);
-                    switch app.getSortMode()
-                        case 1
-                            sortedT = sortrows(T,'name','ascend');
-                        case 2
-                            sortedT = sortrows(T,'name','descend');
-                        case 3
-                            sortedT = sortrows(T,'date','ascend');
-                        case 4
-                            sortedT = sortrows(T,'date','descend');
-                        case 5
-                            sortedT = sortrows(T,'bytes','ascend');
-                        case 6
-                            sortedT = sortrows(T,'bytes','descend');
-                        otherwise
-                            sortedT = sortrows(T,'date','descend');
-                    end
-                    sd = table2struct(sortedT);
+                    sortMode = app.getSortMode();
+                    sd = ac_sort_dir_entries(d,sortMode);
                     names = {sd.name};
                     isDir = [sd.isdir];
                 end

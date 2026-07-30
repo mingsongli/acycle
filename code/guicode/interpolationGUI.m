@@ -273,23 +273,13 @@ end
             if ~isscalar(val1) || ~isfinite(val1)
                 val1 = 1;
             end
-            switch round(val1)
-                case 1
-                    [~,idx] = sort({d.name});
-                case 2
-                    [~,idx] = sort({d.name},'descend');
-                case 3
-                    [~,idx] = sort([d.datenum],'ascend');
-                case 4
-                    [~,idx] = sort([d.datenum],'descend');
-                case 5
-                    [~,idx] = sort([d.bytes],'ascend');
-                case 6
-                    [~,idx] = sort([d.bytes],'descend');
+            sortMode = round(val1);
+            switch sortMode
+                case {1,2,3,4,5,6}
                 otherwise
-                    [~,idx] = sort({d.name});
+                    sortMode = 1;
             end
-            d = d(idx);
+            d = ac_sort_dir_entries(d,sortMode);
 
             pre = '<HTML><FONT color="blue">';
             post = '</FONT></HTML>';

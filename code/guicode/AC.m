@@ -92,7 +92,8 @@ end
 
 function [hFig, handles] = AC_buildCodeUI()
 bg = get(0,'DefaultUicontrolBackgroundColor');
-hFig = figure('Name','Acycle v3.0', ...
+mainFigureTitle = AC_mainFigureTitle();
+hFig = figure('Name',mainFigureTitle, ...
     'NumberTitle','off', ...
     'Color',bg, ...
     'MenuBar','none', ...
@@ -161,11 +162,11 @@ handles.menu_refreshlist = uimenu(handles.menu_edit,'Label','Refresh','Tag','men
     'Callback',@(h,e)AC_dispatch('menu_refreshlist_Callback',h,e));
 handles.menu_rename = uimenu(handles.menu_edit,'Label','Rename','Tag','menu_rename','Separator','on', ...
     'Callback',@(h,e)AC_dispatch('menu_rename_Callback',h,e));
-handles.menu_cut = uimenu(handles.menu_edit,'Label','Cut','Tag','menu_cut','Separator','on','Accelerator','x', ...
+handles.menu_cut = uimenu(handles.menu_edit,'Label','Cut','Tag','menu_cut','Separator','on', ...
     'Callback',@(h,e)AC_dispatch('menu_cut_Callback',h,e));
-handles.menu_copy = uimenu(handles.menu_edit,'Label','Copy','Tag','menu_copy','Accelerator','c', ...
+handles.menu_copy = uimenu(handles.menu_edit,'Label','Copy','Tag','menu_copy', ...
     'Callback',@(h,e)AC_dispatch('menu_copy_Callback',h,e));
-handles.menu_paste = uimenu(handles.menu_edit,'Label','Paste','Tag','menu_paste','Accelerator','v', ...
+handles.menu_paste = uimenu(handles.menu_edit,'Label','Paste','Tag','menu_paste', ...
     'Callback',@(h,e)AC_dispatch('menu_paste_Callback',h,e));
 handles.menu_delete = uimenu(handles.menu_edit,'Label','Delete','Tag','menu_delete','Separator','on', ...
     'Callback',@(h,e)AC_dispatch('menu_delete_Callback',h,e));
@@ -347,8 +348,8 @@ handles.menu_specmoments = uimenu(handles.menuac,'Label','Spectral Moments','Tag
     'Callback',@(h,e)AC_dispatch('menu_specmoments_Callback',h,e));
 
 % Help
-handles.menu_lang = uimenu(handles.menu_help,'Label','文A/语言选择(language)','Tag','menu_lang', ...
-    'Callback',@(h,e)AC_dispatch('menu_lang_Callback',h,e));
+handles.menu_settings = uimenu(handles.menu_help,'Label','Setting...','Tag','menu_settings', ...
+    'Callback',@(h,e)AC_dispatch('menu_settings_Callback',h,e));
 handles.menu_read = uimenu(handles.menu_help,'Label','What''s New','Tag','menu_read', ...
     'Callback',@(h,e)AC_dispatch('menu_read_Callback',h,e));
 handles.menu_manuals = uimenu(handles.menu_help,'Label','Manual','Tag','menu_manuals','Accelerator','h', ...
@@ -383,16 +384,13 @@ handles.edit_acfigmain_dir = uicontrol(hFig,'Style','edit','Units','normalized',
     'Position',[0.081,0.90,0.90,0.04], ...
     'HorizontalAlignment','left', ...
     'BackgroundColor','w', ...
-    'FontUnits','points', ...
-    'FontSize',11.5, ...
     'Tag','edit_acfigmain_dir', ...
     'KeyPressFcn',@AddressBarKeyPress, ...
+    'KeyReleaseFcn',@AddressBarKeyRelease, ...
     'Callback',@(h,e)AC_dispatch('edit_acfigmain_dir_Callback',h,e));
 handles.listbox_acmain = uicontrol(hFig,'Style','listbox','Units','normalized', ...
     'Position',[0.02,0.008,0.96,0.884], ...
     'BackgroundColor','w', ...
-    'FontUnits','points', ...
-    'FontSize',11.5, ...
     'Max',2,'Min',0, ...
     'Tag','listbox_acmain', ...
     'Callback',@(h,e)AC_dispatch('listbox_acmain_Callback',h,e), ...
@@ -419,6 +417,41 @@ end
 
 % Top-level menus should expand submenus; keep callbacks on child items only.
 
+function figureTitle = AC_mainFigureTitle(varargin)
+figureTitle = 'Acycle';
+if ~isempty(varargin)
+    versionPath = varargin{1};
+else
+    % Prefer the version file shipped with this exact AC.m. This avoids an
+    % older Acycle installation elsewhere on the MATLAB path shadowing it.
+    guiDirectory = fileparts(mfilename('fullpath'));
+    candidate = fullfile(guiDirectory,'..','bin','ac_version.txt');
+    if exist(candidate,'file') == 2
+        versionPath = candidate;
+    else
+        versionPath = which('ac_version.txt');
+    end
+end
+
+if isstring(versionPath) && isscalar(versionPath)
+    versionPath = char(versionPath);
+end
+if ~ischar(versionPath) || isempty(versionPath) || ...
+        exist(versionPath,'file') ~= 2
+    return
+end
+
+try
+    versionText = strtrim(fileread(versionPath));
+    isValidVersion = ~isempty(regexp(versionText, ...
+        '^[0-9]+(?:\.[0-9]+)*(?:[-+][0-9A-Za-z.-]+)?$', ...
+        'once'));
+    if isValidVersion
+        figureTitle = ['Acycle v',versionText];
+    end
+catch
+end
+
 function parentMenu = AC_menuParent(handles, key)
 fileItems = {'menu_folder','menu_newtxt','menu_NewDataTable','menu_savefig','menu_open','menu_opendir','menu_extract'};
 editItems = {'menu_refreshlist','menu_rename','menu_cut','menu_copy','menu_paste','menu_delete'};
@@ -439,7 +472,7 @@ timeItems = {'menu_prewhiten','menu_smooth1','menu_bootstrap','menu_smooth_optio
 uniItems = {'menu_statsummary','menu_ttest'};
 bivItems = {'menu_uni2SamTest','menu_anova','menu_normaltest','menu_chi2gof','menu_corr','menu_covariance','menu_linearReg'};
 mulItems = {};
-helpItems = {'menu_read','menu_manuals','menu_findupdates','menu_lang','menu_contact','menu_email'};
+helpItems = {'menu_settings','menu_read','menu_manuals','menu_findupdates','menu_contact','menu_email'};
 
 if any(strcmp(key,fileItems))
     parentMenu = handles.menu_file;
@@ -523,13 +556,15 @@ set(gcf,'units','norm') % set location
 
 %% language
 
-lang_choice = load('ac_lang.txt');
+userSettings = ac_user_settings('load');
+lang_choice = userSettings.languageChoice;
 langdict = readtable('langdict.xlsx','VariableNamingRule','preserve');
 lang_id = langdict.ID;
 lang_var = table2cell(langdict(:, 2 + lang_choice));
 
-[~, c61] = ismember('c61',lang_id);
-set(gcf,'Name',lang_var{c61})
+% The translated c61 entry contains a historical hard-coded version and
+% must not overwrite the title read from ac_version.txt.
+set(handles.acfigmain,'Name',AC_mainFigureTitle())
     
 if lang_choice > 0
     
@@ -742,8 +777,6 @@ if lang_choice > 0
     set(handles.menu_manuals,'text',lang_var{locb})
     [~, locb] = ismember('menu142',lang_id);
     set(handles.menu_findupdates,'text',lang_var{locb})
-    [~, locb] = ismember('l01',lang_id);
-    set(handles.menu_lang,'text',lang_var{locb})
     [~, locb] = ismember('menu143',lang_id);
     set(handles.menu_contact,'text',lang_var{locb})
     [~, locb] = ismember('menu144',lang_id);
@@ -930,12 +963,18 @@ drawnow;
 setupMainListJavaScroll(handles.listbox_acmain);
 h=get(handles.acfigmain,'Children');  % get all content
 h1=findobj(h,'FontUnits','norm');  % find all font units as points
-set(h1,'FontUnits','points','FontSize',12);  % set as norm
+
+% main list box font size and row height
+FontSize_all = userSettings.fontSize;
+MainListRowHeight = FontSize_all * 18/11.5;  % pixels
+
+set(h1,'FontUnits','points','FontSize',FontSize_all);  % set as norm
 h2=findobj(h,'FontUnits','points');  % find all font units as points
-set(h2,'FontUnits','points','FontSize',11.5);  % set as norm
+set(h2,'FontUnits','points','FontSize',FontSize_all);  % set as norm
 % Keep the address bar and native main list at their explicit UI font size.
-set(handles.edit_acfigmain_dir,'FontUnits','points','FontSize',11.5);
-set(handles.listbox_acmain,'FontUnits','points','FontSize',11.5);
+set(handles.edit_acfigmain_dir,'FontUnits','points','FontSize',FontSize_all);
+set(handles.listbox_acmain,'FontUnits','points','FontSize',FontSize_all);
+setappdata(handles.listbox_acmain,'ACListRowHeight',MainListRowHeight);
 
 % Choose default command line output for AC
 handles.output = hObject;
@@ -1085,7 +1124,7 @@ try
         strcmp(get(focusedControl,'Style'),'edit');
     shortcutKey = lower(char(EventData.Key));
     if isTextEdit && any(strcmp(shortcutKey,{'a','c','v','x'})) && ...
-            (ismember('control',EventData.Modifier) || ismember('command',EventData.Modifier))
+            hasClipboardShortcutModifier(EventData.Modifier)
         return
     end
 catch
@@ -1235,7 +1274,7 @@ if itemCount < 1 || isempty(scrollCount) || scrollCount == 0
 end
 
 scrollCount = double(scrollCount);
-rowDelta = 3 * sign(scrollCount) * max(1,round(abs(scrollCount)));
+rowDelta = 10 * sign(scrollCount) * max(1,round(abs(scrollCount)));
 
 % Folder colors are displayed by a drawn list layered over the hidden
 % uicontrol.  Let that list move its own top row so scrolling does not
@@ -1301,15 +1340,104 @@ end
 
 function AddressBarKeyPress(hObject,EventData)
 try
-    hasShortcutModifier = ismember('control',EventData.Modifier) || ...
-        ismember('command',EventData.Modifier);
-    if hasShortcutModifier && strcmpi(EventData.Key,'c')
+    if hasClipboardShortcutModifier(EventData.Modifier) && ...
+            strcmpi(EventData.Key,'c')
         % Classic MATLAB edit controls do not reliably pass Cmd+C to the
         % native macOS text widget when a figure WindowKeyPressFcn exists.
-        % Copy the displayed address explicitly so it is always available.
         clipboard('copy',get(hObject,'String'));
     end
 catch
+end
+
+
+function handled = AddressBarKeyRelease(hObject,EventData,varargin)
+handled = false;
+try
+    if ~hasClipboardShortcutModifier(EventData.Modifier)
+        return
+    end
+    if ~strcmpi(EventData.Key,'v')
+        return
+    end
+    pasteReader = [];
+    if ~isempty(varargin)
+        pasteReader = varargin{1};
+    end
+    % Apply the final value on key release. If the platform's native edit
+    % widget also pasted on key press, this replaces that intermediate text
+    % with exactly one clipboard path instead of duplicating it.
+    handled = AddressBarClipboardAction(hObject,'v',pasteReader);
+catch
+    handled = false;
+end
+
+
+function handled = AddressBarClipboardAction(hObject,action,pasteReader)
+handled = true;
+switch lower(char(action))
+    case 'c'
+        clipboard('copy',get(hObject,'String'));
+    case 'x'
+        clipboard('copy',get(hObject,'String'));
+        set(hObject,'String','');
+    case 'v'
+        if nargin >= 3 && isa(pasteReader,'function_handle')
+            pastedText = pasteReader();
+        else
+            pastedText = clipboard('paste');
+        end
+        if isstring(pastedText)
+            pastedText = char(pastedText);
+        elseif iscell(pastedText)
+            pastedText = strjoin(pastedText,newline);
+        end
+        if ~ischar(pastedText)
+            handled = false;
+            return
+        end
+        % A path bar is single-line. Preserve legitimate spaces and Unicode,
+        % removing only line endings commonly included by clipboard sources.
+        pastedText = regexprep(pastedText,'[\r\n]+$','');
+        if ~isempty(pastedText)
+            set(hObject,'String',pastedText);
+        end
+    otherwise
+        handled = false;
+end
+
+
+function tf = hasClipboardShortcutModifier(modifiers)
+if isempty(modifiers)
+    tf = false;
+    return
+end
+if ischar(modifiers) || isstring(modifiers)
+    modifiers = cellstr(modifiers);
+elseif ~iscell(modifiers)
+    tf = false;
+    return
+end
+tf = any(strcmpi(modifiers,'control')) || ...
+    any(strcmpi(modifiers,'command')) || ...
+    any(strcmpi(modifiers,'meta'));
+
+
+function handled = AddressBarMenuShortcut(handles,action,varargin)
+handled = false;
+try
+    addressBar = handles.edit_acfigmain_dir;
+    focusedControl = get(handles.acfigmain,'CurrentObject');
+    if isequal(focusedControl,addressBar) && ...
+            strcmp(get(addressBar,'Style'),'edit')
+        pasteReader = [];
+        if ~isempty(varargin)
+            pasteReader = varargin{1};
+        end
+        handled = AddressBarClipboardAction( ...
+            addressBar,action,pasteReader);
+    end
+catch
+    handled = false;
 end
 
 
@@ -4938,6 +5066,9 @@ function menu_cut_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_cut (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+if AddressBarMenuShortcut(handles,'x')
+    return
+end
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
@@ -4968,6 +5099,9 @@ function menu_copy_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_copy (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+if AddressBarMenuShortcut(handles,'c')
+    return
+end
 contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
 plot_selected = get(handles.listbox_acmain,'Value');
 nplot = length(plot_selected);   % length
@@ -4999,6 +5133,9 @@ function menu_paste_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_paste (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+if AddressBarMenuShortcut(handles,'v')
+    return
+end
 CDac_pwd;
 copycut = handles.copycut; % cut or copy
 nplot = handles.nplot; % number of selected files
@@ -9079,15 +9216,14 @@ if nplot == 1
 end
 guidata(hObject, handles);
 
-%<<<<<<< HEAD
 % --------------------------------------------------------------------
-function menu_lang_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_lang (see GCBO)
+function menu_settings_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_settings (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
 guidata(hObject, handles);
-languageGUI(handles)
+settingsGUI(handles)
 
 
 % --------------------------------------------------------------------

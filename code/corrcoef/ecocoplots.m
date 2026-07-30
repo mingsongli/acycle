@@ -17,7 +17,7 @@ function [prt_sr] = ecocoplots(prt_sr,out_depth,out_ecc,out_ep,out_eci,out_ecoco
 % language
 % lang_choice = 0;  %
 % handles.main_unit_selection = 0;
-lang_choice = load('ac_lang.txt');
+lang_choice = ac_user_settings('getLanguage');
 langdict = readtable('langdict.xlsx');
 lang_id = langdict.ID;
 lang_var = table2cell(langdict(:, 2 + lang_choice));

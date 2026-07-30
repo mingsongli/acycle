@@ -20,26 +20,7 @@ if isempty(d)
     return
 end
 
-T = struct2table(d); % convert the struct array to a table
-
-switch handles.val1
-    case 1 % User selects unit.
-        sortedT = sortrows(T, 'name', 'ascend'); % sort the table by 'date'
-    case 2 % User selects unit.
-        sortedT = sortrows(T, 'name', 'descend'); % sort the table by 'date'
-    case 3 % User selects unit.
-        sortedT = sortrows(T, 'date', 'ascend'); % sort the table by 'date'
-    case 4 % User selects unit.
-        sortedT = sortrows(T, 'date', 'descend'); % sort the table by 'date'
-    case 5 % User selects unit.
-        sortedT = sortrows(T, 'bytes', 'ascend'); % sort the table by 'date'
-    case 6 % User selects unit.
-        sortedT = sortrows(T, 'bytes', 'descend'); % sort the table by 'date'
-    otherwise
-        sortedT = sortrows(T, 'date', 'descend');
-end
-
-sd = table2struct(sortedT); % change it back to struct array
+sd = ac_sort_dir_entries(d,handles.val1);
 names = {sd.name};
 isDir = [sd.isdir];
 ac_update_listbox_acmain(handles.listbox_acmain,names,isDir);

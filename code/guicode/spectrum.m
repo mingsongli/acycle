@@ -778,27 +778,18 @@ end
                     return;
                 end
 
-                T = struct2table(d);
                 val1 = 1;
                 try
                     val1 = app.ctx.val1;
                 catch
                 end
-                switch val1
-                    case 1
-                        T = sortrows(T,'name','ascend');
-                    case 2
-                        T = sortrows(T,'name','descend');
-                    case 3
-                        T = sortrows(T,'date','ascend');
-                    case 4
-                        T = sortrows(T,'date','descend');
-                    case 5
-                        T = sortrows(T,'bytes','ascend');
-                    case 6
-                        T = sortrows(T,'bytes','descend');
+                sortMode = val1;
+                switch sortMode
+                    case {1,2,3,4,5,6}
+                    otherwise
+                        sortMode = 1;
                 end
-                d = table2struct(T);
+                d = ac_sort_dir_entries(d,sortMode);
 
                 pre = '<HTML><FONT color="blue">';
                 post = '</FONT></HTML>';

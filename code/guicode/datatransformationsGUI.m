@@ -343,8 +343,7 @@ function datatransformationsGUI(varargin)
             % handles are unavailable (for example while AC is closing).
             listing = dir(saveDirectory);
             listing = listing(~ismember({listing.name},{'.','..'}));
-            [~,sortOrder] = sort(lower(string({listing.name})));
-            listing = listing(sortOrder);
+            listing = ac_sort_dir_entries(listing,1);
             ac_update_listbox_acmain(handles.listbox_acmain, ...
                 {listing.name},[listing.isdir]);
             if isgraphics(handles.edit_acfigmain_dir)
