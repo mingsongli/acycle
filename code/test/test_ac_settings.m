@@ -151,6 +151,44 @@ verifyTrue(testCase,getappdata(groot,restartKey));
 verifyEmpty(testCase,findall(groot,'Tag','AcycleSettingsFigure'));
 end
 
+function testWorkingDirectoryRoundTripUsesExplicitStateFile(testCase)
+stateFolder = tempname;
+mkdir(stateFolder);
+testCase.addTeardown(@()removeFolder(stateFolder));
+statePath = fullfile(stateFolder,'working_directory.txt');
+
+saved = ac_working_directory('set',stateFolder,statePath);
+actual = ac_working_directory('get','',statePath);
+
+verifyTrue(testCase,saved);
+verifyEqual(testCase,actual,stateFolder);
+verifyEqual(testCase,strtrim(fileread(statePath)),stateFolder);
+end
+
+function testWorkingDirectoryMissingStateUsesFallback(testCase)
+fallbackFolder = tempname;
+mkdir(fallbackFolder);
+testCase.addTeardown(@()removeFolder(fallbackFolder));
+missingState = fullfile(fallbackFolder,'missing','state.txt');
+
+actual = ac_working_directory('get',fallbackFolder,missingState);
+
+verifyEqual(testCase,actual,fallbackFolder);
+end
+
+function testInvalidWorkingDirectoryIsNotSaved(testCase)
+stateFolder = tempname;
+mkdir(stateFolder);
+testCase.addTeardown(@()removeFolder(stateFolder));
+statePath = fullfile(stateFolder,'working_directory.txt');
+missingDirectory = fullfile(stateFolder,'does-not-exist');
+
+saved = ac_working_directory('set',missingDirectory,statePath);
+
+verifyFalse(testCase,saved);
+verifyEqual(testCase,exist(statePath,'file'),0);
+end
+
 function settingsPath = temporarySettingsPath(testCase)
 settingsFolder = tempname;
 mkdir(settingsFolder);

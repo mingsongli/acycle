@@ -3,8 +3,8 @@
 
 pre_dirML = pwd;
 
-ac_pwd = fileread('ac_pwd.txt');
+ac_pwd = ac_working_directory('get',pre_dirML);
 
-if isdir(ac_pwd)
+if isfolder(ac_pwd)
     cd(ac_pwd)
 end

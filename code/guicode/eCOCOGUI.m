@@ -3205,16 +3205,7 @@ end
 
 function syncAcPwd(dirpath)
 try
-    acPwdFile = which('ac_pwd.txt');
-    if isempty(acPwdFile)
-        return
-    end
-    fid = fopen(acPwdFile,'w');
-    if fid == -1
-        return
-    end
-    fprintf(fid,'%s',dirpath);
-    fclose(fid);
+    ac_working_directory('set',dirpath);
 catch
 end
 end
@@ -3238,13 +3229,7 @@ if ~isempty(editdir) && isgraphics(editdir)
     end
 end
 try
-    acPwdFile = which('ac_pwd.txt');
-    if ~isempty(acPwdFile)
-        p = strtrim(fileread(acPwdFile));
-        if ~isempty(p) && isfolder(p)
-            saveDir = p;
-        end
-    end
+    saveDir = ac_working_directory('get',saveDir);
 catch
 end
 end

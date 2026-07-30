@@ -711,16 +711,7 @@ classdef ft < matlab.apps.AppBase
 
         function syncAcPwd(~,dirpath)
             try
-                acPwdFile = which('ac_pwd.txt');
-                if isempty(acPwdFile)
-                    return
-                end
-                fid = fopen(acPwdFile,'w');
-                if fid == -1
-                    return
-                end
-                fprintf(fid,'%s',dirpath);
-                fclose(fid);
+                ac_working_directory('set',dirpath);
             catch
             end
         end
