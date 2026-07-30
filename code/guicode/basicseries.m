@@ -533,25 +533,14 @@ classdef basicseries < matlab.apps.AppBase
                 return
             end
 
-            T = struct2table(d);
-            switch app.val1
-                case 1
-                    sortedT = sortrows(T,'name','ascend');
-                case 2
-                    sortedT = sortrows(T,'name','descend');
-                case 3
-                    sortedT = sortrows(T,'date','ascend');
-                case 4
-                    sortedT = sortrows(T,'date','descend');
-                case 5
-                    sortedT = sortrows(T,'bytes','ascend');
-                case 6
-                    sortedT = sortrows(T,'bytes','descend');
+            sortMode = app.val1;
+            switch sortMode
+                case {1,2,3,4,5,6}
                 otherwise
-                    sortedT = sortrows(T,'name','ascend');
+                    sortMode = 1;
             end
 
-            sd = table2struct(sortedT);
+            sd = ac_sort_dir_entries(d,sortMode);
             listboxStr = cell(numel(sd),1);
             for i = 1:numel(sd)
                 if isdir(sd(i).name)

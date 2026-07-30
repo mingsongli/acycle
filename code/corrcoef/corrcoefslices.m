@@ -89,7 +89,7 @@ end
 display = 1;  % show simulation steps
 %% For acycle language version (2.6 and after)
 % language
-lang_choice = load('ac_lang.txt');
+lang_choice = ac_user_settings('getLanguage');
 langdict = readtable('langdict.xlsx');
 lang_id = langdict.ID;
 lang_var = table2cell(langdict(:, 2 + lang_choice));

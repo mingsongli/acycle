@@ -14,16 +14,10 @@ function [xdata_filtered,time,freqboundlow,freqboundhigh,cancelled]=dynamic_filt
     freqboundlow = [];
     freqboundhigh = [];
     cancelled = false;
-    lang_choice = load('ac_lang.txt');
+    lang_choice = ac_user_settings('getLanguage');
     langdict = readtable('langdict.xlsx','VariableNamingRule','preserve');
     lang_id = langdict.ID;
-    if lang_choice == 0
-        % English
-        lang_var = langdict.en;
-    elseif lang_choice == 1
-        % Chinese
-        lang_var = langdict.cn;
-    end
+    lang_var = table2cell(langdict(:,2+lang_choice));
     if lang_choice > 0
         % menu
         [~, locb] = ismember('dd53',lang_id);

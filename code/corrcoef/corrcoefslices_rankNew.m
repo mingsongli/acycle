@@ -1376,12 +1376,7 @@ function [langChoice,langId,langVar] = cocoLanguageSettings()
 % Cache the comparatively expensive spreadsheet import while still
 % re-reading it if the language dictionary file changes on disk.
 persistent langDictionary dictionaryStamp cachedDictionaryPath
-choicePath = cocoLanguageResource('ac_lang.txt',false);
-if isempty(choicePath)
-    langChoice = 0;
-else
-    langChoice = load(choicePath);
-end
+langChoice = ac_user_settings('getLanguage');
 if ~isnumeric(langChoice) || ~isscalar(langChoice) || ...
         ~isfinite(langChoice) || ~ismember(langChoice,[0,1])
     langChoice = 0;

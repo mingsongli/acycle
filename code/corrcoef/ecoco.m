@@ -706,13 +706,10 @@ function [langChoice,langId,langVar] = ecocoLanguageSettings()
 langChoice = 0;
 langId = {};
 langVar = {};
-choicePath = ecocoLanguageResource('ac_lang.txt');
-if ~isempty(choicePath)
-    candidate = load(choicePath);
-    if isnumeric(candidate) && isscalar(candidate) && ...
-            isfinite(candidate) && ismember(candidate,[0,1])
-        langChoice = candidate;
-    end
+candidate = ac_user_settings('getLanguage');
+if isnumeric(candidate) && isscalar(candidate) && ...
+        isfinite(candidate) && ismember(candidate,[0,1])
+    langChoice = candidate;
 end
 dictionaryPath = ecocoLanguageResource('langdict.xlsx');
 if isempty(dictionaryPath)
