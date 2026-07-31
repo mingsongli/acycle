@@ -62,6 +62,33 @@ verifyEqual(testCase,{ascending.name},{'oldest','middle','latest'});
 verifyEqual(testCase,{descending.name},{'latest','middle','oldest'});
 end
 
+function testDrawnListUsesBlueFolderNames(testCase)
+fig = figure('Visible','off');
+listbox = uicontrol(fig,'Style','listbox');
+names = {'doc','Acycle.prj','resources'};
+isDir = [true false true];
+
+ac_update_listbox_acmain(listbox,names,isDir);
+
+axesHandle = getappdata(listbox,'ACDrawnListboxAxes');
+rowTexts = findall(axesHandle,'Type','text','Tag','ACListRowText');
+textNames = get(rowTexts,'String');
+textColors = get(rowTexts,'Color');
+if ischar(textNames)
+    textNames = {textNames};
+end
+if isnumeric(textColors)
+    textColors = {textColors};
+end
+
+docColor = textColors{strcmp(textNames,'doc')};
+projectColor = textColors{strcmp(textNames,'Acycle.prj')};
+resourcesColor = textColors{strcmp(textNames,'resources')};
+verifyEqual(testCase,docColor,[0 0 1],'AbsTol',0);
+verifyEqual(testCase,resourcesColor,[0 0 1],'AbsTol',0);
+verifyEqual(testCase,projectColor,[0 0 0],'AbsTol',0);
+end
+
 function testDrawnScrollbarTracksTopIndexInScreenDirection(testCase)
 fig = figure('Visible','off','Units','pixels', ...
     'Position',[100 100 500 180]);
