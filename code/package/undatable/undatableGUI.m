@@ -432,7 +432,7 @@ set(gcf,'color',[1 1 1]);
 udinputfile = handles.udinputfile;
 
 % refresh main window
-ac_pwd = fileread('ac_pwd.txt');
+ac_pwd = ac_working_directory('get',pwd);
 if isdir(ac_pwd)
     cd(ac_pwd)
 end
@@ -445,8 +445,10 @@ print(gcf, '-dpdf', '-painters', savename);
 disp(['  Figure saved : ', savename])
 
 % refresh AC main window
-figure(handles.acfigmain);
-refreshcolor;
+if isfield(handles,'acfigmain') && isgraphics(handles.acfigmain)
+    figure(handles.acfigmain);
+end
+refreshAcMainList(handles,ac_pwd);
 %cd(pre_dirML); % return view dir
 figure(figundatable);
 figure(figundatablePDF);
@@ -471,7 +473,7 @@ date = datestr(now,30);
 
 
 % refresh main window
-ac_pwd = fileread('ac_pwd.txt');
+ac_pwd = ac_working_directory('get',pwd);
 if isdir(ac_pwd)
     cd(ac_pwd)
 end
@@ -492,8 +494,10 @@ if get(handles.specmatfile,'Value') == 1
 end
 
 % refresh AC main window
-figure(handles.acfigmain);
-refreshcolor;
+if isfield(handles,'acfigmain') && isgraphics(handles.acfigmain)
+    figure(handles.acfigmain);
+end
+refreshAcMainList(handles,ac_pwd);
 %cd(pre_dirML); % return view dir
 figure(figundatable);
 
@@ -557,3 +561,34 @@ function specmatfile_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of specmatfile
+
+
+function refreshAcMainList(handles,workingDirectory)
+if ~isfield(handles,'listbox_acmain') || ...
+        isempty(handles.listbox_acmain) || ...
+        ~isgraphics(handles.listbox_acmain)
+    return
+end
+if ac_refresh_main_list(handles.listbox_acmain,workingDirectory)
+    return
+end
+listing = dir(workingDirectory);
+listing = listing(~ismember({listing.name},{'.','..'}));
+sortMode = 4;
+try
+    mainHandles = guidata(handles.listbox_acmain);
+    if isstruct(mainHandles) && isfield(mainHandles,'val1') && ...
+            ~isempty(mainHandles.val1)
+        sortMode = mainHandles.val1;
+    end
+catch
+end
+listing = ac_sort_dir_entries(listing,sortMode);
+ac_update_listbox_acmain(handles.listbox_acmain, ...
+    {listing.name},[listing.isdir]);
+if isfield(handles,'edit_acfigmain_dir') && ...
+        isgraphics(handles.edit_acfigmain_dir)
+    set(handles.edit_acfigmain_dir,'String',workingDirectory);
+end
+ac_working_directory('set',workingDirectory);
+drawnow limitrate;

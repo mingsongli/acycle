@@ -119,12 +119,56 @@ for i = 1:nrow
             dlmwrite(add_list, [significant_freqs,significant_Cxy], 'delimiter', ' ', 'precision', 9);
             add_list2 = [dat_name,'-Phase-',targetname];
             dlmwrite(add_list2, [F2,phase_diff_deg,phase_uncertainty_deg], 'delimiter', ' ', 'precision', 9);
+            saveDirectory = pwd;
             d = dir; %get files
-            set(handles.listbox1,'String',{d.name},'Value',1) %set string
+            % Clear the child list selection before replacing a possibly
+            % shorter String; macOS graphics can otherwise retain an old,
+            % out-of-range Value during the update.
+            set(handles.listbox1,'Value',[])
+            set(handles.listbox1,'String',{d.name}) %set string
+            if ~isempty(d)
+                set(handles.listbox1,'Value',1)
+            end
             %
-            % refresh AC main window
-            figure(handles.acfigmain);
-            refreshcolor;
+            % Refresh AC's native, drawn, and cached selection state through
+            % the shared path, using the directory that received the files.
+            if isfield(handles,'listbox_acmain') && ...
+                    ~isempty(handles.listbox_acmain) && ...
+                    isgraphics(handles.listbox_acmain)
+                refreshed = ac_refresh_main_list( ...
+                    handles.listbox_acmain,saveDirectory);
+                if ~refreshed
+                    mainListing = dir(saveDirectory);
+                    mainListing = mainListing(~ismember( ...
+                        {mainListing.name},{'.','..'}));
+                    sortMode = 1;
+                    try
+                        mainHandles = guidata(ancestor( ...
+                            handles.listbox_acmain,'figure'));
+                        if isstruct(mainHandles) && ...
+                                isfield(mainHandles,'val1')
+                            sortMode = mainHandles.val1;
+                        end
+                    catch
+                    end
+                    mainListing = ac_sort_dir_entries( ...
+                        mainListing,sortMode);
+                    ac_update_listbox_acmain(handles.listbox_acmain, ...
+                        {mainListing.name},[mainListing.isdir]);
+                    if isfield(handles,'edit_acfigmain_dir') && ...
+                            ~isempty(handles.edit_acfigmain_dir) && ...
+                            isgraphics(handles.edit_acfigmain_dir)
+                        if isprop(handles.edit_acfigmain_dir,'String')
+                            set(handles.edit_acfigmain_dir, ...
+                                'String',saveDirectory);
+                        elseif isprop(handles.edit_acfigmain_dir,'Value')
+                            handles.edit_acfigmain_dir.Value = saveDirectory;
+                        end
+                    end
+                    ac_working_directory('set',saveDirectory);
+                    drawnow limitrate;
+                end
+            end
             cd(pre_dirML); % return view dir
         end
         

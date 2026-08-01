@@ -21,7 +21,9 @@ else
     wavecoh_readGUI;
     wavecoh_update_plots;
 end
-handles = guidata(handles.waveletGUIfig);
+% The scripts above add the computed wavelet cache and result-figure handle
+% to this local structure.  Reading GUIDATA here would restore the older
+% pre-computation copy and make the first Save lose handles.figwave.
 guidata(handles.waveletGUIfig, handles);
 
 end

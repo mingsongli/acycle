@@ -459,16 +459,25 @@ end
         end
 
         function refreshMainListbox()
-            if ac_refresh_main_list(app.listbox_acmain)
+            workDir = pwd;
+            if ac_refresh_main_list(app.listbox_acmain,workDir)
                 return
             end
             if isempty(app.listbox_acmain) || ~ishandle(app.listbox_acmain)
                 return
             end
 
-            d = dir;
+            d = dir(workDir);
             d = d(~ismember({d.name},{'.','..'}));
             val1 = app.val1;
+            try
+                mainHandles = guidata(app.listbox_acmain);
+                if isstruct(mainHandles) && isfield(mainHandles,'val1') && ...
+                        ~isempty(mainHandles.val1)
+                    val1 = mainHandles.val1;
+                end
+            catch
+            end
             if ~isscalar(val1) || ~isfinite(val1)
                 val1 = 1;
             end
@@ -480,22 +489,13 @@ end
             end
             d = ac_sort_dir_entries(d,sortMode);
 
-            pre = '<HTML><FONT color="blue">';
-            post = '</FONT></HTML>';
-            listboxStr = cell(numel(d),1);
-            for i = 1:numel(d)
-                if d(i).isdir
-                    listboxStr{i} = [pre,d(i).name,post];
-                else
-                    listboxStr{i} = d(i).name;
-                end
-            end
-
-            set(app.listbox_acmain,'String',listboxStr,'Value',[]);
+            ac_update_listbox_acmain(app.listbox_acmain, ...
+                {d.name},[d.isdir]);
             if ~isempty(app.edit_acfigmain_dir) && ishandle(app.edit_acfigmain_dir)
-                set(app.edit_acfigmain_dir,'String',pwd);
+                set(app.edit_acfigmain_dir,'String',workDir);
             end
-            updateAcPwdTextFile(pwd);
+            updateAcPwdTextFile(workDir);
+            drawnow limitrate;
         end
 
         function onFigureKeyPress(~,event)
@@ -531,11 +531,9 @@ end
 function outDir = getAcPwdPath(fallbackDir)
 outDir = fallbackDir;
 try
-    if exist('ac_pwd.txt','file') == 2
-        p = strtrim(fileread('ac_pwd.txt'));
-        if ~isempty(p) && isfolder(p)
-            outDir = p;
-        end
+    p = ac_working_directory('get',fallbackDir);
+    if ~isempty(p) && isfolder(p)
+        outDir = p;
     end
 catch
 end
@@ -543,17 +541,7 @@ end
 
 function updateAcPwdTextFile(address)
 try
-    ac_pwd_str = which('ac_pwd.txt');
-    if isempty(ac_pwd_str)
-        return
-    end
-    [ac_pwd_dir,~,~] = fileparts(ac_pwd_str);
-    fid = fopen(fullfile(ac_pwd_dir,'ac_pwd.txt'),'w');
-    if fid < 0
-        return
-    end
-    c = onCleanup(@()fclose(fid)); %#ok<NASGU>
-    fprintf(fid,'%s',address);
+    ac_working_directory('set',address);
 catch
 end
 end

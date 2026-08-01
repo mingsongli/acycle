@@ -1,4 +1,44 @@
 - - - - - -    What's New   - - - - - -
+_______________________________________
+
+
+Version : Acycle_v3.0.3
+Date    : August 1, 2026
+By      : Mingsong Li (Peking University)
+
+    1. FIXED: Cross-platform working-directory and file-list state.
+        Each user's current data folder is now stored in the per-user Acycle
+        settings folder (Acycle/ac_pwd.txt), never in the packaged code/bin
+        copy. The main browser safely rebuilds all file-list representations
+        and rejects stale or out-of-range selections, including the macOS
+        String/Value mismatch that could occur after a list became shorter.
+
+    2. FIXED: Refresh behavior throughout Acycle.
+        The main Refresh button and menu clear the current selection, while
+        automatic same-directory refreshes preserve a valid selection by file
+        name. Spectral, wavelet, filtering, recurrence, correlation,
+        interpolation, data-transformation, age-model, and other affected GUI
+        workflows now use the same safe refresh path after saving outputs.
+        Wavelet's first result can also be saved on the first click.
+
+    3. IMPROVED: COCO/eCOCO startup and depth-unit handling.
+        The window now opens in COCO mode by default. If the main-window unit
+        remains the placeholder "unit", it is treated as metres after a
+        non-blocking warning, so analysis can continue without a
+        DepthUnitRequired error.
+
+    4. FIXED: COCO/eCOCO result saving.
+        A saving dialog asks users not to close result windows, which are
+        temporarily protected while all figures are snapshotted and exported.
+        This prevents CorrelationPageMissing and SourceFigureDeleted failures.
+        The GUI saves numerical results, FIG files, and vector PDF files only;
+        it does not create PNG, JPG, or TIFF bitmap files.
+
+    5. TESTED: File-list, GUI-refresh, and output-saving regressions.
+        Automated tests cover working-directory storage, shortened and sorted
+        lists, manual and automatic selection policies, stale selections, and
+        COCO/eCOCO save protection. End-to-end MATLAB R2026a GUI tests with
+        irregularly sampled data also verified analysis and saved outputs.
 
 _______________________________________
 

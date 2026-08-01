@@ -166,9 +166,30 @@ if handles.wavehastorerun
             dlmwrite(name4, wcs_mat, 'delimiter', ',', 'precision', 9);
             dlmwrite(name5, wcoh_mat, 'delimiter', ',', 'precision', 9);
             ac_save_wave_parameter_table(handles,[dn1,'-',dn2],{get(handles.edit1,'String'),get(handles.edit2,'String')});
-            d = dir; %get files
-            set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-            refreshcolor;
+            saveDirectory = pwd;
+            if ~ac_refresh_main_list(handles.listbox_acmain,saveDirectory) && ...
+                    isgraphics(handles.listbox_acmain)
+                listing = dir(saveDirectory);
+                listing = listing(~ismember({listing.name},{'.','..'}));
+                sortMode = 4;
+                try
+                    mainHandles = guidata(handles.listbox_acmain);
+                    if isstruct(mainHandles) && isfield(mainHandles,'val1') && ...
+                            ~isempty(mainHandles.val1)
+                        sortMode = mainHandles.val1;
+                    end
+                catch
+                end
+                listing = ac_sort_dir_entries(listing,sortMode);
+                ac_update_listbox_acmain(handles.listbox_acmain, ...
+                    {listing.name},[listing.isdir]);
+                if isfield(handles,'edit_acfigmain_dir') && ...
+                        isgraphics(handles.edit_acfigmain_dir)
+                    set(handles.edit_acfigmain_dir,'String',saveDirectory);
+                end
+                ac_working_directory('set',saveDirectory);
+                drawnow limitrate;
+            end
             cd(pre_dirML); % return to matlab view folder
 
         end
@@ -226,9 +247,30 @@ if handles.wavehastorerun
             dlmwrite(name7, sig95, 'delimiter', ',', 'precision', 9);
             dlmwrite(name8, coi, 'delimiter', ',', 'precision', 9);
             ac_save_wave_parameter_table(handles,[dn1,'-',dn2],{get(handles.edit1,'String'),get(handles.edit2,'String')});
-            d = dir; %get files
-            set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-            refreshcolor;
+            saveDirectory = pwd;
+            if ~ac_refresh_main_list(handles.listbox_acmain,saveDirectory) && ...
+                    isgraphics(handles.listbox_acmain)
+                listing = dir(saveDirectory);
+                listing = listing(~ismember({listing.name},{'.','..'}));
+                sortMode = 4;
+                try
+                    mainHandles = guidata(handles.listbox_acmain);
+                    if isstruct(mainHandles) && isfield(mainHandles,'val1') && ...
+                            ~isempty(mainHandles.val1)
+                        sortMode = mainHandles.val1;
+                    end
+                catch
+                end
+                listing = ac_sort_dir_entries(listing,sortMode);
+                ac_update_listbox_acmain(handles.listbox_acmain, ...
+                    {listing.name},[listing.isdir]);
+                if isfield(handles,'edit_acfigmain_dir') && ...
+                        isgraphics(handles.edit_acfigmain_dir)
+                    set(handles.edit_acfigmain_dir,'String',saveDirectory);
+                end
+                ac_working_directory('set',saveDirectory);
+                drawnow limitrate;
+            end
             cd(pre_dirML); % return to matlab view folder
 
         end

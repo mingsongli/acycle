@@ -18,9 +18,6 @@ publicationTitle = strtrim(char(string( ...
 dataFile = char(string(dataFile));
 figures = figures(:);
 figures = figures(isgraphics(figures,'figure'));
-if isempty(publicationTitle)
-    figures = orderStandaloneFigures(figures);
-end
 publication = emptyPublicationResult();
 if isempty(figures)
     saved = struct('fig',{},'pdf',{});
@@ -28,44 +25,115 @@ if isempty(figures)
         'The calculation completed, but no result figure was available to save.');
     return
 end
+
+% Freeze every currently valid source figure before beginning any of the
+% potentially slow PDF exports.  In particular, do not return to a visible
+% COCO/eCOCO result window after saving another figure: the user may close
+% it as soon as the calculation appears to have finished.
+[snapshotFiles,snapshotFolder] = snapshotSourceFigures(figures);
+snapshotFolderCleanup = onCleanup(@()removeSnapshotFolder(snapshotFolder));
+snapshotFigures = openSnapshotFigures(snapshotFiles);
+snapshotFigureCleanup = onCleanup(@()closeFiguresIfValid(snapshotFigures));
+cleanSnapshotCloseProtection(snapshotFigures);
+
 if ~isempty(publicationTitle)
     % A COCO calculation may leave auxiliary figures open. The requested
     % four-file output contract keeps only the figure that owns the
     % Correlation and significance page.
-    correlationLayout = findCorrelationLayout(figures);
+    correlationLayout = findCorrelationLayout(snapshotFigures);
     figures = ancestor(correlationLayout,'figure');
+else
+    figures = orderStandaloneFigures(snapshotFigures);
 end
 saved = repmat(struct('fig','','pdf',''),numel(figures),1);
 
 [folder,stem] = fileparts(dataFile);
 for figureIndex = 1:numel(figures)
     sourceFigure = figures(figureIndex);
-    if ~isgraphics(sourceFigure,'figure')
-        error('saveCocoGuiFigures:SourceFigureDeleted', ...
-            'Result figure %d was closed before it could be exported.', ...
-            figureIndex);
-    end
     suffix = figureSuffix(sourceFigure,figureIndex);
     outputStem = fullfile(folder,[stem,suffix]);
     figFile = [outputStem,'.fig'];
     pdfFile = [outputStem,'.pdf'];
     savefig(sourceFigure,figFile);
-
-    % Export from the just-saved hidden clone. This freezes one consistent
-    % graphics snapshot for the potentially long vector-PDF operation and
-    % prevents user interaction with (or closure of) the visible result
-    % figure from invalidating objects midway through export.
-    exportFigure = openfig(figFile,'invisible');
-    exportCleanup = onCleanup(@()closeIfValid(exportFigure));
-    exportVectorPdf(exportFigure,pdfFile);
-    clear exportCleanup
-    closeIfValid(exportFigure);
+    exportVectorPdf(sourceFigure,pdfFile);
     saved(figureIndex).fig = figFile;
     saved(figureIndex).pdf = pdfFile;
 end
 if ~isempty(publicationTitle)
     publication = exportCocoPublicationFigure( ...
         figures,dataFile,publicationTitle);
+end
+end
+
+function [snapshotFiles,snapshotFolder] = snapshotSourceFigures(figures)
+snapshotFolder = tempname;
+[folderCreated,message] = mkdir(snapshotFolder);
+if ~folderCreated
+    error('saveCocoGuiFigures:SnapshotFolderCreationFailed', ...
+        'Could not create a temporary figure-snapshot folder (%s).', ...
+        message);
+end
+snapshotFiles = cell(numel(figures),1);
+try
+    for figureIndex = 1:numel(figures)
+        sourceFigure = figures(figureIndex);
+        if ~isgraphics(sourceFigure,'figure')
+            error('saveCocoGuiFigures:SourceFigureDeleted', ...
+                'Result figure %d was closed before it could be snapshotted.', ...
+                figureIndex);
+        end
+        snapshotFiles{figureIndex} = fullfile(snapshotFolder, ...
+            sprintf('source-figure-%d.fig',figureIndex));
+        savefig(sourceFigure,snapshotFiles{figureIndex});
+    end
+catch exception
+    removeSnapshotFolder(snapshotFolder);
+    rethrow(exception);
+end
+end
+
+function figures = openSnapshotFigures(snapshotFiles)
+figures = gobjects(numel(snapshotFiles),1);
+try
+    for figureIndex = 1:numel(snapshotFiles)
+        figures(figureIndex) = openfig( ...
+            snapshotFiles{figureIndex},'invisible');
+    end
+catch exception
+    closeFiguresIfValid(figures);
+    rethrow(exception);
+end
+end
+
+function cleanSnapshotCloseProtection(figures)
+originalCallbackKey = 'AcycleCOCOSaveOriginalCloseRequestFcn';
+protectionKey = 'AcycleCOCOSaveCloseProtected';
+for figureIndex = 1:numel(figures)
+    snapshotFigure = figures(figureIndex);
+    if isappdata(snapshotFigure,originalCallbackKey)
+        originalCallback = getappdata( ...
+            snapshotFigure,originalCallbackKey);
+        set(snapshotFigure,'CloseRequestFcn',originalCallback);
+        rmappdata(snapshotFigure,originalCallbackKey);
+    end
+    if isappdata(snapshotFigure,protectionKey)
+        rmappdata(snapshotFigure,protectionKey);
+    end
+end
+end
+
+function closeFiguresIfValid(figures)
+for figureIndex = 1:numel(figures)
+    closeIfValid(figures(figureIndex));
+end
+end
+
+function removeSnapshotFolder(snapshotFolder)
+try
+    if isfolder(snapshotFolder)
+        rmdir(snapshotFolder,'s');
+    end
+catch
 end
 end
 

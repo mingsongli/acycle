@@ -1,5 +1,14 @@
-function ac_update_listbox_acmain(hListbox,names,isDir)
+function [updated,selectedIndices] = ac_update_listbox_acmain( ...
+        hListbox,names,isDir,preserveSelection)
 % Update the AC main file list with blue folder names.
+
+updated = false;
+selectedIndices = [];
+
+if nargin < 1 || isempty(hListbox) || ~isgraphics(hListbox)
+    error('Acycle:MainListInvalidHandle', ...
+        'A valid main-list handle is required.');
+end
 
 if nargin < 2 || isempty(names)
     names = {};
@@ -7,14 +16,32 @@ end
 if nargin < 3 || isempty(isDir)
     isDir = false(size(names));
 end
+if nargin < 4 || isempty(preserveSelection)
+    preserveSelection = false;
+end
+preserveSelection = islogical(preserveSelection) && ...
+    isscalar(preserveSelection) && preserveSelection;
 
 names = cellstr(names);
-isDir = logical(isDir);
-
-try
-    set(hListbox,'UserData',struct('names',{names},'isDir',isDir));
-catch
+names = names(:);
+isDir = logical(isDir(:));
+if numel(isDir) ~= numel(names)
+    error('Acycle:MainListInvalidDirectoryFlags', ...
+        'The directory flags must match the number of file names.');
 end
+
+selectedNames = {};
+if preserveSelection
+    % Row numbers are transient when a directory is sorted or gains output
+    % files.  Preserve only a selection whose three current list views agree,
+    % and later recover it by file name in the rebuilt list.
+    selectedNames = ac_current_main_list_selection_names(hListbox);
+end
+
+% Clear the old row number before replacing String/Items.  Combining these
+% properties in one SET call can leave a shortened String paired with the
+% previous out-of-range Value on some MATLAB/macOS graphics versions.
+ac_clear_main_list_selection(hListbox);
 
 if ac_has_items_property(hListbox)
     ac_update_uilistbox(hListbox,names,isDir);
@@ -22,6 +49,10 @@ else
     ac_update_drawn_listbox(hListbox,names,isDir);
 end
 
+set(hListbox,'UserData',struct('names',{names},'isDir',isDir));
+selectedIndices = ac_restore_main_list_selection( ...
+    hListbox,names,selectedNames);
+updated = true;
 end
 
 function tf = ac_has_items_property(hListbox)
@@ -33,17 +64,19 @@ end
 end
 
 function ac_update_uilistbox(hListbox,names,isDir)
+try
+    hListbox.Value = {};
+catch
+end
 hListbox.Items = names;
 if isempty(names)
     hListbox.Value = {};
 else
     try
-        if isprop(hListbox,'Multiselect') && strcmpi(hListbox.Multiselect,'on')
-            hListbox.Value = names(1);
-        else
-            hListbox.Value = names{1};
-        end
+        hListbox.Value = {};
     catch
+        % Some single-selection UI list boxes do not permit an empty Value.
+        % Select the first new item rather than retaining a stale old item.
         hListbox.Value = names{1};
     end
 end
@@ -60,12 +93,20 @@ end
 end
 
 function ac_update_drawn_listbox(hListbox,names,isDir)
-ac_delete_stale_java_overlay(hListbox);
+set(hListbox,'Value',[]);
+set(hListbox,'String',names);
+set(hListbox,'Value',[]);
+set(hListbox,'Visible','off');
 
-try
-    set(hListbox,'String',names,'Value',[],'Visible','off');
-catch
+nativeNames = cellstr(get(hListbox,'String'));
+nativeNames = nativeNames(:);
+nativeValue = get(hListbox,'Value');
+if ~isequal(nativeNames,names) || ~isempty(nativeValue)
+    error('Acycle:MainListNativeUpdateFailed', ...
+        'The native main-list state could not be updated safely.');
 end
+
+ac_delete_stale_java_overlay(hListbox);
 
 [hPanel,hAxes,hSlider] = ac_ensure_drawn_listbox(hListbox);
 if isempty(hPanel) || ~isgraphics(hPanel)
@@ -384,6 +425,15 @@ end
 end
 
 function ac_row_click(src,evt,hListbox,idx)
+if ~ac_main_list_row_is_current(hListbox,idx)
+    ac_clear_main_list_selection(hListbox);
+    try
+        ac_refresh_main_list(hListbox);
+    catch
+    end
+    return
+end
+
 fig = ancestor(hListbox,'figure');
 isDoubleClick = ac_is_double_click(fig,hListbox,idx);
 selected = getappdata(hListbox,'ACListSelected');
@@ -423,7 +473,12 @@ end
 
 try
     set(hListbox,'Value',value);
-catch
+catch selectionError
+    ac_clear_main_list_selection(hListbox);
+    warning('Acycle:MainListSelectionFailed', ...
+        'Unable to update the main-list selection: %s', ...
+        selectionError.message);
+    return
 end
 setappdata(hListbox,'ACListSelected',selected);
 setappdata(hListbox,'ACListAnchor',anchor);
@@ -443,9 +498,230 @@ else
     try
         handles = guidata(fig);
         handles.index_selected = selected;
+        handles.plot_selected = selected;
         guidata(hListbox,handles);
     catch
     end
+end
+end
+
+function current = ac_main_list_row_is_current(hListbox,idx)
+current = false;
+try
+    drawnNames = cellstr(getappdata(hListbox,'ACListNames'));
+    drawnNames = drawnNames(:);
+    nativeNames = cellstr(get(hListbox,'String'));
+    nativeNames = nativeNames(:);
+    userdata = get(hListbox,'UserData');
+    if ~isstruct(userdata) || ~isfield(userdata,'names')
+        return
+    end
+    storedNames = cellstr(userdata.names);
+    storedNames = storedNames(:);
+    current = idx >= 1 && idx <= numel(nativeNames) && ...
+        isequal(drawnNames,nativeNames) && ...
+        isequal(storedNames,nativeNames);
+catch
+    current = false;
+end
+end
+
+function ac_clear_main_list_selection(hListbox)
+try
+    if ac_has_items_property(hListbox)
+        try
+            hListbox.Value = {};
+        catch
+        end
+    else
+        set(hListbox,'Value',[]);
+    end
+catch clearError
+    error('Acycle:MainListSelectionClearFailed', ...
+        'Unable to clear the previous main-list selection: %s', ...
+        clearError.message);
+end
+
+selectionAppdata = {'ACListSelected','ACListAnchor', ...
+    'ACListLastClickIndex','ACListLastClickTic'};
+for index = 1:numel(selectionAppdata)
+    try
+        if isappdata(hListbox,selectionAppdata{index})
+            setappdata(hListbox,selectionAppdata{index},[]);
+        end
+    catch
+    end
+end
+
+try
+    mainFigure = ancestor(hListbox,'figure');
+    handles = guidata(mainFigure);
+    if isstruct(handles)
+        handles.index_selected = [];
+        handles.plot_selected = [];
+        guidata(mainFigure,handles);
+    end
+catch
+end
+
+try
+    ac_update_drawn_selection(hListbox);
+catch
+end
+end
+
+function selectedNames = ac_current_main_list_selection_names(hListbox)
+selectedNames = {};
+try
+    [nativeNames,nativeSelection,nativeIsValid] = ...
+        ac_native_main_list_state(hListbox);
+    if ~nativeIsValid
+        return
+    end
+
+    userdata = get(hListbox,'UserData');
+    if ~isstruct(userdata) || ~isfield(userdata,'names')
+        return
+    end
+    storedNames = cellstr(userdata.names);
+    storedNames = storedNames(:);
+    if ~isequal(storedNames,nativeNames)
+        return
+    end
+
+    selected = nativeSelection;
+    if isappdata(hListbox,'ACListNames')
+        drawnNames = cellstr(getappdata(hListbox,'ACListNames'));
+        drawnNames = drawnNames(:);
+        if ~isequal(drawnNames,nativeNames)
+            return
+        end
+        drawnSelection = getappdata(hListbox,'ACListSelected');
+        if ~ac_indices_are_valid(drawnSelection,numel(nativeNames)) || ...
+                ~isequal(double(drawnSelection(:)'),nativeSelection)
+            return
+        end
+        selected = double(drawnSelection(:)');
+    end
+
+    if ~ac_indices_are_valid(selected,numel(nativeNames))
+        return
+    end
+    selectedNames = nativeNames(selected);
+catch
+    selectedNames = {};
+end
+end
+
+function selected = ac_restore_main_list_selection( ...
+        hListbox,names,selectedNames)
+selected = [];
+if ~isempty(selectedNames) && ~isempty(names)
+    [isPresent,locations] = ismember(selectedNames,names);
+    selected = unique(locations(isPresent),'stable');
+    selected = double(selected(:)');
+end
+
+if ac_has_items_property(hListbox)
+    try
+        if isempty(selected)
+            hListbox.Value = {};
+        else
+            hListbox.Value = names(selected);
+        end
+    catch
+        % A single-selection UI list box may reject an empty/cell Value.
+        if isempty(selected)
+            if isempty(names)
+                try hListbox.Value = {}; catch, end
+            else
+                hListbox.Value = names{1};
+                selected = 1;
+            end
+        else
+            hListbox.Value = names{selected(1)};
+            selected = selected(1);
+        end
+    end
+else
+    set(hListbox,'Value',selected);
+end
+
+try
+    if isappdata(hListbox,'ACListSelected')
+        setappdata(hListbox,'ACListSelected',selected);
+        if isempty(selected)
+            setappdata(hListbox,'ACListAnchor',[]);
+        else
+            setappdata(hListbox,'ACListAnchor',selected(end));
+        end
+    end
+catch
+end
+
+try
+    mainFigure = ancestor(hListbox,'figure');
+    handles = guidata(mainFigure);
+    if isstruct(handles)
+        handles.index_selected = selected;
+        handles.plot_selected = selected;
+        guidata(mainFigure,handles);
+    end
+catch
+end
+
+try
+    ac_update_drawn_selection(hListbox);
+catch
+end
+end
+
+function [names,selected,isValid] = ac_native_main_list_state(hListbox)
+names = {};
+selected = [];
+isValid = false;
+try
+    if ac_has_items_property(hListbox)
+        names = cellstr(hListbox.Items);
+        names = names(:);
+        rawValue = hListbox.Value;
+        if isempty(rawValue)
+            selected = [];
+        else
+            valueNames = cellstr(rawValue);
+            [isPresent,selected] = ismember(valueNames(:),names);
+            if ~all(isPresent)
+                selected = [];
+                return
+            end
+            selected = double(selected(:)');
+        end
+    else
+        names = cellstr(get(hListbox,'String'));
+        names = names(:);
+        selected = get(hListbox,'Value');
+        if ~ac_indices_are_valid(selected,numel(names))
+            selected = [];
+            return
+        end
+        selected = double(selected(:)');
+    end
+    isValid = true;
+catch
+    names = {};
+    selected = [];
+    isValid = false;
+end
+end
+
+function valid = ac_indices_are_valid(indices,count)
+valid = isnumeric(indices) && isreal(indices);
+if valid
+    indices = double(indices(:)');
+    valid = all(isfinite(indices)) && ...
+        all(indices == fix(indices)) && ...
+        all(indices >= 1) && all(indices <= count) && ...
+        numel(unique(indices)) == numel(indices);
 end
 end
 

@@ -340,6 +340,100 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
+function workDir = spectrumWorkingDirectory(handles,fallbackDir)
+% Resolve Spectrum output through Acycle's per-user working-directory state.
+if nargin < 2 || isempty(fallbackDir) || ~isfolder(fallbackDir)
+    fallbackDir = pwd;
+end
+workDir = '';
+try
+    workDir = ac_working_directory('get',fallbackDir);
+catch
+end
+if isstring(workDir)
+    workDir = char(workDir);
+elseif ~ischar(workDir)
+    workDir = '';
+end
+if isempty(workDir) || ~isfolder(workDir)
+    try
+        workDir = strtrim(get(handles.edit_acfigmain_dir,'String'));
+    catch
+    end
+end
+if isstring(workDir)
+    workDir = char(workDir);
+elseif ~ischar(workDir)
+    workDir = '';
+end
+if isempty(workDir) || ~isfolder(workDir)
+    workDir = fallbackDir;
+end
+
+
+function spectrumFinishCallback(handles,workDir,returnDir)
+% Always restore MATLAB's caller directory and refresh the directory where
+% this callback actually wrote its outputs, including on an early error.
+try
+    if isfolder(returnDir)
+        cd(returnDir);
+    end
+catch
+end
+spectrumRefreshMainList(handles,workDir);
+
+
+function refreshed = spectrumRefreshMainList(handles,workDir)
+% Refresh the main Acycle list without running a child-GUI script.
+refreshed = false;
+if isempty(workDir) || ~isfolder(workDir) || ...
+        ~isfield(handles,'listbox_acmain') || ...
+        ~isgraphics(handles.listbox_acmain)
+    return
+end
+try
+    refreshed = ac_refresh_main_list(handles.listbox_acmain,workDir);
+catch
+    refreshed = false;
+end
+if refreshed
+    return
+end
+
+% Safe compatibility fallback: rebuild every list representation through
+% the unified updater.  Never assign String/Value directly.
+try
+    entries = dir(workDir);
+    entries = entries(~ismember({entries.name},{'.','..'}));
+    sortMode = 1;
+    try
+        sortMode = handles.val1;
+    catch
+    end
+    if ~isscalar(sortMode) || ~isnumeric(sortMode) || ...
+            ~isfinite(sortMode) || ~ismember(sortMode,1:6)
+        sortMode = 1;
+    end
+    entries = ac_sort_dir_entries(entries,sortMode);
+    ac_update_listbox_acmain(handles.listbox_acmain, ...
+        {entries.name},[entries.isdir]);
+    refreshed = true;
+catch
+    refreshed = false;
+end
+if ~refreshed
+    return
+end
+try
+    set(handles.edit_acfigmain_dir,'String',workDir);
+catch
+end
+try
+    ac_working_directory('set',workDir);
+catch
+end
+
+
 function edit_fmax_input_Callback(hObject, eventdata, handles)
 % hObject    handle to edit_fmax_input (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -374,6 +468,10 @@ function pushbutton17_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton17 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+pre_dirML = pwd;
+outputDir = spectrumWorkingDirectory(handles,pre_dirML);
+callbackCleanup = onCleanup(@()spectrumFinishCallback( ...
+    handles,outputDir,pre_dirML)); %#ok<NASGU>
 figspectrum = gcf;
 data = handles.current_data; % load current_data
 data_name = handles.filename;
@@ -967,19 +1065,11 @@ if strcmp(method,'Multi-taper method')
         end
     end
     
-    %% SWA method 
+    %% SWA method
     if SelectSWA == 1
-        
-        %  runfirst, ensure data saved in the current working dir
-        % move data file to current working folder
-        % refresh main window
-        pre_dirML = pwd;
-        ac_pwd = fileread('ac_pwd.txt');
-        if isdir(ac_pwd)
-            cd(ac_pwd)
-        else
-            disp([' Data in Working Dir: ', pre_dirML])
-        end
+        % spectralswafdr creates its intermediate files in the current
+        % directory, so enter the resolved Acycle output directory first.
+        cd(outputDir);
         
         [outputdata] = spectralswafdr(data, 'mtm', nw, padtimes, 0);
         clfdr = outputdata(:, 9:13);
@@ -1091,29 +1181,15 @@ if strcmp(method,'Multi-taper method')
 
         date = datestr(now,30);
 
-        movefile('SWA-Spectrum-background-FDR.dat',[dat_name,'-',num2str(nw),'pi-MTM-SWA-Spectrum-FDR-',date,'.dat']);
-        movefile('SWA-Spectrum-Chi2CL.dat',        [dat_name,'-',num2str(nw),'pi-MTM-SWA-Spectrum-Chi2CL-',date,'.dat']);
-        
-        % refresh main window
-        d = dir; %get files
-        set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-        % define some nested parameters
-        pre  = '<HTML><FONT color="blue">';
-        post = '</FONT></HTML>';
-        address = pwd;
-        d = dir; %get files
-        d(1)=[];d(1)=[];
-        listboxStr = cell(numel(d),1);
-        ac_pwd_str = which('ac_pwd.txt');
-        [ac_pwd_dir,ac_pwd_name,ext] = fileparts(ac_pwd_str);
-        fileID = fopen(fullfile(ac_pwd_dir,'ac_pwd.txt'),'w');
-        T = struct2table(d);
-        sortedT = [];
-        sd = [];
-        str=[];
-        i=[];
+        sourceFdr = fullfile(outputDir,'SWA-Spectrum-background-FDR.dat');
+        sourceChi = fullfile(outputDir,'SWA-Spectrum-Chi2CL.dat');
+        targetFdr = fullfile(outputDir, ...
+            [dat_name,'-',num2str(nw),'pi-MTM-SWA-Spectrum-FDR-',date,'.dat']);
+        targetChi = fullfile(outputDir, ...
+            [dat_name,'-',num2str(nw),'pi-MTM-SWA-Spectrum-Chi2CL-',date,'.dat']);
+        movefile(sourceFdr,targetFdr);
+        movefile(sourceChi,targetChi);
 
-        refreshcolor;
         cd(pre_dirML); % return to matlab view folder
         
         figure(fswa);
@@ -1828,10 +1904,6 @@ elseif  strcmp(method,'Periodogram')
     
 else
 end
-% refresh AC main window
-figure(handles.acfigmain);
-CDac_pwd; % cd working dir
-refreshcolor;
 cd(pre_dirML); % return view dir
 figure(figspectrum);
 
@@ -1862,6 +1934,10 @@ function pushbutton3_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton3 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+pre_dirML = pwd;
+outputDir = spectrumWorkingDirectory(handles,pre_dirML);
+callbackCleanup = onCleanup(@()spectrumFinishCallback( ...
+    handles,outputDir,pre_dirML)); %#ok<NASGU>
 lang_id = handles.lang_id;
 lang_var = handles.lang_var;
 
@@ -2045,8 +2121,8 @@ if strcmp(method,'Multi-taper method')
             data1 = redconfML96;
             name2 = [dat_name,'-',num2str(nw),'piMTM-RobustAR1-Med-smooth',ext];
             data2 = [f1,pxxsmooth0];
-            
-            CDac_pwd;
+
+            cd(outputDir);
             dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9);
             dlmwrite(name2, data2, 'delimiter', ' ', 'precision', 9);
             if handles.lang_choice == 0
@@ -2110,7 +2186,7 @@ if strcmp(method,'Multi-taper method')
         data1 = [fd1,po,pl,red90,red95,red99];
         name2 = [dat_name,'-',num2str(nw),'piMTM-PL-global',ext];
         data2 = [fd1,po,pl,red90global,red95global,red99global];
-        CDac_pwd;
+        cd(outputDir);
         dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9);
         dlmwrite(name2, data2, 'delimiter', ' ', 'precision', 9);
         if handles.lang_choice == 0
@@ -2233,7 +2309,7 @@ if strcmp(method,'Multi-taper method')
         data1 = [fd1,po,theored1,red90,red95,red99];
         name2 = [dat_name,'-',num2str(nw),'piMTM-BPL-global',ext];
         data2 = [fd1,po,theored1,red90global,red95global,red99global];
-        CDac_pwd;
+        cd(outputDir);
         dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9);
         dlmwrite(name2, data2, 'delimiter', ' ', 'precision', 9);
         if handles.lang_choice == 0
@@ -2461,7 +2537,7 @@ if strcmp(method,'Multi-taper method')
         end
         %filename_mtm = [dat_name,'-',num2str(nw),'piMTMspectrum.txt'];
         filename_mtm_cl = [dat_name,'-',num2str(nw),'piMTM-ClassicAR1.txt'];
-        CDac_pwd; % cd ac_pwd dir
+        cd(outputDir);
         dlmwrite(filename_mtm_cl, [fd,po,theored,tabtchi90,tabtchi95,tabtchi99,tabtchi999], 'delimiter', ' ', 'precision', 9);
 
         disp(filename_mtm_cl)
@@ -2519,8 +2595,8 @@ if strcmp(method,'Multi-taper method')
         namefsig = [dat_name,'-',num2str(nw),'piMTM-fsig',ext];
         namefamp = [dat_name,'-',num2str(nw),'piMTM-amp',ext];
         namefrest = [dat_name,'-',num2str(nw),'piMTM-Faz-Sig-Noi-Dof',ext];
-        
-        CDac_pwd;
+
+        cd(outputDir);
         dataftest = [freq',ftest'];
         datafsig  = [freq',fsigout'];
         dataamp  = [freq',Amp'];
@@ -2542,8 +2618,9 @@ if strcmp(method,'Multi-taper method')
     end
     
     
-    %% SWA method 
+    %% SWA method
     if SelectSWA == 1
+        cd(outputDir);
         [outputdata] = spectralswafdr(data, 'mtm', nw, padtimes, 0);
         clfdr = outputdata(:, 9:13);
         xvalue = outputdata(:,1);
@@ -2634,46 +2711,23 @@ if strcmp(method,'Multi-taper method')
         if handles.logfreq == 1
             set(gca,'xscale','log')
         end
-        % move data file to current working folder
-        % refresh main window
-        pre_dirML = pwd;
-        ac_pwd = fileread('ac_pwd.txt');
-        if isdir(ac_pwd)
-            cd(ac_pwd)
+        date = datestr(now,30);
+        sourceFdr = fullfile(outputDir,'SWA-Spectrum-background-FDR.dat');
+        sourceChi = fullfile(outputDir,'SWA-Spectrum-Chi2CL.dat');
+        if ~isfile(sourceChi)
+            sourceChi = fullfile(outputDir,'Spectrum-SWA-Chi2CL.dat');
         end
-        
-        if isfile( which( 'SWA-Spectrum-background-FDR.dat'))
-            date = datestr(now,30);
-            curr_dir_full1 = which('SWA-Spectrum-background-FDR.dat');
-            curr_dir_full2 = which('Spectrum-SWA-Chi2CL.dat');
-
-            curr_dir1 = fullfile(ac_pwd,[dat_name,'-',num2str(nw),'pi-MTM-SWA-Spectrum-FDR-',date,'.dat']);
-            curr_dir2 = fullfile(ac_pwd,[dat_name,'-',num2str(nw),'pi-MTM-SWA-Spectrum-Chi2CL-',date,'.dat']);
-
-            movefile(curr_dir_full1,curr_dir1);
-            movefile(curr_dir_full2,curr_dir2);
-            
+        targetFdr = fullfile(outputDir, ...
+            [dat_name,'-',num2str(nw),'pi-MTM-SWA-Spectrum-FDR-',date,'.dat']);
+        targetChi = fullfile(outputDir, ...
+            [dat_name,'-',num2str(nw),'pi-MTM-SWA-Spectrum-Chi2CL-',date,'.dat']);
+        if isfile(sourceFdr)
+            movefile(sourceFdr,targetFdr);
         end
-        % refresh main window
-        d = dir; %get files
-        set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-        % define some nested parameters
-        pre  = '<HTML><FONT color="blue">';
-        post = '</FONT></HTML>';
-        address = pwd;
-        d = dir; %get files
-        d(1)=[];d(1)=[];
-        listboxStr = cell(numel(d),1);
-        ac_pwd_str = which('ac_pwd.txt');
-        [ac_pwd_dir,ac_pwd_name,ext] = fileparts(ac_pwd_str);
-        fileID = fopen(fullfile(ac_pwd_dir,'ac_pwd.txt'),'w');
-        T = struct2table(d);
-        sortedT = [];
-        sd = [];
-        str=[];
-        i=[];
+        if isfile(sourceChi)
+            movefile(sourceChi,targetChi);
+        end
 
-        refreshcolor;
         cd(pre_dirML); % return to matlab view folder
     end
     
@@ -2751,9 +2805,9 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
             set(gca,'xscale','log')
         end
         
-        
+
         filename_LS = [dat_name,'-Lomb-Scargle.txt'];
-        CDac_pwd; % cd ac_pwd dir
+        cd(outputDir);
         dlmwrite(filename_LS, [fd1,po,(pth*ones(size(fd1')))'], 'delimiter', ' ', 'precision', 9);
         cd(pre_dirML); % return to matlab view folder
         %disp('Refresh the Main Window:')
@@ -2850,7 +2904,7 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
             
             name1 = [dat_name,'-Lomb-robustAR1',ext];
             data1 = [fd1,po,pth'];
-            CDac_pwd;
+            cd(outputDir);
             dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9);
             if handles.lang_choice == 0
                 disp('>>  Refresh main window to see red noise estimation data files: ')
@@ -2901,7 +2955,7 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
         data1 = [fd1,po,pl,red90,red95,red99];
         name2 = [dat_name,'-Lomb-PL-global',ext];
         data2 = [fd1,po,pl,red90global,red95global,red99global];
-        CDac_pwd;
+        cd(outputDir);
         dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9);
         dlmwrite(name2, data2, 'delimiter', ' ', 'precision', 9);
         if handles.lang_choice == 0
@@ -3028,7 +3082,7 @@ elseif strcmp(method,'Lomb-Scargle spectrum')
         data1 = [fd1,po,pl,red90,red95,red99];
         name2 = [dat_name,'-Lomb-BPL-global',ext];
         data2 = [fd1,po,pl,red90global,red95global,red99global];
-        CDac_pwd;
+        cd(outputDir);
         dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9);
         dlmwrite(name2, data2, 'delimiter', ' ', 'precision', 9);
         if handles.lang_choice == 0
@@ -3219,7 +3273,7 @@ elseif  strcmp(method,'Periodogram')
         data1 = [fd1,po,pl,red90,red95,red99];
         name2 = [dat_name,'-Periodogram-PL-global',ext];
         data2 = [fd1,po,pl,red90global,red95global,red99global];
-        CDac_pwd;
+        cd(outputDir);
         dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9);
         dlmwrite(name2, data2, 'delimiter', ' ', 'precision', 9);
         if handles.lang_choice == 0
@@ -3341,7 +3395,7 @@ elseif  strcmp(method,'Periodogram')
         data1 = [fd1,po,pl,red90,red95,red99];
         name2 = [dat_name,'-Periodogram-BPL-global',ext];
         data2 = [fd1,po,pl,red90global,red95global,red99global];
-        CDac_pwd;
+        cd(outputDir);
         dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9);
         dlmwrite(name2, data2, 'delimiter', ' ', 'precision', 9);
         if handles.lang_choice == 0
@@ -3433,10 +3487,10 @@ elseif  strcmp(method,'Periodogram')
             set(gca,'xscale','log')
         end
     end
-    
-    CDac_pwd; % cd ac_pwd dir
-    
-    try filename_Periodogram = [dat_name,'-PeriodogramAR1.txt'];   
+
+    cd(outputDir);
+
+    try filename_Periodogram = [dat_name,'-PeriodogramAR1.txt'];
         dlmwrite(filename_Periodogram, [fd1,po,theored,tabtchired90,tabtchired95,tabtchired99,tabtchired999], ...
             'delimiter', ' ', 'precision', 9);
     catch
@@ -3449,10 +3503,6 @@ elseif  strcmp(method,'Periodogram')
 else
 end
 
-% refresh AC main window
-figure(handles.acfigmain);
-CDac_pwd; % cd working dir
-refreshcolor;
 cd(pre_dirML); % return view dir
 figure(figspectrum);
 try figure(figwarn); 

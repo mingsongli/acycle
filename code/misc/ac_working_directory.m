@@ -19,10 +19,6 @@ switch action
         end
         statePath = ac_state_path(varargin,2);
         output = ac_read_saved_directory(statePath);
-        hasExplicitStatePath = numel(varargin) >= 2 && ~isempty(varargin{2});
-        if isempty(output) && ~isdeployed && ~hasExplicitStatePath
-            output = ac_read_legacy_directory();
-        end
         if isempty(output)
             output = ac_default_directory(fallbackDirectory);
         end
@@ -77,21 +73,6 @@ if exist(statePath,'file') ~= 2
 end
 try
     candidate = ac_normalize_directory(fileread(statePath));
-    if isfolder(candidate)
-        directory = candidate;
-    end
-catch
-end
-end
-
-function directory = ac_read_legacy_directory()
-directory = '';
-legacyPath = which('ac_pwd.txt');
-if isempty(legacyPath)
-    return
-end
-try
-    candidate = ac_normalize_directory(fileread(legacyPath));
     if isfolder(candidate)
         directory = candidate;
     end

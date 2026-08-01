@@ -431,18 +431,12 @@ end
             end
         end
 
-        pre_dir2 = pwd;
         try
-            cd(saveDir);
-            if exist('refreshcolor','file') == 2
-                refreshcolor;
-            else
-                refreshMainListbox(app.ctx,saveDir);
-            end
+            refreshMainListbox(app.ctx,saveDir);
         catch
-            try refreshMainListbox(app.ctx,saveDir); catch, end
+            % Saving already succeeded; leave the output intact if the
+            % main window is closing and can no longer be refreshed.
         end
-        try cd(pre_dir2); catch, end
 
         try
             if ~isempty(app.acfigmain) && isgraphics(app.acfigmain)
@@ -450,11 +444,6 @@ end
             end
         catch
         end
-        try
-            refreshcolor;
-        catch
-        end
-
         try figure(figdata); catch, end
     end
 
@@ -512,14 +501,22 @@ try
     if numel(d) >= 2
         d = d(~ismember({d.name},{'.','..'}));
     end
-    names = {d.name};
-    if isempty(names)
-        names = {''};
+    sortMode = getfielddef(ctx,'val1',4);
+    try
+        mainHandles = guidata(listbox);
+        if isstruct(mainHandles) && isfield(mainHandles,'val1') && ...
+                ~isempty(mainHandles.val1)
+            sortMode = mainHandles.val1;
+        end
+    catch
     end
-    set(listbox,'String',names,'Value',1);
+    d = ac_sort_dir_entries(d,sortMode);
+    ac_update_listbox_acmain(listbox,{d.name},[d.isdir]);
     if ~isempty(editdir) && isgraphics(editdir)
         set(editdir,'String',dirpath);
     end
+    ac_working_directory('set',dirpath);
+    drawnow limitrate;
 catch
 end
 end

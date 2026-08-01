@@ -345,38 +345,13 @@ set(runbt,'CData',imread('menu_robot.jpg'))
         %% save data
         if robot_savedata == 1
             pre_dirML = pwd;
-            ac_pwd = fileread('ac_pwd.txt');
+            ac_pwd = ac_working_directory('get',pwd);
             if isdir(ac_pwd)
                 cd(ac_pwd)
             end
             dlmwrite([name1,ext], dat, 'delimiter', ' ', 'precision', 9);
             disp(['>>  Saving data. See main window: ', name1,ext])
-            d = dir; %get files
-            set(listbox_acmain,'String',{d.name},'Value',1) %set string
-            
-            pre  = '<HTML><FONT color="blue">';
-            post = '</FONT></HTML>';
-            d = dir; %get files
-            address = pwd;
-            set(edit_acfigmain_dir,'String',address);
-            listboxStr = cell(numel(d),1);
-            % Save pwd into a text file
-            ac_pwd_str = which('ac_pwd.txt');
-            [ac_pwd_dir,ac_pwd_name,ext] = fileparts(ac_pwd_str);
-            fileID = fopen(fullfile(ac_pwd_dir,'ac_pwd.txt'),'w');
-            fprintf(fileID,'%s',address);
-            fclose(fileID);
-            %
-            for i = 1:numel( d )
-                if isdir(d(i).name)
-                    str = [pre d(i).name post];
-                    listboxStr{i} = str;
-                else
-                    listboxStr{i} = d(i).name;
-                end
-            end
-            set(listbox_acmain,'String',listboxStr,'Value',1) %set string
-            ac_refresh_main_list(listbox_acmain,pwd);
+            refreshRobotMainList(pwd);
 
             cd(pre_dirML); % return to matlab view folder
         end
@@ -466,38 +441,13 @@ set(runbt,'CData',imread('menu_robot.jpg'))
                 % save data
                 if robot_savedata == 1
                     pre_dirML = pwd;
-                    ac_pwd = fileread('ac_pwd.txt');
+                    ac_pwd = ac_working_directory('get',pwd);
                     if isdir(ac_pwd)
                         cd(ac_pwd)
                     end
                     dlmwrite([name1,ext], dati, 'delimiter', ' ', 'precision', 9);
                     disp(['>>  Saving data. See main window: ', name1,ext])
-                    d = dir; %get files
-                    set(listbox_acmain,'String',{d.name},'Value',1) %set string
-                    
-                    pre  = '<HTML><FONT color="blue">';
-                    post = '</FONT></HTML>';
-                    d = dir; %get files
-                    address = pwd;
-                    set(edit_acfigmain_dir,'String',address);
-                    listboxStr = cell(numel(d),1);
-                    % Save pwd into a text file
-                    ac_pwd_str = which('ac_pwd.txt');
-                    [ac_pwd_dir,ac_pwd_name,ext] = fileparts(ac_pwd_str);
-                    fileID = fopen(fullfile(ac_pwd_dir,'ac_pwd.txt'),'w');
-                    fprintf(fileID,'%s',address);
-                    fclose(fileID);
-                    %
-                    for i = 1:numel( d )
-                        if isdir(d(i).name)
-                            str = [pre d(i).name post];
-                            listboxStr{i} = str;
-                        else
-                            listboxStr{i} = d(i).name;
-                        end
-                    end
-                    set(listbox_acmain,'String',listboxStr,'Value',1) %set string
-                    ac_refresh_main_list(listbox_acmain,pwd);
+                    refreshRobotMainList(pwd);
                     cd(pre_dirML); % return to matlab view folder
             
                 end
@@ -553,37 +503,13 @@ set(runbt,'CData',imread('menu_robot.jpg'))
             % save data
             if robot_savedata == 1
                 pre_dirML = pwd;
-                ac_pwd = fileread('ac_pwd.txt');
+                ac_pwd = ac_working_directory('get',pwd);
                 if isdir(ac_pwd)
                     cd(ac_pwd)
                 end
                 dlmwrite([name1,ext], dat, 'delimiter', ' ', 'precision', 9);
                 disp(['>>  Saving data. See main window: ', name1,ext])
-                d = dir; %get files
-                set(listbox_acmain,'String',{d.name},'Value',1) %set string
-                pre  = '<HTML><FONT color="blue">';
-                post = '</FONT></HTML>';
-                d = dir; %get files
-                address = pwd;
-                set(edit_acfigmain_dir,'String',address);
-                listboxStr = cell(numel(d),1);
-                % Save pwd into a text file
-                ac_pwd_str = which('ac_pwd.txt');
-                [ac_pwd_dir,ac_pwd_name,ext] = fileparts(ac_pwd_str);
-                fileID = fopen(fullfile(ac_pwd_dir,'ac_pwd.txt'),'w');
-                fprintf(fileID,'%s',address);
-                fclose(fileID);
-                %
-                for i = 1:numel( d )
-                    if isdir(d(i).name)
-                        str = [pre d(i).name post];
-                        listboxStr{i} = str;
-                    else
-                        listboxStr{i} = d(i).name;
-                    end
-                end
-                set(listbox_acmain,'String',listboxStr,'Value',1) %set string
-                ac_refresh_main_list(listbox_acmain,pwd);
+                refreshRobotMainList(pwd);
                 cd(pre_dirML); % return to matlab view folder
             end
         end
@@ -614,7 +540,7 @@ set(runbt,'CData',imread('menu_robot.jpg'))
                     data2 = redconfAR1;
 
                     pre_dirML = pwd;
-                    ac_pwd = fileread('ac_pwd.txt');
+                    ac_pwd = ac_working_directory('get',pwd);
                     if isdir(ac_pwd)
                         cd(ac_pwd)
                     end
@@ -622,31 +548,7 @@ set(runbt,'CData',imread('menu_robot.jpg'))
                     dlmwrite(name2, data2, 'delimiter', ' ', 'precision', 9);
                     disp(['>>  Saving data. See main window: ', name11,ext])
                     disp(['>>  Saving data. See main window: ', name2,ext])
-                    d = dir; %get files
-                    set(listbox_acmain,'String',{d.name},'Value',1) %set string
-                    pre  = '<HTML><FONT color="blue">';
-                    post = '</FONT></HTML>';
-                    d = dir; %get files
-                    address = pwd;
-                    set(edit_acfigmain_dir,'String',address);
-                    listboxStr = cell(numel(d),1);
-                    % Save pwd into a text file
-                    ac_pwd_str = which('ac_pwd.txt');
-                    [ac_pwd_dir,ac_pwd_name,ext] = fileparts(ac_pwd_str);
-                    fileID = fopen(fullfile(ac_pwd_dir,'ac_pwd.txt'),'w');
-                    fprintf(fileID,'%s',address);
-                    fclose(fileID);
-                    %
-                    for i = 1:numel( d )
-                        if isdir(d(i).name)
-                            str = [pre d(i).name post];
-                            listboxStr{i} = str;
-                        else
-                            listboxStr{i} = d(i).name;
-                        end
-                    end
-                    set(listbox_acmain,'String',listboxStr,'Value',1) %set string
-                    ac_refresh_main_list(listbox_acmain,pwd);
+                    refreshRobotMainList(pwd);
                     cd(pre_dirML); % return to matlab view folder
                 end
                 
@@ -673,37 +575,13 @@ set(runbt,'CData',imread('menu_robot.jpg'))
                     name11 = [name1,'-peirodogram-AR1.txt'];
                     data11 = [f,p,theored,tabtchi90,tabtchi95,tabtchi99,tabtchi999];
                     pre_dirML = pwd;
-                    ac_pwd = fileread('ac_pwd.txt');
+                    ac_pwd = ac_working_directory('get',pwd);
                     if isdir(ac_pwd)
                         cd(ac_pwd)
                     end
                     dlmwrite(name11, data11, 'delimiter', ' ', 'precision', 9);
                     disp(['>>  Saving data. See main window: ', name11,ext])
-                    d = dir; %get files
-                    set(listbox_acmain,'String',{d.name},'Value',1) %set string
-                    pre  = '<HTML><FONT color="blue">';
-                    post = '</FONT></HTML>';
-                    d = dir; %get files
-                    address = pwd;
-                    set(edit_acfigmain_dir,'String',address);
-                    listboxStr = cell(numel(d),1);
-                    % Save pwd into a text file
-                    ac_pwd_str = which('ac_pwd.txt');
-                    [ac_pwd_dir,ac_pwd_name,ext] = fileparts(ac_pwd_str);
-                    fileID = fopen(fullfile(ac_pwd_dir,'ac_pwd.txt'),'w');
-                    fprintf(fileID,'%s',address);
-                    fclose(fileID);
-                    %
-                    for i = 1:numel( d )
-                        if isdir(d(i).name)
-                            str = [pre d(i).name post];
-                            listboxStr{i} = str;
-                        else
-                            listboxStr{i} = d(i).name;
-                        end
-                    end
-                    set(listbox_acmain,'String',listboxStr,'Value',1) %set string
-                    ac_refresh_main_list(listbox_acmain,pwd);
+                    refreshRobotMainList(pwd);
                     cd(pre_dirML); % return to matlab view folder
                 end
             end
@@ -794,5 +672,33 @@ set(runbt,'CData',imread('menu_robot.jpg'))
         disp('')
         disp('>>  ==========    Done   ==========')
         disp('>>  ==================================================')
+    end
+
+    function refreshRobotMainList(workDir)
+        if ac_refresh_main_list(listbox_acmain,workDir)
+            return
+        end
+        if isempty(listbox_acmain) || ~isgraphics(listbox_acmain)
+            return
+        end
+        listing = dir(workDir);
+        listing = listing(~ismember({listing.name},{'.','..'}));
+        sortMode = 4;
+        try
+            mainHandles = guidata(listbox_acmain);
+            if isstruct(mainHandles) && isfield(mainHandles,'val1') && ...
+                    ~isempty(mainHandles.val1)
+                sortMode = mainHandles.val1;
+            end
+        catch
+        end
+        listing = ac_sort_dir_entries(listing,sortMode);
+        ac_update_listbox_acmain(listbox_acmain, ...
+            {listing.name},[listing.isdir]);
+        if ~isempty(edit_acfigmain_dir) && isgraphics(edit_acfigmain_dir)
+            set(edit_acfigmain_dir,'String',workDir);
+        end
+        ac_working_directory('set',workDir);
+        drawnow limitrate;
     end
 end

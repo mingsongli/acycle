@@ -189,11 +189,53 @@ verifyFalse(testCase,saved);
 verifyEqual(testCase,exist(statePath,'file'),0);
 end
 
+function testDefaultWorkingDirectoryStateLivesInUserSettings(testCase)
+[environmentCleanup,settingsRoot] = ...
+    redirectAcycleSettingsToTemporaryFolder(); %#ok<NASGU>
+workingFolder = tempname;
+mkdir(workingFolder);
+testCase.addTeardown(@()removeFolder(workingFolder));
+
+statePath = ac_working_directory('path');
+saved = ac_working_directory('set',workingFolder);
+
+verifyTrue(testCase,startsWith(statePath,settingsRoot));
+verifyFalse(testCase,contains(statePath,fullfile('code','bin')));
+verifyTrue(testCase,saved);
+verifyEqual(testCase,strtrim(fileread(statePath)),workingFolder);
+end
+
 function settingsPath = temporarySettingsPath(testCase)
 settingsFolder = tempname;
 mkdir(settingsFolder);
 testCase.addTeardown(@()removeFolder(settingsFolder));
 settingsPath = fullfile(settingsFolder,'settings.mat');
+end
+
+function [cleanup,settingsRoot] = ...
+        redirectAcycleSettingsToTemporaryFolder()
+settingsRoot = tempname;
+mkdir(settingsRoot);
+if ispc
+    variableNames = {'APPDATA','LOCALAPPDATA','USERPROFILE'};
+elseif ismac
+    variableNames = {'HOME'};
+else
+    variableNames = {'XDG_CONFIG_HOME','HOME'};
+end
+oldValues = cellfun(@getenv,variableNames,'UniformOutput',false);
+for index = 1:numel(variableNames)
+    setenv(variableNames{index},settingsRoot);
+end
+cleanup = onCleanup(@()restoreTestEnvironment( ...
+    variableNames,oldValues,settingsRoot));
+end
+
+function restoreTestEnvironment(variableNames,oldValues,settingsRoot)
+for index = 1:numel(variableNames)
+    setenv(variableNames{index},oldValues{index});
+end
+removeFolder(settingsRoot);
 end
 
 function removeFolder(folder)
