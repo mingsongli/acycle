@@ -197,7 +197,7 @@ _Examples #12 Image profile_
 _Examples #13 Plot Digitizer_
 
 
-[Read More](https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf) and [example](https://acycle.org/examples/)
+[Read More](https://github.com/mingsongli/acycleDoc/blob/main/Acycle_Users_Guide.pdf) and [example](https://acycle.org/examples/)
 
 ---
 ## Wiki: Table of Content
@@ -349,13 +349,9 @@ also my students were very enthusiastic about _**Acycle**_ and I now use it now 
 ---
 ## Read more
 - **Official website**: https://acycle.org <br>
-- or here: https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf
-- or here:  _Acycle_ "**Help**" menu - "**Manual**",
-- or here:
-
-```json
-  /doc/AC_Users_Guide.pdf
-```
+- **Acycle User Guide**: https://github.com/mingsongli/acycleDoc/blob/main/Acycle_Users_Guide.pdf
+- **Documentation repository**: https://github.com/mingsongli/acycleDoc
+- or use the _Acycle_ "**Help**" menu - "**Manual**".
 
 <br><br>
 <b> 

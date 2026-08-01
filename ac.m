@@ -35,12 +35,12 @@ function ac
 % evolutionary fast Fourier transform, wavelet transform, Bayesian changepoint,
 % (e)TimeOpt, or other methods, please also cite the respective original 
 % publications. Details on these references can be found in the 
-% "AC_Users_Guide.pdf" document.
+% "Acycle_Users_Guide.pdf" document.
 %
 %**************************************************************************
 %
 %
-% https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf
+% https://github.com/mingsongli/acycleDoc/blob/main/Acycle_Users_Guide.pdf
 %
 % Author Information for the Acycle Program:
 %

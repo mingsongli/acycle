@@ -31,7 +31,7 @@
 % publications, as detailed in Acycle website and the Users Guide at
 %
 %   https://acycle.org
-%   https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf
+%   https://github.com/mingsongli/acycleDoc/blob/main/Acycle_Users_Guide.pdf
 %
 %**************************************************************************
 % Program Manager:

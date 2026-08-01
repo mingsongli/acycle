@@ -16,7 +16,7 @@ research results. The supplementary materials include a demonstration case study
 an Excel file for parameter documentation.
 
 If you publish results using techniques such as correlation coefficient, sedimentary noise model, power decomposition analysis, evolutionary fast Fourier transform, wavelet transform, Bayesian change point, (e)TimeOpt, Spectral Moments or other approaches, please also cite original publications, as detailed in Acycle Wiki and the Users Guide at
-    https://github.com/mingsongli/acycle/blob/master/doc/Acycle_Users_Guide.pdf
+    https://github.com/mingsongli/acycleDoc/blob/main/Acycle_Users_Guide.pdf
 
 **************************************************************************
 Program Manager:

@@ -20,10 +20,10 @@ function varargout = AC(varargin)
 % sedimentary noise model, power decomposition analysis, evolutionary fast
 % Fourier transform, wavelet transform, Bayesian changepoint,
 % or other approaches, please also cite original publications,
-% as detailed in "AC_Users_Guide.pdf" file at
+% as detailed in "Acycle_Users_Guide.pdf" file at
 % 
 % https://github.com/mingsongli/acycle/wiki
-% https://github.com/mingsongli/acycle/blob/master/doc/AC_Users_Guide.pdf
+% https://github.com/mingsongli/acycleDoc/blob/main/Acycle_Users_Guide.pdf
 %
 % Program Author:
 %           Mingsong Li, PhD
@@ -2688,9 +2688,9 @@ function menu_manuals_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-%filename = which('AC_Users_Guide.pdf');
+%filename = which('Acycle_Users_Guide.pdf');
 %openpdf(filename);
-url2 = 'https://github.com/mingsongli/acycle/blob/master/doc/Acycle_Users_Guide.pdf';
+url2 = 'https://github.com/mingsongli/acycleDoc/blob/main/Acycle_Users_Guide.pdf';
 web(url2,'-browser')
 url = 'https://acycle.org/manual/';
 web(url,'-browser')
