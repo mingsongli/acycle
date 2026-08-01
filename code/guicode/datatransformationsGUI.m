@@ -245,7 +245,7 @@ function datatransformationsGUI(varargin)
         
         % refresh main window
         pre_dirML = pwd;
-        ac_pwd = strtrim(fileread('ac_pwd.txt'));
+        ac_pwd = ac_working_directory('get',pwd);
         if isdir(ac_pwd)
             cd(ac_pwd)
             disp([' Working Dir: ', ac_pwd])
@@ -343,12 +343,23 @@ function datatransformationsGUI(varargin)
             % handles are unavailable (for example while AC is closing).
             listing = dir(saveDirectory);
             listing = listing(~ismember({listing.name},{'.','..'}));
-            listing = ac_sort_dir_entries(listing,1);
+            sortMode = 4;
+            try
+                mainHandles = guidata(handles.listbox_acmain);
+                if isstruct(mainHandles) && isfield(mainHandles,'val1') && ...
+                        ~isempty(mainHandles.val1)
+                    sortMode = mainHandles.val1;
+                end
+            catch
+            end
+            listing = ac_sort_dir_entries(listing,sortMode);
             ac_update_listbox_acmain(handles.listbox_acmain, ...
                 {listing.name},[listing.isdir]);
-            if isgraphics(handles.edit_acfigmain_dir)
+            if isfield(handles,'edit_acfigmain_dir') && ...
+                    isgraphics(handles.edit_acfigmain_dir)
                 set(handles.edit_acfigmain_dir,'String',saveDirectory);
             end
+            ac_working_directory('set',saveDirectory);
             drawnow limitrate;
         end
         cd(pre_dirML); % return to matlab view folder

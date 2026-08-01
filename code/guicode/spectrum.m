@@ -746,10 +746,7 @@ end
         function outdir = getAcWorkDir()
             outdir = '';
             try
-                acPwdPath = which('ac_pwd.txt');
-                if ~isempty(acPwdPath) && isfile(acPwdPath)
-                    outdir = strtrim(fileread(acPwdPath));
-                end
+                outdir = ac_working_directory('get',pwd);
             catch
             end
             if isempty(outdir)
@@ -774,13 +771,17 @@ end
                 end
                 d = dir(workDir);
                 d = d(~ismember({d.name},{'.','..'}));
-                if isempty(d)
-                    return;
-                end
-
                 val1 = 1;
                 try
                     val1 = app.ctx.val1;
+                catch
+                end
+                try
+                    mainHandles = guidata(app.ctx.listbox_acmain);
+                    if isstruct(mainHandles) && isfield(mainHandles,'val1') && ...
+                            ~isempty(mainHandles.val1)
+                        val1 = mainHandles.val1;
+                    end
                 catch
                 end
                 sortMode = val1;
@@ -791,33 +792,19 @@ end
                 end
                 d = ac_sort_dir_entries(d,sortMode);
 
-                pre = '<HTML><FONT color="blue">';
-                post = '</FONT></HTML>';
-                listboxStr = cell(numel(d),1);
-                for i = 1:numel(d)
-                    if d(i).isdir
-                        listboxStr{i} = [pre d(i).name post];
-                    else
-                        listboxStr{i} = d(i).name;
-                    end
-                end
-
                 try
                     set(app.ctx.edit_acfigmain_dir,'String',workDir);
                 catch
                 end
                 try
-                    set(app.ctx.listbox_acmain,'String',listboxStr,'Value',[]);
+                    ac_update_listbox_acmain(app.ctx.listbox_acmain, ...
+                        {d.name},[d.isdir]);
+                    drawnow limitrate;
                 catch
                 end
 
                 try
-                    acPwdPath = which('ac_pwd.txt');
-                    if ~isempty(acPwdPath)
-                        fid = fopen(acPwdPath,'w');
-                        fprintf(fid,'%s',workDir);
-                        fclose(fid);
-                    end
+                    ac_working_directory('set',workDir);
                 catch
                 end
             catch

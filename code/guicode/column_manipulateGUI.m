@@ -20,7 +20,7 @@ function column_manipulateGUI(varargin)
     colhead = [];
     % get working directory
     
-    ac_pwd = fileread('ac_pwd.txt');
+    ac_pwd = ac_working_directory('get',pwd);
     disp(' ')
     disp(' Column Manipulate ...')
     
@@ -141,7 +141,7 @@ function column_manipulateGUI(varargin)
         
         % refresh main window
         pre_dirML = pwd;
-        ac_pwd = fileread('ac_pwd.txt');
+        ac_pwd = ac_working_directory('get',pwd);
         if isdir(ac_pwd)
             cd(ac_pwd)
             disp([' Working Dir: ', ac_pwd])
@@ -161,26 +161,31 @@ function column_manipulateGUI(varargin)
         
         disp(name1)
         
-        % refresh main window
-        d = dir; %get files
-        set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
-        % define some nested parameters
-        pre  = '<HTML><FONT color="blue">';
-        post = '</FONT></HTML>';
-        address = pwd;
-        d = dir; %get files
-        d(1)=[];
-        d(1)=[];
-        listboxStr = cell(numel(d),1);
-        ac_pwd_str = which('ac_pwd.txt');
-        [ac_pwd_dir,ac_pwd_name, ext] = fileparts(ac_pwd_str);
-        fileID = fopen(fullfile(ac_pwd_dir,'ac_pwd.txt'),'w');
-        T = struct2table(d);
-        sortedT = [];
-        sd = [];
-        str=[];
-        i=[];
-        refreshcolor;
+        % refresh main window through the shared synchronized list path
+        saveDirectory = pwd;
+        if ~ac_refresh_main_list(handles.listbox_acmain,saveDirectory) && ...
+                isgraphics(handles.listbox_acmain)
+            listing = dir(saveDirectory);
+            listing = listing(~ismember({listing.name},{'.','..'}));
+            sortMode = 4;
+            try
+                mainHandles = guidata(handles.listbox_acmain);
+                if isstruct(mainHandles) && isfield(mainHandles,'val1') && ...
+                        ~isempty(mainHandles.val1)
+                    sortMode = mainHandles.val1;
+                end
+            catch
+            end
+            listing = ac_sort_dir_entries(listing,sortMode);
+            ac_update_listbox_acmain(handles.listbox_acmain, ...
+                {listing.name},[listing.isdir]);
+            if isfield(handles,'edit_acfigmain_dir') && ...
+                    isgraphics(handles.edit_acfigmain_dir)
+                set(handles.edit_acfigmain_dir,'String',saveDirectory);
+            end
+            ac_working_directory('set',saveDirectory);
+            drawnow limitrate;
+        end
         cd(pre_dirML); % return to matlab view folder
     end
 %%

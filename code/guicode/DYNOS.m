@@ -723,50 +723,50 @@ filename = sprintf('%s-%s%s',baseName,datestr(now,'yyyymmddTHHMMSS'),ext);
 end
 
 function refreshMainListbox(S)
-if ac_refresh_main_list(S.listbox_acmain)
+workDir = pwd;
+if ac_refresh_main_list(S.listbox_acmain,workDir)
     return
 end
 if isempty(S.listbox_acmain) || ~isgraphics(S.listbox_acmain)
     return
 end
-pre  = '<HTML><FONT color="blue">';
-post = '</FONT></HTML>';
-d = dir;
-if numel(d)>=2, d(1:2)=[]; end
-address = pwd;
+d = dir(workDir);
+d = d(~ismember({d.name},{'.','..'}));
 if ~isempty(S.edit_acfigmain_dir) && isgraphics(S.edit_acfigmain_dir)
-    set(S.edit_acfigmain_dir,'String',address);
+    set(S.edit_acfigmain_dir,'String',workDir);
 end
-ac_working_directory('set',address);
-if isempty(d)
-    set(S.listbox_acmain,'String',{},'Value',[]);
-    return
-end
+ac_working_directory('set',workDir);
 sortMode = S.val1;
+try
+    mainHandles = guidata(S.listbox_acmain);
+    if isstruct(mainHandles) && isfield(mainHandles,'val1') && ...
+            ~isempty(mainHandles.val1)
+        sortMode = mainHandles.val1;
+    end
+catch
+end
 switch sortMode
     case {1,2,3,4,5,6}
     otherwise
         sortMode = 1;
 end
 sd = ac_sort_dir_entries(d,sortMode);
-out = cell(numel(sd),1);
-for i=1:numel(sd)
-    if isdir(sd(i).name)
-        out{i} = [pre sd(i).name post];
-    else
-        out{i} = sd(i).name;
-    end
-end
-set(S.listbox_acmain,'String',out,'Value',[]);
+ac_update_listbox_acmain(S.listbox_acmain,{sd.name},[sd.isdir]);
+drawnow limitrate;
 end
 
 function onSaveFigure(src)
 S = getState(src);
 try
+    previousDirectory = pwd;
+    workDir = ac_working_directory('get',previousDirectory);
+    directoryCleanup = onCleanup(@()cd(previousDirectory)); %#ok<NASGU>
+    cd(workDir);
     fig = buildDynotFigure(S,'DYNOT');
     out = nextOutputFile('plots_','.fig');
     savefig(fig,out);
     close(fig);
+    refreshMainListbox(S);
     uialert(S.UIFigure,['Saved: ',out],'Save');
 catch ME
     uialert(S.UIFigure,ME.message,'Save Figure Error');
@@ -776,10 +776,15 @@ end
 function onPrintFigure(src)
 S = getState(src);
 try
+    previousDirectory = pwd;
+    workDir = ac_working_directory('get',previousDirectory);
+    directoryCleanup = onCleanup(@()cd(previousDirectory)); %#ok<NASGU>
+    cd(workDir);
     fig = buildDynotFigure(S,'DYNOT print');
     out = nextOutputFile('plots_','.pdf');
     exportgraphics(fig,out,'ContentType','vector');
     close(fig);
+    refreshMainListbox(S);
     uialert(S.UIFigure,['Printed: ',out],'Print');
 catch ME
     uialert(S.UIFigure,ME.message,'Print Error');

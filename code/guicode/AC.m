@@ -562,10 +562,261 @@ catch
     handles = guidata(hObject);
 end
 try
+    % Every callback receives one reconciled view of the main list.  The
+    % visible drawn list, the hidden uicontrol and GUIDE's cached handles
+    % can otherwise retain different selections after a refresh/sort.
+    [~,~,handles] = getMainListSelection(handles);
+    guidata(fig,handles);
     feval(callbackName, hObject, eventdata, handles);
+    % A callback may have created/deleted files and refreshed the list.
+    % Reconcile again so handles.index_selected cannot remain stale after it.
+    latestHandles = guidata(fig);
+    [~,~,latestHandles] = getMainListSelection(latestHandles);
+    guidata(fig,latestHandles);
 catch ME
     warning('%s failed: %s', callbackName, ME.message);
     rethrow(ME);
+end
+
+
+function [contents,plot_selected,handles,selectionReset] = ...
+        getMainListSelection(handles,allowRefresh)
+% Return a selection that belongs to the list currently shown to the user.
+%
+% The macOS-compatible main list has three representations: a visible
+% drawn list (appdata), a hidden classic listbox (String/Value), and a
+% cached copy in handles.index_selected.  File creation/deletion or sorting
+% can update these at different times.  Never reuse a numeric row from a
+% different representation: a still-in-range row can silently name the
+% wrong file after sorting.
+
+contents = {};
+plot_selected = [];
+selectionReset = false;
+if nargin < 2
+    allowRefresh = true;
+end
+
+if isempty(handles) || ~isfield(handles,'listbox_acmain') || ...
+        ~isgraphics(handles.listbox_acmain)
+    if isstruct(handles)
+        handles.index_selected = [];
+    end
+    selectionReset = true;
+    return
+end
+
+hListbox = handles.listbox_acmain;
+[nativeNames,nativeSelection,nativeSelectionIsValid] = ...
+    getNativeMainListState(hListbox);
+managedNames = {};
+hasManagedNames = false;
+hasDrawnNames = false;
+listMismatch = false;
+
+% ACListNames is what the user can actually see in the drawn macOS list.
+try
+    if isappdata(hListbox,'ACListNames')
+        managedNames = normalizeMainListNames( ...
+            getappdata(hListbox,'ACListNames'));
+        hasManagedNames = true;
+        hasDrawnNames = true;
+    end
+catch
+end
+
+% UserData is the platform-independent name store.  It must agree with the
+% visible list before any row number is accepted.
+try
+    userdata = get(hListbox,'UserData');
+    if isstruct(userdata) && isfield(userdata,'names')
+        userdataNames = normalizeMainListNames(userdata.names);
+        if hasManagedNames
+            listMismatch = ~isequal(managedNames,userdataNames);
+        else
+            managedNames = userdataNames;
+            hasManagedNames = true;
+        end
+    end
+catch
+end
+
+if hasManagedNames
+    contents = managedNames;
+    listMismatch = listMismatch || ~isequal(nativeNames,contents);
+else
+    contents = nativeNames;
+end
+
+hasDrawnSelection = false;
+try
+    if hasDrawnNames && isappdata(hListbox,'ACListSelected')
+        rawSelection = getappdata(hListbox,'ACListSelected');
+        hasDrawnSelection = true;
+    end
+catch
+end
+if ~hasDrawnSelection
+    rawSelection = nativeSelection;
+end
+
+selectionIsValid = isValidMainListIndices(rawSelection,numel(contents));
+if selectionIsValid
+    rawSelection = double(rawSelection(:)');
+end
+if hasDrawnSelection
+    listMismatch = listMismatch || ~nativeSelectionIsValid || ...
+        ~selectionIsValid || ...
+        ~isequal(double(rawSelection(:)'),nativeSelection);
+elseif ~nativeSelectionIsValid
+    listMismatch = true;
+end
+
+% A partial update is repaired from the actual browser directory before a
+% menu is allowed to consume any row number.
+if listMismatch && allowRefresh
+    try
+        if ac_refresh_main_list(hListbox)
+            latestHandles = guidata(ancestor(hListbox,'figure'));
+            [contents,plot_selected,handles,selectionReset] = ...
+                getMainListSelection(latestHandles,false);
+            selectionReset = true;
+            return
+        end
+    catch
+    end
+end
+
+if selectionIsValid && ~listMismatch
+    plot_selected = unique(rawSelection,'stable');
+else
+    plot_selected = [];
+    selectionReset = listMismatch || ~isempty(rawSelection);
+end
+
+if isfield(handles,'index_selected') && ...
+        ~isequal(handles.index_selected,plot_selected)
+    selectionReset = selectionReset || ~isempty(handles.index_selected);
+end
+handles.index_selected = plot_selected;
+handles.plot_selected = plot_selected;
+
+% Synchronize the native control so legacy scripts called by a menu see the
+% same safe names and rows returned above.
+setNativeMainListState(hListbox,contents,plot_selected);
+try
+    if isappdata(hListbox,'ACListSelected')
+        setappdata(hListbox,'ACListSelected',plot_selected);
+    end
+catch
+end
+
+
+function names = normalizeMainListNames(value)
+% Convert any supported listbox name representation to a column cellstr.
+if isempty(value)
+    names = {};
+elseif ischar(value)
+    names = cellstr(value);
+elseif isstring(value)
+    names = cellstr(value(:));
+elseif iscell(value)
+    names = cell(size(value));
+    for i = 1:numel(value)
+        item = value{i};
+        if isstring(item)
+            item = char(item);
+        elseif ~ischar(item)
+            item = char(string(item));
+        end
+        names{i} = item;
+    end
+    names = names(:);
+else
+    names = cellstr(string(value(:)));
+end
+
+
+function [names,selected,isValid] = getNativeMainListState(hListbox)
+% Read either a classic listbox (String/numeric Value) or a UI listbox
+% (Items/name Value) as the same names-and-row-indices representation.
+names = {};
+selected = [];
+isValid = false;
+try
+    if isprop(hListbox,'Items')
+        names = normalizeMainListNames(hListbox.Items);
+        rawValue = hListbox.Value;
+        if isempty(rawValue)
+            selected = [];
+        else
+            valueNames = normalizeMainListNames(rawValue);
+            [isPresent,selected] = ismember(valueNames,names);
+            if ~all(isPresent)
+                selected = [];
+                return
+            end
+            selected = double(selected(:)');
+        end
+    else
+        names = normalizeMainListNames(get(hListbox,'String'));
+        selected = get(hListbox,'Value');
+        if ~isValidMainListIndices(selected,numel(names))
+            selected = [];
+            return
+        end
+        selected = double(selected(:)');
+    end
+    isValid = true;
+catch
+    names = {};
+    selected = [];
+    isValid = false;
+end
+
+
+function valid = isValidMainListIndices(indices,count)
+valid = isnumeric(indices) && isreal(indices);
+if valid
+    indices = double(indices(:)');
+    valid = all(isfinite(indices)) && ...
+        all(indices == fix(indices)) && ...
+        all(indices >= 1) && all(indices <= count) && ...
+        numel(unique(indices)) == numel(indices);
+end
+
+
+function setNativeMainListState(hListbox,names,selected)
+try
+    if isprop(hListbox,'Items')
+        currentNames = normalizeMainListNames(hListbox.Items);
+        if ~isequal(currentNames,names)
+            try hListbox.Value = {}; catch, end
+            hListbox.Items = names;
+        end
+        if isempty(selected)
+            try hListbox.Value = {}; catch, end
+        else
+            try
+                hListbox.Value = names(selected);
+            catch
+                hListbox.Value = names{selected(1)};
+            end
+        end
+    else
+        % Clear Value first because MATLAB rejects a shorter String while an
+        % old out-of-range Value is still installed on some macOS releases.
+        set(hListbox,'Value',[]);
+        set(hListbox,'String',names);
+        set(hListbox,'Value',selected);
+    end
+catch
+    try
+        if ~isprop(hListbox,'Items')
+            set(hListbox,'Value',[]);
+        end
+    catch
+    end
 end
 
 
@@ -1081,7 +1332,9 @@ handles.nsim = 2000;
 handles.red = 2;
 handles.adjust = 0;
 handles.slices = 1;
-handles.index_selected = 1;
+% A refresh does not select a file.  Keep the GUIDE cache empty until the
+% user selects a row in the current list.
+handles.index_selected = [];
 handles.pad = 50000;
 handles.prewhiten_linear = 'notlinear';
 handles.prewhiten_lowess = 'notlowess';
@@ -1193,8 +1446,10 @@ end
 
 if ismember('control', EventData.Modifier) || ismember('command', EventData.Modifier)
     if strcmp(EventData.Key,'c')
-    contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-    plot_selected = get(handles.listbox_acmain,'Value');
+    [contents,plot_selected,handles] = getMainListSelection(handles);
+    if isempty(plot_selected)
+        return
+    end
     nplot = length(plot_selected);   % length
     CDac_pwd;
     handles.nplot = nplot;
@@ -1212,8 +1467,10 @@ if ismember('control', EventData.Modifier) || ismember('command', EventData.Modi
 end
 if ismember('control', EventData.Modifier) || ismember('command', EventData.Modifier)
     if strcmp(EventData.Key,'x')
-    contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-    plot_selected = get(handles.listbox_acmain,'Value');
+    [contents,plot_selected,handles] = getMainListSelection(handles);
+    if isempty(plot_selected)
+        return
+    end
     nplot = length(plot_selected);   % length
     CDac_pwd;
     handles.nplot = nplot;
@@ -1288,9 +1545,8 @@ if ismember('control', EventData.Modifier) || ismember('command', EventData.Modi
             end
         end
     end
-    d = dir; %get files
-    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
     refreshcolor;
+    [~,~,handles] = getMainListSelection(handles);
     if isdir(pre_dirML)
         cd(pre_dirML);
     end
@@ -1496,6 +1752,7 @@ handles = guidata(hObject);
 CDac_pwd; % cd working dir
 cd ..;
 refreshcolor;
+[~,~,handles] = getMainListSelection(handles);
 cd(pre_dirML); % return view dir
 guidata(hObject,handles)
 
@@ -1538,8 +1795,10 @@ if handles.lang_choice > 0
     dd24 = handles.lang_var{locb1};
 end
 
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 check = [];
 
@@ -1644,8 +1903,11 @@ end
 function push_refresh_clbk(hObject, handles)
 handles = guidata(hObject);
 CDac_pwd; % cd working dir
+ac_clear_main_list_selection_on_refresh = true;
 refreshcolor;
+[~,~,handles] = getMainListSelection(handles);
 cd(pre_dirML); % return view dir
+guidata(hObject,handles)
 
 % --- Executes on button press in push_openfolder.
 function push_openfolder_clbk(hObject, eventdata, handles)
@@ -1674,7 +1936,9 @@ else
         end
         cd(selpath)
         refreshcolor;
+        [~,~,handles] = getMainListSelection(handles);
         cd(pre_dirML); % return view dir
+        guidata(hObject,handles)
     end
 end
 
@@ -1711,8 +1975,7 @@ end
 
 unit = handles.unit;
 unit_type = handles.unit_type;
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
 nplot = length(plot_selected);   % length
 check = 0;
 % check
@@ -1846,17 +2109,17 @@ else
 end
 
         
+% Resolve the clicked row through the same checked path used by menus.  In
+% particular, never index String directly with a stale Value.
+[contents,index_selected,handles] = getMainListSelection(handles);
 if handles.doubleclick
-    index_selected = get(hObject,'Value');
-    index_selected = index_selected(1);
-    file_list = get(hObject,'String');
-    userdata = get(hObject,'UserData');
-    if isstruct(userdata) && isfield(userdata,'names') && numel(userdata.names) >= index_selected
-        filename1 = userdata.names{index_selected};
-    else
-        filename1 = file_list{index_selected};
-        filename1 = strrep2(filename1, '<HTML><FONT color="blue">', '</FONT></HTML>');
+    if isempty(index_selected)
+        guidata(hObject,handles)
+        return
     end
+    index_selected = index_selected(1);
+    filename1 = char(contents{index_selected});
+    filename1 = strrep2(filename1, '<HTML><FONT color="blue">', '</FONT></HTML>');
     filename = filename1;
     try
         % if selected item is a folder, try to open the folder.
@@ -1864,6 +2127,7 @@ if handles.doubleclick
         filename = fullfile(ac_pwd,filename1);
         cd(filename)
         refreshcolor;
+        [~,~,handles] = getMainListSelection(handles);
         cd(pre_dirML);
         if handles.lang_choice == 0
             disp(['>>  Change directory to < ', filename1, ' >'])
@@ -2086,7 +2350,7 @@ if handles.doubleclick
         end
     end
 else
-    handles.index_selected  = get(hObject,'Value');
+    handles.index_selected = index_selected;
 end
 guidata(hObject,handles)
 
@@ -2139,8 +2403,6 @@ else
         errordlg(a35)
     end
 end
-d = dir; %get files
-set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
 cd(pre_dirML);
 guidata(hObject,handles)
@@ -2200,8 +2462,10 @@ function menu_plot_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_plotall (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = handles.index_selected;  % read selection in listbox 1
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 
 %language
@@ -2721,8 +2985,10 @@ function menu_selectinterval_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_selectinterval (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 
 %language
@@ -2818,8 +3084,6 @@ for i = 1:nplot
                         end
                     end
                 end
-                d = dir; %get files
-                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                 refreshcolor;
                 cd(pre_dirML); % return to matlab view folder
                 return
@@ -2848,8 +3112,6 @@ for i = 1:nplot
 
                 CDac_pwd; % cd ac_pwd dir
                 dlmwrite(name1, current_data, 'delimiter', ' ', 'precision', 9);
-                d = dir; %get files
-                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                 refreshcolor;
                 cd(pre_dirML); % return to matlab view folder
             end
@@ -2871,8 +3133,7 @@ function menu_interp_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_interp (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
 nplot = length(plot_selected);   % length
 
 %language
@@ -2943,8 +3204,6 @@ for nploti = 1:nplot
                     name1 = [dat_name,'-rsp',num2str(interpolate_rate),ext];  % New name
                     CDac_pwd
                     dlmwrite(name1, data_interp, 'delimiter', ' ', 'precision', 9); 
-                    d = dir; %get files
-                    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                     refreshcolor;
                     cd(pre_dirML); % return to matlab view folder
                 end
@@ -2959,8 +3218,7 @@ function menu_norm_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_norm (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
 nplot = length(plot_selected);   % length
 if nplot == 1
     data_name = char(contents(plot_selected));
@@ -2977,8 +3235,6 @@ if nplot == 1
             name1 = [dat_name,'-stand',ext];
             CDac_pwd
             dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9); 
-            d = dir; %get files
-            set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
             refreshcolor;
             cd(pre_dirML); % return to matlab view folder
         end
@@ -2992,8 +3248,7 @@ function menu_clip_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_clip (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
 nplot = length(plot_selected);   % length
 
 %language
@@ -3122,8 +3377,6 @@ for nploti = 1:nplot
                         data1 = [time,y];
                         CDac_pwd
                         dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9);
-                        d = dir; %get files
-                        set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                         refreshcolor;
                         cd(pre_dirML); % return to matlab view folder
                 else
@@ -3139,8 +3392,10 @@ function menu_log10_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_log10 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 if nplot == 1
     data_name = char(contents(plot_selected));
@@ -3159,8 +3414,6 @@ if nplot == 1
             % cd ac_pwd dir
             CDac_pwd
             dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9); 
-            d = dir; %get files
-            set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
             refreshcolor;
             cd(pre_dirML); % return to matlab view folder
         end
@@ -3170,8 +3423,10 @@ guidata(hObject, handles);
 
 % --------------------------------------------------------------------
 function menu_bootstrap_Callback(hObject, eventdata, handles)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 if nplot == 1
     data_name = char(contents(plot_selected));
@@ -3198,8 +3453,8 @@ guidata(hObject, handles);
 % % hObject    handle to menu_smooth_option (see GCBO)
 % % eventdata  reserved - to be defined in a future version of MATLAB
 % % handles    structure with handles and user data (see GUIDATA)
-% contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-% plot_selected = get(handles.listbox_acmain,'Value');
+% Legacy bootstrap implementation retained below for reference; its direct
+% listbox selection access has been removed.
 % nplot = length(plot_selected);   % length
 % 
 % if nplot == 1
@@ -3297,8 +3552,6 @@ guidata(hObject, handles);
 %                 CDac_pwd
 %                 dlmwrite(name, data, 'delimiter', ' ', 'precision', 9); 
 %                 dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9); 
-%                 d = dir; %get files
-%                 set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 %                 refreshcolor;
 %                 cd(pre_dirML); % return to matlab view folder
 %             end
@@ -3314,8 +3567,7 @@ function menu_derivative_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_derivative (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
 nplot = length(plot_selected);   % length
 
 
@@ -3406,8 +3658,6 @@ for nploti = 1:nplot
                     name1 = [dat_name,'_',num2str(derivative_n),'derv',ext];
                     CDac_pwd
                     dlmwrite(name1, data1, 'delimiter', ' ', 'precision', 9);
-                    d = dir; %get files
-                    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                     refreshcolor;
                     cd(pre_dirML); % return to matlab view folder
                 end
@@ -3428,8 +3678,10 @@ function menu_period_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_period (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 if nplot == 1
     data_name = char(contents(plot_selected));
@@ -3461,8 +3713,10 @@ function menu_power_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_power (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 if nplot == 1
     data_name = char(contents(plot_selected));
@@ -3488,8 +3742,10 @@ function menu_swa_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_swa (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 if nplot == 1
     data_name = char(contents(plot_selected));
@@ -3523,8 +3779,10 @@ function menu_filter_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_filter (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 if nplot == 1
     data_name = char(contents(plot_selected));
@@ -3551,8 +3809,10 @@ function menu_AM_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_filter (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 
 %language
@@ -3619,8 +3879,6 @@ if nplot == 1
                 msgbox(a87)
             end
 
-            d = dir; %get files
-            set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
             refreshcolor;
             cd(pre_dirML); % return to matlab view folder
 
@@ -3644,8 +3902,10 @@ function menu_dynos_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_dynos (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 if nplot == 1
     data_name = char(contents(plot_selected));
@@ -3676,8 +3936,10 @@ function menu_ecoco_Callback(hObject, eventdata, handles)
 handles = guidata(hObject);
 handles.main_unit_selection = get(handles.main_unit_en,'Value');
 
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 if nplot == 1
     data_name = char(contents(plot_selected));
@@ -3780,8 +4042,6 @@ if ~isempty(answer)
     % cd ac_pwd dir
     CDac_pwd
     dlmwrite(filename, LR04stack_s, 'delimiter', ' ', 'precision', 9);
-    d = dir; %get files
-    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
     refreshcolor;
     cd(pre_dirML); % return to matlab view folder
 end
@@ -3792,8 +4052,10 @@ function menu_plotn_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_plotn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = handles.index_selected;  % read selection in listbox 1
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 
 
@@ -3877,8 +4139,10 @@ function menu_plotn2_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_plotn2 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = handles.index_selected;  % read selection in listbox 1
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 
 %language
@@ -3963,8 +4227,10 @@ function menu_rename_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_rename (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = handles.index_selected;  % read selection in listbox 1
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 
 %language
@@ -4005,8 +4271,6 @@ if nplot == 1
                 msgbox(a102)
             end
         end
-        d = dir; %get files
-        set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
         refreshcolor;
         cd(pre_dirML);
     end
@@ -4059,8 +4323,6 @@ else
     
     CDac_pwd % cd ac_pwd dir
     dlmwrite(handles.foldname, data, 'delimiter', ' ', 'precision', 9); 
-    d = dir; %get files
-    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
     refreshcolor;
     cd(pre_dirML); % return to matlab view folder
     handles.current_data = data;
@@ -4104,8 +4366,10 @@ function menu_depeaks_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_depeaks (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 
 %language
@@ -4151,8 +4415,6 @@ if nplot == 1
                 name1 = [dat_name,'-dpks',num2str(ymin_cut),'_',num2str(ymax_cut),ext];  % New name
                 CDac_pwd
                 dlmwrite(name1, current_data, 'delimiter', ' ', 'precision', 9); 
-                d = dir; %get files
-                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                 refreshcolor;
                 cd(pre_dirML); % return to matlab view folder
             end
@@ -4186,8 +4448,10 @@ function menu_prewhiten_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_prewhiten (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 if nplot == 1
     data_name = char(contents(plot_selected));
@@ -4214,8 +4478,10 @@ function menu_agebuild_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_agebuild (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 
 %language
@@ -4315,8 +4581,6 @@ if nplot == 1
                 CDac_pwd
                 dlmwrite(name1, agemodel, 'delimiter', ' ', 'precision', 9);
                 dlmwrite(name2, sedrate,  'delimiter', ' ', 'precision', 9);
-                d = dir; %get files
-                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                 refreshcolor;
                 cd(pre_dirML); % return to matlab view folder
                 
@@ -4387,8 +4651,10 @@ if handles.lang_choice > 0
     a129 = handles.lang_var{locb1};
 end
 
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 if nplot == 1
     data_name = char(contents(plot_selected));
@@ -4426,8 +4692,6 @@ if nplot == 1
             else
                 CDac_pwd
                 dlmwrite([dat_name,'-new',ext], data, 'delimiter', ' ', 'precision', 9);
-                d = dir; %get files
-                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                 refreshcolor;
                 cd(pre_dirML); % return to matlab view folder
             end
@@ -4443,8 +4707,10 @@ function menu_maxmin_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_function (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 %language
 lang_id = handles.lang_id;
@@ -4546,8 +4812,10 @@ end
 
 % Function of Bayesian changepoint technique
 
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 if nplot == 1
     data_name = char(contents(plot_selected));
@@ -4633,8 +4901,6 @@ if nplot == 1
                     end
 
                     
-                    d = dir; %get files
-                    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                     refreshcolor;
                     cd(pre_dirML); % return to matlab view folder
                 end
@@ -4649,8 +4915,10 @@ function menu_imshow_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_function (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 
 %language
@@ -4743,8 +5011,10 @@ function menu_rgb2gray_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_function (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 
 %language
@@ -4778,8 +5048,6 @@ if nplot == 1
                         set(gcf,'Name',dat_name,'NumberTitle','off')
                         CDac_pwd;
                         imwrite(I,dat_name)
-                        d = dir; %get files
-                        set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                         refreshcolor;
                         cd(pre_dirML); % return to matlab view folder
                     else
@@ -4805,8 +5073,10 @@ function menu_rgb2lab_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_rgb2lab (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 if nplot == 1
     data_name = char(contents(plot_selected));
@@ -4839,8 +5109,6 @@ if nplot == 1
                         set(gcf,'Name',dat_name,'NumberTitle','off')
                         CDac_pwd;
                         imwrite(I,dat_name,'tif','ColorSpace','CIELab')
-                        d = dir; %get files
-                        set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                         refreshcolor;
                         cd(pre_dirML); % return to matlab view folder
                     else
@@ -4860,8 +5128,10 @@ function menu_improfile_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_function (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 
 %language
@@ -5052,8 +5322,6 @@ if nplot == 1
 
                             dlmwrite(name2, czp, 'delimiter', ' ', 'precision', 9);
                             disp([a149,name2])
-                            d = dir; %get files
-                            set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                             refreshcolor;
                             cd(pre_dirML); % return to matlab view folder
 
@@ -5119,8 +5387,10 @@ function menu_cut_Callback(hObject, eventdata, handles)
 if AddressBarMenuShortcut(handles,'x')
     return
 end
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 CDac_pwd;
 handles.nplot = nplot;
@@ -5152,8 +5422,10 @@ function menu_copy_Callback(hObject, eventdata, handles)
 if AddressBarMenuShortcut(handles,'c')
     return
 end
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 CDac_pwd;
 handles.nplot = nplot;
@@ -5267,8 +5539,6 @@ for i = 1:nplot
         disp(' failed')
     end
 end
-d = dir; %get files
-set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
 if isdir(pre_dirML)
     cd(pre_dirML);
@@ -5281,6 +5551,10 @@ function menu_delete_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 deletefile = 0;
+[list_content,selected,handles] = getMainListSelection(handles);
+if isempty(selected)
+    return
+end
 
 %language
 lang_id = handles.lang_id;
@@ -5319,8 +5593,6 @@ switch choice
 end
 
 if deletefile == 1
-    list_content = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-    selected = handles.index_selected;  % read selection in listbox 1; minus 2 for listbox
     nplot = length(selected);   % length
     CDac_pwd; % cd working dir
     % handles.listnumber = handles.listnumber - nplot;
@@ -5352,8 +5624,6 @@ if deletefile == 1
             delete(plot_filter_selection);
         end
     end
-    d = dir; %get files
-    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
     refreshcolor;
     cd(pre_dirML);
     guidata(hObject,handles)
@@ -5365,8 +5635,10 @@ function menu_add_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_add (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = handles.index_selected;  % read selection in listbox 1
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 % check
 check = 0;
@@ -5403,8 +5675,6 @@ if check == 1
     dat_merge = findduplicate(dat_merge);
     CDac_pwd
     dlmwrite('mergedseries.txt', dat_merge, 'delimiter', ' ', 'precision', 9);
-    d = dir; %get files
-set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
 cd(pre_dirML); % return to matlab view folder
 end
@@ -5416,8 +5686,10 @@ function menu_multiply_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_multiply (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = handles.index_selected;  % read selection in listbox 1
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 % check
 check = 0;
@@ -5456,8 +5728,6 @@ if check == 1
     CDac_pwd
     dlmwrite('multipliedseries1.txt', dat_new1, 'delimiter', ' ', 'precision', 9);
     dlmwrite('multipliedseries2.txt', dat_new2, 'delimiter', ' ', 'precision', 9);
-    d = dir; %get files
-set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
 cd(pre_dirML); % return to matlab view folder
 end
@@ -5474,8 +5744,7 @@ function menu_sort_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_sort (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
 nplot = length(plot_selected);   % length
 
 %<<<<<<< HEAD
@@ -5629,8 +5898,6 @@ for nploti = 1:nplot
                     end
                 end
             end
-            d = dir; %get files
-            set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
             refreshcolor;
             cd(pre_dirML); % return to matlab view folder
             return
@@ -5725,8 +5992,6 @@ for nploti = 1:nplot
 
                         CDac_pwd
                         dlmwrite(name2, data, 'delimiter', ',', 'precision', 9);
-                        d = dir; %get files
-                        set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                         refreshcolor;
                         cd(pre_dirML); % return to matlab view folder
                     end
@@ -5743,8 +6008,10 @@ function menu_sr2age_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_sr2age (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 if nplot == 1
     data_name = char(contents(plot_selected));
@@ -5770,8 +6037,6 @@ if nplot == 1
             name1 = [dat_name,'-agemod',ext];  % New name
                 CDac_pwd
             dlmwrite(name1, agemodel, 'delimiter', ' ', 'precision', 9);
-            d = dir; %get files
-            set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
             refreshcolor;
             cd(pre_dirML); % return to matlab view folder
         end
@@ -5787,8 +6052,10 @@ function menu_plotpro_2d_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 
 %language
@@ -5901,8 +6168,10 @@ function menu_plotadv_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 check = 0;
 % check
@@ -6084,8 +6353,10 @@ switch choice
         nsim_yes = 2;
 end
 if nsim_yes < 2
-    contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-    plot_selected = get(handles.listbox_acmain,'Value');
+    [contents,plot_selected,handles] = getMainListSelection(handles);
+    if isempty(plot_selected)
+        return
+    end
     nplot = length(plot_selected);   % length
     if nplot > 1
         if handles.lang_choice == 0
@@ -6177,6 +6448,10 @@ if nsim_yes < 2
                             end
 
                             ac_refresh_main_list(handles.listbox_acmain,pwd);
+                            % The child-safe wrapper updates guidata in the
+                            % main figure; keep this callback's local copy in
+                            % sync before its final guidata write below.
+                            handles = guidata(hObject);
                             cd(pre_dirML); % return to matlab view folder
                         end
                     else
@@ -6367,8 +6642,6 @@ if nsim_yes < 2
                                 disp([a197,name1])   
                                 disp([a198,name2])  
                             end
-                            d = dir; %get files
-                            set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                             refreshcolor;
                             cd(pre_dirML);
                           else
@@ -6403,8 +6676,7 @@ if handles.lang_choice > 0
     a203 = handles.lang_var{locb1};
 end
 
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
 nplot = length(plot_selected);   % length
 if nplot == 1
     dat_name = char(contents(plot_selected));
@@ -6498,8 +6770,10 @@ if handles.lang_choice > 0
     main42 = handles.lang_var{locb1};
 end
 
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = handles.index_selected;  % read selection in listbox 1
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 % check
 for i = 1:nplot
@@ -6654,8 +6928,10 @@ if handles.lang_choice > 0
     dd40 = handles.lang_var{locb1};
 end
 
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = handles.index_selected;  % read selection in listbox 1
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 % check
 for i = 1:nplot
@@ -6788,8 +7064,10 @@ if handles.lang_choice > 0
     a234 = handles.lang_var{locb1};
 end
 
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = handles.index_selected;  % read selection in listbox 1
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 % check
 for i = 1:nplot
@@ -6978,8 +7256,10 @@ function menu_desection_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_desection (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 if nplot == 1
     
@@ -7100,8 +7380,10 @@ function menu_gap_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_gap (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 if nplot == 1
     
@@ -7230,8 +7512,7 @@ function menu_newtxt_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
 nplot = length(plot_selected);   % length
 
 %language
@@ -7369,6 +7650,7 @@ function menu_refreshlist_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 handles = guidata(hObject);
 CDac_pwd; % cd working dir
+ac_clear_main_list_selection_on_refresh = true;
 refreshcolor;
 cd(pre_dirML); % return view dir
 
@@ -7402,8 +7684,10 @@ function axes_plot_ButtonDownFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 handles = guidata(hObject);
 
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 
 % check
@@ -7447,8 +7731,10 @@ function menu_extract_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_extract (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = handles.index_selected;  % read selection in listbox 1
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 
 %language
@@ -7554,8 +7840,6 @@ if check == 1
                     else
                         disp([a264,num2str(c1),' & ',num2str(c2),' : ',dat_name,ext])
                     end
-                    d = dir; %get files
-                    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                     refreshcolor;
                     cd(pre_dirML); % return to matlab view folder
                 catch
@@ -7579,8 +7863,10 @@ function menu_pca_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_pca (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = handles.index_selected;  % read selection in listbox 1
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 %<<<<<<< HEAD
 nplot = length(plot_selected);   % length
 
@@ -7727,8 +8013,6 @@ if check == 1;
         dlmwrite(name2, coeff, 'delimiter', ' ', 'precision', 9);
         dlmwrite(name3, [latent,explained,mu'], 'delimiter', ' ', 'precision', 9);
         dlmwrite(name4, [data_new(:,1),tsquared], 'delimiter', ' ', 'precision', 9);
-        d = dir; %get files
-        set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
         refreshcolor;
         cd(pre_dirML); % return to matlab view folder
         
@@ -7778,8 +8062,10 @@ function menu_whiten_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 if nplot == 1
     data_name = char(contents(plot_selected));
@@ -7811,8 +8097,10 @@ function menu_movmeanfbw_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_movmeanfbw (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 if nplot == 1
     
@@ -7941,8 +8229,6 @@ if nplot == 1
                 disp(' ');
                 
                 fclose(fidout);
-                d = dir; %get files
-                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                 refreshcolor;
                 cd(pre_dirML); % return to matlab view folder
                 
@@ -7958,8 +8244,10 @@ function menu_smooth_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_smooth_option (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 if nplot == 1
     
@@ -8026,8 +8314,6 @@ if nplot == 1
                 end
                 CDac_pwd
                 dlmwrite(name1, data, 'delimiter', ' ', 'precision', 9); 
-                d = dir; %get files
-                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                 refreshcolor;
                 cd(pre_dirML); % return to matlab view folder
                 figure;
@@ -8069,8 +8355,10 @@ function menu_movmedianfbw_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_movmedianfbw (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 if nplot == 1
 
@@ -8169,8 +8457,6 @@ if nplot == 1
                 
                 fclose(fidout);
                 
-                d = dir; %get files
-                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                 refreshcolor;
                 cd(pre_dirML); % return to matlab view folder
                 
@@ -8193,8 +8479,10 @@ function menu_movmedian_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_movmedian_option (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 if nplot == 1
     
@@ -8264,8 +8552,6 @@ if nplot == 1
                     end
                     CDac_pwd
                     dlmwrite(name1, data, 'delimiter', ' ', 'precision', 9); 
-                    d = dir; %get files
-                    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                     refreshcolor;
                     cd(pre_dirML); % return to matlab view folder
                     mvmedianfig = figure;
@@ -8303,8 +8589,10 @@ function menu_movGauss_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_movGauss (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 if nplot == 1
     
@@ -8369,8 +8657,6 @@ if nplot == 1
                     name1 = [dat_name,'_',num2str(window),'pts-Gauss',ext];  % New name
                     CDac_pwd
                     dlmwrite(name1, data, 'delimiter', ' ', 'precision', 9); 
-                    d = dir; %get files
-                    set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                     refreshcolor;
                     cd(pre_dirML); % return to matlab view folder
                     mvmedianfig = figure;
@@ -8438,8 +8724,6 @@ end
 ylabel('Log(Fe)')
 CDac_pwd
 copyfile(data_name,pwd);
-d = dir; %get files
-set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
 cd(pre_dirML); % return to matlab view folder
 
@@ -8476,8 +8760,6 @@ end
     
 CDac_pwd
 copyfile(data_name,pwd);
-d = dir; %get files
-set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
 cd(pre_dirML); % return to matlab view folder
 
@@ -8500,8 +8782,6 @@ ylabel('Ma')
 
 CDac_pwd
 copyfile(data_name,pwd);
-d = dir; %get files
-set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
 cd(pre_dirML); % return to matlab view folder
 
@@ -8537,8 +8817,6 @@ end
     
 CDac_pwd
 copyfile(data_name,pwd);
-d = dir; %get files
-set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
 cd(pre_dirML); % return to matlab view folder
 
@@ -8575,8 +8853,6 @@ end
     
 CDac_pwd
 copyfile(data_name,pwd);
-d = dir; %get files
-set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
 cd(pre_dirML); % return to matlab view folder
 
@@ -8651,8 +8927,6 @@ end
 CDac_pwd
 copyfile(data_name,pwd);
 copyfile(data_name2,pwd);
-d = dir; %get files
-set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
 cd(pre_dirML); % return to matlab view folder
 
@@ -8688,8 +8962,6 @@ end
     
 CDac_pwd
 copyfile(data_name,pwd);
-d = dir; %get files
-set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
 cd(pre_dirML); % return to matlab view folder
 
@@ -8725,8 +8997,6 @@ end
     
 CDac_pwd
 copyfile(data_name,pwd);
-d = dir; %get files
-set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
 cd(pre_dirML); % return to matlab view folder
 
@@ -8763,8 +9033,6 @@ end
     
 CDac_pwd
 copyfile(data_name,pwd);
-d = dir; %get files
-set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
 cd(pre_dirML); % return to matlab view folder
 
@@ -8785,8 +9053,6 @@ end
 
 CDac_pwd
 copyfile(data_name,pwd)
-d = dir; %get files
-set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
 cd(pre_dirML); % return to matlab view folder
 
@@ -8835,8 +9101,6 @@ if handles.lang_choice == 0
 else
     disp([main01,': ',[dat_name,ext]])
 end
-d = dir; %get files
-set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
 cd(pre_dirML); % return to matlab view folder
 
@@ -8846,8 +9110,10 @@ function menu_digitizer_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_digitizer (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 if nplot == 1
 
@@ -8897,8 +9163,6 @@ end
 
 CDac_pwd
 copyfile(data_name,pwd)
-d = dir; %get files
-set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
 cd(pre_dirML); % return to matlab view folder
 
@@ -8920,8 +9184,6 @@ end
 
 CDac_pwd
 copyfile(data_name,pwd)
-d = dir; %get files
-set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
 refreshcolor;
 cd(pre_dirML); % return to matlab view folder
 
@@ -8931,8 +9193,7 @@ function linegenerator_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
 nplot = length(plot_selected);   % length
 if nplot == 1
     data_name = char(contents(plot_selected));
@@ -8969,8 +9230,10 @@ function menu_specmoments_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 %#function bsxfun
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 if nplot == 1
     data_name = char(contents(plot_selected));
@@ -9024,8 +9287,10 @@ function menu_dynfilter_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_dynfilter (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 if nplot == 1
     data_name = char(contents(plot_selected));
@@ -9070,8 +9335,10 @@ function menu_CSA_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_CSA (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 if nplot == 1
     data_name = char(contents(plot_selected));
@@ -9130,8 +9397,10 @@ function menu_waveletGUI_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 if nplot <= 2
     data_name = char(contents(plot_selected));
@@ -9182,8 +9451,10 @@ function menu_interpolationGUI_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 if nplot <= 1
     data_name = char(contents(plot_selected));
@@ -9212,8 +9483,10 @@ function menu_sound_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_sound (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 if nplot == 1
     data_name = char(contents(plot_selected));
@@ -9256,8 +9529,6 @@ if nplot == 1
                 name1 = [dat_name,'_rep-',num2str(a),'-rate-',num2str(b*8192),'.wav'];  % New name
                 CDac_pwd
                 audiowrite(name1,y,b*8192)
-                d = dir; %get files
-                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                 refreshcolor;
                 cd(pre_dirML); % return to matlab view folder
             end
@@ -9281,8 +9552,10 @@ function menu_recplot_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_recplot (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 if nplot == 1
     data_name = char(contents(plot_selected));
@@ -9335,8 +9608,7 @@ function menu_undatable_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
 nplot = length(plot_selected);   % length
 if nplot == 1
     dat_name = char(contents(plot_selected));
@@ -9364,8 +9636,10 @@ function menu_datatransf_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 if nplot <= 1
     data_name = char(contents(plot_selected));
@@ -9395,8 +9669,10 @@ function menu_colman_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_colman (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = handles.index_selected;  % read selection in listbox 1
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 % check
 check = 0;
@@ -9675,24 +9951,13 @@ end
 function plotPaths = getSelectedDataPaths(handles)
 plotPaths = {};
 try
-    contents = cellstr(get(handles.listbox_acmain,'String'));
-    userdata = get(handles.listbox_acmain,'UserData');
-    if isstruct(userdata) && isfield(userdata,'names') && ~isempty(userdata.names)
-        contents = userdata.names;
-    end
-    plot_selected = get(handles.listbox_acmain,'Value');
-    if isempty(plot_selected) && isfield(handles,'index_selected')
-        plot_selected = handles.index_selected;
-    end
+    [contents,plot_selected] = getMainListSelection(handles);
     if isempty(plot_selected)
         return
     end
     GETac_pwd;
     for i = 1:numel(plot_selected)
         plot_no = plot_selected(i);
-        if plot_no < 1 || plot_no > numel(contents)
-            continue
-        end
         data_name = char(contents(plot_no));
         data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
         data_path = fullfile(ac_pwd,data_name);
@@ -9809,8 +10074,10 @@ function menu_emd_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_emd (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 loaddata4acycle;  % load data as data_filterout, must be evenly spaced sampling
 
@@ -9936,8 +10203,10 @@ function menu_eemd_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_eemd (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 loaddata4acycle;  % load data as data_filterout, must be evenly spaced sampling
 
@@ -10156,8 +10425,10 @@ switch choice
         nsim_yes = 2;
 end
 if nsim_yes < 2
-    contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-    plot_selected = get(handles.listbox_acmain,'Value');
+    [contents,plot_selected,handles] = getMainListSelection(handles);
+    if isempty(plot_selected)
+        return
+    end
     nplot = length(plot_selected);   % length
     if nplot > 1
         if handles.lang_choice == 0
@@ -10441,8 +10712,6 @@ if nsim_yes < 2
                                 disp([a197,name1])   
                                 disp([a198,name2])  
                             end
-                            d = dir; %get files
-                            set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                             refreshcolor;
                             cd(pre_dirML);
                           else
@@ -10466,8 +10735,10 @@ function menu_dynot_v2_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_dynot_v2 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-plot_selected = get(handles.listbox_acmain,'Value');
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    return
+end
 nplot = length(plot_selected);   % length
 if nplot == 1
     data_name = char(contents(plot_selected));
@@ -10586,8 +10857,10 @@ switch choice
         nsim_yes = 2;
 end
 if nsim_yes < 2
-    contents = cellstr(get(handles.listbox_acmain,'String')); % read contents of listbox 1 
-    plot_selected = get(handles.listbox_acmain,'Value');
+    [contents,plot_selected,handles] = getMainListSelection(handles);
+    if isempty(plot_selected)
+        return
+    end
     nplot = length(plot_selected);   % length
     if nplot > 1
         if handles.lang_choice == 0
@@ -10898,8 +11171,6 @@ if nsim_yes < 2
                                     disp([a197,name1])   
                                     disp([a198,name2])  
                                 end
-                                d = dir; %get files
-                                set(handles.listbox_acmain,'String',{d.name},'Value',1) %set string
                                 refreshcolor;
                                 cd(pre_dirML);
                           else

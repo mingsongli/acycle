@@ -12,6 +12,7 @@ app.bg = [0.94 0.94 0.94];
 app.blue = [0.08 0.02 0.95];
 app.listbox_acmain = getFieldDefault(ctx,'listbox_acmain',[]);
 app.edit_acfigmain_dir = getFieldDefault(ctx,'edit_acfigmain_dir',[]);
+app.val1 = getFieldDefault(ctx,'val1',4);
 app.lang_choice = getFieldDefault(ctx,'lang_choice',0);
 app.lang_id = getFieldDefault(ctx,'lang_id',{});
 app.lang_var = getFieldDefault(ctx,'lang_var',{});
@@ -333,22 +334,31 @@ end
     end
 
     function refreshMainListbox()
-        if ac_refresh_main_list(app.listbox_acmain)
+        workDir = pwd;
+        if ac_refresh_main_list(app.listbox_acmain,workDir)
             return
         end
         if ~isempty(app.listbox_acmain) && isgraphics(app.listbox_acmain)
-            d = dir;
-            names = {d.name};
-            keep = ~strcmp(names,'.') & ~strcmp(names,'..');
-            names = names(keep);
+            d = dir(workDir);
+            d = d(~ismember({d.name},{'.','..'}));
+            sortMode = app.val1;
             try
-                if isempty(names)
-                    set(app.listbox_acmain,'String',{},'Value',[]);
-                else
-                    set(app.listbox_acmain,'String',names,'Value',1);
+                mainHandles = guidata(app.listbox_acmain);
+                if isstruct(mainHandles) && isfield(mainHandles,'val1') && ...
+                        ~isempty(mainHandles.val1)
+                    sortMode = mainHandles.val1;
                 end
             catch
             end
+            d = ac_sort_dir_entries(d,sortMode);
+            ac_update_listbox_acmain(app.listbox_acmain, ...
+                {d.name},[d.isdir]);
+            if ~isempty(app.edit_acfigmain_dir) && ...
+                    isgraphics(app.edit_acfigmain_dir)
+                set(app.edit_acfigmain_dir,'String',workDir);
+            end
+            ac_working_directory('set',workDir);
+            drawnow limitrate;
         end
     end
 

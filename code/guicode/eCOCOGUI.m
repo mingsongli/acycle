@@ -19,7 +19,7 @@ end
         [app.dataRaw, app.data, app.meta] = prepData(ctx);
         app.fmaxdata = app.meta.fmax_data;
         app.main_unit_selection = getfielddef(ctx,'main_unit_selection',0);
-        app.mode = 2; % 1=COCO, 2=eCOCO
+        app.mode = 1; % 1=COCO, 2=eCOCO
         % Public default: the coherent nine-term, method-B bidirectional
         % held-out engine formerly exposed as cvCOCO9B.
         app.cocoTargetMode = 'cv9b';
@@ -66,14 +66,21 @@ end
 
         setappdata(app.UIFigure,'ECOCO_APP',app);
         onResize();
+        if app.meta.depthUnitDefaulted
+            safeUiAlert(app.UIFigure, ...
+                ['The main-window unit is still the default "unit". ', ...
+                 'COCO/eCOCO will treat the first data column as metres (m) ', ...
+                 'in this window. The analysis can continue normally.'], ...
+                'COCO/eCOCO unit warning','warning','Modal',false);
+        end
         
 
         function createComponents()
             app.PMethod = uipanel(app.UIFigure,'Title','Select Method','BackgroundColor',app.bg);
             app.BGMethod = uibuttongroup(app.PMethod,'BackgroundColor',app.bg,'BorderType','none', ...
                 'SelectionChangedFcn',@(s,e)onModeChanged());
-            app.RCOCO = uiradiobutton(app.BGMethod,'Text','COCO','FontWeight','bold','FontColor',app.blue,'Value',false);
-            app.RECOCO = uiradiobutton(app.BGMethod,'Text','eCOCO','FontWeight','bold','FontColor',app.blue,'Value',true);
+            app.RCOCO = uiradiobutton(app.BGMethod,'Text','COCO','FontWeight','bold','FontColor',app.blue,'Value',true);
+            app.RECOCO = uiradiobutton(app.BGMethod,'Text','eCOCO','FontWeight','bold','FontColor',app.blue,'Value',false);
             app.LCOCOMethod = uilabel(app.PMethod,'Text','COCO method','FontColor',app.blue,'BackgroundColor',app.bg);
             app.DCOCOMethod = uidropdown(app.PMethod, ...
                 'Items',{'cvCOCO — Blocked','cvCOCO — Interleaved', ...
@@ -561,16 +568,20 @@ end
             runButtonCleanup = onCleanup( ...
                 @()restoreRunButton(runButtonAtStart));
             h = [];
+            figureProtectionCleanup = [];
             conclusionReport = [];
             figuresBeforeRun = findall(groot,'Type','figure');
             invalidateRunState();
             safeStoreAppData(uiFigureAtStart,app);
             try
                 if ~isfield(app.meta,'depthInMeters') || ~app.meta.depthInMeters
-                    error('eCOCOGUI:DepthUnitRequired', ...
-                        ['COCO/eCOCO sedimentation rates are defined for depth in metres. ', ...
-                         'Select a supported depth unit (m, dm, cm, mm, ft, or km) ', ...
-                         'in the Acycle main window before running this analysis.']);
+                    safeUiAlert(app.UIFigure, ...
+                        ['COCO/eCOCO sedimentation rates require a depth unit. ', ...
+                         'Select m, dm, cm, mm, ft, or km in the Acycle main ', ...
+                         'window and reopen this analysis. The current run was ', ...
+                         'skipped; the GUI remains available.'], ...
+                        'COCO/eCOCO unit warning','warning','Modal',false);
+                    return
                 end
                 % Full-record COCO/eCOCO calculations use the uniformly
                 % sampled series. Held-out cvCOCO modes receive the sorted,
@@ -824,8 +835,7 @@ end
                                 '; partial-orbit exploratory training, ', ...
                                 'not complete all-nine confirmation'];
                         end
-                        closeProgress(h);
-                        h = [];
+                        showSavingProgress(h);
 
                         app.run.cv = cv;
                         app.run.conclusion = conclusionReport;
@@ -850,6 +860,13 @@ end
                         [outputFile,~] = ...
                             saveCVCOCOOutputs(cv,modeName);
                         plotCVCOCOResult(cv);
+                        runFigures = figuresCreatedSince(figuresBeforeRun);
+                        if isgraphics(uiFigureAtStart,'figure')
+                            runFigures = setdiff( ...
+                                runFigures,uiFigureAtStart,'stable');
+                        end
+                        figureProtectionCleanup = ...
+                            ac_protect_coco_result_figures(runFigures);
                     else
                         cocoDisplayName = char(string(app.DCOCOMethod.Value));
                         h = uiprogressdlg(app.UIFigure, ...
@@ -865,8 +882,14 @@ end
                             'ShowPeriodograms',app.CShowPeriod.Value, ...
                             'ProgressFcn',@(fraction,message) ...
                             updateProgressDialog(h,fraction,message));
-                        closeProgress(h);
-                        h = [];
+                        showSavingProgress(h);
+                        runFigures = figuresCreatedSince(figuresBeforeRun);
+                        if isgraphics(uiFigureAtStart,'figure')
+                            runFigures = setdiff( ...
+                                runFigures,uiFigureAtStart,'stable');
+                        end
+                        figureProtectionCleanup = ...
+                            ac_protect_coco_result_figures(runFigures);
                         app.run.corrCI = corrCI;
                         app.run.corr_h0 = corr_h0;
                         app.run.corry = corry;
@@ -1001,8 +1024,14 @@ end
                         'InterleavedStepDepth',interleavedStepDepth, ...
                         'ProgressFcn',@(fraction,message) ...
                         updateProgressDialog(h,fraction,message));
-                    closeProgress(h);
-                    h = [];
+                    showSavingProgress(h);
+                    runFigures = figuresCreatedSince(figuresBeforeRun);
+                    if isgraphics(uiFigureAtStart,'figure')
+                        runFigures = setdiff( ...
+                            runFigures,uiFigureAtStart,'stable');
+                    end
+                    figureProtectionCleanup = ...
+                        ac_protect_coco_result_figures(runFigures);
                     
                     app.run.prt_sr = prt_sr;
                     app.run.out_depth = out_depth;
@@ -1043,6 +1072,7 @@ end
                     runFigures = setdiff( ...
                         runFigures,uiFigureAtStart,'stable');
                 end
+                figureSaveError = [];
                 try
                     saveArguments = {};
                     if app.mode == 1
@@ -1052,24 +1082,41 @@ end
                     saveCocoGuiFigures( ...
                         runFigures,outputFile,saveArguments{:});
                 catch MEfigureSave
+                    figureSaveError = MEfigureSave;
+                end
+                % Restore normal close behavior before dismissing the save
+                % dialog or showing any export warning.  This also ensures
+                % a transient CloseRequestFcn is never left on a result
+                % window after saving has finished or failed.
+                clear figureProtectionCleanup
+                figureProtectionCleanup = [];
+                closeProgress(h);
+                h = [];
+                if ~isempty(figureSaveError)
                     warning('eCOCOGUI:FigureAutoSaveFailed', ...
                         ['The calculation and numerical outputs were saved, ', ...
-                        'but automatic FIG/PDF/PNG export failed [%s]: %s'], ...
-                        MEfigureSave.identifier,MEfigureSave.message);
+                        'but automatic FIG/PDF export failed [%s]: %s'], ...
+                        figureSaveError.identifier,figureSaveError.message);
                     fprintf(2,'\n>> COCO/eCOCO figure export warning\n%s\n\n', ...
-                        getReport(MEfigureSave,'extended','hyperlinks','off'));
+                        getReport(figureSaveError,'extended', ...
+                        'hyperlinks','off'));
                     safeUiAlert(uiFigureAtStart, ...
                         ['The calculation and numerical outputs were saved. ', ...
-                        'Automatic FIG/PDF/PNG export failed: ', ...
-                         MEfigureSave.message], ...
+                        'Automatic FIG/PDF export failed: ', ...
+                         figureSaveError.message], ...
                         'Figure save warning','warning');
                 end
-                refreshMainListbox(ctx,resolveSaveDir(ctx));
+                outputDirectory = fileparts(outputFile);
+                if isempty(outputDirectory) || ~isfolder(outputDirectory)
+                    outputDirectory = resolveSaveDir(ctx);
+                end
+                refreshMainListbox(ctx,outputDirectory);
                 safeStoreAppData(uiFigureAtStart,app);
                 if ~isempty(conclusionReport)
                     showConclusionReport(conclusionReport);
                 end
             catch ME
+                clear figureProtectionCleanup
                 closeProgress(h);
                 invalidateRunState();
                 safeStoreAppData(uiFigureAtStart,app);
@@ -1148,6 +1195,26 @@ end
                     close(h);
                 end
             catch
+            end
+        end
+
+        function showSavingProgress(h)
+            if isempty(h)
+                return
+            end
+            try
+                if ~isvalid(h)
+                    return
+                end
+                h.Indeterminate = 'on';
+                h.Message = [ ...
+                    'Please wait. Data are being saved. ', ...
+                    'Do not close the result windows.'];
+                drawnow limitrate nocallbacks
+            catch MEprogress
+                warning('eCOCOGUI:ProgressUpdateFailed', ...
+                    'Saving-progress display update failed: %s', ...
+                    MEprogress.message);
             end
         end
 
@@ -2328,6 +2395,11 @@ end
         function params = buildRunParameterTable(modeName,outputFile)
             [~,outBase,outExt] = fileparts(outputFile);
             outputName = [outBase,outExt];
+            inputUnitExplanation = 'Converted before preprocessing';
+            if app.meta.depthUnitDefaulted
+                inputUnitExplanation = ...
+                    'Defaulted from the main-window placeholder "unit"';
+            end
             params = repmat({''},45,6);
             params(1,2) = {'Detailed Parameters Used in Data Processing by Acycle'};
             params(2,2:6) = {'Version','Designed by','Institute','E-mail','Date'};
@@ -2398,7 +2470,7 @@ end
                 'Adaptive/Fixed COCO and eCOCO display only; not used by cvCOCO',''};
             params(42,:) = {'', '', 'Depth unit used internally','m','Supported input depth units are converted to metres',''};
             params(43,:) = {'', '', 'Test sedimentation rate: actual final grid value',actualSedRateMaximum(),'',''};
-            params(44,:) = {'', '', 'Input depth unit',app.meta.input_unit,'Converted before preprocessing',''};
+            params(44,:) = {'', '', 'Input depth unit',app.meta.input_unit,inputUnitExplanation,''};
             params(45,:) = {'', '', 'Input-depth multiplier to metres',app.meta.depth_scale_to_m,'',''};
             params(30,:) = [];
         end
@@ -2915,7 +2987,12 @@ end
 end
 
 function [raw, dat, meta] = prepData(ctx)
-    inputUnit = char(getfielddef(ctx,'unit','m'));
+    requestedInputUnit = strtrim(char(getfielddef(ctx,'unit','m')));
+    depthUnitDefaulted = strcmpi(requestedInputUnit,'unit');
+    inputUnit = requestedInputUnit;
+    if depthUnitDefaulted
+        inputUnit = 'm';
+    end
     [depthScaleToM,depthInMeters] = depthUnitScaleToMetres(inputUnit);
     raw = getfielddef(ctx,'current_data',[]);
     if isempty(raw)
@@ -2958,6 +3035,8 @@ function [raw, dat, meta] = prepData(ctx)
     end
     meta = struct();
     meta.input_unit = inputUnit;
+    meta.requested_input_unit = requestedInputUnit;
+    meta.depthUnitDefaulted = depthUnitDefaulted;
     meta.depth_scale_to_m = depthScaleToM;
     meta.depthInMeters = depthInMeters;
     if depthInMeters
@@ -2966,6 +3045,9 @@ function [raw, dat, meta] = prepData(ctx)
         meta.unit = inputUnit;
     end
     meta.unit_type = getfielddef(ctx,'unit_type',0);
+    if depthUnitDefaulted
+        meta.unit_type = 1;
+    end
     meta.filename = char(getfielddef(ctx,'data_name','data.txt'));
     meta.dat_name = char(getfielddef(ctx,'dat_name',meta.filename));
     meta.preprocessing = preprocessing;
@@ -3162,6 +3244,9 @@ function refreshMainListbox(ctx,dirpath)
     if nargin < 2 || isempty(dirpath) || ~isfolder(dirpath)
         dirpath = pwd;
     end
+    if ac_refresh_main_list(listbox,dirpath)
+        return
+    end
     try
         d = dir(dirpath);
         if numel(d) >= 2
@@ -3179,13 +3264,7 @@ function refreshMainListbox(ctx,dirpath)
             set(editdir,'String',dirpath);
         end
         syncAcPwd(dirpath);
-        if exist('ac_update_listbox_acmain','file') == 2
-            ac_update_listbox_acmain(listbox,names,isDir);
-        elseif isempty(names)
-            set(listbox,'String',{},'Value',[]);
-        else
-            set(listbox,'String',names,'Value',1);
-        end
+        ac_update_listbox_acmain(listbox,names,isDir);
         drawnow limitrate;
     catch
     end
@@ -3258,10 +3337,15 @@ catch
 end
 end
 
-function safeUiAlert(uiFigure,message,titleText,iconName)
+function safeUiAlert(uiFigure,message,titleText,iconName,varargin)
 try
     if isgraphics(uiFigure,'figure')
-        uialert(uiFigure,message,titleText,'Icon',iconName);
+        try
+            uialert(uiFigure,message,titleText,'Icon',iconName,varargin{:});
+        catch
+            % Older MATLAB releases may not support every dialog option.
+            uialert(uiFigure,message,titleText,'Icon',iconName);
+        end
     end
 catch
 end

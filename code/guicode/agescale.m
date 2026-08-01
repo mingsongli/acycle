@@ -606,6 +606,9 @@ classdef agescale < matlab.apps.AppBase
             if nargin < 2 || isempty(dirpath) || exist(dirpath,'dir') ~= 7
                 dirpath = pwd;
             end
+            if ac_refresh_main_list(app.listbox_acmain,dirpath)
+                return
+            end
             try
                 d = dir(dirpath);
                 if numel(d) >= 2
@@ -623,13 +626,7 @@ classdef agescale < matlab.apps.AppBase
                     set(app.edit_acfigmain_dir,'String',dirpath);
                 end
                 app.syncAcPwd(dirpath);
-                if exist('ac_update_listbox_acmain','file') == 2
-                    ac_update_listbox_acmain(app.listbox_acmain,names,isDir);
-                elseif isempty(names)
-                    set(app.listbox_acmain,'String',{},'Value',[]);
-                else
-                    set(app.listbox_acmain,'String',names,'Value',1);
-                end
+                ac_update_listbox_acmain(app.listbox_acmain,names,isDir);
                 drawnow limitrate;
             catch
             end

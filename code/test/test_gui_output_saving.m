@@ -15,6 +15,105 @@ testCase.addTeardown(@()set( ...
     groot,'DefaultFigureVisible',oldVisibility));
 end
 
+function testEcocoGuiOpensInCocoMode(testCase)
+guiFigure = eCOCOGUI;
+testCase.addTeardown(@()closeIfValid(guiFigure));
+app = getappdata(guiFigure,'ECOCO_APP');
+
+verifyEqual(testCase,app.mode,1);
+verifyTrue(testCase,app.RCOCO.Value);
+verifyFalse(testCase,app.RECOCO.Value);
+verifyEqual(testCase,app.BGMethod.SelectedObject,app.RCOCO);
+verifyEqual(testCase,string(app.DCOCOMethod.Enable),"on");
+verifyEqual(testCase,string(app.PSlide.Visible),"off");
+verifyEqual(testCase,string(app.BPlotE.Visible),"off");
+verifyEqual(testCase,string(app.RFast.Enable),"off");
+verifyEqual(testCase,string(app.RAccurate.Enable),"off");
+verifyEqual(testCase,string(app.RInterleaved.Enable),"off");
+end
+
+function testEcocoGuiDefaultsGenericUnitToMetres(testCase)
+x = (0:0.5:12)';
+inputData = [x,sin(2*pi*x/4)];
+context = struct( ...
+    'unit','unit', ...
+    'unit_type',0, ...
+    'current_data',inputData, ...
+    'data_name','generic-unit-input.txt');
+
+guiFigure = eCOCOGUI(context);
+testCase.addTeardown(@()closeIfValid(guiFigure));
+app = getappdata(guiFigure,'ECOCO_APP');
+
+verifyTrue(testCase,app.meta.depthUnitDefaulted);
+verifyTrue(testCase,app.meta.depthInMeters);
+verifyEqual(testCase,app.meta.requested_input_unit,'unit');
+verifyEqual(testCase,app.meta.input_unit,'m');
+verifyEqual(testCase,app.meta.unit,'m');
+verifyEqual(testCase,app.meta.unit_type,1);
+verifyEqual(testCase,app.meta.depth_scale_to_m,1,'AbsTol',0);
+verifyEqual(testCase,app.dataRaw(:,1),inputData(:,1),'AbsTol',0);
+verifyEqual(testCase,app.LSizeUnit.Text,'m');
+verifyEqual(testCase,app.LStepUnit.Text,'m');
+verifyEqual(testCase,string(app.BRun.Enable),"on");
+
+source = regexprep(fileread(which('eCOCOGUI')),'\s+','');
+verifyTrue(testCase,contains(source, ...
+    "'COCO/eCOCOunitwarning','warning','Modal',false"));
+verifyFalse(testCase,contains(source, ...
+    "error('eCOCOGUI:DepthUnitRequired'"));
+end
+
+function testEcocoGenericUnitOkDoesNotRaiseDepthError(testCase)
+x = (0:3)';
+context = struct( ...
+    'unit','unit', ...
+    'unit_type',0, ...
+    'current_data',[x,[0.2;0.6;0.4;0.8]], ...
+    'data_name','generic-unit-ok.txt');
+
+guiFigure = eCOCOGUI(context);
+testCase.addTeardown(@()closeIfValid(guiFigure));
+guiFigure.Visible = 'on';
+drawnow;
+app = getappdata(guiFigure,'ECOCO_APP');
+runCallback = app.BRun.ButtonPushedFcn;
+
+commandOutput = evalc('runCallback(app.BRun,[])');
+app = getappdata(guiFigure,'ECOCO_APP');
+
+verifyFalse(testCase,contains(commandOutput, ...
+    'eCOCOGUI:DepthUnitRequired'));
+verifyFalse(testCase,contains(commandOutput,'>> eCOCO error'));
+verifyTrue(testCase,app.meta.depthInMeters);
+verifyEqual(testCase,app.meta.unit,'m');
+verifyEqual(testCase,string(app.BRun.Enable),"on");
+verifyFalse(testCase,app.run.ready);
+end
+
+function testWaveletInitialComputationPersistsFirstSaveState(testCase)
+mainFigure = AC;
+testCase.addTeardown(@()closeIfValid(mainFigure));
+context = guidata(mainFigure);
+x = (0:0.5:32)';
+y = sin(2*pi*x/4) + 0.25*cos(2*pi*x/9) + 0.01*x;
+context.current_data = [x,y];
+context.data_name = 'wavelet-initial-state.txt';
+
+waveletFigure = waveletGUI(context);
+testCase.addTeardown(@()closeIfValid(waveletFigure));
+state = guidata(waveletFigure);
+
+verifyTrue(testCase,isfield(state,'figwave'));
+verifyTrue(testCase,isgraphics(state.figwave,'figure'));
+testCase.addTeardown(@()closeIfValid(state.figwave));
+verifyTrue(testCase,isfield(state,'power'));
+verifyTrue(testCase,isfield(state,'sig95'));
+verifyTrue(testCase,isfield(state,'datax'));
+verifyEqual(testCase,numel(state.datax),numel(x));
+verifyEqual(testCase,size(state.power,2),numel(x));
+end
+
 function testTabbedFigureCopiesLegendWithAxes(testCase)
 outputFolder = tempname;
 mkdir(outputFolder);
@@ -52,6 +151,68 @@ verifyGreaterThan(testCase,dir(saved.pdf).bytes,0);
 reopened = openfig(saved.fig,'invisible');
 cleanup = onCleanup(@()closeIfValid(reopened));
 verifyNumElements(testCase,findall(reopened,'Type','uitab'),2);
+end
+
+function testCocoSaveGuardDefersCloseAndRestoresCallback(testCase)
+fig = figure('Visible','off','Name','COCO save-guard test');
+testCase.addTeardown(@()closeIfValid(fig));
+originalCallback = 'closereq';
+fig.CloseRequestFcn = originalCallback;
+
+guardCleanup = ac_protect_coco_result_figures(fig);
+verifyTrue(testCase,isappdata(fig, ...
+    'AcycleCOCOSaveOriginalCloseRequestFcn'));
+verifyTrue(testCase,isappdata(fig,'AcycleCOCOSaveCloseProtected'));
+
+close(fig);
+drawnow;
+verifyTrue(testCase,isgraphics(fig,'figure'), ...
+    'The result figure closed while its save guard was active.');
+
+clear guardCleanup
+verifyFalse(testCase,isappdata(fig, ...
+    'AcycleCOCOSaveOriginalCloseRequestFcn'));
+verifyFalse(testCase,isappdata(fig,'AcycleCOCOSaveCloseProtected'));
+verifyTrue(testCase,isequal(fig.CloseRequestFcn,originalCallback));
+
+close(fig);
+drawnow;
+verifyFalse(testCase,isgraphics(fig,'figure'), ...
+    'The original CloseRequestFcn was not restored after saving.');
+end
+
+function testGuardedCocoSaveProducesNormallyClosableCleanFig(testCase)
+outputFolder = tempname;
+mkdir(outputFolder);
+testCase.addTeardown(@()removeFolder(outputFolder));
+fig = figure('Visible','off','Name','Guarded COCO result');
+testCase.addTeardown(@()closeIfValid(fig));
+ax = axes(fig);
+plot(ax,1:4,[1 3 2 4]);
+
+guardCleanup = ac_protect_coco_result_figures(fig);
+verifyTrue(testCase,isappdata(fig,'AcycleCOCOSaveCloseProtected'));
+
+dataFile = fullfile(outputFolder,'sample-COCO-guarded-1.xlsx');
+saved = saveCocoGuiFigures(fig,dataFile);
+verifyNumElements(testCase,saved,1);
+verifyTrue(testCase,isappdata(fig,'AcycleCOCOSaveCloseProtected'), ...
+    'The saver removed the guard from the live result figure too early.');
+verifyTrue(testCase,isfile(saved.fig));
+verifyTrue(testCase,isfile(saved.pdf));
+verifyEmpty(testCase,dir(fullfile(outputFolder,'*.png')));
+
+reopened = openfig(saved.fig,'invisible');
+testCase.addTeardown(@()closeIfValid(reopened));
+verifyFalse(testCase,isappdata(reopened, ...
+    'AcycleCOCOSaveOriginalCloseRequestFcn'));
+verifyFalse(testCase,isappdata(reopened,'AcycleCOCOSaveCloseProtected'));
+
+close(reopened);
+drawnow;
+verifyFalse(testCase,isgraphics(reopened,'figure'), ...
+    'The saved FIG retained the temporary close guard.');
+clear guardCleanup
 end
 
 function testEcocoGroupedFiguresSaveMainAndRidgeFiles(testCase)
@@ -165,6 +326,8 @@ for savedIndex = 1:2
     verifyTrue(testCase,isfile(saved(savedIndex).pdf));
     verifyGreaterThan(testCase,dir(saved(savedIndex).pdf).bytes,0);
 end
+verifyEmpty(testCase,dir(fullfile(outputFolder,'*.png')), ...
+    'eCOCO exports must not create bitmap images.');
 
 main = openfig(saved(1).fig,'invisible');
 ridge = openfig(saved(2).fig,'invisible');
@@ -285,6 +448,69 @@ verifyTrue(testCase,contains(source, ...
     "runFigures,uiFigureAtStart,'stable'"));
 end
 
+function testGuiKeepsSavingNoticeAndCloseGuardThroughAllExports(testCase)
+testFolder = fileparts(mfilename('fullpath'));
+repoRoot = fileparts(fileparts(testFolder));
+guiSource = fileread(fullfile(repoRoot,'code','guicode','eCOCOGUI.m'));
+ecocoPlotSource = fileread(fullfile( ...
+    repoRoot,'code','corrcoef','ecocoplot.m'));
+onRunSource = sourceSection(guiSource, ...
+    '        function onRun()', ...
+    '        function invalidateRunState()');
+
+verifyTrue(testCase,contains(guiSource, ...
+    "'Please wait. Data are being saved. '"));
+verifyTrue(testCase,contains(guiSource, ...
+    "'Do not close the result windows.'"));
+verifyFalse(testCase,contains(guiSource,'FIG/PDF/PNG'), ...
+    'The GUI still claims that COCO/eCOCO exports PNG images.');
+verifyTrue(testCase,contains(ecocoPlotSource, ...
+    'drawnow limitrate nocallbacks'), ...
+    ['eCOCO plotting must not dispatch a close request before the GUI ', ...
+     'installs its save-time result-figure guard.']);
+verifyEmpty(testCase,regexp(ecocoPlotSource,'drawnow\s*;','once'), ...
+    'A bare drawnow could dispatch the queued pre-guard close request.');
+
+noticePositions = strfind(onRunSource,'showSavingProgress(h);');
+guardPositions = regexp(onRunSource, ...
+    'ac_protect_coco_result_figures\s*\(\s*runFigures\s*\)', ...
+    'start');
+numericSavePositions = [ ...
+    oneSourcePosition(testCase,onRunSource,'saveCVCOCOOutputs(cv,modeName)'), ...
+    oneSourcePosition(testCase,onRunSource,'saveCOCOOutputs(corrCI,corr_h0,modeName)'), ...
+    oneSourcePosition(testCase,onRunSource,'saveECOCOOutputs(')];
+figureSavePosition = oneSourcePosition( ...
+    testCase,onRunSource,'saveCocoGuiFigures(');
+
+verifyNumElements(testCase,noticePositions,3, ...
+    ['Each of cvCOCO, COCO, and eCOCO must switch its calculation ', ...
+     'dialog to the saving notice.']);
+verifyNumElements(testCase,guardPositions,3, ...
+    ['Each of cvCOCO, COCO, and eCOCO must protect its result ', ...
+     'figures while output files are being saved.']);
+verifyTrue(testCase,all(noticePositions < numericSavePositions));
+
+% One close guard must be installed in every mutually exclusive branch.
+% It remains live through the shared FIG/PDF exporter, and is released only
+% after that exporter returns (or throws into its local warning path).
+branchEnds = [noticePositions(2:3),figureSavePosition];
+for branchIndex = 1:3
+    verifyTrue(testCase,any(guardPositions > noticePositions(branchIndex) & ...
+        guardPositions < branchEnds(branchIndex)), ...
+        sprintf('Saving guard missing from COCO/eCOCO branch %d.', ...
+        branchIndex));
+end
+verifyTrue(testCase,all(guardPositions < figureSavePosition));
+
+releasePositions = regexp(onRunSource, ...
+    'clear\s+figureProtectionCleanup','start');
+progressClosePositions = strfind(onRunSource,'closeProgress(h);');
+verifyNotEmpty(testCase,releasePositions);
+verifyNotEmpty(testCase,progressClosePositions);
+verifyTrue(testCase,all(releasePositions > figureSavePosition));
+verifyTrue(testCase,all(progressClosePositions > figureSavePosition));
+end
+
 function testEvofftUsesOneOrderedWorkbook(testCase)
 outputFolder = tempname;
 mkdir(outputFolder);
@@ -396,6 +622,32 @@ verifyTrue(testCase,contains(source, ...
     "horizontalMarginCm = 0.5*(1-contentScale)*widthCm"));
 verifyTrue(testCase,contains(source, ...
     "verticalMarginCm = 0.5*(1-contentScale)*heightCm"));
+bitmapWriterPattern = [ ...
+    '(?i)(?:-dpng|-djpeg|-dtiff|-dbmp|imwrite\s*\(|', ...
+    'exportgraphics\s*\([^;]*(?:\.png|\.jpe?g|\.tiff?|\.bmp))'];
+verifyEmpty(testCase,regexp(source,bitmapWriterPattern,'once'), ...
+    'The COCO/eCOCO saver must remain vector-only (FIG and PDF).');
+end
+
+function section = sourceSection(source,startMarker,endMarker)
+startIndex = strfind(source,startMarker);
+endIndex = strfind(source,endMarker);
+assert(isscalar(startIndex) && isscalar(endIndex) && ...
+    startIndex < endIndex, ...
+    'test_gui_output_saving:SourceSectionMissing', ...
+    'Could not isolate the expected MATLAB source section.');
+section = source(startIndex:endIndex-1);
+end
+
+function position = oneSourcePosition(testCase,source,needle)
+positions = strfind(source,needle);
+verifyNumElements(testCase,positions,1, ...
+    sprintf('Expected one source occurrence of "%s".',needle));
+if isempty(positions)
+    position = NaN;
+else
+    position = positions(1);
+end
 end
 
 function closeIfValid(fig)

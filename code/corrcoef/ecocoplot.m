@@ -640,7 +640,11 @@ function applyGroupedFigureStyle( ...
 % text is not drawn inside the image.  A-D are placed just above the four
 % axes, and the map boxes are shortened from below to keep their horizontal
 % colorbars and labels clear.
-drawnow;
+% Finish the grouped layout without dispatching a queued close request.
+% eCOCOGUI installs its save-time CloseRequestFcn immediately after ECOCO
+% returns; allowing callbacks here would leave a brief interval in which a
+% newly visible result window could be closed before that protection exists.
+drawnow limitrate nocallbacks;
 
 textHandles = findall(fig,'Type','text');
 for textIndex = 1:numel(textHandles)

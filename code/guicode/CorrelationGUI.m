@@ -799,41 +799,37 @@ classdef CorrelationGUI < matlab.apps.AppBase
         end
 
         function refreshMainListbox(app)
-            if ac_refresh_main_list(app.listbox_acmain)
+            workDir = pwd;
+            if ac_refresh_main_list(app.listbox_acmain,workDir)
                 return
             end
-            pre = '<HTML><FONT color="blue">';
-            post = '</FONT></HTML>';
-            d = dir;
-            if numel(d) >= 2, d(1:2) = []; end
-            address = pwd;
-
-            if ~isempty(app.edit_acfigmain_dir) && isgraphics(app.edit_acfigmain_dir)
-                set(app.edit_acfigmain_dir,'String',address);
-            end
-
-            ac_working_directory('set',address);
-
-            if isempty(d) || isempty(app.listbox_acmain) || ~isgraphics(app.listbox_acmain)
+            if isempty(app.listbox_acmain) || ~isgraphics(app.listbox_acmain)
                 return
             end
-
+            d = dir(workDir);
+            d = d(~ismember({d.name},{'.','..'}));
             sortMode = app.val1;
+            try
+                mainHandles = guidata(app.listbox_acmain);
+                if isstruct(mainHandles) && isfield(mainHandles,'val1') && ...
+                        ~isempty(mainHandles.val1)
+                    sortMode = mainHandles.val1;
+                end
+            catch
+            end
             switch sortMode
                 case {1,2,3,4,5,6}
                 otherwise
                     sortMode = 1;
             end
             sd = ac_sort_dir_entries(d,sortMode);
-            listboxStr = cell(numel(sd),1);
-            for i = 1:numel(sd)
-                if isdir(sd(i).name)
-                    listboxStr{i} = [pre,sd(i).name,post];
-                else
-                    listboxStr{i} = sd(i).name;
-                end
+            ac_update_listbox_acmain(app.listbox_acmain, ...
+                {sd.name},[sd.isdir]);
+            if ~isempty(app.edit_acfigmain_dir) && isgraphics(app.edit_acfigmain_dir)
+                set(app.edit_acfigmain_dir,'String',workDir);
             end
-            set(app.listbox_acmain,'String',listboxStr,'Value',[]);
+            ac_working_directory('set',workDir);
+            drawnow limitrate;
         end
     end
 
