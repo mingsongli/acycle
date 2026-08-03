@@ -326,6 +326,8 @@ handles.menu_waveletGUI = uimenu(handles.menuac,'Label','Wavelet','Tag','menu_wa
     'Callback',@(h,e)AC_dispatch('menu_waveletGUI_Callback',h,e));
 handles.menu_CSA = uimenu(handles.menuac,'Label','Circular Spectral Analysis','Tag','menu_CSA', ...
     'Callback',@(h,e)AC_dispatch('menu_CSA_Callback',h,e));
+handles.menu_bispectral = uimenu(handles.menuac,'Label','Bispectral Analysis','Tag','menu_bispectral', ...
+    'Callback',@(h,e)AC_dispatch('menu_bispectral_Callback',h,e));
 handles.menu_recplot = uimenu(handles.menuac,'Label','Recurrence Plot','Tag','menu_recplot', ...
     'Callback',@(h,e)AC_dispatch('menu_recplot_Callback',h,e));
 handles.menu_coh = uimenu(handles.menuac,'Label','Coherence & Phase','Tag','menu_coh','Separator','on','Accelerator','k', ...
@@ -521,7 +523,7 @@ mathItems = {'menu_sort','menu_interp','menu_interpolationGUI','menu_interpserie
     'menu_image','menu_imshow','menu_rgb2gray','menu_rgb2lab','menu_improfile','menu_digitizer'};
 timeItems = {'menu_prewhiten','menu_smooth1','menu_bootstrap','menu_smooth_option','menu_movGauss', ...
     'menu_movmedian_option','menu_whiten','menu_power','menu_period','menu_waveletGUI','menu_CSA', ...
-    'menu_recplot','menu_coh','menu_leadlag','menu_filter','menu_dynfilter','menu_AM','menu_agebuild', ...
+    'menu_bispectral','menu_recplot','menu_coh','menu_leadlag','menu_filter','menu_dynfilter','menu_AM','menu_agebuild', ...
     'menu_sr2age','menu_age','menu_correlation','menu_pda','menu_sednoise','menu_dynos','menu_rho', ...
     'menu_ecoco','menu_specmoments','menu_swa'};
 uniItems = {'menu_statsummary','menu_ttest'};
@@ -3737,6 +3739,37 @@ end
 guidata(hObject, handles);
 
 
+% --- Open the bispectrum / bicoherence parameter window.
+function menu_bispectral_Callback(hObject, eventdata, handles)
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    warndlg({'No data selected.'; ...
+        'Select one two-column *.txt, *.csv, *.dat, or *.out file first.'}, ...
+        'Bispectral Analysis');
+    return
+end
+if numel(plot_selected) ~= 1
+    warndlg('Select exactly one data file for Bispectral Analysis.', ...
+        'Bispectral Analysis');
+    return
+end
+
+    selectedName = char(contents(plot_selected));
+    selectedName = strrep2(selectedName, ...
+        '<HTML><FONT color="blue">','</FONT></HTML>');
+    [current_data,data_name,readError] = ...
+        bispectralLoadAcycleSelection(handles,selectedName);
+    if ~isempty(readError)
+        warndlg(readError,'Bispectral Analysis');
+        return
+end
+handles.current_data = current_data;
+handles.data_name = data_name;
+guidata(hObject,handles);
+    bispectralGUI(handles);
+    guidata(hObject,handles);
+
+
 % --------------------------------------------------------------------
 function menu_swa_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_swa (see GCBO)
@@ -5625,9 +5658,41 @@ if deletefile == 1
         end
     end
     refreshcolor;
-    cd(pre_dirML);
+    restoreDirectoryAfterDelete(pre_dirML,ac_pwd);
     guidata(hObject,handles)
 end
+
+
+function restoredDirectory = restoreDirectoryAfterDelete( ...
+        preferredDirectory,fallbackDirectory)
+% Return to the caller's directory when it still exists. If that directory
+% was itself deleted, keep MATLAB in the live Acycle browser directory (or
+% another existing safe fallback) instead of throwing from CD.
+candidates = {preferredDirectory,fallbackDirectory};
+if ischar(preferredDirectory) || ...
+        (isstring(preferredDirectory) && isscalar(preferredDirectory))
+    candidates{end+1} = fileparts(char(preferredDirectory));
+end
+candidates{end+1} = pwd;
+candidates{end+1} = tempdir;
+
+for candidateIndex = 1:numel(candidates)
+    candidate = candidates{candidateIndex};
+    if isstring(candidate) && isscalar(candidate)
+        candidate = char(candidate);
+    end
+    if ~ischar(candidate) || isempty(strtrim(candidate)) || ...
+            ~isfolder(candidate)
+        continue
+    end
+    try
+        cd(candidate);
+        restoredDirectory = pwd;
+        return
+    catch
+    end
+end
+restoredDirectory = pwd;
 
 
 % --------------------------------------------------------------------

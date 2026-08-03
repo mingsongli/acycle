@@ -2,6 +2,23 @@
 _______________________________________
 
 
+Version : Acycle_v3.1.0
+Date    : August 3, 2026
+By      : Mingsong Li (Peking University)
+
+    1. NEW: Bispectral analysis.
+        A new interactive GUI estimates bispectrum magnitude and
+        magnitude-squared bicoherence, provides IAAFT maximum-statistic FWER
+        inference, and supports reference-period and frequency-pair guides.
+        The overview combines square frequency maps with aligned 2pi
+        multitaper power spectra.
+
+        Special thanks to Research Professor Yan Zhao (赵艳) for valuable
+        suggestions on this new functionality.
+
+_______________________________________
+
+
 Version : Acycle_v3.0.3
 Date    : August 1, 2026
 By      : Mingsong Li (Peking University)

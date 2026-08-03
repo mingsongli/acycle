@@ -66,7 +66,7 @@
 %   Victor A. Piedrahita Velez, 
 %   Chuanyue Wang, Meng Wang, Zhixin Wang, Yujing Wu,
 %   Deke Xu, Xu Yao, Qiyan Zhang, Haotian Zhang, Haoxun Zhang, 
-%   Xiaoyu Zhang, Yang Zhang, Ze Zhang, Hanyu Zhu, Christian Zeeden
+%   Xiaoyu Zhang, Yang Zhang, Ze Zhang, Yan Zhao, Hanyu Zhu, Christian Zeeden
 %   
 %
 %**************************************************************************

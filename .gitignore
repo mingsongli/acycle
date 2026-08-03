@@ -1,4 +1,6 @@
 .DS_Store
+__pycache__/
+*.py[cod]
 .idea
 code/test/*
 !code/test/test_coco_publication_preflight.m
