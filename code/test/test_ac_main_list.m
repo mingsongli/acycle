@@ -159,7 +159,7 @@ end
 function testSameDirectoryRefreshPreservesSelectedFilename(testCase)
 dataFolder = tempname;
 mkdir(dataFolder);
-folderCleanup = onCleanup(@()removeTestFolder(dataFolder)); %#ok<NASGU>
+folderCleanup = onCleanup(@()removeTestFolder(dataFolder));
 createTextFile(fullfile(dataFolder,'beta.txt'));
 createTextFile(fullfile(dataFolder,'Alpha.txt'));
 
@@ -197,13 +197,13 @@ end
 function testManualRefreshButtonAndMenuClearSelection(testCase)
 dataFolder = tempname;
 mkdir(dataFolder);
-folderCleanup = onCleanup(@()removeTestFolder(dataFolder)); %#ok<NASGU>
+folderCleanup = onCleanup(@()removeTestFolder(dataFolder));
 createTextFile(fullfile(dataFolder,'beta.txt'));
 createTextFile(fullfile(dataFolder,'Alpha.txt'));
 
 environmentCleanup = redirectAcycleSettingsToTemporaryFolder(); %#ok<NASGU>
 previousDirectory = pwd;
-directoryCleanup = onCleanup(@()cd(previousDirectory)); %#ok<NASGU>
+directoryCleanup = onCleanup(@()cd(previousDirectory));
 verifyTrue(testCase,ac_working_directory('set',dataFolder));
 
 fig = figure('Visible','off');
@@ -240,6 +240,32 @@ verifyMainListSelectionCleared( ...
     testCase,fig,listbox,expectedNames);
 verifyEqual(testCase,get(address,'String'),dataFolder);
 verifyEqual(testCase,pwd,previousDirectory);
+end
+
+function testDeleteDirectoryRestoreFallsBackWhenOriginalWasDeleted(testCase)
+originalDirectory = pwd;
+testRoot = tempname;
+deletedDirectory = fullfile(testRoot,'result-bispectral-1');
+mkdir(deletedDirectory);
+cleanup = onCleanup(@()cleanupDirectoryRestoreFixture( ...
+    originalDirectory,testRoot));
+
+% Reproduce the callback sequence: MATLAB starts inside the selected
+% folder, CDac_pwd moves to the Acycle browser parent, and RMDIR removes the
+% directory stored in pre_dirML.
+cd(deletedDirectory);
+preferredDirectory = pwd;
+cd(testRoot);
+fallbackDirectory = pwd;
+[removed,message] = rmdir(deletedDirectory,'s');
+verifyTrue(testCase,removed,message);
+verifyFalse(testCase,isfolder(preferredDirectory));
+
+restoredDirectory = AC('restoreDirectoryAfterDelete', ...
+    preferredDirectory,fallbackDirectory);
+
+verifyEqual(testCase,restoredDirectory,fallbackDirectory);
+verifyEqual(testCase,pwd,fallbackDirectory);
 end
 
 function testUnifiedUpdaterNeverLeavesValuePastString(testCase)
@@ -442,7 +468,7 @@ end
 function testUiListboxDirectoryRefreshUsesEditFieldValue(testCase)
 dataFolder = tempname;
 mkdir(dataFolder);
-folderCleanup = onCleanup(@()removeTestFolder(dataFolder)); %#ok<NASGU>
+folderCleanup = onCleanup(@()removeTestFolder(dataFolder));
 createTextFile(fullfile(dataFolder,'beta.txt'));
 createTextFile(fullfile(dataFolder,'Alpha.txt'));
 environmentCleanup = redirectAcycleSettingsToTemporaryFolder(); %#ok<NASGU>
@@ -492,6 +518,119 @@ verifyEmpty(testCase,listbox.Value);
 handles = guidata(fig);
 verifyEmpty(testCase,handles.index_selected);
 verifyEmpty(testCase,handles.plot_selected);
+end
+
+function testBispectralMenuAndSaveUseLiveBrowserDirectory(testCase)
+liveFolder = tempname;
+staleFolder = tempname;
+mkdir(liveFolder);
+mkdir(staleFolder);
+liveCleanup = onCleanup(@()removeTestFolder(liveFolder));
+staleCleanup = onCleanup(@()removeTestFolder(staleFolder));
+environmentCleanup = redirectAcycleSettingsToTemporaryFolder(); %#ok<NASGU>
+verifyTrue(testCase,ac_working_directory('set',staleFolder));
+
+t = (0:255)';
+liveData = [t,sin(2*pi*0.07*t)+0.4*cos(2*pi*0.13*t)];
+staleData = [t,100+zeros(size(t))];
+filename = 'SERIES.TXT';
+createNumericMatrixFile(fullfile(liveFolder,filename),liveData);
+createNumericMatrixFile(fullfile(staleFolder,filename),staleData);
+
+mainFigure = figure('Visible','off');
+address = uicontrol(mainFigure,'Style','edit','String',liveFolder);
+listbox = uicontrol(mainFigure,'Style','listbox','Min',0,'Max',2);
+menu = uimenu(mainFigure,'Label','Bispectral Analysis');
+handles = struct('listbox_acmain',listbox, ...
+    'edit_acfigmain_dir',address,'index_selected',[], ...
+    'plot_selected',[],'nplot',0,'val1',1,'filetype', ...
+    {{'.txt','.csv','','.res','.dat','.out','.tab'}}, ...
+    'unit','unit');
+guidata(mainFigure,handles);
+ac_update_listbox_acmain(listbox,{filename},false);
+seedMainListSelection(mainFigure,listbox,1);
+handles = guidata(mainFigure);
+
+AC('menu_bispectral_Callback',menu,[],handles);
+gui = findall(groot,'Type','figure','Tag','bispectralGUI');
+verifyNumElements(testCase,gui,1);
+controls = getappdata(gui,'BispectralControls');
+verifyEqual(testCase,controls.Data,liveData,'AbsTol',1e-12);
+verifyEqual(testCase,controls.DataName,fullfile(liveFolder,filename));
+verifyTrue(testCase,isa(gui.CloseRequestFcn,'function_handle'));
+
+gui.Visible = 'off';
+controls.Significance.Value = 'none';
+controls.NumSurrogates.Value = 19;
+controls.NumSegments.Value = 8;
+controls.Overlap.Value = 0;
+controls.AnnotatePeaks.Value = false;
+controls.PeriodAxes.Value = false;
+controls.ColorGrid.Value = -1;
+colorGridChanged = controls.ColorGrid.ValueChangedFcn;
+colorGridChanged(controls.ColorGrid,[]);
+stateBeforeSave = getappdata(gui,'BispectralState');
+verifyNumElements(testCase,stateBeforeSave.PendingParameterCorrections,1);
+verifyTrue(testCase,contains( ...
+    stateBeforeSave.PendingParameterCorrections{1},'Colormap grid #'));
+preview = controls.PreviewButton.ButtonPushedFcn;
+preview(controls.PreviewButton,[]);
+stateAfterPreview = getappdata(gui,'BispectralState');
+verifyEqual(testCase,stateAfterPreview.AnalysisCount,1);
+verifyNumElements(testCase, ...
+    stateAfterPreview.PendingParameterCorrections,1);
+runAndSave = controls.SaveButton.ButtonPushedFcn;
+runAndSave(controls.SaveButton,[]);
+
+resultFolder = fullfile(liveFolder,'SERIES-bispectral-1');
+artifactStem = 'SERIES-bispectral-1';
+expected = { ...
+    fullfile(resultFolder,[artifactStem,'.pdf']), ...
+    fullfile(resultFolder,[artifactStem,'.fig']), ...
+    fullfile(resultFolder,[artifactStem,'.mat']), ...
+    fullfile(resultFolder,[artifactStem,'-preprocessed.csv']), ...
+    fullfile(resultFolder,[artifactStem,'-config.json'])};
+verifyTrue(testCase,isfolder(resultFolder));
+verifyTrue(testCase,all(cellfun(@(path)exist(path,'file') == 2,expected)));
+verifyEmpty(testCase,dir(fullfile(staleFolder,'SERIES-bispectral-*')));
+verifyTrue(testCase,contains(controls.Status.Text,liveFolder));
+saved = load(expected{3},'result');
+verifyNumElements(testCase,saved.result.GUIParameterCorrections,1);
+verifyTrue(testCase,contains( ...
+    saved.result.GUIParameterCorrections{1},'Colormap grid #'));
+configuration = jsondecode(fileread(expected{5}));
+verifyNumElements(testCase,configuration.GUIParameterCorrections,1);
+verifyTrue(testCase,contains( ...
+    configuration.GUIParameterCorrections{1},'Colormap grid #'));
+stateAfterSave = getappdata(gui,'BispectralState');
+verifyEqual(testCase,stateAfterSave.AnalysisCount,2);
+verifyEmpty(testCase,stateAfterSave.PendingParameterCorrections);
+
+close(gui);
+verifyFalse(testCase,isvalid(gui));
+end
+
+function testBispectralReaderReturnsFriendlyValidationErrors(testCase)
+missingPath = fullfile(tempname,'missing.txt');
+[data,message] = bispectralReadDataFile(missingPath);
+verifyEmpty(testCase,data);
+verifyNotEmpty(testCase,message);
+
+temporaryFolder = tempname;
+mkdir(temporaryFolder);
+cleanup = onCleanup(@()removeTestFolder(temporaryFolder));
+invalidPath = fullfile(temporaryFolder,'one-column.txt');
+writematrix((0:3)',invalidPath);
+[data,message] = bispectralReadDataFile(invalidPath);
+verifyEmpty(testCase,data);
+verifyNotEmpty(testCase,message);
+
+validPath = fullfile(temporaryFolder,'two-column.txt');
+expected = [(0:3)',[1;3;2;4]];
+writematrix(expected,validPath);
+[data,message] = bispectralReadDataFile(validPath);
+verifyEmpty(testCase,message);
+verifyEqual(testCase,data,expected);
 end
 
 function entries = listingFixture(names,modificationTimes,bytes)
@@ -576,6 +715,13 @@ fileCleanup = onCleanup(@()fclose(fileID));
 fprintf(fileID,'0 0\n');
 end
 
+function createNumericMatrixFile(filename,data)
+fileID = fopen(filename,'wt');
+assert(fileID >= 0,'Unable to create the numeric matrix fixture.');
+fileCleanup = onCleanup(@()fclose(fileID));
+fprintf(fileID,'%.17g %.17g\n',data.');
+end
+
 function cleanup = redirectAcycleSettingsToTemporaryFolder()
 settingsRoot = tempname;
 mkdir(settingsRoot);
@@ -605,6 +751,15 @@ function removeTestFolder(folder)
 if exist(folder,'dir') == 7
     rmdir(folder,'s');
 end
+end
+
+function cleanupDirectoryRestoreFixture(originalDirectory,testRoot)
+if isfolder(originalDirectory)
+    cd(originalDirectory);
+elseif isfolder(tempdir)
+    cd(tempdir);
+end
+removeTestFolder(testRoot);
 end
 
 function deleteIfValid(value)
