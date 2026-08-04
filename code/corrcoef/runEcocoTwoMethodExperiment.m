@@ -815,8 +815,7 @@ if reconstructed
 end
 spacing = diff(raw(:,1));
 dt = median(spacing);
-tolerance = max(64*eps(max(1,max(abs(raw(:,1))))), ...
-    1e-8*max(1,abs(dt)));
+tolerance = cocoSamplingTolerance(raw(:,1),dt);
 interpolated = any(abs(spacing-dt) > tolerance);
 data = raw;
 if interpolated

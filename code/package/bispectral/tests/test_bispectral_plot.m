@@ -98,15 +98,15 @@ verifyEqual(testCase,controls.Defaults.Interpolate,'never');
 verifyEqual(testCase,controls.Defaults.DetrendMethod,'none');
 verifyFalse(testCase,controls.Defaults.Standardize);
 verifyEqual(testCase,controls.Defaults.InputPolicy,'strict');
-verifyEqual(testCase,controls.Defaults.PlotKeepStrongestBispectrumFraction,0.2);
-verifyEqual(testCase,controls.Defaults.PlotKeepStrongestBicoherenceFraction,0.2);
+verifyEqual(testCase,controls.Defaults.PlotKeepStrongestBispectrumFraction,0.5);
+verifyEqual(testCase,controls.Defaults.PlotKeepStrongestBicoherenceFraction,0.5);
 verifyEqual(testCase,controls.Defaults.PlotColorGrid,32);
 verifyEqual(testCase,controls.Defaults.PlotFrequencyPairs,zeros(0,2));
 verifyEqual(testCase,controls.Defaults.SignificanceMethod,'surrogate-global');
 verifyEqual(testCase,controls.Defaults.SurrogateType,'iaaft');
 verifyEqual(testCase,controls.Defaults.NumSurrogates,199);
-verifyEqual(testCase,controls.KeepBispectrum.Value,20);
-verifyEqual(testCase,controls.KeepBicoherence.Value,20);
+verifyEqual(testCase,controls.KeepBispectrum.Value,50);
+verifyEqual(testCase,controls.KeepBicoherence.Value,50);
 verifyEqual(testCase,controls.ColorGrid.Value,32);
 verifyEqual(testCase,string(controls.PlotQuantity.ItemsData), ...
     ["overview" "bicoherence-squared" "bispectrum-magnitude" "biphase"]);
@@ -267,7 +267,7 @@ verifyEqual(testCase,controls.FrequencyMax.Value,0.5,'AbsTol',32*eps);
 verifyEqual(testCase,controls.Confidence.Value,95);
 verifyEqual(testCase,controls.NumSurrogates.Value,20);
 verifyEqual(testCase,controls.RandomSeed.Value,1);
-verifyEqual(testCase,controls.KeepBispectrum.Value,20);
+verifyEqual(testCase,controls.KeepBispectrum.Value,50);
 verifyEqual(testCase,controls.ColorGrid.Value,32);
 verifyEqual(testCase,state.LastResult.Options.NumSegments, ...
     controls.Defaults.NumSegments);
@@ -425,11 +425,11 @@ verifyEqual(testCase,controls.FrequencyMax.Value,0.5,'AbsTol',32*eps);
 verifyEqual(testCase,controls.Confidence.Value,95);
 verifyEqual(testCase,controls.NumSurrogates.Value,199);
 verifyEqual(testCase,controls.RandomSeed.Value,1);
-verifyEqual(testCase,controls.KeepBispectrum.Value,20);
-verifyEqual(testCase,controls.KeepBicoherence.Value,20);
+verifyEqual(testCase,controls.KeepBispectrum.Value,50);
+verifyEqual(testCase,controls.KeepBicoherence.Value,50);
 verifyEqual(testCase,controls.ColorGrid.Value,32);
-verifyEqual(testCase,state.LastResult.Options.PlotKeepStrongestBispectrumFraction,0.2);
-verifyEqual(testCase,state.LastResult.Options.PlotKeepStrongestBicoherenceFraction,0.2);
+verifyEqual(testCase,state.LastResult.Options.PlotKeepStrongestBispectrumFraction,0.5);
+verifyEqual(testCase,state.LastResult.Options.PlotKeepStrongestBicoherenceFraction,0.5);
 end
 
 function testGuiTextBudgetsRestoreLastValidValuesAndBoundAuditText(testCase)
@@ -640,7 +640,7 @@ verifyEqual(testCase,state.ParameterCorrectionCount,1);
 verifyEqual(testCase,state.AnalysisCount,0);
 verifyFalse(testCase,state.HasResult);
 verifyTrue(testCase,contains(controls.Status.Text,'Analysis failed'));
-verifyTrue(testCase,contains(controls.Status.Text,'Strict input policy'));
+verifyTrue(testCase,contains(controls.Status.Text,'10 ppm'));
 end
 
 function testOverviewLayoutAndCommonMapRendering(testCase)

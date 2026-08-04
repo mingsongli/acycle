@@ -252,6 +252,19 @@ classdef DynamicFilter < matlab.apps.AppBase
             data_s(:,2) = data_s(:,2) - mean(data_s(:,2));
             app.current_data = data_s;
 
+            diffx = diff(data_s(:,1));
+            if acycleSamplingIsUneven(data_s(:,1))
+                hwarn = warndlg(app.getLang('dd37','Not uniformly spaced data. Interpolated using mean sampling rate!'));
+                interpolate_rate = mean(diffx);
+                app.current_data = interpolate(data_s,interpolate_rate);
+                data_s = app.current_data;
+                try
+                    set(hwarn,'Units','normalized');
+                    set(hwarn,'Position',[0.15,0.6,0.25,0.1]);
+                catch
+                end
+            end
+
             xmin = min(data_s(:,1));
             xmax = max(data_s(:,1));
             app.meanStep = median(diff(data_s(:,1)));
@@ -291,18 +304,6 @@ classdef DynamicFilter < matlab.apps.AppBase
                     app.getLang('dd41','none')};
                 app.DropPadding.ItemsData = [1 2 3 4];
                 app.DropPadding.Value = 1;
-            end
-
-            diffx = diff(data_s(:,1));
-            if max(diffx) - min(diffx) > 2*eps('single')
-                hwarn = warndlg(app.getLang('dd37','Not uniformly spaced data. Interpolated using mean sampling rate!'));
-                interpolate_rate = mean(diffx);
-                app.current_data = interpolate(data_s,interpolate_rate);
-                try
-                    set(hwarn,'Units','normalized');
-                    set(hwarn,'Position',[0.15,0.6,0.25,0.1]);
-                catch
-                end
             end
 
             app.UIFigure.Position = app.normalizedToPixelPosition([0.63,0.4,0.35,0.22]);

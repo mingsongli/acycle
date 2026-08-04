@@ -236,6 +236,71 @@ verifyEqual(testCase,strict,regular,'AbsTol',0);
 verifyFalse(testCase,strictMeta.WasInterpolated);
 end
 
+function testStrictPolicyAcceptsSerializationJitterWithinTenPpm(testCase)
+coordinate = 289.816514+(0:518)'.*3.9;
+coordinate = arrayfun(@(value)str2double(sprintf('%.9g',value)),coordinate);
+signal = sin(2*pi*coordinate/97)+0.2*cos(2*pi*coordinate/41);
+data = [coordinate signal];
+
+options = bispectralDefaults(data);
+options.InputPolicy = 'strict';
+options.Interpolate = 'never';
+options.DetrendMethod = 'none';
+options.Standardize = false;
+[processed,meta] = bispectralPreprocess(data,options);
+
+verifyEqual(testCase,processed,data,'AbsTol',0);
+verifyFalse(testCase,meta.WasInterpolated);
+verifyTrue(testCase,meta.AcceptedNearUniformSpacing);
+verifyEqual(testCase,meta.StrictSpacingRelativeTolerance,1e-5,'AbsTol',0);
+verifyLessThan(testCase,meta.RelativeSpacingDeparture, ...
+    meta.StrictSpacingRelativeTolerance);
+verifyGreaterThan(testCase,meta.MaximumSpacingError, ...
+    meta.StrictSpacingRoundoffTolerance);
+verifyEqual(testCase,meta.MaximumSpacingError,4.0000000467443897e-6, ...
+    'RelTol',1e-8);
+end
+
+function testStrictPolicyRejectsSpacingBeyondTenPpm(testCase)
+dt = 3.9;
+coordinate = (0:127)'.*dt;
+coordinate(64) = coordinate(64)+11e-6*dt;
+signal = sin(2*pi*coordinate/97);
+data = [coordinate signal];
+
+options = bispectralDefaults(data);
+options.InputPolicy = 'strict';
+options.Interpolate = 'never';
+options.DetrendMethod = 'none';
+options.Standardize = false;
+
+verifyError(testCase,@()bispectralPreprocess(data,options), ...
+    'Acycle:Bispectral:StrictUnevenSampling');
+end
+
+function testStrictTenPpmLimitSurvivesScaleAndOffset(testCase)
+largeOffset = 1e12+(0:127)';
+largeOffset(64) = largeOffset(64)+1e-3;
+verifyStrictUnevenError(testCase,largeOffset);
+
+smallDt = 1e-10;
+smallSpacing = (0:127)'.*smallDt;
+smallSpacing(64) = smallSpacing(64)+11e-6*smallDt;
+verifyStrictUnevenError(testCase,smallSpacing);
+end
+
+function verifyStrictUnevenError(testCase,coordinate)
+signal = sin((0:numel(coordinate)-1)'/17);
+data = [coordinate signal];
+options = bispectralDefaults(data);
+options.InputPolicy = 'strict';
+options.Interpolate = 'never';
+options.DetrendMethod = 'none';
+options.Standardize = false;
+verifyError(testCase,@()bispectralPreprocess(data,options), ...
+    'Acycle:Bispectral:StrictUnevenSampling');
+end
+
 function closeFigure(fig)
 if ~isempty(fig) && isgraphics(fig)
     close(fig);

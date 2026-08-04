@@ -398,7 +398,7 @@ if any(diff(depthOriginal) <= 0)
 end
 depthStep = median(diff(depthOriginal));
 if any(abs(diff(depthOriginal)-depthStep) > ...
-        max(1e-10*max(1,abs(depthStep)),32*eps(max(abs(depthOriginal)))))
+        cocoSamplingTolerance(depthOriginal,depthStep))
     error('cocoAdaptiveEvaluate:UnevenDepth', ...
         'DAT(:,1) must be evenly spaced.');
 end

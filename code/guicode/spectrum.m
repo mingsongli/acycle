@@ -21,8 +21,7 @@ end
         app.unit = getUnit(ctx);
         app.method = "Multi-taper method";
         app.nyquist = estimateNyquist(app.data);
-        dtx = diff(app.data(:,1));
-        app.isUneven = ~isempty(dtx) && (max(dtx)-min(dtx) > 10*eps('single'));
+        app.isUneven = acycleSamplingIsUneven(app.data(:,1));
 
         app.UIFigure = uifigure('Name','Acycle: Spectral Analysis','Color',bg, ...
             'Position',[80 80 808 397],'AutoResizeChildren','off');
@@ -37,7 +36,7 @@ end
         end
         app.DropMethod = uidropdown(app.UIFigure, ...
             'Items',{'Multi-taper method','Periodogram','Lomb-Scargle spectrum'}, ...
-            'Value',defaultMethod, ...
+            'Value',defaultMethod,'Tag','spectrumMethodDropdown', ...
             'ValueChangedFcn',@(~,~)onMethodChanged());
 
         app.PanelMethod = uipanel(app.UIFigure,'Title','Method','BackgroundColor',bg);

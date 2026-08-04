@@ -3,7 +3,7 @@ _______________________________________
 
 
 Version : Acycle_v3.1.0
-Date    : August 3, 2026
+Date    : August 4, 2026
 By      : Mingsong Li (Peking University)
 
     1. NEW: Bispectral analysis.
@@ -15,6 +15,19 @@ By      : Mingsong Li (Peking University)
 
         Special thanks to Research Professor Yan Zhao (赵艳) for valuable
         suggestions on this new functionality.
+
+    2. FIXED: Near-uniform sampling detection across analysis tools.
+        A common 10-parts-per-million relative spacing tolerance now prevents
+        text-quantized regular grids from being warned about, interpolated,
+        rejected, or redirected to Lomb-Scargle. Spectral/Bispectral,
+        filtering, wavelet, recurrence, preprocessing, COCO/eCOCO, and related
+        menu workflows use the same standard. Genuinely uneven inputs retain
+        the appropriate interpolation or analysis fallback. The reversed
+        spacing check in Power Decomposition was also corrected.
+
+    3. IMPROVED: Bispectral display defaults.
+        The independent strongest-value retain fractions for bispectrum
+        magnitude and magnitude-squared bicoherence now both default to 50%.
 
 _______________________________________
 

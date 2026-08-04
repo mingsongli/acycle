@@ -284,16 +284,30 @@ classdef ft < matlab.apps.AppBase
             if isempty(app.current_data)
                 error('ft requires current_data in handles struct.');
             end
+            if size(app.current_data,2) < 2
+                error('ft:InsufficientColumns', ...
+                    'Filtering requires at least two numeric columns.');
+            end
 
-            app.current_data = sortrows(app.current_data);
+            finiteRows = all(isfinite(app.current_data(:,1:2)),2);
+            app.current_data = app.current_data(finiteRows,:);
+            app.current_data = sortrows(app.current_data,1);
+            app.current_data = findduplicate(app.current_data);
+            if size(app.current_data,1) < 2
+                error('ft:InsufficientFiniteData', ...
+                    'Filtering requires at least two finite unique samples.');
+            end
             app.current_data(:,2) = app.current_data(:,2) - mean(app.current_data(:,2));
 
             diffx = diff(app.current_data(:,1));
-            if max(diffx)-min(diffx) > 10*eps('single')
+            if acycleSamplingIsUneven(app.current_data(:,1))
                 warndlg(app.getLang('ec25','Warning: the data may not be evenly spaced.'));
+                app.current_data = interpolate( ...
+                    app.current_data,median(diffx));
+                diffx = diff(app.current_data(:,1));
             end
 
-            app.step = app.current_data(2,1)-app.current_data(1,1);
+            app.step = median(diffx);
             [app.f_fft, app.P1, app.f_mtm, app.p_mtm] = app.computeSpectra(app.current_data);
 
             app.x_1 = 0;

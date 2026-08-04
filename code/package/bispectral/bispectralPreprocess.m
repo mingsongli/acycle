@@ -108,27 +108,29 @@ if dt > originalMedianSpacing + coarseningTolerance
          'then leave SampleInterval at 0 (automatic).']);
 end
 
-relativeDeparture = max(abs(dx-dt)) / dt;
+maximumSpacingError = max(abs(dx-dt));
+relativeDeparture = maximumSpacingError / dt;
 gapFactor = max(dx) / dt;
 mode = lower(strtrim(char(options.Interpolate)));
 if ~any(strcmp(mode,{'auto','always','never'}))
     error('Acycle:Bispectral:InvalidInterpolationMode', ...
         'Interpolate must be auto, always, or never.');
 end
-strictSpacingTolerance = NaN;
+[strictSpacingTolerance,strictSpacingRoundoffTolerance, ...
+    strictSpacingRelativeTolerance] = strictSpacingTolerances(dt);
 if strcmp(inputPolicy,'strict')
     if ~strcmp(mode,'never')
         error('Acycle:Bispectral:StrictInterpolationDisabled', ...
             ['Strict input policy requires Interpolate=''never'' and never ', ...
              'constructs replacement samples.']);
     end
-    strictSpacingTolerance = floatingSpacingTolerance(x,dt);
-    maximumSpacingError = max(abs(dx-dt));
-    if maximumSpacingError > strictSpacingTolerance
+    if relativeDeparture > strictSpacingRelativeTolerance
         error('Acycle:Bispectral:StrictUnevenSampling', ...
-            ['Strict input policy accepts only floating-point roundoff in ', ...
-             'coordinate spacing. Maximum error %.9g exceeds tolerance %.9g.'], ...
-            maximumSpacingError,strictSpacingTolerance);
+            ['Bispectral Analysis accepts coordinate-spacing departures up ', ...
+             'to %.6g ppm without interpolation. Maximum error %.9g ', ...
+             '(%.6g ppm) exceeds the absolute tolerance %.9g.'], ...
+            1e6*strictSpacingRelativeTolerance,maximumSpacingError, ...
+            1e6*relativeDeparture,strictSpacingTolerance);
     end
     isIrregular = false;
     doInterpolate = false;
@@ -229,11 +231,16 @@ meta.Nyquist = 1/(2*dt);
 meta.OriginalMedianSpacing = originalMedianSpacing;
 meta.OriginalMinimumSpacing = min(dx);
 meta.OriginalMaximumSpacing = max(dx);
+meta.MaximumSpacingError = maximumSpacingError;
 meta.RelativeSpacingDeparture = relativeDeparture;
 meta.LargestGapFactor = gapFactor;
 meta.WasIrregular = isIrregular;
 meta.WasInterpolated = doInterpolate;
 meta.StrictSpacingAbsoluteTolerance = strictSpacingTolerance;
+meta.StrictSpacingRoundoffTolerance = strictSpacingRoundoffTolerance;
+meta.StrictSpacingRelativeTolerance = strictSpacingRelativeTolerance;
+meta.AcceptedNearUniformSpacing = strcmp(inputPolicy,'strict') && ...
+    maximumSpacingError > strictSpacingRoundoffTolerance;
 meta.InterpolationMethod = char(options.InterpolationMethod);
 meta.DetrendMethod = trendMethod;
 meta.Trend = trend;
@@ -242,7 +249,12 @@ meta.StandardizationCenter = centerAfterDetrend;
 meta.StandardizationScale = scale;
 end
 
-function tolerance = floatingSpacingTolerance(x,dt)
-coordinateScale = max(1,max(abs(x)));
-tolerance = max(128*eps(coordinateScale),128*eps(max(1,abs(dt))));
+function [effective,roundoff,relative] = strictSpacingTolerances(dt)
+% Text output with a limited number of significant digits can introduce
+% negligible spacing jitter even when the source grid was exactly regular.
+% Ten parts per million accepts that serialization artifact while remaining
+% far below the 1% threshold used by the explicit prepare/interpolate path.
+relative = 1e-5;
+roundoff = 128*eps(max(1,abs(dt)));
+effective = relative*dt;
 end

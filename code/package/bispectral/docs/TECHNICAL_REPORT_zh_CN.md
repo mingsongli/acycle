@@ -167,7 +167,7 @@ $$[-Xₕ(f₁)][-Xₕ(f₂)][-Xₕ*(f₃)] = -Xₕ(f₁)Xₕ(f₂)Xₕ*(f₃)$$
 
 ### 4.1 API prepare 与 GUI strict 的执行边界
 
-以下 1--7 步只属于调用者显式选择的 core API `InputPolicy='prepare'`；GUI 不执行这些改变。GUI 的 `strict` 路径只验证两列数据有限、坐标严格递增且无重复、采样间隔除浮点舍入外严格相等，不满足即硬错误。通过 strict 验证后，只有第 8 步的 estimator 段内去趋势可由 GUI 设置。
+以下 1--7 步只属于调用者显式选择的 core API `InputPolicy='prepare'`；GUI 不执行这些改变。GUI 的 `strict` 路径只验证两列数据有限、坐标严格递增且无重复，并允许不超过中位步长 10 ppm 的间距偏差，以兼容规则网格保存为有限有效数字文本后产生的微小量化误差；它不修改坐标或观测值。超过该阈值即硬错误。通过 strict 验证后，只有第 8 步的 estimator 段内去趋势可由 GUI 设置。
 
 1. 删除第一、第二列中的非有限行。
 2. 按坐标升序排序。
@@ -182,7 +182,7 @@ $$[-Xₕ(f₁)][-Xₕ(f₂)][-Xₕ*(f₃)] = -Xₕ(f₁)Xₕ(f₂)Xₕ*(f₃)$$
 
 $$δirr = maxᵢ |Δxᵢ-Δt| / Δt$$
 
-默认 IrregularTolerance=0.01。auto 模式在 δirr 超过 1% 时规则化；always 总是规则化；never 在不规则时终止分析。默认线性插值，也可选择 pchip 或 makima。若最大原始间隙超过 GapWarningFactor=5 个采样间隔，软件把警告写入结果元数据。
+默认 IrregularTolerance=0.01。prepare/auto 模式在 δirr 超过 1% 时规则化；always 总是规则化；never 在不规则时终止分析。GUI strict 使用独立且严格得多的 10 ppm（0.001%）阈值，只容纳文本序列化量化误差而不执行插值。默认线性插值，也可选择 pchip 或 makima。若最大原始间隙超过 GapWarningFactor=5 个采样间隔，软件把警告写入结果元数据。
 
 > **抗混叠保护。** linear、pchip 和 makima 都不是低通抗混叠滤波器。若核心 API 的 SampleInterval 比原始中位间距更粗，程序抛出 Acycle:Bispectral:AliasingRisk。弹窗 GUI 不再提供预处理模块，也不会隐式插值、整段去趋势或标准化；不规则数据应先用 Acycle 的专用预处理工具完成规则化。长间隙、少分段和解析阈值近似等科学警告仍保留在 MAT/JSON。
 
@@ -284,7 +284,7 @@ WOSA 每段至少 32 点。默认 8 段会根据有效唯一坐标数向下调�
 
 ### 6.4 运行控制与异常恢复
 
-Run 与 Run & Save 共用参数读取和分析流程。运行期间 Run、Run & Save 与 Close 暂时禁用，并显示可取消进度框。取消产生 Acycle:Bispectral:Canceled；其他异常写入状态栏与 MATLAB Command Window。科学结果警告只写入 Command Window，不打开 modal warning。可恢复的 GUI 参数错误包括越界、整数控件含小数、参数组合冲突，以及参考周期或频率对超出理论 Nyquist 频率/频率和上限；每次操作只汇总一次，数值项恢复为该数据的推荐值，文本项恢复为上次有效值，并以一次 warning alert 和 Command Window 同文告知。Run 触发的 alert 只在计算、绘图或保存结束且控件恢复之后显示；alert 调用本身有异常隔离，不会反向中断分析。编辑回调已纠正的记录会跨普通 Preview Run 保留到下一次成功 Run & Save，并连同实际生效参数写入 MAT/JSON；只有原子结果目录已经建立后才消费这批记录。新数值结果也只在候选图完整渲染后提交给 GUI；保存失败保留可操作的新结果和未归档纠正记录，并明确显示 Save failed。该机制绝不修补输入数据，strict 下的 NaN、乱序、重复、不等距或过短数据仍直接停止；参数提示文案也不宣称这些数据错误会继续运行。onCleanup 在成功或失败后恢复控件并关闭进度框；方法帮助仍可由用户主动打开信息窗。
+Run 与 Run & Save 共用参数读取和分析流程。运行期间 Run、Run & Save 与 Close 暂时禁用，并显示可取消进度框。取消产生 Acycle:Bispectral:Canceled；其他异常写入状态栏与 MATLAB Command Window。科学结果警告只写入 Command Window，不打开 modal warning。可恢复的 GUI 参数错误包括越界、整数控件含小数、参数组合冲突，以及参考周期或频率对超出理论 Nyquist 频率/频率和上限；每次操作只汇总一次，数值项恢复为该数据的推荐值，文本项恢复为上次有效值，并以一次 warning alert 和 Command Window 同文告知。Run 触发的 alert 只在计算、绘图或保存结束且控件恢复之后显示；alert 调用本身有异常隔离，不会反向中断分析。编辑回调已纠正的记录会跨普通 Preview Run 保留到下一次成功 Run & Save，并连同实际生效参数写入 MAT/JSON；只有原子结果目录已经建立后才消费这批记录。新数值结果也只在候选图完整渲染后提交给 GUI；保存失败保留可操作的新结果和未归档纠正记录，并明确显示 Save failed。该机制绝不修补输入数据，strict 下的 NaN、乱序、重复、超过 10 ppm 的间距偏差或过短数据仍直接停止；参数提示文案也不宣称这些数据错误会继续运行。onCleanup 在成功或失败后恢复控件并关闭进度框；方法帮助仍可由用户主动打开信息窗。
 
 ## 7. 用户操作说明
 
@@ -292,7 +292,7 @@ Run 与 Run & Save 共用参数读取和分析流程。运行期间 Run、Run & 
 
 1. 在 Acycle 主列表中选择一个至少两列的数值文件。不要同时选择多个文件。
 2. 打开 Timeseries > Bispectral Analysis。确认顶部文件名、有效样本数、坐标范围、中位步长、Nyquist 和最大间距偏差。
-3. GUI 不提供预处理控件。先用 Acycle 专用工具准备有限、严格递增、无重复且规则采样的数据；GUI 仅保留显式的段内去趋势设置。
+3. GUI 不提供预处理控件。先用 Acycle 专用工具准备有限、严格递增、无重复且规则采样的数据；有限有效数字文本造成的不超过 10 ppm 间距偏差可直接通过，GUI 不修改坐标或观测值。GUI 仅保留显式的段内去趋势设置。
 4. 选择 WOSA 或 Frequency-smoothed。WOSA 通常从 8 段、50% overlap、Hann、pad=1 开始。
 5. 设置频率范围。最低目标频率应在每段内有足够周期；不要把 zero padding 当作分辨率。
 6. GUI 预览默认使用 199 个 IAAFT maximum-statistic surrogates；用于研究定稿时设置至少 999 个 IAAFT surrogates。
@@ -357,8 +357,8 @@ files = bispectralSave(result,fig,pwd,options.InputName);
 | 推断 | IAAFTIterations | 200 | 仅 IAAFT 使用；另以谱幅相对误差容差筛除不合格 surrogate |
 | 推断 | RandomSeed | 1 | 保证复现 |
 | 输出 | PlotQuantity | overview | GUI 提供 overview、b²、\|B\| 或 biphase；不单独显示与 b² 单调等价的 b，也不把 Re、Im 作为常规图件 |
-| 输出 | PlotKeepStrongestBispectrumFraction | 0.2 | 仅绘图：按 \|B\| 自身分布独立保留最高 20% |
-| 输出 | PlotKeepStrongestBicoherenceFraction | 0.2 | 仅绘图：按 b² 自身分布独立保留最高 20%；biphase 也使用此强度蒙版 |
+| 输出 | PlotKeepStrongestBispectrumFraction | 0.5 | 仅绘图：按 \|B\| 自身分布独立保留最高 50% |
+| 输出 | PlotKeepStrongestBicoherenceFraction | 0.5 | 仅绘图：按 b² 自身分布独立保留最高 50%；biphase 也使用此强度蒙版 |
 | 输出 | PlotColorGrid | 32 | 所有二维图共享的离散 colormap 颜色级数；GUI 可设 4–256 |
 | 输出 | PlotReferencePeriods | [] | 仅绘图：周期序列 b 对应参考线 f1+f2=1/b；GUI 空格分隔并以 Tab/Enter 提交，且要求 1/b<Nyquist |
 | 输出 | PlotFrequencyPairs | 0×2 | 仅绘图：GUI 语法 `f1 f2; f3,f4`；每对要求两频率均小于 Nyquist 且 f1+f2<Nyquist，绘制 x=f1、y=f2 细点线，外侧仅标 1/f1、1/f2 数值；顶端文字中心对齐竖线，右侧文字中心对齐横线 |
@@ -482,7 +482,7 @@ LR04 输入覆盖 0-5320 ka，共 2115 点，原始间距 1-5 kyr；auto 模式�
 
 ### 10.9 Bundled LR04/CENOGRID LOWESS 敏感性流程
 
-`bispectralLocalDataValidation(outputParent)` 默认读取仓库 `data/Examples` 中的 LR04 与 CENOGRID 原始文件，分析 LR04 全记录以及 CENOGRID 0--5、10--15、50--55 Ma 三段。外层准备明确使用核心 `InputPolicy='prepare'`：删除非有限值、排序、合并重复坐标，并总是按原始中位步长重建严格等距的线性网格，避免低于 1% prepare 容差的轻微抖动在后续 strict 分析才失败。metadata 分开记录 `OriginallyIrregular`（strict 浮点容差）和 `RegularGridReconstructed`。随后保留 regularized 敏感性对照，并以 `smoothdata(...,'lowess',spanSamples)` 去除用户指定的趋势；默认窗口为 800 kyr，正式 driver 默认 999 个 accepted IAAFT surrogate 与 `MaxFrequencyBins=1024`。
+`bispectralLocalDataValidation(outputParent)` 默认读取仓库 `data/Examples` 中的 LR04 与 CENOGRID 原始文件，分析 LR04 全记录以及 CENOGRID 0--5、10--15、50--55 Ma 三段。外层准备明确使用核心 `InputPolicy='prepare'`：删除非有限值、排序、合并重复坐标，并总是按原始中位步长重建严格等距的线性网格，避免低于 1% prepare 容差的轻微抖动在后续 strict 分析才失败。metadata 分开记录 `OriginallyIrregular`（strict 10 ppm 容差）和 `RegularGridReconstructed`。随后保留 regularized 敏感性对照，并以 `smoothdata(...,'lowess',spanSamples)` 去除用户指定的趋势；默认窗口为 800 kyr，正式 driver 默认 999 个 accepted IAAFT surrogate 与 `MaxFrequencyBins=1024`。
 
 每个 result 的 `ExternalPreprocessing` 同时记录 prepare metadata、LOWESS 样点数、按 `(spanSamples-1)×dt` 定义的有效支撑宽度，以及端点只使用可用观测、不反射、不填充、不外推的策略。实际双谱计算重新进入 strict 策略，因而不会第二次修改外层准备后的序列。验证汇总逐例记录 computed axis-bin count、原生频率 bin stride、Rayleigh resolution 与 computed frequency maximum，明确区分数值网格和加密显示 mesh；同时记录实际 IAAFT 类型、接受数、迭代数、谱误差容差、尝试或拒绝数、随机种子、固定检验族定义及其有限三频点数。命名由 LOWESS 参数自动生成，例如 `lowess800kyr`，避免窗口改变后仍留下固定的 `800k` 文件名。
 
@@ -534,13 +534,13 @@ LR04 输入覆盖 0-5320 ka，共 2115 点，原始间距 1-5 kyr；auto 模式�
 
 | 检查 | 结果 |
 |---|---|
-| package 单元与 GUI/绘图/保存回归 | code/package/bispectral/tests：28/28 通过 |
+| package 单元与 GUI/绘图/保存回归 | 当前 31 项；R2026a 下 29/31 通过，全部 8 项 I/O/间距测试通过，另 2 项仅为 `-batch` web-component 像素几何断言 |
 | Acycle 主列表回归 | test_ac_main_list：19/19 通过 |
 | 菜单路由 | 标签、callback、数据加载和 bispectralGUI(handles) 调用均存在 |
 | GUI 烟雾测试 | 47 点记录参数窗创建、Run 预览、结果图和 Nyquist 联动通过 |
 | 短记录 | 32、33、47、63 点路径核验；47 点正式自测自动切换 frequency-smoothed |
 | 重复坐标 GUI | 默认 Nyquist 为有限值，窗口正常打开 |
-| MATLAB checkcode | 本轮修改的 3 个测试文件 0 条消息；22 个 bispectral 相关 .m 文件仍纳入完整检查目标 |
+| MATLAB checkcode | 本轮修改的 Bispectral 文件均为 0 条消息；22 个 bispectral 相关 .m 文件仍纳入完整检查目标 |
 | git diff --check | 通过 |
 
 最准确的测试表述是：菜单代码路径核对 + 参数窗口烟雾测试 + 实际分析、绘图和保存运行。报告不把这些软件测试解释为古气候机制证据。

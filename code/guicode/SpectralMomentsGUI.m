@@ -445,13 +445,26 @@ classdef SpectralMomentsGUI < matlab.apps.AppBase
             end
 
             dat = app.Context.current_data;
+            dat = dat(all(isfinite(dat(:,1:2)),2),:);
+            if size(dat,1) < 2
+                error('SpectralMomentsGUI:InsufficientFiniteData', ...
+                    ['Spectral Moments requires at least two finite ', ...
+                     'unique samples.']);
+            end
             diffx = diff(dat(:,1));
             if sum(diffx <= 0) > 0
                 disp(app.getLang('a178', 'Input data not in ascending order; sorted automatically.'));
                 dat = sortrows(dat);
             end
-            if abs((max(diffx)-min(diffx))/2) > 10*eps('single')
+            dat = findduplicate(dat);
+            if size(dat,1) < 2
+                error('SpectralMomentsGUI:InsufficientUniqueData', ...
+                    ['Spectral Moments requires at least two finite ', ...
+                     'unique samples.']);
+            end
+            if acycleSamplingIsUneven(dat(:,1))
                 warndlg(app.getLang('ec25', 'Input data should be equally spaced.'));
+                dat = interpolate(dat,median(diff(dat(:,1))));
             end
 
             datx = dat(:,1);

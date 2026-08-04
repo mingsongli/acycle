@@ -1,18 +1,18 @@
 function tolerance = cocoSamplingTolerance(depth,spacing)
-%COCOSAMPLINGTOLERANCE Shared roundoff tolerance for COCO depth grids.
+%COCOSAMPLINGTOLERANCE Shared near-uniform tolerance for COCO depth grids.
 %
 % TOLERANCE = COCOSAMPLINGTOLERANCE(DEPTH,SPACING) returns the common
 % absolute tolerance used when deciding whether a sorted depth series is
-% already uniformly sampled.  The relative term is intentionally small
-% enough to absorb decimal-coordinate roundoff without treating meaningful
-% sampling jitter as an exact regular grid.
+% already uniformly sampled. Coordinate-spacing departures of at most
+% 10 parts per million are treated as regular, matching other Acycle
+% spectral tools and avoiding interpolation caused only by text precision.
 
 validateattributes(depth,{'numeric'}, ...
     {'vector','real','finite','nonempty'},mfilename,'depth',1);
 validateattributes(spacing,{'numeric'}, ...
     {'scalar','real','finite','positive'},mfilename,'spacing',2);
 
-depthScale = max(1,max(abs(depth(:))));
-spacingScale = max(1,abs(spacing));
-tolerance = max(64*eps(depthScale),1e-8*spacingScale);
+% Validate DEPTH for the established public contract even though the
+% relative tolerance intentionally does not grow with coordinate offset.
+tolerance = 1e-5*abs(double(spacing));
 end

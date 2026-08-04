@@ -40,7 +40,7 @@ end
 % interpolation
 diffx = diff(dat(:,1));
 sr_target = median(diff(dat(:,1)));
-if nanmax(diffx) - nanmin(diffx) > eps('single')
+if acycleSamplingIsUneven(dat(:,1))
     if qwarn==1
         warndlg('Data may not be evenly spaced. Interpolation using median sampling rate. Done !')
         disp('>>  ==========        interpolation using median sampling rate')

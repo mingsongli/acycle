@@ -277,7 +277,7 @@ classdef RecPlotGUI < matlab.apps.AppBase
                 end
             else
                 diffx = diff(data_s(:,1));
-                if max(diffx) - min(diffx) > 10*eps('single')
+                if acycleSamplingIsUneven(data_s(:,1))
                     if app.lang_choice == 0
                         hwarn = warndlg('Not equally spaced data. Interpolated using mean sampling rate!');
                     else

@@ -3884,7 +3884,7 @@ if nplot == 1
             data(any(isinf(data),2),:) = [];
 
             diffx = diff(data(:,1));
-            if max(diffx) - min(diffx) > eps('single')
+            if acycleSamplingIsUneven(data(:,1))
                 if handles.lang_choice == 0
                     hwarn = warndlg('Warning: Interpolation using median sampling rate');
                 else
@@ -7208,6 +7208,7 @@ if check == 1
                 end
                  data = sortrows(data); % sort data
             end
+            diffx = diff(data(:,1));
             if any(diffx(:) == 0)
                 if handles.lang_choice == 0
                     warndlg('Warning: duplicated numbers are replaced with the mean')
@@ -7216,7 +7217,8 @@ if check == 1
                 end
                 data=findduplicate(data); % find duplicate
             end
-            if max(diffx)-min(diffx) <= eps(5)
+            diffx = diff(data(:,1));
+            if acycleSamplingIsUneven(data(:,1))
                 if handles.lang_choice == 0
                     warndlg('Warning: Data may not be evenly spaced. Interpolation using median sampling rate')
                 else

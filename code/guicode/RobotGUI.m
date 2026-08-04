@@ -427,16 +427,37 @@ set(runbt,'CData',imread('menu_robot.jpg'))
         
         % interpolation
         if check_interp_v == 1
-            if nanmax(diffx) - nanmin(diffx) > eps('single')
-                warndlg('Warning: Data may not be evenly spaced. Interpolation ...')
+            if ~(isnumeric(robot_sr) && isscalar(robot_sr) && ...
+                    isfinite(robot_sr) && robot_sr > 0)
+                warndlg('Invalid Interpolation Rate!')
+                return
+            end
+            [isUneven,samplingInfo] = acycleSamplingIsUneven(dat(:,1));
+            targetSpacingChanged = abs(robot_sr-samplingInfo.MedianSpacing) > ...
+                samplingInfo.AbsoluteTolerance;
+            if isUneven || targetSpacingChanged
+                if isUneven
+                    warndlg('Warning: Data may not be evenly spaced. Interpolation ...')
+                end
                 disp('>>')
                 disp('>>  ==========    Step 2: Interpolation    ==========')
                 disp('>>')
-                disp('>>  ==========        Sampling rates are not even')
+                if isUneven
+                    disp('>>  ==========        Sampling rates are not even')
+                else
+                    disp('>>  ==========        Applying the selected sampling rate')
+                end
                 dati = interpolate(dat,robot_sr);
                 name1 = [name1,'-rsp',num2str(robot_sr)];
-                clear dat; 
+                clear dat;
                 dat = dati;
+                datx = dat(:,1);
+                daty = dat(:,2);
+                newDt = median(diff(dat(:,1)));
+                fmax = min(fmax,1/(2*newDt));
+                set(spectral_fmaxedit,'String',num2str(fmax));
+                wavep1 = max(wavep1,2*newDt);
+                set(wavelet_period1,'String',num2str(wavep1));
                 disp(['>>  ==========        interpolating using ', num2str(robot_sr),' sampling rate'])
                 % save data
                 if robot_savedata == 1

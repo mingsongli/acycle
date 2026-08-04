@@ -82,10 +82,13 @@ bispectrum units but not bicoherence.
 A user-specified interval may refine the grid, but it may not be coarser than
 the original median spacing. Ordinary interpolation is not an anti-aliasing
 filter: to downsample, low-pass filter and resample the record first, then load
-the already resampled series. The GUI always uses `InputPolicy='strict'`,
-intentionally has no preprocessing panel, and performs no hidden row removal,
-sorting, duplicate merging, interpolation, whole-record detrending, or standardization;
-prepare uneven data with Acycle's dedicated tools first. Within-segment mean
+the already resampled series. The GUI always uses `InputPolicy='strict'`. It
+accepts spacing departures up to 10 parts per million so that a regular grid
+saved with limited text precision is not misclassified as uneven, but it does
+not alter coordinates or data values. The GUI intentionally has no
+preprocessing panel and performs no hidden row removal, sorting, duplicate
+merging, interpolation, whole-record detrending, or standardization; prepare
+genuinely uneven data with Acycle's dedicated tools first. Within-segment mean
 removal remains an explicit estimator setting. Scientific warnings produced
 after a run are printed in the MATLAB Command Window instead of opening a
 modal warning dialog.
@@ -172,8 +175,8 @@ height, leaving 20% above it for later annotation. Each power axis keeps at
 least three explicitly labeled y ticks.
 `PlotKeepStrongestBispectrumFraction` and
 `PlotKeepStrongestBicoherenceFraction` are independent plot-only adaptive
-masks, both defaulting to `0.2`. Thus `|B|` and `b^2` each retain their own
-highest 20% rather than sharing an invalid cross-quantity cutoff. Biphase uses
+masks, both defaulting to `0.5`. Thus `|B|` and `b^2` each retain their own
+highest 50% rather than sharing an invalid cross-quantity cutoff. Biphase uses
 the `b^2` strength mask because phase is not reliable where coupling is weak.
 PCOLOR first interpolates the complete finite color field; a separate
 interpolated alpha mask then makes lower values fully transparent. Set the
@@ -258,10 +261,12 @@ assertSuccess(results);
 assertSuccess(acResults);
 ```
 
-The current R2025b baseline is 28/28 package tests. The updated Acycle
-Run-and-Save integration path also passes its targeted regression; MATLAB
-Code Analyzer reports zero diagnostics for the three modified test files,
-and `git diff --check` passes.
+The recorded R2025b baseline was 28/28 package tests. Three strict-spacing
+regressions extend the current package suite to 31 tests. In MATLAB R2026a,
+all eight I/O/spacing tests and the targeted GUI/default checks pass; two
+pixel-geometry assertions remain sensitive to `-batch` web-component layout.
+MATLAB Code Analyzer reports zero diagnostics for the modified Bispectral
+files, and `git diff --check` passes.
 
 It checks a known coupled triad and an uncoupled control, the `[0,1]` bound,
 amplitude-cubed scaling, time-reversal conjugacy, zero denominators and zero

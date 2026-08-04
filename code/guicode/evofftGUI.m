@@ -352,6 +352,13 @@ classdef evofftGUI < matlab.apps.AppBase
             end
 
             data_s = app.current_data;
+            diffx = diff(data_s(:,1));
+            if acycleSamplingIsUneven(data_s(:,1))
+                warndlg(app.getLang('evofft14','Not equally spaced data. Interpolated using mean sampling rate!'));
+                interpolate_rate = mean(diffx);
+                app.current_data = interpolate(data_s,interpolate_rate);
+                data_s = app.current_data;
+            end
             xmin = min(data_s(:,1));
             xmax = max(data_s(:,1));
             app.mean_step = median(diff(data_s(:,1)));
@@ -391,13 +398,6 @@ classdef evofftGUI < matlab.apps.AppBase
             app.DropCmap.Value = 'Default';
             app.EditGrid.Value = '';
             app.CheckSave.Value = false;
-
-            diffx = diff(data_s(:,1));
-            if max(diffx) - min(diffx) > 10*eps('single')
-                warndlg(app.getLang('evofft14','Not equally spaced data. Interpolated using mean sampling rate!'));
-                interpolate_rate = mean(diffx);
-                app.current_data = interpolate(data_s,interpolate_rate);
-            end
 
             app.onDimChanged();
         end

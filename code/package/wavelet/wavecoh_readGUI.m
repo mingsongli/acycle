@@ -102,7 +102,7 @@ if handles.wavehastorerun
     % ensure time are equal
     Dti1 = diff(dat1(:,1));
     dt = mean(Dti1);
-    if max(Dti1) - min(Dti1) > 10 * eps('single')
+    if acycleSamplingIsUneven(dat1(:,1))
         [dat1]=interpolate(dat1,dt);
     end
     if ~isequal(dat1(:,1),dat2(:,1))

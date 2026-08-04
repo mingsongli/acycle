@@ -112,6 +112,51 @@ result = ecocoAdaptiveCore(data,periods,40.4,dt,75,0,256, ...
 verifyNotEmpty(testCase,result.rho);
 end
 
+function testNineDigitSerializedGridIsNotInterpolated(testCase)
+depth = 289.816514+(0:518)'.*3.9;
+depth = arrayfun(@(value)str2double(sprintf('%.9g',value)),depth);
+data = [depth,sin(2*pi*depth/97)];
+
+[prepared,info] = cocoPrepareRegularData( ...
+    data,'serialized regular grid','Verbose',false);
+
+verifyFalse(testCase,info.interpolationApplied);
+verifyEqual(testCase,prepared,data,'AbsTol',0);
+verifyEqual(testCase,info.uniformityTolerance,3.9e-5,'RelTol',1e-12);
+end
+
+function testElevenPpmGridIsStillInterpolated(testCase)
+dt = 3.9;
+depth = (0:127)'.*dt;
+depth(64) = depth(64)+11e-6*dt;
+data = [depth,sin(2*pi*depth/97)];
+
+[~,info] = cocoPrepareRegularData( ...
+    data,'materially uneven grid','Verbose',false);
+
+verifyTrue(testCase,info.interpolationApplied);
+verifyGreaterThan(testCase,info.maximumSpacingDeviation, ...
+    info.uniformityTolerance);
+end
+
+function testAdaptiveEvaluatorAcceptsSerializedRegularDepth(testCase)
+depth = 289.816514+(0:518)'.*3.9;
+depth = arrayfun(@(value)str2double(sprintf('%.9g',value)),depth);
+data = [depth,sin(2*pi*depth/97)];
+pad = 1024;
+dt = median(diff(depth));
+frequency = (0:floor(pad/2))'/(pad*dt);
+power = ones(size(frequency));
+periods = defaultPeriods();
+rayleigh = enbw(rectwin(numel(depth)),1/dt);
+
+rho = cocoAdaptiveEvaluate(power,data,pad,frequency,[],periods, ...
+    rayleigh,[50;51],[],'Pearson');
+
+verifySize(testCase,rho,[2 1]);
+verifyEqual(testCase,rho,zeros(2,1),'AbsTol',0);
+end
+
 function [regular,raw,periods,dt] = syntheticIrregularInput()
 periods = defaultPeriods();
 dt = 0.2;

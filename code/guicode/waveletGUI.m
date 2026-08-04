@@ -238,7 +238,7 @@ if handles.lengthdata == 1
     timelen = time(end)-time(1);
     Dti = diff(time);
     dt = mean(Dti);
-    if max(Dti)-min(Dti) > 10*eps('single')
+    if acycleSamplingIsUneven(time)
         warndlg('Interpolation needed. Mean sampling rate was used.','Warning');
         data = interpolate(data,dt);
         handles.current_data = data;
@@ -253,7 +253,7 @@ else
     dat1 = select_interval(dat1,xmin,xmax);
     Dti1 = diff(dat1(:,1));
     dt = mean(Dti1);
-    if max(Dti1)-min(Dti1) > 10*eps('single')
+    if acycleSamplingIsUneven(dat1(:,1))
         warndlg('Series 1: Interpolation needed! Done!','Warning');
         dat1 = interpolate(dat1,dt);
     end

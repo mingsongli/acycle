@@ -916,8 +916,7 @@ if isempty(spacing)
         'A positive depth spacing is required.');
 end
 dt = median(spacing);
-tolerance = max(64*eps(max(1,max(abs(clean(:,1))))), ...
-    1e-8*max(1,abs(dt)));
+tolerance = cocoSamplingTolerance(clean(:,1),dt);
 interpolationApplied = max(abs(spacing-dt)) > tolerance;
 if ~interpolationApplied
     pointCount = size(clean,1);

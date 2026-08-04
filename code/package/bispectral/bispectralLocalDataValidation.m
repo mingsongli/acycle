@@ -853,15 +853,12 @@ options.SampleInterval = [];
 options.DetrendMethod = 'none';
 options.Standardize = false;
 [regular,meta] = bispectralPreprocess(data,options);
-coordinateScale = max(1,max(abs([meta.OriginalStart,meta.OriginalEnd])));
-strictTolerance = max(128*eps(coordinateScale), ...
-    128*eps(max(1,abs(meta.SampleInterval))));
 meta.OriginallyIrregular = ...
-    meta.RelativeSpacingDeparture*meta.SampleInterval > strictTolerance;
+    meta.RelativeSpacingDeparture > meta.StrictSpacingRelativeTolerance;
 meta.RegularGridReconstructed = meta.WasInterpolated;
 meta.RegularizationPolicy = [ ...
     'Always reconstruct the median-spacing grid before strict analysis; ', ...
-    'OriginallyIrregular uses the strict floating-point spacing tolerance.'];
+    'OriginallyIrregular uses the strict 10 ppm spacing tolerance.'];
 end
 
 function external = externalPreprocessingMetadata(preparation,requestedWindow, ...
@@ -985,9 +982,9 @@ lines = { ...
     ''};
 for ii = 1:height(summary)
     if summary.OriginallyIrregular(ii)
-        spacingText = 'original spacing exceeded strict floating-point regularity';
+        spacingText = 'original spacing exceeded strict 10 ppm regularity';
     else
-        spacingText = 'original spacing already met strict floating-point regularity';
+        spacingText = 'original spacing already met strict 10 ppm regularity';
     end
     reconstructionText = 'median-spacing grid reconstructed';
     if ~summary.RegularGridReconstructed(ii)

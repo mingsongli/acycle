@@ -244,7 +244,6 @@ classdef prewhitenGUI < matlab.apps.AppBase
             [~, a175] = ismember('a175',app.lang_id);
             [~, a176] = ismember('a176',app.lang_id);
             [~, a178] = ismember('a178',app.lang_id);
-            [~, ec25] = ismember('ec25',app.lang_id);
 
             app.UIFigure.Name = ['Acycle: ', app.getLang('a177', 'Prewhiten')];
             app.MainButtonGroup.Title = app.getLang('a173', 'AR1 model');
@@ -254,6 +253,12 @@ classdef prewhitenGUI < matlab.apps.AppBase
             app.RunButton.Text = app.getLang('a177', 'Prewhiten');
 
             dat = app.Context.current_data;
+            dat = dat(all(isfinite(dat(:,1:2)),2),:);
+            if size(dat,1) < 2
+                error('prewhitenGUI:InsufficientFiniteData', ...
+                    ['Pre-whitening requires at least two finite ', ...
+                     'unique samples.']);
+            end
             diffx = diff(dat(:,1));
             if sum(diffx <= 0) > 0
                 if a178 > 0
@@ -261,10 +266,16 @@ classdef prewhitenGUI < matlab.apps.AppBase
                 end
                 dat = sortrows(dat);
             end
-            if abs((max(diffx)-min(diffx))/2) > 10*eps('single')
-                if ec25 > 0
-                    warndlg(app.lang_var{ec25});
-                end
+            dat = findduplicate(dat);
+            if size(dat,1) < 2
+                error('prewhitenGUI:InsufficientUniqueData', ...
+                    ['Pre-whitening requires at least two finite ', ...
+                     'unique samples.']);
+            end
+            if acycleSamplingIsUneven(dat(:,1))
+                warndlg(app.getLang('ec25', ...
+                    'Input data should be equally spaced.'));
+                dat = interpolate(dat,median(diff(dat(:,1))));
             end
 
             rho = rhoAR1ML(dat(:,2));
