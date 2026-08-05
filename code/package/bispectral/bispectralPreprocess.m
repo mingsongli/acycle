@@ -119,12 +119,17 @@ end
 [strictSpacingTolerance,strictSpacingRoundoffTolerance, ...
     strictSpacingRelativeTolerance] = strictSpacingTolerances(dt);
 if strcmp(inputPolicy,'strict')
-    if ~strcmp(mode,'never')
-        error('Acycle:Bispectral:StrictInterpolationDisabled', ...
-            ['Strict input policy requires Interpolate=''never'' and never ', ...
-             'constructs replacement samples.']);
+    activeIrregularTolerance = strictSpacingRelativeTolerance;
+    isIrregular = relativeDeparture > strictSpacingRelativeTolerance;
+    switch mode
+        case 'auto'
+            doInterpolate = isIrregular;
+        case 'always'
+            doInterpolate = true;
+        case 'never'
+            doInterpolate = false;
     end
-    if relativeDeparture > strictSpacingRelativeTolerance
+    if isIrregular && ~doInterpolate
         error('Acycle:Bispectral:StrictUnevenSampling', ...
             ['Bispectral Analysis accepts coordinate-spacing departures up ', ...
              'to %.6g ppm without interpolation. Maximum error %.9g ', ...
@@ -132,9 +137,8 @@ if strcmp(inputPolicy,'strict')
             1e6*strictSpacingRelativeTolerance,maximumSpacingError, ...
             1e6*relativeDeparture,strictSpacingTolerance);
     end
-    isIrregular = false;
-    doInterpolate = false;
 else
+    activeIrregularTolerance = options.IrregularTolerance;
     isIrregular = relativeDeparture > options.IrregularTolerance;
     switch mode
         case 'auto'
@@ -171,6 +175,14 @@ if doInterpolate
     keep = isfinite(y);
     x = xRegular(keep);
     y = y(keep);
+    if isIrregular
+        meta.Warnings{end+1} = sprintf( ...
+            ['Coordinate-spacing departure %.6g ppm exceeded the %.6g ppm ', ...
+             'Bispectral threshold. The data were interpolated onto a ', ...
+             'regular grid with sample interval %.9g using %s before FFT analysis.'], ...
+            1e6*relativeDeparture,1e6*activeIrregularTolerance,dt, ...
+            upper(interpolationMethod));
+    end
 end
 
 if gapFactor > options.GapWarningFactor
@@ -240,6 +252,7 @@ meta.StrictSpacingAbsoluteTolerance = strictSpacingTolerance;
 meta.StrictSpacingRoundoffTolerance = strictSpacingRoundoffTolerance;
 meta.StrictSpacingRelativeTolerance = strictSpacingRelativeTolerance;
 meta.AcceptedNearUniformSpacing = strcmp(inputPolicy,'strict') && ...
+    ~isIrregular && ~doInterpolate && ...
     maximumSpacingError > strictSpacingRoundoffTolerance;
 meta.InterpolationMethod = char(options.InterpolationMethod);
 meta.DetrendMethod = trendMethod;
@@ -253,7 +266,7 @@ function [effective,roundoff,relative] = strictSpacingTolerances(dt)
 % Text output with a limited number of significant digits can introduce
 % negligible spacing jitter even when the source grid was exactly regular.
 % Ten parts per million accepts that serialization artifact while remaining
-% far below the 1% threshold used by the explicit prepare/interpolate path.
+% small enough to distinguish material sampling irregularity.
 relative = 1e-5;
 roundoff = 128*eps(max(1,abs(dt)));
 effective = relative*dt;

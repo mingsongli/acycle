@@ -3,7 +3,7 @@ _______________________________________
 
 
 Version : Acycle_v3.1.0
-Date    : August 4, 2026
+Date    : August 5, 2026
 By      : Mingsong Li (Peking University)
 
     1. NEW: Bispectral analysis.
@@ -28,6 +28,18 @@ By      : Mingsong Li (Peking University)
     3. IMPROVED: Bispectral display defaults.
         The independent strongest-value retain fractions for bispectrum
         magnitude and magnitude-squared bicoherence now both default to 50%.
+
+    4. FIXED: Robust AR(1) spectral settings.
+        Spectral Analysis again asks for the median-smoothing fraction before
+        running Robust AR(1), with the original 20% default. The selected
+        value is used by both MTM and Lomb-Scargle and recorded when saved.
+
+    5. IMPROVED: Bispectral uneven-sampling recovery.
+        Sampling departures above 10 ppm now produce a warning, are linearly
+        regularized at the median spacing, and continue through analysis.
+        WOSA defaults and frequency checks use the regularized sample count,
+        and interpolation warnings remain visible even if later saving fails.
+        Nonfinite, unsorted, duplicate, or too-short inputs remain errors.
 
 _______________________________________
 

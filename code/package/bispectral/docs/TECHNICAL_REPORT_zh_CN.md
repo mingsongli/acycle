@@ -7,11 +7,11 @@
 文档版本：v1.0  
 软件分支：bispectral  
 MATLAB：R2025b  
-日期：2026-08-03
+日期：2026-08-05
 
 ## 摘要
 
-本报告说明 Acycle 中新增的 Bispectral Analysis 工具箱。该工具用于从一维古气候或地学时间/深度序列中估计复 bispectrum、biphase、bicoherence 及 magnitude-squared bicoherence。程序 API 可在明确选择 `InputPolicy='prepare'` 时准备不规则输入；弹窗 GUI 固定使用 `InputPolicy='strict'`，不删除、排序、合并、插值、整段去趋势或标准化数据。GUI 的正式置信推断固定为 IAAFT maximum-statistic FWER；解析 Beta、FT phase 和 pointwise 仅保留为 core API 的高级兼容与方法验证路径。
+本报告说明 Acycle 中新增的 Bispectral Analysis 工具箱。该工具用于从一维古气候或地学时间/深度序列中估计复 bispectrum、biphase、bicoherence 及 magnitude-squared bicoherence。程序 API 可在明确选择 `InputPolicy='prepare'` 时准备不规则输入；弹窗 GUI 固定使用 `InputPolicy='strict'`，不删除、排序、合并、整段去趋势或标准化数据，但超过 10 ppm 的坐标间距偏差会在警告后线性规则化，使 FFT 分析能够继续。GUI 的正式置信推断固定为 IAAFT maximum-statistic FWER；解析 Beta、FT phase 和 pointwise 仅保留为 core API 的高级兼容与方法验证路径。
 
 软件首选 WOSA 分段 FFT 估计；第二条路径在单记录原生 Fourier 网格上采用完整六边形核进行二维频率平滑。两者共享严格的正频、无混叠和频三角域、Kim-Powers 有界归一化、统一的预处理和显著性框架。
 
@@ -167,7 +167,7 @@ $$[-Xₕ(f₁)][-Xₕ(f₂)][-Xₕ*(f₃)] = -Xₕ(f₁)Xₕ(f₂)Xₕ*(f₃)$$
 
 ### 4.1 API prepare 与 GUI strict 的执行边界
 
-以下 1--7 步只属于调用者显式选择的 core API `InputPolicy='prepare'`；GUI 不执行这些改变。GUI 的 `strict` 路径只验证两列数据有限、坐标严格递增且无重复，并允许不超过中位步长 10 ppm 的间距偏差，以兼容规则网格保存为有限有效数字文本后产生的微小量化误差；它不修改坐标或观测值。超过该阈值即硬错误。通过 strict 验证后，只有第 8 步的 estimator 段内去趋势可由 GUI 设置。
+第 1--3、6--7 步只属于调用者显式选择的 core API `InputPolicy='prepare'`。GUI 的 `strict` 路径要求两列数据有限、坐标严格递增且无重复，不会删除、排序或合并观测，也不做整段去趋势或标准化。它允许不超过中位步长 10 ppm 的间距偏差，以兼容有限有效数字文本产生的微小量化误差；超过该阈值时，第 5 步改为线性中位步长插值并发出警告，而不是停止分析。第 8 步的 estimator 段内去趋势仍由 GUI 显式设置。
 
 1. 删除第一、第二列中的非有限行。
 2. 按坐标升序排序。
@@ -182,9 +182,9 @@ $$[-Xₕ(f₁)][-Xₕ(f₂)][-Xₕ*(f₃)] = -Xₕ(f₁)Xₕ(f₂)Xₕ*(f₃)$$
 
 $$δirr = maxᵢ |Δxᵢ-Δt| / Δt$$
 
-默认 IrregularTolerance=0.01。prepare/auto 模式在 δirr 超过 1% 时规则化；always 总是规则化；never 在不规则时终止分析。GUI strict 使用独立且严格得多的 10 ppm（0.001%）阈值，只容纳文本序列化量化误差而不执行插值。默认线性插值，也可选择 pchip 或 makima。若最大原始间隙超过 GapWarningFactor=5 个采样间隔，软件把警告写入结果元数据。
+默认 IrregularTolerance=0.01。prepare/auto 模式在 δirr 超过 1% 时规则化；always 总是规则化；never 在不规则时终止分析。GUI strict 使用独立且严格得多的 10 ppm（0.001%）阈值：阈值以内原样接受，阈值以外自动按中位步长线性插值并警告。core API 的插值方法也可选择 pchip 或 makima。若最大原始间隙超过 GapWarningFactor=5 个采样间隔，软件把警告写入结果元数据。
 
-> **抗混叠保护。** linear、pchip 和 makima 都不是低通抗混叠滤波器。若核心 API 的 SampleInterval 比原始中位间距更粗，程序抛出 Acycle:Bispectral:AliasingRisk。弹窗 GUI 不再提供预处理模块，也不会隐式插值、整段去趋势或标准化；不规则数据应先用 Acycle 的专用预处理工具完成规则化。长间隙、少分段和解析阈值近似等科学警告仍保留在 MAT/JSON。
+> **抗混叠保护。** linear、pchip 和 makima 都不是低通抗混叠滤波器。若核心 API 的 SampleInterval 比原始中位间距更粗，程序抛出 Acycle:Bispectral:AliasingRisk。弹窗 GUI 不提供通用预处理模块，也不删除、排序、合并观测或执行整段去趋势与标准化；它只对超过 10 ppm 的可恢复间距不均匀以线性中位步长插值网格替换输入序列。长间隙、插值和解析阈值近似等科学警告保留在 MAT/JSON，并在 GUI 状态栏与 MATLAB Command Window 中报告；自动插值还会显示 warning alert。
 
 > **古气候数据的插值原则。** FFT-based bispectral estimation 要求规则网格，因此不规则坐标通常必须先插值。但插值不能恢复缺失信息，并可能改变相位；应报告原始间距、最大间隙、目标步长、插值方法和年代模型。若年龄不确定性重要，应在外层年龄模型 ensemble 中重复完整分析。
 
@@ -280,11 +280,11 @@ $$p_{global} = (1+c)/(M+1).$$
 
 ### 6.3 短记录与控件联动
 
-WOSA 每段至少 32 点。默认 8 段会根据有效唯一坐标数向下调整；32-63 个点不足以容纳 3 个 WOSA 分段时，自动切换到 frequency-smoothed。WOSA 模式启用段数、overlap 与 zero padding；frequency-smoothed 模式启用 span 与 kernel。
+WOSA 每段至少 32 点。GUI 先按 strict/auto 规则预演采样处理，再根据预期规则网格的样本数（而不是原始行数）把默认 8 段向下调整；预期网格只有 32--63 点、无法容纳 3 个 WOSA 分段时，自动切换到 frequency-smoothed。同一个预期样本数也用于 WOSA 可行性和预期频率轴校验，实际运行仍由处理后网格再次接受 estimator 的硬校验。WOSA 模式启用段数、overlap 与 zero padding；frequency-smoothed 模式启用 span 与 kernel。
 
 ### 6.4 运行控制与异常恢复
 
-Run 与 Run & Save 共用参数读取和分析流程。运行期间 Run、Run & Save 与 Close 暂时禁用，并显示可取消进度框。取消产生 Acycle:Bispectral:Canceled；其他异常写入状态栏与 MATLAB Command Window。科学结果警告只写入 Command Window，不打开 modal warning。可恢复的 GUI 参数错误包括越界、整数控件含小数、参数组合冲突，以及参考周期或频率对超出理论 Nyquist 频率/频率和上限；每次操作只汇总一次，数值项恢复为该数据的推荐值，文本项恢复为上次有效值，并以一次 warning alert 和 Command Window 同文告知。Run 触发的 alert 只在计算、绘图或保存结束且控件恢复之后显示；alert 调用本身有异常隔离，不会反向中断分析。编辑回调已纠正的记录会跨普通 Preview Run 保留到下一次成功 Run & Save，并连同实际生效参数写入 MAT/JSON；只有原子结果目录已经建立后才消费这批记录。新数值结果也只在候选图完整渲染后提交给 GUI；保存失败保留可操作的新结果和未归档纠正记录，并明确显示 Save failed。该机制绝不修补输入数据，strict 下的 NaN、乱序、重复、超过 10 ppm 的间距偏差或过短数据仍直接停止；参数提示文案也不宣称这些数据错误会继续运行。onCleanup 在成功或失败后恢复控件并关闭进度框；方法帮助仍可由用户主动打开信息窗。
+Run 与 Run & Save 共用参数读取和分析流程。运行期间 Run、Run & Save 与 Close 暂时禁用，并显示可取消进度框。取消产生 Acycle:Bispectral:Canceled；其他异常写入状态栏与 MATLAB Command Window。超过 10 ppm 的可恢复采样不均匀会自动插值，分析完成后在状态栏、Command Window 和 warning alert 中报告；alert 调用本身有异常隔离，不会反向中断已经完成的分析。可恢复的 GUI 参数错误包括越界、整数控件含小数、参数组合冲突，以及参考周期或频率对超出理论 Nyquist 频率/频率和上限；每次操作只汇总一次，数值项恢复为该数据的推荐值，文本项恢复为上次有效值。编辑回调已纠正的记录会跨普通 Preview Run 保留到下一次成功 Run & Save，并连同实际生效参数写入 MAT/JSON；只有原子结果目录已经建立后才消费这批记录。新数值结果也只在候选图完整渲染后提交给 GUI；保存失败保留可操作的新结果和未归档纠正记录，并明确显示 Save failed。只要分析与绘图已完成，后续保存失败不会吞掉科学警告或自动插值 alert。strict 下的 NaN、乱序、重复或过短数据仍直接停止；只有采样间距不均匀被警告并规则化。onCleanup 在成功或失败后恢复控件并关闭进度框；方法帮助仍可由用户主动打开信息窗。
 
 ## 7. 用户操作说明
 
@@ -292,7 +292,7 @@ Run 与 Run & Save 共用参数读取和分析流程。运行期间 Run、Run & 
 
 1. 在 Acycle 主列表中选择一个至少两列的数值文件。不要同时选择多个文件。
 2. 打开 Timeseries > Bispectral Analysis。确认顶部文件名、有效样本数、坐标范围、中位步长、Nyquist 和最大间距偏差。
-3. GUI 不提供预处理控件。先用 Acycle 专用工具准备有限、严格递增、无重复且规则采样的数据；有限有效数字文本造成的不超过 10 ppm 间距偏差可直接通过，GUI 不修改坐标或观测值。GUI 仅保留显式的段内去趋势设置。
+3. GUI 不提供通用预处理控件。输入必须有限、严格递增且无重复；不超过 10 ppm 的间距偏差原样通过，超过 10 ppm 时 GUI 警告并线性插值到中位步长规则网格后继续。GUI 仅保留显式的段内去趋势设置。
 4. 选择 WOSA 或 Frequency-smoothed。WOSA 通常从 8 段、50% overlap、Hann、pad=1 开始。
 5. 设置频率范围。最低目标频率应在每段内有足够周期；不要把 zero padding 当作分辨率。
 6. GUI 预览默认使用 199 个 IAAFT maximum-statistic surrogates；用于研究定稿时设置至少 999 个 IAAFT surrogates。
@@ -332,10 +332,10 @@ files = bispectralSave(result,fig,pwd,options.InputName);
 
 | 分组 | 参数 | API 默认 / GUI 状态 | 说明 |
 |---|---|---|---|
-| 预处理 | InputPolicy | prepare / strict（固定） | prepare 可显式清洗和规则化；GUI strict 不修改输入行或坐标 |
-| 预处理 | Interpolate | auto / never（固定） | API prepare 可选 auto、always 或 never；GUI 不插值 |
+| 预处理 | InputPolicy | prepare / strict（固定） | prepare 可显式清洗和规则化；GUI strict 不删除、排序或合并输入行 |
+| 预处理 | Interpolate | auto / auto（固定） | API 可选 auto、always 或 never；GUI 在超过 10 ppm 时警告并线性插值 |
 | 预处理 | InterpolationMethod | linear / 不显示 | API prepare 可用 linear、pchip 或 makima |
-| 预处理 | SampleInterval | [] / []（固定） | API 仅允许自动或更细步长；GUI 使用已准备序列的实际步长 |
+| 预处理 | SampleInterval | [] / []（固定） | API 仅允许自动或更细步长；GUI 使用原始中位步长，必要时据此建立规则插值网格 |
 | 预处理 | DetrendMethod | linear / none（固定） | GUI 不做整段去趋势；API 可用 none、mean、linear 或 polynomial |
 | 预处理 | PolynomialOrder | 2 / 不显示 | 仅 API polynomial 使用 |
 | 预处理 | SegmentDetrendMethod | mean | none、mean 或 linear |
@@ -652,7 +652,7 @@ Run & Save 每次在 Acycle 实时地址栏目录中创建 `<输入名>-bispectr
 
 硬错误包括：少于 32 个有效点；不规则采样且禁止插值；无抗混叠滤波的粗化 SampleInterval；插值网格过短或超过 10⁷ 点；去趋势后常数；WOSA 少于 3 段或每段少于 32 点；overlap 超出 [0,90%)；NFFT 小于段长；平滑 span 不是大于等于 3 的奇数；频率域为空；surrogate 数不在 19-99999；pointwise surrogate 预计工作内存超过 1 GiB；置信度或 null 类型无效；输出目录、figure 或 JSON 写入失败。
 
-科学警告写入 metadata，并在 GUI 运行完成后仅打印到 MATLAB Command Window，包括：最大 gap>5；WOSA 少于 8 段、方差较高；core API 解析 Beta 在 overlap 下仅为近似；频率平滑的有效样本数仅为诊断。它们不打开 modal warning dialog。
+科学警告写入 metadata；GUI 在分析与绘图完成后把警告数量写入状态栏，并逐条打印到 MATLAB Command Window，包括：自动规则化插值、最大 gap>5、WOSA 少于 8 段而方差较高、core API 解析 Beta 在 overlap 下仅为近似，以及频率平滑的有效样本数仅为诊断。只有 strict/auto 自动插值警告会另外打开 warning alert；其他科学警告不打开 modal dialog。若随后的 Run & Save 归档失败，这些警告仍会照常报告。
 
 ## 附录 B. 古气候应用文献与方法证据
 

@@ -244,14 +244,16 @@ data = [coordinate signal];
 
 options = bispectralDefaults(data);
 options.InputPolicy = 'strict';
-options.Interpolate = 'never';
+options.Interpolate = 'auto';
 options.DetrendMethod = 'none';
 options.Standardize = false;
 [processed,meta] = bispectralPreprocess(data,options);
 
 verifyEqual(testCase,processed,data,'AbsTol',0);
+verifyFalse(testCase,meta.WasIrregular);
 verifyFalse(testCase,meta.WasInterpolated);
 verifyTrue(testCase,meta.AcceptedNearUniformSpacing);
+verifyEmpty(testCase,meta.Warnings);
 verifyEqual(testCase,meta.StrictSpacingRelativeTolerance,1e-5,'AbsTol',0);
 verifyLessThan(testCase,meta.RelativeSpacingDeparture, ...
     meta.StrictSpacingRelativeTolerance);
@@ -261,7 +263,63 @@ verifyEqual(testCase,meta.MaximumSpacingError,4.0000000467443897e-6, ...
     'RelTol',1e-8);
 end
 
-function testStrictPolicyRejectsSpacingBeyondTenPpm(testCase)
+function testStrictAutoInterpolatesSpacingBeyondTenPpm(testCase)
+dt = 3.9;
+regularCoordinate = (0:127)'.*dt;
+coordinate = regularCoordinate;
+coordinate(64) = coordinate(64)+11e-6*dt;
+data = [coordinate sin(2*pi*coordinate/97)];
+
+options = bispectralDefaults(data);
+options.InputPolicy = 'strict';
+options.Interpolate = 'auto';
+options.DetrendMethod = 'none';
+options.Standardize = false;
+[processed,meta] = bispectralPreprocess(data,options);
+
+verifyTrue(testCase,meta.WasIrregular);
+verifyTrue(testCase,meta.WasInterpolated);
+verifyFalse(testCase,meta.AcceptedNearUniformSpacing);
+verifyEqual(testCase,meta.InputPolicy,'strict');
+verifyEqual(testCase,meta.InterpolationMethod,'linear');
+expectedCoordinate = coordinate(1)+(0:size(processed,1)-1)'.* ...
+    meta.SampleInterval;
+verifyEqual(testCase,processed(:,1),expectedCoordinate, ...
+    'AbsTol',256*eps(max(abs(expectedCoordinate))));
+verifyLessThanOrEqual(testCase,processed(end,1),coordinate(end));
+verifyLessThanOrEqual(testCase,max(abs(diff(processed(:,1))- ...
+    meta.SampleInterval)),256*eps(max(abs(processed(:,1)))));
+warningText = string(meta.Warnings);
+verifyTrue(testCase,any(contains(warningText,'interpolated', ...
+    'IgnoreCase',true)));
+verifyTrue(testCase,any(contains(warningText,'10 ppm')));
+end
+
+function testStrictAutoStillRejectsStructuralInput(testCase)
+coordinate = (0:63)';
+data = [coordinate sin(2*pi*coordinate/17)];
+options = bispectralDefaults(data);
+options.InputPolicy = 'strict';
+options.Interpolate = 'auto';
+options.DetrendMethod = 'none';
+options.Standardize = false;
+
+nonfinite = data;
+nonfinite(20,2) = NaN;
+verifyError(testCase,@()bispectralPreprocess(nonfinite,options), ...
+    'Acycle:Bispectral:StrictNonfiniteData');
+
+unsorted = data;
+unsorted([20 21],:) = unsorted([21 20],:);
+verifyError(testCase,@()bispectralPreprocess(unsorted,options), ...
+    'Acycle:Bispectral:StrictUnsortedCoordinates');
+
+duplicate = [data;data(end,:)];
+verifyError(testCase,@()bispectralPreprocess(duplicate,options), ...
+    'Acycle:Bispectral:StrictDuplicateCoordinates');
+end
+
+function testStrictNeverRejectsSpacingBeyondTenPpm(testCase)
 dt = 3.9;
 coordinate = (0:127)'.*dt;
 coordinate(64) = coordinate(64)+11e-6*dt;
@@ -278,18 +336,18 @@ verifyError(testCase,@()bispectralPreprocess(data,options), ...
     'Acycle:Bispectral:StrictUnevenSampling');
 end
 
-function testStrictTenPpmLimitSurvivesScaleAndOffset(testCase)
+function testStrictNeverTenPpmLimitSurvivesScaleAndOffset(testCase)
 largeOffset = 1e12+(0:127)';
 largeOffset(64) = largeOffset(64)+1e-3;
-verifyStrictUnevenError(testCase,largeOffset);
+verifyStrictNeverUnevenError(testCase,largeOffset);
 
 smallDt = 1e-10;
 smallSpacing = (0:127)'.*smallDt;
 smallSpacing(64) = smallSpacing(64)+11e-6*smallDt;
-verifyStrictUnevenError(testCase,smallSpacing);
+verifyStrictNeverUnevenError(testCase,smallSpacing);
 end
 
-function verifyStrictUnevenError(testCase,coordinate)
+function verifyStrictNeverUnevenError(testCase,coordinate)
 signal = sin((0:numel(coordinate)-1)'/17);
 data = [coordinate signal];
 options = bispectralDefaults(data);

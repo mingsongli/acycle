@@ -56,11 +56,13 @@ Nyquist to a negative frequency.
    `|a| <= h, |b| <= h, |a+b| <= h`. Span 3 (`h=1`) uses seven triads and span
    5 uses nineteen. It never treats zero-padded bins as new realizations.
 
-For short inputs the defaults are data-dependent. If three 32-sample WOSA
-segments fit, the requested segment count is reduced to a feasible value;
-for 32--63 distinct samples the default switches to the full-record
-frequency-smoothed estimator. Inputs with fewer than 32 distinct finite
-coordinates are rejected.
+For short inputs the GUI defaults are data-dependent. The GUI first previews
+the strict/auto sampling result, then uses that anticipated regular-grid sample
+count for its WOSA defaults, geometry checks, and anticipated frequency axis.
+If three 32-sample WOSA segments fit, the requested segment count is reduced to
+a feasible value; for an anticipated 32--63 samples the default switches to the
+full-record frequency-smoothed estimator. Inputs whose actual processed grid
+contains fewer than 32 samples are rejected.
 
 A naive `segment x DPSS taper` average is deliberately not included. A DPSS
 eigenvector has an arbitrary sign, while a third-order same-taper product
@@ -84,14 +86,16 @@ the original median spacing. Ordinary interpolation is not an anti-aliasing
 filter: to downsample, low-pass filter and resample the record first, then load
 the already resampled series. The GUI always uses `InputPolicy='strict'`. It
 accepts spacing departures up to 10 parts per million so that a regular grid
-saved with limited text precision is not misclassified as uneven, but it does
-not alter coordinates or data values. The GUI intentionally has no
-preprocessing panel and performs no hidden row removal, sorting, duplicate
-merging, interpolation, whole-record detrending, or standardization; prepare
-genuinely uneven data with Acycle's dedicated tools first. Within-segment mean
-removal remains an explicit estimator setting. Scientific warnings produced
-after a run are printed in the MATLAB Command Window instead of opening a
-modal warning dialog.
+saved with limited text precision is not misclassified as uneven. Larger
+departures produce a warning and linear interpolation onto the median-spacing
+grid so FFT analysis can continue. Strict mode still performs no hidden row
+removal, sorting, duplicate merging, whole-record detrending, or
+standardization; nonfinite, unsorted, duplicate, or too-short input remains an
+error. Within-segment mean removal remains an explicit estimator setting.
+Scientific warnings are recorded in result metadata, counted in the GUI status,
+and printed in the MATLAB Command Window. Automatic sampling interpolation is
+also shown in a warning alert after the completed analysis. A later Run & Save
+archive failure does not suppress these warnings or the interpolation alert.
 
 Recoverable GUI control mistakes such as a value outside its allowed range, a
 fractional integer control, an incompatible parameter combination, or a guide
@@ -103,9 +107,9 @@ controls have been restored; failure of the alert itself is isolated from the
 analysis. Corrections made by an edit callback remain pending through Preview
 runs until the next successful Run & Save, so the effective values and their
 correction audit trail enter the MAT/JSON archive. This recovery never applies
-to the input series: nonfinite,
-unsorted, duplicate, irregular, or otherwise structurally invalid data still
-fail the strict input policy instead of being silently changed.
+to nonfinite, unsorted, duplicate, too-short, or otherwise structurally invalid
+input. Recoverable uneven sampling is the sole exception: it is explicitly
+warned about, linearly regularized, and documented in preprocessing metadata.
 
 The zero-padding factor is applied to the actual segment length (factor 1 is
 no padding). Zero padding only interpolates the displayed Fourier grid; it does not improve
@@ -261,9 +265,9 @@ assertSuccess(results);
 assertSuccess(acResults);
 ```
 
-The recorded R2025b baseline was 28/28 package tests. Three strict-spacing
-regressions extend the current package suite to 31 tests. In MATLAB R2026a,
-all eight I/O/spacing tests and the targeted GUI/default checks pass; two
+The recorded R2025b baseline was 28/28 package tests. Near-uniform and
+strict-auto sampling regressions extend the current package suite to 33 tests.
+In MATLAB R2026a, all ten I/O/spacing tests and the targeted GUI/default checks pass; two
 pixel-geometry assertions remain sensitive to `-batch` web-component layout.
 MATLAB Code Analyzer reports zero diagnostics for the modified Bispectral
 files, and `git diff --check` passes.

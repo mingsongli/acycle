@@ -75,7 +75,8 @@ end
             'ValueChangedFcn',@(~,~)onXPeriodChanged());
 
         app.PanelRed = uipanel(app.UIFigure,'Title','Red noise','BackgroundColor',bg);
-        app.CkRobust = uicheckbox(app.PanelRed,'Text','Robust AR(1)','Value',true,'FontWeight','bold');
+        app.CkRobust = uicheckbox(app.PanelRed,'Text','Robust AR(1)','Value',true, ...
+            'FontWeight','bold','Tag','spectrumRobustCheckbox');
         app.CkClassic = uicheckbox(app.PanelRed,'Text','Classic AR(1)','Value',false);
         app.CkFtest = uicheckbox(app.PanelRed,'Text','F-test & Ampl.','Value',false);
         app.CkSWA = uicheckbox(app.PanelRed,'Text','Smoothed Window Averages','Value',true,'FontWeight','bold');
@@ -84,9 +85,11 @@ end
 
         app.BtnRun = uibutton(app.UIFigure,'push','Text','Run', ...
             'BackgroundColor',blue,'FontColor','white','FontWeight','bold', ...
+            'Tag','spectrumRunButton', ...
             'ButtonPushedFcn',@(~,~)runSpectrum(false));
         app.BtnRunSave = uibutton(app.UIFigure,'push','Text','Run & Save', ...
             'BackgroundColor',blue,'FontColor','white','FontWeight','bold', ...
+            'Tag','spectrumRunSaveButton', ...
             'ButtonPushedFcn',@(~,~)runSpectrum(true));
 
         doLayout();
@@ -264,6 +267,21 @@ end
                 if ~isfinite(nw), nw = 2; end
                 nfft = chooseNfft(numel(y));
                 method = char(app.method);
+                robustSmoothingFraction = NaN;
+                useRobustAr1 = app.CkRobust.Value && ...
+                    (contains(lower(method),'multi') || ...
+                    contains(lower(method),'lomb'));
+                if useRobustAr1
+                    [robustSmoothingFraction,proceed,promptMessage] = ...
+                        requestRobustSmoothingFraction();
+                    if ~proceed
+                        if ~isempty(promptMessage)
+                            uialert(app.UIFigure,promptMessage, ...
+                                'Robust AR(1)','Icon','warning');
+                        end
+                        return;
+                    end
+                end
                 outdir = '';
                 if saveResult
                     outdir = getAcWorkDir();
@@ -275,7 +293,10 @@ end
                 keep = isfinite(f) & isfinite(p) & (f >= fmin) & (f <= fmax);
                 f = f(keep); p = p(keep);
 
-                fig = figure('Color','white','Name','Acycle: Spectral Analysis');
+                fig = figure('Color','white','Name','Acycle: Spectral Analysis', ...
+                    'Tag','spectrumResultFigure');
+                setappdata(fig,'SpectrumRobustSmoothingFraction', ...
+                    robustSmoothingFraction);
                 ax = axes(fig); hold(ax,'on');
                 plot(ax,f,p,'k-','LineWidth',1.2,'DisplayName','Power');
                 plotCount = 1;
@@ -284,10 +305,13 @@ end
 
                 if contains(lower(method),'multi') && app.CkRobust.Value
                     try
-                        [rhoM,s0M,redconfAR1,redconfML96] = redconfML(y,dt,nw,nfft,2,0.2,fmax,0); %#ok<ASGLU>
+                        [rhoM,s0M,redconfAR1,redconfML96] = redconfML( ...
+                            y,dt,nw,nfft,2,robustSmoothingFraction,fmax,0); %#ok<ASGLU>
                         rr0 = redconfAR1(:,1) >= fmin & redconfAR1(:,1) <= fmax;
                         rr = redconfML96(:,1) >= fmin & redconfML96(:,1) <= fmax;
-                        plot(ax,redconfAR1(rr0,1),redconfAR1(rr0,3),'m-.','LineWidth',1.0,'DisplayName','Median smooth');
+                        plot(ax,redconfAR1(rr0,1),redconfAR1(rr0,3), ...
+                            'm-.','LineWidth',1.0,'DisplayName', ...
+                            smoothingLegend(robustSmoothingFraction));
                         plot(ax,redconfML96(rr,1),redconfML96(rr,3),'k-','LineWidth',1.8,'DisplayName','Robust AR(1)');
                         plot(ax,redconfML96(rr,1),redconfML96(rr,4),'r-','LineWidth',0.9,'DisplayName','Robust 90%');
                         plot(ax,redconfML96(rr,1),redconfML96(rr,5),'r--','LineWidth',1.4,'DisplayName','Robust 95%');
@@ -298,13 +322,15 @@ end
                     end
                 elseif contains(lower(method),'lomb') && app.CkRobust.Value
                     try
-                        [~,fR,pth] = plomb_robustar1(y,x+abs(min(x)),fmax,0.2,0);
+                        [~,fR,pth] = plomb_robustar1( ...
+                            y,x+abs(min(x)),fmax,robustSmoothingFraction,0);
                         rr = fR >= fmin & fR <= fmax;
                         plot(ax,fR(rr),pth(2,rr),'k-','LineWidth',1.8,'DisplayName','Robust AR(1)');
                         plot(ax,fR(rr),pth(3,rr),'r-','LineWidth',0.9,'DisplayName','Robust 90%');
                         plot(ax,fR(rr),pth(4,rr),'r--','LineWidth',1.4,'DisplayName','Robust 95%');
                         plot(ax,fR(rr),pth(5,rr),'b-.','LineWidth',1.0,'DisplayName','Robust 99%');
-                        plot(ax,fR(rr),pth(1,rr),'m-.','LineWidth',1.0,'DisplayName','Median smooth');
+                        plot(ax,fR(rr),pth(1,rr),'m-.','LineWidth',1.0, ...
+                            'DisplayName',smoothingLegend(robustSmoothingFraction));
                         plotCount = plotCount + 5;
                     catch MEi
                         warning('spectrum:robustLS','Robust AR(1) (Lomb-Scargle) failed: %s',MEi.message);
@@ -480,7 +506,8 @@ end
                     if hasSwaPdf
                         saveFigurePdf(figSwa,swaPdfFile);
                     end
-                    saveSpectrumParameterTable(paramFile,method,nw,nfft,fmin,fmax);
+                    saveSpectrumParameterTable(paramFile,method,nw,nfft, ...
+                        fmin,fmax,robustSmoothingFraction);
 
                     swaFdr = 'SWA-Spectrum-background-FDR.dat';
                     swaChi = 'SWA-Spectrum-Chi2CL.dat';
@@ -662,7 +689,8 @@ end
             end
         end
 
-        function saveSpectrumParameterTable(paramFile,method,nw,nfft,fmin,fmax)
+        function saveSpectrumParameterTable(paramFile,method,nw,nfft, ...
+                fmin,fmax,robustSmoothingFraction)
             inputName = getDataName(ctx);
             params = repmat({''},19,6);
             params(1,2) = {'Detailed Parameters Used in Data Processing by Acycle'};
@@ -679,12 +707,70 @@ end
 
             params(14,:) = {'','Noise model','Input file name',inputName,'',''};
             params(15,:) = {'','','Method',spectrumNoiseModelName(method),'',''};
-            params(16,:) = {'','','Median smoothing window','NA','',''};
+            params(16,:) = {'','','Median smoothing window', ...
+                smoothingParameterText(robustSmoothingFraction),'',''};
             params(17,:) = {'','','AR(1) best fit model',spectrumAr1ModelName(),'',''};
             params(18,:) = {'','','Bias correction for ultra-high resolution data','NA','',''};
             params(19,:) = {'','','Output file name',spectrumNoiseOutputName(method),'',''};
 
             writecell(params,paramFile,'Sheet','COCO');
+        end
+
+        function [fraction,proceed,message] = requestRobustSmoothingFraction()
+            fraction = NaN;
+            proceed = false;
+            message = '';
+            answer = [];
+            if isfield(app.ctx,'SpectrumTestHooks') && ...
+                    isstruct(app.ctx.SpectrumTestHooks) && ...
+                    isfield(app.ctx.SpectrumTestHooks, ...
+                    'RobustSmoothingPromptFcn') && ...
+                    isa(app.ctx.SpectrumTestHooks.RobustSmoothingPromptFcn, ...
+                    'function_handle')
+                answer = feval( ...
+                    app.ctx.SpectrumTestHooks.RobustSmoothingPromptFcn);
+            else
+                dialogOptions.Resize = 'on';
+                answer = inputdlg( ...
+                    {['Median smoothing window: default 0.2 = 20% ', ...
+                    '(recommended range 0.05-0.25)']}, ...
+                    'Robust AR(1) Estimation',1,{'0.2'},dialogOptions);
+            end
+            if isempty(answer)
+                return
+            end
+            if iscell(answer)
+                answer = answer{1};
+            end
+            if isnumeric(answer) && isscalar(answer)
+                value = double(answer);
+            else
+                value = str2double(string(answer));
+            end
+            % Also accept an explicit percentage such as 20 for convenience.
+            if isfinite(value) && value > 1 && value <= 100
+                value = value/100;
+            end
+            if ~(isscalar(value) && isfinite(value) && ...
+                    value >= 0.05 && value <= 0.25)
+                message = ['Enter a median smoothing fraction from 0.05 ', ...
+                    'through 0.25 (or 5 through 25 percent).'];
+                return
+            end
+            fraction = value;
+            proceed = true;
+        end
+
+        function label = smoothingLegend(fraction)
+            label = sprintf('%.6g%% median-smoothed',100*fraction);
+        end
+
+        function value = smoothingParameterText(fraction)
+            if isfinite(fraction)
+                value = sprintf('%.6g (%.6g%%)',fraction,100*fraction);
+            else
+                value = 'NA';
+            end
         end
 
         function s = timeBandwidthText(method,nw)
@@ -744,6 +830,17 @@ end
 
         function outdir = getAcWorkDir()
             outdir = '';
+            if isfield(app.ctx,'SpectrumTestHooks') && ...
+                    isstruct(app.ctx.SpectrumTestHooks) && ...
+                    isfield(app.ctx.SpectrumTestHooks,'OutputDirectory')
+                candidate = app.ctx.SpectrumTestHooks.OutputDirectory;
+                if (ischar(candidate) || ...
+                        (isstring(candidate) && isscalar(candidate))) && ...
+                        isfolder(candidate)
+                    outdir = char(candidate);
+                    return
+                end
+            end
             try
                 outdir = ac_working_directory('get',pwd);
             catch

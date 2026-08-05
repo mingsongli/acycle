@@ -19,16 +19,21 @@ app.Data = context.current_data;
 app.DataName = getDataName(context);
 app.Unit = getCoordinateUnit(context);
 app.Defaults = bispectralDefaults(app.Data);
-% The main Acycle workflow already provides dedicated preprocessing tools.
-% Keep this analysis window scientifically transparent: validate regular
-% sampling, but do not interpolate, detrend, or standardize behind the GUI.
-app.Defaults.Interpolate = 'never';
+% Strict GUI input must already be finite, strictly increasing, and unique;
+% rows are never silently removed, sorted, or merged. If coordinate spacing
+% exceeds the shared 10 ppm threshold, replace the series with its linear
+% median-spacing interpolation grid after warning the user.
+app.Defaults.Interpolate = 'auto';
 app.Defaults.SampleInterval = [];
 app.Defaults.DetrendMethod = 'none';
 app.Defaults.Standardize = false;
 app.Defaults.InputPolicy = 'strict';
 app.Defaults.InputName = app.DataName;
 app.Defaults.CoordinateUnit = app.Unit;
+app.AnticipatedSampleCount = anticipatedGuiSampleCount( ...
+    app.Data,app.Defaults);
+app.Defaults = applyAnticipatedSampleCountDefaults( ...
+    app.Defaults,app.AnticipatedSampleCount);
 app.Defaults.SignificanceMethod = 'surrogate-global';
 app.Defaults.SurrogateType = 'iaaft';
 app.Defaults.NumSurrogates = 199;
@@ -51,6 +56,8 @@ app.PendingParameterCorrections = cell(0,1);
 app.ParameterCorrectionCount = 0;
 app.ParameterAlertRequestCount = 0;
 app.ParameterAlertFailureCount = 0;
+app.ScientificAlertRequestCount = 0;
+app.ScientificAlertFailureCount = 0;
 app.TestHooks = resolveGuiTestHooks(context);
 
 background = [0.94 0.94 0.94];
@@ -409,13 +416,13 @@ end
             'must be an integer from 4 through 256',corrections);
 
         if strcmp(app.Estimator.Value,'wosa') && ...
-                ~wosaConfigurationFeasible(size(app.Data,1), ...
+                ~wosaConfigurationFeasible(app.AnticipatedSampleCount, ...
                 app.NumSegments.Value,app.Overlap.Value)
             oldValue = sprintf('%g segments, %.15g%% overlap', ...
                 app.NumSegments.Value,app.Overlap.Value);
             app.NumSegments.Value = defaults.NumSegments;
             app.Overlap.Value = defaults.OverlapPercent;
-            if wosaConfigurationFeasible(size(app.Data,1), ...
+            if wosaConfigurationFeasible(app.AnticipatedSampleCount, ...
                     app.NumSegments.Value,app.Overlap.Value)
                 newValue = sprintf('%g segments, %.15g%% overlap', ...
                     app.NumSegments.Value,app.Overlap.Value);
@@ -536,7 +543,7 @@ end
         axisBins = [];
         maximumSumBin = NaN;
         sumMargin = 0;
-        n = size(app.Data,1);
+        n = app.AnticipatedSampleCount;
         dt = estimateSampleInterval(app.Data);
         if n < 1 || ~(isfinite(dt) && dt > 0)
             return
@@ -578,7 +585,8 @@ end
             fprintf(2,'  - %s\n',corrections{correctionIndex});
         end
         fprintf(2,['  Corrected values are active. Parameter correction does ', ...
-            'not relax strict input-data validation.\n\n']);
+            'not relax finite-value, ordering, duplicate-coordinate, or ', ...
+            'minimum-length validation.\n\n']);
         publishState();
     end
 
@@ -596,8 +604,8 @@ end
                 'recommended or last-valid values:']}; ...
                 strcat('- ',corrections(:)); ...
                 {['The corrected values were applied. Parameter correction ', ...
-                'itself does not stop analysis; strict input-data errors ', ...
-                'and user cancellation still do.']}];
+                'itself does not stop analysis; unrecoverable input-data ', ...
+                'errors and user cancellation still do.']}];
             app.ParameterAlertRequestCount = ...
                 app.ParameterAlertRequestCount+1;
             try
@@ -657,7 +665,7 @@ end
 
     function options = readOptions()
         options = app.Defaults;
-        options.Interpolate = 'never';
+        options.Interpolate = 'auto';
         options.SampleInterval = [];
         options.DetrendMethod = 'none';
         options.Standardize = false;
@@ -704,6 +712,8 @@ end
         publishState();
         renderSucceeded = false;
         archiveSucceeded = false;
+        completedResult = [];
+        scientificWarnings = cell(0,1);
         try
             setEnabled(app.InteractiveControls,false);
             app.PreviewButton.Enable = 'off';
@@ -743,6 +753,7 @@ end
             app.CalculationDirty = false;
             app.InferenceDirty = false;
             publishState();
+            completedResult = result;
             scientificWarnings = collectScientificWarnings(result);
             if saveResult
                 setStatusSafe('Saving bispectral results');
@@ -754,16 +765,6 @@ end
                 setStatusSafe(sprintf('Saved result folder: %s',files.Directory));
             else
                 setStatusSafe('Analysis complete (not saved)');
-            end
-            if ~isempty(scientificWarnings)
-                if isValidUiHandle(app.Status)
-                    statusText = app.Status.Text;
-                else
-                    statusText = 'Analysis complete';
-                end
-                setStatusSafe(sprintf('%s | %d scientific warning(s)', ...
-                    statusText,numel(scientificWarnings)));
-                printScientificWarnings(scientificWarnings,app.DataName);
             end
         catch exception
             closeProgress();
@@ -777,6 +778,20 @@ end
                 printGuiFailure('Analysis failed',exception);
             end
             publishState();
+        end
+        % Scientific and automatic-interpolation warnings describe the
+        % completed analysis, not the archive operation. Report them even
+        % when Run & Save fails after the result and figure are available.
+        if renderSucceeded && ~isempty(scientificWarnings)
+            if isValidUiHandle(app.Status)
+                statusText = app.Status.Text;
+            else
+                statusText = 'Analysis complete';
+            end
+            setStatusSafe(sprintf('%s | %d scientific warning(s)', ...
+                statusText,numel(scientificWarnings)));
+            printScientificWarnings(scientificWarnings,app.DataName);
+            showScientificWarningAlert(completedResult);
         end
         % A Preview Run keeps the audit pending so a later Run & Save can
         % archive it. Consume it only after the atomic result folder exists.
@@ -1164,9 +1179,48 @@ end
             'ParameterCorrectionCount',app.ParameterCorrectionCount, ...
             'ParameterAlertRequestCount',app.ParameterAlertRequestCount, ...
             'ParameterAlertFailureCount',app.ParameterAlertFailureCount, ...
+            'ScientificAlertRequestCount',app.ScientificAlertRequestCount, ...
+            'ScientificAlertFailureCount',app.ScientificAlertFailureCount, ...
             'IsRunning',app.IsRunning, ...
             'IsRendering',app.IsRendering);
         setappdata(app.UIFigure,'BispectralState',state);
+    end
+
+    function showScientificWarningAlert(result)
+        samplingWarnings = {};
+        if isfield(result,'Preprocessing') && ...
+                isfield(result.Preprocessing,'WasIrregular') && ...
+                isfield(result.Preprocessing,'WasInterpolated') && ...
+                result.Preprocessing.WasIrregular && ...
+                result.Preprocessing.WasInterpolated && ...
+                isfield(result.Preprocessing,'Warnings')
+            allPreprocessingWarnings = appendScientificWarnings( ...
+                {},result.Preprocessing.Warnings);
+            samplingWarnings = allPreprocessingWarnings(contains( ...
+                string(allPreprocessingWarnings), ...
+                'interpolated onto a regular grid','IgnoreCase',true));
+        end
+        if isempty(samplingWarnings) || ...
+                ~isValidUiHandle(app.UIFigure) || ...
+                ~strcmp(app.UIFigure.Visible,'on')
+            return
+        end
+        message = [{'The analysis completed. Review these scientific warnings:'}; ...
+            strcat('- ',samplingWarnings(:)); ...
+            {'Automatic sampling interpolation, when used, is recorded in the result metadata.'}];
+        app.ScientificAlertRequestCount = ...
+            app.ScientificAlertRequestCount+1;
+        try
+            feval(app.TestHooks.AlertFcn,app.UIFigure,message, ...
+                'Bispectral data warning','Icon','warning');
+        catch exception
+            app.ScientificAlertFailureCount = ...
+                app.ScientificAlertFailureCount+1;
+            fprintf(2,['[Acycle Bispectral] The scientific warning dialog ', ...
+                'could not be displayed (%s). The completed result remains active.\n'], ...
+                exception.message);
+        end
+        publishState();
     end
 
     function showHelp()
@@ -1177,7 +1231,7 @@ end
             'Frequency-smoothed direct analysis uses a full hexagonal kernel on native (not zero-padded) FFT bins.'; ...
             'The only formal GUI inference is IAAFT surrogate max-statistic FWER. None hides a cached contour immediately, and a new Run with None skips inference.'; ...
             'The 199-surrogate default balances precision and runtime; use 999 or more for final publication inference.'; ...
-            'This window does not preprocess data. Use Acycle preprocessing first; input coordinates must be regular.'; ...
+            'This window requires finite, strictly increasing, unique observations and never silently deletes, sorts, or merges rows. Coordinate-spacing departures above 10 ppm trigger a warning and replace the series with its linear median-spacing interpolation grid before FFT analysis.'; ...
             'Minimum and maximum frequency clip the figure only; estimation and map-wide inference retain the full positive-frequency domain.'; ...
             '|B| and b^2 retain fractions are display-only, independently ranked within the current visible frequency range; biphase uses the b^2 mask.'; ...
             'Colormap grid # is shared by all maps; five thin value contours use the same refined display mesh.'; ...
@@ -1185,7 +1239,7 @@ end
             'Frequency pairs use f1 f2; f3,f4 syntax; frequencies and their sum must remain below Nyquist. Tab or Enter redraws thin dotted guides with 1/f1 and 1/f2 labels outside the map.'; ...
             'Overview power panels use the mean-removed processed series and 2pi Thomson MTM (NW=2, K=3, NFFT=5N), independent of the bispectral estimator.'; ...
             'After a Run, display controls redraw the cached result; estimator or uncached inference changes wait for the next Run.'; ...
-            'Invalid GUI parameters are reported and restored to recommended or last-valid values without relaxing strict data validation; correction records remain pending through Preview runs and are archived by the next successful Run & Save.'; ...
+            'Invalid GUI parameters are reported and restored to recommended or last-valid values. Nonfinite, unsorted, duplicate, or too-short inputs still stop; recoverable uneven sampling is warned about and regularized. Correction records remain pending through Preview runs and are archived by the next successful Run & Save.'; ...
             'Interpretation: high b^2 is stable quadratic phase coupling, not automatic proof of causality or energy transfer.'; ...
             'References: Kim & Powers (1979); Da Silva et al. (2019), Geology, doi:10.1130/G45511.1.'};
         uialert(app.UIFigure,message,'Bispectral method notes','Icon','info');
@@ -1320,6 +1374,38 @@ if isempty(dx)
     dt = 1;
 else
     dt = median(dx);
+end
+end
+
+function n = anticipatedGuiSampleCount(data,options)
+% Use the production preprocessing path so GUI geometry validation is based
+% on the same regular grid that the estimator will actually receive. Keep
+% structural input errors deferred until Run, as in the existing GUI flow.
+n = size(data,1);
+try
+    [processed,~] = bispectralPreprocess(data,options);
+    n = size(processed,1);
+catch
+end
+end
+
+function options = applyAnticipatedSampleCountDefaults(options,n)
+% Re-evaluate the estimator recommendation after strict/auto sampling has
+% established its anticipated grid length. Raw-row defaults can otherwise
+% request WOSA segments that no longer fit after interpolation.
+base = bispectralDefaults();
+options.NumSegments = base.NumSegments;
+candidateSegments = base.NumSegments;
+while candidateSegments >= 3 && ...
+        ~wosaConfigurationFeasible(n,candidateSegments, ...
+        options.OverlapPercent)
+    candidateSegments = candidateSegments-1;
+end
+if candidateSegments >= 3
+    options.Estimator = 'wosa';
+    options.NumSegments = candidateSegments;
+else
+    options.Estimator = 'frequency-smoothed';
 end
 end
 

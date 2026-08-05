@@ -94,7 +94,7 @@ cleanup = onCleanup(@()closeFigure(fig));
 controls = getappdata(fig,'BispectralControls');
 verifyFalse(testCase,isfield(controls,'Interpolate'));
 verifyFalse(testCase,isfield(controls,'Detrend'));
-verifyEqual(testCase,controls.Defaults.Interpolate,'never');
+verifyEqual(testCase,controls.Defaults.Interpolate,'auto');
 verifyEqual(testCase,controls.Defaults.DetrendMethod,'none');
 verifyFalse(testCase,controls.Defaults.Standardize);
 verifyEqual(testCase,controls.Defaults.InputPolicy,'strict');
@@ -538,12 +538,12 @@ end
 function testGuiSaveFailureKeepsResultFigureAndPendingCorrection(testCase)
 n = 128;
 t = (0:n-1)';
-hooks = struct('SaveFcn',@injectedSaveFailure);
+t(65:end) = t(65:end)+0.25;
+hooks = struct('SaveFcn',@injectedSaveFailure,'AlertFcn',@noopAlert);
 context = struct('current_data',[t sin(2*pi*t/31)], ...
     'data_name','save-failure-test.txt','unit','kyr', ...
     'BispectralTestHooks',hooks);
 gui = bispectralGUI(context);
-gui.Visible = 'off';
 cleanup = onCleanup(@()closeGuiAndManagedResult(gui));
 controls = getappdata(gui,'BispectralControls');
 controls.Significance.Value = 'none';
@@ -558,6 +558,12 @@ verifyNumElements(testCase,state.PendingParameterCorrections,1);
 verifyEqual(testCase,state.PendingParameterCorrections, ...
     state.LastResult.GUIParameterCorrections);
 verifyTrue(testCase,contains(controls.Status.Text,'Save failed'));
+verifyTrue(testCase,contains(controls.Status.Text,'scientific warning'));
+verifyTrue(testCase,state.LastResult.Preprocessing.WasInterpolated);
+verifyEqual(testCase,state.ScientificAlertRequestCount,1, ...
+    ['A save failure after a completed analysis must not suppress the ', ...
+     'automatic-interpolation warning.']);
+verifyEqual(testCase,state.ScientificAlertFailureCount,0);
 verifyFalse(testCase,state.IsRunning);
 verifyFalse(testCase,state.IsRendering);
 verifyRunButtonsEnabled(testCase,controls);
@@ -621,14 +627,15 @@ verifyTrue(testCase,contains( ...
 verifyEqual(testCase,stateAfterRun.LastResult.Options.PlotColorGrid,32);
 end
 
-function testGuiParameterCorrectionDoesNotRepairInvalidData(testCase)
+function testGuiAutoInterpolatesUnevenSamplingAndContinues(testCase)
 n = 96;
 t = (0:n-1)';
 t(50:end) = t(50:end)+0.25;
+hooks = struct('AlertFcn',@noopAlert);
 context = struct('current_data',[t sin(2*pi*t/31)], ...
-    'data_name','strict-data-error-test.txt','unit','kyr');
+    'data_name','uneven-sampling-recovery-test.txt','unit','kyr', ...
+    'BispectralTestHooks',hooks);
 gui = bispectralGUI(context);
-gui.Visible = 'off';
 cleanup = onCleanup(@()closeGuiAndManagedResult(gui));
 controls = getappdata(gui,'BispectralControls');
 controls.Significance.Value = 'none';
@@ -637,10 +644,58 @@ invokeButton(controls.PreviewButton);
 state = getappdata(gui,'BispectralState');
 verifyEqual(testCase,controls.ColorGrid.Value,32);
 verifyEqual(testCase,state.ParameterCorrectionCount,1);
-verifyEqual(testCase,state.AnalysisCount,0);
-verifyFalse(testCase,state.HasResult);
-verifyTrue(testCase,contains(controls.Status.Text,'Analysis failed'));
-verifyTrue(testCase,contains(controls.Status.Text,'10 ppm'));
+verifyEqual(testCase,state.AnalysisCount,1);
+verifyTrue(testCase,state.HasResult);
+verifyEqual(testCase,state.LastResult.Options.InputPolicy,'strict');
+verifyEqual(testCase,state.LastResult.Options.Interpolate,'auto');
+preprocessing = state.LastResult.Preprocessing;
+verifyTrue(testCase,preprocessing.WasIrregular);
+verifyTrue(testCase,preprocessing.WasInterpolated);
+verifyFalse(testCase,preprocessing.AcceptedNearUniformSpacing);
+verifyLessThanOrEqual(testCase,max(abs(diff( ...
+    state.LastResult.ProcessedData(:,1))-preprocessing.SampleInterval)), ...
+    256*eps(max(abs(state.LastResult.ProcessedData(:,1)))));
+warningText = string(preprocessing.Warnings);
+verifyTrue(testCase,any(contains(warningText,'interpolated', ...
+    'IgnoreCase',true)));
+verifyTrue(testCase,any(contains(warningText,'10 ppm')));
+verifyTrue(testCase,contains(controls.Status.Text,'scientific warning'));
+verifyFalse(testCase,contains(controls.Status.Text,'Analysis failed'));
+verifyEqual(testCase,state.ScientificAlertRequestCount,1);
+verifyEqual(testCase,state.ScientificAlertFailureCount,0);
+end
+
+function testGuiWosaDefaultsUseAnticipatedRegularGridCount(testCase)
+spacing = [0.1*ones(63,1);ones(64,1)];
+t = [0;cumsum(spacing)];
+y = sin(2*pi*t/13)+0.2*cos(2*pi*t/7);
+context = struct('current_data',[t y], ...
+    'data_name','mixed-spacing-wosa-default-test.txt','unit','kyr');
+gui = bispectralGUI(context);
+gui.Visible = 'off';
+cleanup = onCleanup(@()closeGuiAndManagedResult(gui));
+controls = getappdata(gui,'BispectralControls');
+
+verifyEqual(testCase,size(context.current_data,1),128);
+verifyEqual(testCase,controls.AnticipatedSampleCount,71, ...
+    ['The GUI sample-count preview must match the strict/auto ', ...
+     'median-spacing interpolation grid.']);
+verifyEqual(testCase,controls.Defaults.Estimator,'wosa');
+verifyEqual(testCase,controls.Defaults.NumSegments,3);
+verifyEqual(testCase,controls.NumSegments.Value,3);
+controls.Significance.Value = 'none';
+invokeButton(controls.PreviewButton);
+
+state = getappdata(gui,'BispectralState');
+verifyEqual(testCase,state.AnalysisCount,1);
+verifyTrue(testCase,state.HasResult);
+verifyTrue(testCase,state.LastResult.Preprocessing.WasInterpolated);
+verifyEqual(testCase,state.LastResult.Preprocessing.FinalCount,71);
+verifyEqual(testCase,size(state.LastResult.ProcessedData,1),71);
+verifyEqual(testCase,state.LastResult.Options.NumSegments,3);
+verifyEqual(testCase,state.LastResult.Meta.SegmentCount,3);
+verifyGreaterThanOrEqual(testCase,state.LastResult.Meta.SegmentLength,32);
+verifyFalse(testCase,contains(controls.Status.Text,'Analysis failed'));
 end
 
 function testOverviewLayoutAndCommonMapRendering(testCase)
@@ -1691,6 +1746,9 @@ function verifyRunButtonsEnabled(testCase,controls)
 verifyEqual(testCase,string(controls.PreviewButton.Enable),"on");
 verifyEqual(testCase,string(controls.SaveButton.Enable),"on");
 verifyEqual(testCase,string(controls.CloseButton.Enable),"on");
+end
+
+function noopAlert(varargin)
 end
 
 function injectedAlertFailure(varargin)
