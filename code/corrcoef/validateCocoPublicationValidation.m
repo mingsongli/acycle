@@ -35,7 +35,7 @@ for caseIndex = 1:numel(manifest.cases)
         end
         resultPath = fullfile(outputRoot,item.result_file);
         saved = load(resultPath);
-        if strcmp(item.method,'cvCOCO')
+        if strcmp(item.method,'Blocked cvCOCO')
             report = cocoConclusionReport('confirmatory',saved.cv);
             assertSame(report.pA,saved.report.pA,'p_A',caseItem.id);
             assertSame(report.pB,saved.report.pB,'p_B',caseItem.id);
@@ -45,7 +45,8 @@ for caseIndex = 1:numel(manifest.cases)
             if saved.cv.nsimCompleted ~= 9999 || saved.cv.nsimValid ~= 9999 || ...
                     saved.cv.seed ~= 20260713
                 error('validateCocoPublicationValidation:CVProvenance', ...
-                    'cvCOCO provenance failed for case %s.',caseItem.id);
+                    'Blocked cvCOCO provenance failed for case %s.', ...
+                    caseItem.id);
             end
         elseif strcmp(item.method,'Adaptive COCO')
             adaptive = saved.adaptive;

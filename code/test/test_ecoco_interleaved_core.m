@@ -281,13 +281,13 @@ for k = 1:numel(rootMaps)
 end
 verifyEqual(testCase,r.oddToEven.rho,r.forward.rho,'AbsTol',0);
 verifyEqual(testCase,r.evenToOdd.rho,r.backward.rho,'AbsTol',0);
-verifyEqual(testCase,r.method,'interleaved');
+verifyEqual(testCase,r.method,'Interleaved eCOCO');
 verifyEqual(testCase,r.name,'Interleaved eCOCO');
 verifyEqual(testCase,r.publicName,'Interleaved eCOCO');
-verifyEqual(testCase,r.abbreviation,'I-eCOCO');
+verifyEqual(testCase,r.abbreviation,'Interleaved eCOCO');
 verifyEqual(testCase,r.version,3);
 verifyEqual(testCase,r.algorithmVersion, ...
-    'Interleaved-eCOCO9B-windowed-prototype-v3');
+    'Interleaved eCOCO — windowed v3');
 verifyEqual(testCase,r.pGlobal,r.consensus.pGlobal,'AbsTol',0);
 verifyEqual(testCase,r.pCOCO,r.consensus.pCOCO,'AbsTol',0);
 verifyEqual(testCase,r.score,r.consensus.score,'AbsTol',0);
@@ -359,7 +359,7 @@ dt = testCase.TestData.dt;
     'Verbose',false,'InterleavedWindowMode','physical-depth', ...
     'InterleavedStepDepth',testCase.TestData.stepDepth);
 
-verifyEqual(testCase,details.method,'interleaved');
+verifyEqual(testCase,details.method,'Interleaved eCOCO');
 verifyEqual(testCase,details.name,'Interleaved eCOCO');
 verifyFalse(testCase,details.inputPreprocessing.fullRecordInterpolation);
 verifyTrue(testCase,details.inputPreprocessing.splitBeforeInterpolation);

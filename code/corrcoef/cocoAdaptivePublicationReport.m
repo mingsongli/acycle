@@ -20,15 +20,14 @@ if ~isempty(missing)
         'Adaptive diagnostic field(s) missing: %s.',strjoin(missing,', '));
 end
 
-targetMode = lower(char(string(details.targetMode)));
-if strcmp(targetMode,'adaptive9b')
-    validateTargetAmplitudeMode(details,'four-group-area','Adaptive COCO9B');
-elseif strcmp(targetMode,'adaptive9a')
-    validateTargetAmplitudeMode(details,'adaptive','Adaptive COCO9A');
-elseif strcmp(targetMode,'adaptive9') && ...
-        isfield(details,'targetAmplitudeMode')
-    % The former Adaptive COCO9 token is a compatibility alias for A.
-    validateTargetAmplitudeMode(details,'adaptive','Adaptive COCO9A');
+if isfield(details,'targetAmplitudeMode')
+    amplitudeMode = lower(char(string(details.targetAmplitudeMode)));
+    if strcmp(amplitudeMode,'four-group-area')
+        validateTargetAmplitudeMode( ...
+            details,'four-group-area','Adaptive COCO');
+    elseif strcmp(amplitudeMode,'adaptive')
+        validateTargetAmplitudeMode(details,'adaptive','Adaptive COCO');
+    end
 end
 
 report = cocoConclusionReport('adaptive',corrCI,corrH0,details);

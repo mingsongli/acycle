@@ -56,7 +56,7 @@ expectedAutomaticLimit = 1.2*max(1./orbit9);
 cv = runCv(testCase,0,0,11,2,[]);
 verifyEqual(testCase,cv.name,'Blocked cvCOCO');
 verifyEqual(testCase,cv.publicName,'Blocked cvCOCO');
-verifyEqual(testCase,cv.abbreviation,'B-cvCOCO');
+verifyEqual(testCase,cv.abbreviation,'Blocked cvCOCO');
 verifyEqual(testCase,cv.targetModel,'four-group');
 verifyEqual(testCase,cv.config.targetModel,'four-group');
 verifyTrue(testCase,cv.config.maximumTemporalFrequencyWasDefault);
@@ -68,16 +68,16 @@ wrapped = cvcoco2(testCase.TestData.data,orbit9, ...
     'MaxFrequency',testCase.TestData.maximumFrequency,'Seed',11);
 verifyEqual(testCase,wrapped.name,'Blocked cvCOCO');
 verifyEqual(testCase,wrapped.publicName,'Blocked cvCOCO');
-verifyEqual(testCase,wrapped.abbreviation,'B-cvCOCO');
+verifyEqual(testCase,wrapped.abbreviation,'Blocked cvCOCO');
 verifyEqual(testCase,wrapped.targetModel,'four-group');
-verifyEqual(testCase,wrapped.entryPoint,'cvcoco2 compatibility wrapper');
+verifyEqual(testCase,wrapped.entryPoint,'Blocked cvCOCO');
 
 legacy = cvcocoLegacy(testCase.TestData.data,orbit9, ...
     testCase.TestData.padCv,1,8,1,0,0,'Pearson','Seed',11);
-verifyEqual(testCase,legacy.name,'legacy cvCOCO');
+verifyEqual(testCase,legacy.name,'Blocked cvCOCO');
 verifyEqual(testCase,legacy.targetModel,'legacy');
 verifyError(testCase,@()cocoConclusionReport('confirmatory',legacy), ...
-    'cocoConclusionReport:LegacyTargetNotConfirmatory');
+    'Acycle:BlockedCVCOCO:TargetNotConfirmatory');
 
 [~,~,~,adaptiveDetails] = runAdaptive(testCase,0,0,1,11,[]);
 verifyEqual(testCase,adaptiveDetails.MaxFrequency, ...
@@ -1105,7 +1105,7 @@ verifyTrue(testCase,partialReport.pass);
 legacy = cv;
 legacy.targetModel = 'legacy';
 verifyError(testCase,@()cocoConclusionReport('confirmatory',legacy), ...
-    'cocoConclusionReport:LegacyTargetNotConfirmatory');
+    'Acycle:BlockedCVCOCO:TargetNotConfirmatory');
 brokenDirection = cv;
 brokenDirection.pB = 0.123456789;
 verifyError(testCase,@()cocoConclusionReport( ...

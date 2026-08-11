@@ -11,24 +11,23 @@ switch targetMode
     case {'adaptive','adaptive9','adaptive9a'}
         % FREQ2TARGETNEW is the compatibility implementation that already
         % sums fitted orbital sine terms before calculating target power.
-        % The fast Adaptive COCO9A path uses COCOADAPTIVEEVALUATE directly;
-        % these aliases keep diagnostic/compatibility callers consistent.
+        % The per-orbit peak path uses COCOADAPTIVEEVALUATE directly; these
+        % internal aliases keep diagnostic/compatibility callers consistent.
         la = freq2targetNew(dat,pad,dataPower,orbit9,lax,sr_i);
     case 'adaptive9b'
-        % Unlike method A, method B cannot be represented by the legacy
+        % The four-group area design cannot be represented by the
         % per-orbit peak helper. Route compatibility callers through the
         % same native evaluator used by the observed and Monte Carlo paths.
         la = adaptiveNineBCompatibility( ...
             dat,pad,dataPower,orbit9,lax,sr_i);
     case {'fixed','fixed9'}
-        % The explicit Fixed COCO9 public workflow uses the native-grid
-        % evaluator. FREQ2TARGETFIXED already applies the same coherent
+        % Fixed-target COCO uses the native-grid evaluator.
+        % FREQ2TARGETFIXED already applies the same coherent
         % fixed-weight construction for compatibility callers.
         la = freq2targetFixed(dat,pad,orbit9,lax,sr_i);
     otherwise
-        error(['COCO target mode must be ''adaptive'', ''adaptive9a'', ', ...
-            '''adaptive9b'', ''adaptive9'' (9A alias), ''fixed'', or ', ...
-            '''fixed9''.']);
+        error(['Select either Adaptive COCO or Fixed-target COCO through ', ...
+            'a supported Acycle interface.']);
 end
 end
 
@@ -46,7 +45,7 @@ dz = median(diff(depth));
 if numel(depth) < 2 || any(diff(depth) <= 0) || ...
         ~isfinite(dz) || dz <= 0
     error('cocoTargetSpectrum:InvalidDepth', ...
-        'Adaptive COCO9B requires a strictly increasing depth grid.');
+        'Adaptive COCO requires a strictly increasing depth grid.');
 end
 nFrequency = floor(pad/2)+1;
 if ismatrix(dataPower) && size(dataPower,2) == 2 && ...
@@ -58,7 +57,7 @@ elseif isvector(dataPower) && numel(dataPower) == nFrequency
     spatialFrequency = (0:nFrequency-1)'./(pad*dz);
 else
     error('cocoTargetSpectrum:InvalidAdaptive9BPower', ...
-        ['Adaptive COCO9B requires either a one-sided PAD-point power ', ...
+        ['Adaptive COCO requires either a one-sided PAD-point power ', ...
          'vector or a frequency/power matrix with floor(PAD/2)+1 rows.']);
 end
 rayleigh = enbw(rectwin(numel(depth)),1/dz);

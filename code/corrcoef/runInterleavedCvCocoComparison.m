@@ -1,5 +1,5 @@
 function runSummary = runInterleavedCvCocoComparison(outputRoot,varargin)
-%RUNINTERLEAVEDCVCOCOCOMPARISON Reproducible seven-record I-cvCOCO study.
+%RUNINTERLEAVEDCVCOCOCOMPARISON Seven-record Interleaved cvCOCO study.
 %
 % RUNSUMMARY = RUNINTERLEAVEDCVCOCOCOMPARISON(OUTPUTROOT) runs the
 % odd/even Interleaved cvCOCO engine on the seven registered syn3 records.
@@ -135,12 +135,14 @@ for datasetIndex = 1:numel(datasets)
         [caseManifest,row] = runOneDataset( ...
             spec,datasetIndex,outputRoot,logFile,options);
     catch exception
+        failure = publicFailureInfo(exception);
         [caseManifest,row] = failedDataset( ...
-            spec,datasetIndex,outputRoot,exception,options);
+            spec,datasetIndex,outputRoot,failure,options);
         logMessage({logFile},sprintf('FAILED %s: %s (%s)', ...
-            spec.id,exception.message,exception.identifier));
+            spec.id,failure.message,failure.identifier));
         if ~options.ContinueOnError
-            fatalException = exception;
+            fatalException = MException(failure.identifier,'%s', ...
+                failure.message);
         end
     end
     caseManifests(end+1,1) = caseManifest; %#ok<AGROW>
@@ -437,12 +439,25 @@ try
     pdfPath = fullfile(figureDirectory,[stem,'.pdf']);
     temporaryPdf = [tempname(figureDirectory),'.pdf'];
     cleanupPdf = onCleanup(@()deleteIfPresent(temporaryPdf));
+    useLegacyPdfMerge = requiresLegacyPdfMerge();
+    pagePdfPaths = cell(numel(pageFigures),1);
+    if useLegacyPdfMerge
+        for pageIndex = 1:numel(pageFigures)
+            pagePdfPaths{pageIndex} = [tempname(figureDirectory),'.pdf'];
+        end
+    end
+    pagePdfCleanup = onCleanup(@()deleteFilesIfPresent(pagePdfPaths));
     for pageIndex = 1:numel(pageFigures)
         set(pageFigures(pageIndex),'Color','w','Visible',options.Visible);
         drawnow;
-        exportgraphics(pageFigures(pageIndex),temporaryPdf, ...
-            'ContentType','vector','Append',pageIndex > 1, ...
-            'BackgroundColor','white');
+        if useLegacyPdfMerge
+            print(pageFigures(pageIndex),pagePdfPaths{pageIndex}, ...
+                '-dpdf','-painters','-bestfit');
+        else
+            exportgraphics(pageFigures(pageIndex),temporaryPdf, ...
+                'ContentType','vector','Append',pageIndex > 1, ...
+                'BackgroundColor','white');
+        end
         pngPath = fullfile(figureDirectory,sprintf('%s-%02d-%s.png', ...
             stem,pageIndex,expectedKinds{pageIndex}));
         temporaryPng = [tempname(figureDirectory),'.png'];
@@ -454,8 +469,13 @@ try
         entries(end+1,1) = figureEntry(pngPath,outputRoot, ...
             expectedKinds{pageIndex},'PNG'); %#ok<AGROW>
     end
+    if useLegacyPdfMerge
+        mergeVectorPdfPages(pagePdfPaths,temporaryPdf);
+    end
     finalizeAtomicFile(temporaryPdf,pdfPath);
     clear cleanupPdf
+    deleteFilesIfPresent(pagePdfPaths);
+    clear pagePdfCleanup
     entries(end+1,1) = figureEntry(pdfPath,outputRoot, ...
         'multipage vector diagnostics','PDF');
 catch exception
@@ -750,12 +770,12 @@ manifest.updated_at = timestampNow();
 end
 
 function [manifest,row] = failedDataset( ...
-        spec,index,outputRoot,exception,options)
+        spec,index,outputRoot,failure,options)
 caseName = sprintf('%02d_%s',index,sanitizeFilename(spec.id));
 caseDirectory = fullfile(outputRoot,caseName);
 ensureDirectory(caseDirectory);
 writeTextAtomic(fullfile(caseDirectory,'error.txt'), ...
-    exceptionReport(exception));
+    failure.report);
 row = emptySummaryRow();
 row.dataset_id = spec.id;
 row.dataset_title = spec.title;
@@ -768,17 +788,19 @@ row.rate_max_cm_per_kyr = spec.sr2;
 row.rate_step_cm_per_kyr = spec.srstep;
 row.pad = spec.pad;
 row.monte_carlo_requested = options.NSim;
-row.error_identifier = exception.identifier;
-row.error_message = exception.message;
+row.error_identifier = failure.identifier;
+row.error_message = failure.message;
 row.completed_at = timestampNow();
 row.conclusion = sprintf('FAILED: %s (%s)', ...
-    exception.message,exception.identifier);
+    failure.message,failure.identifier);
 manifest = emptyCaseManifest();
 manifest.id = spec.id;
 manifest.title = spec.title;
 manifest.status = 'failed';
 manifest.case_dir = caseName;
 manifest.summary_csv = fullfile(caseName,'summary.csv');
+manifest.error_identifier = failure.identifier;
+manifest.error_message = failure.message;
 manifest.updated_at = timestampNow();
 writeSummaryCsv(fullfile(caseDirectory,'summary.csv'),row);
 writeSummaryText(fullfile(caseDirectory,'summary.txt'),row);
@@ -1167,7 +1189,8 @@ item = struct('id','','title','','status','','reused',false, ...
     'null_statistics_csv','', ...
     'figures',repmat(emptyFigureEntry(),0,1), ...
     'best_rate_odd_to_even',NaN,'best_rate_even_to_odd',NaN, ...
-    'p_symmetric',NaN,'p_robust',NaN,'updated_at','');
+    'p_symmetric',NaN,'p_robust',NaN, ...
+    'error_identifier','','error_message','','updated_at','');
 end
 
 function item = emptyFigureEntry()
@@ -1224,7 +1247,7 @@ clear cleanup
 end
 
 function writeJsonAtomic(path,value)
-writeTextAtomic(path,jsonencode(value,'PrettyPrint',true));
+writeTextAtomic(path,jsonencode(value));
 end
 
 function writeRootManifest(path,manifest)
@@ -1279,6 +1302,38 @@ end
 function deleteIfPresent(path)
 if isfile(path)
     delete(path);
+end
+end
+
+function deleteFilesIfPresent(paths)
+for pathIndex = 1:numel(paths)
+    path = paths{pathIndex};
+    if ~isempty(path)
+        deleteIfPresent(path);
+    end
+end
+end
+
+function yes = requiresLegacyPdfMerge()
+release = version('-release');
+releaseYear = str2double(release(1:min(4,numel(release))));
+yes = isfinite(releaseYear) && releaseYear <= 2020;
+end
+
+function mergeVectorPdfPages(pagePaths,destination)
+try
+    merger = javaObject( ...
+        'org.apache.pdfbox.multipdf.PDFMergerUtility');
+    for pageIndex = 1:numel(pagePaths)
+        merger.addSource(java.io.File(pagePaths{pageIndex}));
+    end
+    merger.setDestinationFileName(destination);
+    memory = javaMethod('setupMainMemoryOnly', ...
+        'org.apache.pdfbox.io.MemoryUsageSetting');
+    merger.mergeDocuments(memory);
+catch exception
+    error('runInterleavedCvCocoComparison:PdfMergeFailed', ...
+        'Could not merge the vector PDF pages: %s',exception.message);
 end
 end
 
@@ -1350,7 +1405,62 @@ end
 end
 
 function text = exceptionReport(exception)
-text = getReport(exception,'extended','hyperlinks','off');
+failure = publicFailureInfo(exception);
+text = failure.report;
+end
+
+function failure = publicFailureInfo(exception)
+category = publicFailureCategory(exception.identifier);
+identifier = sprintf('Acycle:InterleavedCVCOCOStudy:%s',category);
+message = publicFailureText(exception.message);
+report = sprintf([ ...
+    'Method: Interleaved cvCOCO\n', ...
+    'Stage: data-set analysis\n', ...
+    'Category: %s\n', ...
+    'Identifier: %s\n', ...
+    'Message: %s\n'],category,identifier,message);
+failure = struct('method','Interleaved cvCOCO','stage', ...
+    'data-set analysis','category',category,'identifier',identifier, ...
+    'message',message,'report',report);
+end
+
+function category = publicFailureCategory(identifier)
+identifier = char(string(identifier));
+tokens = regexp(identifier,'([^:]+)$','tokens','once');
+if isempty(tokens)
+    category = 'AnalysisFailed';
+else
+    category = tokens{1};
+end
+if ~isempty(regexpi(category,[ ...
+        'cvcoco9|adaptive9|interleavedcvcoco|cross[-_ ]?fit|', ...
+        'method[-_ ]?[ab]|ecoco(?:adaptive|crossfit|interleaved)core'], ...
+        'once'))
+    category = 'AnalysisFailed';
+end
+category = regexprep(category,'[^A-Za-z0-9]','');
+if isempty(category) || ~isletter(category(1))
+    category = 'AnalysisFailed';
+end
+end
+
+function text = publicFailureText(text)
+text = char(string(text));
+replacements = {
+    'ecocoAdaptiveCore','Adaptive eCOCO';
+    'ecocoCrossfitCore','Blocked eCOCO';
+    'ecocoInterleavedCore','Interleaved eCOCO';
+    'interleavedcvcoco','Interleaved cvCOCO';
+    'cvcoco9[A-Za-z]*','Interleaved cvCOCO';
+    'adaptive9[A-Za-z]*','Adaptive COCO';
+    'cross[- ]?fit(?:ted)?','blocked';
+    'Method[- ]?A','per-orbit';
+    'Method[- ]?B','four-group';
+    '\<route\>','analysis path'};
+for ii = 1:size(replacements,1)
+    text = regexprep(text,replacements{ii,1},replacements{ii,2}, ...
+        'ignorecase');
+end
 end
 
 function tf = isScalarText(x)

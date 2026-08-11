@@ -31,6 +31,11 @@ function [prt_sr,out_depth,out_ecc,out_ep,out_eci,out_ecoco,out_ecocorb,out_norb
 %   ECOCOCenterLimits  optional [first last] physical output-center limits.
 %                The GUI uses the unpadded record limits when edge padding
 %                is enabled, so synthetic padding never creates extra maps.
+%   BlockedConsensusPolicy 'supported' (default) preserves Blocked eCOCO's
+%                historical one-direction edge fallback. 'strict' publishes
+%                only the bidirectionally supported STRICTCONSENSUS surface;
+%                one-direction edge windows remain NaN and cannot enter the
+%                tracked ridge.
 
 if nargin < 20 || isempty(calcMode)
     calcMode = 'adaptive';
@@ -65,6 +70,11 @@ addParameter(progressParser,'ECOCOStepDepth',[],@(x) isempty(x) || ...
 addParameter(progressParser,'ECOCOCenterLimits',[],@(x) isempty(x) || ...
     (isnumeric(x) && isvector(x) && numel(x) == 2 && isreal(x) && ...
     all(isfinite(x)) && x(2) >= x(1)));
+addParameter(progressParser,'BlockedConsensusPolicy','supported',@(x) ...
+    ischar(x) || (isstring(x) && isscalar(x)));
+% Retained as an undocumented name-value alias for saved scripts.
+addParameter(progressParser,'CrossfitConsensus','',@(x) ...
+    ischar(x) || (isstring(x) && isscalar(x)));
 parse(progressParser,varargin{:});
 progressFcn = progressParser.Results.ProgressFcn;
 % Retain the accepted name-value option for existing scripts, but enforce
@@ -80,6 +90,21 @@ ecocoWindowMode = validatestring( ...
     {'legacy-count','physical-depth'},mfilename,'ECOCOWindowMode');
 ecocoStepDepth = progressParser.Results.ECOCOStepDepth;
 ecocoCenterLimits = progressParser.Results.ECOCOCenterLimits;
+blockedConsensusPolicy = char( ...
+    progressParser.Results.BlockedConsensusPolicy);
+legacyConsensusPolicy = char(progressParser.Results.CrossfitConsensus);
+if ~isempty(legacyConsensusPolicy)
+    if ~any(strcmpi(progressParser.UsingDefaults, ...
+            'BlockedConsensusPolicy')) && ...
+            ~strcmpi(blockedConsensusPolicy,legacyConsensusPolicy)
+        error('Acycle:BlockedECOCO:ConflictingConsensusPolicy', ...
+            ['BlockedConsensusPolicy and its compatibility alias specify ', ...
+             'different values.']);
+    end
+    blockedConsensusPolicy = legacyConsensusPolicy;
+end
+blockedConsensusPolicy = validatestring(blockedConsensusPolicy, ...
+    {'supported','strict'},mfilename,'BlockedConsensusPolicy');
 interleavedModeExplicit = ~any(strcmpi( ...
     progressParser.UsingDefaults,'InterleavedWindowMode'));
 interleavedStepExplicit = ~any(strcmpi( ...
@@ -111,8 +136,12 @@ if nargin < 16 || isempty(plotn)
 end
 calcMode = lower(strtrim(char(calcMode)));
 if ~ismember(calcMode,{'adaptive','crossfit','interleaved','fast','accurate'})
-    error(['calcMode must be ''adaptive'', ''crossfit'', or ''interleaved'' ', ...
-        '(''fast''/''accurate'' remain legacy compatibility modes).']);
+    error(['Select Adaptive eCOCO, Blocked eCOCO, or Interleaved eCOCO ', ...
+        'through a supported Acycle interface.']);
+end
+if strcmp(blockedConsensusPolicy,'strict') && ~strcmp(calcMode,'crossfit')
+    error('Acycle:BlockedECOCO:ConsensusPolicyMethodMismatch', ...
+        'Strict bidirectional consensus is valid only for Blocked eCOCO.');
 end
 
 ecoDetails = struct;
@@ -121,6 +150,7 @@ ecoDetails = struct;
 % rate grid.  The old Fast/Accurate implementation remains below as an
 % unadvertised compatibility branch for scripts that still call it.
 if any(strcmp(calcMode,{'adaptive','crossfit','interleaved'}))
+    try
     if adjust ~= 0
         error('ecoco:LegacyAdjustmentUnsupported', ...
             'Modern eCOCO algorithms require ADJUST=0.');
@@ -137,10 +167,10 @@ if any(strcmp(calcMode,{'adaptive','crossfit','interleaved'}))
             'splitBeforeInterpolation',true);
     else
         [data,inputPreprocessing] = cocoPrepareRegularData( ...
-            data,sprintf('%s eCOCO input',calcMode), ...
-            'MaximumPoints',1e6,'MinimumPoints',4,'Verbose',true);
+            data,sprintf('%s input',ecocoPublicMethodName(calcMode)), ...
+            'MaximumPoints',1e6,'MinimumPoints',4,'Verbose',verbose);
         dt = inputPreprocessing.outputSpacing;
-        if abs(requestedSamplingInterval-dt) > ...
+        if verbose && abs(requestedSamplingInterval-dt) > ...
                 cocoSamplingTolerance(data(:,1),dt)
             fprintf(['>> eCOCO sampling interval updated from the caller value ', ...
                 '%.12g m to the preprocessed median interval %.12g m.\n'], ...
@@ -198,6 +228,23 @@ if any(strcmp(calcMode,{'adaptive','crossfit','interleaved'}))
                 'WindowMode',interleavedWindowMode, ...
                 'StepDepth',interleavedStepDepth);
     end
+    if strcmp(calcMode,'crossfit')
+        result.blockedConsensusPolicy = blockedConsensusPolicy;
+        if strcmp(blockedConsensusPolicy,'strict')
+            result.rho = result.strictConsensus.rho;
+            result.pLocal = result.strictConsensus.pLocal;
+            result.pParametric = nan(size(result.rho));
+            result.pGlobal = result.strictConsensus.pGlobal;
+            result.nOrbit = result.strictConsensus.nOrbit;
+            result.pCOCO = result.strictConsensus.pCOCO;
+            result.score = result.strictConsensus.score;
+            result.rootConsensus = ...
+                'strict bidirectional consensus; no one-sided fallback';
+        else
+            result.rootConsensus = ...
+                'supported consensus with one-sided edge fallback';
+        end
+    end
     prt_sr = result.srGrid(:);
     out_depth = result.depth(:);
     out_ecc = result.rho;
@@ -250,6 +297,9 @@ if any(strcmp(calcMode,{'adaptive','crossfit','interleaved'}))
             out_ecocorb,out_norbit,plotn,ecoDetails);
     end
     reportEcocoProgress(progressFcn,1,sprintf('%s complete.',result.name));
+    catch exception
+        throwPublicEcocoException(exception,calcMode)
+    end
     return
 end
 
@@ -327,9 +377,9 @@ end
 
 if verbose
     if strcmp(calcMode,'fast')
-        disp('>> Step 1: prepare sliding windows and run Fast eCOCO');
+        disp('>> Step 1: run the internal eCOCO compatibility calculation');
     else
-        disp('>> Step 1: prepare sliding windows and run Accurate eCOCO');
+        disp('>> Step 1: run the internal eCOCO compatibility calculation');
     end
 end
 
@@ -453,6 +503,68 @@ if abs(plotn) > 0
 end
 reportEcocoProgress(progressFcn,1,'eCOCO complete.');
 
+function name = ecocoPublicMethodName(calcMode)
+switch calcMode
+    case 'adaptive'
+        name = 'Adaptive eCOCO';
+    case 'crossfit'
+        name = 'Blocked eCOCO';
+    case 'interleaved'
+        name = 'Interleaved eCOCO';
+    otherwise
+        name = 'eCOCO compatibility analysis';
+end
+
+function throwPublicEcocoException(exception,calcMode)
+name = ecocoPublicMethodName(calcMode);
+switch calcMode
+    case 'adaptive'
+        methodToken = 'AdaptiveECOCO';
+    case 'crossfit'
+        methodToken = 'BlockedECOCO';
+    case 'interleaved'
+        methodToken = 'InterleavedECOCO';
+    otherwise
+        methodToken = 'ECOCO';
+end
+tokens = regexp(char(string(exception.identifier)), ...
+    '([^:]+)$','tokens','once');
+if isempty(tokens)
+    category = 'AnalysisFailed';
+else
+    category = regexprep(tokens{1},'[^A-Za-z0-9]','');
+end
+if isempty(category) || ~isletter(category(1)) || ...
+        ~isempty(regexpi(category,[ ...
+        'cvcoco9|adaptive9|interleavedcvcoco|cross[-_ ]?fit|', ...
+        'method[-_ ]?[ab]|ecoco(?:adaptive|crossfit|interleaved)core'], ...
+        'once'))
+    category = 'AnalysisFailed';
+end
+message = publicEcocoFailureText(exception.message);
+publicException = MException( ...
+    sprintf('Acycle:%s:%s',methodToken,category), ...
+    '%s failed: %s',name,message);
+throwAsCaller(publicException)
+
+function text = publicEcocoFailureText(text)
+text = char(string(text));
+replacements = {
+    'ecocoAdaptiveCore','Adaptive eCOCO';
+    'ecocoCrossfitCore','Blocked eCOCO';
+    'ecocoInterleavedCore','Interleaved eCOCO';
+    'interleavedcvcoco','Interleaved cvCOCO';
+    'cvcoco9[A-Za-z]*','Blocked cvCOCO';
+    'adaptive9[A-Za-z]*','Adaptive COCO';
+    'cross[- ]?fit(?:ted)?','blocked';
+    'Method[- ]?A','per-orbit';
+    'Method[- ]?B','four-group';
+    '\<route\>','analysis path'};
+for index = 1:size(replacements,1)
+    text = regexprep(text,replacements{index,1}, ...
+        replacements{index,2},'ignorecase');
+end
+
 function pValues = getPValues(corr_h0,nofsr)
 pValues = nan(nofsr,1);
 if ~isempty(corr_h0)
@@ -512,12 +624,15 @@ function summary = bestPerWindowSummary( ...
         srGrid,depth,rho,pGlobal,nOrbit,score)
 nWindows = numel(depth);
 summary = nan(nWindows,8);
+% Preserve every requested window coordinate even when no finite score is
+% available.  Columns 2:8 remain NaN for an unresolved window, so saved
+% diagnostics retain their row identity without implying a ridge result.
+summary(:,1) = depth(:);
 for windowIndex = 1:nWindows
     bestIndex = bestFiniteIndex(score(:,windowIndex));
     if isempty(bestIndex)
         continue
     end
-    summary(windowIndex,1) = depth(windowIndex);
     summary(windowIndex,2) = srGrid(bestIndex);
     summary(windowIndex,3) = rho(bestIndex,windowIndex);
     summary(windowIndex,4) = pGlobal(bestIndex,windowIndex);

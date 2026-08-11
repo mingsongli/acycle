@@ -193,7 +193,7 @@ end
 function testBlockedFivePanelsUseConsensusAndFilledPoints(testCase)
 fixture = plotFixture();
 details = struct();
-details.method = 'crossfit';
+details.method = 'Blocked eCOCO';
 details.forward = struct('rho',fixture.rho);
 details.backward = struct('rho',flipud(fixture.rho));
 consensusRho = min(details.forward.rho,details.backward.rho);
@@ -250,7 +250,7 @@ end
 function testInterleavedUsesOddEvenLabelsAndTwoFigureLayout(testCase)
 fixture = plotFixture();
 details = struct();
-details.method = 'interleaved';
+details.method = 'Interleaved eCOCO';
 details.forward = struct('rho',fixture.rho);
 details.backward = struct('rho',flipud(fixture.rho));
 details.oddToEven = details.forward;

@@ -18,7 +18,7 @@ function [rho,pValue,nMissing,diagnostic] = cocoAdaptiveEvaluate( ...
 % TargetModel='phase-averaged' (default) adds the nine independently
 % phase-averaged orbital powers. TargetModel='coherent-nine' instead sums
 % the nine zero-phase sine FFT terms before calculating power, matching the
-% coherent construction used by the legacy cvCOCO target while retaining
+% coherent construction used by the compatibility cvCOCO target while retaining
 % this evaluator's native-grid and batched Monte Carlo workflow.
 % AmplitudeMode='adaptive' (default) estimates one amplitude per orbit from
 % the maximum PSD in its Rayleigh band. AmplitudeMode='four-group-area'

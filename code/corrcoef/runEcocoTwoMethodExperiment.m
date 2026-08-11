@@ -8,9 +8,9 @@ function runSummary = runEcocoTwoMethodExperiment(outputRoot,varargin)
 % atomic and signature matched, so interrupted runs can be resumed.
 %
 % Default design:
-%   * method-B coherent-nine targets through the upgraded eCOCO cores
+%   * four-group coherent-nine targets through the published eCOCO methods
 %   * N_MC = 2000, RED = 0, Pearson, seed = 1
-%   * cross-fit target-anchor fraction = 0.5 window
+%   * Blocked eCOCO target-anchor fraction = 0.5 window
 %   * physical window = 2 * 405 kyr * registered rate / 100 metres
 %   * sliding step = 0.5 window, rounded to the sampling grid
 %   * fewer than 300 complete windows per case
@@ -90,7 +90,8 @@ else
     datasets = normalizeDatasetPlan(options.DatasetPlan,options.InputRoot);
 end
 datasets = selectItems(datasets,options.DatasetIDs,'dataset');
-methods = selectItems(methodPlan(),options.MethodIDs,'method');
+methods = selectEcocoMethods(methodPlan(),options.MethodIDs);
+options.MethodIDs = string({methods.id});
 if isempty(datasets) || isempty(methods)
     error('runEcocoTwoMethodExperiment:EmptyPlan', ...
         'At least one dataset and one method must remain selected.');
@@ -235,7 +236,7 @@ figures = repmat(emptyFigureEntry(),0,1);
 methodManifests = repmat(emptyMethodManifest(),numel(methods),1);
 for methodIndex = 1:numel(methods)
     task = methods(methodIndex);
-    methodDirectory = fullfile(caseDirectory,task.id);
+    methodDirectory = fullfile(caseDirectory,task.folder);
     ensureDirectory(methodDirectory);
     signatureValue = baseSignature;
     signatureValue.method_id = task.id;
@@ -262,7 +263,8 @@ for methodIndex = 1:numel(methods)
             exceptionReport(exception));
         emitMethodEvent(eventLogPath,'ERROR',spec.id,task.id,sprintf( ...
             'identifier=%s message=%s', ...
-            exception.identifier,exception.message));
+            publicFailureText(exception.identifier), ...
+            publicFailureText(exception.message)));
         if ~options.ContinueOnError
             rethrow(exception)
         end
@@ -345,7 +347,7 @@ try
         'ECOCOStepDepth',stepSamples*dt, ...
         'ECOCOCenterLimits',originalDepth([1,end])');
     analysis = struct( ...
-        'method',task.title,'method_id',task.id,'mode',task.mode, ...
+        'method',task.title,'method_id',task.id,'mode',task.title, ...
         'prt_sr',prt_sr,'out_depth',out_depth,'out_ecc',out_ecc, ...
         'out_ep',out_ep,'out_eci',out_eci,'out_ecoco',out_ecoco, ...
         'out_ecocorb',out_ecocorb,'out_norbit',out_norbit, ...
@@ -570,7 +572,8 @@ if numel(figures) ~= 2
         task.title,numel(figures));
 end
 entries = repmat(emptyFigureEntry(),2,1);
-baseStem = sprintf('%s_%s',sanitizeFilename(spec.id),task.id);
+baseStem = sprintf('%s_%s',sanitizeFilename(spec.id), ...
+    sanitizeFilename(task.id));
 suffixes = {'','_ridge'};
 panelLabels = {'Main maps','Ridge score'};
 widths = [28,17.95];
@@ -644,7 +647,7 @@ set(fig, ...
     'PaperUnits','centimeters', ...
     'PaperSize',position(3:4), ...
     'PaperPosition',[0,0,position(3:4)]);
-print(fig,temporary,'-dpdf','-vector','-r300');
+print(fig,temporary,'-dpdf','-painters','-r300');
 set(fig,'Units',oldUnits);
 finalizeAtomicFile(temporary,path);
 clear cleanup
@@ -741,7 +744,7 @@ parameters = struct( ...
     'seed',options.Seed, ...
     'red',options.Red, ...
     'correlation_method',options.Method, ...
-    'crossfit_anchor_fraction',options.AnchorFraction, ...
+    'target_anchor_fraction',options.AnchorFraction, ...
     'maximum_frequency_cycle_per_kyr',maxFrequency, ...
     'maximum_frequency_rule','1.2 x highest nominal orbital frequency', ...
     'orbit_periods_kyr',orbit9(:)', ...
@@ -779,7 +782,7 @@ if isstruct(analysis.details)
 end
 parameters = struct( ...
     'dataset_id',spec.id,'method_id',task.id,'method',task.title, ...
-    'ecoco_mode',task.mode,'target_mode',targetMode, ...
+    'analysis_method',task.title,'target_mode',targetMode, ...
     'full_rate_grid',true,'sr1',spec.sr1,'sr2',spec.sr2, ...
     'srstep',spec.srstep,'window_m',analysis.window, ...
     'sampling_interval_m',analysis.dt,'step_samples',analysis.stepSamples, ...
@@ -928,12 +931,14 @@ end
 
 function methods = methodPlan()
 items = {
-    'adaptive','Adaptive eCOCO','adaptive';
-    'crossfit','Blocked eCOCO','crossfit'};
-methods = repmat(struct('id','','title','','mode',''),size(items,1),1);
+    'Adaptive eCOCO','Adaptive_eCOCO','adaptive';
+    'Blocked eCOCO','Blocked_eCOCO','crossfit'};
+methods = repmat( ...
+    struct('id','','title','','folder','','mode',''),size(items,1),1);
 for ii = 1:size(items,1)
     methods(ii).id = items{ii,1};
-    methods(ii).title = items{ii,2};
+    methods(ii).title = items{ii,1};
+    methods(ii).folder = items{ii,2};
     methods(ii).mode = items{ii,3};
 end
 end
@@ -985,6 +990,32 @@ end
 selected = items(ismember(ids,requested));
 end
 
+function selected = selectEcocoMethods(items,requested)
+if ischar(requested)
+    requested = string({requested});
+else
+    requested = string(requested(:));
+end
+requested = requested(strlength(requested) > 0);
+if isempty(requested)
+    selected = items;
+    return
+end
+% Preserve saved commands while ensuring only published names are carried
+% forward into public options and manifests.
+requested(strcmpi(requested,'adaptive')) = "Adaptive eCOCO";
+requested(strcmpi(requested,'crossfit')) = "Blocked eCOCO";
+requested(strcmpi(requested,'Adaptive_eCOCO')) = "Adaptive eCOCO";
+requested(strcmpi(requested,'Blocked_eCOCO')) = "Blocked eCOCO";
+ids = string({items.id});
+missing = setdiff(requested,ids);
+if ~isempty(missing)
+    error('runEcocoTwoMethodExperiment:UnknownSelection', ...
+        'Unknown eCOCO method name(s): %s.',strjoin(missing,', '));
+end
+selected = items(ismember(ids,requested));
+end
+
 function row = baseSummaryRow(spec,task,options)
 row = emptySummaryRow();
 row.dataset_id = spec.id;
@@ -1002,7 +1033,8 @@ function row = failedSummaryRow(spec,task,exception,options)
 row = baseSummaryRow(spec,task,options);
 row.status = 'failed';
 row.conclusion = sprintf('FAILED: %s (%s)', ...
-    exception.message,exception.identifier);
+    publicFailureText(exception.message), ...
+    publicFailureText(exception.identifier));
 end
 
 function row = emptySummaryRow()
@@ -1084,7 +1116,8 @@ item.id = task.id;
 item.title = task.title;
 item.status = 'failed';
 item.method_dir = relativePath(directory,caseDirectory);
-item.error = sprintf('%s (%s)',exception.message,exception.identifier);
+item.error = sprintf('%s (%s)',publicFailureText(exception.message), ...
+    publicFailureText(exception.identifier));
 end
 
 function item = failedCaseManifest(spec,index,outputRoot,exception)
@@ -1142,7 +1175,7 @@ function digest = engineFingerprint(task)
 % begins with an unexplained "missing" component.
 paths = {which('runEcocoTwoMethodExperiment'),which('ecoco'), ...
     which('cocoAdaptiveEvaluate')};
-if strcmp(task.id,'adaptive')
+if strcmp(task.mode,'adaptive')
     paths{end+1} = which('ecocoAdaptiveCore');
 else
     paths{end+1} = which('ecocoCrossfitCore');
@@ -1276,7 +1309,7 @@ clear cleanup
 end
 
 function writeJsonAtomic(path,value)
-writeTextAtomic(path,jsonencode(value,'PrettyPrint',true));
+writeTextAtomic(path,jsonencode(value));
 end
 
 function writeRootManifest(path,manifest)
@@ -1391,7 +1424,25 @@ text = char(datetime('now','TimeZone','local', ...
 end
 
 function text = exceptionReport(exception)
-text = getReport(exception,'extended','hyperlinks','off');
+text = publicFailureText( ...
+    getReport(exception,'extended','hyperlinks','off'));
+end
+
+function text = publicFailureText(text)
+text = char(string(text));
+replacements = {
+    'ecocoAdaptiveCore','Adaptive eCOCO';
+    'ecocoCrossfitCore','Blocked eCOCO';
+    'ecocoInterleavedCore','Interleaved eCOCO';
+    'interleavedcvcoco','Interleaved cvCOCO';
+    'cvcoco9[A-Za-z]*','Blocked cvCOCO';
+    'adaptive9[A-Za-z]*','Adaptive COCO';
+    'cross[- ]?fit(?:ted)?','blocked';
+    'Method[- ]B','four-group'};
+for ii = 1:size(replacements,1)
+    text = regexprep(text,replacements{ii,1},replacements{ii,2}, ...
+        'ignorecase');
+end
 end
 
 function tf = isScalarText(x)

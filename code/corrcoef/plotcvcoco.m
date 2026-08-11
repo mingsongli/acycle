@@ -60,10 +60,6 @@ end
 [foldLabelA,foldLabelB,directionLabelA,directionLabelB] = ...
     resultFoldLabels(result);
 [~,targetLegend] = targetLabels(result.targetModel);
-if strcmp(result.targetModel,'legacy') && ...
-        ~contains(lower(methodName),'legacy')
-    methodName = [methodName,' (legacy target)'];
-end
 if isfield(result,'degradedMode') && isscalar(result.degradedMode) && ...
         logical(result.degradedMode)
     methodName = [methodName,' (partial-orbit exploratory)'];
@@ -385,15 +381,15 @@ switch targetModel
         description = 'phase-averaged four-group target';
         legendText = 'Frozen phase-averaged four-group target';
     case 'four-group-coherent-nine'
-        description = 'method-B four-group-trained coherent nine-term target';
+        description = 'four-group-trained coherent nine-term target';
         legendText = 'Frozen coherent 9-period target';
     case 'rayleigh-peak-coherent-nine'
         description = ...
-            'method-A per-orbit Rayleigh-peak coherent nine-term target';
-        legendText = 'Frozen nine-amplitude coherent target (cvCOCO9A)';
+            'per-orbit Rayleigh-peak coherent nine-term target';
+        legendText = 'Frozen nine-amplitude coherent target';
     case 'legacy'
-        description = 'legacy coherent nine-term target';
-        legendText = 'Frozen legacy coherent nine-term target';
+        description = 'compatibility coherent nine-term target';
+        legendText = 'Frozen compatibility coherent nine-term target';
 end
 end
 

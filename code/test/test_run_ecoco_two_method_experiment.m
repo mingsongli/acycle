@@ -50,6 +50,9 @@ verifyTrue(testCase,isfile(fullfile(outputRoot,'run_summary.mat')));
 rootManifest = jsondecode(fileread(fullfile(outputRoot,'manifest.json')));
 verifyEqual(testCase,rootManifest.report_title, ...
     'Adaptive and Blocked eCOCO: 1-data-set comparison');
+verifyEqual(testCase,sort(string(rootManifest.options.MethodIDs(:))), ...
+    sort(["Adaptive eCOCO";"Blocked eCOCO"]));
+verifyNoLegacyPublicNames(testCase,rootManifest,'root manifest');
 
 caseDirectory = fullfile(outputRoot,'01_synthetic');
 verifyTrue(testCase,isfile(fullfile(caseDirectory,'parameters.csv')));
@@ -59,14 +62,14 @@ summary = readtable(fullfile(caseDirectory,'summary.csv'), ...
     'VariableNamingRule','preserve');
 verifyEqual(testCase,height(summary),2);
 verifyEqual(testCase,sort(string(summary.method_id)), ...
-    sort(["adaptive";"crossfit"]));
+    sort(["Adaptive eCOCO";"Blocked eCOCO"]));
 verifyTrue(testCase,all(string(summary.status) == "complete"));
 verifyLessThan(testCase,max(summary.window_count),300);
 
 parameters = jsondecode(fileread(fullfile(caseDirectory,'parameters.json')));
 verifyEqual(testCase,parameters.window_formula, ...
     '2 * 405 kyr * rate / 100 m');
-verifyEqual(testCase,parameters.crossfit_anchor_fraction,0.5);
+verifyEqual(testCase,parameters.target_anchor_fraction,0.5);
 verifyEqual(testCase,parameters.pad_nfft, ...
     2^nextpow2(parameters.window_point_count));
 expectedWindowPoints = 2*round(parameters.window_requested_m/ ...
@@ -86,15 +89,19 @@ verifyEqual(testCase,analysisInput(end-nHalf+1:end,2),zeros(nHalf,1), ...
 retained = analysisInput(nHalf+(1:numel(value)),2);
 verifyEqual(testCase,retained,value-mean(value),'AbsTol',1e-12);
 
-for method = ["adaptive","crossfit"]
-    methodDirectory = fullfile(caseDirectory,char(method));
+methodFolders = ["Adaptive_eCOCO","Blocked_eCOCO"];
+methodNames = ["Adaptive eCOCO","Blocked eCOCO"];
+for methodIndex = 1:numel(methodFolders)
+    methodFolder = methodFolders(methodIndex);
+    methodName = methodNames(methodIndex);
+    methodDirectory = fullfile(caseDirectory,char(methodFolder));
     required = {'checkpoint.mat','results.mat','result.json', ...
         'parameters.csv','parameters.json','summary.csv','rho.csv', ...
         'p_global.csv','n_orbit.csv','pcoco.csv','ridge_score.csv', ...
         'tracked_sr.csv'};
     for ii = 1:numel(required)
         verifyTrue(testCase,isfile(fullfile(methodDirectory,required{ii})), ...
-            sprintf('Missing %s/%s',method,required{ii}));
+            sprintf('Missing %s/%s',methodName,required{ii}));
     end
     saved = load(fullfile(methodDirectory,'results.mat'),'analysis');
     resultMetadata = jsondecode(fileread( ...
@@ -134,7 +141,19 @@ for method = ["adaptive","crossfit"]
         methodParameters.score_definition);
     verifyEqual(testCase,resultMetadata.orbit_count_role, ...
         methodParameters.orbit_count_role);
-    if method == "adaptive"
+    verifyEqual(testCase,string(saved.analysis.method),methodName);
+    verifyEqual(testCase,string(saved.analysis.method_id),methodName);
+    verifyEqual(testCase,string(saved.analysis.mode),methodName);
+    verifyEqual(testCase,string(methodParameters.method),methodName);
+    verifyEqual(testCase,string(methodParameters.method_id),methodName);
+    verifyEqual(testCase,string(methodParameters.analysis_method),methodName);
+    verifyNoLegacyPublicNames(testCase,saved.analysis, ...
+        sprintf('%s MAT analysis',methodName));
+    verifyNoLegacyPublicNames(testCase,resultMetadata, ...
+        sprintf('%s result manifest',methodName));
+    verifyNoLegacyPublicNames(testCase,methodParameters, ...
+        sprintf('%s parameters',methodName));
+    if methodName == "Adaptive eCOCO"
         localPath = fullfile(methodDirectory,'p_local.csv');
         verifyTrue(testCase,isfile(localPath));
         verifyFalse(testCase,isfile(fullfile( ...
@@ -175,7 +194,7 @@ for method = ["adaptive","crossfit"]
         'figureEntries');
     verifyNumElements(testCase,savedFigures.figureEntries,2);
     for suffix = ["","_ridge"]
-        stem = sprintf('synthetic_%s%s',method,suffix);
+        stem = sprintf('synthetic_%s%s',methodFolder,suffix);
         png = fullfile(caseDirectory,'figures',[stem,'.png']);
         pdf = fullfile(caseDirectory,'figures',[stem,'.pdf']);
         fig = fullfile(caseDirectory,'figures',[stem,'.fig']);
@@ -187,22 +206,80 @@ end
 
 firstCaseManifest = jsondecode(fileread( ...
     fullfile(caseDirectory,'case_manifest.json')));
+verifyNoLegacyPublicNames(testCase,firstCaseManifest,'case manifest');
 verifyNumElements(testCase,firstCaseManifest.figures,4);
 verifyTrue(testCase,all(arrayfun(@(item) ...
     numel(item.figures) == 2,firstCaseManifest.methods)));
 ridgeToRegenerate = fullfile(caseDirectory,'figures', ...
-    'synthetic_adaptive_ridge.png');
+    'synthetic_Adaptive_eCOCO_ridge.png');
 delete(ridgeToRegenerate);
 verifyFalse(testCase,isfile(ridgeToRegenerate));
 
 second = runEcocoTwoMethodExperiment(outputRoot, ...
     'DatasetPlan',plan,'NSim',2,'MaxWindows',20, ...
+    'MethodIDs',{'adaptive','crossfit'}, ...
     'ExportFigures',true,'Visible','off','ContinueOnError',false);
 verifyEqual(testCase,second.status,'complete');
+verifyEqual(testCase,sort(string(second.options.MethodIDs(:))), ...
+    sort(["Adaptive eCOCO";"Blocked eCOCO"]));
+verifyNoLegacyPublicNames(testCase,second,'resumed run manifest');
 verifyTrue(testCase,isfile(ridgeToRegenerate));
 caseManifest = jsondecode(fileread( ...
     fullfile(caseDirectory,'case_manifest.json')));
 verifyTrue(testCase,all([caseManifest.methods.reused]));
+verifyNoLegacyTextFiles(testCase,outputRoot);
+end
+
+function verifyNoLegacyTextFiles(testCase,root)
+files = dir(fullfile(root,'**','*'));
+for ii = 1:numel(files)
+    if files(ii).isdir
+        continue
+    end
+    [~,~,extension] = fileparts(files(ii).name);
+    if ~ismember(lower(extension),{'.csv','.json','.log','.txt'})
+        continue
+    end
+    pathValue = fullfile(files(ii).folder,files(ii).name);
+    verifyNoLegacyPublicNames(testCase,fileread(pathValue),pathValue);
+end
+end
+
+function verifyNoLegacyPublicNames(testCase,value,context)
+pattern = [ ...
+    '(?i)(cvcoco9[a-z]*|adaptive9[a-z]*|interleavedcvcoco|', ...
+    'cross[- ]?fit(?:ted)?|method[- ]b|', ...
+    'ecoco(?:adaptive|crossfit|interleaved)core)'];
+texts = collectText(value);
+for ii = 1:numel(texts)
+    match = regexp(texts{ii},pattern,'match','once');
+    verifyEmpty(testCase,match,sprintf( ...
+        'Legacy public name "%s" found in %s.',match,context));
+end
+end
+
+function texts = collectText(value)
+texts = {};
+if ischar(value)
+    texts = {value};
+elseif isstring(value)
+    texts = cellstr(value(:))';
+elseif iscell(value)
+    for ii = 1:numel(value)
+        childTexts = collectText(value{ii});
+        texts = [texts,childTexts(:)']; %#ok<AGROW>
+    end
+elseif isstruct(value)
+    names = fieldnames(value);
+    texts = [texts,names(:)'];
+    for elementIndex = 1:numel(value)
+        for fieldIndex = 1:numel(names)
+            childTexts = collectText( ...
+                value(elementIndex).(names{fieldIndex}));
+            texts = [texts,childTexts(:)']; %#ok<AGROW>
+        end
+    end
+end
 end
 
 function removeTree(pathValue)

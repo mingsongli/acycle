@@ -76,9 +76,9 @@ out_norbit = mapSized(out_norbit,nRate,nWindow);
 methodName = lower(string(detailField(ecoDetails,'method','')));
 isInterleaved = contains(methodName,'interleav') || ...
     isfield(ecoDetails,'oddToEven') || isfield(ecoDetails,'evenToOdd');
-isCrossfit = ~isInterleaved && (contains(methodName,'cross') || ...
+isBlocked = ~isInterleaved && (contains(methodName,'blocked') || ...
     (isfield(ecoDetails,'forward') && isfield(ecoDetails,'backward')));
-isDirectional = isInterleaved || isCrossfit;
+isDirectional = isInterleaved || isBlocked;
 isAdaptive = contains(methodName,'adaptive') || ...
     isfield(ecoDetails,'pLocal');
 ridgeScoreRaw = [];
@@ -487,11 +487,11 @@ colormap(ax,'parula');
 color = colorbar(ax,'southoutside');
 switch panel.kind
     case 'p'
-        clim(ax,[0 pLogMaximum]);
+        set(ax,'CLim',[0 pLogMaximum]);
         configurePColorbar(color,pLogMaximum,panel.colorLabel, ...
             panel.significanceThreshold);
     case 'rho'
-        clim(ax,rhoLimits);
+        set(ax,'CLim',rhoLimits);
         color.Label.String = '\rho';
     case 'orbit'
         finiteOrbit = raw(isfinite(raw));
@@ -500,17 +500,17 @@ switch panel.kind
         else
             orbitMaximum = max(1,ceil(max(finiteOrbit)));
         end
-        clim(ax,[0 orbitMaximum]);
+        set(ax,'CLim',[0 orbitMaximum]);
         color.Ticks = 0:orbitMaximum;
         % ColorBar exposes label rotation through its numeric ruler rather
         % than as a direct public property in supported MATLAB releases.
         color.Ruler.TickLabelRotation = 0;
         color.Label.String = 'Number of periods';
     case 'score-normalized'
-        clim(ax,[0 1]);
+        set(ax,'CLim',[0 1]);
         color.Label.String = panel.colorLabel;
     otherwise
-        clim(ax,finiteLimits(finiteData,[0 1]));
+        set(ax,'CLim',finiteLimits(finiteData,[0 1]));
         color.Label.String = 'Score';
 end
 

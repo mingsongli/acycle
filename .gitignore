@@ -1,6 +1,8 @@
 .DS_Store
+~$*.xlsx
 __pycache__/
 *.py[cod]
+*.egg-info/
 .idea
 code/test/*
 !code/test/test_coco_publication_preflight.m
@@ -9,6 +11,7 @@ code/test/*
 !code/test/test_ecoco_progress_callbacks.m
 !code/test/test_ecocoplot_adaptive_graphics.m
 !code/test/test_ecoco_crossfit_core.m
+!code/test/test_run_coco_eight_method_experiment.m
 !code/test/test_run_ecoco_two_method_experiment.m
 !code/test/test_interleaved_cvcoco.m
 !code/test/test_ecoco_interleaved_core.m

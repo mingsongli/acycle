@@ -48,10 +48,10 @@ anchorStep = round(0.5*(nWindow-1));
 
 verifyEqual(testCase,r.name,'Blocked eCOCO');
 verifyEqual(testCase,r.publicName,'Blocked eCOCO');
-verifyEqual(testCase,r.abbreviation,'B-eCOCO');
+verifyEqual(testCase,r.abbreviation,'Blocked eCOCO');
 verifyEqual(testCase,r.version,3);
 verifyEqual(testCase,r.algorithmVersion, ...
-    'Crossfit-eCOCO9B-full-grid-partial-group-v4');
+    'Blocked eCOCO — full-grid partial-group v4');
 verifyEqual(testCase,r.metadata.windowPointCount,nWindow);
 verifyEqual(testCase,r.metadata.windowActualSpan, ...
     testCase.TestData.window,'AbsTol',1e-13);
@@ -111,6 +111,37 @@ for direction = {'forward','backward','consensus','strictConsensus'}
     verifyTrue(testCase,isfield(r.(direction{1}),'score'));
 end
 verifyTrue(testCase,isfield(r,'anchor'));
+end
+
+function testWrapperStrictConsensusMasksOneDirectionEdgesAndPreservesRng(testCase)
+t = testCase.TestData;
+arguments = {t.data,[],t.orbit9,t.window,t.dt,t.step,0,0,t.pad, ...
+    t.srGrid(1),t.srGrid(end),diff(t.srGrid(1:2)),0,0,1,0, ...
+    'Pearson',1/(2*t.dt),0,'crossfit',t.maxFrequency,t.seed,0.5, ...
+    'Verbose',false};
+rng(97531,'twister');
+beforeRng = rng;
+[~,~,supportedRho,~,~,~,~,~,~,supported] = ecoco(arguments{:});
+verifyEqual(testCase,rng,beforeRng);
+[~,~,strictRho,~,~,~,strictScore,~,strictRidge,strict] = ...
+    ecoco(arguments{:},'BlockedConsensusPolicy','strict');
+verifyEqual(testCase,rng,beforeRng);
+
+oneDirection = xor(strict.windows.hasForward,strict.windows.hasBackward);
+bothDirections = strict.windows.hasForward & strict.windows.hasBackward;
+verifyTrue(testCase,any(oneDirection));
+verifyTrue(testCase,any(bothDirections));
+verifyEqual(testCase,supported.blockedConsensusPolicy,'supported');
+verifyEqual(testCase,supportedRho,supported.consensus.rho,'AbsTol',0);
+verifyEqual(testCase,strict.blockedConsensusPolicy,'strict');
+verifyEqual(testCase,strict.rootConsensus, ...
+    'strict bidirectional consensus; no one-sided fallback');
+verifyTrue(testCase,all(isnan(strictRho(:,oneDirection)),'all'));
+verifyTrue(testCase,all(isnan(strictScore(:,oneDirection)),'all'));
+verifyEqual(testCase,strictRho(:,bothDirections), ...
+    strict.strictConsensus.rho(:,bothDirections),'AbsTol',0);
+verifyEqual(testCase,strictRidge(:,1),strict.depth(:),'AbsTol',0);
+verifyTrue(testCase,all(isnan(strictRidge(oneDirection,2:8)),'all'));
 end
 
 function testAge566PeriodsDoNotStopBlockedEcoco(testCase)
@@ -270,7 +301,7 @@ r = ecocoCrossfitCore(t.data,t.orbit9,t.window,t.dt,t.step,0, ...
 verifyTrue(testCase,r.degradedMode);
 verifyEqual(testCase,r.status,'complete-with-warning');
 verifyEqual(testCase,r.warningIdentifier, ...
-    'ecocoCrossfitCore:PartialOrbitTraining');
+    'Acycle:BlockedECOCO:PartialOrbitTraining');
 verifyFalse(testCase,any(r.geometry.strictTrainingRateMask));
 verifyTrue(testCase,all(r.geometry.trainingRateMask));
 verifyTrue(testCase,all(r.geometry.partialOnlyTrainingRateMask));

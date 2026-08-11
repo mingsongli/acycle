@@ -65,8 +65,9 @@ function result = cvcoco(data,orbit9,pad,sr1,sr2,srstep,red,nsim,method,varargin
 %                target model and 0.5 only for explicit 'legacy'
 %                compatibility. An
 %                explicit value must include every nominal orbit frequency.
-%   AnalysisName- optional public-facing name used in progress text and the
-%                 result structure (default 'Blocked cvCOCO').
+%   AnalysisName- retained compatibility option. Progress and result
+%                 metadata always use Blocked cvCOCO or Interleaved
+%                 cvCOCO, according to the selected split design.
 %   SplitMode   - 'midpoint' (default) or 'interleaved'. Interleaved mode
 %                 splits before interpolation and uses one full raw-order
 %                 AR(1) realization per Monte Carlo draw before applying
@@ -122,18 +123,8 @@ isFourGroupTraining = usesFourGroupTraining(options.TargetModel);
 isRayleighPeakTraining = usesRayleighPeakTraining(options.TargetModel);
 isCoherentNine = usesCoherentNineTarget(options.TargetModel);
 analysisName = 'Blocked cvCOCO';
-if strcmp(options.TargetModel,'four-group-coherent-nine')
-    analysisName = 'cvCOCO9B';
-elseif isRayleighPeakTraining
-    analysisName = 'cvCOCO9A';
-elseif strcmp(options.TargetModel,'legacy')
-    analysisName = 'legacy cvCOCO';
-end
 if isInterleaved
     analysisName = 'Interleaved cvCOCO';
-end
-if strlength(string(options.AnalysisName)) > 0
-    analysisName = char(options.AnalysisName);
 end
 if isInterleaved
     foldModelDescription = 'one constant rate within each odd/even fold';
@@ -347,7 +338,13 @@ if ~any(strictTrainingRateMaskA) || ~any(strictTrainingRateMaskB)
             geomB.trainingRateMask = geomB.partialTrainingRateMask;
             trainingCompletenessB = 'partial-orbit';
         end
-        trainingWarningIdentifier = 'cvcoco:PartialOrbitTraining';
+        if isInterleaved
+            trainingWarningIdentifier = ...
+                'Acycle:InterleavedCVCOCO:PartialOrbitTraining';
+        else
+            trainingWarningIdentifier = ...
+                'Acycle:BlockedCVCOCO:PartialOrbitTraining';
+        end
         trainingWarningMessage = sprintf([ ...
             '%s has no tested rate that supports complete all-nine ', ...
             'training in at least one held-out unit. Continuing with an ', ...
@@ -752,13 +749,7 @@ end
 result = struct;
 result.name = analysisName;
 result.publicName = analysisName;
-if strcmp(analysisName,'Blocked cvCOCO')
-    result.abbreviation = 'B-cvCOCO';
-elseif strcmp(analysisName,'Interleaved cvCOCO')
-    result.abbreviation = 'I-cvCOCO';
-else
-    result.abbreviation = '';
-end
+result.abbreviation = analysisName;
 result.supported = true;
 result.degradedMode = degradedMode;
 if degradedMode
@@ -1025,7 +1016,7 @@ elseif isRayleighPeakTraining
         'or minus one Rayleigh, calibrated by the corresponding unit-', ...
         'amplitude sine maximum in the same band; each orbit is evaluated ', ...
         'independently, so an overlapping bin may contribute to more than ', ...
-        'one orbit, matching the legacy cvCOCO peak rule'];
+        'one orbit, matching the compatibility peak-selection rule'];
     result.config.targetConstruction = [ ...
         'nine separately estimated zero-phase orbital sinusoids summed ', ...
         'coherently before power'];
@@ -1975,7 +1966,8 @@ function active = activeOrbitWeights(geom,weights)
 if usesRayleighPeakTraining(geom.targetModel)
     if numel(weights) ~= 9
         error('cvcoco:InternalWeightSize', ...
-            'Method A participation requires nine frozen orbital weights.');
+            ['The per-orbit target design requires nine frozen orbital ', ...
+             'weights.']);
     end
     active = weights(:) > activeGroupWeightTolerance();
 else
@@ -2294,9 +2286,9 @@ end
 
 function method = targetAmplitudeMethod(targetModel)
 if usesRayleighPeakTraining(targetModel)
-    method = 'A: separately calibrated per-orbit Rayleigh-band maxima';
+    method = 'separately calibrated per-orbit Rayleigh-band maxima';
 elseif strcmp(targetModel,'four-group-coherent-nine')
-    method = 'B: leakage-corrected four-group union-band energies';
+    method = 'leakage-corrected four-group union-band energies';
 elseif strcmp(targetModel,'four-group')
     method = 'four-group leakage-corrected union-band energies';
 else

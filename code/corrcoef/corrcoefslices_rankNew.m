@@ -10,18 +10,11 @@ function [corrCI,corr_h0,corry,details] = corrcoefslices_rankNew(dat,orbit9,dt,p
 %   red: 0 none; 1 classical AR(1); 2 robust AR(1); 3 SWA removal
 %   nsim: number of stationary-AR(1) Monte Carlo realizations
 %   plotn: 1 = plot results. else = no plot
-%   targetMode: 'adaptive' estimates target amplitudes from each data
-%               spectrum and adds phase-averaged powers; 'adaptive9a'
-%               estimates one amplitude per orbital Rayleigh-band peak;
-%               'adaptive9b' fits four group amplitudes from Rayleigh-band
-%               union areas with finite-record leakage correction. Both
-%               9A/9B coherently sum nine zero-phase sine terms before
-%               calculating power. 'adaptive9' remains a compatibility
-%               alias for 'adaptive9a';
-%               'fixed' retains the compatibility fixed-target engine;
-%               'fixed9' uses the same fixed 1.0/0.8/0.6 amplitudes for
-%               eccentricity/obliquity/precession but coherently sums all
-%               nine zero-phase sine terms on the native spectral grid
+%   targetMode: selects Adaptive COCO or Fixed-target COCO. Adaptive COCO
+%               estimates target amplitudes from the data spectrum;
+%               Fixed-target COCO uses preset eccentricity, obliquity,
+%               and precession weights. Supported Acycle interfaces choose
+%               the audited target construction for each published method.
 % Optional name-value inputs after TARGETMODE:
 %   MaxFrequency     maximum temporal frequency used in correlations,
 %                    cycles/kyr (adaptive default is 1.2 times the
@@ -63,9 +56,8 @@ end
 targetMode = lower(strtrim(char(targetMode)));
 if ~any(strcmp(targetMode, ...
         {'adaptive','adaptive9','adaptive9a','adaptive9b','fixed','fixed9'}))
-    error(['COCO target mode must be ''adaptive'', ''adaptive9a'', ', ...
-        '''adaptive9b'', ''adaptive9'' (9A alias), ''fixed'', or ', ...
-        '''fixed9''.']);
+    error(['Select either Adaptive COCO or Fixed-target COCO through ', ...
+        'a supported Acycle interface.']);
 end
 optionParser = inputParser;
 optionParser.FunctionName = mfilename;
@@ -98,7 +90,7 @@ validateattributes(dt,{'numeric'}, ...
     {'scalar','real','finite','positive'},mfilename,'dt',3);
 requestedSamplingInterval = dt;
 [dat,inputPreprocessing] = cocoPrepareRegularData( ...
-    dat,sprintf('%s full-record COCO input',targetMode), ...
+    dat,sprintf('%s input',cocoTargetDisplayName(targetMode)), ...
     'MaximumPoints',1e6,'MinimumPoints',4,'Verbose',true);
 dt = inputPreprocessing.outputSpacing;
 if abs(requestedSamplingInterval-dt) > ...
@@ -130,7 +122,7 @@ details.slices = slices;
 details.pad = pad;
 details.red = red;
 details.method = method;
-details.targetMode = targetMode;
+details.targetMode = cocoTargetDisplayName(targetMode);
 details.inputPreprocessing = inputPreprocessing;
 details.requestedSamplingInterval = requestedSamplingInterval;
 details.samplingInterval = dt;
@@ -201,16 +193,17 @@ end
 display = double(showProgress);  % show simulation steps
 if showProgress
     if strcmp(targetMode,'fixed')
-        disp('>> COCO target mode: fixed target (amplitudes 1.0 / 0.8 / 0.6 for eccentricity / obliquity / precession)')
+        disp(['>> Fixed-target COCO: amplitudes 1.0 / 0.8 / 0.6 ', ...
+            'for eccentricity / obliquity / precession'])
     elseif strcmp(targetMode,'fixed9')
-        disp(['>> COCO target mode: Fixed COCO9 coherent nine-term ', ...
+        disp(['>> Fixed-target COCO: coherent nine-term ', ...
             'target (fixed 1.0 / 0.8 / 0.6 amplitudes)'])
     else
         if strcmp(targetMode,'adaptive9b')
-            disp(['>> COCO target mode: Adaptive COCO9B coherent ', ...
+            disp(['>> Adaptive COCO: coherent ', ...
                 'nine-term target (four-group area/leakage amplitudes)'])
         elseif any(strcmp(targetMode,{'adaptive9','adaptive9a'}))
-            disp(['>> COCO target mode: Adaptive COCO9A coherent ', ...
+            disp(['>> Adaptive COCO: coherent ', ...
                 'nine-term target (per-orbit peak amplitudes)'])
         else
             disp(['>> COCO target mode: adaptive phase-averaged noncoherent ', ...
@@ -1263,7 +1256,7 @@ end
 title(ax, sprintf([ ...
     'Maximum-correlation / minimum-global-p spectrum at %.4g cm/kyr ', ...
     '(%s target)'], ...
-    bestSr,targetMode));
+    bestSr,cocoTargetDisplayName(targetMode)));
 legend(ax, {'Data spectrum', 'Target spectrum'}, 'Location', 'best', ...
     'NumColumns',1,'Orientation','vertical');
 set(ax, 'XMinorTick', 'on', 'YMinorTick', 'on');
@@ -1672,12 +1665,8 @@ end
 end
 
 function name = cocoTargetDisplayName(targetMode)
-if strcmp(targetMode,'adaptive9b')
-    name = 'Adaptive COCO9B';
-elseif any(strcmp(targetMode,{'adaptive9','adaptive9a'}))
-    name = 'Adaptive COCO9A';
-elseif strcmp(targetMode,'fixed9')
-    name = 'Fixed COCO9';
+if isFixedTargetMode(targetMode)
+    name = 'Fixed-target COCO';
 else
     name = 'Adaptive COCO';
 end

@@ -40,8 +40,8 @@ r = runInterleaved(testCase,testCase.TestData.data,0,2, ...
 
 verifyEqual(testCase,r.name,'Interleaved cvCOCO');
 verifyEqual(testCase,r.publicName,'Interleaved cvCOCO');
-verifyEqual(testCase,r.abbreviation,'I-cvCOCO');
-verifyEqual(testCase,r.canonicalEntryPoint,'interleavedcvcoco');
+verifyEqual(testCase,r.abbreviation,'Interleaved cvCOCO');
+verifyEqual(testCase,r.canonicalEntryPoint,'Interleaved cvCOCO');
 verifyEqual(testCase,r.targetModel,'four-group-coherent-nine');
 verifyEqual(testCase,r.splitMode,'interleaved');
 verifyTrue(testCase,isnan(r.splitDepth));
@@ -62,10 +62,10 @@ verifyTrue(testCase,contains(splitRule,'row') || ...
 args = interleavedArguments(testCase,testCase.TestData.data,0);
 verifyError(testCase,@()interleavedcvcoco( ...
     args{:},'TargetModel','four-group'), ...
-    'interleavedcvcoco:TargetModelFixed');
+    'Acycle:InterleavedCVCOCO:TargetDesignFixed');
 verifyError(testCase,@()interleavedcvcoco( ...
     args{:},'SplitMode','midpoint'), ...
-    'interleavedcvcoco:SplitModeFixed');
+    'Acycle:InterleavedCVCOCO:SplitDesignFixed');
 end
 
 function testOddEvenIndicesAndInterpolationAreFoldLocal(testCase)

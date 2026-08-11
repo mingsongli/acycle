@@ -1,25 +1,25 @@
 function result = cvcoco9(data,orbit9,pad,sr1,sr2,srstep,red,nsim, ...
         method,varargin)
-%CVCOCO9 Compatibility alias for method-B CVCOCO9B.
+%CVCOCO9 Internal compatibility alias for Blocked cvCOCO.
 %
-% Existing scripts that call CVCOCO9 retain the original four-group,
-% leakage-corrected amplitude estimator. New comparisons should call
-% CVCOCO9A or CVCOCO9B explicitly.
+% Existing scripts that call this entry point retain the four-group,
+% leakage-corrected amplitude estimator. New analyses should select
+% Blocked cvCOCO through a supported Acycle interface.
 
 for optionIndex = 1:2:numel(varargin)
     optionName = varargin{optionIndex};
     if (ischar(optionName) || ...
             (isstring(optionName) && isscalar(optionName))) && ...
             strcmpi(char(optionName),'TargetModel')
-        error('cvcoco9:TargetModelFixed', ...
-            ['cvcoco9 is a compatibility alias for cvcoco9B and fixes ', ...
-             'TargetModel to ''four-group-coherent-nine''; omit this option.']);
+        error('Acycle:BlockedCVCOCO:TargetDesignFixed', ...
+            ['Blocked cvCOCO fixes its target design internally; ', ...
+             'omit the TargetModel option.']);
     end
 end
 
 result = cvcoco9B(data,orbit9,pad,sr1,sr2,srstep,red,nsim,method, ...
     varargin{:});
-result.entryPoint = 'cvcoco9 compatibility alias for cvcoco9B';
-result.canonicalEntryPoint = 'cvcoco9B';
+result.entryPoint = 'Blocked cvCOCO';
+result.canonicalEntryPoint = 'Blocked cvCOCO';
 result.compatibilityAlias = true;
 end

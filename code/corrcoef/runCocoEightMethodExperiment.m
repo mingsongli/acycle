@@ -1,10 +1,10 @@
 function runSummary = runCocoEightMethodExperiment(outputRoot,varargin)
-%RUNCOCOEIGHTMETHODEXPERIMENT Run the registered 9-data x 8-method suite.
+%RUNCOCOEIGHTMETHODEXPERIMENT Run the registered target-design comparison.
 %
-% RUNSUMMARY = RUNCOCOEIGHTMETHODEXPERIMENT(OUTPUTROOT) runs, in order,
-% cvCOCO9A, cvCOCO9B, cvCOCO, cvCOCO Legacy, Adaptive COCO9A,
-% Adaptive COCO9B, Adaptive COCO, and Fixed COCO9 on the nine registered
-% records. Every method has an input/settings signature and an atomic MAT
+% RUNSUMMARY = RUNCOCOEIGHTMETHODEXPERIMENT(OUTPUTROOT) runs eight retained
+% target designs under their published Blocked cvCOCO, Adaptive COCO, and
+% Fixed-target COCO method names on the nine registered records. Every
+% analysis has an input/settings signature and an atomic MAT
 % checkpoint, so an interrupted run can be resumed without repeating
 % completed, signature-matched work. Numerical curves are saved as MAT and
 % CSV, compact results as JSON, and every standard result figure as PNG.
@@ -19,7 +19,7 @@ function runSummary = runCocoEightMethodExperiment(outputRoot,varargin)
 %   Method          Pearson or Spearman (default Pearson)
 %   BatchSize       cvCOCO Monte Carlo batch size (default 100)
 %   DatasetIDs      optional subset of registered data ids
-%   MethodIDs       optional subset of method ids; see METHODPLAN below
+%   MethodIDs       optional subset of neutral target-design selectors
 %   Resume          reuse complete signature-matched results (default true)
 %   ExportFigures   save standard PNG figures (default true)
 %   DatasetPlan     optional caller-supplied plan structure (testing only)
@@ -76,7 +76,9 @@ else
     datasets = normalizeDatasetPlan(options.DatasetPlan,options.InputRoot);
 end
 datasets = selectItems(datasets,options.DatasetIDs,'dataset');
-methods = selectItems(methodPlan(),options.MethodIDs,'method');
+methods = selectMethodItems(methodPlan(),options.MethodIDs);
+options.MethodIDs = string({methods.id});
+options.TargetDesigns = string({methods.targetDesign});
 if isempty(datasets) || isempty(methods)
     error('runCocoEightMethodExperiment:EmptyPlan', ...
         'At least one dataset and one method must remain selected.');
@@ -94,7 +96,7 @@ manifestPath = fullfile(outputRoot,'manifest.json');
 summaryPath = fullfile(outputRoot,'overall_summary.csv');
 manifest = struct( ...
     'schema_version',1, ...
-    'report_title','COCO 八方法 × 九数据大型对比分析报告', ...
+    'report_title','COCO 八种目标设计 × 九数据大型对比分析报告', ...
     'created_at',timestampNow(), ...
     'updated_at',timestampNow(), ...
     'status','running', ...
@@ -111,7 +113,7 @@ fatalException = [];
 for caseIndex = 1:numel(datasets)
     spec = datasets(caseIndex);
     fprintf('\n============================================================\n');
-    fprintf('COCO eight-method case %d/%d: %s\n', ...
+    fprintf('COCO target-design comparison case %d/%d: %s\n', ...
         caseIndex,numel(datasets),spec.title);
     fprintf('============================================================\n');
     try
@@ -248,10 +250,11 @@ conclusions = strings(numel(methods),1);
 for methodIndex = 1:numel(methods)
     task = methods(methodIndex);
     fprintf('\n[%d/%d] %s\n',methodIndex,numel(methods),task.title);
-    methodDirectory = fullfile(caseDirectory,task.id);
+    methodDirectory = fullfile(caseDirectory,task.fileStem);
     ensureDirectory(methodDirectory);
     signatureValue = baseSignature;
     signatureValue.method_id = task.id;
+    signatureValue.target_design = task.targetDesign;
     signatureValue.engine_sha256 = engineFingerprint(task);
     signature = jsonencode(signatureValue);
     try
@@ -341,7 +344,9 @@ try
     if strcmp(task.family,'cv')
         cv = runCvEngine(task,cvData,orbit9,pad,spec,maxFrequency,options);
         [row,report] = summarizeCv(spec,task,cv,options);
-        analysis = struct('family','cv','result',cv,'report',report);
+        analysis = struct('method',task.title, ...
+            'targetDesign',task.targetDesign,'family','cv', ...
+            'result',cv,'report',report);
     else
         [corrCI,corrH0,corry,details] = corrcoefslices_rankNew( ...
             adaptiveData,orbit9,dt,pad,spec.sr1,spec.sr2,spec.srstep, ...
@@ -351,7 +356,9 @@ try
             'ShowPeriodograms',false);
         [row,report] = summarizeFullRecord( ...
             spec,task,corrCI,corrH0,details,options);
-        analysis = struct('family','full-record','corrCI',corrCI, ...
+        analysis = struct('method',task.title, ...
+            'targetDesign',task.targetDesign,'family','full-record', ...
+            'corrCI',corrCI, ...
             'corrH0',corrH0,'corry',corry,'details',details, ...
             'report',report,'data',adaptiveData,'orbit9',orbit9);
     end
@@ -383,7 +390,7 @@ end
 function cv = runCvEngine(task,data,orbit9,pad,spec,maxFrequency,options)
 common = {'BatchSize',options.BatchSize,'Seed',options.Seed, ...
     'MaxFrequency',maxFrequency,'ProgressFcn',[],'AnalysisName',task.title};
-switch task.id
+switch task.dispatch
     case 'cv9a'
         cv = cvcoco9A(data,orbit9,pad,spec.sr1,spec.sr2,spec.srstep, ...
             options.Red,options.NSim,options.Method,common{:});
@@ -399,7 +406,7 @@ switch task.id
             options.Red,options.NSim,options.Method,common{:});
     otherwise
         error('runCocoEightMethodExperiment:UnknownCVMethod', ...
-            'Unknown cv method id %s.',task.id);
+            'Unknown Blocked cvCOCO target design %s.',task.targetDesign);
 end
 end
 
@@ -415,10 +422,12 @@ if strcmp(spec.category,'noise')
     targetHit = ~significant;
 end
 conclusion = sprintf([ ...
-    '%s: A->B best rate %.6g cm/kyr; B->A best rate %.6g cm/kyr; ', ...
+    '%s (%s): A->B best rate %.6g cm/kyr; ', ...
+    'B->A best rate %.6g cm/kyr; ', ...
     'p_robust=max(p_A,p_B)=%.6g; significant(p<0.05)=%s; ', ...
-    'pre-registered target criterion=%s.'],task.title,rateAtoB, ...
-    rateBtoA,pGlobal,yesNo(significant),yesNo(targetHit));
+    'pre-registered target criterion=%s.'], ...
+    task.title,task.targetDesign,rateAtoB,rateBtoA,pGlobal, ...
+    yesNo(significant),yesNo(targetHit));
 row = baseSummaryRow(spec,task,options);
 row.best_rate = bestRate;
 row.best_rate_a_to_b = rateAtoB;
@@ -453,10 +462,11 @@ if strcmp(spec.category,'noise')
     targetHit = ~significant;
 end
 conclusion = sprintf([ ...
-    '%s: best rate %.6g cm/kyr; maximum correlation %.6g; ', ...
+    '%s (%s): best rate %.6g cm/kyr; maximum correlation %.6g; ', ...
     'full-search global p=%.6g; significant(p<0.05)=%s; ', ...
-    'pre-registered target criterion=%s.'],task.title,bestRate, ...
-    bestCorrelation,pGlobal,yesNo(significant),yesNo(targetHit));
+    'pre-registered target criterion=%s.'], ...
+    task.title,task.targetDesign,bestRate,bestCorrelation,pGlobal, ...
+    yesNo(significant),yesNo(targetHit));
 row = baseSummaryRow(spec,task,options);
 row.best_rate = bestRate;
 row.p_global = pGlobal;
@@ -499,11 +509,11 @@ if numel(figures) ~= numel(figureKinds)
 end
 entries = repmat(emptyFigureEntry(),numel(figures),1);
 for ii = 1:numel(figures)
-    figureNumber = sprintf('%s_%02d',task.id,ii);
+    figureNumber = sprintf('%s_%02d',task.fileStem,ii);
     stem = sprintf('%s_%s',figureNumber,sanitizeFilename(figureKinds{ii}));
     path = fullfile(figureDirectory,[stem,'.png']);
-    titleText = sprintf('%s — %s — %s', ...
-        spec.title,task.title,figureKinds{ii});
+    titleText = sprintf('%s — %s — %s — %s', ...
+        spec.title,task.title,task.targetDesign,figureKinds{ii});
     caption = sprintf('%s. %s (%s; red=%d; N_{MC}=%d; seed=%d).', ...
         titleText,captionDetails{ii},options.Method,options.Red, ...
         options.NSim,options.Seed);
@@ -517,6 +527,7 @@ for ii = 1:numel(figures)
     entries(ii).caption = caption;
     entries(ii).title = titleText;
     entries(ii).method = task.title;
+    entries(ii).target_design = task.targetDesign;
     if options.CloseFigures && isgraphics(fig)
         close(fig);
     end
@@ -592,21 +603,46 @@ end
 
 function methods = methodPlan()
 items = {
-    'cv9a','cvCOCO9A','cv','';
-    'cv9b','cvCOCO9B','cv','';
-    'cv','Blocked cvCOCO','cv','';
-    'cvlegacy','cvCOCO Legacy','cv','';
-    'adaptive9a','Adaptive COCO9A','full-record','adaptive9a';
-    'adaptive9b','Adaptive COCO9B','full-record','adaptive9b';
-    'adaptive','Adaptive COCO','full-record','adaptive';
-    'fixed9','Fixed COCO9','full-record','fixed9'};
-methods = repmat(struct('id','','title','','family','','targetMode',''), ...
-    size(items,1),1);
+    'blocked_rayleigh_peak','Blocked cvCOCO', ...
+        'per-orbit Rayleigh-peak coherent target', ...
+        'Blocked_cvCOCO_Rayleigh_peak_target','cv','cv9a','';
+    'blocked_four_group_coherent','Blocked cvCOCO', ...
+        'four-group area coherent target', ...
+        'Blocked_cvCOCO_four_group_coherent_target','cv','cv9b','';
+    'blocked_phase_averaged','Blocked cvCOCO', ...
+        'phase-averaged four-group target', ...
+        'Blocked_cvCOCO_phase_averaged_target','cv','cv','';
+    'blocked_compatibility_target','Blocked cvCOCO', ...
+        'compatibility coherent target', ...
+        'Blocked_cvCOCO_compatibility_target','cv','cvlegacy','';
+    'adaptive_per_orbit_peak','Adaptive COCO', ...
+        'per-orbit Rayleigh-peak coherent target', ...
+        'Adaptive_COCO_per_orbit_peak_target', ...
+        'full-record','adaptive9a','adaptive9a';
+    'adaptive_four_group_area','Adaptive COCO', ...
+        'four-group area coherent target', ...
+        'Adaptive_COCO_four_group_area_target', ...
+        'full-record','adaptive9b','adaptive9b';
+    'adaptive_phase_averaged','Adaptive COCO', ...
+        'phase-averaged adaptive target', ...
+        'Adaptive_COCO_phase_averaged_target', ...
+        'full-record','adaptive','adaptive';
+    'fixed_target_preset_weights','Fixed-target COCO', ...
+        'preset-weight coherent target', ...
+        'Fixed_target_COCO_preset_weight_target', ...
+        'full-record','fixed9','fixed9'};
+methods = repmat(struct('selector','','id','','title','', ...
+    'targetDesign','','fileStem','','family','','dispatch','', ...
+    'targetMode',''),size(items,1),1);
 for ii = 1:size(items,1)
-    methods(ii).id = items{ii,1};
+    methods(ii).selector = items{ii,1};
     methods(ii).title = items{ii,2};
-    methods(ii).family = items{ii,3};
-    methods(ii).targetMode = items{ii,4};
+    methods(ii).id = items{ii,2};
+    methods(ii).targetDesign = items{ii,3};
+    methods(ii).fileStem = items{ii,4};
+    methods(ii).family = items{ii,5};
+    methods(ii).dispatch = items{ii,6};
+    methods(ii).targetMode = items{ii,7};
 end
 end
 
@@ -652,6 +688,41 @@ end
 selected = items(ismember(ids,requested));
 end
 
+function selected = selectMethodItems(items,requested)
+if ischar(requested)
+    requested = string({requested});
+else
+    requested = string(requested(:));
+end
+requested = requested(strlength(requested) > 0);
+if isempty(requested)
+    selected = items;
+    return
+end
+% Saved commands may still use earlier internal selectors. They are
+% normalized here and never written to manifests or numerical results.
+compatibility = {
+    'cv9a','blocked_rayleigh_peak';
+    'cv9b','blocked_four_group_coherent';
+    'cv','blocked_phase_averaged';
+    'cvlegacy','blocked_compatibility_target';
+    'adaptive9a','adaptive_per_orbit_peak';
+    'adaptive9b','adaptive_four_group_area';
+    'adaptive','adaptive_phase_averaged';
+    'fixed9','fixed_target_preset_weights'};
+for aliasIndex = 1:size(compatibility,1)
+    requested(strcmpi(requested,compatibility{aliasIndex,1})) = ...
+        string(compatibility{aliasIndex,2});
+end
+selectors = string({items.selector});
+missing = setdiff(requested,selectors);
+if ~isempty(missing)
+    error('runCocoEightMethodExperiment:UnknownSelection', ...
+        'Unknown target-design selector(s): %s.',strjoin(missing,', '));
+end
+selected = items(ismember(selectors,requested));
+end
+
 function row = baseSummaryRow(spec,task,options)
 row = emptySummaryRow();
 row.dataset_id = spec.id;
@@ -660,6 +731,7 @@ row.category = spec.category;
 row.expected_rate = spec.expected_rate;
 row.method = task.title;
 row.method_id = task.id;
+row.target_design = task.targetDesign;
 row.status = 'complete';
 row.nsim = options.NSim;
 row.seed = options.Seed;
@@ -674,14 +746,17 @@ row.category = spec.category;
 row.expected_rate = spec.expected_rate;
 row.method = task.title;
 row.method_id = task.id;
+row.target_design = task.targetDesign;
 row.status = 'failed';
 row.conclusion = sprintf('FAILED: %s (%s)', ...
-    exception.message,exception.identifier);
+    publicFailureText(exception.message), ...
+    publicFailureText(exception.identifier));
 end
 
 function row = emptySummaryRow()
 row = struct('dataset_id','','dataset_title','','category','', ...
-    'expected_rate','','method','','method_id','','status','', ...
+    'expected_rate','','method','','method_id','','target_design','', ...
+    'status','', ...
     'best_rate',NaN,'best_rate_a_to_b',NaN,'best_rate_b_to_a',NaN, ...
     'p_global',NaN,'p_a',NaN,'p_b',NaN,'p_symmetric',NaN, ...
     'significant',false,'target_hit',false,'nsim',NaN,'seed',NaN, ...
@@ -704,7 +779,8 @@ item = struct('id','','title','','category','','expected_rate','', ...
 end
 
 function entry = emptyFigureEntry()
-entry = struct('path','','caption','','title','','method','');
+entry = struct('path','','caption','','title','','method','', ...
+    'target_design','');
 end
 
 function item = failedCaseManifest(spec,index,outputRoot,exception)
@@ -771,9 +847,15 @@ function digest = engineFingerprint(task)
 paths = {mfilename('fullpath')};
 if strcmp(task.family,'cv')
     paths{end+1} = which('cvcoco');
-    if strcmp(task.id,'cv9a'), paths{end+1} = which('cvcoco9A'); end
-    if strcmp(task.id,'cv9b'), paths{end+1} = which('cvcoco9B'); end
-    if strcmp(task.id,'cvlegacy'), paths{end+1} = which('cvcocoLegacy'); end
+    if strcmp(task.dispatch,'cv9a')
+        paths{end+1} = which('cvcoco9A');
+    end
+    if strcmp(task.dispatch,'cv9b')
+        paths{end+1} = which('cvcoco9B');
+    end
+    if strcmp(task.dispatch,'cvlegacy')
+        paths{end+1} = which('cvcocoLegacy');
+    end
 else
     paths{end+1} = which('corrcoefslices_rankNew');
     paths{end+1} = which('cocoAdaptiveEvaluate');
@@ -870,7 +952,7 @@ clear cleanup
 end
 
 function writeJsonAtomic(path,value)
-writeTextAtomic(path,jsonencode(value,'PrettyPrint',true));
+writeTextAtomic(path,jsonencode(value));
 end
 
 function writeRootManifest(path,manifest)
@@ -968,7 +1050,25 @@ if tf, value = 'YES'; else, value = 'NO'; end
 end
 
 function text = exceptionReport(exception)
-text = getReport(exception,'extended','hyperlinks','off');
+text = publicFailureText( ...
+    getReport(exception,'extended','hyperlinks','off'));
+end
+
+function text = publicFailureText(text)
+text = char(string(text));
+replacements = {
+    'ecocoAdaptiveCore','Adaptive eCOCO';
+    'ecocoCrossfitCore','Blocked eCOCO';
+    'ecocoInterleavedCore','Interleaved eCOCO';
+    'interleavedcvcoco','Interleaved cvCOCO';
+    'cvcoco9[A-Za-z]*','Blocked cvCOCO';
+    'adaptive9[A-Za-z]*','Adaptive COCO';
+    'cross[- ]?fit(?:ted)?','blocked';
+    'Method[- ]B','four-group'};
+for ii = 1:size(replacements,1)
+    text = regexprep(text,replacements{ii,1},replacements{ii,2}, ...
+        'ignorecase');
+end
 end
 
 function tf = isScalarText(x)

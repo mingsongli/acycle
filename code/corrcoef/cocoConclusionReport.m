@@ -52,9 +52,10 @@ if ~((ischar(cv.targetModel) && isrow(cv.targetModel)) || ...
 end
 targetModel = char(cv.targetModel);
 if ~strcmp(targetModel,'four-group')
-    error('cocoConclusionReport:LegacyTargetNotConfirmatory', ...
+    error('Acycle:BlockedCVCOCO:TargetNotConfirmatory', ...
         ['A confirmatory report requires targetModel=''four-group''. ', ...
-         'Legacy and coherent-nine target variants have separate ', ...
+         'Compatibility and alternative coherent-nine target designs ', ...
+         'have separate ', ...
          'analysis roles and must not be presented as the publication-', ...
          'audited confirmatory Blocked cvCOCO method.']);
 end
@@ -296,7 +297,7 @@ conclusion = [conclusion,' ',directionalPQualification];
 report = struct;
 if degradedMode
     report.mode = 'partial-orbit-exploratory';
-    report.method = 'Blocked cvCOCO (partial-orbit exploratory)';
+    report.method = 'Blocked cvCOCO';
     analysisRole = 'Partial-orbit exploratory bidirectional held-out analysis';
     messageHeading = 'Blocked cvCOCO partial-orbit exploratory report';
     directionalCriterionLabel = ...
@@ -305,7 +306,7 @@ if degradedMode
     symmetricStatus = criterionStatus(symmetricPass);
 else
     report.mode = 'confirmatory';
-    report.method = 'Blocked cvCOCO (confirmatory)';
+    report.method = 'Blocked cvCOCO';
     analysisRole = 'Confirmatory bidirectional held-out validation';
     messageHeading = 'Blocked cvCOCO confirmatory report';
     directionalCriterionLabel = 'Directional global-p robustness criterion';
@@ -547,32 +548,30 @@ end
 
 alphaGlobal = 0.05;
 alphaLocal = 0.01;
-adaptiveVariant = '';
-if isstruct(details) && isscalar(details) && isfield(details,'targetMode')
-    adaptiveVariant = lower(char(string(details.targetMode)));
-end
-isAdaptive9A = any(strcmp(adaptiveVariant,{'adaptive9a','adaptive9'}));
-isAdaptive9B = strcmp(adaptiveVariant,'adaptive9b');
 adaptiveName = 'Adaptive COCO';
 amplitudeMode = 'adaptive';
+if isstruct(details) && isscalar(details) && ...
+        isfield(details,'targetAmplitudeMode')
+    amplitudeMode = lower(char(string(details.targetAmplitudeMode)));
+end
+usesRayleighPeakTarget = strcmp(amplitudeMode,'adaptive');
+usesFourGroupAreaTarget = strcmp(amplitudeMode,'four-group-area');
 amplitudeMethod = ...
     'Per-orbit maximum PSD in each +/-1-Rayleigh band';
 targetNullRule = [ ...
     'phase-averaged noncoherent adaptive target-amplitude estimation, ', ...
     'unique nearest-orbit assignment of overlapping band bins, and the '];
-if isAdaptive9A
-    adaptiveName = 'Adaptive COCO9A';
+if usesRayleighPeakTarget
     amplitudeMethod = ...
-        'Method A: per-orbit maximum PSD in each +/-1-Rayleigh band';
+        'Per-orbit maximum PSD in each +/-1-Rayleigh band';
     targetNullRule = [ ...
         'nine per-orbit +/-1-Rayleigh peak amplitudes with unique ', ...
         'nearest-orbit assignment of overlapping band bins, coherent ', ...
         'nine-term target synthesis, and the '];
-elseif isAdaptive9B
-    adaptiveName = 'Adaptive COCO9B';
+elseif usesFourGroupAreaTarget
     amplitudeMode = 'four-group-area';
     amplitudeMethod = [ ...
-        'Method B: four group-band spectral areas de-mixed by a ', ...
+        'Four group-band spectral areas de-mixed by a ', ...
         'finite-record leakage matrix and exact nonnegative least squares'];
     targetNullRule = [ ...
         'four group-band spectral-area amplitudes, 4-by-4 finite-record ', ...
@@ -653,14 +652,8 @@ else
 end
 
 report = struct;
-if isAdaptive9A
-    report.mode = 'adaptive9a';
-elseif isAdaptive9B
-    report.mode = 'adaptive9b';
-else
-    report.mode = 'adaptive';
-end
-report.method = [adaptiveName,' (exploratory)'];
+report.mode = 'Adaptive COCO';
+report.method = adaptiveName;
 report.targetAmplitudeMode = amplitudeMode;
 report.targetAmplitudeMethod = amplitudeMethod;
 report.nullHypothesis = [ ...

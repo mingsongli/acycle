@@ -27,8 +27,9 @@ for optionIndex = 1:2:numel(varargin)
     if (ischar(optionName) || ...
             (isstring(optionName) && isscalar(optionName))) && ...
             strcmpi(char(optionName),'TargetModel')
-        error('cvcoco2:TargetModelFixed', ...
-            'cvcoco2 fixes TargetModel to ''four-group''; omit this option.');
+        error('Acycle:BlockedCVCOCO:TargetDesignFixed', ...
+            ['Blocked cvCOCO fixes its target design internally; ', ...
+             'omit the TargetModel option.']);
     end
 end
 
@@ -36,8 +37,8 @@ result = cvcoco(data,orbit9,pad,sr1,sr2,srstep,red,nsim,method, ...
     varargin{:},'TargetModel','four-group');
 result.name = 'Blocked cvCOCO';
 result.publicName = 'Blocked cvCOCO';
-result.abbreviation = 'B-cvCOCO';
-result.entryPoint = 'cvcoco2 compatibility wrapper';
+result.abbreviation = 'Blocked cvCOCO';
+result.entryPoint = 'Blocked cvCOCO';
 result.targetLabel = 'Phase-averaged four-group piecewise-constant target';
 result.validationLabel = 'Frozen phase-averaged noncoherent four-group target';
 end

@@ -286,14 +286,14 @@ for taskIndex = 1:numel(tasks)
     methodDirectory = fullfile(caseDirectory,task.folder);
     ensureDirectory(methodDirectory);
     methodSignature = caseSignatureBase;
-    methodSignature.engine = task.engine;
+    methodSignature.method = task.displayName;
     methodSignature.role = task.role;
     methodSignature.red = task.red;
     methodSignature.nsim = task.nsim;
     signature = jsonencode(methodSignature);
     emitMethodEvent({rootLog,caseLog},'START',spec.id,task.folder, ...
-        sprintf('engine=%s role=%s red=%d nsim=%d', ...
-        task.engine,task.role,task.red,task.nsim));
+        sprintf('method=%s role=%s red=%d nsim=%d', ...
+        task.displayName,task.role,task.red,task.nsim));
     try
         if strcmp(task.engine,'cvCOCO')
             [record,row,block,figures] = runCvTask( ...
@@ -429,7 +429,7 @@ catch exception
 end
 
 record = emptyMethodRecord();
-record.method = task.engine;
+record.method = task.displayName;
 record.display_name = task.displayName;
 record.role = task.role;
 record.red = task.red;
@@ -528,7 +528,7 @@ catch exception
 end
 
 record = emptyMethodRecord();
-record.method = task.engine;
+record.method = task.displayName;
 record.display_name = task.displayName;
 record.role = task.role;
 record.red = task.red;
@@ -633,7 +633,7 @@ try
     pdfHeightCm = heightCm*pdfWidthCm/widthCm;
     set(fig,'PaperPosition',[0,0,pdfWidthCm,pdfHeightCm], ...
         'PaperSize',[pdfWidthCm,pdfHeightCm]);
-    print(fig,pdfFile,'-dpdf','-vector','-r600');
+    print(fig,pdfFile,'-dpdf','-painters','-r600');
 catch
     exportgraphics(fig,pdfFile,'ContentType','vector', ...
         'BackgroundColor','white');
@@ -987,7 +987,8 @@ end
 
 function checkpoint = runningCheckpoint(signature,task)
 checkpoint = struct('signature',signature,'status','running', ...
-    'method',task.engine,'role',task.role,'red',task.red,'nsim',task.nsim, ...
+    'method',task.displayName,'role',task.role,'red',task.red, ...
+    'nsim',task.nsim, ...
     'started_at',timestampNow(),'updated_at',timestampNow(), ...
     'result_file','','workbook','','conclusion_file','', ...
     'figures',repmat(emptyFigureEntry(),0,1),'error','');
@@ -1161,7 +1162,7 @@ end
 
 function item = failedMethodRecord(task,exception)
 item = emptyMethodRecord();
-item.method = task.engine;
+item.method = task.displayName;
 item.display_name = task.displayName;
 item.role = task.role;
 item.red = task.red;
@@ -1275,7 +1276,7 @@ end
 end
 
 function writeJsonAtomic(path,value)
-text = jsonencode(value,'PrettyPrint',true);
+text = jsonencode(value);
 writeTextAtomic(path,text);
 end
 
@@ -1414,9 +1415,25 @@ end
 
 function text = exceptionReport(exception)
 try
-    text = getReport(exception,'extended','hyperlinks','off');
+    text = publicFailureText( ...
+        getReport(exception,'extended','hyperlinks','off'));
 catch
-    text = sprintf('%s (%s)',exception.message,exception.identifier);
+    text = publicFailureText( ...
+        sprintf('%s (%s)',exception.message,exception.identifier));
+end
+end
+
+function text = publicFailureText(text)
+text = char(string(text));
+replacements = {
+    'cvcoco9[A-Za-z]*','Blocked cvCOCO';
+    'cvcocoLegacy','Blocked cvCOCO';
+    'adaptive9[A-Za-z]*','Adaptive COCO';
+    'Method[- ]B','four-group';
+    'Method[- ]A','per-orbit'};
+for replacementIndex = 1:size(replacements,1)
+    text = regexprep(text,replacements{replacementIndex,1}, ...
+        replacements{replacementIndex,2},'ignorecase');
 end
 end
 

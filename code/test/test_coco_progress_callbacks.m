@@ -54,13 +54,13 @@ expectedCallerState = rng;
 
 withoutCallback = cvcoco9B(args{:});
 verifyEqual(testCase,rng,expectedCallerState, ...
-    'cvCOCO9B without a callback changed the caller RNG state.');
+    'Blocked cvCOCO without a callback changed the caller RNG state.');
 withCallback = cvcoco9B(args{:},'ProgressFcn',@captureProgress);
 verifyEqual(testCase,rng,expectedCallerState, ...
-    ['cvCOCO9B did not isolate random numbers consumed by its ', ...
+    ['Blocked cvCOCO did not isolate random numbers consumed by its ', ...
      'progress callback.']);
 
-verifyProgressTrace(testCase,fractions,messages,'cvCOCO9B');
+verifyProgressTrace(testCase,fractions,messages,'Blocked cvCOCO');
 verifySize(testCase,callbackRandomDraws,[numel(fractions),2]);
 verifyEqual(testCase,withCallback.trainA.curve, ...
     withoutCallback.trainA.curve,'AbsTol',0);
@@ -93,6 +93,7 @@ end
 
 function testAdaptiveAndFixedCocoProgressIsDeterminate(testCase)
 targetModes = {'adaptive9b','fixed9'};
+displayNames = {'Adaptive COCO','Fixed-target COCO'};
 entryRandomState = rng;
 restoreRandomState = onCleanup(@()rng(entryRandomState));
 for modeIndex = 1:numel(targetModes)
@@ -113,7 +114,7 @@ for modeIndex = 1:numel(targetModes)
     verifyEqual(testCase,rng,expectedCallerState,sprintf( ...
         '%s did not isolate callback random-number use.',targetMode));
 
-    verifyProgressTrace(testCase,fractions,messages,targetMode);
+    verifyProgressTrace(testCase,fractions,messages,displayNames{modeIndex});
     verifySize(testCase,callbackRandomDraws,[numel(fractions),2]);
     verifyEqual(testCase,corrWith,corrWithout,'AbsTol',0);
     verifyEqual(testCase,pWith,pWithout,'AbsTol',0);

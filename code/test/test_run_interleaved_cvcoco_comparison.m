@@ -161,6 +161,59 @@ verifyTrue(testCase,isfile(fullfile(outputRoot,'01_missing','error.txt')));
 verifyTrue(testCase,isfile(fullfile(outputRoot,'02_synthetic','results.mat')));
 end
 
+function testFailureArtifactsUsePublicNamesWithoutStacks(testCase)
+[root,inputFile,cleanup] = makeWorkspace(testCase); %#ok<ASGLU>
+plan = syntheticPlan(inputFile);
+plan.id = 'invalid_grid';
+plan.title = 'Invalid rate-grid fixture';
+plan.sr1 = 1;
+plan.sr2 = 10002;
+plan.srstep = 1;
+outputRoot = fullfile(root,'public-failure-output');
+
+summary = runInterleavedCvCocoComparison(outputRoot, ...
+    'InputRoot',root,'DatasetPlan',plan,'NSim',0, ...
+    'ExportFigures',false,'ShowProgress',false, ...
+    'EnforceGuiPad',false,'ContinueOnError',true);
+
+publicIdentifier = ...
+    'Acycle:InterleavedCVCOCOStudy:SedimentationRateGridTooLarge';
+verifyEqual(testCase,summary.status,'failed');
+verifyEqual(testCase,summary.summary_rows(1).error_identifier, ...
+    publicIdentifier);
+verifyEqual(testCase,summary.cases(1).error_identifier,publicIdentifier);
+
+caseDirectory = fullfile(outputRoot,'01_invalid_grid');
+errorText = fileread(fullfile(caseDirectory,'error.txt'));
+verifyTrue(testCase,contains(errorText,'Method: Interleaved cvCOCO'));
+verifyTrue(testCase,contains(errorText, ...
+    'Category: SedimentationRateGridTooLarge'));
+verifyTrue(testCase,contains(errorText,['Identifier: ',publicIdentifier]));
+verifyPublicFailureText(testCase,errorText);
+
+savedCheckpoint = load(fullfile(caseDirectory,'checkpoint.mat'),'checkpoint');
+verifyEqual(testCase,savedCheckpoint.checkpoint.error,errorText);
+caseManifest = jsondecode(fileread(fullfile( ...
+    caseDirectory,'case_manifest.json')));
+verifyEqual(testCase,caseManifest.error_identifier,publicIdentifier);
+verifyPublicFailureText(testCase,caseManifest.error_message);
+
+caseSummary = readtable(fullfile(caseDirectory,'summary.csv'), ...
+    'VariableNamingRule','preserve');
+verifyEqual(testCase,string(caseSummary.error_identifier), ...
+    string(publicIdentifier));
+verifyPublicFailureText(testCase,char(string(caseSummary.error_message)));
+verifyPublicFailureText(testCase,fileread(fullfile(outputRoot,'run.log')));
+end
+
+function verifyPublicFailureText(testCase,textValue)
+forbidden = [ ...
+    '(?i)(cvcoco9[a-z]*|adaptive9[a-z]*|interleavedcvcoco(?!study)|', ...
+    'cross[- _]?fit|method[- _]?[ab]|', ...
+    'ecoco(?:adaptive|crossfit|interleaved)core|error in )'];
+verifyEmpty(testCase,regexp(textValue,forbidden,'match','once'));
+end
+
 function [root,inputFile,cleanup] = makeWorkspace(testCase)
 root = tempname;
 mkdir(root);

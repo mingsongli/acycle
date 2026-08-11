@@ -84,6 +84,46 @@ end
 verifyStreamlinedProgress(testCase,fractions,messages,'monte carlo');
 end
 
+function testEcocoWrapperVerboseControlsPreprocessing(testCase)
+for calcMode = {'adaptive','crossfit'}
+    args = wrapperArguments(calcMode{1});
+    data = args{1};
+    % Force the shared modern preprocessing path to report cleaning while
+    % preserving the regularized series used by the numerical comparison.
+    args{1} = [data(end:-1:1,:); data(17,:); NaN,data(18,2)]; %#ok<NASGU>
+
+    loudOutputs = cell(1,10);
+    rng(9305,'twister');
+    externalState = rng;
+    loudText = evalc( ...
+        '[loudOutputs{:}] = ecoco(args{:},''Verbose'',true);');
+    verifyEqual(testCase,rng,externalState,sprintf( ...
+        '%s eCOCO changed the caller RNG in verbose mode.',calcMode{1}));
+    verifyTrue(testCase,contains(loudText, ...
+        'Full-record COCO/eCOCO preprocessing'),sprintf( ...
+        '%s eCOCO did not exercise preprocessing diagnostics.',calcMode{1}));
+
+    quietOutputs = cell(1,10);
+    rng(externalState);
+    quietText = evalc( ...
+        '[quietOutputs{:}] = ecoco(args{:},''Verbose'',false);');
+    verifyEqual(testCase,rng,externalState,sprintf( ...
+        '%s eCOCO changed the caller RNG in quiet mode.',calcMode{1}));
+    verifyFalse(testCase,contains(quietText, ...
+        'Full-record COCO/eCOCO preprocessing'),sprintf( ...
+        '%s eCOCO ignored Verbose=false during preprocessing.',calcMode{1}));
+    verifyEmpty(testCase,strtrim(quietText),sprintf( ...
+        '%s eCOCO emitted diagnostics despite Verbose=false.',calcMode{1}));
+
+    for outputIndex = 1:numel(loudOutputs)
+        verifyTrue(testCase,isequaln( ...
+            quietOutputs{outputIndex},loudOutputs{outputIndex}),sprintf( ...
+            ['Verbose changed %s eCOCO output %d instead of changing ', ...
+             'diagnostics only.'],calcMode{1},outputIndex));
+    end
+end
+end
+
 function args = adaptiveArguments()
 periods = defaultPeriods();
 dt = 0.2;
@@ -115,13 +155,16 @@ args = {[depth,value],periods,20,dt,45,0,256, ...
     [3.8;4.0;4.2],2,'Pearson',0.06,2718,'BatchSize',1};
 end
 
-function args = wrapperArguments()
+function args = wrapperArguments(calcMode)
+if nargin < 1
+    calcMode = 'adaptive';
+end
 coreArguments = adaptiveArguments();
 data = coreArguments{1};
 periods = coreArguments{2};
 dt = coreArguments{4};
 args = {data,[],periods,40.5,dt,50,0,0,256,4,6,1,2,0,[], ...
-    0,'Pearson',1/(2*dt),0,'adaptive',0.06,1847,0.5};
+    0,'Pearson',1/(2*dt),0,calcMode,0.06,1847,0.5};
 end
 
 function value = orbitalSignal(timeKyr,periods)

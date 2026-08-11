@@ -31,7 +31,7 @@ function testFourGroupCoreWarnsAndReturnsPartialNumerics(testCase)
 % This exact fixture has usable long/short-eccentricity geometry but no
 % all-nine rate in either held-out segment.  It previously threw
 % cvcoco:NoAllNineTrainingRate and caused the GUI to skip the whole method.
-warning('on','cvcoco:PartialOrbitTraining');
+warning('on','Acycle:BlockedCVCOCO:PartialOrbitTraining');
 lastwarn('');
 result = cvcoco(testCase.TestData.data,testCase.TestData.orbit9,256, ...
     1,2,0.5,0,3,'Pearson','TargetModel','four-group', ...
@@ -39,7 +39,8 @@ result = cvcoco(testCase.TestData.data,testCase.TestData.orbit9,256, ...
     'BatchSize',2,'Seed',13,'Verbose',false);
 [warningMessage,warningIdentifier] = lastwarn;
 
-verifyEqual(testCase,warningIdentifier,'cvcoco:PartialOrbitTraining');
+verifyEqual(testCase,warningIdentifier, ...
+    'Acycle:BlockedCVCOCO:PartialOrbitTraining');
 verifySubstring(testCase,lower(warningMessage),'partial');
 verifyEqual(testCase,result.warningIdentifier,warningIdentifier);
 verifyTrue(testCase,result.degradedMode);
@@ -119,7 +120,7 @@ verifyTrue(testCase,all(isfinite( ...
 verifyTrue(testCase,all(isfinite( ...
     result.pGlobal(:,result.windows.success)),'all'));
 verifyEqual(testCase,result.warningIdentifier, ...
-    'ecocoInterleavedCore:PartialOrbitTraining');
+    'Acycle:InterleavedECOCO:PartialOrbitTraining');
 end
 
 function testPublicCoherentWrapperAlsoCompletes(testCase)
@@ -135,6 +136,47 @@ verifyTrue(testCase,all(isfinite([result.validateAtoB.score, ...
 verifySubstring(testCase,result.analysisRole,'partial-orbit');
 end
 
+function testPublicEcocoWrapperSanitizesCoreFailures(testCase)
+cases = { ...
+    'adaptive','Adaptive eCOCO','Acycle:AdaptiveECOCO:PadTooShort',2; ...
+    'crossfit','Blocked eCOCO','Acycle:BlockedECOCO:PadTooShort',2; ...
+    'interleaved','Interleaved eCOCO', ...
+        'Acycle:InterleavedECOCO:DuplicateOrbitPeriods',256};
+for index = 1:size(cases,1)
+    mode = cases{index,1};
+    publicName = cases{index,2};
+    expectedIdentifier = cases{index,3};
+    pad = cases{index,4};
+    periods = testCase.TestData.orbit9;
+    if strcmp(mode,'interleaved')
+        periods(end) = periods(end-1);
+    end
+    exception = captureEcocoFailure(testCase.TestData.data,periods,pad,mode);
+    verifyEqual(testCase,exception.identifier,expectedIdentifier);
+    verifySubstring(testCase,exception.message,publicName);
+    report = getReport(exception,'extended','hyperlinks','off');
+    forbidden = [ ...
+        '(?i)(cvcoco9[a-z]*|adaptive9[a-z]*|interleavedcvcoco|', ...
+        'cross[- _]?fit|method[- _]?[ab]|', ...
+        'ecoco(?:adaptive|crossfit|interleaved)core)'];
+    verifyEmpty(testCase,regexp(report,forbidden,'match','once'));
+end
+end
+
+function exception = captureEcocoFailure(data,periods,pad,mode)
+try
+    ecoco(data,[],periods,20,0.5,2,0,0,pad,1,2,0.5,0,0,1,0, ...
+        'Pearson',1,0,mode,0.064,1,0.5,'Verbose',false);
+    error('test_coco_nonfatal_resolution_policy:ExpectedFailure', ...
+        'The deliberate invalid eCOCO request unexpectedly succeeded.');
+catch exception
+    if strcmp(exception.identifier, ...
+            'test_coco_nonfatal_resolution_policy:ExpectedFailure')
+        rethrow(exception)
+    end
+end
+end
+
 function testClassifierRecognizesOnlyAuditedResolutionFailures(testCase)
 knownIdentifiers = { ...
     'cvcoco:NoAllNineTrainingRate'; ...
@@ -142,6 +184,9 @@ knownIdentifiers = { ...
     'ecocoCrossfitCore:NoTrainingRate'; ...
     'ecocoCrossfitCore:NoValidationRate'; ...
     'ecocoInterleavedCore:NoResolvableWindows'; ...
+    'Acycle:BlockedECOCO:NoTrainingRate'; ...
+    'Acycle:BlockedECOCO:NoValidationRate'; ...
+    'Acycle:InterleavedECOCO:NoResolvableWindows'; ...
     'corrcoefslices_rankNew:NoValidObservedStatistic'};
 
 for index = 1:numel(knownIdentifiers)
@@ -156,7 +201,8 @@ end
 % The recoverable partial-target condition is a warning identifier, not an
 % exception for the GUI's skip branch to classify.
 [isNonfatal,matchedIdentifier] = cocoIsNonfatalResolutionError( ...
-    MException('cvcoco:PartialOrbitTraining','partial target warning'));
+    MException('Acycle:BlockedCVCOCO:PartialOrbitTraining', ...
+    'partial target warning'));
 verifyFalse(testCase,isNonfatal);
 verifyEmpty(testCase,matchedIdentifier);
 
@@ -165,7 +211,7 @@ verifyEmpty(testCase,matchedIdentifier);
 cause = MException('cvcoco:NoAllNineTrainingRate', ...
     'no complete training target');
 wrapped = addCause(MException('publicationStudy:MethodFailed', ...
-    'cvCOCO failed'),cause);
+    'Blocked cvCOCO failed'),cause);
 [isNonfatal,matchedIdentifier] = cocoIsNonfatalResolutionError(wrapped);
 verifyTrue(testCase,isNonfatal);
 verifyEqual(testCase,matchedIdentifier,cause.identifier);

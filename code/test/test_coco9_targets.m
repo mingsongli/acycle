@@ -131,8 +131,8 @@ methodB = cvcoco9B(data,orbit9,testCase.TestData.pad, ...
 compatibility = cvcoco9(data,orbit9,testCase.TestData.pad, ...
     rate,rate,1,0,0,'Pearson','MaxFrequency',limit,'Seed',91);
 
-verifyEqual(testCase,methodA.name,'cvCOCO9A');
-verifyEqual(testCase,methodA.variant,'A');
+verifyEqual(testCase,methodA.name,'Blocked cvCOCO');
+verifyEqual(testCase,methodA.variant,'Blocked cvCOCO');
 verifyEqual(testCase,methodA.targetModel, ...
     'rayleigh-peak-coherent-nine');
 verifyEqual(testCase,methodA.config.targetModel, ...
@@ -141,8 +141,8 @@ verifyEqual(testCase,methodA.frozenValidationWeightLevel, ...
     'nine individual orbital amplitudes');
 verifyFalse(testCase,methodA.compatibilityAlias);
 
-verifyEqual(testCase,methodB.name,'cvCOCO9B');
-verifyEqual(testCase,methodB.variant,'B');
+verifyEqual(testCase,methodB.name,'Blocked cvCOCO');
+verifyEqual(testCase,methodB.variant,'Blocked cvCOCO');
 verifyEqual(testCase,methodB.targetModel,'four-group-coherent-nine');
 verifyEqual(testCase,methodB.config.targetModel, ...
     'four-group-coherent-nine');
@@ -150,12 +150,11 @@ verifyEqual(testCase,methodB.frozenValidationWeightLevel, ...
     'four RMS orbital-group amplitudes');
 verifyFalse(testCase,methodB.compatibilityAlias);
 
-% The historical spelling is intentionally retained only as an exact
-% compatibility alias for method B.  Its public name is no longer the
-% ambiguous cvCOCO9 label.
-verifyEqual(testCase,compatibility.name,'cvCOCO9B');
+% The historical entry point is retained only as an exact compatibility
+% alias. Its result metadata uses the published method name.
+verifyEqual(testCase,compatibility.name,'Blocked cvCOCO');
 verifyTrue(testCase,compatibility.compatibilityAlias);
-verifyEqual(testCase,compatibility.canonicalEntryPoint,'cvcoco9B');
+verifyEqual(testCase,compatibility.canonicalEntryPoint,'Blocked cvCOCO');
 verifyEqual(testCase,compatibility.targetModel,methodB.targetModel);
 verifyEqual(testCase,compatibility.trainA.curve,methodB.trainA.curve, ...
     'AbsTol',0);
@@ -167,7 +166,7 @@ verifyEqual(testCase,compatibility.validateBtoA.curve, ...
     methodB.validateBtoA.curve,'AbsTol',0);
 
 methods = {methodA,methodB};
-methodNames = {'cvCOCO9A','cvCOCO9B'};
+methodNames = {'Blocked cvCOCO','Blocked cvCOCO'};
 for methodIndex = 1:numel(methods)
     result = methods{methodIndex};
     verifyTrue(testCase,all(isfinite(result.trainA.curve( ...
@@ -225,7 +224,7 @@ verifyTrue(testCase,all(isfinite(diagnostic.amplitudes)));
 verifyGreaterThan(testCase,min(diagnostic.amplitudes),0);
 verifyNineNominalPeaks(testCase,diagnostic.frequency, ...
     diagnostic.targetPower,testCase.TestData.orbit9, ...
-    'Adaptive COCO9');
+    'Adaptive COCO');
 end
 
 function testAdaptiveCoherentNineMethodBEvaluator(testCase)
@@ -250,7 +249,7 @@ verifyEqual(testCase,diagnostic.amplitudes, ...
     'RelTol',2e-14,'AbsTol',2e-14);
 verifyNineNominalPeaks(testCase,diagnostic.frequency, ...
     diagnostic.targetPower,testCase.TestData.orbit9, ...
-    'Adaptive COCO9B');
+    'Adaptive COCO');
 end
 
 function testAdaptiveMethodBRejectsNonfiniteIntegratedEnergy(testCase)
@@ -286,7 +285,7 @@ verifyEqual(testCase,diagnostic.amplitudeMode,'fixed');
 verifyEqual(testCase,diagnostic.amplitudes, ...
     fixedWeightReference(testCase.TestData.orbit9),'AbsTol',0);
 verifyNineNominalPeaks(testCase,diagnostic.frequency, ...
-    diagnostic.targetPower,testCase.TestData.orbit9,'Fixed COCO9');
+    diagnostic.targetPower,testCase.TestData.orbit9,'Fixed-target COCO');
 
 % Keep the compatibility target dispatcher public and coherent as well.
 compatibilityFrequency = (0:floor(testCase.TestData.pad/2))' ./ ...
@@ -297,7 +296,7 @@ compatibilityPower = cocoTargetSpectrum( ...
     compatibilityFrequency,testCase.TestData.sedimentationRate,'fixed9');
 verifyNineNominalPeaks(testCase,compatibilityFrequency, ...
     compatibilityPower,testCase.TestData.orbit9, ...
-    'Fixed COCO9 compatibility target');
+    'Fixed-target COCO compatibility target');
 end
 
 function testAdaptive9ABPublicMetadataAndCompatibilityAlias(testCase)
@@ -336,21 +335,20 @@ verifyEmpty(testCase,corryA);
 verifyEmpty(testCase,corryB);
 verifyEmpty(testCase,corryAlias);
 
-verifyEqual(testCase,detailsA.targetMode,'adaptive9a');
+verifyEqual(testCase,detailsA.targetMode,'Adaptive COCO');
 verifyEqual(testCase,detailsA.targetModel,'coherent-nine');
 verifyEqual(testCase,detailsA.targetAmplitudeMode,'adaptive');
 verifyTrue(testCase,contains(lower(detailsA.targetConstruction), ...
     'per-orbit rayleigh-band peak'));
-verifyEqual(testCase,detailsB.targetMode,'adaptive9b');
+verifyEqual(testCase,detailsB.targetMode,'Adaptive COCO');
 verifyEqual(testCase,detailsB.targetModel,'coherent-nine');
 verifyEqual(testCase,detailsB.targetAmplitudeMode,'four-group-area');
 verifyTrue(testCase,contains(lower(detailsB.targetConstruction), ...
     'leakage correction'));
 
-% The former Adaptive COCO9 token remains an exact method-A alias.  Keep
-% its spelling in metadata so old scripts remain auditable, while the
-% target model and amplitude estimator identify the canonical behavior.
-verifyEqual(testCase,detailsAlias.targetMode,'adaptive9');
+% The compatibility token retains its numerical behavior while exported
+% metadata uses the published method name.
+verifyEqual(testCase,detailsAlias.targetMode,'Adaptive COCO');
 verifyEqual(testCase,detailsAlias.targetModel,'coherent-nine');
 verifyEqual(testCase,detailsAlias.targetAmplitudeMode,'adaptive');
 verifyEqual(testCase,corrAlias,corrA,'AbsTol',0);
@@ -375,7 +373,7 @@ verifyEmpty(testCase,corry);
 verifyTrue(testCase,isfinite(corrCI(1,2)));
 verifyEqual(testCase,corrCI(1,4),0);
 verifyEqual(testCase,corrH0(1,2),9);
-verifyEqual(testCase,details.targetMode,'fixed9');
+verifyEqual(testCase,details.targetMode,'Fixed-target COCO');
 verifyEqual(testCase,details.targetModel,'coherent-nine');
 verifyEqual(testCase,details.targetAmplitudeMode,'fixed');
 verifyTrue(testCase,contains(lower(details.targetConstruction), ...
@@ -403,7 +401,7 @@ verifySize(testCase,corry,[1 nsim]);
 verifyTrue(testCase,all(isfinite(corry),'all'));
 verifyTrue(testCase,all(isfinite(corrH0(:,[1 3])),'all'));
 verifyEqual(testCase,details.nSimValid,nsim);
-verifyEqual(testCase,details.targetMode,'adaptive9b');
+verifyEqual(testCase,details.targetMode,'Adaptive COCO');
 verifyEqual(testCase,details.targetAmplitudeMode,'four-group-area');
 verifyEqual(testCase,details.nullMax,max(corry,[],1)', ...
     'AbsTol',2e-14);
@@ -525,7 +523,7 @@ rate = testCase.TestData.sedimentationRate;
     rate,rate,1,0,0,0,0,1,'Pearson',1/(2*dt),0,false, ...
     'adaptive','MaxFrequency',testCase.TestData.maximumFrequency, ...
     'Seed',37,'ShowPeriodograms',false);
-verifyEqual(testCase,details.targetMode,'adaptive');
+verifyEqual(testCase,details.targetMode,'Adaptive COCO');
 verifyEqual(testCase,details.targetConstruction, ...
     ['independent uniform-phase sine/cosine mean PSD templates added ', ...
      'noncoherently with per-spectrum adaptive amplitudes']);
