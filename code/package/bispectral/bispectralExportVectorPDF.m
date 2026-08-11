@@ -84,7 +84,7 @@ for surfaceIndex = 1:numel(surfaces)
         end
     end
 
-    colorLimits = clim(ax);
+    colorLimits = get(ax,'CLim');
     colorCount = size(colormap(ax),1);
     levels = linspace(colorLimits(1),colorLimits(2),colorCount+1);
     xLimits = xlim(ax);
@@ -105,7 +105,7 @@ for surfaceIndex = 1:numel(surfaces)
     end
     xlim(ax,xLimits);
     ylim(ax,yLimits);
-    clim(ax,colorLimits);
+    set(ax,'CLim',colorLimits);
     ax.PlotBoxAspectRatio = aspectRatio;
     ax.PlotBoxAspectRatioMode = aspectMode;
     if ~wasHeld

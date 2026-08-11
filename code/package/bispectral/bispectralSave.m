@@ -161,7 +161,7 @@ end
 if isfield(result,'GUIParameterCorrections')
     configuration.GUIParameterCorrections = result.GUIParameterCorrections;
 end
-json = jsonencode(configuration,'PrettyPrint',true);
+json = jsonencode(configuration);
 fileId = fopen(temporaryFiles.ConfigJSON,'w');
 if fileId < 0
     error('Acycle:Bispectral:WriteConfiguration', ...

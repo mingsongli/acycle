@@ -69,15 +69,15 @@ elseif padding == 2
 elseif padding == 3
     % mean padding
     y_start_mean = mean(y(1:n));
-    y_end_mean = mean(y(end-n:end));
+    y_end_mean = mean(y(end-n+1:end));
     X1y = zeros(length(X1x),1) + y_start_mean;
     X2y = zeros(length(X2x),1) + y_end_mean;
 elseif padding == 4
     % random padding
     y_start_mean = mean(y(1:n));
-    y_end_mean = mean(y(end-n:end));
+    y_end_mean = mean(y(end-n+1:end));
     X1y = randn(length(X1x),1) * std(y(1:n)) + y_start_mean;
-    X2y = randn(length(X2x),1) * std(y(end-n:end)) + y_end_mean;
+    X2y = randn(length(X2x),1) * std(y(end-n+1:end)) + y_end_mean;
 else
     error('Error: padding must be either 1, 2, 3, or 4')
 end

@@ -490,7 +490,7 @@ set(ax,'YDir','normal','Color','w');
 xlim(ax,[plotMinimum,plotMaximum]);
 ylim(ax,[plotMinimum,plotMaximum]);
 pbaspect(ax,[1 1 1]);
-clim(ax,displayLimits);
+set(ax,'CLim',displayLimits);
 colormap(ax,cmap);
 hold(ax,'on');
 valueContour = [];
