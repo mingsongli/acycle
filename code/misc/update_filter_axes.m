@@ -5,7 +5,7 @@ data = handles.current_data;
 datax=data(:,2);
 time = data(:,1);
 npts = length(time);
-dt=mean(diff(time));
+dt=median(diff(time));
 nyquist = 1/(2*dt);
 rayleigh = 1/(dt*npts);
 
@@ -62,12 +62,16 @@ y_1 = str2double(get(handles.edit12,'string'));
 y_2 = str2double(get(handles.edit13,'string'));
 
 L = length(data(:,2));
-dt = mean(diff(data(:,1)));
+dt = median(diff(data(:,1)));
 Y = fft(data(:,2),L);
 P2 = abs(Y/L);
 P1 = P2(1:floor(L/2)+1);
-P1(2:end-1) = 2*P1(2:end-1);
-f = 1/dt * (0:(L/2))/L;
+if mod(L,2) == 0
+    P1(2:end-1) = 2*P1(2:end-1);
+else
+    P1(2:end) = 2*P1(2:end);
+end
+f = (0:floor(L/2))'/(L*dt);
 
 if strcmp(filter,'Gaussian')
     set(handles.edit18,'enable','off')
@@ -91,16 +95,15 @@ if strcmp(filter,'Gaussian')
 elseif strcmp(filter,'Taner-Hilbert')
     set(handles.edit18,'enable','on')
     % update data and names
-    [tanhilb,handles.ifaze,handles.ifreq] = ...
-    tanerhilbertML(data,flch(2),flch(1),flch(3),taner_c);
-
-    tanerfilterenv = evalin('base','tanerfilterenv');
-    tf = tanerfilterenv(1:floor(L/2)+1) ./ max(tanerfilterenv(1:floor(L/2)+1)) .* max(P1);
+    [tanhilb,handles.ifaze,handles.ifreq,tanerfilterenv, ...
+        tanerResponseFrequency,handles.ifreq_coordinate] = ...
+        tanerhilbertML(data,flch(2),flch(1),flch(3),taner_c);
+    tf = tanerfilterenv.*max(P1);
     % plot
     axes(handles.ft_axes3);
     plot(f,P1)
     hold on
-    plot(f,tf,'r-')
+    plot(tanerResponseFrequency,tf,'r-')
     xlim([x_1, x_2])
     ylim([y_1, y_2])
     hold off

@@ -26,7 +26,7 @@ end
         app.lang_var = getFieldDefault(ctx,'lang_var',{});
 
         app.pathRef = '';
-        app.pathSeries = '';
+        app.pathTarget = '';
 
         sc = get(groot,'ScreenSize');
         pos = round([0.38*sc(3), 0.2*sc(4), 0.60*sc(3), 0.25*sc(4)] * app.monzoom);
@@ -45,9 +45,11 @@ end
         app.BOpenRef = uibutton(app.PanelFiles,'push','Text',openTxt,'ButtonPushedFcn',@(~,~)pickRef());
         app.ERef = uieditfield(app.PanelFiles,'text','Editable','off');
 
-        app.LSeries = uilabel(app.PanelFiles,'Text',langText(app,'intser06','Series'),'BackgroundColor',app.bg);
-        app.BOpenSeries = uibutton(app.PanelFiles,'push','Text',openTxt,'ButtonPushedFcn',@(~,~)pickSeries());
-        app.ETwitter = uieditfield(app.PanelFiles,'text','Editable','off');
+        app.LTarget = uilabel(app.PanelFiles,'Text', ...
+            langText(app,'leadlag_target','Target'),'BackgroundColor',app.bg);
+        app.BOpenTarget = uibutton(app.PanelFiles,'push','Text',openTxt, ...
+            'ButtonPushedFcn',@(~,~)pickTarget());
+        app.ETarget = uieditfield(app.PanelFiles,'text','Editable','off');
 
         app.LDepthTime = uilabel(app.UIFigure,'Text',langText(app,'leadlag02','Depth/time'),'BackgroundColor',app.bg);
         app.DDir = uidropdown(app.UIFigure,'Items',{'Small = Young','Small = Old'},'Value','Small = Young');
@@ -66,9 +68,10 @@ end
         setappdata(app.UIFigure,'LEADLAG_APP',app);
 
         function seedInitialPaths()
-            here = getAcPwdFromContext();
-            app.ERef.Value = here;
-            app.ETwitter.Value = here;
+            % Empty fields cannot accidentally treat the working directory
+            % itself as a data file.
+            app.ERef.Value = '';
+            app.ETarget.Value = '';
         end
 
         function layoutUI()
@@ -85,9 +88,9 @@ end
             app.BOpenRef.Position = [round(0.015*pw) round(0.54*ph)-dTop round(0.10*pw) round(0.20*ph)];
             app.ERef.Position = [round(0.125*pw) round(0.53*ph)-dTop round(0.86*pw) round(0.22*ph)];
 
-            app.LSeries.Position = [round(0.015*pw) round(0.28*ph) round(0.23*pw) round(0.12*ph)];
-            app.BOpenSeries.Position = [round(0.015*pw) round(0.03*ph) round(0.10*pw) round(0.20*ph)];
-            app.ETwitter.Position = [round(0.125*pw) round(0.02*ph) round(0.86*pw) round(0.22*ph)];
+            app.LTarget.Position = [round(0.015*pw) round(0.28*ph) round(0.23*pw) round(0.12*ph)];
+            app.BOpenTarget.Position = [round(0.015*pw) round(0.03*ph) round(0.10*pw) round(0.20*ph)];
+            app.ETarget.Position = [round(0.125*pw) round(0.02*ph) round(0.86*pw) round(0.22*ph)];
 
             yb = round(0.11*h);
             xShift = round(0.05*w);
@@ -103,95 +106,87 @@ end
         end
 
         function pickRef()
-            pre = pwd;
-            moveToAcPwd();
-            [file,path] = uigetfile({'*.*','All Files (*.*)'},'Select a Reference Series');
+            [file,path] = uigetfile({'*.*','All Files (*.*)'}, ...
+                'Select a Reference Series',getAcPwdFromContext());
             if ~isequal(file,0)
-                app.pathRef = fullfile(path,file);
-                app.ERef.Value = app.pathRef;
+                selectedPath = fullfile(path,file);
+                try
+                    localLoadStrictSeries(selectedPath,'REFERENCE');
+                    app.pathRef = selectedPath;
+                    app.ERef.Value = selectedPath;
+                catch ME
+                    uialert(app.UIFigure,ME.message, ...
+                        'Acycle: invalid reference');
+                end
             end
-            safeCd(pre);
         end
 
-        function pickSeries()
-            pre = pwd;
-            moveToAcPwd();
-            [file,path] = uigetfile({'*.*','All Files (*.*)'},'Select a Target Series');
+        function pickTarget()
+            [file,path] = uigetfile({'*.*','All Files (*.*)'}, ...
+                'Select a Target Series',getAcPwdFromContext());
             if ~isequal(file,0)
-                app.pathSeries = fullfile(path,file);
-                app.ETwitter.Value = app.pathSeries;
-                updateDefaultLimitAndStep();
+                selectedPath = fullfile(path,file);
+                try
+                    targetData = localLoadStrictSeries( ...
+                        selectedPath,'TARGET');
+                    app.pathTarget = selectedPath;
+                    app.ETarget.Value = selectedPath;
+                    updateDefaultLimitAndStep(targetData);
+                catch ME
+                    uialert(app.UIFigure,ME.message, ...
+                        'Acycle: invalid target');
+                end
             end
-            safeCd(pre);
         end
 
-        function updateDefaultLimitAndStep()
-            try
-                dat2 = localLoad2Col(app.ETwitter.Value);
-                xmax = max(dat2(:,1),[],'omitnan');
-                xmin = min(dat2(:,1),[],'omitnan');
-                ll = (xmax-xmin)/10;
-                st = mean(diff(dat2(:,1)),'omitnan')/2;
-                if ~isfinite(ll), ll = 0; end
-                if ~isfinite(st) || st<=0, st = 1; end
-                app.ELimit.Value = num2str(ll);
-                app.EStep.Value = num2str(st);
-            catch
-            end
+        function updateDefaultLimitAndStep(targetData)
+            coordinateSpan = targetData(end,1)-targetData(1,1);
+            st = mean(diff(targetData(:,1)))/2;
+            ll = max(coordinateSpan/10,st);
+            app.ELimit.Value = num2str(ll,17);
+            app.EStep.Value = num2str(st,17);
         end
 
         function runLeadlag()
             pre = pwd;
+            directoryCleanup = onCleanup(@()restoreDirectory(pre));
+            createdFigures = gobjects(0,1);
             try
                 p1 = strtrim(app.ERef.Value);
-                p2 = strtrim(app.ETwitter.Value);
+                p2 = strtrim(app.ETarget.Value);
                 if isempty(p1) || isempty(p2)
-                    error('Reference/Series path is empty.');
+                    error('Acycle:LeadLagGUI:EmptyPath', ...
+                        'Reference and Target paths are both required.');
                 end
 
-                dat1 = localLoad2Col(p1);
-                dat2 = localLoad2Col(p2);
-                dat1 = sortrows(dat1);
-                dat2 = sortrows(dat2);
-                if exist('findduplicate','file') == 2
-                    dat1 = findduplicate(dat1);
-                    dat2 = findduplicate(dat2);
+                reference = localLoadStrictSeries(p1,'REFERENCE');
+                target = localLoadStrictSeries(p2,'TARGET');
+                maximumLag = str2double(app.ELimit.Value);
+                lagStep = str2double(app.EStep.Value);
+                if strcmp(app.DDir.Value,'Small = Young')
+                    coordinateDirection = 'small_is_young';
                 else
-                    [~,ia] = unique(dat1(:,1),'stable'); dat1 = dat1(ia,:);
-                    [~,ib] = unique(dat2(:,1),'stable'); dat2 = dat2(ib,:);
+                    coordinateDirection = 'small_is_old';
                 end
-                dat1(any(isinf(dat1),2),:) = [];
-                dat2(any(isinf(dat2),2),:) = [];
 
-                ll = str2double(app.ELimit.Value);
-                st = str2double(app.EStep.Value);
-                if ~isfinite(ll) || ll < 0, ll = 0; end
-                if ~isfinite(st) || st <= 0, st = 1; end
-
-                timedir = find(strcmp(app.DDir.Items,app.DDir.Value),1,'first');
-                if isempty(timedir), timedir = 1; end
-                plotn = 1;
-                [llgrid,RMSE] = rmse4leadlag(dat1,dat2,ll,st,timedir,plotn);
+                [result,meta] = acycleLeadLagRmse( ...
+                    reference,target,maximumLag,lagStep, ...
+                    coordinateDirection);
+                createdFigures = plotLeadLagResult( ...
+                    reference,target,result,meta);
 
                 if app.CSave.Value
-                    moveToAcPwd();
+                    workDir = getAcPwdFromContext();
                     [~,name1,~] = fileparts(p1);
-                    [~,name2,ext2] = fileparts(p2);
-                    if isempty(ext2), ext2 = '.txt'; end
-                    outName = [name2,'-LeadLag-',name1,ext2];
-                    dlmwrite(outName,[llgrid',RMSE'],'delimiter',' ','precision',9);
-                    refreshMainListbox();
+                    [~,name2,~] = fileparts(p2);
+                    outName = [name2,'-LeadLagRMSE-',name1,'.txt'];
+                    saveLeadLagResult(result,fullfile(workDir,outName));
+                    refreshMainListbox(workDir);
                 end
-
-                safeCd(pre);
             catch ME
-                safeCd(pre);
+                deleteGraphics(createdFigures);
                 uialert(app.UIFigure,ME.message,'Acycle: lead/lag');
             end
-        end
-
-        function moveToAcPwd()
-            safeCd(getAcPwdFromContext());
         end
 
         function out = getAcPwdFromContext()
@@ -217,8 +212,7 @@ end
             end
         end
 
-        function refreshMainListbox()
-            workDir = pwd;
+        function refreshMainListbox(workDir)
             if ac_refresh_main_list(app.listbox_acmain,workDir)
                 return
             end
@@ -246,13 +240,6 @@ end
             end
         end
 
-        function safeCd(target)
-            if nargin < 1 || isempty(target), return; end
-            try
-                cd(target);
-            catch
-            end
-        end
     end
 end
 
@@ -284,23 +271,185 @@ else
 end
 end
 
-function data = localLoad2Col(filename)
+function data = localLoadStrictSeries(filename,label)
 try
     data = load(filename);
-catch
-    fid = fopen(filename,'r');
-    if fid < 0
-        error('Cannot open file: %s', filename);
+catch loadException
+    try
+        data = readmatrix(filename);
+    catch readException
+        error('Acycle:LeadLagGUI:CannotReadFile', ...
+            ['Cannot read %s file %s. LOAD reported: %s ', ...
+             'READMATRIX reported: %s'], ...
+            label,filename,loadException.message,readException.message);
     end
-    c = onCleanup(@()fclose(fid)); %#ok<NASGU>
-    data_ft = textscan(fid,'%f%f','EmptyValue',Inf);
-    data = cell2mat(data_ft);
 end
-if isempty(data)
-    error('File is empty or unreadable: %s', filename);
+if ~((isa(data,'double') || isa(data,'single')) && ...
+        ~issparse(data) && isreal(data) && ismatrix(data) && ...
+        size(data,2) == 2)
+    error('Acycle:LeadLagGUI:InvalidData', ...
+        ['%s file must contain exactly two real floating-point columns ', ...
+         '[coordinate,value]: %s'],label,filename);
 end
-if size(data,2) < 2
-    error('File needs at least 2 columns: %s', filename);
+if size(data,1) < 3
+    error('Acycle:LeadLagGUI:TooFewRows', ...
+        '%s file must contain at least three rows: %s',label,filename);
 end
-data = data(:,1:2);
+if any(~isfinite(data(:)))
+    error('Acycle:LeadLagGUI:NonfiniteData', ...
+        '%s file contains NaN or Inf; rows are not silently deleted: %s', ...
+        label,filename);
+end
+data = full(double(data));
+spacing = diff(data(:,1));
+if any(~isfinite(spacing)) || ...
+        ~(isfinite(data(end,1)-data(1,1)) && data(end,1) > data(1,1))
+    error('Acycle:LeadLagGUI:UnrepresentableCoordinates', ...
+        '%s coordinate span or spacing is not finite: %s',label,filename);
+end
+if any(spacing <= 0)
+    error('Acycle:LeadLagGUI:CoordinatesNotStrictlyIncreasing', ...
+        ['%s coordinates must already be unique and strictly increasing; ', ...
+         'the GUI does not sort or merge rows: %s'],label,filename);
+end
+standardizeForDisplay(data(:,2),label);
+end
+
+function figures = plotLeadLagResult(reference,target,result,meta)
+figures = gobjects(0,1);
+try
+    firstFigure = figure( ...
+        'Color','white','Name','Acycle: Lead-lag standardized RMSE', ...
+        'NumberTitle','off');
+    figures(end+1,1) = firstFigure;
+    firstAxes = axes('Parent',firstFigure);
+    plot(firstAxes,result(:,1),result(:,2),'k.-');
+    hold(firstAxes,'on');
+    yLimits = ylim(firstAxes);
+    plot(firstAxes,[meta.best_lag meta.best_lag],yLimits,'r-.');
+    hold(firstAxes,'off');
+    xlabel(firstAxes,'Target coordinate shift (lag)');
+    ylabel(firstAxes,'Standardized RMSE');
+    title(firstAxes,sprintf( ...
+        'Minimum @ %.9g. %s.',meta.best_lag, ...
+        relationshipLabel(meta.best_lag_interpretation)));
+
+    secondFigure = figure( ...
+        'Color','white','Name','Acycle: Lead-lag alignment', ...
+        'NumberTitle','off');
+    figures(end+1,1) = secondFigure;
+    referenceStandardized = standardizeForDisplay( ...
+        reference(:,2),'REFERENCE');
+    targetStandardized = standardizeForDisplay(target(:,2),'TARGET');
+
+    referenceAxes = subplot(3,1,1,'Parent',secondFigure);
+    plot(referenceAxes,reference(:,1),reference(:,2),'b-');
+    title(referenceAxes,'Reference');
+
+    targetAxes = subplot(3,1,2,'Parent',secondFigure);
+    plot(targetAxes,target(:,1),target(:,2),'k-');
+    hold(targetAxes,'on');
+    if meta.best_lag ~= 0
+        plot(targetAxes,target(:,1)+meta.best_lag,target(:,2),'r-.');
+        legend(targetAxes,{'Raw Target','Adjusted Target'}, ...
+            'Location','best');
+    end
+    hold(targetAxes,'off');
+    title(targetAxes,'Target');
+
+    alignmentAxes = subplot(3,1,3,'Parent',secondFigure);
+    plot(alignmentAxes,reference(:,1),referenceStandardized,'b-');
+    hold(alignmentAxes,'on');
+    plot(alignmentAxes,target(:,1),targetStandardized,'k-');
+    if meta.best_lag ~= 0
+        plot(alignmentAxes,target(:,1)+meta.best_lag, ...
+            targetStandardized,'r-.');
+        legend(alignmentAxes, ...
+            {'Reference','Raw Target','Adjusted Target'}, ...
+            'Location','best');
+    else
+        legend(alignmentAxes,{'Reference','Target'},'Location','best');
+    end
+    hold(alignmentAxes,'off');
+    xlabel(alignmentAxes,'Depth/Time');
+    ylabel(alignmentAxes,'Whole-record standardized value');
+catch ME
+    deleteGraphics(figures);
+    rethrow(ME);
+end
+end
+
+function standardized = standardizeForDisplay(values,label)
+valueScale = max(abs(values));
+if valueScale == 0
+    error('Acycle:LeadLagGUI:ConstantSeries', ...
+        '%s value column is constant.',label);
+end
+scaled = values/valueScale;
+centered = scaled-mean(scaled);
+sampleStandardDeviation = std(centered,0);
+if ~(isfinite(sampleStandardDeviation) && sampleStandardDeviation > 0)
+    error('Acycle:LeadLagGUI:ConstantSeries', ...
+        '%s value column has no representable nonzero variance.',label);
+end
+standardized = centered/sampleStandardDeviation;
+if any(~isfinite(standardized))
+    error('Acycle:LeadLagGUI:NonfiniteStandardization', ...
+        '%s standardization produced a nonfinite value.',label);
+end
+end
+
+function label = relationshipLabel(identifier)
+switch identifier
+    case 'target_leads_reference'
+        label = 'Target leads Reference';
+    case 'target_lags_reference'
+        label = 'Target lags Reference';
+    otherwise
+        label = 'Target is in phase with Reference';
+end
+end
+
+function saveLeadLagResult(result,outputPath)
+outputDirectory = fileparts(outputPath);
+if exist(outputDirectory,'dir') ~= 7
+    error('Acycle:LeadLagGUI:MissingOutputDirectory', ...
+        'Output directory does not exist: %s',outputDirectory);
+end
+temporaryPath = [tempname(outputDirectory),'.txt'];
+temporaryCleanup = onCleanup(@()deleteFileIfPresent(temporaryPath));
+writematrix(result,temporaryPath,'Delimiter','space');
+[moved,message] = movefile(temporaryPath,outputPath,'f');
+if ~moved
+    error('Acycle:LeadLagGUI:SaveFailed', ...
+        'Cannot save Lead-lag result: %s',message);
+end
+end
+
+function deleteFileIfPresent(filename)
+if exist(filename,'file') == 2
+    delete(filename);
+end
+end
+
+function deleteGraphics(handles)
+if isempty(handles)
+    return
+end
+handles = handles(isgraphics(handles));
+if ~isempty(handles)
+    delete(handles);
+end
+end
+
+function restoreDirectory(originalDirectory)
+if strcmp(pwd,originalDirectory)
+    return
+end
+try
+    cd(originalDirectory);
+catch ME
+    warning('Acycle:LeadLagGUI:DirectoryRestoreFailed', ...
+        'Cannot restore working directory: %s',ME.message);
+end
 end

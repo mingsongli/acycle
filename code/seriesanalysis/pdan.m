@@ -1,122 +1,76 @@
-% function [pow,power_all,powall,powf,nc]=pdan(data,f3,window,nw,ftmin,fterm,step,pad)
-function [pow]=pdan(data,f3,window,nw,ftmin,fterm,step,pad)
-%% pdan calculates evolutionary spectral power of input narrow frequency bands
-%% and total spectral power (last colume)
-%   highlights variances of Milankovitchian 'signal' within 3 bands
-%   i.e., precession, eccentricity and obliquity bands.
-%  pda: Power decompostion analysis
-% INPUT
-% data:   evenly spaced 2-column time series; column 1 is time value
-%             in ascending order; column 2 is signal value 
-% f3:     2x pairs of frequency bands (> 0 and < nyquist)
-% window: moving window length in units of time (<< total data length)
-% nw:     time-bandwidth product of discrete prolate spheroidal sequences  
-%         used for window.  Typical choices for NW are 2, 5/2, 3, 7/2, 4.
-% ftmin:  lower cutoff frequency (> 0) for estimation of total variances
-% fterm:  upper cutoff frequency (< nyquist) for estimation of total variances
-% step:   step of calculations; default is 1
-% pad:    zero-padding number, e.g., 1000
+function pow = pdan(data,f3,window,nw,ftmin,fterm,step,pad)
+%PDAN Deterministic compatibility wrapper for evolutionary PDA.
+%   POW = PDAN(DATA,F3,WINDOW,NW,FTMIN,FTERM,STEP,PAD) delegates to
+%   ACYCLEPOWERDECOMPOSITION and preserves the historical four result
+%   columns. F3 is a vector of paired [lower,upper] target limits. WINDOW is
+%   an explicit first-to-last coordinate span. For compatibility, STEP is
+%   an integer number of input samples, while PAD is the explicit even NFFT.
+%   Limits above physical Nyquist, overlapping/unsorted bands, fractional
+%   steps, and FFT lengths shorter than the resolved window now fail rather
+%   than being silently clipped or truncated. No random NFFT probe is used.
 %
-% Uses pmtm.m, ones.m, zeros.m, mean.m; 
-%      nfft.m included in this script
-%
-% OUTPUT
-% pow:      total power of each selected frequency bands and total power of
-%           frequencies from ftmin to fterm
-%
-%% Mingsong Li (China Univ Geosci & Johns Hopkins Univ), Nov 12, 2014
-% Updated from pda.m by Mingsong Li (George Mason Univ), Dec 2016
-%       pda.m is from
-%       Li et al., 2016 Geology, doi: 10.1130/G37970.1
-%       https://doi.pangaea.de/10.1594/PANGAEA.859147
+%   Original PDA by Mingsong Li (2014); PDAN update by Mingsong Li (2016).
+%   Scientific reference: Li et al. (2016), Geology,
+%   https://doi.org/10.1130/G37970.1; data: https://doi.org/10.1594/PANGAEA.859147.
 
-%% Error msgs
-if(nargin >= 9)
-    disp('>> Error: too many arguments!')
+narginchk(3,8);
+if ~((isa(data,'double') || isa(data,'single')) && ...
+        isreal(data) && ismatrix(data) && size(data,2) == 2 && ...
+        size(data,1) >= 2 && all(isfinite(data(:))))
+    error('Acycle:PdanCompatibility:InvalidData', ...
+        'DATA must be a finite real floating-point N-by-2 matrix.');
 end
-if(nargin < 8)
+coordinate = double(data(:,1));
+spacing = diff(coordinate);
+if any(~isfinite(spacing)) || any(spacing <= 0)
+    error('Acycle:PdanCompatibility:InvalidCoordinates', ...
+        'DATA coordinates must be finite and strictly increasing.');
+end
+sampleInterval = median(spacing);
+nyquist = 1/(2*sampleInterval);
+
+if nargin < 4 || isempty(nw)
+    nw = 2;
+end
+if nargin < 5 || isempty(ftmin)
+    ftmin = 0;
+end
+if nargin < 6 || isempty(fterm)
+    fterm = nyquist;
+end
+if nargin < 7 || isempty(step)
+    step = 1;
+end
+if nargin < 8 || isempty(pad)
     pad = 1000;
-    if nargin < 7
-        step = 1;
-        if nargin < 6
-            fterm = 1/(2*(data(2,1)-data(1,1)));
-            if nargin <5
-                ftmin = 0;
-                if nargin < 4
-                    nw = 2;
-                end
-            end
-        end
-    end
 end
-%% 
-dt=data(2,1)-data(1,1);             % sample rate
-nyquist=1/(2*dt);                   % Nyquist frequency
-[nrow, ~]=size(data);               % size of data
-xdata=data(:,2);                    % value of time series
-npts=fix(window/dt);               % number of time series used for one calculation
-    if step >= nrow/2
-       disp('��Error: step is too big');
-    end
-    if fterm > nyquist
-        fterm = nyquist;
-    end
-f3(f3>nyquist)=nyquist;
-% disp('>>  Warning: Frequency is larger than nyquist frequency!')
-m=fix((nrow-npts)/step)+1;     % number of pmtm calculations, n_row of pmtm matrix results
-[nfpts]=nfft(npts,pad);        % function nfft is at the end of this function
 
-%% Calculate evolutionary pmtm results for data in givin window
-for m1=1:step:(step*m-1)
-    m2=npts+m1-1;
-    m3=(m1-1)/step+1;               % number of pmtm calculations considering step
-   
-    if m2>nrow                      % break in case of reach moving window boundary
-        break
-    end
-    x = xdata(m1:m2,1);x = x';
-    x=detrend(x);                   % remove linear trend of x
-    [p,~]=pmtm(x,nw,pad);           % pmtm of x
-    power_all(m3,:)=p;              % matrix of power
-end    
-%% avoid a overlap of cutoff frequencies
-[~, ncol]=size(f3); % ncol is cutoff frequencies; must be odd number
-nc = ncol/2;        % number of astronomical parameters
-
-%%
-    nftmin = ceil(nfpts*ftmin/nyquist);  % updated June 2016
-    if nftmin == 0
-        nftmin = 1;
-    end
-    nfterm = fix(nfpts*fterm/nyquist);   % updated June 2016
-    powall = power_all(:,nftmin:nfterm);
-    powallsum = sum(powall,2);
-    nf=[];
-for i = 1 : nc
-    % select cutoff frequencies fmin and fmax
-    fmin = min(f3(2*i-1), f3(2*i));
-    fmax = max(f3(2*i-1), f3(2*i));
-    nfmin = ceil(nfpts*fmin/nyquist);
-    if nfmin==0
-       nfmin=1;
-    end
-    nfmax = fix(nfpts*fmax/nyquist);
-    nf1 = nfmin:nfmax;
-    nf = [nf,nf1];
+if ~(isnumeric(f3) && ~islogical(f3) && isreal(f3) && ...
+        isvector(f3) && ~isempty(f3) && all(isfinite(f3(:))) && ...
+        mod(numel(f3),2) == 0)
+    error('Acycle:PdanCompatibility:InvalidTargetBands', ...
+        'F3 must be a finite real vector containing paired band limits.');
 end
-    nfrange = unique(nf);
-    powf = power_all(:,nfrange);
-    powfsum = sum(powf,2);
+targetBands = reshape(double(f3(:)),2,[]).';
+if ~(isnumeric(step) && ~islogical(step) && isreal(step) && ...
+        isscalar(step) && isfinite(step) && step >= 1 && step == fix(step))
+    error('Acycle:PdanCompatibility:InvalidStep', ...
+        'STEP must be a finite positive integer number of input samples.');
+end
+options = struct( ...
+    'window_length',positiveFiniteScalar(window,'WINDOW'), ...
+    'step_length',double(step)*sampleInterval, ...
+    'time_bandwidth',positiveFiniteScalar(nw,'NW'), ...
+    'fft_length',pad, ...
+    'total_band',[ftmin,fterm]);
+[pow,~,~] = acyclePowerDecomposition(data,targetBands,options);
+end
 
-pow(:,1) = (linspace(data(1,1)+window/2,data(nrow,1)-window/2,m3))';
-pow(:,2) = powfsum./powallsum;
-pow(:,3) = powfsum;
-pow(:,4) = powallsum;
- end
-
- %% get total number of frequencies from pmtm
-function [nfpts]=nfft(npts,pad)
-   xx=rand(1,npts);
-   xxx=pmtm(xx,2,pad);
-   [nfpts, ~]=size(xxx);
+function value = positiveFiniteScalar(value,name)
+if ~(isnumeric(value) && ~islogical(value) && isreal(value) && ...
+        isscalar(value) && isfinite(value) && value > 0)
+    error('Acycle:PdanCompatibility:InvalidParameter', ...
+        '%s must be a finite positive numeric scalar.',name);
+end
+value = double(value);
 end

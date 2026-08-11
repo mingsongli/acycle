@@ -1,9 +1,9 @@
 function y = movemean(x,w)
 %
-% movemean returns an array of local w-point mean values, 
-%   where each mean is calculated over a sliding window of length w 
-%   across neighboring elements of x. 
-%   When w is odd, the window is centered about the element in the current position. 
+% movemean returns an array of local w-point mean values,
+%   where each mean is calculated over a sliding window of length w
+%   across neighboring elements of x.
+%   When w is odd, the window is centered about the element in the current position.
 %   When k is even, the window is centered about the left element near the center. 
 %   The window size is automatically truncated at the endpoints 
 %   when there are not enough elements to fill the window. 
@@ -19,39 +19,14 @@ function y = movemean(x,w)
 %   Email: limingsonglms@gmail.com
 %
 
-m=length(x);
-y=zeros(m,1);
+narginchk(2,2);
+validateattributes(x,{'numeric'}, ...
+    {'vector','real','nonempty','finite'},mfilename,'x',1);
+x = full(double(x(:)));
 
-halfw = floor(w/2);
-idx1 = halfw + 1;    % starting index of input signal with moving window of size w
-
-if mod(w,2)
-    % odd number
-    %   first section
-    for i = 1: idx1-1
-        y(i) = nanmean(x(1: idx1-1+i));
-    end
-    %   body
-    for i = idx1 : m-idx1+1
-        y(i) = nanmean( x(i-halfw : i+halfw));
-    end
-    %   last section
-    for i = m-idx1+2 : m
-        y(i) = nanmean(x( i-halfw : m));
-    end
-    
-else
-    % even number
-    %   first section
-    for i = 1: halfw-1
-        y(i) = nanmean(x(1: halfw+i));
-    end
-    %   body
-    for i = halfw : m-idx1+1
-        y(i) = nanmean( x(i-(halfw-1) : i+halfw));
-    end
-    %   last section
-    for i = m-idx1+2 : m
-         y(i) = nanmean(x(i-(halfw-1) : m));
-    end
-end
+% Preserve the historical row-index window direction and column-vector
+% output while sharing the strict, toolbox-free numerical implementation.
+% Missing values are now rejected instead of being silently omitted.
+data = [(1:numel(x))',x];
+summary = acycleFixedCountMovingSummary(data,'mean',w);
+y = summary(:,2);

@@ -85,6 +85,7 @@ classdef ft < matlab.apps.AppBase
         data_filterout double = zeros(0,2)
         ifaze double = zeros(0,1)
         ifreq double = zeros(0,1)
+        ifreq_coordinate double = zeros(0,1)
         add_list_am char = ''
         add_list_ufaze char = ''
         add_list_ufazedet char = ''
@@ -96,6 +97,40 @@ classdef ft < matlab.apps.AppBase
     end
 
     methods (Access = private)
+        function [data,dt] = prepareInputSeries(app,data)
+            if ~((isa(data,'double') || isa(data,'single')) && ...
+                    isreal(data) && ismatrix(data) && size(data,2) == 2 && ...
+                    ~issparse(data))
+                error('Acycle:FT:InvalidInputSeries', ...
+                    'Filtering requires a real floating-point N-by-2 series.');
+            end
+            data = double(data(all(isfinite(data),2),:));
+            data = sortrows(data,1);
+            data = findduplicate(data);
+            if size(data,1) < 8
+                error('Acycle:FT:InsufficientFiniteData', ...
+                    ['Filtering requires at least eight finite samples ', ...
+                     'after duplicate coordinates are combined.']);
+            end
+            if acycleSamplingIsUneven(data(:,1))
+                warndlg(app.getLang('ec25', ...
+                    'Warning: the data may not be evenly spaced.'));
+                data = interpolate(data,median(diff(data(:,1))));
+            end
+            dt = median(diff(data(:,1)));
+            valueScale = max(abs(data(:,2)));
+            if valueScale == 0
+                inputMean = 0;
+            else
+                inputMean = valueScale*mean(data(:,2)/valueScale);
+            end
+            data(:,2) = data(:,2)-inputMean;
+            if any(~isfinite(data(:,2))) || all(data(:,2) == 0)
+                error('Acycle:FT:InvalidInputVariance', ...
+                    'The value column must have representable positive variance.');
+            end
+        end
+
         function txt = getLang(app, key, fallback)
             txt = fallback;
             if app.lang_choice <= 0 || isempty(app.lang_id) || isempty(app.lang_var)
@@ -284,30 +319,8 @@ classdef ft < matlab.apps.AppBase
             if isempty(app.current_data)
                 error('ft requires current_data in handles struct.');
             end
-            if size(app.current_data,2) < 2
-                error('ft:InsufficientColumns', ...
-                    'Filtering requires at least two numeric columns.');
-            end
-
-            finiteRows = all(isfinite(app.current_data(:,1:2)),2);
-            app.current_data = app.current_data(finiteRows,:);
-            app.current_data = sortrows(app.current_data,1);
-            app.current_data = findduplicate(app.current_data);
-            if size(app.current_data,1) < 2
-                error('ft:InsufficientFiniteData', ...
-                    'Filtering requires at least two finite unique samples.');
-            end
-            app.current_data(:,2) = app.current_data(:,2) - mean(app.current_data(:,2));
-
-            diffx = diff(app.current_data(:,1));
-            if acycleSamplingIsUneven(app.current_data(:,1))
-                warndlg(app.getLang('ec25','Warning: the data may not be evenly spaced.'));
-                app.current_data = interpolate( ...
-                    app.current_data,median(diffx));
-                diffx = diff(app.current_data(:,1));
-            end
-
-            app.step = median(diffx);
+            [app.current_data,app.step] = ...
+                app.prepareInputSeries(app.current_data);
             [app.f_fft, app.P1, app.f_mtm, app.p_mtm] = app.computeSpectra(app.current_data);
 
             app.x_1 = 0;
@@ -342,25 +355,33 @@ classdef ft < matlab.apps.AppBase
             app.updateBandpassPreview();
         end
 
-        function [f,P1,fd2,po2] = computeSpectra(app, data)
+        function [f,P1,fd2,po2] = computeSpectra(~, data)
             L = length(data(:,2));
-            dt = mean(diff(data(:,1)));
+            dt = median(diff(data(:,1)));
             try
                 [po2,w2] = pmtm(data(:,2),2,5*length(data(:,1)));
-                fd2 = w2/(2*pi*app.step);
+                fd2 = w2/(2*pi*dt);
             catch
                 % fallback if pmtm unavailable
                 Y0 = fft(data(:,2),L);
                 P20 = abs(Y0/L);
                 po2 = P20(1:floor(L/2)+1);
-                po2(2:end-1) = 2*po2(2:end-1);
-                fd2 = (1/dt) * (0:(L/2))/L;
+                if mod(L,2) == 0
+                    po2(2:end-1) = 2*po2(2:end-1);
+                else
+                    po2(2:end) = 2*po2(2:end);
+                end
+                fd2 = (0:floor(L/2))'/(L*dt);
             end
             Y = fft(data(:,2),L);
             P2 = abs(Y/L);
             P1 = P2(1:floor(L/2)+1);
-            P1(2:end-1) = 2*P1(2:end-1);
-            f = (1/dt) * (0:(L/2))/L;
+            if mod(L,2) == 0
+                P1(2:end-1) = 2*P1(2:end-1);
+            else
+                P1(2:end) = 2*P1(2:end);
+            end
+            f = (0:floor(L/2))'/(L*dt);
         end
 
         function updateBottomMtmPlot(app)
@@ -412,23 +433,26 @@ classdef ft < matlab.apps.AppBase
             data = app.current_data;
             time = data(:,1);
             datax = data(:,2);
-            dt = mean(diff(time));
+            dt = median(diff(time));
             nyquist = 1/(2*dt);
 
             flow = str2double(app.EditFlow.Value);
             fhigh = str2double(app.EditFhigh.Value);
-            if isnan(flow) || isnan(fhigh)
+            if any(~isfinite([flow,fhigh]))
+                uialert(app.UIFigure, ...
+                    'Band frequencies must be finite numbers.', ...
+                    'Invalid frequency band');
                 return
             end
-            if fhigh <= flow
-                fc = (fhigh + flow)/2;
-                flow = 0.8*fc;
-                fhigh = 1.2*fc;
-                app.EditFlow.Value = num2str(flow);
-                app.EditFhigh.Value = num2str(fhigh);
+            if ~(flow > 0 && fhigh > flow && fhigh < nyquist)
+                uialert(app.UIFigure,sprintf( ...
+                    ['Frequencies must satisfy 0 < lower < upper < ', ...
+                     'Nyquist (%.17g).'],nyquist), ...
+                    'Invalid frequency band');
+                return
             end
             fc = (flow + fhigh)/2;
-            flch = sort([flow fc fhigh]);
+            flch = [flow fc fhigh];
             app.filt_flow = flch(1); app.filt_fmid = flch(2); app.filt_fhigh = flch(3);
             app.LabelFcenter.Text = [app.getLang('ft07','f center'),': ',num2str(fc)];
 
@@ -444,29 +468,51 @@ classdef ft < matlab.apps.AppBase
             plot(app.AxesTop, f, P1, 'Color', [0.2 0.65 0.95]); hold(app.AxesTop,'on');
 
             app.filter = app.DropBandFilter.Value;
-            taner_c = 10^str2double(app.EditTaner.Value);
             add_list = '';
             data_filterout = [];
 
             if strcmp(app.filter,'Gaussian')
-                [gaussbandx,filter1,f1] = gaussfilter(datax,dt,flch(2),flch(1),flch(3));
-                gaussbandxAM = abs(hilbert(gaussbandx));
-                plot(app.AxesTop, f1, max(P1)*filter1, 'r-');
-                data_filterout = [time,gaussbandx,gaussbandxAM];
+                [filtered,~] = acycleBandpassFilter(data,struct( ...
+                    'method','gaussian', ...
+                    'lower_frequency',flow, ...
+                    'upper_frequency',fhigh));
+                plot(app.AxesTop,filtered.response_frequency, ...
+                    max(P1)*filtered.response_gain,'r-');
+                data_filterout = [time,filtered.filtered,filtered.envelope];
+                app.ifaze = zeros(0,1);
+                app.ifreq = zeros(0,1);
+                app.ifreq_coordinate = zeros(0,1);
                 add_list = [app.dat_name,'-Gau-flow-',num2str(flch(1)),'-fhigh-',num2str(flch(3)),'.txt'];
 
             elseif strcmp(app.filter,'Taner-Hilbert')
-                [tanhilb,app.ifaze,app.ifreq] = tanerhilbertML(data,flch(2),flch(1),flch(3),taner_c);
-                tanerfilterenv = evalin('base','tanerfilterenv');
-                tf = tanerfilterenv(1:floor(length(P1))) ./ max(tanerfilterenv(1:floor(length(P1)))) .* max(P1);
-                plot(app.AxesTop, f, tf, 'r-');
-                data_filterout = tanhilb;
-                add_list = [app.dat_name,'-Tan-flow-',num2str(flch(1)),'-fhigh-',num2str(flch(3)),'-e',num2str(log10(taner_c)),'.txt'];
-                app.add_list_am = [app.dat_name,'-Tan-flow-',num2str(flch(1)),'-fhigh-',num2str(flch(3)),'-e',num2str(log10(taner_c)),'-AM.txt'];
-                app.add_list_ufaze = [app.dat_name,'-Tan-flow-',num2str(flch(1)),'-fhigh-',num2str(flch(3)),'-e',num2str(log10(taner_c)),'-ufaze.txt'];
-                app.add_list_ufazedet = [app.dat_name,'-Tan-flow-',num2str(flch(1)),'-fhigh-',num2str(flch(3)),'-e',num2str(log10(taner_c)),'-ufazedet.txt'];
-                app.add_list_ifaze = [app.dat_name,'-Tan-flow-',num2str(flch(1)),'-fhigh-',num2str(flch(3)),'-e',num2str(log10(taner_c)),'-ifaze.txt'];
-                app.add_list_ifreq = [app.dat_name,'-Tan-flow-',num2str(flch(1)),'-fhigh-',num2str(flch(3)),'-e',num2str(log10(taner_c)),'-ifreq.txt'];
+                exponent = str2double(app.EditTaner.Value);
+                if ~(isfinite(exponent) && exponent > 0 && exponent <= 20)
+                    hold(app.AxesTop,'off');
+                    uialert(app.UIFigure, ...
+                        'Taner roll-off exponent must lie in (0,20].', ...
+                        'Invalid Taner roll-off');
+                    return
+                end
+                [filtered,~] = acycleBandpassFilter(data,struct( ...
+                    'method','taner_hilbert', ...
+                    'lower_frequency',flow, ...
+                    'upper_frequency',fhigh, ...
+                    'rolloff_exponent',exponent));
+                plot(app.AxesTop,filtered.response_frequency, ...
+                    max(P1)*filtered.response_gain,'r-');
+                data_filterout = [time,filtered.filtered, ...
+                    filtered.envelope,filtered.unwrapped_phase_rad, ...
+                    filtered.phase_residual_rad];
+                app.ifaze = filtered.wrapped_phase_rad;
+                app.ifreq = filtered.instantaneous_frequency;
+                app.ifreq_coordinate = ...
+                    filtered.instantaneous_frequency_coordinate;
+                add_list = [app.dat_name,'-Tan-flow-',num2str(flch(1)),'-fhigh-',num2str(flch(3)),'-e',num2str(exponent),'.txt'];
+                app.add_list_am = [app.dat_name,'-Tan-flow-',num2str(flch(1)),'-fhigh-',num2str(flch(3)),'-e',num2str(exponent),'-AM.txt'];
+                app.add_list_ufaze = [app.dat_name,'-Tan-flow-',num2str(flch(1)),'-fhigh-',num2str(flch(3)),'-e',num2str(exponent),'-ufaze.txt'];
+                app.add_list_ufazedet = [app.dat_name,'-Tan-flow-',num2str(flch(1)),'-fhigh-',num2str(flch(3)),'-e',num2str(exponent),'-ufazedet.txt'];
+                app.add_list_ifaze = [app.dat_name,'-Tan-flow-',num2str(flch(1)),'-fhigh-',num2str(flch(3)),'-e',num2str(exponent),'-ifaze.txt'];
+                app.add_list_ifreq = [app.dat_name,'-Tan-flow-',num2str(flch(1)),'-fhigh-',num2str(flch(3)),'-e',num2str(exponent),'-ifreq.txt'];
 
             elseif any(strcmp(app.filter,{'Cheby1','Ellip','Butter'}))
                 flowN = flch(1)/nyquist;
@@ -503,7 +549,7 @@ classdef ft < matlab.apps.AppBase
             data = app.current_data;
             time = data(:,1);
             datax = data(:,2);
-            dt = mean(diff(time));
+            dt = median(diff(time));
             L = length(datax);
             nyquist = 1/(2*dt);
             rayleigh = 1/(dt*L);
@@ -627,7 +673,7 @@ classdef ft < matlab.apps.AppBase
             if strcmp(filter,'Taner-Hilbert')
                 ampmod = [data_filterout(:,1),data_filterout(:,3)];
                 ifaze = [data_filterout(:,1),app.ifaze];
-                ifreq = [data_filterout(1:end-1,1),app.ifreq];
+                ifreq = [app.ifreq_coordinate,app.ifreq];
                 dlmwrite(app.add_list, data_filterout(:,1:2), 'delimiter', ' ', 'precision', 9);
                 dlmwrite(app.add_list_am, ampmod, 'delimiter', ' ', 'precision', 9);
                 dlmwrite(app.add_list_ufaze,[data_filterout(:,1),data_filterout(:,4)], 'delimiter', ' ', 'precision', 9);
@@ -647,14 +693,13 @@ classdef ft < matlab.apps.AppBase
                 title(app.getLang('ft18','Unrolled instantaneous phase'));
                 xlim([min(data(:,1)),max(data(:,1))]); set(gca,'XMinorTick','on','YMinorTick','on');
 
-                sdat = polyfit(t,data_filterout(:,4),1);
-                iphasedet = data_filterout(:,4) - (t-t(1))*sdat(1);
+                iphasedet = data_filterout(:,5);
                 subplot(4,1,3); plot(t,iphasedet);
                 title(app.getLang('ft19','Instantaneous phase'));
                 ylabel(app.getLang('ft20','phase (radians)'));
                 xlim([min(data(:,1)),max(data(:,1))]); set(gca,'XMinorTick','on','YMinorTick','on');
 
-                subplot(4,1,4); plot(t(1:end-1),app.ifreq);
+                subplot(4,1,4); plot(app.ifreq_coordinate,app.ifreq);
                 title(app.getLang('ft21','Instantaneous frequency'));
                 xlim([min(data(:,1)),max(data(:,1))]); set(gca,'XMinorTick','on','YMinorTick','on');
 

@@ -304,13 +304,13 @@ handles.menu_smooth_option = uimenu(handles.menu_smooth1,'Label','Moving Average
     'Callback',@(h,e)AC_dispatch('menu_smooth_option_Callback',h,e));
 handles.menu_movmeanfbw = uimenu(handles.menu_smooth_option,'Label','Fixed Bandwidth','Tag','menu_movmeanfbw', ...
     'Callback',@(h,e)AC_dispatch('menu_movmeanfbw_Callback',h,e));
-handles.menu_smooth = uimenu(handles.menu_smooth_option,'Label','K-Nearest Neighbor (KNN)','Tag','menu_smooth', ...
+handles.menu_smooth = uimenu(handles.menu_smooth_option,'Label','Fixed Count (K-point)','Tag','menu_smooth', ...
     'Callback',@(h,e)AC_dispatch('menu_smooth_Callback',h,e));
 handles.menu_movmedian_option = uimenu(handles.menu_smooth1,'Label','Moving Median','Tag','menu_movmedian_option', ...
     'Callback',@(h,e)AC_dispatch('menu_movmedian_option_Callback',h,e));
 handles.menu_movmedianfbw = uimenu(handles.menu_movmedian_option,'Label','Fixed Bandwidth','Tag','menu_movmedianfbw', ...
     'Callback',@(h,e)AC_dispatch('menu_movmedianfbw_Callback',h,e));
-handles.menu_movmedian = uimenu(handles.menu_movmedian_option,'Label','K-Nearest Neighbor (KNN)','Tag','menu_movmedian', ...
+handles.menu_movmedian = uimenu(handles.menu_movmedian_option,'Label','Fixed Count (K-point)','Tag','menu_movmedian', ...
     'Callback',@(h,e)AC_dispatch('menu_movmedian_Callback',h,e));
 handles.menu_movGauss = uimenu(handles.menu_smooth1,'Label','Moving Gaussian','Tag','menu_movGauss', ...
     'Callback',@(h,e)AC_dispatch('menu_movGauss_Callback',h,e));
@@ -3221,12 +3221,11 @@ function menu_norm_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 [contents,plot_selected,handles] = getMainListSelection(handles);
-nplot = length(plot_selected);   % length
-if nplot == 1
+if isscalar(plot_selected)
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
-        if isdir(data_name) == 1
+        if isfolder(data_name) == 1
         else
         [~,dat_name,ext] = fileparts(data_name);
         if sum(strcmp(ext,handles.filetype)) > 0
@@ -3403,7 +3402,7 @@ if nplot == 1
     data_name = char(contents(plot_selected));
     data_name = strrep2(data_name, '<HTML><FONT color="blue">', '</FONT></HTML>');
     GETac_pwd; data_name = fullfile(ac_pwd,data_name);
-        if isdir(data_name) == 1
+        if isfolder(data_name) == 1
         else
         [~,dat_name,ext] = fileparts(data_name);
         if sum(strcmp(ext,handles.filetype)) > 0
@@ -3876,15 +3875,14 @@ if nplot == 1
         if sum(strcmp(ext,handles.filetype)) > 0
             data = load(data_name);
 
-            % sort
-            data = sortrows(data);
-            % unique
-            data=findduplicate(data);
-            % remove empty 
+            % Retain the desktop input preparation policy before entering
+            % the strict, reusable numerical core.
             data(any(isinf(data),2),:) = [];
+            data = sortrows(data);
+            data = findduplicate(data);
 
-            diffx = diff(data(:,1));
-            if acycleSamplingIsUneven(data(:,1))
+            [data_am,amMeta] = acycleAmplitudeModulation(data);
+            if amMeta.interpolated
                 if handles.lang_choice == 0
                     hwarn = warndlg('Warning: Interpolation using median sampling rate');
                 else
@@ -3893,19 +3891,18 @@ if nplot == 1
                 set(gcf,'units','norm') % set location
                 %set(gcf,'position',[0.2,0.6,0.2,0.1])
                 figure(hwarn);
-                interpolate_rate = median(diffx);
-                [data]=interpolate(data,interpolate_rate);
             end
-
-            % remove mean of the 2nd column
-            data(:,2) = data(:,2) - mean(data(:,2));
-
-            % Use Hilbert transformation to extract envelope
-            envelope = abs(hilbert(data(:,2)));
-            data_am = [data(:,1), envelope];
             name1 = [dat_name1,'-AM',ext];
             CDac_pwd
-            dlmwrite(name1, data_am, 'delimiter', ' ', 'precision', 9);
+            % Preserve the legacy precision-9 text artifact format.
+            fileId = fopen(name1,'w');
+            if fileId < 0
+                error('Acycle:AmplitudeModulation:OutputOpenFailed', ...
+                    'Unable to open amplitude-modulation output file.');
+            end
+            fileCleanup = onCleanup(@()fclose(fileId));
+            fprintf(fileId,'%.9g %.9g\n',data_am.');
+            clear fileCleanup
             if handles.lang_choice == 0
                 msgbox('See main window for amplitude modulation')
             else
@@ -4428,7 +4425,6 @@ if nplot == 1
             data = load(data_name);
             time = data(:,1);
             value = data(:,2);
-            npts = length(time);
             if handles.lang_choice == 0
                 prompt = {'Enter Mininum value:','Enter Maximum value:'};
                 dlg_title = 'Input MIN and MAX value';
@@ -6069,7 +6065,7 @@ guidata(hObject, handles);
 
 
 % --------------------------------------------------------------------
-function menu_sr2age_Callback(hObject, eventdata, handles)
+function menu_sr2age_Callback(hObject, ~, handles)
 % hObject    handle to menu_sr2age (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -6088,20 +6084,19 @@ if nplot == 1
         if sum(strcmp(ext,handles.filetype)) > 0
             
             data = load(data_name);
-            data = data(~any(isnan(data),2),:);
-            data = sortrows(data);
-            
-            time = data(:,1);
-            value = data(:,2);
-            npts = length(time);
-            agemodel = zeros(npts,2);
-            agemodel(:,1) = time;
-            for i = 2:npts
-                agemodel(i,2) = 100*(time(i)-time(i-1))/value(i-1)+agemodel(i-1,2);
-            end
+            agemodel = acycleSedimentationRateAgeModel( ...
+                data,'m',0);
             name1 = [dat_name,'-agemod',ext];  % New name
-                CDac_pwd
-            dlmwrite(name1, agemodel, 'delimiter', ' ', 'precision', 9);
+            CDac_pwd
+            % Preserve the legacy precision-9 text artifact format.
+            fileId = fopen(name1,'w');
+            if fileId < 0
+                error('Acycle:SedRateAgeModel:OutputOpenFailed', ...
+                    'Unable to open sedimentation-rate age-model output file.');
+            end
+            fileCleanup = onCleanup(@()fclose(fileId));
+            fprintf(fileId,'%.9g %.9g\n',agemodel.');
+            clear fileCleanup
             refreshcolor;
             cd(pre_dirML); % return to matlab view folder
         end
@@ -6466,8 +6461,8 @@ if nsim_yes < 2
                         if ~isempty(answer)
                             window = str2double(answer{1});
                             interpolate_rate= str2double(answer{2});
-                            [data_even] = interpolate(data,interpolate_rate);
-                            [rhox] = erhoAR1(data_even,window);
+                            rhox = acycleEvolutionaryRho1( ...
+                                data,interpolate_rate,window);
 
                             figure; plot(rhox(:,1),rhox(:,2),'LineWidth',1)
 
@@ -8277,7 +8272,7 @@ if nplot == 1
                 fprintf(fidout, '%%\n');
                 fprintf(fidout, '%% Result Columns:\n');
                 fprintf(fidout, '%% ---------------\n');
-                fprintf(fidout, '%% 1:  Time = Time or depth\n');
+                fprintf(fidout, '%% 1:  Time = Window geometric center\n');
                 fprintf(fidout, '%% 2:  Mean = Time-dependent mean\n');
                 fprintf(fidout, '%% 3:   Var = Time-dependent variance\n');
                 fprintf(fidout, '%% 4:    Np = Number of points in window\n');
@@ -8358,7 +8353,6 @@ if nplot == 1
 
             time = data(:,1);
             value = data(:,2);
-            npts = length(time);
             if handles.lang_choice == 0
                 dlg_title = 'Moving Mean';
                 prompt = {'Window (number of data points, e.g., 3, 5, 7, ...):'};
@@ -8372,8 +8366,8 @@ if nplot == 1
             answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
             if ~isempty(answer)
                 smooth_v = str2double(answer{1});
-                %data(:,2) = movemean(data(:,2),smooth_v,'omitnan');
-                data(:,2) = movemean(data(:,2),smooth_v);
+                data = acycleFixedCountMovingSummary( ...
+                    data,'mean',smooth_v);
                 if handles.lang_choice == 0
                     name1 = [dat_name,'_',num2str(smooth_v),'ptsm',ext];  % New name
                 else
@@ -8469,9 +8463,23 @@ if nplot == 1
                 window = str2double(answer{1});
                 step  = str2double(answer{2});
                 halfwindow = str2double(answer{3});
-                % have fun
-                [t, ~, ~, ~, ~, ~, mediantd] ...
-                    = movmeanfbw(data, window, step, halfwindow);
+                if halfwindow == 0
+                    endpointPolicy = 'complete';
+                elseif halfwindow == 1
+                    endpointPolicy = 'partial';
+                else
+                    error('Acycle:FixedBandwidth:InvalidLegacyEndpointFlag', ...
+                        ['Fill half-window must be 0 for complete or 1 ', ...
+                         'for partial windows.']);
+                end
+                medianOptions = struct( ...
+                    'window_length',window, ...
+                    'step',step, ...
+                    'endpoint_policy',endpointPolicy);
+                medianResult = acycleFixedBandwidthSummary( ...
+                    data,'median',medianOptions);
+                t = medianResult(:,1);
+                mediantd = medianResult(:,2);
 
                 %data = [t, mediantd];
                 %if handles.lang_choice == 0
@@ -8508,8 +8516,8 @@ if nplot == 1
                 fprintf(fidout, '%%\n');
                 fprintf(fidout, '%% Result Columns:\n');
                 fprintf(fidout, '%% ---------------\n');
-                fprintf(fidout, '%% 1:   Time = Time or depth\n');
-                fprintf(fidout, '%% 2: Median = Time-dependent mean\n');
+                fprintf(fidout, '%% 1:   Time = Window geometric center\n');
+                fprintf(fidout, '%% 2: Median = Time-dependent median\n');
                 fprintf(fidout, '%%\n');
                 fprintf(fidout, '%%        Time            Median\n');
                 nout = length(t);
@@ -8596,7 +8604,6 @@ if nplot == 1
 
             time = data(:,1);
             value = data(:,2);
-            npts = length(time);
             if handles.lang_choice == 0
                 dlg_title = 'Moving Median';
                 prompt = {'Window (number of data points, e.g., 3, 5, 7, ...):'};
@@ -8611,17 +8618,20 @@ if nplot == 1
             if ~isempty(answer)
                 smooth_v = str2double(answer{1});
                 % median-smoothing
-                try data(:,2) = moveMedian(data(:,2),smooth_v);
+                try data = acycleFixedCountMovingSummary( ...
+                        data,'median',smooth_v);
                     if handles.lang_choice == 0
                         name1 = [dat_name,'_',num2str(smooth_v),'pts-median',ext];  % New name
                     else
                         name1 = [dat_name,'_',num2str(smooth_v),a284,ext];  % New name
                     end
                     CDac_pwd
-                    dlmwrite(name1, data, 'delimiter', ' ', 'precision', 9); 
+                    % Preserve the legacy precision-9 text artifact format.
+                    dlmwrite(name1, data, 'delimiter', ' ', ...
+                        'precision', 9); %#ok<DLMWT>
                     refreshcolor;
                     cd(pre_dirML); % return to matlab view folder
-                    mvmedianfig = figure;
+                    figure;
                     plot(time,value,'k')
                     hold on;
                     plot(time,data(:,2),'r','LineWidth',2.5)
@@ -8718,9 +8728,7 @@ if nplot == 1
             answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
             if ~isempty(answer)
                 window = round(str2double(answer{1}));
-                % median-smoothing data numbers
-                % median-smoothing
-                try data(:,2) = smoothdata(data(:,2),'gaussian',window); 
+                try data = acycleGaussianMovingAverage(data,window);
                     name1 = [dat_name,'_',num2str(window),'pts-Gauss',ext];  % New name
                     CDac_pwd
                     dlmwrite(name1, data, 'delimiter', ' ', 'precision', 9); 
@@ -8738,7 +8746,7 @@ if nplot == 1
                         legend('Raw',[num2str(window),' pts-Gauss smoothed'])
                     else
                         ylabel(main24)
-                        legend(a281,[num2str(smooth_v),a289])
+                        legend(a281,[num2str(window),a289])
                     end
                     
                     hold off;

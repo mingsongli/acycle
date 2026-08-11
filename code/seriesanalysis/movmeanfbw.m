@@ -1,164 +1,125 @@
-function [t, meantd, vartd, np, CI_lower, CI_upper, mediantd] ...
-    = movmeanfbw(data, window, step, halfwindow, alpha, plotn)
+function [t,meantd,vartd,np,CI_lower,CI_upper,mediantd] = ...
+        movmeanfbw(data,window,step,halfwindow,alpha,plotn)
+%MOVMEANFBW Compatibility wrapper for fixed-bandwidth mean statistics.
+%   [T,MEAN_TD,VAR_TD,NP,CI_LOWER,CI_UPPER,MEDIAN_TD] =
+%   MOVMEANFBW(DATA,WINDOW,STEP,HALFWINDOW,ALPHA,PLOTN) preserves the
+%   historical Acycle calling signature while delegating all window
+%   construction and statistics to ACYCLEFIXEDBANDWIDTHSUMMARY.
 %
-% This function calculates the time-dependent mean and variance of a 
-% time series using a sliding rectangular window. Temporal changes in 
-% mean and vari­ance can be used as a first-order check if a time series 
-% is weakly stationary.
-% It can process unevenly spaced time series directly without interpolation.
-% It use fixed bandwidth method.
-
-% INPUT
-%   data: time series, the first column must be time or depth
-%   window: sliding window
-%   step: running step
-%   halfwindow: 0 = empty half window; 1 = force window to cover the end of the data 
-%   alpha: p value
+%   DATA is sorted by coordinate for GUI compatibility, then must satisfy
+%   the shared core's strict finite, unique N-by-2 contract. HALFWINDOW=0
+%   selects complete windows; HALFWINDOW=1 selects partial endpoint windows.
+%   T now contains each nominal window's geometric center. Distinct windows
+%   are never merged merely because they contain the same observations.
+%   Mean rows require at least two observations, so every returned sample
+%   variance and variance confidence interval is finite and defined.
 %
-% OUTPUT
-%   t: mean of timestamps within each sliding window 
-%   meantd: time dependent mean
-%   vartd: time dependent variance
-%   np: number of data points
-%   CI_lower: 95% confidence interval lower bound
-%   CI_upper: 95% confidence interval upper bound
-%   mediantd: time dependent median value
+%   The seventh output is calculated through the same shared core's MEDIAN
+%   path and aligned to the emitted mean centers. PLOTN=1 retains the legacy
+%   optional diagnostic figure. The shared core itself never plots.
 %
-% Mingsong Li
-% Peking University
-% Oct. 13, 2023
-%
-%
-% sort data
-data = sortrows(data);
-% first column
-timestamps = data(:,1);
-% max and min of time
-tmin = min(timestamps);
-tmax = max(timestamps);
-tspan = tmax - tmin;
+%   Original Acycle implementation by Mingsong Li (Peking University),
+%   Oct. 13, 2023.
 
-if nargin < 6; plotn = 0; end
-if nargin < 5; alpha = 0.05; end
-if nargin < 4; halfwindow = 0; end
-if nargin < 3; step = median(diff(data(:,1))); end
-if nargin < 2; window = 0.3 * (tspan); end
-% data = currentdata; % load acycle data
-% window = 10; 
-% step = 2;
-%plotn = 1; % for plot
-
-% values
-values = data(:,2:end);
-
-if window > tspan; error('Error: Window size is larger than the time span.'); end
-if step > tspan; error('Error: Step is larger than the time span.'); end
-
-t = [];
-meantd = [];
-vartd = [];
-mediantd = [];
-np = [];
-CI_lower = [];
-CI_upper = [];
-
-if halfwindow == 0  % empty half window
-    allwindow = tmin:step:(tmax-window);
-elseif  halfwindow == 1  % fill half window
-    allwindow = tmin - window/2 : step :(tmax + window/2) ;
+narginchk(1,6);
+if ~(isa(data,'double') || isa(data,'single')) || ~isreal(data) || ...
+        ~ismatrix(data) || size(data,2) ~= 2 || size(data,1) < 2
+    error('Acycle:FixedBandwidth:InvalidData', ...
+        'DATA must be a real SINGLE or DOUBLE N-by-2 matrix with N >= 2.');
 end
-% for each windows
-for t_start = allwindow
-    t_end = t_start + window;
-    t_center = t_start + window/2;
-    % find data within this window
-    mask = (timestamps >= t_start) & (timestamps <= t_end);
-    
-    if sum(mask) > 0  % if this window contain data, save data
-        if t_center >= tmin && t_center <= tmax
-            % window t
-            window_t = mean(timestamps(mask));
-            % mean of the window
-            window_mean = mean(values(mask,:), 1);
-            % variance of the window
-            window_var = var(values(mask,:), 0, 1); % second input "0" uses N-1
-            % median
-            window_median = median(values(mask,:), 1);
-            % size
-            n = sum(mask);
-            
-            % critical values
-            chi2_lower = chi2inv(1-alpha/2, n-1); 
-            chi2_upper = chi2inv(alpha/2, n-1); 
-            % Confidence intervals at alpha
-            CI_var_lower = (n-1).*window_var./chi2_lower;
-            CI_var_upper = (n-1).*window_var./chi2_upper;
-            
-            % save median 
-            mediantd = [mediantd; window_median];
-            % save data
-            meantd = [meantd; window_mean];
-            vartd = [vartd; window_var];
-            t = [t; window_t];
-            np = [np; n];
-            CI_lower = [CI_lower; CI_var_lower];
-            CI_upper = [CI_upper; CI_var_upper];
-        end
-    end
+data = sortrows(data,1);
+timestamps = double(data(:,1));
+coordinateSpan = timestamps(end)-timestamps(1);
+
+if nargin < 2 || isempty(window)
+    window = 0.3*coordinateSpan;
+end
+if nargin < 3 || isempty(step)
+    step = median(diff(timestamps));
+end
+if nargin < 4 || isempty(halfwindow)
+    halfwindow = 0;
+end
+if nargin < 5 || isempty(alpha)
+    alpha = 0.05;
+end
+if nargin < 6 || isempty(plotn)
+    plotn = 0;
 end
 
-data = [t, meantd, vartd, np, CI_lower, CI_upper, mediantd];
+endpointPolicy = endpointPolicyFromLegacyFlag(halfwindow);
+plotRequested = logicalScalar(plotn,'plotn');
+meanOptions = struct( ...
+    'window_length',window, ...
+    'step',step, ...
+    'endpoint_policy',endpointPolicy, ...
+    'alpha',alpha);
+[meanResult,~] = acycleFixedBandwidthSummary(data,'mean',meanOptions);
 
-data = findduplicate(data);
+medianOptions = rmfield(meanOptions,'alpha');
+[medianResult,~] = acycleFixedBandwidthSummary( ...
+    data,'median',medianOptions);
+[centerFound,medianRow] = ismember(meanResult(:,1),medianResult(:,1));
+if ~all(centerFound)
+    error('Acycle:FixedBandwidth:InternalCenterAlignmentFailure', ...
+        ['Every emitted mean center must also be present in the median ', ...
+         'summary generated from the same candidate grid.']);
+end
 
-t = data(:,1);
-meantd = data(:,2);
-vartd = data(:,3);
-np = data(:,4);
-CI_lower = data(:,5);
-CI_upper = data(:,6);
-mediantd = data(:,7);
+t = meanResult(:,1);
+meantd = meanResult(:,2);
+vartd = meanResult(:,3);
+np = meanResult(:,4);
+CI_lower = meanResult(:,5);
+CI_upper = meanResult(:,6);
+mediantd = medianResult(medianRow,2);
 
-if plotn == 1
+if plotRequested
+    values = double(data(:,2));
+    confidencePercent = 100*(1-double(alpha));
     figure
     subplot(2,1,1)
-    plot(timestamps, values,'k-')
+    plot(timestamps,values,'k-')
     hold on
-    plot(t, meantd,'ro-')
-    xlim([tmin, tmax])
-    title(['Raw and move mean. Window = ', num2str(window)])
+    plot(t,meantd,'ro-')
+    xlim([timestamps(1),timestamps(end)])
+    title(['Raw and move mean. Window = ',num2str(window)])
     subplot(2,1,2)
-    plot(t, vartd,'r-')
+    plot(t,vartd,'r-')
     hold on
-    plot(t, CI_lower,'k--')
-    plot(t, CI_upper,'k--')
-    xlim([tmin, tmax])
-    title(['Move variance and 95% CI. Window = ', num2str(window)])
+    plot(t,CI_lower,'k--')
+    plot(t,CI_upper,'k--')
+    xlim([timestamps(1),timestamps(end)])
+    title(['Move variance and ',num2str(confidencePercent), ...
+        '% CI. Window = ',num2str(window)])
+end
 end
 
-function data=findduplicate(data)
+function policy = endpointPolicyFromLegacyFlag(flag)
+if islogical(flag) && isscalar(flag)
+    flag = double(flag);
+end
+if ~(isnumeric(flag) && isreal(flag) && isscalar(flag) && ...
+        isfinite(flag) && (flag == 0 || flag == 1))
+    error('Acycle:FixedBandwidth:InvalidLegacyEndpointFlag', ...
+        'HALFWINDOW must be 0 for complete or 1 for partial windows.');
+end
+if flag == 0
+    policy = 'complete';
+else
+    policy = 'partial';
+end
+end
 
-% This function aims to creat a new data series
-% with no duplicate values
-% Updated: data >2 columns allowed.
-%
-% Mingsong Li
-% Peking University
-% Oct. 14, 2023
-%
-
-x=data(:,1);
-b=unique(x);
-sizex=length(x);
-sizeb=length(b);
-
-if sizex-sizeb~=0
-    y = data(:,2:end);
-
-      for i = 1:length(b)
-        d(i,:) = mean( y(x==b(i),:) , 1);
-      end
-
-    data=[b,d];
-    disp('>> Duplicate has been detected')
+function value = logicalScalar(value,name)
+if islogical(value) && isscalar(value)
+    return
+end
+if isnumeric(value) && isreal(value) && isscalar(value) && ...
+        isfinite(value) && (value == 0 || value == 1)
+    value = logical(value);
+    return
+end
+error('Acycle:FixedBandwidth:InvalidLogicalScalar', ...
+    '%s must be one logical scalar.',upper(name));
 end

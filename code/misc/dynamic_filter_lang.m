@@ -39,8 +39,6 @@ function [xdata_filtered,time,freqboundlow,freqboundhigh,cancelled]=dynamic_filt
     end
     
     time=data(:,1);
-    xdata=data(:,2);
-    dt = mean(diff(time)); % sampling rate
     %s=evofft18(data,window,step,dt,fmin,fmax,unit,norm,padding);
     % Bug detected. Use Acycle's version evofft with zeropad2.m function
     % ML
@@ -95,8 +93,8 @@ function [xdata_filtered,time,freqboundlow,freqboundhigh,cancelled]=dynamic_filt
     while con == 1   
         [x, y, con] = ginput(1);
         if con == 1
-            x_min(i,1) = x;
-            y_min(i,1) = y;
+            x_min(i,1) = x; %#ok<AGROW>
+            y_min(i,1) = y; %#ok<AGROW>
             i = i + 1;
             figure(evofftfig)
             hold on
@@ -133,8 +131,8 @@ function [xdata_filtered,time,freqboundlow,freqboundhigh,cancelled]=dynamic_filt
     while con == 1   
         [x, y, con] = ginput(1);
         if con == 1
-            x_max(i,1) = x;
-            y_max(i,1) = y;
+            x_max(i,1) = x; %#ok<AGROW>
+            y_max(i,1) = y; %#ok<AGROW>
             i = i + 1;
             figure(evofftfig)
             hold on
@@ -163,38 +161,24 @@ function [xdata_filtered,time,freqboundlow,freqboundhigh,cancelled]=dynamic_filt
     figure(evofftfig)
     title(str);
     
-    inc=step/dt;
-    inc=floor(inc);
-    mpts=window/dt;
-    mpts=floor(mpts);
-    igrid=floor(0.5*mpts);
-    y_min=[y_grid(1);y_min;y_grid(end)];
-    y_max=[y_grid(1);y_max;y_grid(end)];
-    x_min=[x_min(1);x_min;x_min(end)];
-    x_max=[x_max(1);x_max;x_max(end)];
-    f_min = interp1(y_min,x_min,y_grid,'linear');
-    f_max = interp1(y_max,x_max,y_grid,'linear');
+    % Keep the interactive spectrum solely as a GUI for acquiring explicit
+    % control points. Numerical filtering is delegated to the strict,
+    % side-effect-free core. This removes the legacy dense
+    % windows-by-samples matrix, off-by-one window placement, and the use of
+    % nonzero filtered values as a proxy for sample coverage.
+    coreOptions = struct( ...
+        'window_length',window, ...
+        'step_length',step);
+    [coreResult,coreWindows] = acycleDynamicFilter( ...
+        data,freqboundlow,freqboundhigh,coreOptions);
+    time = coreResult(:,1);
+    xdata_filtered = coreResult(:,2).';
     figure(evofftfig)
     hold on
-    plot(f_min,y_grid,'o-g')
-    plot(f_max,y_grid,'o-g')
-    
-    output=zeros(length(y_grid),length(time));
-    fc=zeros(length(y_grid),1);
-    for n=1:length(y_grid)
-        m1=max(((n*inc)-igrid),1);
-        m2=min(((n*inc)+igrid),length(xdata));
-        tmp_data=xdata(m1:m2);
-        fc(n)=(f_min(n)+f_max(n))/2;
-        %gaussbandx=gaussfilter18(tmp_data,dt,(f_min(n)+f_max(n))/2,min(f_min(n),f_max(n)),max(f_min(n),f_max(n)));
-        [gaussbandx,~,~]=gaussfilter(tmp_data,dt,(f_min(n)+f_max(n))/2,min(f_min(n),f_max(n)),max(f_min(n),f_max(n)));
-        output(n,m1:m2)=gaussbandx;
-    end
-    plot(fc,y_grid,'-r')
+    plot(coreWindows(:,2),coreWindows(:,1),'o-g')
+    plot(coreWindows(:,3),coreWindows(:,1),'o-g')
+    plot(coreWindows(:,4),coreWindows(:,1),'-r')
     hold off
-    
-    count=sum(output~=0,1);
-    xdata_filtered=sum(output,1)./count;
     % close msgbox
     try close(msgbox1)
     catch

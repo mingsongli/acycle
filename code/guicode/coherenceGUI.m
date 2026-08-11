@@ -450,12 +450,10 @@ classdef coherenceGUI < matlab.apps.AppBase
 
         function onCohPChanged(app)
             v = str2double(app.EditCohP.Value);
-            if ~isfinite(v)
+            if ~isfinite(v) || v <= 0 || v >= 1
                 app.EditCohP.Value = '0.05';
                 return
             end
-            if v > 1, v = 1; end
-            if v < 0, v = 0; end
             app.EditCohP.Value = num2str(v);
             app.safeUpdate();
         end
@@ -510,7 +508,10 @@ classdef coherenceGUI < matlab.apps.AppBase
             nooverlap1 = str2double(app.EditOverlap.Value);
             plotx1 = str2double(app.EditFrom.Value);
             plotx2 = str2double(app.EditTo.Value);
-            if ~isfinite(cohthreshold), cohthreshold = 0.05; end
+            if ~isfinite(cohthreshold) || cohthreshold <= 0 || cohthreshold >= 1
+                cohthreshold = 0.05;
+                app.EditCohP.Value = '0.05';
+            end
             if ~isfinite(windowsize1) || windowsize1 <= 0, windowsize1 = abs(tar2-tar1)/2; end
             if ~isfinite(nooverlap1) || nooverlap1 < 0, nooverlap1 = windowsize1 * 0.5; end
             if ~isfinite(plotx1), plotx1 = 0; end
@@ -565,23 +566,39 @@ classdef coherenceGUI < matlab.apps.AppBase
 
                 series3 = select_interval(data2,sel1,sel2);
                 target2 = select_interval(target1,sel1,sel2);
-                y = (series3(:,2)-mean(series3(:,2)))./std(series3(:,2));
-                x = (target2(:,2)-mean(target2(:,2)))./std(target2(:,2));
-
-                [Cxy,F1,MSC_critical,significant_freqs,significant_Cxy,phase_diff_deg,F2,phase_uncertainty_deg] = ...
-                    cohac(x,y,sr_target,'hamming',windowsize,nooverlap,cohthreshold,0);
+                nfft = max(256,2^nextpow2(windowsize));
+                coherenceOptions = struct( ...
+                    'window_samples',windowsize, ...
+                    'overlap_samples',nooverlap, ...
+                    'nfft',nfft, ...
+                    'alpha',cohthreshold);
+                [coherenceResult,coherenceMeta] = acycleCoherencePhase( ...
+                    target2(:,1:2),series3(:,1:2),coherenceOptions);
+                Cxy = coherenceResult.magnitude_squared_coherence;
+                F1 = coherenceResult.frequency;
+                F2 = F1;
+                phase_diff_deg = coherenceResult.cross_phase_degrees;
+                phase_uncertainty_deg = ...
+                    coherenceResult.phase_standard_error_degrees;
+                MSC_critical = coherenceMeta.critical_coherence;
+                significantMask = coherenceResult.pointwise_significant;
+                significant_freqs = F1(significantMask);
+                significant_Cxy = Cxy(significantMask);
 
                 if save1
                     pre_dirML = pwd;
                     CDac_pwd;
+                    restoreDirectory = onCleanup(@()cd(pre_dirML));
                     add_list = [dat_name,'-COH-',app.targetName];
-                    dlmwrite(add_list,[F1,Cxy],'delimiter',' ','precision',9);
+                    app.writeNumericMatrix(add_list,[F1,Cxy]);
                     add_list = [dat_name,'-COH-sig-',app.targetName];
-                    dlmwrite(add_list,[significant_freqs,significant_Cxy],'delimiter',' ','precision',9);
+                    app.writeNumericMatrix(add_list, ...
+                        [significant_freqs,significant_Cxy]);
                     add_list2 = [dat_name,'-Phase-',app.targetName];
-                    dlmwrite(add_list2,[F2,phase_diff_deg,phase_uncertainty_deg],'delimiter',' ','precision',9);
+                    app.writeNumericMatrix(add_list2, ...
+                        [F2,phase_diff_deg,phase_uncertainty_deg]);
                     app.refreshMainListbox();
-                    cd(pre_dirML);
+                    clear restoreDirectory
                 end
 
                 if qplot1
@@ -597,28 +614,23 @@ classdef coherenceGUI < matlab.apps.AppBase
                     if forp == 1
                         plot(F1,Cxy,'k-o','LineWidth',2); xlabel('Frequency');
                     else
-                        plot(1./F1(2:end),Cxy(2:end),'k-o','LineWidth',2); xlabel('Period');
+                        plot(1./F1,Cxy,'k-o','LineWidth',2); xlabel('Period');
                     end
                     xlim([plotx1,plotx2]); ylim([0 1]); hold on;
                     plot(xlim,[1 1]*MSC_critical,'-.b');
                     title(['Magnitude-Squared Coherence. Critical Coherence = ',num2str(MSC_critical),' @ p-value = ',num2str(cohthreshold)]);
                     ylabel('Coherence'); set(gca,'XMinorTick','on','YMinorTick','on'); hold off;
 
-                    Cxyp = Cxy(Cxy>MSC_critical);
-                    F2p = F2(Cxy>MSC_critical);
-                    phasep = phase_diff_deg(Cxy>MSC_critical);
-                    uncp = phase_uncertainty_deg(Cxy>MSC_critical);
+                    F2p = F2(significantMask);
+                    phasep = phase_diff_deg(significantMask);
+                    uncp = phase_uncertainty_deg(significantMask);
 
                     subplot(3,1,2);
                     if forp == 1
                         h1 = errorbar(F2p, phasep, uncp);
                         xlabel('Frequency');
                     else
-                        try
-                            h1 = errorbar(1./F2p,1./phasep,1./uncp);
-                        catch
-                            h1 = errorbar(1./F2p(2:end),1./phasep(2:end),1./uncp(2:end));
-                        end
+                        h1 = errorbar(1./F2p,phasep,uncp);
                         xlabel('Period');
                     end
                     h1.LineWidth = 1.5; h1.Color = 'k'; h1.CapSize = 6; h1.LineStyle = 'none'; h1.Marker = 'o'; h1.MarkerSize = 8;
@@ -634,16 +646,20 @@ classdef coherenceGUI < matlab.apps.AppBase
                     set(gca,'XMinorTick','on','YMinorTick','on'); hold off;
 
                     subplot(3,1,3);
-                    if ~isempty(F2p) && F2p(1) ~= 0
-                        F3 = F2p;
+                    if forp == 1
+                        phaseCoordinate = F2p;
+                        phaseCoordinateLabel = 'Frequency';
                     else
-                        F3 = F2p(2:end);
+                        phaseCoordinate = 1./F2p;
+                        phaseCoordinateLabel = 'Period';
                     end
-                    if ~isempty(F3)
-                        h2 = errorbar(F3, phasep(1:numel(F3))./F3/360, uncp(1:numel(F3))./F3/360);
+                    if ~isempty(F2p)
+                        phaseLag = phasep./F2p/360;
+                        phaseLagUncertainty = uncp./F2p/360;
+                        h2 = errorbar(phaseCoordinate,phaseLag,phaseLagUncertainty);
                         h2.LineWidth = 1.5; h2.Color = 'k'; h2.CapSize = 6; h2.LineStyle = 'none'; h2.Marker = 'o'; h2.MarkerSize = 8;
                     end
-                    hold on; plot(xlim,[1 1]*0,'-k'); xlabel('Frequency');
+                    hold on; plot(xlim,[1 1]*0,'-k'); xlabel(phaseCoordinateLabel);
                     if strcmp(timedir,app.DropDepthTime.Items{1})
                         ylabel('Series lead (unit)');
                     else
@@ -656,9 +672,9 @@ classdef coherenceGUI < matlab.apps.AppBase
                 end
 
                 if qplot2
-                    Cxyp = Cxy(Cxy>MSC_critical);
-                    F2p = F2(Cxy>MSC_critical);
-                    phasep = phase_diff_deg(Cxy>MSC_critical);
+                    Cxyp = Cxy(significantMask);
+                    F2p = F2(significantMask);
+                    phasep = phase_diff_deg(significantMask);
                     try
                         figure(app.polarfigure);
                     catch
@@ -669,11 +685,9 @@ classdef coherenceGUI < matlab.apps.AppBase
                     if forp == 1
                         polarscatter(deg2rad(phasep),F2p,Cxyp.^2*500,'filled','MarkerFaceAlpha',.5);
                     else
-                        if numel(F2p) > 1 && numel(phasep) > 1
-                            polarscatter(deg2rad(phasep(2:end)),1./F2p(2:end),2.^(Cxyp(2:end).^2*100),'filled','MarkerFaceAlpha',.5);
-                        else
-                            polarscatter(deg2rad(phasep),1./F2p,2.^(Cxyp.^2*100),'filled','MarkerFaceAlpha',.5);
-                        end
+                        polarscatter(deg2rad(phasep),1./F2p, ...
+                            Cxyp.^2*500,'filled', ...
+                            'MarkerFaceAlpha',.5);
                     end
                     hold on; rlim([plotx1,plotx2]);
                     if strcmp(timedir,app.DropDepthTime.Items{1})
@@ -708,8 +722,25 @@ classdef coherenceGUI < matlab.apps.AppBase
         end
 
         function plotPreviewFallback(app)
-            plot(app.PreviewAxes,rand(20,2));
+            previewX = linspace(0,2*pi,20)';
+            plot(app.PreviewAxes,previewX,[sin(previewX),cos(previewX)]);
             polarscatter(app.PreviewPolar,deg2rad(45),10,50,'filled','MarkerFaceAlpha',0.5);
+        end
+
+        function writeNumericMatrix(~,filename,data)
+            fileID = fopen(filename,'w');
+            if fileID < 0
+                error('Acycle:CoherenceGUI:FileOpenFailed', ...
+                    'Unable to open output file: %s.',filename);
+            end
+            cleanup = onCleanup(@()fclose(fileID));
+            columnCount = size(data,2);
+            if isempty(data) || columnCount == 0
+                return
+            end
+            format = [repmat('%.9g ',1,columnCount-1),'%.9g\n'];
+            fprintf(fileID,format,data.');
+            clear cleanup
         end
 
         function refreshMainListbox(app)

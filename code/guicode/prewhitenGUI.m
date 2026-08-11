@@ -102,20 +102,22 @@ classdef prewhitenGUI < matlab.apps.AppBase
 
         function onRun(app, ~, ~)
             if app.RadioClassic.Value
-                rho1 = app.rho;
+                options = struct('rho_source','classic');
             elseif app.RadioRobust.Value
-                rho1 = app.rhoM;
+                options = struct('rho_source','robust');
             else
-                rho1 = str2double(app.EditUser.Value);
+                options = struct( ...
+                    'rho_source','user', ...
+                    'rho',str2double(app.EditUser.Value));
             end
 
-            if ~isfinite(rho1)
-                errordlg('rho should be numeric');
+            try
+                [datp,audit] = acyclePrewhitenSeries(app.dat,options);
+            catch analysisError
+                errordlg(analysisError.message,'Pre-whitening error');
                 return
             end
-
-            data = app.dat;
-            datp = prewhitening(data, rho1);
+            rho1 = audit.rho;
 
             [~, main21] = ismember('main21', app.lang_id);
             [~, main23] = ismember('main23', app.lang_id);
@@ -139,7 +141,8 @@ classdef prewhitenGUI < matlab.apps.AppBase
             name0 = [app.dat_name, '-', 'prewhiten-', num2str(rho1)];
             name1 = [name0, app.ext];
             CDac_pwd;
-            dlmwrite(name1, datp, 'delimiter', ' ', 'precision', 9);
+            dlmwrite(name1, datp, 'delimiter', ' ', ...
+                'precision', 9); %#ok<DLMWT>
 
             if main01 > 0
                 disp(['>> ', app.lang_var{main01}, ' : ', name1]);
@@ -204,10 +207,10 @@ classdef prewhitenGUI < matlab.apps.AppBase
 
             app.EditClassic = uieditfield(app.MainButtonGroup, 'text', ...
                 'FontSize', app.UIFontSize, 'BackgroundColor', app.EditEnabledColor, ...
-                'HorizontalAlignment', 'center');
+                'HorizontalAlignment', 'center', 'Editable', 'off');
             app.EditRobust = uieditfield(app.MainButtonGroup, 'text', ...
                 'FontSize', app.UIFontSize, 'BackgroundColor', app.EditEnabledColor, ...
-                'HorizontalAlignment', 'center');
+                'HorizontalAlignment', 'center', 'Editable', 'off');
             app.EditUser = uieditfield(app.MainButtonGroup, 'text', ...
                 'FontSize', app.UIFontSize, 'BackgroundColor', app.EditEnabledColor, ...
                 'HorizontalAlignment', 'center');
@@ -278,35 +281,16 @@ classdef prewhitenGUI < matlab.apps.AppBase
                 dat = interpolate(dat,median(diff(dat(:,1))));
             end
 
-            rho = rhoAR1ML(dat(:,2));
-            dt = median(diff(dat(:,1)));
-            [po,w] = periodogram(dat(:,2));
-            fd1 = w/(2*pi*dt);
-            poc = cumsum(po);
-            pocnorm = 100*poc/max(poc);
-            poc1 = find(pocnorm > 99, 1);
-            if fd1(poc1)/fd1(end) <= 0.85
-                ValidNyqFreq = fd1(poc1);
-            else
-                ValidNyqFreq = fd1(end);
-            end
-            fmax = ValidNyqFreq;
-            fn = 1/(2*dt);
-            [pxx,f] = pmtm(dat(:,2),2,length(dat(:,2)));
-            ft = f/pi*fn;
-            ft = ft(ft<=fmax);
-            pxx = pxx(ft<=fmax);
-            smoothn = round(0.2 * length(pxx));
-            pxxsmooth = moveMedian(pxx,smoothn);
-            s0 = mean(pxxsmooth);
-            [rhoM, ~] = minirhos0(s0,fmax,ft,pxxsmooth,2);
-
-            app.rho = rho;
-            app.rhoM = rhoM;
             app.dat = dat;
+            [~,classicAudit] = acyclePrewhitenSeries( ...
+                app.dat,struct('rho_source','classic'));
+            [~,robustAudit] = acyclePrewhitenSeries( ...
+                app.dat,struct('rho_source','robust'));
+            app.rho = classicAudit.rho;
+            app.rhoM = robustAudit.rho;
 
-            app.EditClassic.Value = num2str(rho);
-            app.EditRobust.Value = num2str(rhoM);
+            app.EditClassic.Value = num2str(app.rho);
+            app.EditRobust.Value = num2str(app.rhoM);
             app.EditUser.Value = '1';
 
             app.RadioClassic.Value = false;
@@ -327,7 +311,12 @@ classdef prewhitenGUI < matlab.apps.AppBase
             end
 
             app.createComponents();
-            app.initializeState();
+            try
+                app.initializeState();
+            catch initializationError
+                delete(app);
+                rethrow(initializationError);
+            end
             registerApp(app, app.UIFigure);
 
             if nargout == 0

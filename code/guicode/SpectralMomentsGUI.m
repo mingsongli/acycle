@@ -1,6 +1,25 @@
 classdef SpectralMomentsGUI < matlab.apps.AppBase
     % App Designer style replacement for legacy GUIDE SpectralMomentsGUI.
 
+    methods (Access = private)
+        function writeNumericMatrix(~,filename,values)
+            [fileID,message] = fopen(filename,'wt');
+            if fileID < 0
+                error('Acycle:SpectralMomentsGUI:OutputOpenFailed', ...
+                    'Unable to open output file %s: %s',filename,message);
+            end
+            fileCleanup = onCleanup(@()fclose(fileID));
+            columnCount = size(values,2);
+            format = [repmat('%.9g ',1,columnCount-1),'%.9g\n'];
+            written = fprintf(fileID,format,values.');
+            if written <= 0
+                error('Acycle:SpectralMomentsGUI:OutputWriteFailed', ...
+                    'No numeric output was written to %s.',filename);
+            end
+            clear fileCleanup
+        end
+    end
+
     properties (Access = public)
         UIFigure matlab.ui.Figure
         PanelData matlab.ui.container.Panel
@@ -152,8 +171,7 @@ classdef SpectralMomentsGUI < matlab.apps.AppBase
         end
 
         function updatePreviewPlot(app)
-            dat = app.dat;
-            if isempty(dat)
+            if isempty(app.dat)
                 return
             end
 
@@ -167,11 +185,11 @@ classdef SpectralMomentsGUI < matlab.apps.AppBase
                 set(app.spectralmomentsFig, 'Position', app.normalizedToPixelPosition([0.2,0.4,0.2,0.4]));
             end
 
-            plot(dat(:,1), dat(:,2));
+            plot(app.dat(:,1), app.dat(:,2));
             xlabel(app.unit);
             ylabel('Value');
             title(app.dat_name, 'Interpreter', 'none');
-            xlim([min(dat(:,1)), max(dat(:,1))]);
+            xlim([min(app.dat(:,1)), max(app.dat(:,1))]);
         end
 
         function onWindowChanged(app, ~, ~)
@@ -188,6 +206,9 @@ classdef SpectralMomentsGUI < matlab.apps.AppBase
 
         function onSrMeanChanged(app, ~, ~)
             app.srmean = str2double(app.EditSrMean.Value);
+            app.sedrate = double(app.CheckSedRate.Value);
+            app.padedge = double(app.CheckPadEdge.Value);
+            app.padtype = app.DropPadType.Value;
         end
 
         function onSedRateChanged(app, ~, ~)
@@ -205,16 +226,13 @@ classdef SpectralMomentsGUI < matlab.apps.AppBase
 
         function onPadEdgeChanged(app, ~, ~)
             app.dat = app.datbackup;
+            app.padedge = double(app.CheckPadEdge.Value);
             if app.CheckPadEdge.Value
                 app.DropPadType.Enable = 'on';
-                dat = zeropad2(app.datbackup, app.window, app.padtype);
-                app.pad = length(dat(:,1));
-                app.EditPad.Value = num2str(app.pad);
-                app.dat = dat;
+                app.dat = zeropad2( ...
+                    app.datbackup,app.window,app.padtype);
             else
                 app.DropPadType.Enable = 'off';
-                app.pad = length(app.datbackup(:,1));
-                app.EditPad.Value = num2str(app.pad);
             end
             app.updatePreviewPlot();
         end
@@ -235,41 +253,82 @@ classdef SpectralMomentsGUI < matlab.apps.AppBase
             app.pad = str2double(app.EditPad.Value);
             app.srmean = str2double(app.EditSrMean.Value);
 
-            data = app.dat;
-            window = app.window;
-            step = app.step;
-            pad = app.pad;
-            srmean = app.srmean;
+            requestedWindow = app.window;
+            requestedStep = app.step;
+            paddingFactor = app.pad;
+            meanSedimentationRate = app.srmean;
 
             switch app.smoothmodel
                 case 1
-                    smoothmodel = 'poly';
+                    legacySmoothModel = 'poly';
                 case 2
-                    smoothmodel = 'lowess';
+                    legacySmoothModel = 'lowess';
                 case 3
-                    smoothmodel = 'rlowess';
+                    legacySmoothModel = 'rlowess';
                 case 4
-                    smoothmodel = 'loess';
+                    legacySmoothModel = 'loess';
                 otherwise
-                    smoothmodel = 'rloess';
+                    legacySmoothModel = 'rloess';
             end
 
-            hwarn = warndlg('Please wait, this may take a couple of minutes ...','Warning: Spectral Moments: slow process');
+            useReviewedCore = app.sedrate == 0 && ...
+                (app.padedge == 0 || app.padtype == 1);
+            hwarn = [];
+            if ~useReviewedCore
+                hwarn = warndlg( ...
+                    'Please wait, this may take a couple of minutes ...', ...
+                    'Warning: Spectral Moments: slow process');
+            end
 
             if app.sedrate == 0
-                [depth, uf, Bw] = spectralmoments(data, window, step, pad);
+                if useReviewedCore
+                    if app.padedge == 1
+                        edgePadding = 'zero';
+                    else
+                        edgePadding = 'none';
+                    end
+                    options = struct( ...
+                        'window_length',requestedWindow, ...
+                        'step_length',requestedStep, ...
+                        'zero_padding_factor',paddingFactor, ...
+                        'edge_padding',edgePadding);
+                    moments = acycleSpectralMoments(app.datbackup,options);
+                    depth = moments(:,1);
+                    uf = moments(:,2);
+                    Bw = moments(:,3);
+                else
+                    % Mirror/mean/random padding remains on the legacy
+                    % path. Rebuild it from the unpadded input with the
+                    % current window and explicitly disable the core's
+                    % historical default padding, so the edge is applied
+                    % exactly once.
+                    data = zeropad2( ...
+                        app.datbackup,requestedWindow,app.padtype);
+                    [depth, uf, Bw] = spectralmoments( ...
+                        data,requestedWindow,requestedStep, ...
+                        paddingFactor,0,'poly',0);
+                end
                 figure;
                 set(gcf, 'color', 'w');
                 plot(depth, uf, 'r-', depth, Bw, 'b-.');
                 xlabel(app.unit); ylabel('Frequency (cycles/m)'); legend('\mu_f', 'B');
 
-                name1 = [app.dat_name, '-SpecMoments-depth-uf-bw-win', num2str(window), '.txt'];
+                name1 = [app.dat_name, ...
+                    '-SpecMoments-depth-uf-bw-win', ...
+                    num2str(requestedWindow),'.txt'];
                 CDac_pwd;
-                dlmwrite(name1, [depth, uf, Bw], 'delimiter', ' ', 'precision', 9);
+                app.writeNumericMatrix(name1,[depth,uf,Bw]);
                 app.refreshMainListbox();
                 cd(pre_dirML);
             else
-                [depth, uf, Bw, Bwtrend, sr] = spectralmoments(data, window, step, pad, srmean, smoothmodel, 0);
+                data = app.datbackup;
+                if app.padedge == 1
+                    data = zeropad2( ...
+                        app.datbackup,requestedWindow,app.padtype);
+                end
+                [depth, uf, Bw, Bwtrend, sr] = spectralmoments( ...
+                    data,requestedWindow,requestedStep,paddingFactor, ...
+                    meanSedimentationRate,legacySmoothModel,0);
                 figure;
                 set(gcf, 'color', 'w');
                 plot(depth, uf, 'r-', depth, Bw, 'b-.', depth, Bwtrend, 'g');
@@ -278,16 +337,23 @@ classdef SpectralMomentsGUI < matlab.apps.AppBase
                 set(gcf, 'color', 'w');
                 plot(depth, sr); xlabel('Depth (m)'); ylabel('Sed. rate (cm/kyr)');
 
-                name1 = [app.dat_name, '-SpecMoments-depth-uf-Bw-Btrend-win', num2str(window), '.txt'];
-                name2 = [app.dat_name, '-SpecMoments-sedrate-win', num2str(window), smoothmodel, '-SR', num2str(srmean), '.txt'];
+                name1 = [app.dat_name, ...
+                    '-SpecMoments-depth-uf-Bw-Btrend-win', ...
+                    num2str(requestedWindow),'.txt'];
+                name2 = [app.dat_name, ...
+                    '-SpecMoments-sedrate-win', ...
+                    num2str(requestedWindow),legacySmoothModel, ...
+                    '-SR',num2str(meanSedimentationRate),'.txt'];
                 CDac_pwd;
-                dlmwrite(name1, [depth, uf, Bw, Bwtrend], 'delimiter', ' ', 'precision', 9);
-                dlmwrite(name2, [depth, sr], 'delimiter', ' ', 'precision', 9);
+                app.writeNumericMatrix(name1,[depth,uf,Bw,Bwtrend]);
+                app.writeNumericMatrix(name2,[depth,sr]);
                 app.refreshMainListbox();
                 cd(pre_dirML);
             end
             try
-                close(hwarn);
+                if ~isempty(hwarn) && isgraphics(hwarn)
+                    close(hwarn);
+                end
             catch
             end
         end
@@ -444,39 +510,41 @@ classdef SpectralMomentsGUI < matlab.apps.AppBase
                 app.val1 = app.Context.val1;
             end
 
-            dat = app.Context.current_data;
-            dat = dat(all(isfinite(dat(:,1:2)),2),:);
-            if size(dat,1) < 2
+            inputData = app.Context.current_data;
+            inputData = inputData(all(isfinite(inputData(:,1:2)),2),:);
+            if size(inputData,1) < 2
                 error('SpectralMomentsGUI:InsufficientFiniteData', ...
                     ['Spectral Moments requires at least two finite ', ...
                      'unique samples.']);
             end
-            diffx = diff(dat(:,1));
+            diffx = diff(inputData(:,1));
             if sum(diffx <= 0) > 0
                 disp(app.getLang('a178', 'Input data not in ascending order; sorted automatically.'));
-                dat = sortrows(dat);
+                inputData = sortrows(inputData);
             end
-            dat = findduplicate(dat);
-            if size(dat,1) < 2
+            inputData = findduplicate(inputData);
+            if size(inputData,1) < 2
                 error('SpectralMomentsGUI:InsufficientUniqueData', ...
                     ['Spectral Moments requires at least two finite ', ...
                      'unique samples.']);
             end
-            if acycleSamplingIsUneven(dat(:,1))
+            if acycleSamplingIsUneven(inputData(:,1))
                 warndlg(app.getLang('ec25', 'Input data should be equally spaced.'));
-                dat = interpolate(dat,median(diff(dat(:,1))));
+                inputData = interpolate( ...
+                    inputData,median(diff(inputData(:,1))));
             end
 
-            datx = dat(:,1);
-            npts = length(datx);
-            dt = median(diff(dat(:,1)));
+            datx = inputData(:,1);
+            dt = median(diff(inputData(:,1)));
 
             app.window = 0.25 * abs(datx(end) - datx(1));
             app.step = dt;
-            app.pad = npts;
+            % The numerical contract defines this value as an NFFT
+            % multiplier, matching spectralmoments.m's documented default.
+            app.pad = 5;
 
-            app.dat = dat;
-            app.datbackup = dat;
+            app.dat = inputData;
+            app.datbackup = inputData;
             app.sedrate = 0;
             app.srmean = 5;
             app.smoothmodel = 1;

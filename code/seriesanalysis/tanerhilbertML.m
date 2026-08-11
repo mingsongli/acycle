@@ -1,114 +1,65 @@
-function [tanhilb,ifaze,ifreq] = tanerhilbertML(data,fc,fl,fh,c)
-%tanerhilbert.m - Produces a bandpassed version of an input real-
-%            valued time series by FFT, multiplication by filter
-%           designed in frequency domain, and inverse FFT.
+function [tanhilb,ifaze,ifreq,filter,responseFrequency, ...
+        ifreqCoordinate] = tanerhilbertML(data,fc,fl,fh,c)
+%TANERHILBERTML Corrected, side-effect-free Taner-Hilbert wrapper.
+%   [TANHILB,IFAZE,IFREQ,FILTER,F,IFREQCOORDINATE] =
+%   TANERHILBERTML(DATA,FC,FL,FH,C) preserves the first three historical
+%   outputs and explicitly returns the positive-frequency response and the
+%   instantaneous-frequency midpoint coordinates. No base-workspace value is
+%   assigned. C=10^q and q must lie in (0,20].
 %
-%    INPUTS
-%
-%           data=[t,x] time series to filter
-%           dt = sample rate of time series
-%           f1 = lower cut-off frequency 
-%           fc = center frequency of passband
-%           fh = upper cut-off frequency
-%           c = roll-off/octave (default= 10^12)
-%
-%           x = data to filter
-%           t=output time scale
-%           bandx = output filtered series
-%
-%      Linda Hinnov, December, 2006.  
-%      All service Ricker-based filter by Turhan Taner.
-%
-%      Reference:
-%        Taner, M.T. (2000), Attributes revisited, Technical Publication, 
-%         Rock Solid Images, Inc., Houston, Texas, URL:
-%         http://www.rocksolidimages.com/pdf/attrib_revisited.htm 
-%%
-if nargin < 5; c = 10^12; end
-t=data(:,1);
-x=data(:,2);
-dt=t(2)-t(1);
-filter = [ ];
-xftfor = [ ];
-xftinv = [ ];
-bandx = [ ];
-twopi=2.*pi;
-%c=10^12;
-npts=length(x);
-xnpts = npts;
-wnyq = twopi/(2.*dt);
-dw = twopi/(xnpts*dt);
-% dummy operation to set up filter size
-filter=x;
-%.....Set up filter
-wl = twopi*fl;     % calculate number in the fft rol result ML add
-wc = twopi*fc;     %
-wh = twopi*fh;     %
-bw = wh - wl;      % num used
-amp = 1./sqrt(2.);
-arg1 = 1. - (c*log(10.)) / (20.*log(amp));
-arg1 = log(arg1);
-arg2 = ((bw+2)/bw)^2;
-arg2 = log(arg2);
-twod = 2.*arg1/arg2;
-ncut = fix(npts/2+1);
-%.....Filter for positive frequencies
-for n=1:ncut
-    w = (n-1)*dw;
-    arg = (2.*abs(w-wc)/bw)^twod;
-    darg=-1.0*arg;
-    filter(n) =  ( amp * exp(darg));
+%   Historical attribution: Linda Hinnov (December 2006), using the filter
+%   described by Turhan Taner in "Attributes revisited" (2000), Rock Solid
+%   Images, Inc.
+
+narginchk(4,5);
+if nargin < 5 || isempty(c)
+    c = 1e12;
+end
+if ~((isa(data,'double') || isa(data,'single')) && ...
+        isreal(data) && ismatrix(data) && size(data,2) == 2 && ...
+        ~issparse(data) && size(data,1) >= 8 && all(isfinite(data),'all'))
+    error('Acycle:TanerHilbert:InvalidData', ...
+        'DATA must be a finite real floating-point N-by-2 matrix with N >= 8.');
+end
+fl = positiveFiniteScalar(fl,'FL');
+fh = positiveFiniteScalar(fh,'FH');
+fc = positiveFiniteScalar(fc,'FC');
+c = positiveFiniteScalar(c,'C');
+if fh <= fl
+    error('Acycle:TanerHilbert:InvalidFrequencyOrder', ...
+        'Frequencies must satisfy 0 < FL < FH.');
+end
+midpoint = (fl+fh)/2;
+tolerance = 64*eps(max([1,abs(fl),abs(fh),abs(midpoint)]));
+if abs(fc-midpoint) > tolerance
+    error('Acycle:TanerHilbert:CenterFrequencyMismatch', ...
+        'FC must equal the midpoint (FL+FH)/2.');
+end
+q = log10(c);
+if ~(isfinite(q) && q > 0 && q <= 20)
+    error('Acycle:TanerHilbert:InvalidRolloff', ...
+        'C must equal 10^q for an exponent q in (0,20].');
 end
 
-ncut1 = ncut+1;
-%.....Filter for negative frequencies
-for n=ncut1:npts
-    w = (n-npts-1)*dw;
-    aw = abs(w);
-    arg = (2.*abs(aw-wc)/bw)^twod;
-    darg=-1.0*arg;
-    filter(n) = (amp * exp(darg));
+[result,~] = acycleBandpassFilter(double(data),struct( ...
+    'method','taner_hilbert', ...
+    'lower_frequency',fl, ...
+    'upper_frequency',fh, ...
+    'rolloff_exponent',q));
+tanhilb = [result.coordinate,result.filtered,result.envelope, ...
+    result.unwrapped_phase_rad,result.phase_residual_rad];
+ifaze = result.wrapped_phase_rad;
+ifreq = result.instantaneous_frequency;
+filter = result.response_gain;
+responseFrequency = result.response_frequency;
+ifreqCoordinate = result.instantaneous_frequency_coordinate;
 end
-% below: for acycle plot
-assignin('base','tanerfilterenv',filter)
-% up   : for acycle plot
 
-%% Forward FFT data
-xftfor = fft(x,npts);
-%.....Apply the filter over all frequencies
-for n=1:npts
-    xftfor(n) = xftfor(n) * filter(n);
+function value = positiveFiniteScalar(value,name)
+if ~(isnumeric(value) && ~islogical(value) && isreal(value) && ...
+        isscalar(value) && isfinite(value) && value > 0)
+    error('Acycle:TanerHilbert:InvalidParameter', ...
+        '%s must be a finite positive real numeric scalar.',name);
 end
-%.....Inverse FFT
-xftinv = ifft(xftfor,npts);
-bandx = real(xftinv);
-%figure;plot(time,bandx),title('Taner');
-%
-% PERFORM QUADRATURE ANALYSIS
-% x is evenly spaced signal; t is time vector; 
-% dt is the spacing of x.
-% from Florian Maurer (found in MATLAB newsgroup)
-%
-xx=bandx;
-% performing the HILBERT TRANSFORM
-hx = hilbert(xx);
-% calculating the INSTANTANEOUS AMPLITUDE
-iamp = abs(hx);
-% calculating the UNROLLED PHASE
-ufaze = unwrap(angle(hx));
-ufazedet=detrend(ufaze);
-% calculating the INSTANTANEOUS PHASE
-ifaze = atan(angle(hx));
-% calculating the INSTANTANEOUS FREQUENCY
-ifreq = diff(ufaze)/(2*pi*dt);
-% plot the results
-% figure;
-% subplot(4,1,1), plot(t,xx),title('Modulated signal & Instantaneous amplitude'); hold on;
-% subplot(4,1,1), plot(t,iamp); hold off;
-% subplot(4,1,2), plot(t,ufaze),title('Unrolled phase')
-% subplot(4,1,3), plot(t,ufazedet),title('Detrended phase')
-% subplot(4,1,4), plot(t(1:(length(t)-1)),ifreq),title('Instantaneous frequency')
-%%
-
-tanhilb=[t,xx,iamp,ufaze,ufazedet];
-
+value = double(value);
+end
