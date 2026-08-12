@@ -1,8 +1,16 @@
 % pure EMD, an implementation of HHT
 % coded by Po-Nan Li @ Inst. of Phys., Academia Sinica, Taiwan
 
-function c = emd(y, goal)
+function c = emdNL(y, goal, pollFcn)
+%EMDNL Historical fixed-sift EMD implementation used by EEMD.
+%   C = EMDNL(Y,GOAL) preserves the historical calling convention.
+%   C = EMDNL(Y,GOAL,POLLFcn) additionally invokes a zero-input callback
+%   before each sifting iteration so a caller can cooperatively cancel.
 %%
+
+if nargin < 3
+    pollFcn = [];
+end
 
 sz = length(y);
 t = 1:sz;
@@ -13,10 +21,21 @@ c = zeros(goal+1,sz);
 h = y;
 r = h;
 for m = 1:goal
+    if ~isempty(pollFcn)
+        pollFcn();
+    end
+    internalExtrema = sum( ...
+        (r(2:end-1) > r(1:end-2) & r(2:end-1) > r(3:end)) | ...
+        (r(2:end-1) < r(1:end-2) & r(2:end-1) < r(3:end)));
+    if internalExtrema < 2
+        break
+    end
     count = 0;
     h = r;
     while(count < ceil(sqrt(sz)))        
-        
+        if ~isempty(pollFcn)
+            pollFcn();
+        end
         count = count + 1;
 
         [mx_p, mx_v, mn_p, mn_v] = find_extrema(h);

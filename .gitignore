@@ -23,6 +23,7 @@ code/test/*
 !code/test/test_ac_address_bar.m
 !code/test/test_ac_main_list.m
 !code/test/test_ac_settings.m
+!code/test/test_unittest_gui.m
 !code/test/build_coco_publication_reports.py
 !code/test/coco_publication_report_manifest.schema.json
 !code/test/refresh_coco_artifact_inventory.py

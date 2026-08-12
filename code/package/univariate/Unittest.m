@@ -34,6 +34,7 @@ function Unittest(varargin)
         tab1 = uitable(sf, 'FontSize', 12,...
                  'units','normalized',...
                  'Position', [0.05, 0.03, 0.9, 0.65],...
+                 'Tag', 'TTestSummaryTable',...
                  'ColumnName', {'Statistic', 'Value'},...
                  'ColumnWidth', {120,240},...
                  'RowName', []);
@@ -44,16 +45,19 @@ function Unittest(varargin)
 
         radio1(1) = uicontrol(btnGroup,'Style', 'radio', 'FontSize', 12,...
                         'String', '=',...
+                        'Tag', 'TTestAlternativeEqual',...
                         'Units', 'normalized', ...
                         'Position', [0.1, 0.03, 0.2, 0.9],...
                         'Value',1);
         radio1(2) = uicontrol(btnGroup,'Style', 'radio', 'FontSize', 12,...
                         'String', '>',...
+                        'Tag', 'TTestAlternativeGreater',...
                         'Units', 'normalized', ...
                         'Position', [0.3, 0.03, 0.2, 0.9],...
                         'Value',0);
         radio1(3) = uicontrol(btnGroup,'Style', 'radio', 'FontSize', 12,...
                         'String', '< given mean',...
+                        'Tag', 'TTestAlternativeLess',...
                         'Units', 'normalized', ...
                         'Position', [0.5, 0.03, 0.4, 0.9],...
                         'Value',0);
@@ -65,12 +69,14 @@ function Unittest(varargin)
                         'Position', [0.05, 0.88, 0.2, 0.08]);
         edit1 = uicontrol(sf,'Style', 'edit', 'FontSize', 12,...
                         'String', '0',...
+                        'Tag', 'TTestGivenMean',...
                         'Units', 'normalized', ...
                         'Position', [0.3, 0.9, 0.2, 0.06]);     
 
         % Create a "Statistics Summary" button
         btn = uicontrol(sf,'Style', 'pushbutton','FontSize', 12, ...
                         'String', 't test',...
+                        'Tag', 'TTestRunButton',...
                         'Units', 'normalized', ...
                         'Position', [0.75, 0.88, 0.21, 0.1],...
                         'Callback', @statSummary);
@@ -106,6 +112,12 @@ function Unittest(varargin)
         
         a = data(:);  % force
         miu = str2double(edit1.String);
+        if ~isscalar(miu) || ~isfinite(miu)
+            errordlg('Given mean must be a finite numeric value.', ...
+                'Invalid given mean');
+            stats = tab1.Data;
+            return
+        end
         
         if radio1(1).Value == 1
             option_cal = 1;
@@ -232,26 +244,97 @@ function Unittest(varargin)
         else
             figure(fig1)
         end
-        % PDF
-        if miu > 5
-            xlim1 = 1.2*miu;
+        % Plot the t distribution in t-statistic units. The previous range
+        % was based on the hypothesized mean (which has the data's units),
+        % and an extreme observed t value could also trigger auto-scaling.
+        % Both cases made the distribution appear as a narrow spike.
+        if option_cal == 1
+            criticalValues = [ci_left, t_critical];
         else
-            xlim1 = 5;
+            criticalValues = t_critical;
         end
-        x = -1*xlim1 : .1 : xlim1;
+        baseHalfWidth = max(5, 1.2*max(abs(criticalValues)));
+        if isfinite(t)
+            plotHalfWidth = min(max(baseHalfWidth, 1.1*abs(t)), ...
+                2*baseHalfWidth);
+        else
+            plotHalfWidth = baseHalfWidth;
+        end
+        x = linspace(-plotHalfWidth, plotHalfWidth, 1001);
         y = tpdf(x,dof);
-        % plot
-        plot(x,y,'k-')
-        hold on
-        xline(t_critical,'k--')
-        if option_cal == 1 
-            xline(ci_left,'k--')
+
+        clf(fig1)
+        ax = axes('Parent',fig1,'Tag','TTestAxes');
+        distributionLine = plot(ax,x,y,'k-','LineWidth',1.25, ...
+            'Tag','TTestDistribution');
+        % The first plot resets axes properties while NextPlot is
+        % 'replace', so restore the semantic tag after drawing it.
+        set(ax,'Tag','TTestAxes');
+        hold(ax,'on')
+
+        % Use stable, distinguishable colors for the two critical limits.
+        upperColor = [0, 0.4470, 0.7410];
+        lowerColor = [0.8500, 0.3250, 0.0980];
+        observedColor = [0.6350, 0.0780, 0.1840];
+
+        legendHandles = gobjects(0);
+        legendLabels = {};
+        legendHandles(end+1) = distributionLine;
+        legendLabels{end+1} = ['t distribution (dof = ',num2str(dof),')'];
+
+        if option_cal == 1
+            upperLine = xline(ax,t_critical,'--','Color',upperColor, ...
+                'LineWidth',1.5,'Tag','TTestUpperCritical');
+            lowerLine = xline(ax,ci_left,'--','Color',lowerColor, ...
+                'LineWidth',1.5,'Tag','TTestLowerCritical');
+            legendHandles(end+1) = upperLine;
+            legendLabels{end+1} = ['Upper critical t = ', ...
+                num2str(t_critical),' (95% CI)'];
+            legendHandles(end+1) = lowerLine;
+            legendLabels{end+1} = ['Lower critical t = ', ...
+                num2str(ci_left),' (95% CI)'];
+        elseif option_cal == 2
+            criticalLine = xline(ax,t_critical,'--','Color',upperColor, ...
+                'LineWidth',1.5,'Tag','TTestUpperCritical');
+            legendHandles(end+1) = criticalLine;
+            legendLabels{end+1} = ['Upper critical t = ', ...
+                num2str(t_critical),' (alpha = 0.05)'];
+        else
+            criticalLine = xline(ax,t_critical,'--','Color',lowerColor, ...
+                'LineWidth',1.5,'Tag','TTestLowerCritical');
+            legendHandles(end+1) = criticalLine;
+            legendLabels{end+1} = ['Lower critical t = ', ...
+                num2str(t_critical),' (alpha = 0.05)'];
         end
-        xline(t,'r-')
-        xlabel('Observation')
-        ylabel('Probability Density')
-        legend({['dof = ',num2str(dof)],['t = ',num2str(t_critical),' @ 95% CI'],['t = ',num2str(t),'@ μ = ',num2str(miu)]})
-        title('Testing the mean: probability of a value ')
-        hold off
+
+        if ~isnan(t)
+            observedPlotValue = t;
+            observedOutsideRange = ~isfinite(t) || abs(t) > plotHalfWidth;
+            if observedOutsideRange
+                observedPlotValue = sign(t)*0.97*plotHalfWidth;
+            end
+            observedLine = xline(ax,observedPlotValue,'-','Color', ...
+                observedColor,'LineWidth',1.75,'Tag','TTestObserved', ...
+                'UserData',t);
+            legendHandles(end+1) = observedLine;
+            if observedOutsideRange
+                legendLabels{end+1} = ['Observed t = ',num2str(t), ...
+                    ' @ μ = ',num2str(miu),' (outside displayed range)'];
+            else
+                legendLabels{end+1} = ['Observed t = ',num2str(t), ...
+                    ' @ μ = ',num2str(miu)];
+            end
+        end
+
+        % Lock a symmetric range after adding reference lines so xline
+        % cannot expand the axes and compress the probability density.
+        xlim(ax,[-plotHalfWidth, plotHalfWidth])
+        xlabel(ax,'t statistic')
+        ylabel(ax,'Probability Density')
+        legendObject = legend(ax,legendHandles,legendLabels, ...
+            'Location','best');
+        set(legendObject,'Tag','TTestLegend');
+        title(ax,'Testing the mean: Student''s t distribution')
+        hold(ax,'off')
     end
 end

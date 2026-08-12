@@ -28,15 +28,17 @@ function UniChi2GOFUI()
             "Poisson",...
             "Rayleigh",...
             "Weibull"];
-        % look for an existing figure with the name 'Acycle: Two Sample Tests'
-        fig = findobj(allchild(groot), 'flat', 'Name', 'Acycle: Two Sample Tests');
+        % Look for an existing Chi-square goodness-of-fit window.
+        fig = findobj(allchild(groot), 'flat', ...
+            'Name', 'Acycle: Chi-square GOF');
         
         % if no such uifigure
         stats = calculateStatistics(selectedData,'Normal');
         
         if isempty(fig)
             % Create the figure
-            fig = uifigure('Name', 'Acycle: Two Sample Tests', 'Position',[100 100 400 400]);
+            fig = uifigure('Name', 'Acycle: Chi-square GOF', ...
+                'Position',[100 100 400 400]);
 
             txt1 = uilabel(fig,...
                 'Text','Select test distribution',...

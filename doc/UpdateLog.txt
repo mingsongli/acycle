@@ -2,6 +2,53 @@
 _______________________________________
 
 
+Version : Acycle_v3.1.1
+Date    : August 12, 2026
+By      : Mingsong Li (Peking University)
+
+    1. RESTORED: Empirical Mode Decomposition tools.
+        EMD and EEMD are again available from the Timeseries menu, directly
+        above Amplitude Modulation. Their numerical core is now independent
+        of the desktop GUI for programmatic and batch use, while the GUI
+        provides parameter entry, progress/cancellation, plots, and optional
+        result saving.
+
+    2. FIXED: One-sample t-test visualization.
+        The probability-density plot now uses t-statistic units and stable
+        symmetric axes, with distinct critical limits and the observed
+        statistic, so shifted or extreme data no longer compress the
+        t distribution into a narrow spike.
+
+    3. FIXED: Chi-square goodness-of-fit window title.
+        The interface now uses the correct unique figure name, "Acycle:
+        Chi-square GOF," instead of "Acycle: Two Sample Tests," avoiding a
+        misleading title and window-name collision.
+
+    4. IMPROVED: Help menu reliability and release information.
+        Setting, What's New, Manual, Find Updates, Copyright, and Contact now
+        remain usable after the main GUI code is reloaded. Local resources
+        are located independently of the working directory, online links use
+        current targets with fallbacks, and Copyright reads the current
+        version from ac_version.txt.
+
+    5. IMPROVED: File menu cleanup.
+        The redundant Open Working Directory item has been removed.
+
+    6. NEW: Reusable programmatic analysis interfaces.
+        Major filtering, interpolation, spectral, statistical, age-model,
+        and time-series operations now provide validated numerical cores
+        independent of desktop dialogs and file handling, supporting scripts,
+        batch workflows, automated testing, and future tool integration.
+
+    7. IMPROVED: COCO/eCOCO programmatic method contracts.
+        Adaptive, Blocked, and Interleaved workflows now expose clearer,
+        validated options for window geometry, progress reporting, consensus,
+        preprocessing, and publication-oriented experiments while retaining
+        compatibility with existing GUI workflows.
+
+_______________________________________
+
+
 Version : Acycle_v3.1.0
 Date    : August 5, 2026
 By      : Mingsong Li (Peking University)
@@ -25,21 +72,10 @@ By      : Mingsong Li (Peking University)
         the appropriate interpolation or analysis fallback. The reversed
         spacing check in Power Decomposition was also corrected.
 
-    3. IMPROVED: Bispectral display defaults.
-        The independent strongest-value retain fractions for bispectrum
-        magnitude and magnitude-squared bicoherence now both default to 50%.
-
-    4. FIXED: Robust AR(1) spectral settings.
+    3. FIXED: Robust AR(1) spectral settings.
         Spectral Analysis again asks for the median-smoothing fraction before
         running Robust AR(1), with the original 20% default. The selected
         value is used by both MTM and Lomb-Scargle and recorded when saved.
-
-    5. IMPROVED: Bispectral uneven-sampling recovery.
-        Sampling departures above 10 ppm now produce a warning, are linearly
-        regularized at the median spacing, and continue through analysis.
-        WOSA defaults and frequency checks use the regularized sample count,
-        and interpolation warnings remain visible even if later saving fails.
-        Nonfinite, unsorted, duplicate, or too-short inputs remain errors.
 
 _______________________________________
 

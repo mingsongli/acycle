@@ -52,7 +52,7 @@ classdef copyright < matlab.apps.AppBase
 
         function lines = fallbackCopyrightText(~)
             lines = {
-                'Copyright (C) 2017-2023';
+                ['Copyright (C) 2017-', datestr(now, 'yyyy')];
                 'Copyright text file is missing.';
                 'Expected: acycle/doc/copyright_text.txt'
                 };
@@ -164,7 +164,7 @@ classdef copyright < matlab.apps.AppBase
 
             app.HeaderLabel = uilabel(app.HeaderGrid, ...
                 'Text', sprintf('%s\n%s\n%s\n%s', ...
-                'Acycle v3.0 (Feb 21, 2026)', ...
+                app.currentVersionLabel(), ...
                 'Mingsong Li (Peking University) & Linda A. Hinnov (George Mason)', ...
                 'Website: acycle.org', ...
                 'github.com/mingsongli/acycle'), ...
@@ -199,6 +199,20 @@ classdef copyright < matlab.apps.AppBase
                     axis(app.LogoAxes, 'off');
                 catch
                 end
+            end
+        end
+
+        function label = currentVersionLabel(app)
+            label = 'Acycle';
+            versionPath = app.locateResource('ac_version.txt');
+            try
+                versionText = strtrim(fileread(versionPath));
+                if ~isempty(regexp(versionText, ...
+                        '^[0-9]+(?:\.[0-9]+)*(?:[-+][0-9A-Za-z.-]+)?$', ...
+                        'once'))
+                    label = ['Acycle v', versionText];
+                end
+            catch
             end
         end
     end

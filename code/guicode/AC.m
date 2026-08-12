@@ -164,8 +164,6 @@ handles.menu_NewDataTable = uimenu(handles.menu_file,'Label','Create Data Table'
     'Callback',@(h,e)AC_dispatch('menu_NewDataTable_Callback',h,e));
 handles.menu_savefig = uimenu(handles.menu_file,'Label','Save *.AC.fig','Tag','menu_savefig','Separator','on', ...
     'Callback',@(h,e)AC_dispatch('menu_savefig_Callback',h,e));
-handles.menu_open = uimenu(handles.menu_file,'Label','Open Working Directory','Tag','menu_open', ...
-    'Callback',@(h,e)AC_dispatch('menu_open_Callback',h,e));
 handles.menu_extract = uimenu(handles.menu_file,'Label','Extract Data','Tag','menu_extract','Separator','on', ...
     'Callback',@(h,e)AC_dispatch('menu_extract_Callback',h,e));
 handles.menu_opendir = uimenu(handles.menu_file,'Label','Open Directory','Tag','menu_opendir','Visible','off', ...
@@ -338,6 +336,11 @@ handles.menu_filter = uimenu(handles.menuac,'Label','Filtering','Tag','menu_filt
     'Callback',@(h,e)AC_dispatch('menu_filter_Callback',h,e));
 handles.menu_dynfilter = uimenu(handles.menuac,'Label','Dynamic Filtering','Tag','menu_dynfilter', ...
     'Callback',@(h,e)AC_dispatch('menu_dynfilter_Callback',h,e));
+handles.Menu_EMDmenu = uimenu(handles.menuac,'Label','Empirical Mode Decomposition','Tag','Menu_EMDmenu');
+handles.menu_emd = uimenu(handles.Menu_EMDmenu,'Label','Empirical Mode Decomposition (EMD)','Tag','menu_emd', ...
+    'Callback',@(h,e)AC_dispatch('menu_emd_Callback',h,e));
+handles.menu_eemd = uimenu(handles.Menu_EMDmenu,'Label','Ensemble Empirical Mode Decomposition (EEMD)','Tag','menu_eemd', ...
+    'Callback',@(h,e)AC_dispatch('menu_eemd_Callback',h,e));
 handles.menu_AM = uimenu(handles.menuac,'Label','Amplitude Modulation','Tag','menu_AM', ...
     'Callback',@(h,e)AC_dispatch('menu_AM_Callback',h,e));
 handles.menu_agebuild = uimenu(handles.menuac,'Label','Build Age Model','Tag','menu_agebuild','Separator','on', ...
@@ -365,17 +368,17 @@ handles.menu_specmoments = uimenu(handles.menuac,'Label','Spectral Moments','Tag
 
 % Help
 handles.menu_settings = uimenu(handles.menu_help,'Label','Setting...','Tag','menu_settings', ...
-    'Callback',@(h,e)AC_dispatch('menu_settings_Callback',h,e));
+    'Callback',{@ac_gui_dispatch,'menu_settings_Callback'});
 handles.menu_read = uimenu(handles.menu_help,'Label','What''s New','Tag','menu_read', ...
-    'Callback',@(h,e)AC_dispatch('menu_read_Callback',h,e));
+    'Callback',{@ac_gui_dispatch,'menu_read_Callback'});
 handles.menu_manuals = uimenu(handles.menu_help,'Label','Manual','Tag','menu_manuals','Accelerator','h', ...
-    'Callback',@(h,e)AC_dispatch('menu_manuals_Callback',h,e));
+    'Callback',{@ac_gui_dispatch,'menu_manuals_Callback'});
 handles.menu_findupdates = uimenu(handles.menu_help,'Label','Find Updates','Tag','menu_findupdates', ...
-    'Callback',@(h,e)AC_dispatch('menu_findupdates_Callback',h,e));
+    'Callback',{@ac_gui_dispatch,'menu_findupdates_Callback'});
 handles.menu_contact = uimenu(handles.menu_help,'Label','Copyright','Tag','menu_contact', ...
-    'Callback',@(h,e)AC_dispatch('menu_contact_Callback',h,e));
+    'Callback',{@ac_gui_dispatch,'menu_contact_Callback'});
 handles.menu_email = uimenu(handles.menu_help,'Label','Contact','Tag','menu_email', ...
-    'Callback',@(h,e)AC_dispatch('menu_email_Callback',h,e));
+    'Callback',{@ac_gui_dispatch,'menu_email_Callback'});
 
 % Main controls
 handles.popupmenu2 = uicontrol(hFig,'Style','popupmenu','Units','normalized', ...
@@ -453,6 +456,7 @@ candidates = {
     fullfile(guiDirectory,'..','bin',resourceName)
     fullfile(guiDirectory,'..','icons',resourceName)
     fullfile(guiDirectory,resourceName)
+    fullfile(guiDirectory,'..','..','doc',resourceName)
     };
 for candidateIndex = 1:numel(candidates)
     if exist(candidates{candidateIndex},'file') == 2
@@ -510,7 +514,7 @@ catch
 end
 
 function parentMenu = AC_menuParent(handles, key)
-fileItems = {'menu_folder','menu_newtxt','menu_NewDataTable','menu_savefig','menu_open','menu_opendir','menu_extract'};
+fileItems = {'menu_folder','menu_newtxt','menu_NewDataTable','menu_savefig','menu_opendir','menu_extract'};
 editItems = {'menu_refreshlist','menu_rename','menu_cut','menu_copy','menu_paste','menu_delete'};
 plotItems = {'menu_plot','menu_plotpro_2d','menu_plotn','menu_plotn2','menu_samplerate','menu_datadistri','menu_sound','menu_plotadv'};
 basicItems = {'menu_insol','menu_laskar','menu_LOD','linegenerator','menu_LR04','menu_examples', ...
@@ -564,6 +568,18 @@ catch
     handles = guidata(hObject);
 end
 try
+    isHelpMenuItem = false;
+    if startsWith(callbackName,'menu_') && isgraphics(hObject)
+        parent = get(hObject,'Parent');
+        isHelpMenuItem = isgraphics(parent) && ...
+            strcmp(get(parent,'Tag'),'menu_help');
+    end
+    if isHelpMenuItem
+        % Help actions do not use the selected data file. Keep them usable
+        % even while the main file list is stale or being refreshed.
+        feval(callbackName,hObject,eventdata,handles);
+        return
+    end
     % Every callback receives one reconciled view of the main list.  The
     % visible drawn list, the hidden uicontrol and GUIDE's cached handles
     % can otherwise retain different selections after a refresh/sort.
@@ -906,8 +922,6 @@ if lang_choice > 0
     set(handles.menu_newtxt,'text',lang_var{locb})
     [~, locb] = ismember('menu22',lang_id);
     set(handles.menu_savefig,'text',lang_var{locb})
-    [~, locb] = ismember('menu23',lang_id);
-    set(handles.menu_open,'text',lang_var{locb})
     [~, locb] = ismember('menu24',lang_id);
     set(handles.menu_opendir,'text',lang_var{locb})
     [~, locb] = ismember('menu25',lang_id);
@@ -2913,74 +2927,106 @@ end
 
 
 % --------------------------------------------------------------------
-function menu_read_Callback(hObject, eventdata, handles)
+function menu_read_Callback(~, ~, handles)
 % hObject    handle to menu_read (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-%
-filename = 'UpdateLog.txt';
-url = 'https://github.com/mingsongli/acycle/blob/master/doc/UpdateLog.txt';
-if isdeployed
-    web(url,'-browser')
-else
-    try uiopen(filename,1);
-    catch
-        if ispc
-            try open(filename)
-            catch
-                try winopen(filename)
-                catch
-                    try web(url,'-browser')
-                    catch
-                    end
-                end
-            end
-        elseif ismac
-                try system(['open ',filename]);
-                catch
-                    try web(url,'-browser')
-                    catch
-                    end
-                end
-        else
-            web(url,'-browser')
-        end
-    end
+updateLogPath = AC_resourcePath('UpdateLog.txt');
+updateLogURL = ...
+    'https://github.com/mingsongli/acycle/blob/master/doc/UpdateLog.txt';
+opener = AC_helpTargetOpener(handles);
+opened = false;
+if ~isdeployed && ~isempty(updateLogPath)
+    opened = AC_openHelpTarget(updateLogPath,opener);
+end
+if ~opened && ~AC_openHelpTarget(updateLogURL,opener)
+    AC_helpOpenError('What''s New',updateLogURL);
 end
 
 % --------------------------------------------------------------------
-function menu_manuals_Callback(hObject, eventdata, handles)
+function menu_manuals_Callback(~, ~, handles)
 % hObject    handle to menu_manuals (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-%filename = which('Acycle_Users_Guide.pdf');
-%openpdf(filename);
-url2 = 'https://github.com/mingsongli/acycleDoc/blob/main/Acycle_Users_Guide.pdf';
-web(url2,'-browser')
-url = 'https://acycle.org/manual/';
-web(url,'-browser')
+manualURL = 'https://acycle.org/manual/';
+manualFallbackURL = ...
+    'https://github.com/mingsongli/acycleDoc/blob/main/Acycle_Users_Guide.pdf';
+opener = AC_helpTargetOpener(handles);
+if ~AC_openHelpTarget(manualURL,opener) && ...
+        ~AC_openHelpTarget(manualFallbackURL,opener)
+    AC_helpOpenError('Manual',manualURL);
+end
 
 
 % --------------------------------------------------------------------
-function menu_findupdates_Callback(hObject, eventdata, handles)
+function menu_findupdates_Callback(~, ~, handles)
 % hObject    handle to menu_findupdates (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-url = 'https://github.com/mingsongli/acycle';
-web(url,'-browser')
-url = 'https://acycle.org/downloads/';
-web(url,'-browser')
+downloadsURL = 'https://acycle.org/downloads/';
+downloadsFallbackURL = 'https://github.com/mingsongli/acycle/releases';
+opener = AC_helpTargetOpener(handles);
+if ~AC_openHelpTarget(downloadsURL,opener) && ...
+        ~AC_openHelpTarget(downloadsFallbackURL,opener)
+    AC_helpOpenError('Find Updates',downloadsURL);
+end
 
 % --------------------------------------------------------------------
-function menu_contact_Callback(hObject, eventdata, handles)
+function menu_contact_Callback(hObject, ~, handles)
 % hObject    handle to menu_contact (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
 guidata(hObject, handles);
 copyright(handles)
+
+
+function opened = AC_openHelpTarget(target,varargin)
+% Open one local Help resource or external URL through a testable adapter.
+if ~isempty(varargin) && isa(varargin{1},'function_handle')
+    opener = varargin{1};
+else
+    opener = @AC_defaultHelpTargetOpener;
+end
+try
+    status = opener(target);
+    opened = isempty(status) || ...
+        (isnumeric(status) && isscalar(status) && status == 0) || ...
+        (islogical(status) && isscalar(status) && status);
+catch
+    opened = false;
+end
+
+
+function opener = AC_helpTargetOpener(handles)
+opener = [];
+if isstruct(handles) && isfield(handles,'HelpTargetOpener') && ...
+        isa(handles.HelpTargetOpener,'function_handle')
+    opener = handles.HelpTargetOpener;
+end
+if isempty(opener)
+    opener = @AC_defaultHelpTargetOpener;
+end
+
+
+function status = AC_defaultHelpTargetOpener(target)
+if isstring(target) && isscalar(target)
+    target = char(target);
+end
+if ~ischar(target)
+    error('Acycle:Help:InvalidTarget','The Help target must be text.');
+end
+isExternalURL = ~isempty(regexp(target,'^https?://','once'));
+if isExternalURL
+    status = web(target,'-browser');
+else
+    status = open(target);
+end
+
+
+function AC_helpOpenError(itemLabel,target)
+errordlg({['Unable to open Help > ',itemLabel,'.'];target}, ...
+    'Acycle: Help');
 
 % --------------------------------------------------------------------
 function menu_selectinterval_Callback(hObject, eventdata, handles)
@@ -6781,12 +6827,14 @@ end
 
 
 % --------------------------------------------------------------------
-function menu_email_Callback(hObject, eventdata, handles)
+function menu_email_Callback(~, ~, handles)
 % hObject    handle to menu_email (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-url = 'mingsongli.com';
-web(url,'-browser')
+contactURL = 'https://mingsongli.com/';
+if ~AC_openHelpTarget(contactURL,AC_helpTargetOpener(handles))
+    AC_helpOpenError('Contact',contactURL);
+end
 
 % --------------------------------------------------------------------
 function menu_samplerate_Callback(hObject, eventdata, handles)
@@ -7665,37 +7713,6 @@ if ~isempty(answer)
     cd(ac_pwd);
     refreshcolor;
     cd(pre_dirML);
-end
-
-
-% --------------------------------------------------------------------
-function menu_open_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_open (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-%language
-lang_id = handles.lang_id;
-if handles.lang_choice > 0
-
-    [~, locb1] = ismember('a258',lang_id);
-    a258 = handles.lang_var{locb1};
-    [~, locb1] = ismember('a259',lang_id);
-    a259 = handles.lang_var{locb1};
-end
-
-if handles.lang_choice  == 0
-    [filename, pathname] = uigetfile({'*.fig','Files (*.fig)'},...
-        'Open *.fig file');
-else
-    [filename, pathname] = uigetfile({'*.fig',a258},...
-        a259);
-end
-if filename == 0
-else
-    aaa = [pathname,filename];
-    openfig(aaa)
 end
 
 % --- Executes during object creation, after setting all properties.
@@ -10138,267 +10155,456 @@ BivLinearRegUI;
 
 
 % --------------------------------------------------------------------
-function Menu_EMDmenu_Callback(hObject, eventdata, handles)
+function Menu_EMDmenu_Callback(~, ~, ~)
 % hObject    handle to Menu_EMDmenu (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
 
 % --------------------------------------------------------------------
-function menu_emd_Callback(hObject, eventdata, handles)
+function menu_emd_Callback(~, ~, handles)
 % hObject    handle to menu_emd (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-[contents,plot_selected,handles] = getMainListSelection(handles);
-if isempty(plot_selected)
-    return
-end
-nplot = length(plot_selected);   % length
-loaddata4acycle;  % load data as data_filterout, must be evenly spaced sampling
-
-t = data_filterout(:,1); % first column
-dt = median(diff(t)); % sampling rate
-time_series = data_filterout(:,2); % 2nd column
-
-dlg_title = 'Acycle: Empirical Mode Decomposition (EMD)';
-prompt = {...
-    'goal (Number of Intrinsic Mode Functions - IMFs)',...
-    'Maximum number of extrema in the residual signal',...
-    'Interpolation method for envelope construction'};
-
-num_lines = 1;
-defaultans = {num2str(10),'1','pchip'};
-options.Resize='on';
-answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-if ~isempty(answer)
-%     h1 = warndlg('EEMD: Slow! See command window');
-    goal = str2double(answer{1}); % default based on the emd IMFs + residual
-    extrema = str2double(answer{2}); 
-    intp = answer{3};
-    emd(time_series,'MaxNumIMF',goal,'MaxNumExtrema',extrema,'Interpolation',intp,'Display',1);
-    [imfs,residual,~] = emd(time_series,'MaxNumIMF',goal,'MaxNumExtrema',extrema,'Interpolation',intp);
-    imfsn = size(imfs, 2);
-    nw = 2;
-    pow = [];
-    [po,w]=pmtm(time_series,nw);
-    pow = [pow,po];
-    for k = 1:imfsn
-        [po,w]=pmtm(imfs(:, k),nw);
-        pow = [pow,po];
-    end
-    fd1=w/(2*pi*dt);
-    % plot periodogram
-    figure
-    for k = 1:imfsn+1
-        subplot(imfsn+1, 1, k);
-        plot(fd1, pow(:,k))
-        if k == 1
-            ylabel('Raw')
-        else
-            ylabel(['IMF', num2str(k-1)]);
-        end
-        ax = gca;
-        if k == 1
-            title('2 pi MTM power spectra')
-        end
-        % Turn on minor ticks for the x-axis
-        ax.XAxis.MinorTick = 'on';
-    end
-    
-    % Add labels, title, and legend
-    xlabel('Frequency');
-    
-    % figure
-    figure
-    hold on
-    for k = 2:imfsn + 1
-            plot(fd1, pow(:,k), 'DisplayName', ['IMF ', num2str(k-1)])
-    end
-    set(gca, 'YScale', 'log')
-    title('2 pi MTM power spectra')
-    ax.XAxis.MinorTick = 'on';
-    xlabel('Frequency')
-    ylabel('Power')
-    legend
-    hold off
-    
-    CDac_pwd; % cd working dir
-
-    %% Dave data
-    % write data
-    file_name = [plotseries,'-emd',ext];
-    current_data = [t,imfs,residual];
-    [nrow, ncol] = size(imfs);
-    %series_var = var(time_series, 0, 1);
-    imfs_var = var(imfs, 0, 1);
-    resid_var = var(residual, 0, 1);
-    total_var = sum(imfs_var) + resid_var;
-    file_id = fopen(file_name, 'wt'); % Open the file for writing text
-    fprintf(file_id, '%% Empirical Mode Decompostion (EMD)\n');
-    fprintf(file_id, '%% \n');
-    fprintf(file_id, '%% Raw data: %s\n', file_name);
-    fprintf(file_id, '%% \n');
-    fprintf(file_id, '%% Number of Intrinsic Mode Functions:                %d\n', goal);
-    fprintf(file_id, '%% Maximum number of extrema in the residual signal:  %d\n', extrema);
-    fprintf(file_id, '%% Interpolation method for envelope construction:    %s\n', intp);
-    fprintf(file_id, '%% \n');
-    fprintf(file_id, '%% Total Variance: %7.9f    100.00%\n', total_var);
-    fprintf(file_id, '%% \n');
-    fprintf(file_id, '%% IMFs variance and ratio (%%) \n');
-    % save variance
-    for kcol = 1:ncol
-        fprintf(file_id, '%%   IMF%d:     %7.9f     %2.2f\n', kcol, imfs_var(kcol), 100*imfs_var(kcol)/total_var);
-    end    
-    fprintf(file_id,     '%%   Residual: %7.9f     %2.2f\n', resid_var, 100*resid_var/total_var);
-    fprintf(file_id, '%% \n');
-    % Dynamically create the header based on the number of columns
-    header = ['% Time'];
-    for i = 1:ncol % assuming ncol is the number of columns
-        header = [header, sprintf('\t\tIMF%d', i)];
-    end
-    header = [header, sprintf('\t\tResidual')];
-    fprintf(file_id, '%s\n', header); % Write the header
-    % Data
-    for ki = 1:nrow
-        for kj = 1:(ncol+2)  % with t and residual
-            fprintf(file_id, '%7.9f\t', current_data(ki, kj)); % Modify here as per your matrix name
-        end
-        fprintf(file_id, '\n'); % New line at the end of each rowend
-    end
-    fclose(file_id);
-    %%
-    refreshcolor;
-    cd(pre_dirML); % return view dir
-end
-
+AC_runEmpiricalModeMenu(handles,'emd');
 
 
 % --------------------------------------------------------------------
-function menu_eemd_Callback(hObject, eventdata, handles)
+function menu_eemd_Callback(~, ~, handles)
 % hObject    handle to menu_eemd (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-[contents,plot_selected,handles] = getMainListSelection(handles);
-if isempty(plot_selected)
+AC_runEmpiricalModeMenu(handles,'eemd');
+
+
+function AC_runEmpiricalModeMenu(handles,method)
+% Thin desktop adapter. The public core owns all numerical work; this
+% function owns only selection, dialogs, progress, plotting, and opt-in I/O.
+[contents,selected,handles] = getMainListSelection(handles);
+dialogTitle = AC_empiricalModeTitle(method);
+if isempty(selected)
+    warndlg({'No data selected.'; ...
+        'Select one two-column time-series file first.'},dialogTitle);
     return
 end
-nplot = length(plot_selected);   % length
-loaddata4acycle;  % load data as data_filterout, must be evenly spaced sampling
-
-t = data_filterout(:,1); % first column
-dt = median(diff(t)); % sampling rate
-time_series = data_filterout(:,2); % 2nd column
-
-[imfs,~,~] = emd(time_series);
-[~, ncol] = size(imfs);
-
-dlg_title = 'Acycle: Ensemble Empirical Mode Decomposition (EEMD)';
-prompt = {...
-    'goal (Number of Intrinsic Mode Functions - IMFs)',...
-    'ens (Number of Ensemble Members)',...
-    'nos (Amplitude of Added Noise)'};
-
-num_lines = 1;
-defaultans = {num2str(ncol+2),'100','0.2'};
-options.Resize='on';
-answer = inputdlg(prompt,dlg_title,num_lines,defaultans,options);
-if ~isempty(answer)
-%     h1 = warndlg('EEMD: Slow! See command window');
-    goal = str2double(answer{1}); % default based on the emd IMFs + residual
-    ens = str2double(answer{2}); % default is 100
-    nos = str2double(answer{3}); % default is 20%
-    %run
-    imfs = eemd(time_series', goal, ens, nos);
-    % copy code above function menu_emd_Callback
-    imfs = imfs';
-    imfsn = size(imfs, 2);
-    nw = 2;
-    % plot
-    figure
-    subplot(imfsn + 1, 1, 1)
-    plot(t,time_series);
-    xlim([min(t), max(t)])
-    
-    ylabel('Raw data')
-    pow = [];
-    for k = 1:imfsn
-        subplot(imfsn+1, 1, k+1);
-        plot(t,imfs(:, k));
-        xlim([min(t), max(t)])
-        ylabel(['IMF', num2str(k)]);
-        if k == 1
-            title('EEMD')
-        end
-        % periodogram
-        [po,w]=pmtm(imfs(:, k),nw);
-        pow = [pow,po];
-    end
-    fd1=w/(2*pi*dt);
-
-    % plot periodogram
-    figure
-    
-    for k = 1:imfsn-1
-        subplot(imfsn-1, 1, k);
-        plot(fd1, pow(:,k), 'DisplayName', ['IMF ', num2str(k)])
-        if k == 1
-            title('2-pi MTM power spectra of IMFs')
-        end
-        ylabel(['IMF', num2str(k)]);
-        ax = gca;
-        % Turn on minor ticks for the x-axis
-        ax.XAxis.MinorTick = 'on';
-    end
-    % Add labels, title, and legend
-    xlabel('Frequency');
-    CDac_pwd; % cd working dir
-
-    %% Dave data
-    % write data
-    file_name = [plotseries,'-eemd',ext];
-    current_data = [t,imfs];
-    [nrow, ncol] = size(imfs);
-    imfs_var = var(imfs, 0, 1);
-    total_var = sum(imfs_var);
-    file_id = fopen(file_name, 'wt'); % Open the file for writing text
-    fprintf(file_id, '%% Acycle: Ensemble Empirical Mode Decompostion (EEMD)\n');
-    fprintf(file_id, '%% \n');
-    fprintf(file_id, '%% Raw data: %s\n', file_name);
-    fprintf(file_id, '%% goal (Number of Intrinsic Mode Functions - IMFs): %d\n', goal);
-    fprintf(file_id, '%% ens  (Number of Ensemble Members):                %d\n', ens);
-    fprintf(file_id, '%% nos  (Amplitude of Added Noise):                  %f\n', nos);
-    fprintf(file_id, '%% \n');
-    fprintf(file_id, '%% Total Variance: %7.9f    100.00%\n', total_var);
-    fprintf(file_id, '%% \n');
-    fprintf(file_id, '%% IMFs variance and ratio (%%) \n');       
-    % save variance
-    for kcol = 1:ncol-1
-        fprintf(file_id, '%%   IMF%d:     %7.9f     %2.2f\n', kcol, imfs_var(kcol), 100*imfs_var(kcol)/total_var);
-    end    
-    fprintf(file_id, '%%   Residual: %7.9f     %2.2f\n', imfs_var(end), 100*imfs_var(end)/total_var);
-    fprintf(file_id, '%% \n');
-    % Dynamically create the header based on the number of columns
-    header = ['% Time'];
-    for i = 1:ncol-1 % assuming ncol is the number of columns
-        header = [header, sprintf('\t\tIMF%d', i)];
-    end
-    header = [header, sprintf('\t\tResidual')];
-    fprintf(file_id, '%s\n', header); % Write the header
-    % Data
-    for ki = 1:nrow
-        for kj = 1:(ncol+1)  % with t
-            fprintf(file_id, '%7.9f\t', current_data(ki, kj)); % Modify here as per your matrix name
-        end
-        fprintf(file_id, '\n'); % New line at the end of each rowend
-    end
-    fclose(file_id);
-    %%
-    refreshcolor;
-    cd(pre_dirML); % return view dir
+if numel(selected) ~= 1
+    warndlg('Select exactly one time-series file.',dialogTitle);
+    return
 end
 
+selectedName = char(contents(selected));
+selectedName = strrep2(selectedName, ...
+    '<HTML><FONT color="blue">','</FONT></HTML>');
+[data,dataPath,readError] = ...
+    AC_loadEmpiricalModeSelection(handles,selectedName);
+if ~isempty(readError)
+    warndlg(readError,dialogTitle);
+    return
+end
+
+options = AC_promptEmpiricalModeOptions(method,dialogTitle);
+if isempty(options)
+    return
+end
+
+try
+    if strcmp(method,'eemd')
+        progressFigure = waitbar(0,'Starting EEMD...', ...
+            'Name','Acycle: EEMD', ...
+            'WindowStyle','modal', ...
+            'CreateCancelBtn',@(source,event) ...
+                AC_cancelEmpiricalModeWaitbar(source));
+        setappdata(progressFigure,'canceling',false);
+        progressCleanup = onCleanup( ... %#ok<NASGU>
+            @()AC_deleteEmpiricalModeWaitbar(progressFigure));
+        options.progress_fcn = @(fraction,message) ...
+            AC_updateEmpiricalModeWaitbar( ...
+                progressFigure,fraction,message);
+        options.cancel_fcn = @() ...
+            AC_empiricalModeWaitbarCanceled(progressFigure);
+    end
+    [result,meta] = ...
+        acycleEmpiricalModeDecomposition(data,options);
+catch exception
+    clear progressCleanup
+    if strcmp(exception.identifier,'Acycle:EMD:Canceled')
+        return
+    end
+    errordlg(exception.message,dialogTitle);
+    return
+end
+clear progressCleanup
+
+try
+    AC_plotEmpiricalModeResult(result,meta,selectedName);
+catch exception
+    warning('Acycle:EMD:PlotFailed', ...
+        'Unable to plot the EMD result: %s',exception.message);
+    warndlg({'The decomposition completed, but plotting failed.'; ...
+        exception.message},dialogTitle);
+end
+
+try
+    saved = AC_offerToSaveEmpiricalModeResult( ...
+        result,meta,dataPath,handles,dialogTitle);
+catch exception
+    saved = false;
+    errordlg({'Unable to save the decomposition.';exception.message}, ...
+        dialogTitle);
+end
+if saved
+    ac_refresh_main_list(handles.listbox_acmain, ...
+        AC_empiricalModeBrowserDirectory(handles));
+end
+
+
+function titleText = AC_empiricalModeTitle(method)
+if strcmp(method,'eemd')
+    titleText = ...
+        'Acycle: Ensemble Empirical Mode Decomposition (EEMD)';
+else
+    titleText = 'Acycle: Empirical Mode Decomposition (EMD)';
+end
+
+
+function options = AC_promptEmpiricalModeOptions(method,dialogTitle)
+dialogOptions.Resize = 'on';
+if strcmp(method,'eemd')
+    prompt = { ...
+        'Maximum number of intrinsic mode functions (IMFs)', ...
+        'Number of complementary-noise ensemble pairs', ...
+        'Noise amplitude (multiple of input standard deviation)', ...
+        'Random seed (integer from 0 through 2^32-1)'};
+    defaults = {'10','100','0.2','0'};
+else
+    prompt = { ...
+        'Maximum number of intrinsic mode functions (IMFs)', ...
+        'Maximum number of extrema in the residual signal', ...
+        'Envelope interpolation method (pchip or spline)'};
+    defaults = {'10','1','pchip'};
+end
+answer = inputdlg(prompt,dialogTitle,1,defaults,dialogOptions);
+if isempty(answer)
+    options = [];
+    return
+end
+
+options = struct('method',method, ...
+    'max_num_imf',str2double(answer{1}));
+if strcmp(method,'eemd')
+    options.ensemble_count = str2double(answer{2});
+    options.noise_amplitude = str2double(answer{3});
+    options.random_seed = str2double(answer{4});
+else
+    options.max_num_extrema = str2double(answer{2});
+    options.interpolation = answer{3};
+end
+
+
+function [data,dataPath,errorMessage] = ...
+        AC_loadEmpiricalModeSelection(handles,selectedName)
+data = [];
+dataPath = fullfile( ...
+    AC_empiricalModeBrowserDirectory(handles),selectedName);
+if isfolder(dataPath)
+    errorMessage = 'The selected item is a folder, not a data file.';
+    return
+end
+if exist(dataPath,'file') ~= 2
+    errorMessage = {'The selected data file no longer exists.';dataPath};
+    return
+end
+[~,~,extension] = fileparts(dataPath);
+if ~any(strcmpi(extension,handles.filetype))
+    errorMessage = 'Unsupported time-series file type.';
+    return
+end
+
+loadedNumeric = false;
+loadMessage = '';
+try
+    candidate = load(dataPath);
+    loadedNumeric = isnumeric(candidate);
+    if ~loadedNumeric
+        loadMessage = 'load returned nonnumeric content.';
+    end
+catch exception
+    loadMessage = exception.message;
+end
+if ~loadedNumeric
+    try
+        candidate = readmatrix(dataPath);
+    catch exception
+        errorMessage = { ...
+            'Acycle could not read the selected data file.'; ...
+            ['load: ',loadMessage]; ...
+            ['readmatrix: ',exception.message]};
+        return
+    end
+end
+if ~isnumeric(candidate) || ~isreal(candidate) || ...
+        ~ismatrix(candidate) || size(candidate,2) ~= 2
+    errorMessage = { ...
+        'Data format invalid.'; ...
+        'Input must be a real numeric matrix with exactly two columns.'};
+    return
+end
+data = candidate;
+errorMessage = '';
+
+
+function directory = AC_empiricalModeBrowserDirectory(handles)
+directory = '';
+try
+    addressControl = handles.edit_acfigmain_dir;
+    if isprop(addressControl,'String')
+        directory = get(addressControl,'String');
+    elseif isprop(addressControl,'Value')
+        directory = addressControl.Value;
+    end
+    if iscell(directory) && ~isempty(directory)
+        directory = directory{1};
+    end
+    if isstring(directory) && isscalar(directory)
+        directory = char(directory);
+    end
+    if ischar(directory)
+        directory = strtrim(directory);
+    end
+catch
+    directory = '';
+end
+if ~ischar(directory) || ~isfolder(directory)
+    directory = ac_working_directory('get',pwd);
+end
+if ~ischar(directory) || ~isfolder(directory)
+    directory = pwd;
+end
+
+
+function AC_updateEmpiricalModeWaitbar(figureHandle,fraction,message)
+if ~isgraphics(figureHandle)
+    return
+end
+waitbar(fraction,figureHandle,message);
+drawnow limitrate
+
+
+function AC_cancelEmpiricalModeWaitbar(source)
+figureHandle = ancestor(source,'figure');
+if isempty(figureHandle) && isgraphics(source) && ...
+        strcmp(get(source,'Type'),'figure')
+    figureHandle = source;
+end
+if ~isempty(figureHandle) && isgraphics(figureHandle)
+    setappdata(figureHandle,'canceling',true);
+end
+
+
+function canceled = AC_empiricalModeWaitbarCanceled(figureHandle)
+drawnow limitrate
+canceled = ~isgraphics(figureHandle) || ...
+    (isappdata(figureHandle,'canceling') && ...
+     getappdata(figureHandle,'canceling'));
+
+
+function AC_deleteEmpiricalModeWaitbar(figureHandle)
+if isgraphics(figureHandle)
+    delete(figureHandle);
+end
+
+
+function AC_deleteIncompleteEmpiricalModeFigure( ...
+        figureHandle,statusFigure)
+plotComplete = isgraphics(statusFigure) && ...
+    isappdata(statusFigure,'AcycleEmpiricalModePlotComplete') && ...
+    getappdata(statusFigure,'AcycleEmpiricalModePlotComplete');
+if isgraphics(figureHandle) && ~plotComplete
+    delete(figureHandle);
+end
+
+
+function AC_plotEmpiricalModeResult(result,meta,selectedName)
+coordinate = result.coordinate;
+imfCount = size(result.imfs,2);
+plotCount = imfCount+2;
+componentFigure = figure( ...
+    'Name',[upper(meta.method),' decomposition: ',selectedName], ...
+    'NumberTitle','off');
+componentCleanup = onCleanup( ...
+    @()AC_deleteIncompleteEmpiricalModeFigure( ...
+        componentFigure,componentFigure));
+axesHandles = gobjects(plotCount,1);
+axesHandles(1) = subplot(plotCount,1,1);
+plot(coordinate,result.input,'k');
+ylabel('Raw');
+title([upper(meta.method),' decomposition: ',selectedName], ...
+    'Interpreter','none');
+for imfIndex = 1:imfCount
+    axesHandles(imfIndex+1) = subplot(plotCount,1,imfIndex+1);
+    plot(coordinate,result.imfs(:,imfIndex));
+    ylabel(sprintf('IMF %d',imfIndex));
+end
+axesHandles(end) = subplot(plotCount,1,plotCount);
+plot(coordinate,result.residual);
+ylabel('Residual');
+xlabel('Coordinate');
+linkaxes(axesHandles,'x');
+xlim(axesHandles(1),coordinate([1,end]));
+
+spectrumValues = [result.input,result.imfs];
+spectrumCount = size(spectrumValues,2);
+spectrumFigure = figure( ...
+    'Name',[upper(meta.method),' MTM spectra: ',selectedName], ...
+    'NumberTitle','off');
+spectrumCleanup = onCleanup( ...
+    @()AC_deleteIncompleteEmpiricalModeFigure( ...
+        spectrumFigure,componentFigure));
+for spectrumIndex = 1:spectrumCount
+    [power,angularFrequency] = pmtm(spectrumValues(:,spectrumIndex),2);
+    physicalFrequency = angularFrequency/(2*pi*meta.sample_interval);
+    subplot(spectrumCount,1,spectrumIndex);
+    plot(physicalFrequency,power);
+    if spectrumIndex == 1
+        ylabel('Raw');
+        title(['MTM power spectra: ',selectedName], ...
+            'Interpreter','none');
+    else
+        ylabel(sprintf('IMF %d',spectrumIndex-1));
+    end
+    set(gca,'XMinorTick','on');
+end
+xlabel('Frequency');
+setappdata(componentFigure,'AcycleEmpiricalModePlotComplete',true);
+
+
+function saved = AC_offerToSaveEmpiricalModeResult( ...
+        result,meta,dataPath,handles,dialogTitle)
+saved = false;
+choice = questdlg( ...
+    'Save decomposition components to a text file?', ...
+    dialogTitle,'Save...','Do Not Save','Do Not Save');
+if ~strcmp(choice,'Save...')
+    return
+end
+[~,baseName] = fileparts(dataPath);
+defaultPath = fullfile(AC_empiricalModeBrowserDirectory(handles), ...
+    [baseName,'-',meta.method,'.txt']);
+[fileName,fileDirectory] = uiputfile( ...
+    {'*.txt','Text file (*.txt)'}, ...
+    ['Save ',upper(meta.method),' components'],defaultPath);
+if isequal(fileName,0) || isequal(fileDirectory,0)
+    return
+end
+outputPath = fullfile(fileDirectory,fileName);
+AC_writeEmpiricalModeResult(outputPath,result,meta,dataPath);
+saved = true;
+
+
+function AC_writeEmpiricalModeResult(outputPath,result,meta,dataPath)
+[outputDirectory,~,~] = fileparts(outputPath);
+if isempty(outputDirectory)
+    outputDirectory = pwd;
+end
+if ~isfolder(outputDirectory)
+    error('Acycle:EMD:OutputOpenFailed', ...
+        'Unable to open the selected output file: %s',outputPath);
+end
+temporaryPath = [tempname(outputDirectory),'.tmp'];
+fileID = fopen(temporaryPath,'wt');
+if fileID < 0
+    error('Acycle:EMD:OutputOpenFailed', ...
+        'Unable to open the selected output file: %s',outputPath);
+end
+fileCleanup = onCleanup( ...
+    @()AC_cleanupEmpiricalModeOutput(fileID,temporaryPath));
+
+textBlocks = cell(1,meta.actual_num_imf+14);
+textBlocks(1:12) = { ...
+    sprintf('%% Acycle %s decomposition\n',upper(meta.method)), ...
+    sprintf('%% Input: %s\n',dataPath), ...
+    sprintf('%% Sample interval: %.17g\n',meta.sample_interval), ...
+    sprintf('%% Requested IMFs: %d\n',meta.requested_num_imf), ...
+    sprintf('%% Actual IMFs: %d\n',meta.actual_num_imf), ...
+    sprintf('%% Raw standard deviation: %.17g\n', ...
+        meta.raw_standard_deviation), ...
+    sprintf('%% Raw variance: %.17g\n',meta.raw_variance), ...
+    sprintf('%% Raw variance representable: %d\n', ...
+        meta.raw_variance_representable), ...
+    sprintf('%% Component variance sum: %.17g\n', ...
+        meta.component_variance_sum), ...
+    sprintf('%% Component variance sum representable: %d\n', ...
+        meta.component_variance_sum_representable), ...
+    sprintf('%% Covariance gap (raw minus component sum): %.17g\n', ...
+        meta.covariance_gap), ...
+    sprintf('%% Covariance gap defined: %d\n', ...
+        meta.covariance_gap_defined)};
+for imfIndex = 1:meta.actual_num_imf
+    textBlocks{12+imfIndex} = sprintf( ...
+        ['%% IMF %d variance: %.17g ', ...
+         '(%.17g%% of component variance allocation)\n'], ...
+        imfIndex,meta.component_variance(imfIndex), ...
+        meta.component_variance_percent(imfIndex));
+end
+textBlocks{meta.actual_num_imf+13} = sprintf( ...
+    ['%% Residual variance: %.17g ', ...
+     '(%.17g%% of component variance allocation)\n'], ...
+    meta.component_variance(end),meta.component_variance_percent(end));
+header = '% Coordinate';
+for imfIndex = 1:meta.actual_num_imf
+    header = [header,sprintf('\tIMF%d',imfIndex)]; %#ok<AGROW>
+end
+textBlocks{meta.actual_num_imf+14} = ...
+    [header,sprintf('\tResidual\n')];
+for blockIndex = 1:numel(textBlocks)
+    if fprintf(fileID,'%s',textBlocks{blockIndex}) < 0
+        error('Acycle:EMD:OutputWriteFailed', ...
+            'Unable to write the complete output file: %s',outputPath);
+    end
+end
+
+output = [result.coordinate,result.imfs,result.residual];
+format = [repmat('%.17g\t',1,size(output,2)-1),'%.17g\n'];
+if fprintf(fileID,format,output.') < 0
+    error('Acycle:EMD:OutputWriteFailed', ...
+        'Unable to write the complete output file: %s',outputPath);
+end
+[streamMessage,streamNumber] = ferror(fileID);
+if streamNumber ~= 0
+    error('Acycle:EMD:OutputWriteFailed', ...
+        'Unable to write the complete output file (%s): %s', ...
+        outputPath,streamMessage);
+end
+closeStatus = fclose(fileID);
+if closeStatus ~= 0
+    error('Acycle:EMD:OutputWriteFailed', ...
+        'Unable to finish writing the output file: %s',outputPath);
+end
+[moveStatus,moveMessage] = movefile(temporaryPath,outputPath,'f');
+if ~moveStatus
+    error('Acycle:EMD:OutputMoveFailed', ...
+        'Unable to install the completed output file (%s): %s', ...
+        outputPath,moveMessage);
+end
+clear fileCleanup
+
+function AC_cleanupEmpiricalModeOutput(fileID,temporaryPath)
+try
+    if fileID >= 0 && ~isempty(fopen(fileID))
+        fclose(fileID);
+    end
+catch
+end
+try
+    if exist(temporaryPath,'file') == 2
+        delete(temporaryPath);
+    end
+catch
+end
+
+
 % --------------------------------------------------------------------
-function menu_memd_Callback(hObject, eventdata, handles)
+function menu_memd_Callback(~, ~, ~)
 % hObject    handle to menu_memd (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
