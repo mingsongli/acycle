@@ -7,7 +7,8 @@ function [freq,dof,wt] = mtmdofs(t,y,NW,npad)
 %	t (column vector) = timescale of y; must be uniformly sampled. 
 %	y (column vector) = real-valued time series  
 %	NW = time-bandwidth product to use (e.g. NW=2 for 2pi multitapers)
-%   npad = zero pad to npad * length of y 
+%   npad = zero pad to npad * length of y; the product is rounded to an
+%          integer NFFT, so non-integer multipliers are supported.
 %
 %   CALLS TO:
 %   dpss.m (discrete prolate spheroidal sequences, MATLAB Signal Toolbox)
@@ -26,16 +27,18 @@ function [freq,dof,wt] = mtmdofs(t,y,NW,npad)
 
 dof=[ ]; wt=[ ]; evals=[ ]; bias=[ ]; spw=[ ]; 
 N = length(y);
+validateFtestInputs(N,NW);
 sig2=var(y);
-K = 2*NW - 1; % total number of dpss tapers to use
+K = acycleMtmTaperCount(NW); % total number of dpss tapers to use
 [h,evals] = dpss(N,NW);	% get the dpss tapers and eigenvalues
 bias = 1.-evals; % compute bias of the dpss tapers
 k = 1;	% index, dpss taper
 f = 1;	% index, frequency
 % get K sets of dpss-tapered Fourier coefficients of y;
 % zero pad to npad x length of y 
+nfft = max(1,round(npad*N));
 for k = 1:K
-    Yk(:,k) = fft(h(:,k).*y,npad*N);
+    Yk(:,k) = fft(h(:,k).*y,nfft);
 end
 % 
 nfft=length(Yk);
@@ -77,11 +80,23 @@ end
 dof(n)=2.*degs;
 end
 % create frequency scale; first nnft/2+1 frequencies are 0 and positive
-dt= t(2)-t(1);
+dt = median(diff(t));
 fnyq = 1/(2*dt);
 M = length(dof);
 df=fnyq/(M/2);
 freq =(0:df:(M-1)*df);
 %disp('Real-valued time series spectra valid from f=0 to 1/(2*dt) only')
 % Note: dof=dof(1:(M/2+1)) are the positive frequencies
+end
 
+function validateFtestInputs(N,NW)
+K = 2*NW-1;
+if ~(isnumeric(NW) && isreal(NW) && isscalar(NW) && ...
+        isfinite(NW) && NW >= 1.5 && NW < N/2 && ...
+        abs(K-round(K)) <= eps(max(1,abs(K))))
+    error('Acycle:FtestMTM:InvalidTimeBandwidth', ...
+        ['NW must be at least 1.5, less than half the data length, ', ...
+         'and in 0.5 increments so that at least two whole tapers ', ...
+         'are available.']);
+end
+end

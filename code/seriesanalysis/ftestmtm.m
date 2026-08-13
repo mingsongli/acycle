@@ -9,7 +9,8 @@ function [freq,ftest,fsig,Amp,Faz,Sig,Noi] = ftestmtm(t,y,NW,dof,npad)
 %	NW = time-bandwidth product
 %   dof (column vector) = adaptive-weighted dofs (from mtmdofs.m)
 %   >> NOTE: if dof is missing, high-resolution option is used.
-%   npad = zero pad to npad * length of y 
+%   npad = zero pad to npad * length of y; the product is rounded to an
+%          integer NFFT, so non-integer multipliers are supported.
 %
 %   CALLS TO:
 %   dpss.m (discrete prolate spheroidal sequences, MATLAB Signal Toolbox)
@@ -35,15 +36,25 @@ function [freq,ftest,fsig,Amp,Faz,Sig,Noi] = ftestmtm(t,y,NW,dof,npad)
 
 Amp=[ ];Noi=[ ];Sig=[ ];ftest=[ ];fsig=[ ];freq=[ ];Faz=[ ];
 N = length(y);
+rawK = 2*NW-1;
+if ~(isnumeric(NW) && isreal(NW) && isscalar(NW) && ...
+        isfinite(NW) && NW >= 1.5 && NW < N/2 && ...
+        abs(rawK-round(rawK)) <= eps(max(1,abs(rawK))))
+    error('Acycle:FtestMTM:InvalidTimeBandwidth', ...
+        ['NW must be at least 1.5, less than half the data length, ', ...
+         'and in 0.5 increments so that at least two whole tapers ', ...
+         'are available.']);
+end
+K = acycleMtmTaperCount(NW); % total number of dpss tapers
 if nargin<4, disp('NOTE: using high-resolution option'); end
-K = 2*NW - 1; % total number of dpss tapers 
 h = dpss(N,NW);	% get the dpss tapers 
 k = 1;	% dpss taper index
 f = 1;	% frequency index
 % get K sets of dpss-tapered Fourier coefficients of y;
 % pad to  npad x length of y 
+nfft = max(1,round(npad*N));
 for k = 1:K
-    Yk(:,k) = fft(h(:,k).*y,npad*N);
+    Yk(:,k) = fft(h(:,k).*y,nfft);
 end
 nfft=length(Yk);
 % U0 and Usum are elements from Eq. 13.5 (Thomson, 1982)
@@ -69,7 +80,7 @@ Sig(f)=(((K-1)*(abs(mu)).^2*Usum));
 Noi(f)=(sum((abs(Yk(f,:)-mu*U0)).^2));
 end
 % create frequency scale; first nfft/2+1  0 + positive frequencies
-dt= t(2)-t(1);
+dt = median(diff(t));
 fnyq = 1/(2*dt);
 M = length(Amp);
 df=fnyq/(M/2);

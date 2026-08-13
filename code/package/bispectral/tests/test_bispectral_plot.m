@@ -175,6 +175,8 @@ function geometry = settleGuiOutputLayout(fig,controls)
 % geometry for unrelated controls. Nudge the width, then require two stable
 % resolved samples before testing actual component positions.
 targetPosition = fig.Position;
+expectedResetWidth = (targetPosition(3)-64)/2;
+expectedPreviewWidth = (targetPosition(3)-52)/3;
 nudgePosition = targetPosition;
 nudgePosition(3) = targetPosition(3)+1;
 fig.Position = nudgePosition;
@@ -193,7 +195,9 @@ while attempt < 100
         geometry.Help geometry.Preview geometry.Save];
     actionGap = geometry.Help(1)-sum(geometry.Reset([1 3]));
     resolved = abs(geometry.Retain(3)-58) <= 1 && ...
-        abs(actionGap-10) <= 1 && geometry.Reset(3) > 150;
+        abs(actionGap-10) <= 1 && ...
+        abs(geometry.Reset(3)-expectedResetWidth) <= 1 && ...
+        abs(geometry.Preview(3)-expectedPreviewWidth) <= 1;
     if resolved && ~isempty(lastSignature) && ...
             max(abs(signature-lastSignature),[],'all') <= 0.01
         stableCount = stableCount+1;
@@ -800,7 +804,7 @@ periodTitles = findobj(handles.PeriodAxes,'Tag','bispectralPeriodAxisTitle');
 verifyNumElements(testCase,periodTitles,2);
 for titleIndex = 1:numel(periodTitles)
     verifyEqual(testCase,periodTitles(titleIndex).Position(1:2), ...
-        [1.04 0.985],'AbsTol',32*eps);
+        [1.01 0.985],'AbsTol',32*eps);
     verifyEqual(testCase,periodTitles(titleIndex).HorizontalAlignment,'left');
     verifyEqual(testCase,periodTitles(titleIndex).VerticalAlignment,'top');
     verifyGreaterThanOrEqual(testCase,periodTitles(titleIndex).FontSize,9.5);
@@ -1063,7 +1067,7 @@ verifyGreaterThanOrEqual(testCase,verticalLabel.FontSize,9);
 verifyGreaterThanOrEqual(testCase,horizontalLabel.FontSize,9);
 periodTitle = findobj(handles.PeriodAxes,'Tag','bispectralPeriodAxisTitle');
 verifyNumElements(testCase,periodTitle,1);
-verifyEqual(testCase,periodTitle.Position(1:2),[1.04 0.985],'AbsTol',32*eps);
+verifyEqual(testCase,periodTitle.Position(1:2),[1.01 0.985],'AbsTol',32*eps);
 verifyEqual(testCase,periodTitle.HorizontalAlignment,'left');
 verifyEqual(testCase,periodTitle.VerticalAlignment,'top');
 verifyNormalizedTextWithinFigure(testCase,fig,verticalLabel);

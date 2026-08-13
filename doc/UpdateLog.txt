@@ -3,7 +3,7 @@ _______________________________________
 
 
 Version : Acycle_v3.1.1
-Date    : August 12, 2026
+Date    : August 13, 2026
 By      : Mingsong Li (Peking University)
 
     1. RESTORED: Empirical Mode Decomposition tools.
@@ -45,6 +45,28 @@ By      : Mingsong Li (Peking University)
         validated options for window geometry, progress reporting, consensus,
         preprocessing, and publication-oriented experiments while retaining
         compatibility with existing GUI workflows.
+
+    8. FIXED: Spectral Analysis numerical and interface regressions.
+        MTM confidence levels now use the actual taper count and physical
+        Nyquist frequency, frequency and period coordinates remain consistent
+        across plots and saved data, and zero padding defaults to the exact
+        NFFT input. The SWA confidence selector and its v2.8 colors and line
+        styles have also been restored, together with several macOS layout
+        and validation fixes.
+
+    9. FIXED: DYNOT and Power Decomposition compatibility.
+        Power Decomposition again preserves the v2.8 target-band union,
+        frequency clipping, window, and FFT behavior required by DYNOT.
+        DYNOT confidence intervals now retain the true median center, cut
+        values persist correctly, and closing the progress window cancels
+        cleanly instead of producing a waitbar error.
+
+    10. FIXED: Evolutionary spectral-analysis displays.
+        Evolutionary FFT, periodogram, Lomb-Scargle, and MTM views now retain
+        the intended sampling grid, sliding-window coverage, frequency limits,
+        axis directions, logarithmic coordinates, and 3-D frame behavior.
+
+        Special thanks to Zhenglei Wu for valuable testing and debugging.
 
 _______________________________________
 

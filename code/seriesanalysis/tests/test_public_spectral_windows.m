@@ -134,7 +134,7 @@ verifyEqual(testCase,edgeMeta.left_padding_samples,1);
 verifyEqual(testCase,edgeMeta.right_padding_samples,2);
 end
 
-function testDesktopSpectralCallersDelegateToPublicCores(testCase)
+function testDesktopSpectralCallersUseIntendedAnalysisContracts(testCase)
 codeDirectory = testCase.TestData.CodeDirectory;
 coherenceSource = fileread(fullfile( ...
     codeDirectory,'guicode','coherenceGUI.m'));
@@ -153,8 +153,6 @@ verifyTrue(testCase,contains(momentsSource, ...
     'acycleSamplingIsUneven('));
 verifyTrue(testCase,contains(dynamicSource,'acycleDynamicFilter('));
 verifyTrue(testCase,contains(pdaSource, ...
-    'acyclePowerDecomposition('));
-verifyTrue(testCase,contains(pdanSource, ...
     'acyclePowerDecomposition('));
 verifyFalse(testCase,contains(pdaSource,'rand('));
 verifyFalse(testCase,contains(pdanSource,'rand('));

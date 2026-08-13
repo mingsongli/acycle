@@ -82,6 +82,69 @@ verifyEqual(testCase,defaultResult(:,3),expectedBackground, ...
     'RelTol',2e-14,'AbsTol',2e-14*max(abs(expectedBackground)));
 end
 
+function testFitFmaxChangesFitButKeepsFullPhysicalOutput(testCase)
+dt = 0.25;
+n = 256;
+physicalNyquist = 1/(2*dt);
+fitMaximum = 0.45*physicalNyquist;
+displayMaximum = 0.7*physicalNyquist;
+values = highFrequencyRichSeries(n,dt);
+
+[rhoLimited,s0Limited,conventionalLimited,robustLimited] = ...
+    redconfML(values,dt,2,n,1,0.2,displayMaximum,0,fitMaximum);
+[rhoFull,s0Full,conventionalFull,robustFull] = redconfML( ...
+    values,dt,2,n,1,0.2,physicalNyquist,0,physicalNyquist);
+
+verifyEqual(testCase,robustLimited(:,1:2),robustFull(:,1:2), ...
+    'AbsTol',0, ...
+    'FITFMAX must not truncate the returned frequency/power grid.');
+verifyEqual(testCase,conventionalLimited(:,1:2), ...
+    conventionalFull(:,1:2),'AbsTol',0);
+verifyEqual(testCase,robustLimited(end,1),physicalNyquist,'AbsTol',0);
+verifyGreaterThan(testCase, ...
+    norm([rhoLimited-rhoFull,s0Limited-s0Full]),1e-5, ...
+    'The test signal must distinguish a limited fit from a full fit.');
+
+fitMask = robustLimited(:,1) <= fitMaximum;
+smoothBins = round(0.2*nnz(fitMask));
+expectedFullSmooth = moveMedian(robustLimited(:,2),smoothBins);
+verifyEqual(testCase,conventionalLimited(:,3),expectedFullSmooth, ...
+    'RelTol',2e-14,'AbsTol',2e-14*max(expectedFullSmooth), ...
+    ['The full output must use the absolute smoothing-window length ', ...
+     'selected from the FITFMAX support.']);
+end
+
+function testLimitedFitBackgroundUsesPhysicalNyquist(testCase)
+dt = 0.25;
+n = 256;
+physicalNyquist = 1/(2*dt);
+fitMaximum = 0.4*physicalNyquist;
+values = highFrequencyRichSeries(n,dt);
+
+[rhoM,s0M,conventional,robust] = redconfML( ...
+    values,dt,2,n,1,0.2,0.65*physicalNyquist,0,fitMaximum);
+
+expectedRobust = ar1Background( ...
+    robust(:,1),s0M,rhoM,physicalNyquist);
+wrongRobust = ar1Background(robust(:,1),s0M,rhoM,fitMaximum);
+verifyEqual(testCase,robust(:,3),expectedRobust, ...
+    'RelTol',2e-14,'AbsTol',2e-14*max(abs(expectedRobust)));
+verifyGreaterThan(testCase,max(abs(robust(:,3)-wrongRobust)),1e-5);
+
+fitMask = robust(:,1) <= fitMaximum;
+smoothBins = round(0.2*nnz(fitMask));
+fitSmooth = moveMedian(robust(fitMask,2),smoothBins);
+conventionalRho = rhoAR1(values);
+expectedConventional = ar1Background(conventional(:,1), ...
+    mean(fitSmooth),conventionalRho,physicalNyquist);
+wrongConventional = ar1Background(conventional(:,1), ...
+    mean(fitSmooth),conventionalRho,fitMaximum);
+verifyEqual(testCase,conventional(:,4),expectedConventional, ...
+    'RelTol',2e-14,'AbsTol',2e-14*max(abs(expectedConventional)));
+verifyGreaterThan(testCase, ...
+    max(abs(conventional(:,4)-wrongConventional)),1e-5);
+end
+
 function testFmaxGuardRejectsInvalidOrUnusableSupport(testCase)
 dt = 0.25;
 n = 64;
@@ -104,6 +167,26 @@ verifyError(testCase,@()redconfML( ...
 verifyEqual(testCase,rhoSmall,rhoFull,'AbsTol',0);
 verifyEqual(testCase,s0Small,s0Full,'AbsTol',0);
 verifyEqual(testCase,smallDisplay,fullDisplay,'AbsTol',0);
+end
+
+function testFitFmaxGuardRejectsInvalidOrUnusableSupport(testCase)
+dt = 0.25;
+n = 64;
+values = correlatedSeries(n,dt);
+physicalNyquist = 1/(2*dt);
+
+invalid = {[],0,-1,NaN,Inf,[0.5,1],complex(0.5,0.1),'0.5'};
+for index = 1:numel(invalid)
+    verifyError(testCase,@()redconfML(values,dt,2,n,1,0.2, ...
+        physicalNyquist,0,invalid{index}), ...
+        'Acycle:RedconfML:InvalidFitFmax');
+end
+verifyError(testCase,@()redconfML(values,dt,2,n,1,0.2, ...
+    physicalNyquist,0,physicalNyquist*(1+1e-6)), ...
+    'Acycle:RedconfML:FitFmaxAbovePhysicalNyquist');
+verifyError(testCase,@()redconfML(values,dt,2,n,1,0.2, ...
+    physicalNyquist,0,0.25/(n*dt)), ...
+    'Acycle:RedconfML:InsufficientFrequencySupport');
 end
 
 function testLombDisplayLimitDoesNotChangeFitOrBackground(testCase)
@@ -142,6 +225,30 @@ verifyGreaterThan(testCase, ...
     max(abs(thresholdDisplay(2,:).'-wrong)),1e-5);
 end
 
+function testLombRobustAr1ConfidenceUsesChiSquareDegreesOfFreedom(testCase)
+n = 96;
+baseSpacing = 0.25;
+spacing = baseSpacing*(1+0.18*sin((1:n-1)'*0.37));
+timex = [0;cumsum(spacing)];
+values = correlatedSeriesAtCoordinates(timex);
+physicalNyquist = 1/(2*median(diff(timex)));
+
+[~,~,thresholds] = plomb_robustar1( ...
+    values,timex,physicalNyquist,0.2,0);
+background = thresholds(2,:);
+probabilities = [0.90;0.95;0.99;0.999];
+expectedRatios = chi2inv(probabilities,2)/2;
+
+for confidenceIndex = 1:numel(probabilities)
+    actualRatio = thresholds(confidenceIndex+2,:)./background;
+    verifyEqual(testCase,actualRatio, ...
+        repmat(expectedRatios(confidenceIndex),size(actualRatio)), ...
+        'RelTol',2e-14,'AbsTol',2e-14, ...
+        ['Lomb robust AR(1) confidence must divide the chi-square ', ...
+         'quantile by its two degrees of freedom.']);
+end
+end
+
 function values = correlatedSeries(n,dt)
 coordinate = (0:n-1)'*dt;
 values = correlatedSeriesAtCoordinates(coordinate);
@@ -156,6 +263,16 @@ values = zeros(n,1);
 for index = 2:n
     values(index) = 0.82*values(index-1)+innovation(index);
 end
+end
+
+function values = highFrequencyRichSeries(n,dt)
+coordinate = (0:n-1)'*dt;
+redComponent = correlatedSeriesAtCoordinates(coordinate);
+sample = (0:n-1)';
+raw = mod(73*sample+19,101)/101-0.5;
+highPass = [raw(1);diff(raw)];
+chirpComponent = sin(pi*sample.^2/n);
+values = redComponent+2.5*highPass+1.5*chirpComponent;
 end
 
 function background = ar1Background(frequency,s0,rho,physicalNyquist)

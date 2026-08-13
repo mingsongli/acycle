@@ -50,8 +50,8 @@ S.fza = 0.9;
 S.fzb = 1.2;
 S.ftmin = 0.001;
 S.ftmax = 1;
-S.nmc = 1000;
-S.numcore = feature('numCores');
+S.nmc = 60;
+S.numcore = dynotPhysicalCoreCount();
 S.itinerary = 50;
 
 S.percent_on = [true true true true true true];
@@ -61,7 +61,10 @@ S.sampa = NaN;
 S.sampb = NaN;
 S.parmhat = [1 1];
 
-S.run = struct('y_grid',[],'powyad_p_nan',[],'npercent',0,'npercent2',0,'colorcode',[],'powyadjust',[],'f3m',[],'nwz',[],'windowz',[],'samplez',[]);
+S.run = struct('y_grid',[],'powyad_p_nan',[],'npercent',0, ...
+    'npercent2',0,'percentiles',[],'medianIndex',[], ...
+    'colorcode',[],'powyadjust',[],'f3m',[],'nwz',[], ...
+    'windowz',[],'samplez',[]);
 end
 
 function S = createUI(S)
@@ -166,15 +169,15 @@ S.TPadWin = uilabel(S.PPlot,'Text','Half-window padding','BackgroundColor',S.bg)
 S.EPadWin = uieditfield(S.PPlot,'text','Value',num2str(S.padwin));
 
 S.PProc = uipanel(S.UIFigure,'Title','Process','BackgroundColor',S.bg);
-S.TCore = uilabel(S.PProc,'Text','Numer of physical core will be used','BackgroundColor',S.bg);
+S.TCore = uilabel(S.PProc,'Text','Number of physical cores to use','BackgroundColor',S.bg);
 S.ECore = uieditfield(S.PProc,'text','Value',num2str(S.numcore));
-S.TIt = uilabel(S.PProc,'Text','The first','BackgroundColor',S.bg);
+S.TIt = uilabel(S.PProc,'Text','First','BackgroundColor',S.bg);
 S.EIt = uieditfield(S.PProc,'text','Value',num2str(S.itinerary));
-S.TIt2 = uilabel(S.PProc,'Text','iterations to estimate process time','BackgroundColor',S.bg);
+S.TIt2 = uilabel(S.PProc,'Text','iterations run serially before parallel work','BackgroundColor',S.bg);
 S.TTips = uitextarea(S.PProc,'Editable','off','BackgroundColor',S.bg,'FontSize',11, ...
-    'Value',{'Press "CTRL" + "X" to cease the process;', ...
-             'May type the following script to quit the parallel computing:', ...
-             'delete(gcp(''nocreate''))'});
+    'Value',{'For more than 199 simulations, initial iterations run serially;', ...
+             'remaining iterations use the selected cores.', ...
+             'Use Cancel in the progress window; DYNOT manages its worker pool.'});
 
 % right plot panels
 S.PDataPlot = uipanel(S.UIFigure,'Title','Data','BackgroundColor',S.bg);
@@ -386,6 +389,10 @@ if cut1 > cut2
 end
 idx = S.data(:,1)>=cut1 & S.data(:,1)<=cut2;
 if nnz(idx) < 10, return; end
+S.cut1 = cut1;
+S.cut2 = cut2;
+S.ECut1.Value = num2str(S.cut1);
+S.ECut2.Value = num2str(S.cut2);
 S.data = S.data(idx,1:2);
 
 samplerate = diff(S.data(:,1));
@@ -447,6 +454,9 @@ try
     S = runDynot(S);
     setState(src,S);
 catch ME
+    if strcmp(ME.identifier,'Acycle:DYNOT:Canceled')
+        return
+    end
     uialert(S.UIFigure,ME.message,'DYNOT Error');
 end
 end
@@ -458,20 +468,31 @@ S.nw1 = str2double(S.ENW1.Value);
 S.nw2 = str2double(S.ENW2.Value);
 S.pad = str2double(S.EPad.Value);
 S.step = str2double(S.EStep.Value);
-S.nmc = max(10,round(str2double(S.ENMC.Value)));
-S.nout = max(100,round(str2double(S.ENout.Value)));
-S.padwin = max(0,round(str2double(S.EPadWin.Value)));
+S.nmc = positiveIntegerInput(S.ENMC.Value, ...
+    'Number of Monte Carlo simulations');
+S.nout = positiveIntegerInput(S.ENout.Value, ...
+    'Interpolation number');
+S.padwin = nonnegativeIntegerInput(S.EPadWin.Value, ...
+    'Half-window padding');
 S.fza = str2double(S.EFza.Value);
 S.fzb = str2double(S.EFzb.Value);
 S.ftmin = str2double(S.EFtmin.Value);
 S.ftmax = str2double(S.EFtmax.Value);
 S.sampa = str2double(S.ESampA.Value);
 S.sampb = str2double(S.ESampB.Value);
-S.numcore = max(1,round(str2double(S.ECore.Value)));
-S.itinerary = max(1,round(str2double(S.EIt.Value)));
+S.numcore = positiveIntegerInput(S.ECore.Value, ...
+    'Number of physical cores');
+S.numcore = min(S.numcore,dynotPhysicalCoreCount());
+S.itinerary = positiveIntegerInput(S.EIt.Value, ...
+    'Initial serial iterations');
+S.itinerary = min(S.itinerary,S.nmc);
+S.ENMC.Value = num2str(S.nmc);
+S.ENout.Value = num2str(S.nout);
+S.EPadWin.Value = num2str(S.padwin);
+S.ECore.Value = num2str(S.numcore);
+S.EIt.Value = num2str(S.itinerary);
 
 S.percent_on = [S.CMedian.Value S.C50.Value S.C68.Value S.C80.Value S.C90.Value S.C95.Value];
-if ~any(S.percent_on), S.percent_on(1) = true; end
 
 if S.use_middle_age
     S = updateOrbit9Display(S);
@@ -528,8 +549,13 @@ else
     randnw = randi(2*(S.nw2-S.nw1),[nmc 1]);
 end
 samplez = wblrnd(S.parmhat(1),S.parmhat(2),[nmc 1]);
-samplez(samplez<S.sampa) = S.sampa + (S.sampb-S.sampa).*rand(sum(samplez<S.sampa),1);
-samplez(samplez>S.sampb) = S.sampa + (S.sampb-S.sampa).*rand(sum(samplez>S.sampb),1);
+% v2.8 used one shared replacement draw for every value below the lower
+% bound and a second shared draw for every value above the upper bound.
+% Keep both draws unconditional to preserve the historical random stream.
+lowerReplacement = S.sampa + (S.sampb-S.sampa)*rand(1);
+samplez(samplez<S.sampa) = lowerReplacement;
+upperReplacement = S.sampa + (S.sampb-S.sampa)*rand(1);
+samplez(samplez>S.sampb) = upperReplacement;
 windowz = S.window1 + (S.window2-S.window1).*rand(nmc,1);
 nwz = S.nw1 + randnw/2;
 bw = nwz./windowz;
@@ -547,27 +573,12 @@ y_grid = linspace(data(1,1),data(end,1),nout)';
 powy = nan(nout,nmc);
 powmean = nan(1,nmc);
 
-hwb = waitbar(0,'Running DYNOT ...','WindowStyle','modal');
+hwb = waitbar(0,'Running DYNOT ...','WindowStyle','modal', ...
+    'CreateCancelBtn',@(source,event)requestDynotCancel(source));
+setappdata(hwb,'canceling',false);
 cleanupWb = onCleanup(@()safeClose(hwb));
-for i = 1:nmc
-    dat = [];
-    dat(:,1) = data(1,1):samplez(i):data(end,1);
-    dat(:,2) = interp1(data(:,1),data(:,2),dat(:,1),'pchip');
-    p = polyfit(dat(:,1),dat(:,2),1);
-    dat(:,2) = dat(:,2) - polyval(p,dat(:,1));
-    if S.padwin > 0
-        dat = zeropad2(dat,windowz(i),S.padwin);
-    end
-    nw = nwz(i);
-    power = pdan(dat,f3m(i,:),windowz(i),nw,S.ftmin,S.ftmax,S.step,S.pad);
-    powy(:,i) = interp1(power(:,1),power(:,2),y_grid);
-    p2 = power(:,2);
-    powmean(i) = mean(p2(~isnan(p2)));
-
-    if rem(i,max(1,round(nmc/100))) == 0 || i==nmc
-        waitbar(i/nmc,hwb,sprintf('Progress %.1f%%',100*i/nmc));
-    end
-end
+[powy,powmean] = runDynotIterations(S,data,y_grid,samplez, ...
+    windowz,nwz,f3m,powy,powmean,hwb);
 clear cleanupWb;
 
 pm = mean(powmean,'omitnan');
@@ -578,15 +589,8 @@ if isfinite(maxp) && maxp > 1
     powyadjust = powyadjust/maxp;
 end
 
-percentBank = {50,[25 75],[15.865 84.135],[10 90],[5 95],[2.5 97.5]};
-pp = [];
-for k=1:numel(percentBank)
-    if S.percent_on(k)
-        pp = [pp percentBank{k}]; %#ok<AGROW>
-    end
-end
-pp = sort(unique(pp));
-if isempty(pp), pp = 50; end
+percentilePlan = dynotPercentilePlan(S.percent_on);
+pp = percentilePlan.percentiles;
 powyadjustp = prctile(powyadjust,pp,2);
 mask = ~isnan(powyadjustp(:,1));
 y_grid_nan = y_grid(mask);
@@ -595,16 +599,15 @@ powyad_p_nan = 1 - powyadjustp(mask,:);
 colorcode = [221 234 224;201 227 209;176 219 188;126 201 146;67 180 100]/255;
 cla(S.AxDynot); hold(S.AxDynot,'on');
 npercent = numel(pp);
-npercent2 = floor((npercent-1)/2);
+npercent2 = percentilePlan.intervalCount;
 for i = 1:min(npercent2,size(colorcode,1))
     x = [y_grid_nan; flipud(y_grid_nan)];
     y = [powyad_p_nan(:,npercent+1-i); flipud(powyad_p_nan(:,i))];
     fill(S.AxDynot,x,y,colorcode(i,:),'LineStyle','none');
 end
-mid = npercent2+1;
-if mid>=1 && mid<=size(powyad_p_nan,2)
-    plot(S.AxDynot,y_grid_nan,powyad_p_nan(:,mid),'Color',[0 120/255 0],'LineWidth',1.5,'LineStyle','--');
-end
+medianIndex = percentilePlan.medianIndex;
+plot(S.AxDynot,y_grid_nan,powyad_p_nan(:,medianIndex), ...
+    'Color',[0 120/255 0],'LineWidth',1.5,'LineStyle','--');
 axis(S.AxDynot,[data(1,1) data(end,1) min(powyad_p_nan,[],'all') max(powyad_p_nan,[],'all')]);
 set(S.AxDynot,'YDir','reverse');
 set(S.AxDynot,'XMinorTick','on','YMinorTick','on');
@@ -617,6 +620,8 @@ assignin('base','samplez',samplez);
 assignin('base','powy_grid',y_grid);
 assignin('base','powy',1-powyadjust);
 assignin('base','powyp',1-powyadjustp);
+assignin('base','powyad_p_grid',y_grid_nan);
+assignin('base','powyad_p',powyad_p_nan);
 
 S.run.y_grid = y_grid;
 S.run.powyadjust = 1-powyadjust;
@@ -624,16 +629,18 @@ S.run.y_grid_nan = y_grid_nan;
 S.run.powyad_p_nan = powyad_p_nan;
 S.run.npercent = npercent;
 S.run.npercent2 = npercent2;
+S.run.percentiles = pp;
+S.run.medianIndex = medianIndex;
 S.run.colorcode = colorcode;
 S.run.f3m = f3m;
 S.run.nwz = nwz;
 S.run.windowz = windowz;
 S.run.samplez = samplez;
 
-saveDynotFiles(S, y_grid_nan, powyad_p_nan, npercent2);
+saveDynotFiles(S, y_grid_nan, powyad_p_nan, medianIndex);
 end
 
-function saveDynotFiles(S, y_grid_nan, powyad_p_nan, npercent2)
+function saveDynotFiles(S, y_grid_nan, powyad_p_nan, medianIndex)
 pre_dir = pwd;
 try
     CDac_pwd;
@@ -652,8 +659,8 @@ if exist(name1,'file') || exist(name2,'file')
     end
 end
 
-mid = max(1,min(size(powyad_p_nan,2),npercent2+1));
-dlmwrite(name1,[y_grid_nan,powyad_p_nan(:,mid)],'delimiter',' ','precision',9);
+dlmwrite(name1,[y_grid_nan,powyad_p_nan(:,medianIndex)], ...
+    'delimiter',' ','precision',9);
 dlmwrite(name2,[y_grid_nan,powyad_p_nan],'delimiter',' ','precision',9);
 saveDynotParameterTable(S);
 
@@ -829,8 +836,9 @@ for i = 1:min(npercent2,size(colorcode,1))
     y = [powyad_p_nan(:,npercent+1-i); flipud(powyad_p_nan(:,i))];
     fill(ax,x,y,colorcode(i,:),'LineStyle','none');
 end
-mid = npercent2 + 1;
-plot(ax,y_grid_nan,powyad_p_nan(:,mid),'Color',[0 120/255 0],'LineWidth',1.5,'LineStyle','--');
+medianIndex = S.run.medianIndex;
+plot(ax,y_grid_nan,powyad_p_nan(:,medianIndex), ...
+    'Color',[0 120/255 0],'LineWidth',1.5,'LineStyle','--');
 set(ax,'YDir','reverse');
 title(ax,'DYNOT');
 grid(ax,'on');
@@ -877,6 +885,171 @@ if ~isempty(h) && isgraphics(h)
 end
 end
 
+function [powy,powmean] = runDynotIterations(S,data,yGrid,samplez, ...
+        windowz,nwz,f3m,powy,powmean,hwb)
+nmc = S.nmc;
+options = struct('padwin',S.padwin,'ftmin',S.ftmin, ...
+    'ftmax',S.ftmax,'step',S.step,'pad',S.pad);
+serialCount = nmc;
+useParallel = S.numcore > 1 && nmc > 199 && S.itinerary < nmc && ...
+    dynotParallelAvailable();
+if useParallel
+    serialCount = S.itinerary;
+end
+
+for index = 1:serialCount
+    checkDynotCanceled(hwb);
+    [powy(:,index),powmean(index)] = dynotIterationWorker(data,yGrid, ...
+        samplez(index),windowz(index),nwz(index),f3m(index,:),options);
+    reportDynotProgress(hwb,index,nmc);
+end
+if ~useParallel
+    return
+end
+
+[pool,effectiveCores,ownedPool] = acquireDynotPool(S.numcore);
+if isempty(pool) || effectiveCores < 2
+    for index = serialCount+1:nmc
+        checkDynotCanceled(hwb);
+        [powy(:,index),powmean(index)] = dynotIterationWorker(data,yGrid, ...
+            samplez(index),windowz(index),nwz(index),f3m(index,:),options);
+        reportDynotProgress(hwb,index,nmc);
+    end
+    return
+end
+poolCleanup = onCleanup(@()releaseDynotPool(pool,ownedPool));
+
+nextIndex = serialCount + 1;
+slotCount = min(effectiveCores,nmc-serialCount);
+futures(slotCount) = parallel.FevalFuture;
+futureIndices = zeros(1,slotCount);
+for slot = slotCount:-1:1
+    futures(slot) = submitDynotIteration(pool,data,yGrid,samplez, ...
+        windowz,nwz,f3m,options,nextIndex);
+    futureIndices(slot) = nextIndex;
+    nextIndex = nextIndex + 1;
+end
+
+completed = serialCount;
+try
+    while completed < nmc
+        if dynotCanceled(hwb)
+            cancel(futures);
+            error('Acycle:DYNOT:Canceled','DYNOT calculation canceled.');
+        end
+        [slot,column,powerMean] = fetchNext(futures,0.1);
+        if isempty(slot)
+            continue
+        end
+        resultIndex = futureIndices(slot);
+        powy(:,resultIndex) = column;
+        powmean(resultIndex) = powerMean;
+        completed = completed + 1;
+        reportDynotProgress(hwb,completed,nmc);
+        if nextIndex <= nmc
+            futures(slot) = submitDynotIteration(pool,data,yGrid,samplez, ...
+                windowz,nwz,f3m,options,nextIndex);
+            futureIndices(slot) = nextIndex;
+            nextIndex = nextIndex + 1;
+        end
+    end
+catch ME
+    cancel(futures);
+    rethrow(ME);
+end
+clear poolCleanup;
+end
+
+function future = submitDynotIteration(pool,data,yGrid,samplez, ...
+        windowz,nwz,f3m,options,index)
+future = parfeval(pool,@dynotIterationWorker,2,data,yGrid,samplez(index), ...
+    windowz(index),nwz(index),f3m(index,:),options);
+end
+
+function available = dynotParallelAvailable()
+available = false;
+try
+    available = exist('parfeval','file') == 2 && exist('gcp','file') == 2 && ...
+        exist('parpool','file') == 2 && ...
+        license('test','Distrib_Computing_Toolbox');
+catch
+end
+end
+
+function [pool,effectiveCores,ownedPool] = acquireDynotPool(requestedCores)
+pool = [];
+effectiveCores = 1;
+ownedPool = false;
+try
+    pool = gcp('nocreate');
+    if isempty(pool)
+        pool = parpool('local',requestedCores);
+        ownedPool = true;
+    end
+    effectiveCores = min(requestedCores,pool.NumWorkers);
+catch ME
+    warning('Acycle:DYNOT:ParallelFallback', ...
+        'Parallel execution is unavailable; continuing serially: %s', ...
+        ME.message);
+    pool = [];
+    effectiveCores = 1;
+    ownedPool = false;
+end
+end
+
+function releaseDynotPool(pool,ownedPool)
+if ownedPool && ~isempty(pool) && isvalid(pool)
+    delete(pool);
+end
+end
+
+function count = dynotPhysicalCoreCount()
+try
+    count = max(1,fix(feature('numCores')));
+catch
+    count = 1;
+end
+end
+
+function checkDynotCanceled(hwb)
+if dynotCanceled(hwb)
+    error('Acycle:DYNOT:Canceled','DYNOT calculation canceled.');
+end
+end
+
+function reportDynotProgress(hwb,completed,nmc)
+if rem(completed,max(1,round(nmc/100))) == 0 || completed == nmc
+    updateDynotWaitbar(hwb,completed/nmc, ...
+        sprintf('Progress %.1f%%',100*completed/nmc));
+end
+end
+
+function requestDynotCancel(source)
+fig = ancestor(source,'figure');
+if isempty(fig) && isgraphics(source,'figure')
+    fig = source;
+end
+if ~isempty(fig) && isgraphics(fig,'figure')
+    setappdata(fig,'canceling',true);
+end
+end
+
+function canceled = dynotCanceled(hwb)
+drawnow limitrate;
+canceled = ~isgraphics(hwb,'figure') || ...
+    (isappdata(hwb,'canceling') && getappdata(hwb,'canceling'));
+end
+
+function updateDynotWaitbar(hwb,fraction,message)
+% The user can close the waitbar while PDAN is busy. Check again immediately
+% before updating so a closed waitbar is treated as cancellation instead of
+% being passed to WAITBAR as an invalid second argument.
+if dynotCanceled(hwb)
+    error('Acycle:DYNOT:Canceled','DYNOT calculation canceled.');
+end
+waitbar(min(max(double(fraction),0),1),hwb,char(message));
+end
+
 function setState(h,S)
 fig = ancestor(h,'figure');
 setappdata(fig,'DYNOS_STATE',S);
@@ -892,6 +1065,22 @@ if isstruct(s) && isfield(s,name) && ~isempty(s.(name))
     v = s.(name);
 else
     v = def;
+end
+end
+
+function value = positiveIntegerInput(textValue,label)
+value = str2double(textValue);
+if ~(isfinite(value) && value >= 1 && value == fix(value))
+    error('Acycle:DYNOT:InvalidIntegerInput', ...
+        '%s must be a positive integer.',label);
+end
+end
+
+function value = nonnegativeIntegerInput(textValue,label)
+value = str2double(textValue);
+if ~(isfinite(value) && value >= 0 && value == fix(value))
+    error('Acycle:DYNOT:InvalidIntegerInput', ...
+        '%s must be a nonnegative integer.',label);
 end
 end
 

@@ -15,7 +15,7 @@ function [s,x_grid,y_grid] = evoplomb(data,window,step,fmin,fmax,normal)
 pad = 10; % x zero-padding
 x = data(:,1);
 y = data(:,2);
-dt = abs(x(2)-x(1)); % sample rates
+dt = median(abs(diff(x))); % representative sample rate
 if step < dt
     step = dt;
 end

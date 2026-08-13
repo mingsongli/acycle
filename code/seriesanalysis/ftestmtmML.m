@@ -18,7 +18,8 @@ function [freq1,ftest,fsigout,Amp,Faz,Sig,Noi,dof,wt]=ftestmtmML(data,NW,npad,pl
 % INPUT
 %   data: n-by-2 dataset, must be uniformly sampled.
 %   NW:   time-bandwidth product to use (e.g. NW=2 for 2pi multitapers)
-%   npad: zero pad to npad * length of y (1 for no padding)
+%   npad: zero pad to npad * length of y (1 for no padding). The helpers
+%         round npad*N to an integer, allowing an exact NFFT via NFFT/N.
 %   plotn: 1 for plot, 0 for no plot.
 %
 % OUTPUT
@@ -96,6 +97,5 @@ if plotn
     xlabel('Frequency')
     set(gca, 'YDir','reverse')
 end
-
 
 

@@ -93,15 +93,19 @@ classdef copyright < matlab.apps.AppBase
                     app.UIFigure.Name = 'Acycle: Copyright';
                 end
 
-                [~, loc1] = ismember('c61', app.LangID);
-                [~, loc2] = ismember('c65', app.LangID);
                 [~, loc3] = ismember('c62', app.LangID);
                 [~, loc4] = ismember('c63', app.LangID);
                 [~, loc5] = ismember('c64', app.LangID);
 
-                headerLines = {''; 'Acycle'; ''; 'Time-Series Analysis Software'; ''; 'Copyright'};
-                if loc1 > 0 && loc2 > 0 && loc3 > 0 && loc4 > 0 && loc5 > 0
-                    headerLines = {''; [app.LangVar{loc1}, ' (', app.LangVar{loc2}, ') ']; ''; app.LangVar{loc3}; ''; [app.LangVar{loc4}, app.LangVar{loc5}]};
+                % c61 and c65 contain a historical hard-coded version and
+                % release date. Keep the translated descriptive text, but
+                % always obtain the current release from ac_version.txt.
+                headerLines = {''; app.currentVersionLabel(); ''; ...
+                    'Time-Series Analysis Software'; ''; 'Copyright'};
+                if loc3 > 0 && loc4 > 0 && loc5 > 0
+                    headerLines = {''; app.currentVersionLabel(); ''; ...
+                        app.LangVar{loc3}; ''; ...
+                        [app.LangVar{loc4}, app.LangVar{loc5}]};
                 end
                 app.HeaderLabel.Text = strjoin(headerLines, newline);
             else

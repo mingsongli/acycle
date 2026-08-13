@@ -1,11 +1,12 @@
-function [rhoM, s0M,redconfAR1,redconfML96]=redconfML(x,dt,nw,nfft,linlog,smoothwin,fmax,plotn)
+function [rhoM, s0M,redconfAR1,redconfML96]=redconfML(x,dt,nw,nfft,linlog,smoothwin,fmax,plotn,fitFmax)
 %
 % Robust Estimation of Background Noise and Signal Detection
 %INPUT
 % x:        1 column evenly spaced dataset. Value only.
 % dt:       Sampling rate
-% nw:       time-halfbandwidth product; then using K = 2*nw - 1 Slepian
-%           tapers in the power spectral density (PSD) estimate.
+% nw:       time-halfbandwidth product. The confidence-level degrees of
+%           freedom use the actual number of Slepian tapers retained by
+%           PMTM.
 % nfft:     uses nfft points in the DFT.  
 %           If nfft is greater than the signal length, x is zero-padded to length nfft. 
 %           If nfft is less than the signal length, the signal is wrapped modulo nfft.
@@ -13,10 +14,13 @@ function [rhoM, s0M,redconfAR1,redconfML96]=redconfML(x,dt,nw,nfft,linlog,smooth
 %           1 = a linear fit to S(f); 2 = a fit to log S(f).
 % smoothwin:median smoothing window. Should be smaller than 0.25 and
 %           larger than 0.05 or the spectral resolution. Default value is 0.2
-% fmax: maximum displayed frequency. The spectrum, robust fit, and AR(1)
-%       transfer function always use the complete one-sided grid bounded by
-%       the physical Nyquist frequency 1/(2*dt).
+% fmax: maximum displayed frequency. It does not select data for fitting.
 % plot: plot results or not
+% fitFmax: optional maximum frequency included in the robust fit. The
+%          default is the physical Nyquist frequency 1/(2*dt). This limit
+%          selects fit ordinates only: the AR(1) transfer function and all
+%          returned spectra retain the physical Nyquist frequency and the
+%          complete one-sided frequency grid.
 %
 %OUTPUT
 % rhoM:     Robust AR1 coefficient 
@@ -40,7 +44,7 @@ function [rhoM, s0M,redconfAR1,redconfML96]=redconfML(x,dt,nw,nfft,linlog,smooth
 %
 % EXAMPLE:
 % x = dat(:,2); dt = 1; nw = 2; nfft = 2000; linlog = 2; smoothwin = 0.2; plot =1;
-% [rhoM, s0M,redconfAR1,redconfML96]=redconfML(x,dt,nw,nfft,linlog,smoothwin,plot);
+% [rhoM, s0M,redconfAR1,redconfML96]=redconfML(x,dt,nw,nfft,linlog,smoothwin,fmax,plotn,fitFmax);
 %
 %
 if nargin < 8
@@ -90,6 +94,22 @@ if fmax > physicalNyquist
          'FMAX controls only the plot display limit and cannot redefine ', ...
          'the physical Nyquist frequency.'],fmax,physicalNyquist);
 end
+if nargin < 9
+    fitFmax = physicalNyquist;
+elseif ~(isnumeric(fitFmax) && isreal(fitFmax) && ...
+        isscalar(fitFmax) && isfinite(fitFmax) && fitFmax > 0)
+    error('Acycle:RedconfML:InvalidFitFmax', ...
+        'FITFMAX must be a finite positive real numeric scalar.');
+else
+    fitFmax = double(fitFmax);
+    if fitFmax > physicalNyquist
+        error('Acycle:RedconfML:FitFmaxAbovePhysicalNyquist', ...
+            ['FITFMAX %.17g exceeds the physical Nyquist frequency ', ...
+             '%.17g. FITFMAX may select reliable fit ordinates but ', ...
+             'cannot redefine the physical Nyquist frequency.'], ...
+            fitFmax,physicalNyquist);
+    end
+end
 % Multi-taper method power spectrum
 if nw == 1
     [pxx,f] = pmtm(x,nw,nfft,'DropLastTaper',false);
@@ -102,15 +122,21 @@ ft = f/pi*physicalNyquist;
 pxx0 = pxx;
 ft0 = ft;
 %
+% FITFMAX selects only the reliable ordinates used to estimate rho and S0.
+% Keep the complete grid for the displayed/saved median and backgrounds.
+fitMask = ft0 <= fitFmax;
+ftFit = ft0(fitMask);
+pxxFit = pxx0(fitMask);
 % median-smoothing data numbers
-smoothn = round(smoothwin * length(pxx));
+smoothn = round(smoothwin * nnz(fitMask));
 if smoothn < 1
     error('Acycle:RedconfML:InsufficientFrequencySupport', ...
-        ['The complete spectrum contains too few ordinates for the ', ...
-         'requested median-smoothing fraction. Increase NFFT or SMOOTHWIN.']);
+        ['The selected robust-fit frequency range contains too few ', ...
+         'ordinates for the requested median-smoothing fraction. ', ...
+         'Increase FITFMAX, NFFT, or SMOOTHWIN.']);
 end
 % median-smoothing
-pxxsmooth = moveMedian(pxx,smoothn);  % valid data; for rho evaluation
+pxxsmooth = moveMedian(pxxFit,smoothn);  % selected data; for rho evaluation
 pxxsmooth0 = moveMedian(pxx0,smoothn);  % all data;for plot only
 %
 %pxxsmooth = pxxsmooth(ft<= fmax);
@@ -132,15 +158,15 @@ theored0 = mean(pxxsmooth) * (1-rho^2)./(1-(2.*rho.* ...
     % Mingsong Li, Penn State
     % June 5, 2020
 try
-    cospara = cos(pi.*ft./physicalNyquist);
+    cospara = cos(pi.*ftFit./physicalNyquist);
     if linlog == 1
         funrobust = @(v,f)v(1) * (1-v(2)^2)./(1-(2.*v(2).*cospara)+v(2)^2);
         v1 = [s0,rho];
-        x = lsqcurvefit(funrobust,v1,ft,pxxsmooth);
+        x = lsqcurvefit(funrobust,v1,ftFit,pxxsmooth);
     else
         funrobust = @(v,f)log10(v(1) * (1-v(2)^2)./(1-(2.*v(2).*cospara)+v(2)^2));
         v1 = [s0,rho];
-        x = lsqcurvefit(funrobust,v1,ft,log10(pxxsmooth));
+        x = lsqcurvefit(funrobust,v1,ftFit,log10(pxxsmooth));
     end
     rhoM = x(2);
     s0M = x(1);
@@ -149,7 +175,7 @@ try
 catch
     % Alternatively, acycle will use a naive grid search method.
     [rhoM, s0M] = minirhos0( ...
-        s0,physicalNyquist,ft,pxxsmooth,linlog);
+        s0,physicalNyquist,ftFit,pxxsmooth,linlog);
     disp('>>  MTM rho and S0 estimation: grid search method')
 end
 %
@@ -157,9 +183,9 @@ end
 %[rhoM, s0M] = minirho(s0,fn,ft,pxxsmooth,linlog);
 % median-smoothing reshape significance level
 theored1 = s0M * (1-rhoM^2)./(1-(2.*rhoM.* ...
-    cos(pi.*ft./physicalNyquist))+rhoM^2);
+    cos(pi.*ft0./physicalNyquist))+rhoM^2);
 
-K = 2*nw -1;
+K = acycleMtmTaperCount(nw);
 nw2 = 2*(K);
 % Chi-square inversed distribution
 chi90 = theored1 * chi2inv(0.90,nw2)/nw2;
@@ -172,11 +198,11 @@ if plotn == 1
     semilogy(ft0,pxx0,'k')
     hold on; 
     semilogy(ft0,pxxsmooth0,'m-.');
-    semilogy(ft,theored1,'k-','LineWidth',2);
-    semilogy(ft,chi90,'r-');
-    semilogy(ft,chi95,'r--','LineWidth',2);
-    semilogy(ft,chi99,'b-.');
-    semilogy(ft,chi999,'g--','LineWidth',1);
+    semilogy(ft0,theored1,'k-','LineWidth',2);
+    semilogy(ft0,chi90,'r-');
+    semilogy(ft0,chi95,'r--','LineWidth',2);
+    semilogy(ft0,chi99,'b-.');
+    semilogy(ft0,chi999,'g--','LineWidth',1);
     xlabel('Frequency')
     ylabel('Power')
     xlim([0,fmax])
@@ -189,4 +215,4 @@ end
 
 % data for output
 redconfAR1 = [ft0,pxx0,pxxsmooth0,theored0];
-redconfML96 = [ft,pxx,theored1,chi90,chi95,chi99,chi999];
+redconfML96 = [ft0,pxx0,theored1,chi90,chi95,chi99,chi999];

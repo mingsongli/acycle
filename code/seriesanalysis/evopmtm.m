@@ -16,7 +16,7 @@ pad = 20; % x zero-padding
 nw=2;
 x = data(:,1);
 y = data(:,2);
-dt = abs(x(2)-x(1)); % sample rates
+dt = median(abs(diff(x))); % representative sample rate
 if step < dt
     step = dt;
 end

@@ -92,10 +92,10 @@ theored1 = s0M * (1-rhoM^2)./(1-(2.*rhoM.* ...
 nw2 = 2; % degree of freedom
 
 % Chi-square inversed distribution
-chi90 = theored1 * chi2inv(0.90,nw2);
-chi95 = theored1 * chi2inv(0.95,nw2);
-chi99 = theored1 * chi2inv(0.99,nw2);
-chi999 = theored1 * chi2inv(0.999,nw2);
+chi90 = theored1 * chi2inv(0.90,nw2)/nw2;
+chi95 = theored1 * chi2inv(0.95,nw2)/nw2;
+chi99 = theored1 * chi2inv(0.99,nw2)/nw2;
+chi999 = theored1 * chi2inv(0.999,nw2)/nw2;
 
 pth = [pxxsmooth';theored1';chi90';chi95';chi99';chi999'];
 

@@ -35,13 +35,13 @@ if nargin < 2; method = 'mtm'; end
 %% basic parameters
 datax = data(:,1);  % depth or time
 datay = data(:,2);  % value
-dt = mean(diff(datax)); % mean sampling rate
+dt = median(diff(datax)); % sampling interval used by the main spectrum
 ndata = length(datax); % data length
-nzeropad = padtimes * ndata;  % number of padding times 
+nzeropad = max(ndata,round(padtimes * ndata));  % exact integer NFFT
 
 % DOF
 if strcmp(method,'mtm')
-    K = 2 * nw -1;   % for 2 pi MTM, nw = 2, K = 3, dof = 6;
+    K = acycleMtmTaperCount(nw); % for 2 pi MTM, K = 3, dof = 6
     dof = 2*(K);  % dof, swa dof = 8;
 elseif strcmp(method,'lomb')
     dof = 2; % 
@@ -352,7 +352,7 @@ if nneg == 0
     fprintf('\n');
     fprintf(' *** No spectral peaks exceed the ***\n');
     fprintf(' *** confidence level associated  ***\n');
-    fprintf(' *** with the 5% False Discovery  ***\n');
+    fprintf(' *** with the 5%% False Discovery  ***\n');
     fprintf(' *** Rate                         ***\n');
 else
     fprintf('\n');

@@ -35,7 +35,11 @@ Art=mean(theored);
 theored(1)=theoredun;
 theored=theored*(meanp/Art);
 
-K = 2*nw -1;
+if method == 2
+    K = acycleMtmTaperCount(nw);
+else
+    K = 1;
+end
 nw2 = 2*(K);
 % Chi-square inversed distribution
 chi90 = theored * chi2inv(0.90,nw2)/nw2;

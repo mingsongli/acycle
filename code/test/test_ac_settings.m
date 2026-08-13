@@ -197,6 +197,29 @@ verifyTrue(testCase,startsWith(headerText,expectedTitle));
 verifyEqual(testCase,get(app.UIFigure,'Name'),'Acycle: Copyright');
 end
 
+function testLocalizedCopyrightHeaderUsesCurrentVersion(testCase)
+context = struct();
+context.lang_choice = 1;
+context.lang_id = {'c60';'c61';'c62';'c63';'c64';'c65'};
+context.lang_var = {'Localized Copyright';'Acycle v3.0'; ...
+    'Localized Time-Series Analysis';'Localized ';'Copyright'; ...
+    'Jan 18, 2023'};
+app = copyright(context);
+testCase.addTeardown(@()deleteIfValid(app));
+
+expectedTitle = AC('AC_mainFigureTitle');
+headerText = get(app.HeaderLabel,'Text');
+headerLines = regexp(headerText,'\r\n|\n|\r','split');
+headerLines(cellfun('isempty',headerLines)) = [];
+
+verifyEqual(testCase,headerLines{1},expectedTitle);
+verifySubstring(testCase,headerText,'Localized Time-Series Analysis');
+verifySubstring(testCase,headerText,'Localized Copyright');
+verifyFalse(testCase,contains(headerText,'Acycle v3.0'));
+verifyFalse(testCase,contains(headerText,'Jan 18, 2023'));
+verifyEqual(testCase,get(app.UIFigure,'Name'),'Localized Copyright');
+end
+
 function testFileMenuHasNoOpenWorkingDirectoryItem(testCase)
 [figureHandle,handles] = AC('AC_buildCodeUI');
 testCase.addTeardown(@()deleteIfValid(figureHandle));
