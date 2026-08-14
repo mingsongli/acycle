@@ -115,12 +115,35 @@ verifyTrue(testCase,contains(source,"'CreateCancelBtn'"));
 verifyTrue(testCase,contains(source, ...
     "error('Acycle:DYNOT:Canceled'"));
 verifyTrue(testCase,contains(source,'dynotCanceled(hwb)'));
+verifyTrue(testCase,contains(source, ...
+    'dynotCloseProgressWindow(source,true)'));
+verifyTrue(testCase,contains(source, ...
+    'dynotCloseProgressWindow(hwb,false)'));
 hasProgressUpdate = contains(source, ...
     'updateDynotWaitbar(hwb,completed/nmc') || ...
     contains(source,'reportDynotProgress(hwb,completed,nmc)');
 verifyTrue(testCase,hasProgressUpdate);
 verifyFalse(testCase,contains(source, ...
     'waitbar(i/nmc,hwb'));
+end
+
+function testProgressWindowClosesOnCompletionAndWindowClose(testCase)
+hwb = waitbar(0,'DYNOT completion test','Visible','off', ...
+    'CreateCancelBtn',@(~,~)[]);
+testCase.addTeardown(@()closeIfValid(hwb));
+setappdata(hwb,'canceling',false);
+dynotCloseProgressWindow(hwb,false);
+verifyFalse(testCase,isgraphics(hwb,'figure'));
+
+hwb = waitbar(0,'DYNOT close-button test','Visible','off', ...
+    'CreateCancelBtn',@(~,~)[]);
+testCase.addTeardown(@()closeIfValid(hwb));
+setappdata(hwb,'canceling',false);
+hwb.CloseRequestFcn = @(source,event) ...
+    dynotCloseProgressWindow(source,true);
+close(hwb);
+drawnow;
+verifyFalse(testCase,isgraphics(hwb,'figure'));
 end
 
 function testInputsAreValidatedWithoutSilentMinimumClamps(testCase)
@@ -141,15 +164,15 @@ verifyTrue(testCase,contains(source, ...
     'S.numcore = min(S.numcore,dynotPhysicalCoreCount());'));
 end
 
-function testDefaultMonteCarloCountIsSixty(testCase)
+function testDefaultMonteCarloCountIsOneThousand(testCase)
 x = (0:0.5:20)';
 context = struct('current_data',[x,sin(x)],'dat_name','dynot-default-nmc');
 guiFigure = DYNOS(context);
 testCase.addTeardown(@()closeIfValid(guiFigure));
 state = getappdata(guiFigure,'DYNOS_STATE');
 
-verifyEqual(testCase,state.nmc,60,'AbsTol',0);
-verifyEqual(testCase,str2double(state.ENMC.Value),60,'AbsTol',0);
+verifyEqual(testCase,state.nmc,1000,'AbsTol',0);
+verifyEqual(testCase,str2double(state.ENMC.Value),1000,'AbsTol',0);
 end
 
 function testProcessControlsDriveSafeParallelScheduler(testCase)

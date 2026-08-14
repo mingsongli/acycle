@@ -50,7 +50,7 @@ S.fza = 0.9;
 S.fzb = 1.2;
 S.ftmin = 0.001;
 S.ftmax = 1;
-S.nmc = 60;
+S.nmc = 1000;
 S.numcore = dynotPhysicalCoreCount();
 S.itinerary = 50;
 
@@ -576,7 +576,9 @@ powmean = nan(1,nmc);
 hwb = waitbar(0,'Running DYNOT ...','WindowStyle','modal', ...
     'CreateCancelBtn',@(source,event)requestDynotCancel(source));
 setappdata(hwb,'canceling',false);
-cleanupWb = onCleanup(@()safeClose(hwb));
+hwb.CloseRequestFcn = @(source,event) ...
+    dynotCloseProgressWindow(source,true);
+cleanupWb = onCleanup(@()dynotCloseProgressWindow(hwb,false));
 [powy,powmean] = runDynotIterations(S,data,y_grid,samplez, ...
     windowz,nwz,f3m,powy,powmean,hwb);
 clear cleanupWb;
@@ -877,12 +879,6 @@ else
     data = data(ia,:);
 end
 data(any(~isfinite(data),2),:) = [];
-end
-
-function safeClose(h)
-if ~isempty(h) && isgraphics(h)
-    close(h);
-end
 end
 
 function [powy,powmean] = runDynotIterations(S,data,yGrid,samplez, ...
