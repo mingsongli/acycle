@@ -79,8 +79,17 @@ pwd_init = pwd;
 if ~isdeployed
     % If running in MATLAB (not compiled)
 
-    % Add Acycle's root directory and subdirectories to MATLAB's search path
+    % Add Acycle's runtime directories to MATLAB's search path. Development
+    % tests are kept locally under code/test and must not shadow production
+    % functions with the same name.
     addpath(genpath(path_root));
+    acycle_test_root = fullfile(path_root,'code','test');
+    if isfolder(acycle_test_root)
+        acycle_test_paths = genpath(acycle_test_root);
+        if ~isempty(acycle_test_paths)
+            rmpath(acycle_test_paths);
+        end
+    end
     % Display an acknowledgment message (do not remove this line)
     %#exclude help
     help ac_acknowledgment
