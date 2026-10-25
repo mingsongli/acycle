@@ -129,7 +129,7 @@ handles.menu_math = uimenu(hFig,'Label','Math','Tag','menu_math');
 % Legacy statistical top-level menus (restored)
 handles.menu_univariate = uimenu(hFig,'Label','Univariate','Tag','menu_univariate');
 handles.menu_bivariate = uimenu(hFig,'Label','Bivariate','Tag','menu_bivariate');
-handles.menu_multivariate1 = uimenu(hFig,'Label','Multivariate','Tag','menu_multivariate1','Visible','off');
+handles.menu_multivariate1 = uimenu(hFig,'Label','Multivariate','Tag','menu_multivariate1');
 handles.menuac = uimenu(hFig,'Label','Timeseries','Tag','menuac');
 handles.menu_help = uimenu(hFig,'Label','Help','Tag','menu_help');
 
@@ -154,6 +154,14 @@ handles.menu_covariance = uimenu(handles.menu_bivariate,'Label','Covariance','Ta
     'Callback',@(h,e)AC_dispatch('menu_covariance_Callback',h,e));
 handles.menu_linearReg = uimenu(handles.menu_bivariate,'Label','Linear Regression','Tag','menu_linearReg', ...
     'Callback',@(h,e)AC_dispatch('menu_linearReg_Callback',h,e));
+
+% Multivariate
+handles.menu_mv_pcoa = uimenu(handles.menu_multivariate1,'Label','PCoA Ordination','Tag','menu_mv_pcoa', ...
+    'Callback',@(h,e)AC_dispatch('menu_mv_pcoa_Callback',h,e));
+handles.menu_mv_anosim = uimenu(handles.menu_multivariate1,'Label','ANOSIM','Tag','menu_mv_anosim', ...
+    'Callback',@(h,e)AC_dispatch('menu_mv_anosim_Callback',h,e));
+handles.menu_mv_permanova = uimenu(handles.menu_multivariate1,'Label','PERMANOVA','Tag','menu_mv_permanova', ...
+    'Callback',@(h,e)AC_dispatch('menu_mv_permanova_Callback',h,e));
 
 % File
 handles.menu_folder = uimenu(handles.menu_file,'Label','New Folder','Tag','menu_folder','Accelerator','o', ...
@@ -532,7 +540,7 @@ timeItems = {'menu_prewhiten','menu_smooth1','menu_bootstrap','menu_smooth_optio
     'menu_ecoco','menu_specmoments','menu_swa'};
 uniItems = {'menu_statsummary','menu_ttest'};
 bivItems = {'menu_uni2SamTest','menu_anova','menu_normaltest','menu_chi2gof','menu_corr','menu_covariance','menu_linearReg'};
-mulItems = {};
+mulItems = {'menu_mv_pcoa','menu_mv_anosim','menu_mv_permanova'};
 helpItems = {'menu_settings','menu_read','menu_manuals','menu_findupdates','menu_contact','menu_email'};
 
 if any(strcmp(key,fileItems))
@@ -9839,6 +9847,68 @@ function menu_multivariate1_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_multivariate1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function menu_mv_pcoa_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_mv_pcoa (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+runMultivariateMenu(hObject,handles,'pcoa')
+
+
+% --------------------------------------------------------------------
+function menu_mv_anosim_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_mv_anosim (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+runMultivariateMenu(hObject,handles,'anosim')
+
+
+% --------------------------------------------------------------------
+function menu_mv_permanova_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_mv_permanova (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+runMultivariateMenu(hObject,handles,'permanova')
+
+
+function runMultivariateMenu(hObject,handles,method)
+% Shared launcher for the Multivariate menu: stacks the selected
+% equal-length series (rows = samples, columns = series, the same
+% convention as Principal Component) and opens the analysis dialog.
+[contents,plot_selected,handles] = getMainListSelection(handles);
+if isempty(plot_selected)
+    warndlg({'No data selected.'; ...
+        'Select one or more equal-length series in the main window first.'}, ...
+        'Multivariate Analysis');
+    return
+end
+
+selectedNames = cell(1,numel(plot_selected));
+for k = 1:numel(plot_selected)
+    name_k = char(contents(plot_selected(k)));
+    name_k = strrep2(name_k,'<HTML><FONT color="blue">','</FONT></HTML>');
+    [~,~,ext_k] = fileparts(name_k);
+    if sum(strcmp(ext_k,handles.filetype)) == 0
+        warndlg(sprintf('Unsupported file type: "%s".',name_k),'Multivariate Analysis');
+        return
+    end
+    selectedNames{k} = name_k;
+end
+
+[dataMatrix,axisValues,seriesNames,baseName,loadError] = ...
+    multivariateLoadSelection(handles,selectedNames);
+if ~isempty(loadError)
+    warndlg(loadError,'Multivariate Analysis');
+    return
+end
+
+handles.dat_name = baseName;
+guidata(hObject,handles);
+
+multivariateGUI(handles,method,dataMatrix,axisValues,seriesNames,baseName);
+guidata(hObject,handles);
 
 
 % --------------------------------------------------------------------
